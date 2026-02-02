@@ -1,0 +1,13 @@
+# Changes here will be overwritten by Copier
+_src_path: /Users/subhashb/.pyenv/versions/3.13.11/lib/python3.13/site-packages/protean/template
+author_email: subhash.bhushan@gmail.com
+author_name: Subhash Bhushan C
+broker: redis
+cache: memory
+database: postgresql
+domain_name: customer
+event_store: message-db
+include_example: true
+package_name: shopstream
+project_name: shopstream
+short_description: shopstream - E-Commerce Platform (Built on Protean)
