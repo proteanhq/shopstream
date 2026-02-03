@@ -1673,8 +1673,10 @@ sendgrid = ["sendgrid (>=6.1.3)"]
 sqlite = ["sqlalchemy (>=2.0.30,<2.1.0)"]
 
 [package.source]
-type = "directory"
-url = "../protean"
+type = "git"
+url = "https://github.com/proteanhq/protean.git"
+reference = "main"
+resolved_reference = "6c64e5b312485fb8cf88ad0b5b2aa340fd33ed90"
 
 [[package]]
 name = "psycopg2"
@@ -2710,4 +2712,4 @@ watchdog = ["watchdog (>=2.3)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "28d3f51fbac977723b295929dde0a1d85105aec27bcf4cf5c60629a562928dc2"
+content-hash = "8328a9527bf044e38a25e8f8e269d7eb97fa0a9b33bab43d12f8568f135461dd"
