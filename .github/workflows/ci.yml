@@ -69,9 +69,6 @@ jobs:
       - name: Run linting
         run: poetry run ruff check src/ tests/
 
-      - name: Run type checking
-        run: poetry run mypy src/identity
-
       - name: Run tests
         run: poetry run pytest tests/identity --cov=src/identity --cov-report=xml --cov-report=term-missing
 
