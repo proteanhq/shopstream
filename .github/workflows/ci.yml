@@ -66,6 +66,9 @@ jobs:
       - name: Install dependencies
         run: poetry install --with dev,test,lint,types --all-extras
 
+      - name: Set up test database
+        run: bash src/identity/create_db.sh
+
       - name: Run linting
         run: poetry run ruff check src/ tests/
 
