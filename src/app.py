@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from identity.api import router as identity_router
 from identity.domain import identity
+from scalar_fastapi import get_scalar_api_reference
 
 # ---------------------------------------------------------------------------
 # Domain initialization
@@ -46,6 +47,7 @@ app = FastAPI(
     title="ShopStream API",
     description="E-Commerce Platform API built on Protean",
     version="0.1.0",
+    docs_url=None,
 )
 
 app.add_middleware(
@@ -74,6 +76,17 @@ async def domain_context_middleware(request: Request, call_next):
 app.include_router(identity_router)
 app.include_router(product_router)
 app.include_router(category_router)
+
+
+# ---------------------------------------------------------------------------
+# API Documentation (Scalar)
+# ---------------------------------------------------------------------------
+@app.get("/docs", include_in_schema=False)
+async def scalar_docs():
+    return get_scalar_api_reference(
+        openapi_url=app.openapi_url,
+        title=app.title,
+    )
 
 
 # ---------------------------------------------------------------------------

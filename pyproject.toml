@@ -27,6 +27,7 @@ python-dotenv = "^1.0.0"
 structlog = "^24.1.0"
 python-json-logger = "^2.0.7"
 uvicorn = {version = ">=0.27.0", extras = ["standard"]}
+scalar-fastapi = "^1.6.2"
 
 [tool.poetry.group.dev]
 optional = true

@@ -45,7 +45,7 @@ make setup-db
 make api
 ```
 
-The API is now available at `http://localhost:8000`. Try it:
+The API is now available at `http://localhost:8000`. Browse the interactive API docs at **http://localhost:8000/docs** (powered by [Scalar](https://scalar.com)).
 
 ```bash
 curl -X POST http://localhost:8000/customers \
@@ -135,6 +135,9 @@ Starts a FastAPI server on port 8000 with hot-reload. Routes are mapped to domai
 | `/products/*` | Catalogue |
 | `/categories/*` | Catalogue |
 | `/health` | — |
+| `/docs` | Interactive API reference (Scalar) |
+| `/redoc` | ReDoc API documentation |
+| `/openapi.json` | OpenAPI 3.x spec |
 
 ### 3. Engine Workers
 
@@ -201,7 +204,7 @@ make test-catalogue
 make test-fast
 ```
 
-Tests use `PROTEAN_ENV=test`, which keeps `event_processing = "sync"` so projectors fire during UoW commit for deterministic assertions.
+Tests use `PROTEAN_ENV=test`, which keeps `event_processing = "sync"` so projectors fire during UoW commit for deterministic assertions. Tests run against separate `_test` databases so they never destroy dev data (see [Configuration](#configuration)).
 
 ## Configuration
 
@@ -210,13 +213,13 @@ Tests use `PROTEAN_ENV=test`, which keeps `event_processing = "sync"` so project
 Each domain has a `domain.toml` in its package directory. Key settings:
 
 ```toml
-event_processing = "sync"        # Base: sync for tests
+event_processing = "sync"        # Base config (development)
 command_processing = "sync"
 enable_outbox = true             # Events written to outbox table
 
 [databases.default]
 provider = "postgresql"
-database_uri = "${DATABASE_URL|postgresql://...}"
+database_uri = "${DATABASE_URL|postgresql://.../<domain>_local}"
 
 [brokers.default]
 provider = "redis"
@@ -226,20 +229,31 @@ URI = "redis://127.0.0.1:6379/0"
 provider = "message_db"
 database_uri = "${MESSAGE_DB_URL|postgresql://...}"
 
-# Production overlay (PROTEAN_ENV=production)
+# Test overlay — separate database for tests
+[test]
+testing = true
+[test.databases.default]
+database_uri = "${TEST_DATABASE_URL|postgresql://.../<domain>_test}"
+
+# Production overlay
 [production]
 event_processing = "async"       # Projectors fire via Engine workers
 debug = false
+[production.databases.default]
+database_uri = "${DATABASE_URL|postgresql://.../<domain>}"
 ```
 
 ### Environment Overlays
 
-Protean applies config sections based on `PROTEAN_ENV`:
+Protean applies config sections from `domain.toml` based on `PROTEAN_ENV`:
 
-| Environment | `event_processing` | Projectors fire... |
-|-------------|-------------------|-------------------|
-| `test` | sync | During UoW commit (immediate) |
-| `production` (default) | async | Via Engine workers (eventually consistent) |
+| Environment | Identity DB | Catalogue DB | `event_processing` | Projectors fire... |
+|-------------|------------|-------------|-------------------|-------------------|
+| _(unset)_ — development | `identity_local` | `catalogue_local` | sync | During UoW commit |
+| `test` | `identity_test` | `catalogue_test` | sync | During UoW commit |
+| `production` | `identity` | `catalogue` | async | Via Engine workers |
+
+Tests and dev use separate databases so running the test suite never destroys development data.
 
 ### Environment Variables
 
@@ -247,8 +261,15 @@ See [.env.example](.env.example) for all variables:
 
 ```bash
 PROTEAN_ENV=production
+
+# Development databases
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/identity_local
 CATALOGUE_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/catalogue_local
+
+# Test databases (used when PROTEAN_ENV=test)
+TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/identity_test
+TEST_CATALOGUE_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/catalogue_test
+
 MESSAGE_DB_URL=postgresql://message_store:message_store@localhost:5433/message_store
 REDIS_URL=redis://127.0.0.1:6379/0
 SECRET_KEY=change-me-in-production
