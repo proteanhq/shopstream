@@ -7,6 +7,16 @@ event_processing = "sync"
 command_processing = "sync"
 message_processing = "sync"
 
+# Outbox pattern: events are written to an outbox table in the same
+# transaction as the aggregate mutation, then asynchronously forwarded
+# to the broker (Redis Streams) by the Engine's OutboxProcessor.
+enable_outbox = true
+
+[outbox]
+broker = "default"
+messages_per_tick = 50
+tick_interval = 0.01
+
 # Default Database Configuration
 [databases.default]
 provider = "postgresql"

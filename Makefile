@@ -27,7 +27,7 @@ test-application: ## Run application layer tests across all domains
 	poetry run pytest tests/identity/application/ tests/catalogue/application/
 
 test-integration: ## Run integration tests across all domains
-	poetry run pytest tests/identity/integration/ tests/catalogue/integration/
+	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/integration/
 
 test-fast: ## Run fast tests across all domains (domain + application)
 	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ -m "not slow"
@@ -96,8 +96,14 @@ pre-commit: ## Run pre-commit hooks on all files
 shell: ## Start Protean shell
 	poetry run protean shell
 
-server: ## Start Protean server for async message processing
-	poetry run protean server
+server: ## Start all domain engines (outbox + broker processing)
+	poetry run python src/server.py
+
+server-identity: ## Run Identity domain engine
+	poetry run protean server --domain identity
+
+server-catalogue: ## Run Catalogue domain engine
+	poetry run protean server --domain catalogue
 
 generate-docker: ## Generate docker-compose file for infrastructure
 	poetry run protean generate docker

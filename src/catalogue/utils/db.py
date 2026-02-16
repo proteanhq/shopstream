@@ -21,6 +21,10 @@ def setup_db(domain: Domain):
                     if entity_record.cls.meta_.provider == provider.name:
                         domain.repository_for(entity_record.cls)._dao  # noqa: B018
 
+                # Force DAO creation for outbox tables (registered as internal)
+                if hasattr(domain, "_outbox_repos") and provider.name in domain._outbox_repos:
+                    domain._outbox_repos[provider.name]._dao  # noqa: B018
+
                 provider._metadata.create_all(engine)
 
 

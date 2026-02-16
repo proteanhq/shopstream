@@ -39,5 +39,8 @@ def run_around_tests(_catalogue_domain):
     for _, provider in current_domain.providers.items():
         provider._data_reset()
 
+    for _, broker in current_domain.brokers.items():
+        broker._data_reset()
+
     current_domain.event_store.store._data_reset()
     ctx.pop()
