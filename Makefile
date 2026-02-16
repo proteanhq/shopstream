@@ -92,18 +92,42 @@ check: lint typecheck test ## Run all checks (lint, typecheck, test)
 pre-commit: ## Run pre-commit hooks on all files
 	poetry run pre-commit run --all-files
 
+# ──────────────────────────────────────────────
+# Web Server
+# ──────────────────────────────────────────────
+api: ## Start FastAPI web server (port 8000)
+	poetry run uvicorn src.app:app --host 0.0.0.0 --port 8000 --reload
+
+# ──────────────────────────────────────────────
+# Engine Workers (async event processing)
+# ──────────────────────────────────────────────
+engine: ## Start all domain engines
+	PROTEAN_ENV=production poetry run python src/server.py
+
+engine-identity: ## Start Identity domain engine
+	PROTEAN_ENV=production poetry run python src/server.py --domain identity
+
+engine-catalogue: ## Start Catalogue domain engine
+	PROTEAN_ENV=production poetry run python src/server.py --domain catalogue
+
+# ──────────────────────────────────────────────
+# Monitoring
+# ──────────────────────────────────────────────
+monitor: ## Start monitoring dashboard (port 9000)
+	poetry run uvicorn src.monitor:app --host 0.0.0.0 --port 9000
+
+# ──────────────────────────────────────────────
+# Database
+# ──────────────────────────────────────────────
+setup-db: ## Create database schemas for all domains
+	poetry run python src/manage.py setup-db
+
+drop-db: ## Drop database schemas for all domains
+	poetry run python src/manage.py drop-db
+
 # Protean Commands
 shell: ## Start Protean shell
 	poetry run protean shell
-
-server: ## Start all domain engines (outbox + broker processing)
-	poetry run python src/server.py
-
-server-identity: ## Run Identity domain engine
-	poetry run protean server --domain identity
-
-server-catalogue: ## Run Catalogue domain engine
-	poetry run protean server --domain catalogue
 
 generate-docker: ## Generate docker-compose file for infrastructure
 	poetry run protean generate docker
@@ -160,11 +184,7 @@ docker-prod-down: ## Stop production stack
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
 
 # Development
-dev: docker-up ## Start development environment (Docker services only)
-
-# Database
-migrate: ## Run database migrations
-	@echo "Add your migration command here"
+dev: docker-up setup-db ## Start development environment (Docker services + database setup)
 
 # Cleanup
 clean: ## Clean up generated files

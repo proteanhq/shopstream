@@ -170,3 +170,4 @@ cython_debug/
 .claude/
 todo/
 *.todo
+*.temp

@@ -1,488 +1,307 @@
-# shopstream
+# ShopStream
 
 **Version 0.1.0**
 
-shopstream - E-Commerce Platform (Built on Protean)
+E-Commerce Platform built on [Protean](https://github.com/proteanhq/protean) — a Domain-Driven Design framework for Python.
 
-> **Note**: This project includes example code demonstrating the recommended project structure and patterns.
-> The `example` aggregate is provided as a reference implementation. Feel free to modify or remove it as you build your domain.
+ShopStream implements a multi-domain CQRS architecture with two bounded contexts:
+
+- **Identity** — Customer accounts, profiles, addresses, tiers
+- **Catalogue** — Products, variants, categories, pricing
+
+Commands are processed synchronously via a FastAPI web server. Events flow asynchronously through the outbox pattern and Redis Streams, with Engine workers maintaining read-model projections.
 
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Development Setup](#development-setup)
+- [Quick Start](#quick-start)
+- [Architecture](#architecture)
+- [Running the Platform](#running-the-platform)
 - [Project Structure](#project-structure)
-- [Development Tools](#development-tools)
-- [Available Commands](#available-commands)
 - [Testing](#testing)
-- [Code Quality](#code-quality)
 - [Configuration](#configuration)
-- [Contributing](#contributing)
+- [Available Commands](#available-commands)
 
 ## Prerequisites
 
-- Python 3.11 or higher
-- Poetry (for dependency management)
-- Docker and Docker Compose (for infrastructure services)
+- Python 3.11+
+- [Poetry](https://python-poetry.org/) for dependency management
+- Docker and Docker Compose for infrastructure services
 - Make (optional, for convenience commands)
 
-## Installation
-
-### Quick Start
+## Quick Start
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd shopstream
-
 # Install dependencies
 make install
 
-# Set up pre-commit hooks
-make install-pre-commit
-
-# Start infrastructure services
+# Start infrastructure (PostgreSQL, Message DB, Redis)
 make docker-up
+
+# Create database schemas
+make setup-db
+
+# Start the API server
+make api
 ```
 
-### Manual Installation
+The API is now available at `http://localhost:8000`. Try it:
 
 ```bash
-# Install all dependencies
-poetry install --with dev,test,docs,types,lint
-
-# Install pre-commit hooks
-poetry run pre-commit install
-
-# Start Docker services
-docker-compose up -d
+curl -X POST http://localhost:8000/customers \
+  -H "Content-Type: application/json" \
+  -d '{"external_id":"EXT-1","email":"jane@example.com","first_name":"Jane","last_name":"Doe"}'
 ```
 
-## Development Setup
-
-### Environment Variables
-
-Copy the `.env.example` file to `.env` and update the values:
+To process events asynchronously (update projections, etc.), start the Engine workers in separate terminals:
 
 ```bash
-cp .env.example .env
+make engine-identity   # Terminal 2
+make engine-catalogue  # Terminal 3
 ```
 
-### Pre-commit Hooks
+## Architecture
 
-This project uses pre-commit hooks to ensure code quality. The hooks will run automatically before each commit. To run them manually:
+```
+  ┌──────────────────────┐          ┌─────────────────────┐
+  │  FastAPI Web Server  │          │   PostgreSQL (5432)  │
+  │    (port 8000)       │          │  identity_local DB   │
+  │                      │          │  catalogue_local DB  │
+  │  /customers/*        │─────────▶│                      │
+  │  /products/*         │ commands │  Outbox Table        │
+  │  /categories/*       │          └──────────┬───────────┘
+  └──────────────────────┘                     │
+                                               │ OutboxProcessor
+                                               ▼
+  ┌──────────────────────┐          ┌──────────────────────┐
+  │  Engine Workers      │◀─────────│   Redis Streams      │
+  │                      │ consume  │   (port 6379)        │
+  │  Identity Engine     │          └──────────────────────┘
+  │  Catalogue Engine    │
+  │                      │          ┌──────────────────────┐
+  │  - OutboxProcessor   │          │   Message DB (5433)  │
+  │  - Projector Subs    │          │   Event Store        │
+  └──────────────────────┘          └──────────────────────┘
+
+  ┌──────────────────────┐
+  │  Monitor (port 9000) │
+  │  /outbox, /streams   │
+  │  /health             │
+  └──────────────────────┘
+```
+
+### Event Flow
+
+1. HTTP request hits the FastAPI server
+2. Command handler mutates the aggregate and raises domain events
+3. UoW commit writes aggregate state + outbox records **atomically**
+4. HTTP response returns to client
+5. Engine's OutboxProcessor picks up pending outbox records and publishes to Redis Streams
+6. Engine's StreamSubscription reads from Redis, invokes projectors to update read models
+7. On failure, messages are retried with exponential backoff, then moved to a DLQ
+
+### Process Model
+
+| Process | Command | Port | Purpose |
+|---------|---------|------|---------|
+| Web Server | `make api` | 8000 | Synchronous command processing |
+| Identity Engine | `make engine-identity` | — | Async event processing for Identity domain |
+| Catalogue Engine | `make engine-catalogue` | — | Async event processing for Catalogue domain |
+| Monitor | `make monitor` | 9000 | Outbox/stream/health dashboard |
+
+## Running the Platform
+
+### 1. Infrastructure
 
 ```bash
-make pre-commit
+# Start PostgreSQL, Message DB, and Redis
+make docker-up
+
+# Create database tables for both domains
+make setup-db
 ```
 
-## Project Structure
-
-```
-shopstream/
-├── src/
-│   └── shopstream/
-│       ├── domain.py              # Domain initialization
-│       ├── domain.toml            # Domain configuration
-│       ├── __init__.py
-│       │
-│       # Each aggregate gets its own folder with all related components
-│       ├── example/               # Example aggregate (included as reference)
-│       │   ├── __init__.py
-│       │   ├── aggregate.py       # The aggregate root
-│       │   ├── entities.py        # Related entities (if any)
-│       │   ├── value_objects.py   # Value objects
-│       │   ├── commands.py        # Commands for this aggregate
-│       │   ├── events.py          # Events emitted by this aggregate
-│       │   ├── handlers.py        # Command/Event handlers
-│       │   ├── repository.py      # Repository interface & implementation
-│       │   └── services.py        # Domain services (if needed)
-│       │
-│       # Shared/Cross-cutting concerns
-│       ├── shared/                 # Shared value objects, exceptions, etc.
-│       │   ├── __init__.py
-│       │   ├── value_objects.py
-│       │   └── exceptions.py
-│       │
-│       # Application layer (if using application services)
-│       ├── application/            # Application services that orchestrate
-│       │   ├── __init__.py        # use cases across aggregates
-│       │   └── services.py
-│       │
-│       # Infrastructure projections
-│       └── projections/            # Read models/projections
-│           ├── __init__.py
-│           └── example_summary.py # Example projection
-│
-├── tests/
-│   ├── unit/                      # Unit tests
-│   │   └── example/               # Example aggregate tests
-│   │       └── test_aggregate.py
-│   ├── integration/                # Integration tests
-│   ├── bdd/                        # BDD tests
-│   └── conftest.py                # Pytest configuration
-│
-├── Makefile                        # Convenience commands
-├── pyproject.toml                 # Project configuration
-├── docker-compose.yml             # Infrastructure services
-└── .pre-commit-config.yaml       # Pre-commit hooks
-```
-
-## Development Tools
-
-This project comes pre-configured with modern Python development tools:
-
-### Code Formatting & Linting
-
-- **Ruff**: Fast Python linter and formatter
-  - Configuration in `pyproject.toml` under `[tool.ruff]`
-  - Run: `make format` (formatting) or `make lint` (linting)
-
-### Type Checking
-
-- **MyPy**: Static type checker for Python
-  - Configuration in `pyproject.toml` under `[tool.mypy]`
-  - Run: `make typecheck`
-
-### Testing
-
-- **Pytest**: Testing framework with extensive plugin support
-  - Configuration in `pyproject.toml` under `[tool.pytest.ini_options]`
-  - Includes: pytest-cov, pytest-bdd, pytest-asyncio, pytest-mock
-  - Run: `make test` or `make test-cov` (with coverage)
-
-### Code Coverage
-
-- **Coverage.py**: Code coverage measurement
-  - Configuration in `pyproject.toml` under `[tool.coverage]`
-  - Generates HTML, XML, and terminal reports
-  - Run: `make test-cov`
-
-### Pre-commit Hooks
-
-Automated checks before each commit:
-- Trailing whitespace removal
-- End-of-file fixing
-- YAML/TOML validation
-- Large file detection
-- Merge conflict detection
-- Ruff linting and formatting
-- MyPy type checking
-
-### Commit Message Convention
-
-This project uses [Conventional Commits](https://www.conventionalcommits.org/):
-- `feat:` New feature
-- `fix:` Bug fix
-- `docs:` Documentation changes
-- `style:` Code style changes
-- `refactor:` Code refactoring
-- `test:` Test changes
-- `chore:` Maintenance tasks
-
-## Available Commands
-
-Run `make help` to see all available commands:
-
-### Core Commands
+### 2. API Server
 
 ```bash
-make install           # Install all dependencies
-make test             # Run all tests
-make test-cov         # Run tests with coverage
-make lint             # Run linting checks
-make format           # Format code
-make typecheck        # Run type checking
-make check            # Run all checks (lint, typecheck, test)
+make api
 ```
 
-### Protean Commands
+Starts a FastAPI server on port 8000 with hot-reload. Routes are mapped to domain contexts:
+
+| Route prefix | Domain |
+|-------------|--------|
+| `/customers/*` | Identity |
+| `/products/*` | Catalogue |
+| `/categories/*` | Catalogue |
+| `/health` | — |
+
+### 3. Engine Workers
+
+Engine workers process events asynchronously. Each engine runs an OutboxProcessor (polls the outbox table, publishes to Redis Streams) and StreamSubscriptions (consume from Redis, invoke projectors).
 
 ```bash
-make shell            # Start Protean interactive shell
-make server           # Start Protean message processing server
-make generate-docker  # Generate docker-compose for infrastructure
+# Run both engines in one process
+make engine
+
+# Or run individually (recommended for production)
+make engine-identity
+make engine-catalogue
 ```
 
-### Docker Commands
+### 4. Monitoring
 
 ```bash
-# Infrastructure services
-make docker-up        # Start Docker services
-make docker-down      # Stop Docker services
-make docker-logs      # View Docker logs
-make docker-clean     # Clean Docker volumes
-make docker-ps        # List running containers
-make docker-restart   # Restart all services
-
-# Application containers
-make docker-build     # Build production Docker image
-make docker-build-dev # Build development Docker image
-make docker-run       # Run application in Docker
-make docker-shell     # Open shell in application container
-make docker-rebuild   # Rebuild and restart all services
-
-# Production deployment
-make docker-prod      # Run production stack
-make docker-prod-logs # View production logs
-make docker-prod-down # Stop production stack
+make monitor
 ```
 
-### Docker Setup
+Available at `http://localhost:9000`:
 
-This project includes comprehensive Docker support for both development and production environments.
+| Endpoint | Description |
+|----------|-------------|
+| `GET /` | System overview |
+| `GET /health` | Infrastructure health (Redis connectivity, memory, uptime) |
+| `GET /outbox` | Combined outbox status for all domains |
+| `GET /identity/outbox` | Identity outbox queue depth by status |
+| `GET /catalogue/outbox` | Catalogue outbox queue depth by status |
+| `GET /streams` | Redis stream lengths, consumer groups, pending messages |
 
-#### Development with Docker
-
-1. **Start all services including the application:**
-   ```bash
-   docker-compose up -d
-   ```
-
-2. **View application logs:**
-   ```bash
-   docker-compose logs -f app
-   ```
-
-3. **Open a shell in the application container:**
-   ```bash
-   make docker-shell
-   ```
-
-#### Production Deployment
-
-1. **Build the production image:**
-   ```bash
-   make docker-build
-   ```
-
-2. **Run the production stack:**
-   ```bash
-   make docker-prod
-   ```
-
-The production setup includes:
-- Multi-stage Docker build for optimized images
-- Non-root user for security
-- Health checks for all services
-- Nginx reverse proxy
-- Automatic service dependencies
-- Volume mounts for logs persistence
-
-#### Docker Files
-
-- `Dockerfile` - Production multi-stage build
-- `Dockerfile.dev` - Development image with hot reload
-- `docker-compose.yml` - Base infrastructure services
-- `docker-compose.override.yml` - Development overrides (auto-loaded)
-- `docker-compose.prod.yml` - Production configuration
-- `.dockerignore` - Optimize build context
-
-### Development Commands
+### Development Workflow
 
 ```bash
-make dev              # Start development environment (Docker services)
-make clean            # Clean generated files and caches
-make pre-commit       # Run pre-commit hooks manually
-make docs             # Build documentation
-make docs-serve       # Serve documentation locally
+# One-command setup: starts Docker + creates schemas
+make dev
+
+# Then in separate terminals:
+make api               # Terminal 1: web server
+make engine-identity   # Terminal 2: identity worker
+make engine-catalogue  # Terminal 3: catalogue worker
+make monitor           # Terminal 4: monitoring (optional)
 ```
 
 ## Testing
 
-### Running Tests
-
 ```bash
-# Run all tests
+# Run all tests (626 tests)
 make test
 
-# Run specific test suites
-make test-unit         # Unit tests only
-make test-integration  # Integration tests only
-make test-bdd         # BDD tests only
-
-# Run with coverage
+# With coverage report
 make test-cov
 
-# Run in watch mode
-poetry run pytest-watch
+# By layer
+make test-domain        # Pure business logic (no DB)
+make test-application   # Command handler tests (with DB)
+make test-integration   # Cross-domain outbox/event tests
+
+# By domain
+make test-identity
+make test-catalogue
+
+# Fast tests only (skip slow/integration)
+make test-fast
 ```
 
-### Test Organization
-
-- **Unit tests**: Test individual components in isolation
-- **Integration tests**: Test component interactions
-- **BDD tests**: Business behavior specifications using Gherkin syntax
-
-### Test Markers
-
-Tests can be marked for selective execution:
-
-```python
-@pytest.mark.unit
-@pytest.mark.integration
-@pytest.mark.slow
-@pytest.mark.database
-@pytest.mark.broker
-@pytest.mark.eventstore
-```
-
-Run marked tests:
-```bash
-pytest -m "unit"           # Run only unit tests
-pytest -m "not slow"       # Skip slow tests
-```
-
-## Code Quality
-
-### Formatting
-
-```bash
-# Format all code
-make format
-
-# Check formatting without changes
-poetry run ruff format --check src/ tests/
-```
-
-### Linting
-
-```bash
-# Run linting
-make lint
-
-# Fix auto-fixable issues
-poetry run ruff check --fix src/ tests/
-```
-
-### Type Checking
-
-```bash
-# Run type checking
-make typecheck
-
-# Type check specific files
-poetry run mypy src/shopstream/specific_file.py
-```
-
-### Pre-commit Checks
-
-```bash
-# Run all pre-commit hooks
-make pre-commit
-
-# Run specific hook
-poetry run pre-commit run ruff --all-files
-```
+Tests use `PROTEAN_ENV=test`, which keeps `event_processing = "sync"` so projectors fire during UoW commit for deterministic assertions.
 
 ## Configuration
 
 ### Domain Configuration
 
-Domain settings are in `src/shopstream/domain.toml`:
+Each domain has a `domain.toml` in its package directory. Key settings:
 
 ```toml
-debug = true
-testing = false
-event_processing = "sync"
+event_processing = "sync"        # Base: sync for tests
 command_processing = "sync"
+enable_outbox = true             # Events written to outbox table
 
 [databases.default]
 provider = "postgresql"
+database_uri = "${DATABASE_URL|postgresql://...}"
 
 [brokers.default]
 provider = "redis"
+URI = "redis://127.0.0.1:6379/0"
 
-[caches.default]
-provider = "memory"
+[event_store]
+provider = "message_db"
+database_uri = "${MESSAGE_DB_URL|postgresql://...}"
+
+# Production overlay (PROTEAN_ENV=production)
+[production]
+event_processing = "async"       # Projectors fire via Engine workers
+debug = false
 ```
 
-### Environment-specific Configuration
+### Environment Overlays
 
-Use environment variables or `.env` files for sensitive configuration:
+Protean applies config sections based on `PROTEAN_ENV`:
+
+| Environment | `event_processing` | Projectors fire... |
+|-------------|-------------------|-------------------|
+| `test` | sync | During UoW commit (immediate) |
+| `production` (default) | async | Via Engine workers (eventually consistent) |
+
+### Environment Variables
+
+See [.env.example](.env.example) for all variables:
 
 ```bash
-# .env
-SECRET_KEY=your-secret-key
-DATABASE_URL=postgresql://user:pass@localhost/dbname
-REDIS_URL=redis://localhost:6379
-ENVIRONMENT=development  # production, staging, development, test
-LOG_LEVEL=INFO          # DEBUG, INFO, WARNING, ERROR, CRITICAL (optional)
+PROTEAN_ENV=production
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/identity_local
+CATALOGUE_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/catalogue_local
+MESSAGE_DB_URL=postgresql://message_store:message_store@localhost:5433/message_store
+REDIS_URL=redis://127.0.0.1:6379/0
+SECRET_KEY=change-me-in-production
 ```
 
-### Logging Configuration
+## Available Commands
 
-This project includes comprehensive structured logging with:
+Run `make help` for the full list.
 
-#### Features
-- **Structured logging** with JSON output for production
-- **Human-readable** console output for development
-- **Automatic log rotation** with size and time-based policies
-- **Environment-specific** log levels
-- **Context propagation** for tracing requests
+### API & Workers
 
-#### Usage
-
-```python
-from shopstream.shared.logging import get_logger, add_context, log_method_call
-
-# Get a logger
-logger = get_logger(__name__)
-
-# Basic logging
-logger.info("Processing request", user_id=123, action="create")
-
-# Add context that persists across log messages
-add_context(request_id="abc-123", user_id=456)
-logger.info("Starting process")  # Will include request_id and user_id
-
-# Use decorator for automatic method logging
-@log_method_call
-def process_order(order_id: str):
-    # Method entry, exit, and errors are logged automatically
-    return {"status": "processed"}
+```bash
+make api               # FastAPI web server (port 8000)
+make engine            # All domain engines
+make engine-identity   # Identity engine only
+make engine-catalogue  # Catalogue engine only
+make monitor           # Monitoring dashboard (port 9000)
 ```
 
-#### Configuration Files
-- `logging.toml` - Logging configuration (optional)
-- `logs/` - Directory for log files (auto-created)
-  - `shopstream.log` - Main application log
-  - `shopstream_error.log` - Error-only log
+### Database
 
-#### Environment Variables
-- `ENVIRONMENT` - Sets default log level (production=INFO, development=DEBUG)
-- `LOG_LEVEL` - Override default log level
+```bash
+make setup-db          # Create all database schemas
+make drop-db           # Drop all database schemas
+```
 
-## Contributing
+### Testing
 
-### Development Workflow
+```bash
+make test              # All tests
+make test-cov          # Tests with coverage
+make test-domain       # Domain layer only
+make test-application  # Application layer only
+make test-integration  # Integration tests
+make test-fast         # Skip slow tests
+```
 
-1. Create a feature branch
-2. Make your changes
-3. Ensure all tests pass: `make check`
-4. Commit using conventional commits
-5. Push and create a pull request
+### Code Quality
 
-### Code Style
+```bash
+make lint              # Ruff linting
+make format            # Ruff formatting
+make typecheck         # MyPy type checking
+make check             # All checks (lint + typecheck + test)
+make pre-commit        # Run pre-commit hooks
+```
 
-- Follow PEP 8 guidelines
-- Use type hints for all functions
-- Write docstrings for modules, classes, and functions
-- Keep line length under 120 characters
-- Use meaningful variable and function names
+### Docker
 
-### Testing Requirements
-
-- Write tests for all new features
-- Maintain or improve code coverage
-- Ensure all tests pass before committing
-- Use appropriate test markers
-
-## License
-
-[Add your license information here]
-
-## Support
-
-[Add support contact information or links]
+```bash
+make docker-up         # Start infrastructure services
+make docker-down       # Stop services
+make docker-logs       # Follow service logs
+make docker-clean      # Stop + remove volumes
+make dev               # docker-up + setup-db
+```
