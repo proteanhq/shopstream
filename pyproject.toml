@@ -169,8 +169,8 @@ omit = [
     "*/test_*.py",
     "*/__init__.py",
     "*/conftest.py",
-    "*/shared/exceptions.py",
-    "*/shared/logging.py",
+    "*/utils/exceptions.py",
+    "*/utils/logging.py",
     "*/utils/db.py",
 ]
 

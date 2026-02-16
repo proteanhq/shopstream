@@ -1,4 +1,4 @@
-"""Shared value objects used across multiple aggregates."""
+"""EmailAddress value object for validated email addresses."""
 
 from protean import invariant
 from protean.fields import String
@@ -10,7 +10,7 @@ from identity.domain import identity
 class EmailAddress:
     """Value object for email addresses."""
 
-    address = String(required=True, max_length=254)
+    address: String(required=True, max_length=254)
 
     @invariant.post
     def verify_email_address(self):
@@ -31,8 +31,11 @@ class EmailAddress:
         if not domain_part or domain_part.startswith(".") or domain_part.endswith("."):
             raise ValueError(f"Invalid email address: {email!r}")
 
-        if domain_part.startswith("-") or domain_part.endswith("-"):
-            raise ValueError(f"Invalid email address: {email!r}")
+        # Check each label in the domain for leading/trailing hyphens
+        if not (domain_part.startswith("[") and domain_part.endswith("]")):
+            for label in domain_part.split("."):
+                if label.startswith("-") or label.endswith("-"):
+                    raise ValueError(f"Invalid email address: {email!r}")
 
         if "." not in domain_part and not (domain_part.startswith("[") and domain_part.endswith("]")):
             raise ValueError(f"Invalid email address: {email!r}")
