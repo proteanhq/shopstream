@@ -15,6 +15,7 @@ classifiers=[
 
 packages = [
     { include = "identity", from = "src" },
+    { include = "catalogue", from = "src" },
 ]
 
 [tool.poetry.dependencies]

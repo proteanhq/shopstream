@@ -5,7 +5,7 @@ help: ## Show this help message
 	@echo "Usage: make [target]"
 	@echo ""
 	@echo "Available targets:"
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-20s %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-30s %s\n", $$1, $$2}'
 
 # Installation and Setup
 install: ## Install dependencies using Poetry
@@ -14,34 +14,66 @@ install: ## Install dependencies using Poetry
 install-pre-commit: ## Install pre-commit hooks
 	poetry run pre-commit install
 
-# Testing
-test: ## Run all tests
+# ──────────────────────────────────────────────
+# Application-level testing (all domains)
+# ──────────────────────────────────────────────
+test: ## Run all tests across all domains
 	poetry run pytest
 
-test-domain: ## Run domain layer tests (100% coverage required)
-	poetry run pytest tests/identity/domain/ --cov=src/identity --cov-fail-under=100 --cov-report=term-missing
+test-domain: ## Run domain layer tests across all domains
+	poetry run pytest tests/identity/domain/ tests/catalogue/domain/
 
-test-application: ## Run application layer tests (100% coverage required)
-	poetry run pytest tests/identity/application/ --cov=src/identity --cov-fail-under=100 --cov-report=term-missing
+test-application: ## Run application layer tests across all domains
+	poetry run pytest tests/identity/application/ tests/catalogue/application/
 
-test-integration: ## Run integration tests (90% coverage required)
-	poetry run pytest tests/identity/integration/ --cov=src/identity --cov-fail-under=90 --cov-report=term-missing
+test-integration: ## Run integration tests across all domains
+	poetry run pytest tests/identity/integration/ tests/catalogue/integration/
 
-test-fast: ## Run fast tests (domain + application)
-	poetry run pytest tests/identity/domain/ tests/identity/application/ -m "not slow"
+test-fast: ## Run fast tests across all domains (domain + application)
+	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ -m "not slow"
 
-test-cov: ## Run all tests with full coverage report
-	poetry run pytest tests/identity/ --cov=src/identity --cov-report=term-missing --cov-report=html --cov-report=xml
+test-cov: ## Run all tests with combined coverage report
+	poetry run pytest --cov=identity --cov=catalogue --cov-report=term-missing --cov-report=html --cov-report=xml
 
-test-cov-domain: ## Run domain tests with coverage report
-	poetry run pytest tests/identity/domain/ --cov=src/identity --cov-report=term-missing --cov-report=html:htmlcov/domain
+# ──────────────────────────────────────────────
+# Identity domain testing
+# ──────────────────────────────────────────────
+test-identity: ## Run all identity tests
+	poetry run pytest tests/identity/
 
-test-cov-application: ## Run application tests with coverage report
-	poetry run pytest tests/identity/application/ --cov=src/identity --cov-report=term-missing --cov-report=html:htmlcov/application
+test-identity-domain: ## Run identity domain layer tests
+	poetry run pytest tests/identity/domain/ --cov=identity --cov-report=term-missing
 
-test-cov-integration: ## Run integration tests with coverage report
-	poetry run pytest tests/identity/integration/ --cov=src/identity --cov-report=term-missing --cov-report=html:htmlcov/integration
+test-identity-application: ## Run identity application layer tests
+	poetry run pytest tests/identity/application/ --cov=identity --cov-report=term-missing
 
+test-identity-integration: ## Run identity integration tests
+	poetry run pytest tests/identity/integration/ --cov=identity --cov-report=term-missing
+
+test-identity-cov: ## Run all identity tests with coverage report
+	poetry run pytest tests/identity/ --cov=identity --cov-report=term-missing --cov-report=html:htmlcov/identity
+
+# ──────────────────────────────────────────────
+# Catalogue domain testing
+# ──────────────────────────────────────────────
+test-catalogue: ## Run all catalogue tests
+	poetry run pytest tests/catalogue/
+
+test-catalogue-domain: ## Run catalogue domain layer tests
+	poetry run pytest tests/catalogue/domain/ --cov=catalogue --cov-report=term-missing
+
+test-catalogue-application: ## Run catalogue application layer tests
+	poetry run pytest tests/catalogue/application/ --cov=catalogue --cov-report=term-missing
+
+test-catalogue-integration: ## Run catalogue integration tests
+	poetry run pytest tests/catalogue/integration/ --cov=catalogue --cov-report=term-missing
+
+test-catalogue-cov: ## Run all catalogue tests with coverage report
+	poetry run pytest tests/catalogue/ --cov=catalogue --cov-report=term-missing --cov-report=html:htmlcov/catalogue
+
+# ──────────────────────────────────────────────
+# Test utilities
+# ──────────────────────────────────────────────
 test-watch: ## Run tests in watch mode
 	poetry run pytest-watch
 

@@ -1,0 +1,23 @@
+debug = true
+testing = false
+secret_key = "${SECRET_KEY|c349a2e36bf9e8bd7d117c4c789f22167gc3d2f1d623d1a482e1b348c1ef9dfd}"
+identity_strategy = "uuid"
+identity_type = "string"
+event_processing = "sync"
+command_processing = "sync"
+message_processing = "sync"
+
+# Default Database Configuration
+[databases.default]
+provider = "postgresql"
+database_uri = "${CATALOGUE_DATABASE_URL|postgresql://postgres:postgres@localhost:5432/catalogue_local}"
+
+# Default Event Store Configuration
+[event_store]
+provider = "message_db"
+database_uri = "${MESSAGE_DB_URL|postgresql://message_store:message_store@localhost:5433/message_store}"
+
+# Default Broker Configuration
+[brokers.default]
+provider = "redis"
+URI = "redis://127.0.0.1:6379/0"
