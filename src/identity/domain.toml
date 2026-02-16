@@ -17,7 +17,7 @@ broker = "default"
 messages_per_tick = 50
 tick_interval = 0.01
 
-# Default Database Configuration
+# Default Database Configuration (used in development / PROTEAN_ENV unset)
 [databases.default]
 provider = "postgresql"
 database_uri = "${DATABASE_URL|postgresql://postgres:postgres@localhost:5432/identity_local}"
@@ -32,9 +32,24 @@ database_uri = "${MESSAGE_DB_URL|postgresql://message_store:message_store@localh
 provider = "redis"
 URI = "redis://127.0.0.1:6379/0"
 
-# Production overrides (applied when PROTEAN_ENV=production, which is the default)
-# In production, events are processed asynchronously by Engine workers,
+# ──────────────────────────────────────────────
+# Test overrides (PROTEAN_ENV=test)
+# Separate database so test runs don't destroy dev data.
+# ──────────────────────────────────────────────
+[test]
+testing = true
+
+[test.databases.default]
+database_uri = "${TEST_DATABASE_URL|postgresql://postgres:postgres@localhost:5432/identity_test}"
+
+# ──────────────────────────────────────────────
+# Production overrides (PROTEAN_ENV=production)
+# Events are processed asynchronously by Engine workers,
 # not synchronously during UoW commit.
+# ──────────────────────────────────────────────
 [production]
 event_processing = "async"
 debug = false
+
+[production.databases.default]
+database_uri = "${DATABASE_URL|postgresql://postgres:postgres@localhost:5432/identity}"

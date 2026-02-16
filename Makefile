@@ -95,8 +95,8 @@ pre-commit: ## Run pre-commit hooks on all files
 # ──────────────────────────────────────────────
 # Web Server
 # ──────────────────────────────────────────────
-api: ## Start FastAPI web server (port 8000)
-	poetry run uvicorn src.app:app --host 0.0.0.0 --port 8000 --reload
+api: ## Start FastAPI web server (Swagger UI at http://localhost:8000/docs)
+	poetry run uvicorn app:app --host 0.0.0.0 --port 8000 --reload --app-dir src
 
 # ──────────────────────────────────────────────
 # Engine Workers (async event processing)

@@ -4,22 +4,20 @@ Multi-domain web server that processes commands synchronously via HTTP.
 Each request is wrapped in the correct domain context based on URL prefix.
 
 Usage:
-    uvicorn src.app:app --host 0.0.0.0 --port 8000 --reload
+    uvicorn app:app --host 0.0.0.0 --port 8000 --reload --app-dir src
 """
+
+from catalogue.api import category_router, product_router
+from catalogue.domain import catalogue
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from identity.api import router as identity_router
+from identity.domain import identity
 
 # ---------------------------------------------------------------------------
 # Domain initialization
 # ---------------------------------------------------------------------------
-# Domains are initialized at module level so uvicorn workers share them.
-# PROTEAN_ENV controls which config overlay is applied:
-#   - "test"       → event_processing = "sync"  (projectors fire in UoW)
-#   - "production" → event_processing = "async" (projectors fire via Engine)
-from catalogue.domain import catalogue  # noqa: E402
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from identity.domain import identity  # noqa: E402
-
 identity.init()
 catalogue.init()
 
@@ -46,7 +44,8 @@ def _resolve_domain(path: str):
 # ---------------------------------------------------------------------------
 app = FastAPI(
     title="ShopStream API",
-    description="E-commerce platform — Identity & Catalogue domains",
+    description="E-Commerce Platform API built on Protean",
+    version="0.1.0",
 )
 
 app.add_middleware(
@@ -66,16 +65,12 @@ async def domain_context_middleware(request: Request, call_next):
         with domain.domain_context():
             response = await call_next(request)
         return response
-    # No domain match — pass through (health check, docs, etc.)
     return await call_next(request)
 
 
 # ---------------------------------------------------------------------------
 # Routers
 # ---------------------------------------------------------------------------
-from catalogue.api import category_router, product_router  # noqa: E402
-from identity.api import router as identity_router  # noqa: E402
-
 app.include_router(identity_router)
 app.include_router(product_router)
 app.include_router(category_router)
