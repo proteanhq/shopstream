@@ -40,8 +40,8 @@ class UpdateProfileRequest(BaseModel):
         }
     }
 
-    first_name: str = Field(..., max_length=100)
-    last_name: str = Field(..., max_length=100)
+    first_name: str | None = Field(None, max_length=100)
+    last_name: str | None = Field(None, max_length=100)
     phone: str | None = Field(None, max_length=20)
     date_of_birth: str | None = Field(None, max_length=10)
 

@@ -14,6 +14,9 @@ from identity.shared.phone import PhoneNumber
 # Tier ordering for upgrade validation
 _TIER_ORDER = ["Standard", "Silver", "Gold", "Platinum"]
 
+# Sentinel for distinguishing "not provided" from None in partial updates
+_UNSET = object()
+
 
 class CustomerStatus(Enum):
     """Enumeration of customer account statuses."""
@@ -143,23 +146,35 @@ class Customer:
         )
         return customer
 
-    def update_profile(self, first_name, last_name, phone=None, date_of_birth=None):
+    def update_profile(
+        self,
+        first_name=_UNSET,
+        last_name=_UNSET,
+        phone=_UNSET,
+        date_of_birth=_UNSET,
+    ):
         from identity.customer.events import ProfileUpdated
 
-        phone_vo = PhoneNumber(number=phone) if phone else None
+        new_first = first_name if first_name is not _UNSET else self.profile.first_name
+        new_last = last_name if last_name is not _UNSET else self.profile.last_name
+
+        phone_vo = (PhoneNumber(number=phone) if phone else None) if phone is not _UNSET else self.profile.phone
+
+        new_dob = date_of_birth if date_of_birth is not _UNSET else self.profile.date_of_birth
+
         self.profile = Profile(
-            first_name=first_name,
-            last_name=last_name,
+            first_name=new_first,
+            last_name=new_last,
             phone=phone_vo,
-            date_of_birth=date_of_birth,
+            date_of_birth=new_dob,
         )
         self.raise_(
             ProfileUpdated(
                 customer_id=self.id,
-                first_name=first_name,
-                last_name=last_name,
-                phone=phone,
-                date_of_birth=str(date_of_birth) if date_of_birth else None,
+                first_name=new_first,
+                last_name=new_last,
+                phone=phone_vo.number if phone_vo else None,
+                date_of_birth=str(new_dob) if new_dob else None,
             )
         )
 

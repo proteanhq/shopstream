@@ -85,7 +85,7 @@ class TestUpdateProfile:
         assert event.last_name == "Smith"
         assert event.phone == "+1-555-123-4567"
 
-    def test_update_profile_clears_optional_fields(self):
+    def test_partial_update_preserves_existing_fields(self):
         customer = Customer.register(
             external_id="EXT-001",
             email="test@example.com",
@@ -95,6 +95,21 @@ class TestUpdateProfile:
         )
         customer._events.clear()
 
-        customer.update_profile(first_name="John", last_name="Doe")
-        assert customer.profile.phone is None
-        assert customer.profile.date_of_birth is None
+        customer.update_profile(first_name="Jane")
+        assert customer.profile.first_name == "Jane"
+        assert customer.profile.last_name == "Doe"
+        assert customer.profile.phone.number == "+1-555-123-4567"
+
+    def test_update_only_phone(self):
+        customer = Customer.register(
+            external_id="EXT-001",
+            email="test@example.com",
+            first_name="John",
+            last_name="Doe",
+        )
+        customer._events.clear()
+
+        customer.update_profile(phone="+1-555-999-0000")
+        assert customer.profile.first_name == "John"
+        assert customer.profile.last_name == "Doe"
+        assert customer.profile.phone.number == "+1-555-999-0000"
