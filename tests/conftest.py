@@ -3,15 +3,6 @@ from pathlib import Path
 import pytest
 
 
-def pytest_addoption(parser):
-    parser.addoption(
-        "--env",
-        action="store",
-        default="test",
-        help="Config environment to run tests on",
-    )
-
-
 def pytest_collection_modifyitems(config, items):
     """Automatically mark tests based on their directory location."""
     for item in items:
