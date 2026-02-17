@@ -100,15 +100,19 @@ api: ## Start FastAPI web server (Swagger UI at http://localhost:8000/docs)
 
 # ──────────────────────────────────────────────
 # Engine Workers (async event processing)
+# Uses Protean CLI: protean server --domain <path> [--workers N]
 # ──────────────────────────────────────────────
-engine: ## Start all domain engines
-	poetry run python src/server.py
-
 engine-identity: ## Start Identity domain engine
-	poetry run python src/server.py --domain identity
+	poetry run protean server --domain identity.domain
 
 engine-catalogue: ## Start Catalogue domain engine
-	poetry run python src/server.py --domain catalogue
+	poetry run protean server --domain catalogue.domain
+
+engine-identity-scaled: ## Start Identity engine with 4 workers
+	poetry run protean server --domain identity.domain --workers 4
+
+engine-catalogue-scaled: ## Start Catalogue engine with 4 workers
+	poetry run protean server --domain catalogue.domain --workers 4
 
 # ──────────────────────────────────────────────
 # Observability
