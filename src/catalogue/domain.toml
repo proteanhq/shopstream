@@ -20,17 +20,17 @@ tick_interval = 0.01
 # Default Database Configuration (used in development / PROTEAN_ENV unset)
 [databases.default]
 provider = "postgresql"
-database_uri = "${CATALOGUE_DATABASE_URL|postgresql://postgres:postgres@localhost:5432/catalogue_local}"
+database_uri = "${CATALOGUE_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/catalogue_local}"
 
 # Default Event Store Configuration
 [event_store]
 provider = "message_db"
-database_uri = "${MESSAGE_DB_URL|postgresql://message_store:message_store@localhost:5433/message_store}"
+database_uri = "${MESSAGE_DB_URL|postgresql://message_store:message_store@localhost:15433/message_store}"
 
 # Default Broker Configuration
 [brokers.default]
 provider = "redis"
-URI = "redis://127.0.0.1:6379/0"
+URI = "redis://127.0.0.1:16379/0"
 
 # ──────────────────────────────────────────────
 # Test overrides (PROTEAN_ENV=test)
@@ -41,7 +41,7 @@ testing = true
 event_processing = "sync"
 
 [test.databases.default]
-database_uri = "${TEST_CATALOGUE_DATABASE_URL|postgresql://postgres:postgres@localhost:5432/catalogue_test}"
+database_uri = "${TEST_CATALOGUE_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/catalogue_test}"
 
 # ──────────────────────────────────────────────
 # Production overrides (PROTEAN_ENV=production)
@@ -53,4 +53,4 @@ event_processing = "async"
 debug = false
 
 [production.databases.default]
-database_uri = "${CATALOGUE_DATABASE_URL|postgresql://postgres:postgres@localhost:5432/catalogue}"
+database_uri = "${CATALOGUE_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/catalogue}"
