@@ -3,7 +3,7 @@ testing = false
 secret_key = "${SECRET_KEY|b248a1d25be9e7ad6c006c3c678f11056fb2c1f0c512c09371d90237b0de8bfc}"
 identity_strategy = "uuid"
 identity_type = "string"
-event_processing = "sync"
+event_processing = "async"
 command_processing = "sync"
 message_processing = "sync"
 
@@ -38,6 +38,7 @@ URI = "redis://127.0.0.1:6379/0"
 # ──────────────────────────────────────────────
 [test]
 testing = true
+event_processing = "sync"
 
 [test.databases.default]
 database_uri = "${TEST_DATABASE_URL|postgresql://postgres:postgres@localhost:5432/identity_test}"
