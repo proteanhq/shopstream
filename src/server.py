@@ -11,7 +11,6 @@ Usage:
 """
 
 import argparse
-import asyncio
 
 from protean.server.engine import Engine
 
@@ -32,15 +31,6 @@ def _get_domain(name):
         raise ValueError(f"Unknown domain: {name}")
 
 
-async def run(domain_names):
-    engines = []
-    for name in domain_names:
-        domain = _get_domain(name)
-        engines.append(Engine(domain))
-
-    await asyncio.gather(*(engine.run() for engine in engines))
-
-
 def main():
     parser = argparse.ArgumentParser(description="ShopStream Engine runner")
     parser.add_argument(
@@ -50,9 +40,10 @@ def main():
     )
     args = parser.parse_args()
 
-    domain_names = [args.domain] if args.domain else ["identity", "catalogue"]
-
-    asyncio.run(run(domain_names))
+    domain_name = args.domain or "identity"
+    domain = _get_domain(domain_name)
+    engine = Engine(domain)
+    engine.run()
 
 
 if __name__ == "__main__":

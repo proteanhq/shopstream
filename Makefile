@@ -102,18 +102,21 @@ api: ## Start FastAPI web server (Swagger UI at http://localhost:8000/docs)
 # Engine Workers (async event processing)
 # ──────────────────────────────────────────────
 engine: ## Start all domain engines
-	PROTEAN_ENV=production poetry run python src/server.py
+	poetry run python src/server.py
 
 engine-identity: ## Start Identity domain engine
-	PROTEAN_ENV=production poetry run python src/server.py --domain identity
+	poetry run python src/server.py --domain identity
 
 engine-catalogue: ## Start Catalogue domain engine
-	PROTEAN_ENV=production poetry run python src/server.py --domain catalogue
+	poetry run python src/server.py --domain catalogue
 
 # ──────────────────────────────────────────────
-# Monitoring
+# Observability
 # ──────────────────────────────────────────────
-monitor: ## Start monitoring dashboard (port 9000)
+observatory: ## Start Observatory dashboard (port 9000, live message flow + Prometheus metrics)
+	poetry run uvicorn src.observatory:app --host 0.0.0.0 --port 9000 --timeout-graceful-shutdown 3
+
+monitor: ## [Deprecated] Use 'make observatory' instead
 	poetry run uvicorn src.monitor:app --host 0.0.0.0 --port 9000
 
 # ──────────────────────────────────────────────
