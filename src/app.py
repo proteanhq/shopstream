@@ -9,11 +9,15 @@ Usage:
 
 from catalogue.api import category_router, product_router
 from catalogue.domain import catalogue
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from identity.api import router as identity_router
 from identity.domain import identity
+from protean.integrations.fastapi import (
+    DomainContextMiddleware,
+    register_exception_handlers,
+)
 from scalar_fastapi import get_scalar_api_reference
 
 # ---------------------------------------------------------------------------
@@ -21,24 +25,6 @@ from scalar_fastapi import get_scalar_api_reference
 # ---------------------------------------------------------------------------
 identity.init()
 catalogue.init()
-
-# ---------------------------------------------------------------------------
-# Route-to-domain mapping
-# ---------------------------------------------------------------------------
-_ROUTE_DOMAIN_MAP = {
-    "/customers": identity,
-    "/products": catalogue,
-    "/categories": catalogue,
-}
-
-
-def _resolve_domain(path: str):
-    """Return the domain for the given request path, or None."""
-    for prefix, domain in _ROUTE_DOMAIN_MAP.items():
-        if path.startswith(prefix):
-            return domain
-    return None
-
 
 # ---------------------------------------------------------------------------
 # FastAPI app
@@ -58,17 +44,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.add_middleware(
+    DomainContextMiddleware,
+    route_domain_map={
+        "/customers": identity,
+        "/products": catalogue,
+        "/categories": catalogue,
+    },
+)
 
-@app.middleware("http")
-async def domain_context_middleware(request: Request, call_next):
-    """Push the correct Protean domain context for each request."""
-    domain = _resolve_domain(request.url.path)
-    if domain is not None:
-        with domain.domain_context():
-            response = await call_next(request)
-        return response
-    return await call_next(request)
-
+# ---------------------------------------------------------------------------
+# Exception handlers (from Protean)
+# ---------------------------------------------------------------------------
+register_exception_handlers(app)
 
 # ---------------------------------------------------------------------------
 # Routers
