@@ -1,4 +1,4 @@
-.PHONY: help install test test-unit test-integration test-bdd test-cov lint format typecheck clean run shell server migrate
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue
 
 # Default target
 help: ## Show this help message
@@ -115,83 +115,68 @@ engine-catalogue-scaled: ## Start Catalogue engine with 4 workers
 	poetry run protean server --domain catalogue.domain --workers 4
 
 # ──────────────────────────────────────────────
+# Docker-based Engine Workers
+# ──────────────────────────────────────────────
+engine-docker: ## Start all engines in Docker (1 worker each)
+	docker compose up engine-identity engine-catalogue
+
+engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue)
+	docker compose up --scale engine-identity=3 --scale engine-catalogue=2
+
+# ──────────────────────────────────────────────
 # Observability
 # ──────────────────────────────────────────────
 observatory: ## Start Observatory dashboard (port 9000, live message flow + Prometheus metrics)
 	poetry run uvicorn src.observatory:app --host 0.0.0.0 --port 9000 --timeout-graceful-shutdown 3
 
-monitor: ## [Deprecated] Use 'make observatory' instead
-	poetry run uvicorn src.monitor:app --host 0.0.0.0 --port 9000
-
 # ──────────────────────────────────────────────
 # Database
 # ──────────────────────────────────────────────
 setup-db: ## Create database schemas for all domains
-	poetry run python src/manage.py setup-db
+	poetry run protean db setup --domain identity.domain
+	poetry run protean db setup --domain catalogue.domain
 
 drop-db: ## Drop database schemas for all domains
-	poetry run python src/manage.py drop-db
+	poetry run protean db drop --domain identity.domain --yes
+	poetry run protean db drop --domain catalogue.domain --yes
+
+truncate-db: ## Delete all data from all tables (preserves schema)
+	poetry run protean db truncate --domain identity.domain --yes
+	poetry run protean db truncate --domain catalogue.domain --yes
 
 # Protean Commands
 shell: ## Start Protean shell
 	poetry run protean shell
 
-generate-docker: ## Generate docker-compose file for infrastructure
-	poetry run protean generate docker
-
+# ──────────────────────────────────────────────
 # Docker
-docker-up: ## Start Docker services
-	docker-compose up -d
+# ──────────────────────────────────────────────
+docker-up: ## Start infrastructure services (Postgres, Redis, Message DB)
+	docker compose up -d postgres message-db redis
 
-docker-down: ## Stop Docker services
-	docker-compose down
+docker-dev: ## Start full stack in Docker (infra + api + engines)
+	docker compose up
 
-docker-logs: ## View Docker logs
-	docker-compose logs -f
+docker-down: ## Stop all Docker services
+	docker compose down
 
-docker-clean: ## Clean Docker volumes
-	docker-compose down -v
+docker-logs: ## View Docker service logs
+	docker compose logs -f
 
-docker-build: ## Build application Docker image
-	docker build -t shopstream:latest .
-
-docker-build-dev: ## Build development Docker image
-	docker build -f Dockerfile.dev -t shopstream:dev .
-
-docker-run: ## Run application in Docker
-	docker-compose up app
-
-docker-run-detached: ## Run application in Docker (detached)
-	docker-compose up -d app
-
-docker-shell: ## Open shell in application container
-	docker-compose run --rm app /bin/bash
-
-docker-exec: ## Execute command in running container
-	docker-compose exec app $(cmd)
+docker-clean: ## Stop all services and remove volumes
+	docker compose down -v
 
 docker-ps: ## List running containers
-	docker-compose ps
+	docker compose ps
 
-docker-restart: ## Restart all services
-	docker-compose restart
+docker-rebuild: ## Rebuild dev image and restart (after dependency changes)
+	docker compose build --no-cache
+	docker compose up
 
-docker-rebuild: ## Rebuild and restart all services
-	docker-compose down
-	docker-compose build --no-cache
-	docker-compose up -d
-
-docker-prod: ## Run production stack
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
-
-docker-prod-logs: ## View production logs
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f
-
-docker-prod-down: ## Stop production stack
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
-
+# ──────────────────────────────────────────────
 # Development
-dev: docker-up setup-db ## Start development environment (Docker services + database setup)
+# ──────────────────────────────────────────────
+dev: docker-up ## Start dev environment (infrastructure services)
 
 # Cleanup
 clean: ## Clean up generated files

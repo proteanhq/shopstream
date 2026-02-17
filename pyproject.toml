@@ -149,14 +149,8 @@ addopts = [
     "--strict-config",
 ]
 markers = [
-    "domain: Domain layer tests (pure business logic)",
-    "application: Application layer tests (handlers, services)",
-    "integration: Integration tests (external dependencies)",
-    "unit: Unit tests",
-    "slow: Slow tests",
-    "database: Database tests",
-    "broker: Broker tests",
-    "eventstore: Event store tests",
+    # domain, application, integration, slow are registered by Protean's pytest plugin
+    "fast: Fast tests (excludes slow integration tests)",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",

@@ -1,0 +1,42 @@
+# Development Dockerfile for ShopStream
+#
+# Uses volume mounts for code — no rebuild needed for code changes.
+# Mount local Protean source at /protean for development with local dependency.
+#
+# Usage:
+#   docker compose up engine-identity          # Single worker
+#   docker compose up --scale engine-identity=3 # Three workers
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app/src \
+    POETRY_VERSION=1.8.5 \
+    POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_NO_INTERACTION=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    make \
+    libpq-dev \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Poetry
+RUN pip install --no-cache-dir poetry==${POETRY_VERSION}
+
+WORKDIR /app
+
+# Copy dependency files for the entrypoint install
+COPY pyproject.toml poetry.lock* ./
+
+# Entrypoint installs Protean from mounted volume + remaining deps
+COPY docker/entrypoint.dev.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+CMD ["protean", "server", "--domain", "identity.domain"]

@@ -33,7 +33,7 @@ database_uri = "${MESSAGE_DB_URL|postgresql://message_store:message_store@localh
 # Default Broker Configuration
 [brokers.default]
 provider = "redis"
-URI = "redis://127.0.0.1:16379/0"
+URI = "${REDIS_URL|redis://127.0.0.1:16379/0}"
 
 # ──────────────────────────────────────────────
 # Test overrides (PROTEAN_ENV=test)

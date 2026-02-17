@@ -1,6 +1,7 @@
-version: "3.8"
-
 services:
+  # ──────────────────────────────────────────────
+  # Infrastructure
+  # ──────────────────────────────────────────────
   postgres:
     image: postgres:15-alpine
     restart: unless-stopped
@@ -38,7 +39,7 @@ services:
     restart: unless-stopped
     ports:
       - "16379:6379"
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --loglevel warning
     volumes:
       - redis-data:/data
     healthcheck:
@@ -46,6 +47,83 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  # ──────────────────────────────────────────────
+  # Application: API Server
+  # ──────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: uvicorn app:app --host 0.0.0.0 --port 8000 --reload --app-dir src
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/app/src
+      - ../protean:/protean
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/identity_local
+      - CATALOGUE_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/catalogue_local
+      - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ──────────────────────────────────────────────
+  # Application: Engine Workers
+  #
+  # Each container runs a single Engine process.
+  # Scale with: docker compose up --scale engine-identity=3
+  # ──────────────────────────────────────────────
+  engine-identity:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: protean server --domain identity.domain
+    volumes:
+      - ./src:/app/src
+      - ../protean:/protean
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/identity_local
+      - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      message-db:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
+  engine-catalogue:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: protean server --domain catalogue.domain
+    volumes:
+      - ./src:/app/src
+      - ../protean:/protean
+    environment:
+      - CATALOGUE_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/catalogue_local
+      - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      message-db:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      replicas: 1
 
 volumes:
   postgres-data:
