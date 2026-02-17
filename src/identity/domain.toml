@@ -7,11 +7,14 @@ event_processing = "async"
 command_processing = "sync"
 message_processing = "sync"
 
+# Engine subscriptions use Redis Streams (outbox → broker → projectors).
+# Protean defaults to "event_store"; override to "stream" for outbox pattern.
+[server]
+default_subscription_type = "stream"
+
 # Outbox pattern: events are written to an outbox table in the same
 # transaction as the aggregate mutation, then asynchronously forwarded
 # to the broker (Redis Streams) by the Engine's OutboxProcessor.
-enable_outbox = true
-
 [outbox]
 broker = "default"
 messages_per_tick = 50
