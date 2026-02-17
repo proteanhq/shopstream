@@ -5,7 +5,7 @@ from protean.domain import Domain
 from catalogue.utils.logging import configure_logging, get_logger
 
 # Configure logging for the application
-configure_logging(log_dir="logs", log_file_prefix="shopstream")
+configure_logging(level="INFO", log_dir="logs", log_file_prefix="shopstream")
 
 # Get logger for this module
 logger = get_logger(__name__)
