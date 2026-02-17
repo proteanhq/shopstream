@@ -21,8 +21,8 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.11"
 
-# protean = { path = "../protean", extras = ["postgresql", "message-db", "redis"] }
-protean = {git = "https://github.com/proteanhq/protean.git", branch = "main", extras = ["postgresql", "message-db", "redis"] }
+protean = { path = "../protean", extras = ["postgresql", "message-db", "redis"], develop = true }
+# protean = {git = "https://github.com/proteanhq/protean.git", branch = "main", extras = ["postgresql", "message-db", "redis"] }
 python-dotenv = "^1.0.0"
 structlog = "^24.1.0"
 python-json-logger = "^2.0.7"
