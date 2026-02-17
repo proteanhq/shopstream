@@ -171,3 +171,4 @@ cython_debug/
 todo/
 *.todo
 *.temp
+CLAUDE.md
