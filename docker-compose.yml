@@ -125,6 +125,29 @@ services:
     deploy:
       replicas: 1
 
+  engine-ordering:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: protean server --domain ordering.domain
+    volumes:
+      - ./src:/app/src
+      - ../protean:/protean
+    environment:
+      - ORDERING_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ordering_local
+      - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      message-db:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
 volumes:
   postgres-data:
     driver: local

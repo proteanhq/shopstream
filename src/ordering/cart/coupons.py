@@ -1,0 +1,24 @@
+"""Cart coupon management — command and handler."""
+
+from protean import handle
+from protean.fields import Identifier, String
+from protean.utils.globals import current_domain
+
+from ordering.cart.cart import ShoppingCart
+from ordering.domain import ordering
+
+
+@ordering.command(part_of="ShoppingCart")
+class ApplyCouponToCart:
+    cart_id = Identifier(required=True)
+    coupon_code = String(required=True, max_length=100)
+
+
+@ordering.command_handler(part_of=ShoppingCart)
+class ApplyCouponHandler:
+    @handle(ApplyCouponToCart)
+    def apply_coupon(self, command):
+        repo = current_domain.repository_for(ShoppingCart)
+        cart = repo.get(command.cart_id)
+        cart.apply_coupon(coupon_code=command.coupon_code)
+        repo.add(cart)
