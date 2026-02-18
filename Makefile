@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean
 
 # Default target
 help: ## Show this help message
@@ -21,19 +21,19 @@ test: ## Run all tests across all domains
 	poetry run pytest
 
 test-domain: ## Run domain layer tests across all domains
-	poetry run pytest tests/identity/domain/ tests/catalogue/domain/
+	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/
 
 test-application: ## Run application layer tests across all domains
-	poetry run pytest tests/identity/application/ tests/catalogue/application/
+	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/
 
 test-integration: ## Run integration tests across all domains
-	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/integration/
+	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/integration/
 
 test-fast: ## Run fast tests across all domains (domain + application)
-	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ -m "not slow"
+	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ -m "not slow"
 
 test-cov: ## Run all tests with combined coverage report
-	poetry run pytest --cov=identity --cov=catalogue --cov-report=term-missing --cov-report=html --cov-report=xml
+	poetry run pytest --cov=identity --cov=catalogue --cov=ordering --cov-report=term-missing --cov-report=html --cov-report=xml
 
 # ──────────────────────────────────────────────
 # Identity domain testing
@@ -72,6 +72,24 @@ test-catalogue-cov: ## Run all catalogue tests with coverage report
 	poetry run pytest tests/catalogue/ --cov=catalogue --cov-report=term-missing --cov-report=html:htmlcov/catalogue
 
 # ──────────────────────────────────────────────
+# Ordering domain testing
+# ──────────────────────────────────────────────
+test-ordering: ## Run all ordering tests
+	poetry run pytest tests/ordering/
+
+test-ordering-domain: ## Run ordering domain layer tests
+	poetry run pytest tests/ordering/domain/ --cov=ordering --cov-report=term-missing
+
+test-ordering-application: ## Run ordering application layer tests
+	poetry run pytest tests/ordering/application/ --cov=ordering --cov-report=term-missing
+
+test-ordering-integration: ## Run ordering integration tests
+	poetry run pytest tests/ordering/integration/ --cov=ordering --cov-report=term-missing
+
+test-ordering-cov: ## Run all ordering tests with coverage report
+	poetry run pytest tests/ordering/ --cov=ordering --cov-report=term-missing --cov-report=html:htmlcov/ordering
+
+# ──────────────────────────────────────────────
 # Test utilities
 # ──────────────────────────────────────────────
 test-watch: ## Run tests in watch mode
@@ -108,26 +126,32 @@ engine-identity: ## Start Identity domain engine
 engine-catalogue: ## Start Catalogue domain engine
 	poetry run protean server --domain catalogue.domain
 
+engine-ordering: ## Start Ordering domain engine
+	poetry run protean server --domain ordering.domain
+
 engine-identity-scaled: ## Start Identity engine with 4 workers
 	poetry run protean server --domain identity.domain --workers 4
 
 engine-catalogue-scaled: ## Start Catalogue engine with 4 workers
 	poetry run protean server --domain catalogue.domain --workers 4
 
+engine-ordering-scaled: ## Start Ordering engine with 4 workers
+	poetry run protean server --domain ordering.domain --workers 4
+
 # ──────────────────────────────────────────────
 # Docker-based Engine Workers
 # ──────────────────────────────────────────────
 engine-docker: ## Start all engines in Docker (1 worker each)
-	docker compose up engine-identity engine-catalogue
+	docker compose up engine-identity engine-catalogue engine-ordering
 
-engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue)
-	docker compose up --scale engine-identity=3 --scale engine-catalogue=2
+engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue, 2 ordering)
+	docker compose up --scale engine-identity=3 --scale engine-catalogue=2 --scale engine-ordering=2
 
 # ──────────────────────────────────────────────
 # Observability
 # ──────────────────────────────────────────────
 observatory: ## Start Observatory dashboard (port 9000, live message flow + Prometheus metrics)
-	poetry run uvicorn src.observatory:app --host 0.0.0.0 --port 9000 --timeout-graceful-shutdown 3
+	poetry run protean observatory --domain identity.domain --domain catalogue.domain --domain ordering.domain --title "ShopStream Observatory"
 
 # ──────────────────────────────────────────────
 # Database
@@ -135,14 +159,17 @@ observatory: ## Start Observatory dashboard (port 9000, live message flow + Prom
 setup-db: ## Create database schemas for all domains
 	poetry run protean db setup --domain identity.domain
 	poetry run protean db setup --domain catalogue.domain
+	poetry run protean db setup --domain ordering.domain
 
 drop-db: ## Drop database schemas for all domains
 	poetry run protean db drop --domain identity.domain --yes
 	poetry run protean db drop --domain catalogue.domain --yes
+	poetry run protean db drop --domain ordering.domain --yes
 
 truncate-db: ## Delete all data from all tables (preserves schema)
 	poetry run protean db truncate --domain identity.domain --yes
 	poetry run protean db truncate --domain catalogue.domain --yes
+	poetry run protean db truncate --domain ordering.domain --yes
 
 # Protean Commands
 shell: ## Start Protean shell
@@ -157,8 +184,8 @@ docker-up: ## Start infrastructure services (Postgres, Redis, Message DB)
 docker-dev: ## Start full stack in Docker (infra + api + engines)
 	docker compose up
 
-docker-dev-scaled: ## Full stack in Docker with scaled engines (3 identity, 2 catalogue)
-	docker compose up --scale engine-identity=3 --scale engine-catalogue=2
+docker-dev-scaled: ## Full stack in Docker with scaled engines (3 identity, 2 catalogue, 2 ordering)
+	docker compose up --scale engine-identity=3 --scale engine-catalogue=2 --scale engine-ordering=2
 
 docker-down: ## Stop all Docker services
 	docker compose down
@@ -231,7 +258,7 @@ loadtest-spike: ## Run spike test (100 users, instant spawn, 2 min)
 loadtest-stack: ## Start full load test stack (Docker API + engines + Observatory + Locust)
 	./scripts/loadtest-stack.sh
 
-loadtest-stack-scaled: ## Start scaled load test stack (3 identity + 2 catalogue engines)
+loadtest-stack-scaled: ## Start scaled load test stack (3 identity + 2 catalogue + 2 ordering engines)
 	./scripts/loadtest-stack.sh --scaled
 
 loadtest-clean: truncate-db ## Clean all data for a fresh load test run

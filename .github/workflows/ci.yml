@@ -84,11 +84,14 @@ jobs:
       - name: Set up catalogue database
         run: bash src/catalogue/create_db.sh
 
+      - name: Set up ordering database
+        run: bash src/ordering/create_db.sh
+
       - name: Run linting
         run: poetry run ruff check src/ tests/
 
       - name: Run all tests with coverage
-        run: poetry run pytest --cov=src/identity --cov=src/catalogue --cov-report=xml --cov-report=term-missing
+        run: poetry run pytest --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov-report=xml --cov-report=term-missing
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.11'

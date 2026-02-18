@@ -26,7 +26,7 @@ cleanup() {
     for pid in "${PIDS[@]}"; do
         kill "$pid" 2>/dev/null || true
     done
-    docker compose stop api engine-identity engine-catalogue 2>/dev/null || true
+    docker compose stop api engine-identity engine-catalogue engine-ordering 2>/dev/null || true
     wait 2>/dev/null || true
     echo "[LOADTEST] Done."
 }
@@ -47,12 +47,12 @@ make truncate-db
 
 # 3. API + Engines via Docker
 if [ "$SCALED" = true ]; then
-    echo "[3/5] Starting API + scaled engines (3 identity, 2 catalogue)..."
+    echo "[3/5] Starting API + scaled engines (3 identity, 2 catalogue, 2 ordering)..."
     docker compose up -d api
-    docker compose up -d --scale engine-identity=3 --scale engine-catalogue=2
+    docker compose up -d --scale engine-identity=3 --scale engine-catalogue=2 --scale engine-ordering=2
 else
     echo "[3/5] Starting API + engines..."
-    docker compose up -d api engine-identity engine-catalogue
+    docker compose up -d api engine-identity engine-catalogue engine-ordering
 fi
 
 sleep 3
@@ -73,9 +73,9 @@ echo "  API Docs:    http://localhost:8000/docs"
 echo "  Prometheus:  http://localhost:9000/metrics"
 echo ""
 if [ "$SCALED" = true ]; then
-    echo "Mode: SCALED (3 identity + 2 catalogue engine containers)"
+    echo "Mode: SCALED (3 identity + 2 catalogue + 2 ordering engine containers)"
 else
-    echo "Mode: DEFAULT (1 identity + 1 catalogue engine)"
+    echo "Mode: DEFAULT (1 identity + 1 catalogue + 1 ordering engine)"
 fi
 echo ""
 

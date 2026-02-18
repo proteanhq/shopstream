@@ -14,6 +14,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from identity.api import router as identity_router
 from identity.domain import identity
+from ordering.api import cart_router, order_router
+from ordering.domain import ordering
 from protean.integrations.fastapi import (
     DomainContextMiddleware,
     register_exception_handlers,
@@ -25,6 +27,7 @@ from scalar_fastapi import get_scalar_api_reference
 # ---------------------------------------------------------------------------
 identity.init()
 catalogue.init()
+ordering.init()
 
 # ---------------------------------------------------------------------------
 # FastAPI app
@@ -50,6 +53,8 @@ app.add_middleware(
         "/customers": identity,
         "/products": catalogue,
         "/categories": catalogue,
+        "/carts": ordering,
+        "/orders": ordering,
     },
 )
 
@@ -64,6 +69,8 @@ register_exception_handlers(app)
 app.include_router(identity_router)
 app.include_router(product_router)
 app.include_router(category_router)
+app.include_router(cart_router)
+app.include_router(order_router)
 
 
 # ---------------------------------------------------------------------------
@@ -88,6 +95,7 @@ async def health():
             "domains": {
                 "identity": {"name": identity.name},
                 "catalogue": {"name": catalogue.name},
+                "ordering": {"name": ordering.name},
             },
         }
     )
