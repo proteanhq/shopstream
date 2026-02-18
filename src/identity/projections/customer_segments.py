@@ -5,7 +5,7 @@ from protean.fields import Identifier, String
 from protean.utils.globals import current_domain
 
 from identity.customer.customer import Customer
-from identity.customer.events import CustomerRegistered, TierUpgraded
+from identity.customer.events import CustomerRegistered, ProfileUpdated, TierUpgraded
 from identity.domain import identity
 
 
@@ -31,6 +31,14 @@ class CustomerSegmentsProjector:
                 tier="Standard",
             )
         )
+
+    @on(ProfileUpdated)
+    def on_profile_updated(self, event):
+        repo = current_domain.repository_for(CustomerSegments)
+        record = repo.get(event.customer_id)
+        record.first_name = event.first_name
+        record.last_name = event.last_name
+        repo.add(record)
 
     @on(TierUpgraded)
     def on_tier_upgraded(self, event):
