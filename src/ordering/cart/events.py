@@ -7,6 +7,8 @@ from ordering.domain import ordering
 
 @ordering.event(part_of="ShoppingCart")
 class CartItemAdded:
+    """A product was added to the shopping cart."""
+
     __version__ = "v1"
 
     cart_id = Identifier(required=True)
@@ -18,6 +20,8 @@ class CartItemAdded:
 
 @ordering.event(part_of="ShoppingCart")
 class CartQuantityUpdated:
+    """The quantity of a cart item was changed."""
+
     __version__ = "v1"
 
     cart_id = Identifier(required=True)
@@ -28,6 +32,8 @@ class CartQuantityUpdated:
 
 @ordering.event(part_of="ShoppingCart")
 class CartItemRemoved:
+    """An item was removed from the shopping cart."""
+
     __version__ = "v1"
 
     cart_id = Identifier(required=True)
@@ -36,6 +42,8 @@ class CartItemRemoved:
 
 @ordering.event(part_of="ShoppingCart")
 class CartCouponApplied:
+    """A coupon code was applied to the shopping cart."""
+
     __version__ = "v1"
 
     cart_id = Identifier(required=True)
@@ -44,6 +52,8 @@ class CartCouponApplied:
 
 @ordering.event(part_of="ShoppingCart")
 class CartsMerged:
+    """A guest cart's items were merged into a registered customer's cart."""
+
     __version__ = "v1"
 
     cart_id = Identifier(required=True)
@@ -53,6 +63,8 @@ class CartsMerged:
 
 @ordering.event(part_of="ShoppingCart")
 class CartConverted:
+    """A shopping cart was converted into an order at checkout."""
+
     __version__ = "v1"
 
     cart_id = Identifier(required=True)
@@ -62,6 +74,8 @@ class CartConverted:
 
 @ordering.event(part_of="ShoppingCart")
 class CartAbandoned:
+    """A shopping cart was marked as abandoned due to inactivity."""
+
     __version__ = "v1"
 
     cart_id = Identifier(required=True)

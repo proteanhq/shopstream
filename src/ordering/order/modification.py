@@ -14,6 +14,8 @@ from ordering.order.order import Order
 
 @ordering.command(part_of="Order")
 class AddItem:
+    """Add a new line item to an order (only allowed in Created state)."""
+
     order_id = Identifier(required=True)
     product_id = Identifier(required=True)
     variant_id = Identifier(required=True)
@@ -25,12 +27,16 @@ class AddItem:
 
 @ordering.command(part_of="Order")
 class RemoveItem:
+    """Remove a line item from an order (only allowed in Created state)."""
+
     order_id = Identifier(required=True)
     item_id = Identifier(required=True)
 
 
 @ordering.command(part_of="Order")
 class UpdateItemQuantity:
+    """Change the quantity of an existing order line item."""
+
     order_id = Identifier(required=True)
     item_id = Identifier(required=True)
     new_quantity = Integer(required=True, min_value=1)
@@ -38,6 +44,8 @@ class UpdateItemQuantity:
 
 @ordering.command(part_of="Order")
 class ApplyCoupon:
+    """Apply a coupon code to an order for a discount."""
+
     order_id = Identifier(required=True)
     coupon_code = String(required=True, max_length=100)
 

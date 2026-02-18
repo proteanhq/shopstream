@@ -10,6 +10,8 @@ from catalogue.product.product import Product
 
 @catalogue.command(part_of="Product")
 class AddProductImage:
+    """Upload a new image for a product."""
+
     product_id: Identifier(required=True)
     url: String(required=True, max_length=500)
     alt_text: String(max_length=255)
@@ -18,6 +20,8 @@ class AddProductImage:
 
 @catalogue.command(part_of="Product")
 class RemoveProductImage:
+    """Remove an image from a product's gallery."""
+
     product_id: Identifier(required=True)
     image_id: Identifier(required=True)
 

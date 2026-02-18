@@ -12,6 +12,8 @@ from ordering.order.order import Order
 
 @ordering.command(part_of="Order")
 class CreateOrder:
+    """Create a new order from a shopping cart's items, addresses, and pricing."""
+
     customer_id = Identifier(required=True)
     items = Text(required=True)  # JSON: list of item dicts
     shipping_address = Text(required=True)  # JSON: address dict

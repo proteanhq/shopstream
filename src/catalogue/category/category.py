@@ -11,7 +11,11 @@ from catalogue.domain import catalogue
 
 @catalogue.aggregate
 class Category:
-    """Category aggregate root for organizing products into a hierarchy."""
+    """A hierarchical grouping for organizing products in the catalogue.
+
+    Categories form a tree up to 5 levels deep (0-4). Each category can have a
+    parent, custom attributes, and a display order for controlling presentation.
+    """
 
     name: String(required=True, max_length=100)
     parent_category_id: Identifier()

@@ -10,6 +10,8 @@ from identity.domain import identity
 
 @identity.command(part_of="Customer")
 class UpgradeTier:
+    """Promote a customer to a higher loyalty tier (upgrades only, no downgrades)."""
+
     customer_id: Identifier(required=True)
     new_tier: String(required=True, max_length=20)
 

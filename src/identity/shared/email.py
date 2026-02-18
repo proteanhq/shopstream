@@ -8,7 +8,12 @@ from identity.domain import identity
 
 @identity.value_object
 class EmailAddress:
-    """Value object for email addresses."""
+    """A validated email address conforming to standard format rules.
+
+    Enforces structural validity: exactly one @, valid local and domain parts,
+    no consecutive dots, no forbidden characters. Used across contexts wherever
+    an email is required.
+    """
 
     address: String(required=True, max_length=254)
 

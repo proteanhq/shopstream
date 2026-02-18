@@ -7,6 +7,8 @@ from identity.domain import identity
 
 @identity.event(part_of="Customer")
 class CustomerRegistered:
+    """A new customer account was created on the platform."""
+
     __version__ = "v1"
 
     customer_id: Identifier(required=True)
@@ -19,6 +21,8 @@ class CustomerRegistered:
 
 @identity.event(part_of="Customer")
 class ProfileUpdated:
+    """A customer's personal profile information was changed."""
+
     __version__ = "v1"
 
     customer_id: Identifier(required=True)
@@ -30,6 +34,8 @@ class ProfileUpdated:
 
 @identity.event(part_of="Customer")
 class AddressAdded:
+    """A new address was added to a customer's address book."""
+
     __version__ = "v1"
 
     customer_id: Identifier(required=True)
@@ -45,6 +51,8 @@ class AddressAdded:
 
 @identity.event(part_of="Customer")
 class AddressUpdated:
+    """An existing address in a customer's address book was modified."""
+
     __version__ = "v1"
 
     customer_id: Identifier(required=True)
@@ -59,6 +67,8 @@ class AddressUpdated:
 
 @identity.event(part_of="Customer")
 class AddressRemoved:
+    """An address was removed from a customer's address book."""
+
     __version__ = "v1"
 
     customer_id: Identifier(required=True)
@@ -67,6 +77,8 @@ class AddressRemoved:
 
 @identity.event(part_of="Customer")
 class DefaultAddressChanged:
+    """A different address was designated as the customer's default."""
+
     __version__ = "v1"
 
     customer_id: Identifier(required=True)
@@ -76,6 +88,8 @@ class DefaultAddressChanged:
 
 @identity.event(part_of="Customer")
 class AccountSuspended:
+    """A customer account was suspended, blocking further activity."""
+
     __version__ = "v1"
 
     customer_id: Identifier(required=True)
@@ -85,6 +99,8 @@ class AccountSuspended:
 
 @identity.event(part_of="Customer")
 class AccountReactivated:
+    """A previously suspended customer account was restored to active status."""
+
     __version__ = "v1"
 
     customer_id: Identifier(required=True)
@@ -93,6 +109,8 @@ class AccountReactivated:
 
 @identity.event(part_of="Customer")
 class AccountClosed:
+    """A customer account was permanently closed."""
+
     __version__ = "v1"
 
     customer_id: Identifier(required=True)
@@ -101,6 +119,8 @@ class AccountClosed:
 
 @identity.event(part_of="Customer")
 class TierUpgraded:
+    """A customer was promoted to a higher loyalty tier."""
+
     __version__ = "v1"
 
     customer_id: Identifier(required=True)

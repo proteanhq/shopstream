@@ -15,17 +15,23 @@ from ordering.order.order import Order
 
 @ordering.command(part_of="Order")
 class RequestReturn:
+    """Request a return of a delivered order, providing a reason."""
+
     order_id = Identifier(required=True)
     reason = String(required=True, max_length=500)
 
 
 @ordering.command(part_of="Order")
 class ApproveReturn:
+    """Approve a pending return request."""
+
     order_id = Identifier(required=True)
 
 
 @ordering.command(part_of="Order")
 class RecordReturn:
+    """Record that returned items have been received back from the customer."""
+
     order_id = Identifier(required=True)
     returned_item_ids = Text()  # JSON: list of item ID strings (optional — all items if omitted)
 

@@ -14,6 +14,8 @@ from ordering.order.order import Order
 
 @ordering.command(part_of="Order")
 class RecordPaymentPending:
+    """Record that payment processing has been initiated."""
+
     order_id = Identifier(required=True)
     payment_id = String(required=True, max_length=255)
     payment_method = String(required=True, max_length=50)
@@ -21,6 +23,8 @@ class RecordPaymentPending:
 
 @ordering.command(part_of="Order")
 class RecordPaymentSuccess:
+    """Record that payment was successfully captured."""
+
     order_id = Identifier(required=True)
     payment_id = String(required=True, max_length=255)
     amount = Float(required=True)
@@ -29,6 +33,8 @@ class RecordPaymentSuccess:
 
 @ordering.command(part_of="Order")
 class RecordPaymentFailure:
+    """Record that payment failed, returning the order to Confirmed for retry."""
+
     order_id = Identifier(required=True)
     payment_id = String(required=True, max_length=255)
     reason = String(required=True, max_length=500)

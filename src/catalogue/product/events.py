@@ -9,6 +9,8 @@ from catalogue.domain import catalogue
 
 @catalogue.event(part_of="Product")
 class ProductCreated:
+    """A new product was added to the catalogue in Draft status."""
+
     __version__ = "v1"
 
     product_id: Identifier(required=True)
@@ -22,6 +24,8 @@ class ProductCreated:
 
 @catalogue.event(part_of="Product")
 class VariantAdded:
+    """A new purchasable variant was added to a product."""
+
     __version__ = "v1"
 
     product_id: Identifier(required=True)
@@ -34,6 +38,8 @@ class VariantAdded:
 
 @catalogue.event(part_of="Product")
 class VariantPriceChanged:
+    """A variant's base price was updated."""
+
     __version__ = "v1"
 
     product_id: Identifier(required=True)
@@ -45,6 +51,8 @@ class VariantPriceChanged:
 
 @catalogue.event(part_of="Product")
 class TierPriceSet:
+    """A loyalty-tier-specific price was set on a variant."""
+
     __version__ = "v1"
 
     product_id: Identifier(required=True)
@@ -56,6 +64,8 @@ class TierPriceSet:
 
 @catalogue.event(part_of="Product")
 class ProductActivated:
+    """A draft product was activated and made available for sale."""
+
     __version__ = "v1"
 
     product_id: Identifier(required=True)
@@ -65,6 +75,8 @@ class ProductActivated:
 
 @catalogue.event(part_of="Product")
 class ProductDiscontinued:
+    """An active product was discontinued and removed from sale."""
+
     __version__ = "v1"
 
     product_id: Identifier(required=True)
@@ -77,6 +89,8 @@ class ProductDiscontinued:
 
 @catalogue.event(part_of="Product")
 class ProductDetailsUpdated:
+    """A product's title, description, brand, or attributes were changed."""
+
     __version__ = "v1"
 
     product_id: Identifier(required=True)
@@ -87,6 +101,8 @@ class ProductDetailsUpdated:
 
 @catalogue.event(part_of="Product")
 class ProductImageAdded:
+    """A new image was uploaded for a product."""
+
     __version__ = "v1"
 
     product_id: Identifier(required=True)
@@ -97,6 +113,8 @@ class ProductImageAdded:
 
 @catalogue.event(part_of="Product")
 class ProductImageRemoved:
+    """An image was removed from a product's gallery."""
+
     __version__ = "v1"
 
     product_id: Identifier(required=True)
@@ -105,6 +123,8 @@ class ProductImageRemoved:
 
 @catalogue.event(part_of="Product")
 class ProductArchived:
+    """A discontinued product was archived for permanent storage."""
+
     __version__ = "v1"
 
     product_id: Identifier(required=True)

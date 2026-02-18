@@ -10,6 +10,8 @@ from identity.domain import identity
 
 @identity.command(part_of="Customer")
 class AddAddress:
+    """Add a new address to a customer's address book."""
+
     customer_id: Identifier(required=True)
     label: String(max_length=20)
     street: String(required=True, max_length=255)
@@ -23,6 +25,8 @@ class AddAddress:
 
 @identity.command(part_of="Customer")
 class UpdateAddress:
+    """Modify fields of an existing address."""
+
     customer_id: Identifier(required=True)
     address_id: Identifier(required=True)
     label: String(max_length=20)
@@ -35,12 +39,16 @@ class UpdateAddress:
 
 @identity.command(part_of="Customer")
 class RemoveAddress:
+    """Remove an address from a customer's address book."""
+
     customer_id: Identifier(required=True)
     address_id: Identifier(required=True)
 
 
 @identity.command(part_of="Customer")
 class SetDefaultAddress:
+    """Designate an existing address as the customer's default."""
+
     customer_id: Identifier(required=True)
     address_id: Identifier(required=True)
 

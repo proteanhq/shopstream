@@ -10,6 +10,8 @@ from catalogue.domain import catalogue
 
 @catalogue.command(part_of="Category")
 class CreateCategory:
+    """Add a new category to the product hierarchy."""
+
     name: String(required=True, max_length=100)
     parent_category_id: Identifier()
     attributes: Text()
@@ -17,6 +19,8 @@ class CreateCategory:
 
 @catalogue.command(part_of="Category")
 class UpdateCategory:
+    """Change a category's name or attributes."""
+
     category_id: Identifier(required=True)
     name: String(max_length=100)
     attributes: Text()
@@ -24,12 +28,16 @@ class UpdateCategory:
 
 @catalogue.command(part_of="Category")
 class ReorderCategory:
+    """Change a category's display position in the hierarchy."""
+
     category_id: Identifier(required=True)
     new_display_order: Integer(required=True)
 
 
 @catalogue.command(part_of="Category")
 class DeactivateCategory:
+    """Deactivate a category, hiding it from the storefront."""
+
     category_id: Identifier(required=True)
 
 

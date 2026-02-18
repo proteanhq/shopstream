@@ -10,6 +10,8 @@ from catalogue.product.product import SEO, Product
 
 @catalogue.command(part_of="Product")
 class UpdateProductDetails:
+    """Change a product's title, description, brand, attributes, or SEO metadata."""
+
     product_id: Identifier(required=True)
     title: String(max_length=255)
     description: String()

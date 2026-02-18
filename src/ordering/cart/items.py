@@ -10,6 +10,8 @@ from ordering.domain import ordering
 
 @ordering.command(part_of="ShoppingCart")
 class AddToCart:
+    """Add a product variant to the shopping cart (merges if already present)."""
+
     cart_id = Identifier(required=True)
     product_id = Identifier(required=True)
     variant_id = Identifier(required=True)
@@ -18,6 +20,8 @@ class AddToCart:
 
 @ordering.command(part_of="ShoppingCart")
 class UpdateCartQuantity:
+    """Change the quantity of an item already in the cart."""
+
     cart_id = Identifier(required=True)
     item_id = Identifier(required=True)
     new_quantity = Integer(required=True, min_value=1)
@@ -25,6 +29,8 @@ class UpdateCartQuantity:
 
 @ordering.command(part_of="ShoppingCart")
 class RemoveFromCart:
+    """Remove an item from the shopping cart."""
+
     cart_id = Identifier(required=True)
     item_id = Identifier(required=True)
 

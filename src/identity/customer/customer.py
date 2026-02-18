@@ -45,7 +45,11 @@ class AddressLabel(Enum):
 
 @identity.value_object(part_of="Customer")
 class GeoCoordinates:
-    """Geographic coordinates for address geolocation."""
+    """Latitude/longitude pair for address geolocation.
+
+    Both coordinates are required when provided; partial coordinates are rejected.
+    Latitude ranges from -90 to 90, longitude from -180 to 180.
+    """
 
     latitude: Float(min_value=-90.0, max_value=90.0)
     longitude: Float(min_value=-180.0, max_value=180.0)
@@ -58,7 +62,11 @@ class GeoCoordinates:
 
 @identity.value_object(part_of="Customer")
 class Profile:
-    """Customer profile information."""
+    """Personal information associated with a Customer — name, phone, and date of birth.
+
+    A Profile has no identity of its own; it exists only as part of a Customer.
+    It is replaced wholesale on update (value object semantics).
+    """
 
     first_name: String(required=True, max_length=100)
     last_name: String(required=True, max_length=100)
@@ -68,7 +76,11 @@ class Profile:
 
 @identity.entity(part_of="Customer")
 class Address:
-    """Address entity within the Customer aggregate."""
+    """A physical location associated with a Customer, such as a home or work address.
+
+    Each address carries a label, geo-coordinates, and a default flag. A customer may
+    have up to 10 addresses, with exactly one marked as the default at all times.
+    """
 
     label: String(choices=AddressLabel, default=AddressLabel.HOME.value)
     street: String(required=True, max_length=255)
@@ -82,7 +94,12 @@ class Address:
 
 @identity.aggregate
 class Customer:
-    """Customer aggregate root."""
+    """A registered person on the platform, identified by a system ID and an external ID.
+
+    The Customer aggregate groups profile, addresses, account status, and loyalty tier
+    into a single transactional boundary. The "exactly one default address" invariant
+    requires these elements to change together consistently.
+    """
 
     external_id: String(required=True, max_length=255, unique=True)
     email: ValueObject(EmailAddress, required=True)

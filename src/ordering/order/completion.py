@@ -10,6 +10,8 @@ from ordering.order.order import Order
 
 @ordering.command(part_of="Order")
 class CompleteOrder:
+    """Finalize a delivered order after the return window has expired."""
+
     order_id = Identifier(required=True)
 
 

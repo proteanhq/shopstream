@@ -12,6 +12,8 @@ from catalogue.product.product import Dimensions, Price, Product, Weight
 
 @catalogue.command(part_of="Product")
 class AddVariant:
+    """Add a new purchasable variant (size, color, etc.) to a product."""
+
     product_id: Identifier(required=True)
     variant_sku: String(required=True, max_length=50)
     attributes: Text()
@@ -27,6 +29,8 @@ class AddVariant:
 
 @catalogue.command(part_of="Product")
 class UpdateVariantPrice:
+    """Change the base price of an existing variant."""
+
     product_id: Identifier(required=True)
     variant_id: Identifier(required=True)
     base_price: Float(required=True)
@@ -35,6 +39,8 @@ class UpdateVariantPrice:
 
 @catalogue.command(part_of="Product")
 class SetTierPrice:
+    """Set a loyalty-tier-specific discount price on a variant."""
+
     product_id: Identifier(required=True)
     variant_id: Identifier(required=True)
     tier: String(required=True, max_length=50)

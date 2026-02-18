@@ -122,6 +122,12 @@ _CANCELLABLE_STATES = {
 # ---------------------------------------------------------------------------
 @ordering.value_object(part_of="Order")
 class ShippingAddress:
+    """A delivery or billing address captured at checkout time.
+
+    Once recorded on an Order, the address is immutable — it represents where
+    the order was shipped, regardless of future address changes on the Customer.
+    """
+
     street = String(required=True, max_length=255)
     city = String(required=True, max_length=100)
     state = String(max_length=100)
@@ -131,6 +137,12 @@ class ShippingAddress:
 
 @ordering.value_object(part_of="Order")
 class OrderPricing:
+    """Financial summary of an order: subtotal, shipping, tax, discounts, and grand total.
+
+    Prices are locked at checkout and never change, even if the catalogue prices
+    change later. The currency is captured alongside the amounts.
+    """
+
     subtotal = Float(default=0.0)
     shipping_cost = Float(default=0.0)
     tax_total = Float(default=0.0)
@@ -144,6 +156,13 @@ class OrderPricing:
 # ---------------------------------------------------------------------------
 @ordering.entity(part_of="Order")
 class OrderItem:
+    """A line item in an order, representing a specific product variant and quantity.
+
+    Each item tracks its own status through the fulfillment lifecycle
+    (Pending -> Shipped -> Delivered -> optionally Returned), enabling partial
+    shipments where some items ship before others.
+    """
+
     product_id = Identifier(required=True)
     variant_id = Identifier(required=True)
     sku = String(required=True, max_length=50)
