@@ -10,11 +10,13 @@ import random
 from locust import HttpUser, SequentialTaskSet, between, task
 
 from loadtests.data_generators import (
+    category_attributes,
     category_name,
     image_data,
     product_data,
     variant_data,
 )
+from loadtests.helpers.response import extract_error_detail
 from loadtests.helpers.state import CategoryState, ProductState
 
 
@@ -41,7 +43,7 @@ class ProductCatalogBuilder(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.product_id = resp.json()["product_id"]
             else:
-                resp.failure(f"Create product failed: {resp.status_code}")
+                resp.failure(f"Create product failed: {resp.status_code} — {extract_error_detail(resp)}")
                 self.interrupt()
 
     @task
@@ -55,7 +57,7 @@ class ProductCatalogBuilder(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.variant_count += 1
             else:
-                resp.failure(f"Add variant failed: {resp.status_code}")
+                resp.failure(f"Add variant failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def add_variant_2(self):
@@ -68,7 +70,7 @@ class ProductCatalogBuilder(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.variant_count += 1
             else:
-                resp.failure(f"Add variant 2 failed: {resp.status_code}")
+                resp.failure(f"Add variant 2 failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def add_primary_image(self):
@@ -81,7 +83,7 @@ class ProductCatalogBuilder(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.image_count += 1
             else:
-                resp.failure(f"Add image failed: {resp.status_code}")
+                resp.failure(f"Add image failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def add_secondary_image(self):
@@ -94,7 +96,7 @@ class ProductCatalogBuilder(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.image_count += 1
             else:
-                resp.failure(f"Add second image failed: {resp.status_code}")
+                resp.failure(f"Add second image failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def activate_product(self):
@@ -106,7 +108,7 @@ class ProductCatalogBuilder(SequentialTaskSet):
             if resp.status_code == 200:
                 self.state.current_status = "Active"
             else:
-                resp.failure(f"Activate failed: {resp.status_code}")
+                resp.failure(f"Activate failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):
@@ -137,7 +139,7 @@ class ProductLifecycleJourney(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.product_id = resp.json()["product_id"]
             else:
-                resp.failure(f"Create product failed: {resp.status_code}")
+                resp.failure(f"Create product failed: {resp.status_code} — {extract_error_detail(resp)}")
                 self.interrupt()
 
     @task
@@ -149,7 +151,7 @@ class ProductLifecycleJourney(SequentialTaskSet):
             name="POST /products/{id}/variants",
         ) as resp:
             if resp.status_code != 201:
-                resp.failure(f"Add variant failed: {resp.status_code}")
+                resp.failure(f"Add variant failed: {resp.status_code} — {extract_error_detail(resp)}")
                 self.interrupt()
 
     @task
@@ -160,7 +162,7 @@ class ProductLifecycleJourney(SequentialTaskSet):
             name="PUT /products/{id}/activate",
         ) as resp:
             if resp.status_code != 200:
-                resp.failure(f"Activate failed: {resp.status_code}")
+                resp.failure(f"Activate failed: {resp.status_code} — {extract_error_detail(resp)}")
                 self.interrupt()
 
     @task
@@ -171,7 +173,7 @@ class ProductLifecycleJourney(SequentialTaskSet):
             name="PUT /products/{id}/discontinue",
         ) as resp:
             if resp.status_code != 200:
-                resp.failure(f"Discontinue failed: {resp.status_code}")
+                resp.failure(f"Discontinue failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def archive(self):
@@ -181,7 +183,7 @@ class ProductLifecycleJourney(SequentialTaskSet):
             name="PUT /products/{id}/archive",
         ) as resp:
             if resp.status_code != 200:
-                resp.failure(f"Archive failed: {resp.status_code}")
+                resp.failure(f"Archive failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):
@@ -210,7 +212,7 @@ class CategoryHierarchyBuilder(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.category_ids.append(resp.json()["category_id"])
             else:
-                resp.failure(f"Create root category failed: {resp.status_code}")
+                resp.failure(f"Create root category failed: {resp.status_code} — {extract_error_detail(resp)}")
                 self.interrupt()
 
     @task
@@ -227,7 +229,7 @@ class CategoryHierarchyBuilder(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.category_ids.append(resp.json()["category_id"])
             else:
-                resp.failure(f"Create child category failed: {resp.status_code}")
+                resp.failure(f"Create child category failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def create_grandchild(self):
@@ -236,7 +238,7 @@ class CategoryHierarchyBuilder(SequentialTaskSet):
             json={
                 "name": category_name(),
                 "parent_category_id": self.state.category_ids[1],
-                "attributes": "season=summer",
+                "attributes": category_attributes(),
             },
             catch_response=True,
             name="POST /categories",
@@ -244,18 +246,18 @@ class CategoryHierarchyBuilder(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.category_ids.append(resp.json()["category_id"])
             else:
-                resp.failure(f"Create grandchild failed: {resp.status_code}")
+                resp.failure(f"Create grandchild failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def update_root(self):
         with self.client.put(
             f"/categories/{self.state.category_ids[0]}",
-            json={"name": category_name(), "attributes": "updated=true"},
+            json={"name": category_name(), "attributes": category_attributes()},
             catch_response=True,
             name="PUT /categories/{id}",
         ) as resp:
             if resp.status_code != 200:
-                resp.failure(f"Update category failed: {resp.status_code}")
+                resp.failure(f"Update category failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def reorder_leaf(self):
@@ -266,7 +268,7 @@ class CategoryHierarchyBuilder(SequentialTaskSet):
             name="PUT /categories/{id}/reorder",
         ) as resp:
             if resp.status_code != 200:
-                resp.failure(f"Reorder failed: {resp.status_code}")
+                resp.failure(f"Reorder failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def deactivate_leaf(self):
@@ -276,7 +278,7 @@ class CategoryHierarchyBuilder(SequentialTaskSet):
             name="PUT /categories/{id}/deactivate",
         ) as resp:
             if resp.status_code != 200:
-                resp.failure(f"Deactivate failed: {resp.status_code}")
+                resp.failure(f"Deactivate failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):

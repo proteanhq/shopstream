@@ -15,6 +15,7 @@ from loadtests.data_generators import (
     valid_email,
     valid_phone,
 )
+from loadtests.helpers.response import extract_error_detail
 from loadtests.helpers.state import CustomerState
 
 
@@ -48,7 +49,7 @@ class NewCustomerJourney(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.customer_id = resp.json()["customer_id"]
             else:
-                resp.failure(f"Registration failed: {resp.status_code}")
+                resp.failure(f"Registration failed: {resp.status_code} — {extract_error_detail(resp)}")
                 self.interrupt()
 
     @task
@@ -67,7 +68,7 @@ class NewCustomerJourney(SequentialTaskSet):
             name="PUT /customers/{id}/profile",
         ) as resp:
             if resp.status_code != 200:
-                resp.failure(f"Update profile failed: {resp.status_code}")
+                resp.failure(f"Update profile failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def add_first_address(self):
@@ -80,7 +81,7 @@ class NewCustomerJourney(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.address_count += 1
             else:
-                resp.failure(f"Add address failed: {resp.status_code}")
+                resp.failure(f"Add address failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def add_second_address(self):
@@ -93,20 +94,20 @@ class NewCustomerJourney(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.address_count += 1
             else:
-                resp.failure(f"Add second address failed: {resp.status_code}")
+                resp.failure(f"Add second address failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def upgrade_to_silver(self):
         with self.client.put(
             f"/customers/{self.state.customer_id}/tier",
-            json={"new_tier": "SILVER"},
+            json={"new_tier": "Silver"},
             catch_response=True,
             name="PUT /customers/{id}/tier",
         ) as resp:
             if resp.status_code == 200:
-                self.state.current_tier = "SILVER"
+                self.state.current_tier = "Silver"
             else:
-                resp.failure(f"Tier upgrade failed: {resp.status_code}")
+                resp.failure(f"Tier upgrade failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):
@@ -143,7 +144,7 @@ class AccountLifecycleJourney(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.customer_id = resp.json()["customer_id"]
             else:
-                resp.failure(f"Registration failed: {resp.status_code}")
+                resp.failure(f"Registration failed: {resp.status_code} — {extract_error_detail(resp)}")
                 self.interrupt()
 
     @task
@@ -155,7 +156,7 @@ class AccountLifecycleJourney(SequentialTaskSet):
             name="PUT /customers/{id}/suspend",
         ) as resp:
             if resp.status_code != 200:
-                resp.failure(f"Suspend failed: {resp.status_code}")
+                resp.failure(f"Suspend failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def reactivate(self):
@@ -165,7 +166,7 @@ class AccountLifecycleJourney(SequentialTaskSet):
             name="PUT /customers/{id}/reactivate",
         ) as resp:
             if resp.status_code != 200:
-                resp.failure(f"Reactivate failed: {resp.status_code}")
+                resp.failure(f"Reactivate failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def close(self):
@@ -175,7 +176,7 @@ class AccountLifecycleJourney(SequentialTaskSet):
             name="PUT /customers/{id}/close",
         ) as resp:
             if resp.status_code != 200:
-                resp.failure(f"Close failed: {resp.status_code}")
+                resp.failure(f"Close failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):
@@ -210,20 +211,20 @@ class TierProgressionJourney(SequentialTaskSet):
             if resp.status_code == 201:
                 self.state.customer_id = resp.json()["customer_id"]
             else:
-                resp.failure(f"Registration failed: {resp.status_code}")
+                resp.failure(f"Registration failed: {resp.status_code} — {extract_error_detail(resp)}")
                 self.interrupt()
 
     @task
     def upgrade_silver(self):
-        self._upgrade("SILVER")
+        self._upgrade("Silver")
 
     @task
     def upgrade_gold(self):
-        self._upgrade("GOLD")
+        self._upgrade("Gold")
 
     @task
     def upgrade_platinum(self):
-        self._upgrade("PLATINUM")
+        self._upgrade("Platinum")
 
     def _upgrade(self, tier: str):
         with self.client.put(
@@ -235,7 +236,7 @@ class TierProgressionJourney(SequentialTaskSet):
             if resp.status_code == 200:
                 self.state.current_tier = tier
             else:
-                resp.failure(f"Upgrade to {tier} failed: {resp.status_code}")
+                resp.failure(f"Upgrade to {tier} failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):

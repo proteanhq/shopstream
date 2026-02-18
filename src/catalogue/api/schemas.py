@@ -18,8 +18,8 @@ class CreateProductRequest(BaseModel):
                     "description": "Premium cotton crew-neck tee in black.",
                     "category_id": "cat-apparel-001",
                     "brand": "Acme Apparel",
-                    "attributes": "color=black,material=cotton",
-                    "visibility": "VISIBLE",
+                    "attributes": '{"color": "black", "material": "cotton"}',
+                    "visibility": "Public",
                     "meta_title": "Classic Black T-Shirt | Acme Apparel",
                     "meta_description": "Premium cotton crew-neck tee available in multiple sizes.",
                     "slug": "classic-black-tshirt",
@@ -71,7 +71,7 @@ class AddVariantRequest(BaseModel):
             "examples": [
                 {
                     "variant_sku": "TSHIRT-BLK-L",
-                    "attributes": "size=L",
+                    "attributes": '{"size": "L"}',
                     "base_price": 29.99,
                     "currency": "USD",
                     "weight_value": 0.25,
@@ -105,7 +105,7 @@ class UpdateVariantPriceRequest(BaseModel):
 
 
 class SetTierPriceRequest(BaseModel):
-    model_config = {"json_schema_extra": {"examples": [{"tier": "GOLD", "price": 22.49}]}}
+    model_config = {"json_schema_extra": {"examples": [{"tier": "Gold", "price": 22.49}]}}
 
     tier: str = Field(..., max_length=50)
     price: float
@@ -134,7 +134,9 @@ class AddProductImageRequest(BaseModel):
 
 class CreateCategoryRequest(BaseModel):
     model_config = {
-        "json_schema_extra": {"examples": [{"name": "Apparel", "parent_category_id": None, "attributes": "season=all"}]}
+        "json_schema_extra": {
+            "examples": [{"name": "Apparel", "parent_category_id": None, "attributes": '{"season": "all"}'}]
+        }
     }
 
     name: str = Field(..., max_length=100)
@@ -144,7 +146,9 @@ class CreateCategoryRequest(BaseModel):
 
 class UpdateCategoryRequest(BaseModel):
     model_config = {
-        "json_schema_extra": {"examples": [{"name": "Men's Apparel", "attributes": "season=spring,gender=men"}]}
+        "json_schema_extra": {
+            "examples": [{"name": "Men's Apparel", "attributes": '{"season": "spring", "gender": "men"}'}]
+        }
     }
 
     name: str | None = Field(None, max_length=100)

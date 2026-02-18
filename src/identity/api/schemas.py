@@ -105,7 +105,7 @@ class SuspendAccountRequest(BaseModel):
 
 
 class UpgradeTierRequest(BaseModel):
-    model_config = {"json_schema_extra": {"examples": [{"new_tier": "GOLD"}]}}
+    model_config = {"json_schema_extra": {"examples": [{"new_tier": "Gold"}]}}
 
     new_tier: str = Field(..., max_length=20)
 
