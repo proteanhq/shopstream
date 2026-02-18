@@ -15,6 +15,7 @@ State Machine (14 states):
 import json
 from datetime import UTC, datetime
 from enum import Enum
+from uuid import uuid4
 
 from protean import apply
 from protean.exceptions import ValidationError
@@ -205,31 +206,6 @@ class Order:
     updated_at = DateTime()
 
     # -------------------------------------------------------------------
-    # Event sourcing reconstruction
-    # -------------------------------------------------------------------
-    @classmethod
-    def from_events(cls, events):
-        """Reconstruct Order from stored events.
-
-        Overrides base implementation because OrderCreated contains flat
-        pricing fields and JSON strings that don't match the aggregate's
-        ValueObject/HasMany constructor parameters.  We create a minimal
-        aggregate and let @apply methods rebuild full state.
-        """
-        first = events[0].payload
-        order = cls(
-            id=first.get("order_id"),
-            customer_id=first.get("customer_id", "unknown"),
-            items=[],  # Initialize empty — @apply methods will populate
-        )
-        order._events.clear()
-
-        for event in events:
-            order._apply(event)
-
-        return order
-
-    # -------------------------------------------------------------------
     # Factory method
     # -------------------------------------------------------------------
     @classmethod
@@ -243,6 +219,10 @@ class Order:
     ):
         """Create a new order from checkout data.
 
+        Uses _create_new() to get a blank aggregate with auto-generated
+        identity.  All state is established by the OrderCreated event's
+        @apply handler — the single source of truth.
+
         Args:
             customer_id: The customer placing the order.
             items_data: List of dicts with product_id, variant_id, sku,
@@ -254,27 +234,10 @@ class Order:
         """
         now = datetime.now(UTC)
 
-        order_items = [OrderItem(**item) for item in items_data]
-        ship_addr = ShippingAddress(**shipping_address)
-        bill_addr = ShippingAddress(**billing_address)
-        order_pricing = OrderPricing(**pricing)
+        # Pre-generate item IDs for deterministic replay
+        items_with_ids = [{**item, "id": str(uuid4())} for item in items_data]
 
-        order = cls(
-            customer_id=customer_id,
-            status=OrderStatus.CREATED.value,
-            items=order_items,
-            shipping_address=ship_addr,
-            billing_address=bill_addr,
-            pricing=order_pricing,
-            created_at=now,
-            updated_at=now,
-        )
-
-        # Capture item IDs assigned during construction for event replay
-        items_with_ids = [
-            {**item_data, "id": str(oi.id)} for item_data, oi in zip(items_data, order.items, strict=False)
-        ]
-
+        order = cls._create_new()
         order.raise_(
             OrderCreated(
                 order_id=str(order.id),
@@ -282,12 +245,12 @@ class Order:
                 items=json.dumps(items_with_ids),
                 shipping_address=json.dumps(shipping_address),
                 billing_address=json.dumps(billing_address),
-                subtotal=order_pricing.subtotal,
-                shipping_cost=order_pricing.shipping_cost,
-                tax_total=order_pricing.tax_total,
-                discount_total=order_pricing.discount_total,
-                grand_total=order_pricing.grand_total,
-                currency=order_pricing.currency,
+                subtotal=pricing.get("subtotal", 0.0),
+                shipping_cost=pricing.get("shipping_cost", 0.0),
+                tax_total=pricing.get("tax_total", 0.0),
+                discount_total=pricing.get("discount_total", 0.0),
+                grand_total=pricing.get("grand_total", 0.0),
+                currency=pricing.get("currency", "USD"),
                 created_at=now,
             )
         )
@@ -423,14 +386,10 @@ class Order:
     def confirm(self):
         """Confirm the order (inventory reserved)."""
         self._assert_can_transition(OrderStatus.CONFIRMED)
-        self.status = OrderStatus.CONFIRMED.value
-        now = datetime.now(UTC)
-        self.updated_at = now
-
         self.raise_(
             OrderConfirmed(
                 order_id=str(self.id),
-                confirmed_at=now,
+                confirmed_at=datetime.now(UTC),
             )
         )
 
@@ -490,14 +449,10 @@ class Order:
     def mark_processing(self):
         """Mark order as being processed (fulfillment started)."""
         self._assert_can_transition(OrderStatus.PROCESSING)
-        self.status = OrderStatus.PROCESSING.value
-        now = datetime.now(UTC)
-        self.updated_at = now
-
         self.raise_(
             OrderProcessing(
                 order_id=str(self.id),
-                started_at=now,
+                started_at=datetime.now(UTC),
             )
         )
 
@@ -517,20 +472,6 @@ class Order:
         ):
             raise ValidationError({"status": ["Order must be Paid, Processing, or Partially Shipped to ship"]})
 
-        self.status = OrderStatus.SHIPPED.value
-        self.shipment_id = shipment_id
-        self.carrier = carrier
-        self.tracking_number = tracking_number
-        if estimated_delivery:
-            self.estimated_delivery = estimated_delivery
-
-        # Update item statuses
-        for item in self.items:
-            item.item_status = ItemStatus.SHIPPED.value
-
-        now = datetime.now(UTC)
-        self.updated_at = now
-
         self.raise_(
             OrderShipped(
                 order_id=str(self.id),
@@ -539,7 +480,7 @@ class Order:
                 tracking_number=tracking_number,
                 shipped_item_ids=json.dumps(shipped_item_ids or [str(i.id) for i in self.items]),
                 estimated_delivery=estimated_delivery,
-                shipped_at=now,
+                shipped_at=datetime.now(UTC),
             )
         )
 
@@ -554,19 +495,6 @@ class Order:
         if OrderStatus(self.status) != OrderStatus.PROCESSING:
             raise ValidationError({"status": ["Order must be Processing for partial shipment"]})
 
-        self.status = OrderStatus.PARTIALLY_SHIPPED.value
-        self.shipment_id = shipment_id
-        self.carrier = carrier
-        self.tracking_number = tracking_number
-
-        # Update shipped item statuses
-        for item in self.items:
-            if str(item.id) in shipped_item_ids:
-                item.item_status = ItemStatus.SHIPPED.value
-
-        now = datetime.now(UTC)
-        self.updated_at = now
-
         self.raise_(
             OrderPartiallyShipped(
                 order_id=str(self.id),
@@ -574,39 +502,27 @@ class Order:
                 carrier=carrier,
                 tracking_number=tracking_number,
                 shipped_item_ids=json.dumps(shipped_item_ids),
-                shipped_at=now,
+                shipped_at=datetime.now(UTC),
             )
         )
 
     def record_delivery(self):
         """Record that the order has been delivered."""
         self._assert_can_transition(OrderStatus.DELIVERED)
-        self.status = OrderStatus.DELIVERED.value
-        now = datetime.now(UTC)
-        self.updated_at = now
-
-        # Update item statuses
-        for item in self.items:
-            item.item_status = ItemStatus.DELIVERED.value
-
         self.raise_(
             OrderDelivered(
                 order_id=str(self.id),
-                delivered_at=now,
+                delivered_at=datetime.now(UTC),
             )
         )
 
     def complete(self):
         """Complete the order (return window expired)."""
         self._assert_can_transition(OrderStatus.COMPLETED)
-        self.status = OrderStatus.COMPLETED.value
-        now = datetime.now(UTC)
-        self.updated_at = now
-
         self.raise_(
             OrderCompleted(
                 order_id=str(self.id),
-                completed_at=now,
+                completed_at=datetime.now(UTC),
             )
         )
 
@@ -616,49 +532,33 @@ class Order:
     def request_return(self, reason):
         """Request a return (within return window)."""
         self._assert_can_transition(OrderStatus.RETURN_REQUESTED)
-        self.status = OrderStatus.RETURN_REQUESTED.value
-        now = datetime.now(UTC)
-        self.updated_at = now
-
         self.raise_(
             ReturnRequested(
                 order_id=str(self.id),
                 reason=reason,
-                requested_at=now,
+                requested_at=datetime.now(UTC),
             )
         )
 
     def approve_return(self):
         """Approve a return request."""
         self._assert_can_transition(OrderStatus.RETURN_APPROVED)
-        self.status = OrderStatus.RETURN_APPROVED.value
-        now = datetime.now(UTC)
-        self.updated_at = now
-
         self.raise_(
             ReturnApproved(
                 order_id=str(self.id),
-                approved_at=now,
+                approved_at=datetime.now(UTC),
             )
         )
 
     def record_return(self, returned_item_ids=None):
         """Record that returned items have been received."""
         self._assert_can_transition(OrderStatus.RETURNED)
-        self.status = OrderStatus.RETURNED.value
-        now = datetime.now(UTC)
-        self.updated_at = now
-
         ids_to_return = returned_item_ids or [str(i.id) for i in self.items]
-        for item in self.items:
-            if str(item.id) in ids_to_return:
-                item.item_status = ItemStatus.RETURNED.value
-
         self.raise_(
             OrderReturned(
                 order_id=str(self.id),
                 returned_item_ids=json.dumps(ids_to_return),
-                returned_at=now,
+                returned_at=datetime.now(UTC),
             )
         )
 
@@ -679,18 +579,12 @@ class Order:
                 }
             )
 
-        self.status = OrderStatus.CANCELLED.value
-        self.cancellation_reason = reason
-        self.cancelled_by = cancelled_by
-        now = datetime.now(UTC)
-        self.updated_at = now
-
         self.raise_(
             OrderCancelled(
                 order_id=str(self.id),
                 reason=reason,
                 cancelled_by=cancelled_by,
-                cancelled_at=now,
+                cancelled_at=datetime.now(UTC),
             )
         )
 
@@ -700,16 +594,12 @@ class Order:
         if current not in (OrderStatus.CANCELLED, OrderStatus.RETURNED):
             raise ValidationError({"status": ["Only cancelled or returned orders can be refunded"]})
 
-        self.status = OrderStatus.REFUNDED.value
         amount = refund_amount if refund_amount is not None else self.pricing.grand_total
-        now = datetime.now(UTC)
-        self.updated_at = now
-
         self.raise_(
             OrderRefunded(
                 order_id=str(self.id),
                 refund_amount=amount,
-                refunded_at=now,
+                refunded_at=datetime.now(UTC),
             )
         )
 
@@ -718,6 +608,7 @@ class Order:
     # -------------------------------------------------------------------
     @apply
     def _on_order_created(self, event: OrderCreated):
+        self.id = event.order_id
         self.customer_id = event.customer_id
         self.status = OrderStatus.CREATED.value
         self.created_at = event.created_at
@@ -725,8 +616,7 @@ class Order:
 
         # Reconstruct items from JSON (includes IDs for deterministic replay)
         items_data = json.loads(event.items) if isinstance(event.items, str) else []
-        for item_data in items_data:
-            self.add_items(OrderItem(**item_data))
+        self.items = [OrderItem(**item_data) for item_data in items_data]
 
         # Reconstruct addresses
         ship_data = json.loads(event.shipping_address) if isinstance(event.shipping_address, str) else {}
@@ -749,17 +639,20 @@ class Order:
 
     @apply
     def _on_item_added(self, event: ItemAdded):
-        self.add_items(
-            OrderItem(
-                id=event.item_id,
-                product_id=event.product_id,
-                variant_id=event.variant_id,
-                sku=event.sku,
-                title=event.title,
-                quantity=int(event.quantity),
-                unit_price=float(event.unit_price),
+        # Idempotent: skip if already added (live path pre-mutates)
+        existing = next((i for i in (self.items or []) if str(i.id) == str(event.item_id)), None)
+        if not existing:
+            self.add_items(
+                OrderItem(
+                    id=event.item_id,
+                    product_id=event.product_id,
+                    variant_id=event.variant_id,
+                    sku=event.sku,
+                    title=event.title,
+                    quantity=int(event.quantity),
+                    unit_price=float(event.unit_price),
+                )
             )
-        )
         self.pricing = OrderPricing(
             subtotal=event.new_subtotal,
             shipping_cost=self.pricing.shipping_cost if self.pricing else 0.0,
