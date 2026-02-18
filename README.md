@@ -19,6 +19,7 @@ Commands are processed synchronously via a FastAPI web server. Events flow async
 - [Running the Platform](#running-the-platform)
 - [Project Structure](#project-structure)
 - [Testing](#testing)
+- [Load Testing](#load-testing)
 - [Configuration](#configuration)
 - [Available Commands](#available-commands)
 
@@ -107,7 +108,7 @@ make engine-catalogue  # Terminal 3
 | Web Server | `make api` | 8000 | Synchronous command processing |
 | Identity Engine | `make engine-identity` | — | Async event processing for Identity domain |
 | Catalogue Engine | `make engine-catalogue` | — | Async event processing for Catalogue domain |
-| Monitor | `make monitor` | 9000 | Outbox/stream/health dashboard |
+| Observatory | `make observatory` | 9000 | Live message flow dashboard + Prometheus metrics |
 
 ## Running the Platform
 
@@ -152,22 +153,13 @@ make engine-identity
 make engine-catalogue
 ```
 
-### 4. Monitoring
+### 4. Observatory
 
 ```bash
-make monitor
+make observatory
 ```
 
-Available at `http://localhost:9000`:
-
-| Endpoint | Description |
-|----------|-------------|
-| `GET /` | System overview |
-| `GET /health` | Infrastructure health (Redis connectivity, memory, uptime) |
-| `GET /outbox` | Combined outbox status for all domains |
-| `GET /identity/outbox` | Identity outbox queue depth by status |
-| `GET /catalogue/outbox` | Catalogue outbox queue depth by status |
-| `GET /streams` | Redis stream lengths, consumer groups, pending messages |
+Available at `http://localhost:9000` — provides a live message flow dashboard and Prometheus metrics endpoint at `/metrics` for monitoring outbox depth, Redis stream health, and broker statistics across both domains.
 
 ### Development Workflow
 
@@ -179,7 +171,7 @@ make dev
 make api               # Terminal 1: web server
 make engine-identity   # Terminal 2: identity worker
 make engine-catalogue  # Terminal 3: catalogue worker
-make monitor           # Terminal 4: monitoring (optional)
+make observatory       # Terminal 4: monitoring (optional)
 ```
 
 ## Testing
@@ -205,6 +197,47 @@ make test-fast
 ```
 
 Tests use `PROTEAN_ENV=test`, which keeps `event_processing = "sync"` so projectors fire during UoW commit for deterministic assertions. Tests run against separate `_test` databases so they never destroy dev data (see [Configuration](#configuration)).
+
+## Load Testing
+
+ShopStream includes a [Locust](https://locust.io)-based load testing suite that simulates realistic e-commerce traffic across both domains. It exercises the full event pipeline — API throughput, outbox processing, Redis Streams publishing, and projector consumption.
+
+```bash
+# Install load testing dependencies
+make loadtest-install
+
+# Start the backend (API + engines in Docker)
+make docker-dev                # or make docker-dev-scaled for multi-worker engines
+
+# Start the Observatory for monitoring
+make observatory               # Terminal 2
+
+# Start Locust web UI
+make loadtest                  # Terminal 3 — opens at http://localhost:8089
+```
+
+The suite provides 5 user classes covering 6 journey scenarios:
+
+| User Class | Scenarios | Purpose |
+|------------|-----------|---------|
+| `MixedWorkloadUser` | All 6 journeys, weighted | Realistic cross-domain baseline |
+| `IdentityUser` | Customer registration, lifecycle, tiers | Identity domain focus |
+| `CatalogueUser` | Product building, lifecycle, categories | Catalogue domain focus |
+| `EventFloodUser` | Rapid aggregate creation | Event pipeline saturation |
+| `SpikeUser` | Burst registration | Sudden traffic handling |
+
+```bash
+# Key commands
+make loadtest-mixed            # Mixed workload (web UI)
+make loadtest-stress           # Event pipeline stress (web UI)
+make loadtest-headless         # CI mode: 50 users, 5 min, CSV + HTML report
+make loadtest-spike            # Burst: 100 users, instant spawn, 2 min
+make loadtest-stack            # Full stack: Docker + Observatory + Locust
+make loadtest-stack-scaled     # Same with 3 identity + 2 catalogue engines
+make loadtest-clean            # Truncate all data for a fresh run
+```
+
+During testing, monitor three dashboards simultaneously: **Locust** (`:8089`) for request metrics, **Observatory** (`:9000`) for event flow and outbox depth, and **Prometheus** (`:9000/metrics`) for raw counters. See [`loadtests/README.md`](loadtests/README.md) for full documentation.
 
 ## Configuration
 
@@ -282,11 +315,12 @@ Run `make help` for the full list.
 ### API & Workers
 
 ```bash
-make api               # FastAPI web server (port 8000)
-make engine            # All domain engines
-make engine-identity   # Identity engine only
-make engine-catalogue  # Catalogue engine only
-make monitor           # Monitoring dashboard (port 9000)
+make api                    # FastAPI web server (port 8000)
+make engine-identity        # Identity engine only
+make engine-catalogue       # Catalogue engine only
+make engine-identity-scaled # Identity engine with 4 workers
+make engine-catalogue-scaled# Catalogue engine with 4 workers
+make observatory            # Observatory dashboard (port 9000)
 ```
 
 ### Database
@@ -294,6 +328,7 @@ make monitor           # Monitoring dashboard (port 9000)
 ```bash
 make setup-db          # Create all database schemas
 make drop-db           # Drop all database schemas
+make truncate-db       # Delete all data (preserves schema)
 ```
 
 ### Testing
@@ -321,8 +356,24 @@ make pre-commit        # Run pre-commit hooks
 
 ```bash
 make docker-up         # Start infrastructure services
+make docker-dev        # Full stack in Docker (API + engines)
+make docker-dev-scaled # Full stack with scaled engines
 make docker-down       # Stop services
 make docker-logs       # Follow service logs
 make docker-clean      # Stop + remove volumes
-make dev               # docker-up + setup-db
+make dev               # docker-up (infrastructure only)
+```
+
+### Load Testing
+
+```bash
+make loadtest-install       # Install Locust dependency
+make loadtest               # Locust web UI (all scenarios)
+make loadtest-mixed         # Mixed workload
+make loadtest-stress        # Event pipeline stress
+make loadtest-headless      # Headless: 50 users, 5 min, reports
+make loadtest-spike         # Spike: 100 users, instant burst
+make loadtest-stack         # Full stack + Locust (one command)
+make loadtest-stack-scaled  # Same with scaled engines
+make loadtest-clean         # Truncate data for fresh run
 ```

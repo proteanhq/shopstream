@@ -72,6 +72,12 @@ mkdocs = "^1.5.3"
 mkdocs-material = "^9.5.0"
 mkdocs-mermaid2-plugin = "^1.1.1"
 
+[tool.poetry.group.loadtest]
+optional = true
+
+[tool.poetry.group.loadtest.dependencies]
+locust = "^2.20"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
@@ -170,6 +176,7 @@ omit = [
     "*/utils/exceptions.py",
     "*/utils/logging.py",
     "*/utils/db.py",
+    "loadtests/*",
 ]
 
 [tool.coverage.report]

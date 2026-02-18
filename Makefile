@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean
 
 # Default target
 help: ## Show this help message
@@ -157,6 +157,9 @@ docker-up: ## Start infrastructure services (Postgres, Redis, Message DB)
 docker-dev: ## Start full stack in Docker (infra + api + engines)
 	docker compose up
 
+docker-dev-scaled: ## Full stack in Docker with scaled engines (3 identity, 2 catalogue)
+	docker compose up --scale engine-identity=3 --scale engine-catalogue=2
+
 docker-down: ## Stop all Docker services
 	docker compose down
 
@@ -193,6 +196,45 @@ clean: ## Clean up generated files
 	find . -type d -name "htmlcov" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name "dist" -exec rm -rf {} + 2>/dev/null || true
 	find . -type d -name "build" -exec rm -rf {} + 2>/dev/null || true
+
+# ──────────────────────────────────────────────
+# Load Testing
+# ──────────────────────────────────────────────
+loadtest-install: ## Install load testing dependencies
+	poetry install --with loadtest
+
+loadtest: ## Start Locust web UI for interactive load testing (all scenarios)
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000
+
+loadtest-mixed: ## Run mixed workload scenario (web UI)
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 MixedWorkloadUser
+
+loadtest-stress: ## Run event pipeline stress test (web UI)
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 EventFloodUser
+
+loadtest-headless: ## Run headless load test (50 users, 5/sec spawn, 5 min, CSV + HTML report)
+	@mkdir -p results
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 \
+		MixedWorkloadUser --headless \
+		-u 50 -r 5 -t 300s \
+		--csv=results/loadtest --csv-full-history \
+		--html=results/loadtest-report.html
+
+loadtest-spike: ## Run spike test (100 users, instant spawn, 2 min)
+	@mkdir -p results
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 \
+		SpikeUser --headless \
+		-u 100 -r 100 -t 120s \
+		--csv=results/spike-test --csv-full-history \
+		--html=results/spike-report.html
+
+loadtest-stack: ## Start full load test stack (Docker API + engines + Observatory + Locust)
+	./scripts/loadtest-stack.sh
+
+loadtest-stack-scaled: ## Start scaled load test stack (3 identity + 2 catalogue engines)
+	./scripts/loadtest-stack.sh --scaled
+
+loadtest-clean: truncate-db ## Clean all data for a fresh load test run
 
 # Documentation
 docs: ## Build documentation

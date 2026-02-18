@@ -168,6 +168,9 @@ cython_debug/
 .vscode/
 .ruff_cache/
 .claude/
+
+# Load test results
+results/
 todo/
 *.todo
 *.temp
