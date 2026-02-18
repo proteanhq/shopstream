@@ -40,6 +40,18 @@ jobs:
         ports:
           - 5433:5432
 
+    # Override domain.toml defaults (ports 15432/15433/16379 for local Docker)
+    # with CI service ports (5432/5433/6379).
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/identity_local
+      TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/identity_test
+      CATALOGUE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/catalogue_local
+      TEST_CATALOGUE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/catalogue_test
+      ORDERING_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ordering_local
+      TEST_ORDERING_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ordering_test
+      MESSAGE_DB_URL: postgresql://message_store:message_store@localhost:5433/message_store
+      REDIS_URL: redis://127.0.0.1:6379/0
+
     steps:
       - uses: actions/checkout@v4
         with:
