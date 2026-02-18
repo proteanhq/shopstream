@@ -2172,7 +2172,7 @@ description = "Protean Application Framework"
 optional = false
 python-versions = "^3.11"
 files = []
-develop = true
+develop = false
 
 [package.dependencies]
 bleach = ">=4.1.0"
@@ -2205,8 +2205,10 @@ sendgrid = ["sendgrid (>=6.1.3)"]
 sqlite = ["sqlalchemy (>=2.0.30,<2.1.0)"]
 
 [package.source]
-type = "directory"
-url = "../protean"
+type = "git"
+url = "https://github.com/proteanhq/protean.git"
+reference = "main"
+resolved_reference = "106183bbe281e193484501e125e49353c39febff"
 
 [[package]]
 name = "psutil"
@@ -3803,4 +3805,4 @@ testing = ["coverage[toml]", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "6f32aa74c7f0a97b31be925c0b216c5bd443547776826da263903c5f26e88267"
+content-hash = "f03a054fff0c0319bc343170cb95b980559a25a004a031d61cdb616912da0e69"
