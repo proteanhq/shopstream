@@ -10,6 +10,7 @@ classifiers=[
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: 3 :: Only",
 ]
 
@@ -37,6 +38,7 @@ optional = true
 pre-commit = "^3.6.0"
 ipython = "^8.20.0"
 ipdb = "^0.13.13"
+nox = ">=2024.4.15"
 
 [tool.poetry.group.test]
 optional = true
