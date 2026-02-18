@@ -49,6 +49,7 @@ pytest-mock = "^3.12.0"
 pytest-watch = "^4.2.0"
 factory-boy = "^3.3.0"
 faker = "^22.0.0"
+httpx = ">=0.25.0"
 
 [tool.poetry.group.types]
 optional = true
