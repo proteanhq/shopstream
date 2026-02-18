@@ -12,6 +12,8 @@ from identity.domain import identity
 
 @identity.command(part_of="Customer")
 class UpdateProfile:
+    """Change a customer's personal profile information (name, phone, date of birth)."""
+
     customer_id: Identifier(required=True)
     first_name: String(max_length=100)
     last_name: String(max_length=100)

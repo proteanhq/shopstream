@@ -10,6 +10,8 @@ from catalogue.product.product import SEO, Product
 
 @catalogue.command(part_of="Product")
 class CreateProduct:
+    """Add a new product to the catalogue in Draft status."""
+
     sku: String(required=True, max_length=50)
     seller_id: Identifier()
     title: String(required=True, max_length=255)

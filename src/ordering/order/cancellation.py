@@ -10,6 +10,8 @@ from ordering.order.order import Order
 
 @ordering.command(part_of="Order")
 class CancelOrder:
+    """Cancel an order before fulfillment begins (allowed in Created through Paid states)."""
+
     order_id = Identifier(required=True)
     reason = String(required=True, max_length=500)
     cancelled_by = String(required=True, max_length=50)
@@ -17,6 +19,8 @@ class CancelOrder:
 
 @ordering.command(part_of="Order")
 class RefundOrder:
+    """Issue a refund for a cancelled or returned order."""
+
     order_id = Identifier(required=True)
     refund_amount = Float()  # Optional — defaults to grand_total
 

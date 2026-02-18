@@ -14,6 +14,8 @@ from ordering.domain import ordering
 
 @ordering.event(part_of="Order")
 class OrderCreated:
+    """A new order was created from a shopping cart at checkout."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -32,6 +34,8 @@ class OrderCreated:
 
 @ordering.event(part_of="Order")
 class ItemAdded:
+    """A new line item was added to an order (only in Created state)."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -48,6 +52,8 @@ class ItemAdded:
 
 @ordering.event(part_of="Order")
 class ItemRemoved:
+    """A line item was removed from an order (only in Created state)."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -58,6 +64,8 @@ class ItemRemoved:
 
 @ordering.event(part_of="Order")
 class ItemQuantityUpdated:
+    """The quantity of an order line item was changed."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -70,6 +78,8 @@ class ItemQuantityUpdated:
 
 @ordering.event(part_of="Order")
 class CouponApplied:
+    """A coupon code was applied to an order."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -78,6 +88,8 @@ class CouponApplied:
 
 @ordering.event(part_of="Order")
 class OrderConfirmed:
+    """The customer confirmed the order, committing to the purchase."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -86,6 +98,8 @@ class OrderConfirmed:
 
 @ordering.event(part_of="Order")
 class PaymentPending:
+    """Payment processing was initiated for the order."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -95,6 +109,8 @@ class PaymentPending:
 
 @ordering.event(part_of="Order")
 class PaymentSucceeded:
+    """Payment was successfully captured for the order."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -105,6 +121,8 @@ class PaymentSucceeded:
 
 @ordering.event(part_of="Order")
 class PaymentFailed:
+    """Payment processing failed; the order returns to Confirmed for retry."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -114,6 +132,8 @@ class PaymentFailed:
 
 @ordering.event(part_of="Order")
 class OrderProcessing:
+    """The warehouse began picking and packing the order."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -122,6 +142,8 @@ class OrderProcessing:
 
 @ordering.event(part_of="Order")
 class OrderShipped:
+    """All order items were shipped with a carrier."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -135,6 +157,8 @@ class OrderShipped:
 
 @ordering.event(part_of="Order")
 class OrderPartiallyShipped:
+    """Some (but not all) order items were shipped."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -147,6 +171,8 @@ class OrderPartiallyShipped:
 
 @ordering.event(part_of="Order")
 class OrderDelivered:
+    """The carrier confirmed delivery of the order to the customer."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -155,6 +181,8 @@ class OrderDelivered:
 
 @ordering.event(part_of="Order")
 class OrderCompleted:
+    """The order was finalized after delivery and return window expiry."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -163,6 +191,8 @@ class OrderCompleted:
 
 @ordering.event(part_of="Order")
 class ReturnRequested:
+    """The customer requested a return of a delivered order."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -172,6 +202,8 @@ class ReturnRequested:
 
 @ordering.event(part_of="Order")
 class ReturnApproved:
+    """A return request was approved by the system or an admin."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -180,6 +212,8 @@ class ReturnApproved:
 
 @ordering.event(part_of="Order")
 class OrderReturned:
+    """Returned items were received back from the customer."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -189,6 +223,8 @@ class OrderReturned:
 
 @ordering.event(part_of="Order")
 class OrderCancelled:
+    """The order was cancelled before fulfillment began."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)
@@ -199,6 +235,8 @@ class OrderCancelled:
 
 @ordering.event(part_of="Order")
 class OrderRefunded:
+    """A refund was issued for a cancelled or returned order."""
+
     __version__ = "v1"
 
     order_id = Identifier(required=True)

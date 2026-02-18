@@ -34,7 +34,11 @@ VALID_CURRENCIES = frozenset(
 
 @catalogue.value_object
 class Money:
-    """Value object representing a monetary amount with currency."""
+    """A monetary amount paired with an ISO 4217 currency code.
+
+    Supports 20 major currencies. Amount must be non-negative. Used for
+    representing prices, totals, and other financial values.
+    """
 
     amount: Float(required=True, min_value=0.0)
     currency: String(max_length=3, default="USD")

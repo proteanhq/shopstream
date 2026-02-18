@@ -16,11 +16,15 @@ from ordering.order.order import Order
 
 @ordering.command(part_of="Order")
 class MarkProcessing:
+    """Signal that the warehouse has started picking and packing."""
+
     order_id = Identifier(required=True)
 
 
 @ordering.command(part_of="Order")
 class RecordShipment:
+    """Record that all items have been shipped with a carrier."""
+
     order_id = Identifier(required=True)
     shipment_id = String(required=True, max_length=255)
     carrier = String(required=True, max_length=100)
@@ -31,6 +35,8 @@ class RecordShipment:
 
 @ordering.command(part_of="Order")
 class RecordPartialShipment:
+    """Record that some (but not all) items have been shipped."""
+
     order_id = Identifier(required=True)
     shipment_id = String(required=True, max_length=255)
     carrier = String(required=True, max_length=100)
@@ -40,6 +46,8 @@ class RecordPartialShipment:
 
 @ordering.command(part_of="Order")
 class RecordDelivery:
+    """Record that the carrier has confirmed delivery to the customer."""
+
     order_id = Identifier(required=True)
 
 

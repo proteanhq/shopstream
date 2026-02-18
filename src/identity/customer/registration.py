@@ -12,6 +12,8 @@ from identity.domain import identity
 
 @identity.command(part_of="Customer")
 class RegisterCustomer:
+    """Create a new customer account with profile information."""
+
     external_id: String(required=True, max_length=255)
     email: String(required=True, max_length=254)
     first_name: String(required=True, max_length=100)

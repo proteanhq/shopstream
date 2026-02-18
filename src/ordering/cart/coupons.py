@@ -10,6 +10,8 @@ from ordering.domain import ordering
 
 @ordering.command(part_of="ShoppingCart")
 class ApplyCouponToCart:
+    """Apply a coupon code to a shopping cart."""
+
     cart_id = Identifier(required=True)
     coupon_code = String(required=True, max_length=100)
 

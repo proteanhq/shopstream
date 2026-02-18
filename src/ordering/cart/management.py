@@ -15,18 +15,24 @@ from ordering.domain import ordering
 
 @ordering.command(part_of="ShoppingCart")
 class CreateCart:
+    """Create a new shopping cart for a registered customer or guest session."""
+
     customer_id = Identifier()  # Optional for guest carts
     session_id = String(max_length=255)
 
 
 @ordering.command(part_of="ShoppingCart")
 class MergeGuestCart:
+    """Merge items from a guest session cart into a registered customer's cart."""
+
     cart_id = Identifier(required=True)
     guest_cart_items = Text(required=True)  # JSON: list of {product_id, variant_id, quantity}
 
 
 @ordering.command(part_of="ShoppingCart")
 class AbandonCart:
+    """Mark a cart as abandoned due to inactivity."""
+
     cart_id = Identifier(required=True)
 
 

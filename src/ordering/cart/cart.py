@@ -33,6 +33,12 @@ class CartStatus(Enum):
 
 @ordering.entity(part_of="ShoppingCart")
 class CartItem:
+    """An item in a shopping cart, tracking only product reference and quantity.
+
+    Cart items do not store prices — prices are resolved from the Catalogue
+    context at checkout time and locked on the Order.
+    """
+
     product_id = Identifier(required=True)
     variant_id = Identifier(required=True)
     quantity = Integer(required=True, min_value=1)

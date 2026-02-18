@@ -44,7 +44,12 @@ class ProductVisibility(Enum):
 
 @catalogue.value_object(part_of="Product")
 class Price:
-    """Value object for product pricing with tier support."""
+    """The monetary cost of a variant, with optional loyalty-tier discounts.
+
+    Base price is the standard retail price. Tier prices (stored as JSON) allow
+    different pricing for Silver, Gold, and Platinum customers. Tier prices must
+    always be lower than the base price.
+    """
 
     base_price: Float(required=True, min_value=0.01)
     currency: String(max_length=3, default="USD")
@@ -78,7 +83,11 @@ class Price:
 
 @catalogue.value_object(part_of="Product")
 class SEO:
-    """Value object for SEO metadata."""
+    """Search engine optimization metadata for a product page.
+
+    Contains meta title (max 70 chars), meta description (max 160 chars), and a
+    URL-safe slug. The slug must be lowercase alphanumeric with hyphens only.
+    """
 
     meta_title: String(max_length=70)
     meta_description: String(max_length=160)
@@ -104,7 +113,10 @@ class SEO:
 
 @catalogue.value_object(part_of="Product")
 class Dimensions:
-    """Value object for physical dimensions."""
+    """Physical dimensions (length, width, height) of a product or variant.
+
+    Supports centimeters (cm) and inches (in) as measurement units.
+    """
 
     length: Float(min_value=0.0)
     width: Float(min_value=0.0)
@@ -119,7 +131,10 @@ class Dimensions:
 
 @catalogue.value_object(part_of="Product")
 class Weight:
-    """Value object for physical weight."""
+    """Physical weight of a product or variant, used for shipping calculations.
+
+    Supports kilograms (kg), pounds (lb), grams (g), and ounces (oz).
+    """
 
     value: Float(min_value=0.0)
     unit: String(max_length=2, default="kg")
@@ -132,7 +147,12 @@ class Weight:
 
 @catalogue.entity(part_of="Product")
 class Variant:
-    """Product variant entity with unique SKU and pricing."""
+    """A purchasable configuration of a Product, such as a specific size or color.
+
+    Each variant has its own SKU, pricing (with optional tier discounts), and
+    physical attributes (weight, dimensions). A product must have at least one
+    variant to be activated for sale.
+    """
 
     variant_sku: ValueObject(SKU, required=True)
     attributes: Text()
@@ -144,7 +164,11 @@ class Variant:
 
 @catalogue.entity(part_of="Product")
 class Image:
-    """Product image entity."""
+    """A visual representation of a Product, with URL and display ordering.
+
+    A product may have up to 10 images, with exactly one marked as primary.
+    The first image added is automatically set as primary.
+    """
 
     url: String(required=True, max_length=500)
     alt_text: String(max_length=255)
@@ -154,7 +178,13 @@ class Image:
 
 @catalogue.aggregate
 class Product:
-    """Product aggregate root."""
+    """A sellable item in the catalogue, identified by a unique SKU.
+
+    The Product aggregate groups variants, images, pricing, and SEO metadata
+    into a single transactional boundary. Its lifecycle follows a forward-only
+    state machine: Draft -> Active -> Discontinued -> Archived. A product must
+    have at least one variant before activation.
+    """
 
     sku: ValueObject(SKU, required=True)
     seller_id: Identifier()
