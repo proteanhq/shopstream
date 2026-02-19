@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean
 
 # Default target
 help: ## Show this help message
@@ -21,19 +21,19 @@ test: ## Run all tests across all domains
 	poetry run pytest
 
 test-domain: ## Run domain layer tests across all domains
-	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/
+	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/
 
 test-application: ## Run application layer tests across all domains
-	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/
+	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/
 
 test-integration: ## Run integration tests across all domains
-	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/integration/
+	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/integration/
 
 test-fast: ## Run fast tests across all domains (domain + application)
-	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ -m "not slow"
+	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ -m "not slow"
 
 test-cov: ## Run all tests with combined coverage report
-	poetry run pytest --cov=identity --cov=catalogue --cov=ordering --cov-report=term-missing --cov-report=html --cov-report=xml
+	poetry run pytest --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov-report=term-missing --cov-report=html --cov-report=xml
 
 # ──────────────────────────────────────────────
 # Identity domain testing
@@ -90,6 +90,24 @@ test-ordering-cov: ## Run all ordering tests with coverage report
 	poetry run pytest tests/ordering/ --cov=ordering --cov-report=term-missing --cov-report=html:htmlcov/ordering
 
 # ──────────────────────────────────────────────
+# Inventory domain testing
+# ──────────────────────────────────────────────
+test-inventory: ## Run all inventory tests
+	poetry run pytest tests/inventory/
+
+test-inventory-domain: ## Run inventory domain layer tests
+	poetry run pytest tests/inventory/domain/ --cov=inventory --cov-report=term-missing
+
+test-inventory-application: ## Run inventory application layer tests
+	poetry run pytest tests/inventory/application/ --cov=inventory --cov-report=term-missing
+
+test-inventory-integration: ## Run inventory integration tests
+	poetry run pytest tests/inventory/integration/ --cov=inventory --cov-report=term-missing
+
+test-inventory-cov: ## Run all inventory tests with coverage report
+	poetry run pytest tests/inventory/ --cov=inventory --cov-report=term-missing --cov-report=html:htmlcov/inventory
+
+# ──────────────────────────────────────────────
 # Test utilities
 # ──────────────────────────────────────────────
 test-watch: ## Run tests in watch mode
@@ -129,6 +147,9 @@ engine-catalogue: ## Start Catalogue domain engine
 engine-ordering: ## Start Ordering domain engine
 	poetry run protean server --domain ordering.domain
 
+engine-inventory: ## Start Inventory domain engine
+	poetry run protean server --domain inventory.domain
+
 engine-identity-scaled: ## Start Identity engine with 4 workers
 	poetry run protean server --domain identity.domain --workers 4
 
@@ -137,6 +158,9 @@ engine-catalogue-scaled: ## Start Catalogue engine with 4 workers
 
 engine-ordering-scaled: ## Start Ordering engine with 4 workers
 	poetry run protean server --domain ordering.domain --workers 4
+
+engine-inventory-scaled: ## Start Inventory engine with 4 workers
+	poetry run protean server --domain inventory.domain --workers 4
 
 # ──────────────────────────────────────────────
 # Docker-based Engine Workers
@@ -151,7 +175,7 @@ engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue
 # Observability
 # ──────────────────────────────────────────────
 observatory: ## Start Observatory dashboard (port 9000, live message flow + Prometheus metrics)
-	poetry run protean observatory --domain identity.domain --domain catalogue.domain --domain ordering.domain --title "ShopStream Observatory"
+	poetry run protean observatory --domain identity.domain --domain catalogue.domain --domain ordering.domain --domain inventory.domain --title "ShopStream Observatory"
 
 # ──────────────────────────────────────────────
 # Database
@@ -160,16 +184,19 @@ setup-db: ## Create database schemas for all domains
 	poetry run protean db setup --domain identity.domain
 	poetry run protean db setup --domain catalogue.domain
 	poetry run protean db setup --domain ordering.domain
+	poetry run protean db setup --domain inventory.domain
 
 drop-db: ## Drop database schemas for all domains
 	poetry run protean db drop --domain identity.domain --yes
 	poetry run protean db drop --domain catalogue.domain --yes
 	poetry run protean db drop --domain ordering.domain --yes
+	poetry run protean db drop --domain inventory.domain --yes
 
 truncate-db: ## Delete all data from all tables (preserves schema)
 	poetry run protean db truncate --domain identity.domain --yes
 	poetry run protean db truncate --domain catalogue.domain --yes
 	poetry run protean db truncate --domain ordering.domain --yes
+	poetry run protean db truncate --domain inventory.domain --yes
 
 # Protean Commands
 shell: ## Start Protean shell

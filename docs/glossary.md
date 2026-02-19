@@ -298,6 +298,108 @@ rule, e.g., payment timeout), or **Admin** (manual intervention).
 
 ---
 
+## Inventory Context
+
+### Inventory Item
+
+A stock tracking record for one product variant at one warehouse. An InventoryItem
+uses **event sourcing** -- every stock movement (receive, reserve, ship, adjust,
+damage, return) is captured as an immutable event. The current state is rebuilt by
+replaying these events, providing a complete audit trail for financial reconciliation
+and shrinkage analysis.
+
+Each InventoryItem is scoped to a specific product_id, variant_id, and warehouse_id.
+The same product variant in multiple warehouses has separate InventoryItem aggregates.
+
+&rarr; [`InventoryItem`](../src/inventory/stock/stock.py) (Aggregate, Event Sourced)
+
+### Warehouse
+
+A physical location where inventory is stored. Warehouses contain zones (logical
+storage areas like cold storage or hazmat), track capacity, and can be deactivated
+when taken offline. Uses standard CQRS (not event sourced) because warehouses change
+infrequently.
+
+&rarr; [`Warehouse`](../src/inventory/warehouse/warehouse.py) (Aggregate)
+
+### Stock Levels
+
+The five-part quantity model that tracks all stock positions for an InventoryItem:
+- **on_hand** -- Physical count in the warehouse.
+- **reserved** -- Held for orders (not yet shipped).
+- **available** -- What can be sold right now (`on_hand - reserved`).
+- **in_transit** -- Ordered from supplier (not yet received).
+- **damaged** -- Write-off pending.
+
+Available is denormalized (always `on_hand - reserved`) for query convenience.
+StockLevels is immutable -- every mutation creates a new instance.
+
+&rarr; [`StockLevels`](../src/inventory/stock/stock.py) (Value Object)
+
+### Reservation
+
+A hold on inventory for a specific order. Reservations have a quantity, expiration
+time (default 15 minutes), and a lifecycle: Active &rarr; Confirmed (after payment)
+&rarr; Committed (after shipping), or Active &rarr; Released (on cancellation/timeout).
+
+Reservations prevent overselling during concurrent checkout flows. Each reservation
+is tracked as an entity within its InventoryItem aggregate.
+
+&rarr; [`Reservation`](../src/inventory/stock/stock.py) (Entity)
+
+### Zone
+
+A logical storage area within a warehouse -- regular, cold storage, or hazmat.
+Zones organize how inventory is physically arranged and may have different handling
+requirements.
+
+&rarr; [`Zone`](../src/inventory/warehouse/warehouse.py) (Entity)
+
+### Warehouse Address
+
+The physical location of a warehouse: street, city, state, postal code, country.
+
+&rarr; [`WarehouseAddress`](../src/inventory/warehouse/warehouse.py) (Value Object)
+
+### Reservation Status
+
+The lifecycle state of a stock reservation:
+- **Active** -- Stock is held. The order has been placed but not yet paid.
+- **Confirmed** -- The order has been paid. The reservation is locked in.
+- **Released** -- The reservation was cancelled, payment failed, or timed out. Stock returns to available.
+- **Expired** -- The reservation's time limit passed without action.
+
+&rarr; [`ReservationStatus`](../src/inventory/stock/stock.py) (Enum)
+
+### Adjustment Type
+
+Why stock was manually adjusted:
+- **Count** -- Physical inventory count revealed a discrepancy.
+- **Shrinkage** -- Unexplained loss (theft, evaporation, etc.).
+- **Correction** -- Data entry error being fixed.
+- **Receiving Error** -- Wrong quantity was logged during receiving.
+
+&rarr; [`AdjustmentType`](../src/inventory/stock/stock.py) (Enum)
+
+### Zone Type
+
+Classification of warehouse storage areas:
+- **Regular** -- Standard shelf storage.
+- **Cold** -- Temperature-controlled storage (perishables, pharmaceuticals).
+- **Hazmat** -- Hazardous materials storage (chemicals, flammables).
+
+&rarr; [`ZoneType`](../src/inventory/warehouse/warehouse.py) (Enum)
+
+### Low Stock
+
+A condition where available quantity drops at or below the reorder point. When
+detected, a `LowStockDetected` event is raised as a notification to purchasing
+systems. This is a notification-only event -- it does not change aggregate state.
+
+&rarr; [`LowStockDetected`](../src/inventory/stock/events.py) (Event)
+
+---
+
 ## Cross-Context Terms
 
 ### customer_id
@@ -308,10 +410,12 @@ it only stores the ID. This is the anti-corruption boundary between contexts.
 
 ### product_id / variant_id
 
-Opaque identifiers that the Ordering context uses to reference Products and Variants
-from the Catalogue context. Order Items store these IDs along with a snapshot of the
-SKU, title, and price at the time of order creation. If the product's price or title
-changes later, existing orders are unaffected.
+Opaque identifiers used by the Ordering and Inventory contexts to reference Products
+and Variants from the Catalogue context. Order Items store these IDs along with a
+snapshot of the SKU, title, and price at the time of order creation. InventoryItems
+store these IDs to identify which product variant is being tracked at each warehouse.
+If the product's price or title changes later, existing orders and inventory records
+are unaffected.
 
 ### seller_id
 
@@ -324,3 +428,16 @@ Marketplace context in a larger system), so it appears only as a reference ID.
 An identifier linking a Product to its Category. Products reference categories by ID
 rather than embedding category data, because categories can change independently of
 products.
+
+### warehouse_id
+
+An identifier linking an InventoryItem to the Warehouse where it is physically stored.
+Each InventoryItem belongs to exactly one warehouse. The same product variant in
+multiple warehouses has separate InventoryItem aggregates, each with its own stock
+levels and reservation history.
+
+### order_id (in Inventory)
+
+An opaque identifier from the Ordering context stored on Reservation entities and
+stock return events. Links stock movements to the specific order they support,
+enabling reconciliation between order fulfillment and stock changes.

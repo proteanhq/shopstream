@@ -17,7 +17,7 @@ for how real-world e-commerce concepts map to DDD building blocks.
 
 ### Start with the Big Picture
 
-1. **[Context Map](context-map.md)** -- How the three bounded contexts relate to each
+1. **[Context Map](context-map.md)** -- How the four bounded contexts relate to each
    other. Understand the overall architecture and what each context owns.
 
 2. **[Glossary](glossary.md)** -- The ubiquitous language of ShopStream. Every term
@@ -33,6 +33,7 @@ Each bounded context has a **narrative** (the business story) and **scenarios**
 | **[Identity](identity/)** | [Domain narrative](identity/README.md) | [Customer Registration](identity/scenarios/customer-registration.md) |
 | **[Catalogue](catalogue/)** | [Domain narrative](catalogue/README.md) | [Product Lifecycle](catalogue/scenarios/product-lifecycle.md) |
 | **[Ordering](ordering/)** | [Domain narrative](ordering/README.md) | [Cart Checkout](ordering/scenarios/cart-to-order.md), [Order Fulfillment](ordering/scenarios/order-fulfillment.md) |
+| **[Inventory](inventory/)** | [Domain narrative](inventory/README.md) | [Stock Receiving](inventory/scenarios/stock-receiving.md), [Reservation Lifecycle](inventory/scenarios/reservation-lifecycle.md) |
 
 ### Recommended Reading Order
 
@@ -43,11 +44,14 @@ Each bounded context has a **narrative** (the business story) and **scenarios**
 4. Catalogue narrative (two aggregates, product lifecycle)
 5. Ordering narrative (event sourcing, 14-state machine)
 6. Cart Checkout scenario (cross-aggregate operation)
+7. Inventory narrative (event sourcing for audit trail, reservation pattern)
+8. Reservation Lifecycle scenario (reserve/confirm/commit flow)
 
 **For experienced DDD practitioners:**
 1. Ordering narrative (event sourcing + CQRS in same BC, design decisions)
 2. Order Fulfillment scenario (state machine + event replay in detail)
-3. Glossary (see how UL maps to code elements)
+3. Inventory narrative (stock level model, reservation with expiry, notification events)
+4. Glossary (see how UL maps to code elements)
 
 ## Document Structure
 
@@ -64,25 +68,30 @@ docs/
 │   ├── README.md
 │   └── scenarios/
 │       └── product-lifecycle.md
-└── ordering/
+├── ordering/
+│   ├── README.md
+│   └── scenarios/
+│       ├── cart-to-order.md
+│       └── order-fulfillment.md
+└── inventory/
     ├── README.md
     └── scenarios/
-        ├── cart-to-order.md
-        └── order-fulfillment.md
+        ├── stock-receiving.md
+        └── reservation-lifecycle.md
 ```
 
 ## Domain at a Glance
 
-| | Identity | Catalogue | Ordering |
-|---|---------|-----------|----------|
-| **Aggregates** | Customer | Product, Category | Order (ES), ShoppingCart |
-| **Entities** | Address | Variant, Image | OrderItem, CartItem |
-| **Value Objects** | Profile, EmailAddress, PhoneNumber, GeoCoordinates | SKU, Price, SEO, Dimensions, Weight, Money | ShippingAddress, OrderPricing |
-| **Events** | 10 | 13 | 25 |
-| **Commands** | 10 | 14 | 27 |
-| **Projections** | 4 | 5 | 6 |
-| **API Endpoints** | 10 | 14 | 25 |
-| **Persistence** | CQRS | CQRS | Event Sourced (Order) + CQRS (Cart) |
+| | Identity | Catalogue | Ordering | Inventory |
+|---|---------|-----------|----------|-----------|
+| **Aggregates** | Customer | Product, Category | Order (ES), ShoppingCart | InventoryItem (ES), Warehouse |
+| **Entities** | Address | Variant, Image | OrderItem, CartItem | Reservation, Zone |
+| **Value Objects** | Profile, EmailAddress, PhoneNumber, GeoCoordinates | SKU, Price, SEO, Dimensions, Weight, Money | ShippingAddress, OrderPricing | StockLevels, WarehouseAddress |
+| **Events** | 10 | 13 | 25 | 18 |
+| **Commands** | 10 | 14 | 27 | 16 |
+| **Projections** | 4 | 5 | 6 | 6 |
+| **API Endpoints** | 10 | 14 | 25 | 16 |
+| **Persistence** | CQRS | CQRS | Event Sourced (Order) + CQRS (Cart) | Event Sourced (InventoryItem) + CQRS (Warehouse) |
 
 ## Conventions in This Documentation
 

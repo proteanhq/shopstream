@@ -7,4 +7,5 @@ set -e
 psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" <<-EOSQL
     CREATE DATABASE catalogue_local;
     CREATE DATABASE ordering_local;
+    CREATE DATABASE inventory_local;
 EOSQL

@@ -1,0 +1,59 @@
+debug = true
+testing = false
+secret_key = "${SECRET_KEY|a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2}"
+identity_strategy = "uuid"
+identity_type = "string"
+event_processing = "async"
+command_processing = "sync"
+message_processing = "sync"
+
+# Engine subscriptions use Redis Streams (outbox → broker → projectors).
+# Protean defaults to "event_store"; override to "stream" for outbox pattern.
+[server]
+default_subscription_type = "stream"
+
+# Outbox pattern: events are written to an outbox table in the same
+# transaction as the aggregate mutation, then asynchronously forwarded
+# to the broker (Redis Streams) by the Engine's OutboxProcessor.
+[outbox]
+broker = "default"
+messages_per_tick = 50
+tick_interval = 0.01
+
+# Default Database Configuration (used in development / PROTEAN_ENV unset)
+[databases.default]
+provider = "postgresql"
+database_uri = "${INVENTORY_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/inventory_local}"
+
+# Default Event Store Configuration
+[event_store]
+provider = "message_db"
+database_uri = "${MESSAGE_DB_URL|postgresql://message_store:message_store@localhost:15433/message_store}"
+
+# Default Broker Configuration
+[brokers.default]
+provider = "redis"
+URI = "${REDIS_URL|redis://127.0.0.1:16379/0}"
+
+# ──────────────────────────────────────────────
+# Test overrides (PROTEAN_ENV=test)
+# Separate database so test runs don't destroy dev data.
+# ──────────────────────────────────────────────
+[test]
+testing = true
+event_processing = "sync"
+
+[test.databases.default]
+database_uri = "${TEST_INVENTORY_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/inventory_test}"
+
+# ──────────────────────────────────────────────
+# Production overrides (PROTEAN_ENV=production)
+# Events are processed asynchronously by Engine workers,
+# not synchronously during UoW commit.
+# ──────────────────────────────────────────────
+[production]
+event_processing = "async"
+debug = false
+
+[production.databases.default]
+database_uri = "${INVENTORY_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/inventory}"

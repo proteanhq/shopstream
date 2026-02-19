@@ -18,6 +18,7 @@ packages = [
     { include = "identity", from = "src" },
     { include = "catalogue", from = "src" },
     { include = "ordering", from = "src" },
+    { include = "inventory", from = "src" },
 ]
 
 [tool.poetry.dependencies]
