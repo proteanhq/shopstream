@@ -49,6 +49,8 @@ jobs:
       TEST_CATALOGUE_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/catalogue_test
       ORDERING_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ordering_local
       TEST_ORDERING_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ordering_test
+      INVENTORY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/inventory_local
+      TEST_INVENTORY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/inventory_test
       MESSAGE_DB_URL: postgresql://message_store:message_store@localhost:5433/message_store
       REDIS_URL: redis://127.0.0.1:6379/0
 
