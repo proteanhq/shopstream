@@ -263,7 +263,7 @@ class Order:
         """Validate that the current state allows transition to target."""
         current = OrderStatus(self.status)
         if target_status not in _VALID_TRANSITIONS.get(current, set()):
-            raise ValidationError({"status": [f"Cannot transition from {current.value} " f"to {target_status.value}"]})
+            raise ValidationError({"status": [f"Cannot transition from {current.value} to {target_status.value}"]})
 
     def _recalculate_pricing(self):
         """Recalculate subtotal and grand total from items."""

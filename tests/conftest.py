@@ -16,3 +16,6 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.integration)
             if not any(m.name == "fast" for m in item.iter_markers()):
                 item.add_marker(pytest.mark.slow)
+
+        if "/bdd/" in str(test_path):
+            item.add_marker(pytest.mark.bdd)

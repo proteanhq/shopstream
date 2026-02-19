@@ -19,7 +19,7 @@ class TestMaxAddressesInvariant:
         customer = _make_customer()
         for i in range(10):
             customer.add_address(
-                street=f"{i+1} Street",
+                street=f"{i + 1} Street",
                 city="City",
                 postal_code="12345",
                 country="US",
@@ -30,7 +30,7 @@ class TestMaxAddressesInvariant:
         customer = _make_customer()
         for i in range(10):
             customer.add_address(
-                street=f"{i+1} Street",
+                street=f"{i + 1} Street",
                 city="City",
                 postal_code="12345",
                 country="US",

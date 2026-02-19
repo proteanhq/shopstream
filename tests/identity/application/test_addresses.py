@@ -209,7 +209,7 @@ class TestAddressManagementFlow:
             current_domain.process(
                 AddAddress(
                     customer_id=customer_id,
-                    street=f"{i+1} Street",
+                    street=f"{i + 1} Street",
                     city="City",
                     postal_code="12345",
                     country="US",
