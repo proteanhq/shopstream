@@ -10,6 +10,15 @@ Usage:
     # Mixed workload only:
     locust -f loadtests/locustfile.py MixedWorkloadUser
 
+    # Cross-domain workload:
+    locust -f loadtests/locustfile.py CrossDomainUser
+
+    # Race conditions:
+    locust -f loadtests/locustfile.py RaceConditionUser
+
+    # Flash sale:
+    locust -f loadtests/locustfile.py FlashSaleUser
+
     # Stress test:
     locust -f loadtests/locustfile.py EventFloodUser
 
@@ -27,8 +36,16 @@ from locust import events
 # Import all user classes so Locust discovers them
 from loadtests.helpers.response import extract_error_detail
 from loadtests.scenarios.catalogue import CatalogueUser  # noqa: F401
+from loadtests.scenarios.cross_domain import (  # noqa: F401
+    CrossDomainUser,
+    FlashSaleUser,
+    RaceConditionUser,
+)
 from loadtests.scenarios.identity import IdentityUser  # noqa: F401
+from loadtests.scenarios.inventory import InventoryUser  # noqa: F401
 from loadtests.scenarios.mixed import MixedWorkloadUser  # noqa: F401
+from loadtests.scenarios.ordering import OrderingUser  # noqa: F401
+from loadtests.scenarios.payments import PaymentsUser  # noqa: F401
 from loadtests.scenarios.stress import EventFloodUser, SpikeUser  # noqa: F401
 
 logger = logging.getLogger("loadtest")

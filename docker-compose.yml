@@ -64,6 +64,9 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/identity_local
       - CATALOGUE_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/catalogue_local
+      - ORDERING_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ordering_local
+      - INVENTORY_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/inventory_local
+      - PAYMENTS_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/payments_local
       - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
       - REDIS_URL=redis://redis:6379/0
     depends_on:
@@ -135,6 +138,29 @@ services:
       - ../protean:/protean
     environment:
       - ORDERING_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ordering_local
+      - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      message-db:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
+  engine-inventory:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: protean server --domain inventory.domain
+    volumes:
+      - ./src:/app/src
+      - ../protean:/protean
+    environment:
+      - INVENTORY_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/inventory_local
       - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
       - REDIS_URL=redis://redis:6379/0
     depends_on:
