@@ -18,6 +18,8 @@ from inventory.api import inventory_router, warehouse_router
 from inventory.domain import inventory
 from ordering.api import cart_router, order_router
 from ordering.domain import ordering
+from payments.api import invoice_router, payment_router
+from payments.domain import payments
 from protean.integrations.fastapi import (
     DomainContextMiddleware,
     register_exception_handlers,
@@ -31,6 +33,7 @@ identity.init()
 catalogue.init()
 ordering.init()
 inventory.init()
+payments.init()
 
 # ---------------------------------------------------------------------------
 # FastAPI app
@@ -60,6 +63,8 @@ app.add_middleware(
         "/orders": ordering,
         "/inventory": inventory,
         "/warehouses": inventory,
+        "/payments": payments,
+        "/invoices": payments,
     },
 )
 
@@ -78,6 +83,8 @@ app.include_router(cart_router)
 app.include_router(order_router)
 app.include_router(inventory_router)
 app.include_router(warehouse_router)
+app.include_router(payment_router)
+app.include_router(invoice_router)
 
 
 # ---------------------------------------------------------------------------
@@ -104,6 +111,7 @@ async def health():
                 "catalogue": {"name": catalogue.name},
                 "ordering": {"name": ordering.name},
                 "inventory": {"name": inventory.name},
+                "payments": {"name": payments.name},
             },
         }
     )
