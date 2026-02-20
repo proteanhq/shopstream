@@ -8,7 +8,7 @@ set -euo pipefail
 #
 # Usage:
 #   ./scripts/loadtest-stack.sh              # Default: 1 engine per domain
-#   ./scripts/loadtest-stack.sh --scaled     # Scaled: 3 identity + 2 catalogue engines
+#   ./scripts/loadtest-stack.sh --scaled     # Scaled: 3 identity + 2 catalogue + 2 ordering + 2 inventory + 2 payments engines
 
 SCALED=false
 for arg in "$@"; do
@@ -16,6 +16,9 @@ for arg in "$@"; do
         --scaled) SCALED=true ;;
     esac
 done
+
+# All engine services
+ALL_ENGINES="engine-identity engine-catalogue engine-ordering engine-inventory engine-payments"
 
 # Track background PIDs for cleanup
 PIDS=()
@@ -26,7 +29,7 @@ cleanup() {
     for pid in "${PIDS[@]}"; do
         kill "$pid" 2>/dev/null || true
     done
-    docker compose stop api engine-identity engine-catalogue engine-ordering 2>/dev/null || true
+    docker compose stop api $ALL_ENGINES 2>/dev/null || true
     wait 2>/dev/null || true
     echo "[LOADTEST] Done."
 }
@@ -47,17 +50,22 @@ make truncate-db
 
 # 3. API + Engines via Docker
 if [ "$SCALED" = true ]; then
-    echo "[3/5] Starting API + scaled engines (3 identity, 2 catalogue, 2 ordering)..."
+    echo "[3/5] Starting API + scaled engines (3 identity, 2 catalogue, 2 ordering, 2 inventory, 2 payments)..."
     docker compose up -d api
-    docker compose up -d --scale engine-identity=3 --scale engine-catalogue=2 --scale engine-ordering=2
+    docker compose up -d \
+        --scale engine-identity=3 \
+        --scale engine-catalogue=2 \
+        --scale engine-ordering=2 \
+        --scale engine-inventory=2 \
+        --scale engine-payments=2
 else
     echo "[3/5] Starting API + engines..."
-    docker compose up -d api engine-identity engine-catalogue engine-ordering
+    docker compose up -d api $ALL_ENGINES
 fi
 
 sleep 3
 
-# 4. Observatory (runs locally to access both domains)
+# 4. Observatory (runs locally to access all domains)
 echo "[4/5] Starting Observatory on :9000..."
 make observatory &
 PIDS+=($!)
@@ -73,9 +81,9 @@ echo "  API Docs:    http://localhost:8000/docs"
 echo "  Prometheus:  http://localhost:9000/metrics"
 echo ""
 if [ "$SCALED" = true ]; then
-    echo "Mode: SCALED (3 identity + 2 catalogue + 2 ordering engine containers)"
+    echo "Mode: SCALED (3 identity + 2 catalogue + 2 ordering + 2 inventory + 2 payments engine containers)"
 else
-    echo "Mode: DEFAULT (1 identity + 1 catalogue + 1 ordering engine)"
+    echo "Mode: DEFAULT (1 engine per domain)"
 fi
 echo ""
 

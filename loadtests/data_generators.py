@@ -132,3 +132,177 @@ def category_attributes() -> str:
 def category_name() -> str:
     """Generate a category name like 'Casual Footwear'."""
     return f"{fake.word().capitalize()} {fake.word().capitalize()}"[:100]
+
+
+# ---------- Ordering Domain ----------
+
+
+def order_address() -> dict:
+    """Generate AddressSchema payload for order shipping/billing."""
+    return {
+        "street": fake.street_address()[:255],
+        "city": fake.city()[:100],
+        "state": fake.state_abbr(),
+        "postal_code": fake.zipcode()[:20],
+        "country": "US",
+    }
+
+
+def order_item(product_id: str | None = None, variant_id: str | None = None) -> dict:
+    """Generate OrderItemSchema payload for order creation."""
+    return {
+        "product_id": product_id or f"prod-{uuid.uuid4().hex[:8]}",
+        "variant_id": variant_id or f"var-{uuid.uuid4().hex[:8]}",
+        "sku": valid_sku("ORD"),
+        "title": f"{fake.word().capitalize()} {fake.word().capitalize()}"[:100],
+        "quantity": random.randint(1, 5),
+        "unit_price": round(random.uniform(9.99, 199.99), 2),
+    }
+
+
+def order_data(customer_id: str | None = None, num_items: int = 2) -> dict:
+    """Generate CreateOrderRequest payload."""
+    items = [order_item() for _ in range(num_items)]
+    return {
+        "customer_id": customer_id or f"cust-{uuid.uuid4().hex[:8]}",
+        "items": items,
+        "shipping_address": order_address(),
+        "billing_address": order_address(),
+        "shipping_cost": round(random.uniform(0, 15.99), 2),
+        "tax_total": round(random.uniform(0, 25.0), 2),
+        "discount_total": 0.0,
+        "currency": "USD",
+    }
+
+
+def cart_data(customer_id: str | None = None) -> dict:
+    """Generate CreateCartRequest payload."""
+    return {
+        "customer_id": customer_id or f"cust-{uuid.uuid4().hex[:8]}",
+    }
+
+
+def cart_item_data() -> dict:
+    """Generate AddToCartRequest payload."""
+    return {
+        "product_id": f"prod-{uuid.uuid4().hex[:8]}",
+        "variant_id": f"var-{uuid.uuid4().hex[:8]}",
+        "quantity": random.randint(1, 3),
+    }
+
+
+def checkout_data() -> dict:
+    """Generate CheckoutRequest payload."""
+    return {
+        "shipping": order_address(),
+        "billing": order_address(),
+        "payment_method": random.choice(["credit_card", "debit_card", "wallet"]),
+    }
+
+
+def shipment_data() -> dict:
+    """Generate RecordShipmentRequest payload."""
+    carriers = ["FedEx", "UPS", "USPS", "DHL"]
+    return {
+        "shipment_id": f"ship-{uuid.uuid4().hex[:8]}",
+        "carrier": random.choice(carriers),
+        "tracking_number": f"TRK{uuid.uuid4().hex[:12].upper()}",
+        "estimated_delivery": fake.future_date(end_date="+14d").isoformat(),
+    }
+
+
+# ---------- Inventory Domain ----------
+
+
+def warehouse_data() -> dict:
+    """Generate CreateWarehouseRequest payload."""
+    return {
+        "name": f"{fake.city()} Warehouse {random.randint(1, 99)}",
+        "address": order_address(),
+        "capacity": random.randint(1000, 50000),
+    }
+
+
+def initialize_stock_data(
+    product_id: str | None = None,
+    variant_id: str | None = None,
+    warehouse_id: str | None = None,
+    initial_quantity: int | None = None,
+) -> dict:
+    """Generate InitializeStockRequest payload."""
+    return {
+        "product_id": product_id or f"prod-{uuid.uuid4().hex[:8]}",
+        "variant_id": variant_id or f"var-{uuid.uuid4().hex[:8]}",
+        "warehouse_id": warehouse_id or f"wh-{uuid.uuid4().hex[:8]}",
+        "sku": valid_sku("INV"),
+        "initial_quantity": initial_quantity if initial_quantity is not None else random.randint(10, 500),
+        "reorder_point": 10,
+        "reorder_quantity": 50,
+    }
+
+
+def reserve_stock_data(order_id: str | None = None, quantity: int = 1) -> dict:
+    """Generate ReserveStockRequest payload."""
+    return {
+        "order_id": order_id or f"ord-{uuid.uuid4().hex[:8]}",
+        "quantity": quantity,
+        "expires_in_minutes": 15,
+    }
+
+
+# ---------- Payments Domain ----------
+
+
+def payment_data(
+    order_id: str | None = None,
+    customer_id: str | None = None,
+    amount: float | None = None,
+) -> dict:
+    """Generate InitiatePaymentRequest payload."""
+    return {
+        "order_id": order_id or f"ord-{uuid.uuid4().hex[:8]}",
+        "customer_id": customer_id or f"cust-{uuid.uuid4().hex[:8]}",
+        "amount": amount or round(random.uniform(19.99, 499.99), 2),
+        "currency": "USD",
+        "payment_method_type": random.choice(["credit_card", "debit_card", "wallet"]),
+        "last4": str(random.randint(1000, 9999)),
+        "idempotency_key": f"idem-{uuid.uuid4().hex[:12]}",
+    }
+
+
+def webhook_data_success(payment_id: str) -> dict:
+    """Generate ProcessWebhookRequest payload for successful payment."""
+    return {
+        "payment_id": payment_id,
+        "gateway_transaction_id": f"gtx-{uuid.uuid4().hex[:12]}",
+        "gateway_status": "succeeded",
+    }
+
+
+def webhook_data_failure(payment_id: str) -> dict:
+    """Generate ProcessWebhookRequest payload for failed payment."""
+    reasons = ["Card declined", "Insufficient funds", "Card expired", "Processing error"]
+    return {
+        "payment_id": payment_id,
+        "gateway_transaction_id": f"gtx-{uuid.uuid4().hex[:12]}",
+        "gateway_status": "failed",
+        "failure_reason": random.choice(reasons),
+    }
+
+
+def invoice_data(order_id: str | None = None, customer_id: str | None = None) -> dict:
+    """Generate GenerateInvoiceRequest payload."""
+    num_items = random.randint(1, 4)
+    return {
+        "order_id": order_id or f"ord-{uuid.uuid4().hex[:8]}",
+        "customer_id": customer_id or f"cust-{uuid.uuid4().hex[:8]}",
+        "line_items": [
+            {
+                "description": f"{fake.word().capitalize()} {fake.word().capitalize()}"[:100],
+                "quantity": random.randint(1, 5),
+                "unit_price": round(random.uniform(9.99, 99.99), 2),
+            }
+            for _ in range(num_items)
+        ],
+        "tax": round(random.uniform(0, 30.0), 2),
+    }

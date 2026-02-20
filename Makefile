@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood
 
 # Default target
 help: ## Show this help message
@@ -190,10 +190,10 @@ engine-payments-scaled: ## Start Payments engine with 4 workers
 # Docker-based Engine Workers
 # ──────────────────────────────────────────────
 engine-docker: ## Start all engines in Docker (1 worker each)
-	docker compose up engine-identity engine-catalogue engine-ordering
+	docker compose up engine-identity engine-catalogue engine-ordering engine-inventory engine-payments
 
-engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue, 2 ordering)
-	docker compose up --scale engine-identity=3 --scale engine-catalogue=2 --scale engine-ordering=2
+engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue, 2 ordering, 2 inventory, 2 payments)
+	docker compose up --scale engine-identity=3 --scale engine-catalogue=2 --scale engine-ordering=2 --scale engine-inventory=2 --scale engine-payments=2
 
 # ──────────────────────────────────────────────
 # Observability
@@ -309,10 +309,38 @@ loadtest-spike: ## Run spike test (100 users, instant spawn, 2 min)
 		--csv=results/spike-test --csv-full-history \
 		--html=results/spike-report.html
 
+loadtest-cross-domain: ## Run cross-domain workload scenario (web UI)
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 CrossDomainUser
+
+loadtest-race: ## Run race condition scenarios (web UI)
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 RaceConditionUser
+
+loadtest-flash-sale: ## Run flash sale simulation (web UI)
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 FlashSaleUser
+
+loadtest-cross-flood: ## Run cross-domain flood stress test (web UI)
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 CrossDomainFloodUser
+
+loadtest-headless-race: ## Run headless race condition test (30 users, 10/sec spawn, 3 min, reports)
+	@mkdir -p results
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 \
+		RaceConditionUser --headless \
+		-u 30 -r 10 -t 180s \
+		--csv=results/race-test --csv-full-history \
+		--html=results/race-report.html
+
+loadtest-headless-flash: ## Run headless flash sale test (50 users, instant spawn, 2 min, reports)
+	@mkdir -p results
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 \
+		FlashSaleUser --headless \
+		-u 50 -r 50 -t 120s \
+		--csv=results/flash-sale-test --csv-full-history \
+		--html=results/flash-sale-report.html
+
 loadtest-stack: ## Start full load test stack (Docker API + engines + Observatory + Locust)
 	./scripts/loadtest-stack.sh
 
-loadtest-stack-scaled: ## Start scaled load test stack (3 identity + 2 catalogue + 2 ordering engines)
+loadtest-stack-scaled: ## Start scaled load test stack (3+2+2+2+2 engines across all domains)
 	./scripts/loadtest-stack.sh --scaled
 
 loadtest-clean: truncate-db ## Clean all data for a fresh load test run
