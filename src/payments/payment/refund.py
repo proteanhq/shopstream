@@ -35,11 +35,12 @@ class RefundHandler:
     def request_refund(self, command):
         repo = current_domain.repository_for(Payment)
         payment = repo.get(command.payment_id)
-        payment.request_refund(
+        refund_id = payment.request_refund(
             amount=command.amount,
             reason=command.reason,
         )
         repo.add(payment)
+        return refund_id
 
     @handle(ProcessRefundWebhook)
     def process_refund_webhook(self, command):

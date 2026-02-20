@@ -52,6 +52,7 @@ class PaymentSuccessJourney(SequentialTaskSet):
         with self.client.post(
             "/payments/webhook",
             json=payload,
+            headers={"X-Gateway-Signature": "test-signature"},
             catch_response=True,
             name="POST /payments/webhook (success)",
         ) as resp:
@@ -98,6 +99,7 @@ class PaymentFailureRetryJourney(SequentialTaskSet):
         with self.client.post(
             "/payments/webhook",
             json=payload,
+            headers={"X-Gateway-Signature": "test-signature"},
             catch_response=True,
             name="POST /payments/webhook (failure)",
         ) as resp:
@@ -124,6 +126,7 @@ class PaymentFailureRetryJourney(SequentialTaskSet):
         with self.client.post(
             "/payments/webhook",
             json=payload,
+            headers={"X-Gateway-Signature": "test-signature"},
             catch_response=True,
             name="POST /payments/webhook (success after retry)",
         ) as resp:
@@ -169,6 +172,7 @@ class PaymentRefundJourney(SequentialTaskSet):
         with self.client.post(
             "/payments/webhook",
             json=payload,
+            headers={"X-Gateway-Signature": "test-signature"},
             catch_response=True,
             name="POST /payments/webhook (success)",
         ) as resp:
@@ -187,19 +191,22 @@ class PaymentRefundJourney(SequentialTaskSet):
             catch_response=True,
             name="POST /payments/{id}/refund",
         ) as resp:
-            if resp.status_code != 200:
+            if resp.status_code == 200:
+                self.state.refund_id = resp.json()["refund_id"]
+            else:
                 resp.failure(f"Refund request failed: {extract_error_detail(resp)}")
+                self.interrupt()
 
     @task
     def refund_webhook(self):
-        refund_id = f"ref-{uuid.uuid4().hex[:8]}"
         with self.client.post(
             "/payments/refund/webhook",
             json={
                 "payment_id": self.state.payment_id,
-                "refund_id": refund_id,
+                "refund_id": self.state.refund_id,
                 "gateway_refund_id": f"gref-{uuid.uuid4().hex[:12]}",
             },
+            headers={"X-Gateway-Signature": "test-signature"},
             catch_response=True,
             name="POST /payments/refund/webhook",
         ) as resp:

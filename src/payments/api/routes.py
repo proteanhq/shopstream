@@ -15,6 +15,7 @@ from payments.api.schemas import (
     PaymentIdResponse,
     ProcessRefundWebhookRequest,
     ProcessWebhookRequest,
+    RefundIdResponse,
     RequestRefundRequest,
     StatusResponse,
     VoidInvoiceRequest,
@@ -78,16 +79,16 @@ async def retry_payment(payment_id: str) -> StatusResponse:
     return StatusResponse(status="retry_initiated")
 
 
-@payment_router.post("/{payment_id}/refund", response_model=StatusResponse)
-async def request_refund(payment_id: str, body: RequestRefundRequest) -> StatusResponse:
+@payment_router.post("/{payment_id}/refund", response_model=RefundIdResponse)
+async def request_refund(payment_id: str, body: RequestRefundRequest) -> RefundIdResponse:
     """Request a refund for a payment."""
     command = RequestRefund(
         payment_id=payment_id,
         amount=body.amount,
         reason=body.reason,
     )
-    current_domain.process(command, asynchronous=False)
-    return StatusResponse(status="refund_requested")
+    refund_id = current_domain.process(command, asynchronous=False)
+    return RefundIdResponse(refund_id=refund_id)
 
 
 @payment_router.post("/refund/webhook", response_model=StatusResponse)

@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline
 
 # Default target
 help: ## Show this help message
@@ -342,6 +342,41 @@ loadtest-stack: ## Start full load test stack (Docker API + engines + Observator
 
 loadtest-stack-scaled: ## Start scaled load test stack (3+2+2+2+2 engines across all domains)
 	./scripts/loadtest-stack.sh --scaled
+
+loadtest-priority: ## Run migration + production priority lanes scenario (web UI)
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 MigrationWithProductionTrafficUser
+
+loadtest-priority-headless: ## Run headless priority lanes test (30 users, 5/sec spawn, 3 min, reports)
+	@mkdir -p results
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 \
+		MigrationWithProductionTrafficUser --headless \
+		-u 30 -r 5 -t 180s \
+		--csv=results/priority-test --csv-full-history \
+		--html=results/priority-report.html
+
+loadtest-backfill-drain: ## Run backfill drain rate measurement (headless, 10 users, 3 min)
+	@mkdir -p results
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 \
+		BackfillDrainRateUser --headless \
+		-u 10 -r 10 -t 180s \
+		--csv=results/backfill-drain --csv-full-history \
+		--html=results/backfill-drain-report.html
+
+loadtest-starvation: ## Run priority starvation test (headless, 50 users, 5 min)
+	@mkdir -p results
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 \
+		PriorityStarvationTestUser --headless \
+		-u 50 -r 10 -t 300s \
+		--csv=results/starvation-test --csv-full-history \
+		--html=results/starvation-report.html
+
+loadtest-baseline: ## Run priority lanes disabled baseline (headless, 30 users, 3 min)
+	@mkdir -p results
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 \
+		PriorityLanesDisabledBaseline --headless \
+		-u 30 -r 5 -t 180s \
+		--csv=results/baseline-test --csv-full-history \
+		--html=results/baseline-report.html
 
 loadtest-clean: truncate-db ## Clean all data for a fresh load test run
 

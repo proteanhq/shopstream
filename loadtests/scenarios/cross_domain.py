@@ -14,6 +14,7 @@ Scenarios:
 """
 
 import random
+import time
 import uuid
 
 from locust import HttpUser, SequentialTaskSet, between, constant_pacing, task
@@ -229,6 +230,7 @@ class EndToEndOrderJourney(SequentialTaskSet):
         with self.client.post(
             "/payments/webhook",
             json=payload,
+            headers={"X-Gateway-Signature": "test-signature"},
             catch_response=True,
             name="[E2E] POST /payments/webhook",
         ) as resp:
@@ -311,12 +313,14 @@ class FlashSaleStampede(SequentialTaskSet):
     _shared_inventory_item_id = None
     _shared_warehouse_id = None
     _setup_done = False
+    _setup_complete = False
 
     def on_start(self):
         # First user sets up the shared inventory item with limited stock
         if not FlashSaleStampede._setup_done:
             FlashSaleStampede._setup_done = True
             self._setup_shared_inventory()
+            FlashSaleStampede._setup_complete = True
 
     def _setup_shared_inventory(self):
         """Create a warehouse and inventory item with limited stock (10 units)."""
@@ -343,6 +347,12 @@ class FlashSaleStampede(SequentialTaskSet):
     @task
     def rush_reserve(self):
         """Each user tries to grab 1-3 units — most will fail."""
+        # Wait for setup to complete (first user is creating shared inventory)
+        for _ in range(50):  # Wait up to 5 seconds
+            if FlashSaleStampede._setup_complete:
+                break
+            time.sleep(0.1)
+
         if not FlashSaleStampede._shared_inventory_item_id:
             self.interrupt()
             return
@@ -466,6 +476,7 @@ class CancelDuringPaymentJourney(SequentialTaskSet):
         with self.client.post(
             "/payments/webhook",
             json=payload,
+            headers={"X-Gateway-Signature": "test-signature"},
             catch_response=True,
             name="[RACE-CANCEL] POST /payments/webhook (RACE)",
         ) as resp:
@@ -687,6 +698,7 @@ class SagaOrderCheckoutJourney(SequentialTaskSet):
             self.client.post(
                 "/payments/webhook",
                 json=payload,
+                headers={"X-Gateway-Signature": "test-signature"},
                 name="[SAGA] POST /payments/webhook (success)",
             )
             self.client.put(
@@ -704,6 +716,7 @@ class SagaOrderCheckoutJourney(SequentialTaskSet):
             self.client.post(
                 "/payments/webhook",
                 json=payload,
+                headers={"X-Gateway-Signature": "test-signature"},
                 name="[SAGA] POST /payments/webhook (failure)",
             )
             self.client.put(

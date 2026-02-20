@@ -228,5 +228,6 @@ class CrossDomainFloodUser(HttpUser):
             self.client.post(
                 "/payments/webhook",
                 json=webhook_data_success(pid),
+                headers={"X-Gateway-Signature": "test-signature"},
                 name="[X-FLOOD] POST /payments/webhook",
             )

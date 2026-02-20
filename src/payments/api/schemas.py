@@ -97,6 +97,10 @@ class InvoiceIdResponse(BaseModel):
     invoice_id: str
 
 
+class RefundIdResponse(BaseModel):
+    refund_id: str
+
+
 class StatusResponse(BaseModel):
     status: str
 

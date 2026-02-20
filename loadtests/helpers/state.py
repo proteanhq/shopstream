@@ -74,6 +74,7 @@ class PaymentState:
     order_id: str | None = None
     amount: float = 0.0
     current_status: str = "pending"
+    refund_id: str | None = None
 
 
 @dataclass

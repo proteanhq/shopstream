@@ -2347,7 +2347,7 @@ sqlite = ["sqlalchemy (>=2.0.30,<2.1.0)"]
 type = "git"
 url = "https://github.com/proteanhq/protean.git"
 reference = "main"
-resolved_reference = "fb97b82d01620ad455a359ec050b73deae5c30b3"
+resolved_reference = "0fbb758275bc6a67d5d4dc1811ddafaeef84eec9"
 
 [[package]]
 name = "psutil"

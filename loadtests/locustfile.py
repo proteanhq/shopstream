@@ -46,6 +46,12 @@ from loadtests.scenarios.inventory import InventoryUser  # noqa: F401
 from loadtests.scenarios.mixed import MixedWorkloadUser  # noqa: F401
 from loadtests.scenarios.ordering import OrderingUser  # noqa: F401
 from loadtests.scenarios.payments import PaymentsUser  # noqa: F401
+from loadtests.scenarios.priority_lanes import (  # noqa: F401
+    BackfillDrainRateUser,
+    MigrationWithProductionTrafficUser,
+    PriorityLanesDisabledBaseline,
+    PriorityStarvationTestUser,
+)
 from loadtests.scenarios.stress import EventFloodUser, SpikeUser  # noqa: F401
 
 logger = logging.getLogger("loadtest")

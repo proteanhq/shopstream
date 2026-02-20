@@ -75,7 +75,8 @@ class OrderCheckoutSaga:
                 order_id=self.order_id,
                 payment_id=f"saga-pay-{self.order_id}",
                 payment_method="credit_card",
-            )
+            ),
+            asynchronous=False,
         )
 
     @handle(PaymentSucceeded, correlate="order_id")
@@ -93,7 +94,8 @@ class OrderCheckoutSaga:
                 payment_id=event.payment_id,
                 amount=event.amount,
                 payment_method="credit_card",
-            )
+            ),
+            asynchronous=False,
         )
         self.mark_as_complete()
 
@@ -115,7 +117,8 @@ class OrderCheckoutSaga:
                     order_id=self.order_id,
                     reason=f"Payment failed: {event.reason}",
                     cancelled_by="System",
-                )
+                ),
+                asynchronous=False,
             )
             self.mark_as_complete()
 
@@ -132,5 +135,6 @@ class OrderCheckoutSaga:
                 order_id=self.order_id,
                 reason=f"Inventory reservation released: {event.reason}",
                 cancelled_by="System",
-            )
+            ),
+            asynchronous=False,
         )

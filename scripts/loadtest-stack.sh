@@ -26,8 +26,15 @@ PIDS=()
 cleanup() {
     echo ""
     echo "[LOADTEST] Shutting down load test stack..."
+    # Kill background process groups (not just the shell PID) so child
+    # processes like Uvicorn are also terminated immediately.
     for pid in "${PIDS[@]}"; do
-        kill "$pid" 2>/dev/null || true
+        kill -- -"$pid" 2>/dev/null || kill "$pid" 2>/dev/null || true
+    done
+    # Brief grace period, then force-kill any survivors
+    sleep 1
+    for pid in "${PIDS[@]}"; do
+        kill -9 -- -"$pid" 2>/dev/null || kill -9 "$pid" 2>/dev/null || true
     done
     docker compose stop api $ALL_ENGINES 2>/dev/null || true
     wait 2>/dev/null || true

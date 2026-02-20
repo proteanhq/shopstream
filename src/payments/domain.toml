@@ -12,6 +12,14 @@ message_processing = "sync"
 [server]
 default_subscription_type = "stream"
 
+# Priority Lanes: Route low-priority events (migrations, bulk imports) to a
+# separate Redis Stream so production events are always processed first.
+# See docs/priority-lanes.md for usage and load test instructions.
+[server.priority_lanes]
+enabled = true
+threshold = 0           # priority < 0 → backfill lane
+backfill_suffix = "backfill"
+
 # Outbox pattern: events are written to an outbox table in the same
 # transaction as the aggregate mutation, then asynchronously forwarded
 # to the broker (Redis Streams) by the Engine's OutboxProcessor.
