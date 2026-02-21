@@ -29,7 +29,7 @@ class FulfillmentInventoryEventHandler:
     def on_shipment_handed_off(self, event: ShipmentHandedOff) -> None:
         """Commit reserved stock when shipment leaves the warehouse.
 
-        This finds active reservations for the order and commits them,
+        This finds confirmed reservations for the order and commits them,
         reducing on-hand stock and clearing the reservation.
         """
         logger.info(
@@ -37,22 +37,25 @@ class FulfillmentInventoryEventHandler:
             order_id=str(event.order_id),
             fulfillment_id=str(event.fulfillment_id),
         )
-        # Find inventory items with active reservations for this order
+        # Find inventory items with confirmed reservations for this order.
+        # InventoryItem is event-sourced, so we use the event store to
+        # discover all aggregate identifiers, then load each via repo.get().
         repo = current_domain.repository_for(InventoryItem)
-        results = repo._dao.query.all()
+        identifiers = current_domain.event_store.store._stream_identifiers(InventoryItem.meta_.stream_category)
 
-        if not results or not results.items:
+        if not identifiers:
             logger.warning(
                 "No inventory items found for stock commitment",
                 order_id=str(event.order_id),
             )
             return
 
-        for item in results.items:
+        for identifier in identifiers:
+            item = repo.get(identifier)
             if not item.reservations:
                 continue
             for reservation in item.reservations:
-                if str(reservation.order_id) == str(event.order_id) and reservation.status == "Active":
+                if str(reservation.order_id) == str(event.order_id) and reservation.status == "Confirmed":
                     from inventory.stock.shipping import CommitStock
 
                     current_domain.process(
