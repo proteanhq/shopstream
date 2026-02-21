@@ -24,11 +24,11 @@ class FakeCarrier(CarrierPort):
 
     def create_shipment(
         self,
-        _order_id: str,
-        _carrier: str,
+        order_id: str,
+        carrier: str,
         service_level: str,
-        _weight: float | None = None,
-        _dimensions: dict | None = None,
+        weight: float | None = None,
+        dimensions: dict | None = None,
     ) -> dict:
         if not self.should_succeed:
             return {
@@ -53,7 +53,7 @@ class FakeCarrier(CarrierPort):
             "estimated_delivery": estimated_delivery.isoformat(),
         }
 
-    def get_tracking(self, _tracking_number: str) -> dict:
+    def get_tracking(self, tracking_number: str) -> dict:
         if not self.should_succeed:
             return {
                 "status": "unknown",
@@ -81,11 +81,11 @@ class FakeCarrier(CarrierPort):
             ],
         }
 
-    def cancel_shipment(self, _tracking_number: str) -> dict:
+    def cancel_shipment(self, tracking_number: str) -> dict:
         if not self.should_succeed:
             return {"cancelled": False, "reason": self.failure_reason}
         return {"cancelled": True, "reason": "Shipment cancelled successfully"}
 
-    def verify_webhook_signature(self, _payload: str, _signature: str) -> bool:
+    def verify_webhook_signature(self, payload: str, signature: str) -> bool:
         # FakeCarrier accepts any signature (or empty signature) for testing
         return True

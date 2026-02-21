@@ -65,3 +65,21 @@ debug = false
 
 [production.databases.default]
 database_uri = "${DATABASE_URL|postgresql://postgres:postgres@localhost:15432/identity}"
+
+# ──────────────────────────────────────────────
+# Memory overrides (PROTEAN_ENV=memory)
+# Fast in-memory adapters for quick test feedback.
+# No Docker, PostgreSQL, Redis, or Message DB required.
+# ──────────────────────────────────────────────
+[memory]
+testing = true
+event_processing = "sync"
+
+[memory.databases.default]
+provider = "memory"
+
+[memory.event_store]
+provider = "memory"
+
+[memory.brokers.default]
+provider = "inline"

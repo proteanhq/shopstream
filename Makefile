@@ -32,6 +32,28 @@ test-integration: ## Run integration tests across all domains
 test-fast: ## Run fast tests across all domains (domain + application)
 	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ -m "not slow"
 
+# ──────────────────────────────────────────────
+# Memory-mode testing (no Docker/infrastructure needed)
+# Uses PROTEAN_ENV=memory → in-memory DB, inline broker, memory event store
+# ──────────────────────────────────────────────
+test-memory: ## Run all tests with in-memory adapters (no Docker needed)
+	poetry run pytest --protean-env memory
+
+test-memory-domain: ## Run domain tests with in-memory adapters
+	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/ --protean-env memory
+
+test-memory-application: ## Run application tests with in-memory adapters
+	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ --protean-env memory
+
+test-memory-integration: ## Run integration tests with in-memory adapters
+	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/integration/ --protean-env memory
+
+test-memory-fast: ## Run fast memory tests (domain + application, excludes slow)
+	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ -m "not slow" --protean-env memory
+
+test-memory-cov: ## Run all memory tests with coverage report
+	poetry run pytest --protean-env memory --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov-report=term-missing --cov-report=html --cov-report=xml
+
 test-cov: ## Run all tests with combined coverage report
 	poetry run pytest --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov-report=term-missing --cov-report=html --cov-report=xml
 

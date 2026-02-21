@@ -35,6 +35,13 @@ def tests(session: nox.Session) -> None:
 
 
 @nox.session(python=PYTHON_VERSIONS)
+def tests_memory(session: nox.Session) -> None:
+    """Run full test suite with memory adapters (no infrastructure)."""
+    _install(session)
+    session.run("pytest", "--protean-env", "memory")
+
+
+@nox.session(python=PYTHON_VERSIONS)
 def tests_domain(session: nox.Session) -> None:
     """Run domain-layer tests only (no infrastructure required)."""
     _install(session)
