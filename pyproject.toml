@@ -20,6 +20,7 @@ packages = [
     { include = "ordering", from = "src" },
     { include = "inventory", from = "src" },
     { include = "payments", from = "src" },
+    { include = "fulfillment", from = "src" },
     { include = "shared", from = "src" },
 ]
 
@@ -170,6 +171,8 @@ markers = [
 filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::PendingDeprecationWarning",
+    "ignore:usefixtures.*without arguments has no effect:",
+    "ignore:This declarative base already contains a class:sqlalchemy.exc.SAWarning",
 ]
 
 # Coverage configuration

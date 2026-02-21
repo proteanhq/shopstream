@@ -400,6 +400,129 @@ systems. This is a notification-only event -- it does not change aggregate state
 
 ---
 
+## Fulfillment Context
+
+### Fulfillment
+
+A warehouse-to-delivery pipeline for one order, tracking the full lifecycle from
+creation through picking, packing, carrier handoff, tracking, and delivery confirmation.
+A Fulfillment is created after payment succeeds and contains all the items to be shipped.
+
+The Fulfillment aggregate uses standard **CQRS** (not event sourcing) because fulfillment
+workflows are largely linear and external carriers own the tracking state of truth.
+
+&rarr; [`Fulfillment`](../src/fulfillment/fulfillment/fulfillment.py) (Aggregate)
+
+### Fulfillment Item
+
+A single line item being fulfilled -- a specific product variant at a given quantity.
+Each item tracks its own pick status (Pending, Picked, Packed) independently, ensuring
+all items are picked before packing can begin.
+
+&rarr; [`FulfillmentItem`](../src/fulfillment/fulfillment/fulfillment.py) (Entity)
+
+### Pick List
+
+The picking assignment details: who is assigned as the picker, when they were assigned,
+and when picking was completed. A Pick List has no identity of its own; it exists only
+as part of a Fulfillment.
+
+&rarr; [`PickList`](../src/fulfillment/fulfillment/fulfillment.py) (Value Object)
+
+### Packing Info
+
+Packing completion details: who packed the items, when, and the URL of the generated
+shipping label. Immutable -- replaced on each update.
+
+&rarr; [`PackingInfo`](../src/fulfillment/fulfillment/fulfillment.py) (Value Object)
+
+### Shipment Info
+
+Carrier shipment details: carrier name, service level, tracking number, estimated
+delivery date, and actual delivery date (set upon confirmation).
+
+&rarr; [`ShipmentInfo`](../src/fulfillment/fulfillment/fulfillment.py) (Value Object)
+
+### Package
+
+A physical shipping package containing one or more fulfillment items. Each Package
+has weight, dimensions, and a list of item IDs it contains.
+
+&rarr; [`Package`](../src/fulfillment/fulfillment/fulfillment.py) (Entity)
+
+### Package Dimensions
+
+Physical dimensions of a package: weight, length, width, height. All measurements
+are floats.
+
+&rarr; [`PackageDimensions`](../src/fulfillment/fulfillment/fulfillment.py) (Value Object)
+
+### Tracking Event
+
+A carrier-reported tracking update with status, location, description, and timestamp.
+Tracking events accumulate over the shipment's journey and form a complete delivery
+history.
+
+&rarr; [`TrackingEvent`](../src/fulfillment/fulfillment/fulfillment.py) (Entity)
+
+### Carrier
+
+An external shipping provider (FedEx, UPS, DHL, etc.) abstracted behind a port interface.
+The domain code programs against the `CarrierPort`; adapters handle carrier-specific details.
+
+&rarr; [`CarrierPort`](../src/fulfillment/carrier/port.py) (Port)
+
+### Fulfillment Status
+
+The 9-state lifecycle of a fulfillment, enforced by a state machine:
+
+| State | Meaning |
+|-------|---------|
+| **Pending** | Fulfillment created, waiting for warehouse assignment. |
+| **Picking** | Picker assigned, items being collected from shelves. |
+| **Packing** | All items picked, being packed into shipping packages. |
+| **Ready_To_Ship** | Packed and labeled, waiting for carrier pickup. |
+| **Shipped** | Handed to carrier, left the warehouse. |
+| **In_Transit** | Carrier has scanned the package, it's moving. |
+| **Delivered** | Carrier confirmed delivery to customer. (Terminal) |
+| **Exception** | Carrier reported a delivery problem. |
+| **Cancelled** | Fulfillment cancelled before shipment. (Terminal) |
+
+&rarr; [`FulfillmentStatus`](../src/fulfillment/fulfillment/fulfillment.py) (Enum)
+
+### Fulfillment Item Status
+
+The pick/pack status of an individual item:
+- **Pending** -- not yet picked from the shelf.
+- **Picked** -- collected from the warehouse location.
+- **Packed** -- placed into a shipping package.
+
+&rarr; [`FulfillmentItemStatus`](../src/fulfillment/fulfillment/fulfillment.py) (Enum)
+
+### Service Level
+
+The shipping speed for a fulfillment:
+- **Standard** -- regular ground shipping.
+- **Express** -- expedited shipping (2-3 days).
+- **Overnight** -- next-day delivery.
+
+&rarr; [`ServiceLevel`](../src/fulfillment/fulfillment/fulfillment.py) (Enum)
+
+### Handoff
+
+The moment a shipment physically leaves the warehouse and is given to the carrier.
+This is the point of no return for cancellation -- once handed off, the carrier owns
+the package.
+
+### Delivery Exception
+
+A problem reported by the carrier during delivery -- wrong address, customer not
+available, weather delay, damaged in transit, etc. Exceptions transition the fulfillment
+to EXCEPTION state, from which it can recover (carrier retries) or be resolved by
+delivery.
+
+---
+
 ## Cross-Context Terms
 
 ### customer_id
@@ -410,12 +533,13 @@ it only stores the ID. This is the anti-corruption boundary between contexts.
 
 ### product_id / variant_id
 
-Opaque identifiers used by the Ordering and Inventory contexts to reference Products
-and Variants from the Catalogue context. Order Items store these IDs along with a
-snapshot of the SKU, title, and price at the time of order creation. InventoryItems
-store these IDs to identify which product variant is being tracked at each warehouse.
-If the product's price or title changes later, existing orders and inventory records
-are unaffected.
+Opaque identifiers used by the Ordering, Inventory, and Fulfillment contexts to
+reference Products and Variants from the Catalogue context. Order Items store these
+IDs along with a snapshot of the SKU, title, and price at the time of order creation.
+InventoryItems store these IDs to identify which product variant is being tracked at
+each warehouse. FulfillmentItems store these IDs to identify what is being shipped.
+If the product's price or title changes later, existing orders, inventory records,
+and fulfillments are unaffected.
 
 ### seller_id
 
@@ -441,3 +565,16 @@ levels and reservation history.
 An opaque identifier from the Ordering context stored on Reservation entities and
 stock return events. Links stock movements to the specific order they support,
 enabling reconciliation between order fulfillment and stock changes.
+
+### order_id (in Fulfillment)
+
+An opaque identifier from the Ordering context stored on the Fulfillment aggregate.
+Links the warehouse pipeline to the originating order. Used for cross-domain event
+correlation: when `ShipmentHandedOff` is raised, the `order_id` tells the Ordering
+domain which Order to update to Shipped status.
+
+### fulfillment_id (cross-domain)
+
+An opaque identifier from the Fulfillment context carried in cross-domain events
+(`ShipmentHandedOff`, `DeliveryConfirmed`). The Ordering domain stores this as the
+`shipment_id` on the Order when recording shipment.

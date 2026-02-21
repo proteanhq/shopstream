@@ -12,6 +12,8 @@ from catalogue.domain import catalogue
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fulfillment.api import fulfillment_router
+from fulfillment.domain import fulfillment
 from identity.api import router as identity_router
 from identity.domain import identity
 from inventory.api import inventory_router, warehouse_router
@@ -34,6 +36,7 @@ catalogue.init()
 ordering.init()
 inventory.init()
 payments.init()
+fulfillment.init()
 
 # ---------------------------------------------------------------------------
 # FastAPI app
@@ -65,6 +68,7 @@ app.add_middleware(
         "/warehouses": inventory,
         "/payments": payments,
         "/invoices": payments,
+        "/fulfillments": fulfillment,
     },
 )
 
@@ -85,6 +89,7 @@ app.include_router(inventory_router)
 app.include_router(warehouse_router)
 app.include_router(payment_router)
 app.include_router(invoice_router)
+app.include_router(fulfillment_router)
 
 
 # ---------------------------------------------------------------------------
@@ -112,6 +117,7 @@ async def health():
                 "ordering": {"name": ordering.name},
                 "inventory": {"name": inventory.name},
                 "payments": {"name": payments.name},
+                "fulfillment": {"name": fulfillment.name},
             },
         }
     )

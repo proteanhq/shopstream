@@ -78,6 +78,17 @@ class PaymentState:
 
 
 @dataclass
+class FulfillmentState:
+    """Tracks state for a single fulfillment lifecycle."""
+
+    fulfillment_id: str | None = None
+    order_id: str | None = None
+    tracking_number: str | None = None
+    item_count: int = 0
+    current_status: str = "Pending"
+
+
+@dataclass
 class CrossDomainState:
     """Tracks state across domains for end-to-end scenarios.
 

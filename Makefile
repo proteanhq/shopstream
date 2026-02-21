@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment
 
 # Default target
 help: ## Show this help message
@@ -21,19 +21,19 @@ test: ## Run all tests across all domains
 	poetry run pytest
 
 test-domain: ## Run domain layer tests across all domains
-	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/
+	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/
 
 test-application: ## Run application layer tests across all domains
-	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/
+	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/
 
 test-integration: ## Run integration tests across all domains
-	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/integration/
+	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/integration/
 
 test-fast: ## Run fast tests across all domains (domain + application)
-	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ -m "not slow"
+	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ -m "not slow"
 
 test-cov: ## Run all tests with combined coverage report
-	poetry run pytest --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov-report=term-missing --cov-report=html --cov-report=xml
+	poetry run pytest --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov-report=term-missing --cov-report=html --cov-report=xml
 
 # ──────────────────────────────────────────────
 # Identity domain testing
@@ -126,6 +126,24 @@ test-payments-cov: ## Run all payments tests with coverage report
 	poetry run pytest tests/payments/ --cov=payments --cov-report=term-missing --cov-report=html:htmlcov/payments
 
 # ──────────────────────────────────────────────
+# Fulfillment domain testing
+# ──────────────────────────────────────────────
+test-fulfillment: ## Run all fulfillment tests
+	poetry run pytest tests/fulfillment/
+
+test-fulfillment-domain: ## Run fulfillment domain layer tests
+	poetry run pytest tests/fulfillment/domain/ --cov=fulfillment --cov-report=term-missing
+
+test-fulfillment-application: ## Run fulfillment application layer tests
+	poetry run pytest tests/fulfillment/application/ --cov=fulfillment --cov-report=term-missing
+
+test-fulfillment-integration: ## Run fulfillment integration tests
+	poetry run pytest tests/fulfillment/integration/ --cov=fulfillment --cov-report=term-missing
+
+test-fulfillment-cov: ## Run all fulfillment tests with coverage report
+	poetry run pytest tests/fulfillment/ --cov=fulfillment --cov-report=term-missing --cov-report=html:htmlcov/fulfillment
+
+# ──────────────────────────────────────────────
 # Test utilities
 # ──────────────────────────────────────────────
 test-watch: ## Run tests in watch mode
@@ -171,6 +189,9 @@ engine-inventory: ## Start Inventory domain engine
 engine-payments: ## Start Payments domain engine
 	poetry run protean server --domain payments.domain
 
+engine-fulfillment: ## Start Fulfillment domain engine
+	poetry run protean server --domain fulfillment.domain
+
 engine-identity-scaled: ## Start Identity engine with 4 workers
 	poetry run protean server --domain identity.domain --workers 4
 
@@ -186,20 +207,23 @@ engine-inventory-scaled: ## Start Inventory engine with 4 workers
 engine-payments-scaled: ## Start Payments engine with 4 workers
 	poetry run protean server --domain payments.domain --workers 4
 
+engine-fulfillment-scaled: ## Start Fulfillment engine with 4 workers
+	poetry run protean server --domain fulfillment.domain --workers 4
+
 # ──────────────────────────────────────────────
 # Docker-based Engine Workers
 # ──────────────────────────────────────────────
 engine-docker: ## Start all engines in Docker (1 worker each)
-	docker compose up engine-identity engine-catalogue engine-ordering engine-inventory engine-payments
+	docker compose up engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment
 
-engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue, 2 ordering, 2 inventory, 2 payments)
-	docker compose up --scale engine-identity=3 --scale engine-catalogue=2 --scale engine-ordering=2 --scale engine-inventory=2 --scale engine-payments=2
+engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue, 2 ordering, 2 inventory, 2 payments, 2 fulfillment)
+	docker compose up --scale engine-identity=3 --scale engine-catalogue=2 --scale engine-ordering=2 --scale engine-inventory=2 --scale engine-payments=2 --scale engine-fulfillment=2
 
 # ──────────────────────────────────────────────
 # Observability
 # ──────────────────────────────────────────────
 observatory: ## Start Observatory dashboard (port 9000, live message flow + Prometheus metrics)
-	poetry run protean observatory --domain identity.domain --domain catalogue.domain --domain ordering.domain --domain inventory.domain --domain payments.domain --title "ShopStream Observatory"
+	poetry run protean observatory --domain identity.domain --domain catalogue.domain --domain ordering.domain --domain inventory.domain --domain payments.domain --domain fulfillment.domain --title "ShopStream Observatory"
 
 # ──────────────────────────────────────────────
 # Database
@@ -210,6 +234,7 @@ setup-db: ## Create database schemas for all domains
 	poetry run protean db setup --domain ordering.domain
 	poetry run protean db setup --domain inventory.domain
 	poetry run protean db setup --domain payments.domain
+	poetry run protean db setup --domain fulfillment.domain
 
 drop-db: ## Drop database schemas for all domains
 	poetry run protean db drop --domain identity.domain --yes
@@ -217,6 +242,7 @@ drop-db: ## Drop database schemas for all domains
 	poetry run protean db drop --domain ordering.domain --yes
 	poetry run protean db drop --domain inventory.domain --yes
 	poetry run protean db drop --domain payments.domain --yes
+	poetry run protean db drop --domain fulfillment.domain --yes
 
 truncate-db: ## Delete all data from all tables (preserves schema)
 	poetry run protean db truncate --domain identity.domain --yes
@@ -224,6 +250,7 @@ truncate-db: ## Delete all data from all tables (preserves schema)
 	poetry run protean db truncate --domain ordering.domain --yes
 	poetry run protean db truncate --domain inventory.domain --yes
 	poetry run protean db truncate --domain payments.domain --yes
+	poetry run protean db truncate --domain fulfillment.domain --yes
 
 # Protean Commands
 shell: ## Start Protean shell
@@ -377,6 +404,9 @@ loadtest-baseline: ## Run priority lanes disabled baseline (headless, 30 users, 
 		-u 30 -r 5 -t 180s \
 		--csv=results/baseline-test --csv-full-history \
 		--html=results/baseline-report.html
+
+loadtest-fulfillment: ## Run fulfillment workflow load test (web UI)
+	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 FulfillmentUser
 
 loadtest-clean: truncate-db ## Clean all data for a fresh load test run
 

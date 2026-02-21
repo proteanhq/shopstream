@@ -306,3 +306,30 @@ def invoice_data(order_id: str | None = None, customer_id: str | None = None) ->
         ],
         "tax": round(random.uniform(0, 30.0), 2),
     }
+
+
+# ---------- Fulfillment Domain ----------
+
+
+def fulfillment_item_data() -> dict:
+    """Generate FulfillmentItemRequest payload."""
+    return {
+        "order_item_id": f"oi-{uuid.uuid4().hex[:8]}",
+        "product_id": f"prod-{uuid.uuid4().hex[:8]}",
+        "sku": valid_sku("FUL"),
+        "quantity": random.randint(1, 3),
+    }
+
+
+def fulfillment_data(
+    order_id: str | None = None,
+    customer_id: str | None = None,
+    num_items: int | None = None,
+) -> dict:
+    """Generate CreateFulfillmentRequest payload."""
+    num = num_items or random.randint(1, 4)
+    return {
+        "order_id": order_id or f"ord-{uuid.uuid4().hex[:8]}",
+        "customer_id": customer_id or f"cust-{uuid.uuid4().hex[:8]}",
+        "items": [fulfillment_item_data() for _ in range(num)],
+    }

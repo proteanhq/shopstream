@@ -1823,13 +1823,13 @@ files = [
 
 [[package]]
 name = "message-db-py"
-version = "0.3.0"
+version = "0.3.2"
 description = "The Python interface to the MessageDB Event Store and Message Store"
 optional = false
 python-versions = "<4.0,>=3.11"
 files = [
-    {file = "message_db_py-0.3.0-py3-none-any.whl", hash = "sha256:2ca613ab09727c33b07e6a9bff136ead4ca5ecaeb97d3c75e3afd35f48027ac1"},
-    {file = "message_db_py-0.3.0.tar.gz", hash = "sha256:55a902ca2b1cec175827ad129061c40997dd14f0282b0eb0971936f7d4005b6f"},
+    {file = "message_db_py-0.3.2-py3-none-any.whl", hash = "sha256:198865cf482e845c8d76f36edd76566398dbc4d921a9fe9ee0030c0f56a42c50"},
+    {file = "message_db_py-0.3.2.tar.gz", hash = "sha256:be94fd2532d2cf52e587a1e4d1bb12b603ad9dedb27d57733003d7baebcee4a3"},
 ]
 
 [package.dependencies]
@@ -2322,7 +2322,7 @@ greenlet = "^3.0.3"
 inflection = ">=0.5.1"
 ipython = ">=8.23,<10.0"
 marshmallow = ">=3.15.0"
-message-db-py = {version = ">=0.3.0", optional = true}
+message-db-py = {version = ">=0.3.2", optional = true}
 psycopg2 = {version = ">=2.9.9", optional = true}
 pydantic = ">=2.10,<3.0"
 python-dateutil = ">=2.8.2"
@@ -2336,7 +2336,7 @@ werkzeug = ">=2.0.0"
 [package.extras]
 elasticsearch = ["elasticsearch (>=7.17.9,<7.18.0)", "elasticsearch-dsl (>=7.4.1,<7.5.0)"]
 flask = ["flask (>=1.1.1)"]
-message-db = ["message-db-py (>=0.3.0)"]
+message-db = ["message-db-py (>=0.3.2)"]
 mssql = ["pyodbc (>=5.0.0)", "sqlalchemy (>=2.0.30,<2.1.0)"]
 postgresql = ["psycopg2 (>=2.9.9)", "sqlalchemy (>=2.0.30,<2.1.0)"]
 redis = ["redis (>=5.0.7,<7.3.0)"]
@@ -2347,7 +2347,7 @@ sqlite = ["sqlalchemy (>=2.0.30,<2.1.0)"]
 type = "git"
 url = "https://github.com/proteanhq/protean.git"
 reference = "main"
-resolved_reference = "0fbb758275bc6a67d5d4dc1811ddafaeef84eec9"
+resolved_reference = "67a74d296db172189d64c25e9bb7366ba40ef988"
 
 [[package]]
 name = "psutil"

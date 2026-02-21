@@ -41,6 +41,7 @@ from loadtests.scenarios.cross_domain import (  # noqa: F401
     FlashSaleUser,
     RaceConditionUser,
 )
+from loadtests.scenarios.fulfillment import FulfillmentUser  # noqa: F401
 from loadtests.scenarios.identity import IdentityUser  # noqa: F401
 from loadtests.scenarios.inventory import InventoryUser  # noqa: F401
 from loadtests.scenarios.mixed import MixedWorkloadUser  # noqa: F401
