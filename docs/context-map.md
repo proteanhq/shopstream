@@ -4,7 +4,7 @@
 
 ## Overview
 
-ShopStream is decomposed into six bounded contexts, each owning a distinct
+ShopStream is decomposed into seven bounded contexts, each owning a distinct
 area of business responsibility. The contexts share **no domain objects** --
 they communicate only through opaque identifiers and asynchronous domain events.
 
@@ -27,6 +27,9 @@ consistency requirements, change rates, and scalability needs:
 - **Fulfillment** bridges the gap between payment and delivery. It operates at
   warehouse pace -- fulfillments progress linearly through pick/pack/ship/deliver
   and use standard CQRS since carriers own the tracking state of truth.
+- **Reviews** is read-heavy and write-light (customers submit reviews occasionally,
+  shoppers read them constantly). Reviews use CQRS with a pre-publication moderation
+  workflow and consume `OrderDelivered` events to flag verified purchases.
 
 ```mermaid
 graph TB
@@ -37,6 +40,7 @@ graph TB
         inventory["<b>Inventory</b><br/>Stock levels, reservations,<br/>warehouses, damage tracking<br/><i>2 aggregates &middot; 18 events</i>"]
         payments["<b>Payments</b><br/>Charges, refunds, invoices,<br/>gateway integration<br/><i>2 aggregates &middot; 10 events</i>"]
         fulfillment_ctx["<b>Fulfillment</b><br/>Picking, packing, shipping,<br/>tracking, delivery<br/><i>1 aggregate &middot; 11 events</i>"]
+        reviews_ctx["<b>Reviews</b><br/>Ratings, moderation, voting,<br/>seller replies<br/><i>1 aggregate &middot; 8 events</i>"]
     end
 
     ordering -- "customer_id" --> identity
@@ -49,6 +53,8 @@ graph TB
     fulfillment_ctx -. "DeliveryConfirmed" .-> ordering
     fulfillment_ctx -. "ShipmentHandedOff" .-> inventory
     ordering -. "OrderCancelled" .-> fulfillment_ctx
+    reviews_ctx -- "product_id, customer_id" --> catalogue
+    ordering -. "OrderDelivered" .-> reviews_ctx
 
     style identity fill:#4a90d9,color:#fff,stroke:#2a6cb0
     style catalogue fill:#7bc96f,color:#fff,stroke:#4a9e3f
@@ -56,6 +62,7 @@ graph TB
     style inventory fill:#d94a8a,color:#fff,stroke:#b02a6c
     style payments fill:#9b59b6,color:#fff,stroke:#7d3c98
     style fulfillment_ctx fill:#1abc9c,color:#fff,stroke:#16a085
+    style reviews_ctx fill:#e74c3c,color:#fff,stroke:#c0392b
 ```
 
 ## Context Relationships
@@ -154,6 +161,19 @@ The Fulfillment context triggers stock commitment in Inventory:
 This is a one-way **event-driven** relationship. Fulfillment does not know about
 Inventory -- it simply raises `ShipmentHandedOff`. Inventory independently reacts.
 
+### Ordering &rarr; Reviews
+
+The Ordering context raises `OrderDelivered` events that the Reviews context consumes
+to populate its local `VerifiedPurchases` projection. When a customer submits a review,
+the Reviews handler checks this projection to flag the review as a verified purchase.
+
+This is a one-way **event-driven** relationship. Ordering does not know about Reviews
+-- it simply raises `OrderDelivered` as part of its normal lifecycle. Reviews
+independently reacts by creating per-product verified purchase records.
+
+The Reviews context also references `product_id` and `customer_id` as opaque
+identifiers. It never queries the Catalogue or Identity contexts.
+
 ## Communication Patterns
 
 | Pattern | Where Used | Why |
@@ -161,15 +181,16 @@ Inventory -- it simply raises `ShipmentHandedOff`. Inventory independently react
 | **Opaque IDs** (no shared objects) | All cross-context references | Keeps bounded contexts decoupled. Each context has its own data model. |
 | **Data snapshots** | Order Items capture sku, title, unit_price from Catalogue | Orders must be immutable once placed, even if product data changes later. |
 | **Domain events via outbox + Redis Streams** | All async reactions within each context | Events are written atomically with aggregate state changes. Engine workers consume them and update projections. |
-| **Cross-domain events via shared contracts** | Fulfillment &harr; Ordering, Fulfillment &rarr; Inventory, Payments &harr; Ordering | Events defined in `src/shared/events/`, registered via `register_external_event()`, consumed from other domains' streams. |
+| **Cross-domain events via shared contracts** | Fulfillment &harr; Ordering, Fulfillment &rarr; Inventory, Payments &harr; Ordering, Ordering &rarr; Reviews | Events defined in `src/shared/events/`, registered via `register_external_event()`, consumed from other domains' streams. |
 | **Synchronous command processing** | All write operations within each context | Commands are processed in the same request. The API returns only after the aggregate state change is committed. |
 
 ## What This Context Map Does NOT Show (Yet)
 
 ShopStream has cross-context event subscriptions for the checkout saga (Payments
 &harr; Ordering), fulfillment lifecycle (Fulfillment &harr; Ordering, Fulfillment
-&rarr; Inventory), and order cancellation (Ordering &rarr; Fulfillment). In a
-production e-commerce system, you would likely add:
+&rarr; Inventory), order cancellation (Ordering &rarr; Fulfillment), and verified
+purchase tracking (Ordering &rarr; Reviews). In a production e-commerce system,
+you would likely add:
 
 - **Ordering subscribes to Catalogue's `ProductDiscontinued`** -- to prevent new orders
   for discontinued products.
@@ -182,5 +203,7 @@ production e-commerce system, you would likely add:
   and push notifications.
 - **A Returns context** -- handling post-delivery returns, restock, and refund coordination
   across Ordering, Inventory, and Payments.
+- **Catalogue subscribes to Reviews' `ReviewApproved`/`ReviewRemoved`** -- to update
+  product rating summaries directly on the product listing.
 
 These extensions would be natural additions as ShopStream evolves.

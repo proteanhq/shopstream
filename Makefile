@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment
 
 # Default target
 help: ## Show this help message
@@ -21,16 +21,16 @@ test: ## Run all tests across all domains
 	poetry run pytest
 
 test-domain: ## Run domain layer tests across all domains
-	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/
+	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/ tests/reviews/domain/
 
 test-application: ## Run application layer tests across all domains
-	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/
+	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ tests/reviews/application/
 
 test-integration: ## Run integration tests across all domains
-	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/integration/
+	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/reviews/integration/ tests/integration/
 
 test-fast: ## Run fast tests across all domains (domain + application)
-	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ -m "not slow"
+	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ tests/reviews/domain/ tests/reviews/application/ -m "not slow"
 
 # ──────────────────────────────────────────────
 # Memory-mode testing (no Docker/infrastructure needed)
@@ -40,22 +40,22 @@ test-memory: ## Run all tests with in-memory adapters (no Docker needed)
 	poetry run pytest --protean-env memory
 
 test-memory-domain: ## Run domain tests with in-memory adapters
-	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/ --protean-env memory
+	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/ tests/reviews/domain/ --protean-env memory
 
 test-memory-application: ## Run application tests with in-memory adapters
-	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ --protean-env memory
+	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ tests/reviews/application/ --protean-env memory
 
 test-memory-integration: ## Run integration tests with in-memory adapters
-	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/integration/ --protean-env memory
+	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/reviews/integration/ tests/integration/ --protean-env memory
 
 test-memory-fast: ## Run fast memory tests (domain + application, excludes slow)
-	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ -m "not slow" --protean-env memory
+	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ tests/reviews/domain/ tests/reviews/application/ -m "not slow" --protean-env memory
 
 test-memory-cov: ## Run all memory tests with coverage report
-	poetry run pytest --protean-env memory --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov-report=term-missing --cov-report=html --cov-report=xml
+	poetry run pytest --protean-env memory --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov=reviews --cov-report=term-missing --cov-report=html --cov-report=xml
 
 test-cov: ## Run all tests with combined coverage report
-	poetry run pytest --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov-report=term-missing --cov-report=html --cov-report=xml
+	poetry run pytest --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov=reviews --cov-report=term-missing --cov-report=html --cov-report=xml
 
 # ──────────────────────────────────────────────
 # Identity domain testing
@@ -166,6 +166,24 @@ test-fulfillment-cov: ## Run all fulfillment tests with coverage report
 	poetry run pytest tests/fulfillment/ --cov=fulfillment --cov-report=term-missing --cov-report=html:htmlcov/fulfillment
 
 # ──────────────────────────────────────────────
+# Reviews domain testing
+# ──────────────────────────────────────────────
+test-reviews: ## Run all reviews tests
+	poetry run pytest tests/reviews/
+
+test-reviews-domain: ## Run reviews domain layer tests
+	poetry run pytest tests/reviews/domain/ --cov=reviews --cov-report=term-missing
+
+test-reviews-application: ## Run reviews application layer tests
+	poetry run pytest tests/reviews/application/ --cov=reviews --cov-report=term-missing
+
+test-reviews-integration: ## Run reviews integration tests
+	poetry run pytest tests/reviews/integration/ --cov=reviews --cov-report=term-missing
+
+test-reviews-cov: ## Run all reviews tests with coverage report
+	poetry run pytest tests/reviews/ --cov=reviews --cov-report=term-missing --cov-report=html:htmlcov/reviews
+
+# ──────────────────────────────────────────────
 # Test utilities
 # ──────────────────────────────────────────────
 test-watch: ## Run tests in watch mode
@@ -214,6 +232,9 @@ engine-payments: ## Start Payments domain engine
 engine-fulfillment: ## Start Fulfillment domain engine
 	poetry run protean server --domain fulfillment.domain
 
+engine-reviews: ## Start Reviews domain engine
+	poetry run protean server --domain reviews.domain
+
 engine-identity-scaled: ## Start Identity engine with 4 workers
 	poetry run protean server --domain identity.domain --workers 4
 
@@ -245,7 +266,7 @@ engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue
 # Observability
 # ──────────────────────────────────────────────
 observatory: ## Start Observatory dashboard (port 9000, live message flow + Prometheus metrics)
-	poetry run protean observatory --domain identity.domain --domain catalogue.domain --domain ordering.domain --domain inventory.domain --domain payments.domain --domain fulfillment.domain --title "ShopStream Observatory"
+	poetry run protean observatory --domain identity.domain --domain catalogue.domain --domain ordering.domain --domain inventory.domain --domain payments.domain --domain fulfillment.domain --domain reviews.domain --title "ShopStream Observatory"
 
 # ──────────────────────────────────────────────
 # Database
@@ -257,6 +278,7 @@ setup-db: ## Create database schemas for all domains
 	poetry run protean db setup --domain inventory.domain
 	poetry run protean db setup --domain payments.domain
 	poetry run protean db setup --domain fulfillment.domain
+	poetry run protean db setup --domain reviews.domain
 
 drop-db: ## Drop database schemas for all domains
 	poetry run protean db drop --domain identity.domain --yes
@@ -265,6 +287,7 @@ drop-db: ## Drop database schemas for all domains
 	poetry run protean db drop --domain inventory.domain --yes
 	poetry run protean db drop --domain payments.domain --yes
 	poetry run protean db drop --domain fulfillment.domain --yes
+	poetry run protean db drop --domain reviews.domain --yes
 
 truncate-db: ## Delete all data from all tables (preserves schema)
 	poetry run protean db truncate --domain identity.domain --yes
@@ -273,6 +296,7 @@ truncate-db: ## Delete all data from all tables (preserves schema)
 	poetry run protean db truncate --domain inventory.domain --yes
 	poetry run protean db truncate --domain payments.domain --yes
 	poetry run protean db truncate --domain fulfillment.domain --yes
+	poetry run protean db truncate --domain reviews.domain --yes
 
 # Protean Commands
 shell: ## Start Protean shell

@@ -523,23 +523,128 @@ delivery.
 
 ---
 
+## Reviews Context
+
+### Review
+
+A customer's written assessment of a product, consisting of a star rating (1-5), title,
+body text, and optional pros/cons lists and images. Each customer can submit at most one
+review per product (excluding removed reviews). Reviews go through moderation before
+becoming publicly visible.
+
+&rarr; [`Review`](../src/reviews/review/review.py) (Aggregate)
+
+### Rating
+
+A 1-5 star score representing a customer's satisfaction with a product. The score is
+enforced by a post-invariant on the value object -- values outside 1-5 are rejected
+at construction time.
+
+&rarr; [`Rating`](../src/reviews/review/review.py) (Value Object)
+
+### Review Image
+
+A photograph attached to a review, with URL, alt text, and display order. A review
+can have at most 5 images.
+
+&rarr; [`ReviewImage`](../src/reviews/review/review.py) (Entity)
+
+### Helpful Vote
+
+A customer's indication that a review was helpful or unhelpful. A customer cannot vote
+on their own review (no self-vote) and can only vote once per review (no duplicate votes).
+Vote counts are tracked on the aggregate for display purposes.
+
+&rarr; [`HelpfulVote`](../src/reviews/review/review.py) (Entity)
+
+### Seller Reply
+
+A single response from the product seller attached to a published review. Only one reply
+is allowed per review, and replies can only be added to published (not pending or rejected)
+reviews. This gives sellers a voice to address feedback without allowing back-and-forth
+conversations.
+
+&rarr; [`SellerReply`](../src/reviews/review/review.py) (Entity)
+
+### Review Status
+
+The lifecycle state of a review, enforced by a state machine:
+- **Pending** -- submitted by the customer, awaiting moderator action. Not publicly visible.
+- **Published** -- approved by a moderator and visible on the product page.
+- **Rejected** -- rejected by a moderator. The customer can edit and re-submit (returns to Pending).
+- **Removed** -- removed by an admin from Published state for policy violations. Terminal for the review, but the customer can submit a new one.
+
+&rarr; [`ReviewStatus`](../src/reviews/review/review.py) (Enum)
+
+### Vote Type
+
+Whether a helpful vote is **Helpful** or **Unhelpful**. Both types are tracked separately
+on the review for display (e.g., "42 of 50 people found this review helpful").
+
+&rarr; [`VoteType`](../src/reviews/review/review.py) (Enum)
+
+### Report Reason
+
+Why a customer flagged a review for moderation: **Spam**, **Offensive**, **Irrelevant**,
+**Fake**, or **Other**. Report reasons are tracked as a JSON list on the aggregate,
+allowing multiple reports with different reasons to accumulate.
+
+&rarr; [`ReportReason`](../src/reviews/review/review.py) (Enum)
+
+### Moderation Action
+
+The two actions a moderator can take on a pending review: **Approve** (makes it publicly
+visible) or **Reject** (sends it back to the customer with feedback). Rejection requires
+a reason; approval does not.
+
+&rarr; [`ModerationAction`](../src/reviews/review/review.py) (Enum)
+
+### Verified Purchase
+
+A flag on a review indicating that the reviewer actually purchased and received the
+product. This is determined at submission time by checking the local `VerifiedPurchases`
+projection, which is populated by consuming `OrderDelivered` events from the Ordering
+domain. Verified purchase is a trust signal for shoppers, not a gate -- unverified
+customers can still write reviews.
+
+### Moderation Queue
+
+A read model (projection) that shows all reviews awaiting moderator action: newly
+submitted reviews (Pending) and reported reviews (Published but flagged by the
+community). When a reported review is not in the queue (because it was previously
+approved and removed from the queue), the projector enriches it from the aggregate
+data before re-adding it.
+
+&rarr; [`ModerationQueue`](../src/reviews/projections/moderation_queue.py) (Projection)
+
+### Product Rating
+
+An aggregated view of a product's review statistics: average rating, star distribution
+(count per star), total review count, and verified review count. Updated when reviews
+are approved (incremented) or removed (decremented).
+
+&rarr; [`ProductRating`](../src/reviews/projections/product_rating.py) (Projection)
+
+---
+
 ## Cross-Context Terms
 
 ### customer_id
 
-An opaque identifier that the Ordering context uses to reference a Customer in the
-Identity context. The Ordering context never loads or inspects the Customer aggregate --
-it only stores the ID. This is the anti-corruption boundary between contexts.
+An opaque identifier that the Ordering and Reviews contexts use to reference a Customer
+in the Identity context. Neither context loads or inspects the Customer aggregate --
+they only store the ID. This is the anti-corruption boundary between contexts.
 
 ### product_id / variant_id
 
-Opaque identifiers used by the Ordering, Inventory, and Fulfillment contexts to
-reference Products and Variants from the Catalogue context. Order Items store these
+Opaque identifiers used by the Ordering, Inventory, Fulfillment, and Reviews contexts
+to reference Products and Variants from the Catalogue context. Order Items store these
 IDs along with a snapshot of the SKU, title, and price at the time of order creation.
 InventoryItems store these IDs to identify which product variant is being tracked at
 each warehouse. FulfillmentItems store these IDs to identify what is being shipped.
+Reviews store `product_id` to associate a review with the product being reviewed.
 If the product's price or title changes later, existing orders, inventory records,
-and fulfillments are unaffected.
+fulfillments, and reviews are unaffected.
 
 ### seller_id
 
@@ -578,3 +683,16 @@ domain which Order to update to Shipped status.
 An opaque identifier from the Fulfillment context carried in cross-domain events
 (`ShipmentHandedOff`, `DeliveryConfirmed`). The Ordering domain stores this as the
 `shipment_id` on the Order when recording shipment.
+
+### product_id (in Reviews)
+
+An opaque identifier from the Catalogue context stored on Review aggregates. Links
+a review to the product being reviewed. Used for the one-review-per-customer-per-product
+business rule and for populating the `ProductReviews` and `ProductRating` projections.
+
+### customer_id (in Reviews)
+
+An opaque identifier from the Identity context stored on Review aggregates. Links a
+review to the customer who wrote it. Used for enforcing ownership (only the author can
+edit), preventing self-votes, preventing self-reports, and the one-review-per-customer-
+per-product constraint.

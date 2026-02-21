@@ -26,6 +26,8 @@ from protean.integrations.fastapi import (
     DomainContextMiddleware,
     register_exception_handlers,
 )
+from reviews.api import review_router
+from reviews.domain import reviews
 from scalar_fastapi import get_scalar_api_reference
 
 # ---------------------------------------------------------------------------
@@ -37,6 +39,7 @@ ordering.init()
 inventory.init()
 payments.init()
 fulfillment.init()
+reviews.init()
 
 # ---------------------------------------------------------------------------
 # FastAPI app
@@ -69,6 +72,7 @@ app.add_middleware(
         "/payments": payments,
         "/invoices": payments,
         "/fulfillments": fulfillment,
+        "/reviews": reviews,
     },
 )
 
@@ -90,6 +94,7 @@ app.include_router(warehouse_router)
 app.include_router(payment_router)
 app.include_router(invoice_router)
 app.include_router(fulfillment_router)
+app.include_router(review_router)
 
 
 # ---------------------------------------------------------------------------
@@ -118,6 +123,7 @@ async def health():
                 "inventory": {"name": inventory.name},
                 "payments": {"name": payments.name},
                 "fulfillment": {"name": fulfillment.name},
+                "reviews": {"name": reviews.name},
             },
         }
     )

@@ -21,6 +21,7 @@ packages = [
     { include = "inventory", from = "src" },
     { include = "payments", from = "src" },
     { include = "fulfillment", from = "src" },
+    { include = "reviews", from = "src" },
     { include = "shared", from = "src" },
 ]
 

@@ -36,3 +36,20 @@ class OrderCancelled(BaseEvent):
     reason = String(required=True)
     cancelled_by = String(required=True)
     cancelled_at = DateTime(required=True)
+
+
+class OrderDelivered(BaseEvent):
+    """An order was delivered to the customer.
+
+    Consumed by the Reviews domain to track verified purchases.
+    Note: The source event (Ordering.OrderDelivered.v1) only carries
+    order_id and delivered_at. This shared contract adds customer_id
+    and items for downstream consumers that need them.
+    """
+
+    __version__ = "v1"
+
+    order_id = Identifier(required=True)
+    customer_id = Identifier()
+    items = Text()  # JSON list of {product_id, variant_id}
+    delivered_at = DateTime(required=True)
