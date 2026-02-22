@@ -38,3 +38,21 @@ class PaymentFailed(BaseEvent):
     attempt_number = Integer(required=True)
     can_retry = Boolean(required=True)
     failed_at = DateTime(required=True)
+
+
+class RefundCompleted(BaseEvent):
+    """A refund was completed by the payment gateway.
+
+    Consumed by the Notifications domain to send refund confirmation emails.
+    """
+
+    __version__ = "v1"
+
+    payment_id = Identifier(required=True)
+    refund_id = Identifier(required=True)
+    order_id = Identifier(required=True)
+    customer_id = Identifier()
+    amount = Float(required=True)
+    currency = String(default="USD")
+    reason = String()
+    completed_at = DateTime(required=True)

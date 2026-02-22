@@ -13,6 +13,7 @@ from protean.utils.mixins import handle
 from shared.events.fulfillment import ShipmentHandedOff
 
 from inventory.domain import inventory
+from inventory.projections.reservation_status import ReservationStatus
 from inventory.stock.stock import InventoryItem
 
 logger = structlog.get_logger(__name__)
@@ -29,45 +30,49 @@ class FulfillmentInventoryEventHandler:
     def on_shipment_handed_off(self, event: ShipmentHandedOff) -> None:
         """Commit reserved stock when shipment leaves the warehouse.
 
-        This finds confirmed reservations for the order and commits them,
-        reducing on-hand stock and clearing the reservation.
+        Queries the ReservationStatus projection to find confirmed
+        reservations for the order, then commits each one.
         """
         logger.info(
             "Committing stock for shipped fulfillment",
             order_id=str(event.order_id),
             fulfillment_id=str(event.fulfillment_id),
         )
-        # Find inventory items with confirmed reservations for this order.
-        # InventoryItem is event-sourced, so we use the event store to
-        # discover all aggregate identifiers, then load each via repo.get().
-        repo = current_domain.repository_for(InventoryItem)
-        identifiers = current_domain.event_store.store._stream_identifiers(InventoryItem.meta_.stream_category)
 
-        if not identifiers:
-            logger.warning(
-                "No inventory items found for stock commitment",
+        # Query the ReservationStatus read model for confirmed reservations
+        try:
+            confirmed = (
+                current_domain.repository_for(ReservationStatus)
+                ._dao.query.filter(
+                    order_id=str(event.order_id),
+                    status="Confirmed",
+                )
+                .all()
+                .items
+            )
+        except Exception:
+            confirmed = []
+
+        if not confirmed:
+            logger.info(
+                "No confirmed reservations for order",
                 order_id=str(event.order_id),
             )
             return
 
-        for identifier in identifiers:
-            item = repo.get(identifier)
-            if not item.reservations:
-                continue
-            for reservation in item.reservations:
-                if str(reservation.order_id) == str(event.order_id) and reservation.status == "Confirmed":
-                    from inventory.stock.shipping import CommitStock
+        from inventory.stock.shipping import CommitStock
 
-                    current_domain.process(
-                        CommitStock(
-                            inventory_item_id=str(item.id),
-                            reservation_id=str(reservation.id),
-                        ),
-                        asynchronous=False,
-                    )
-                    logger.info(
-                        "Committed stock reservation",
-                        inventory_item_id=str(item.id),
-                        reservation_id=str(reservation.id),
-                        order_id=str(event.order_id),
-                    )
+        for reservation in confirmed:
+            current_domain.process(
+                CommitStock(
+                    inventory_item_id=str(reservation.inventory_item_id),
+                    reservation_id=str(reservation.reservation_id),
+                ),
+                asynchronous=False,
+            )
+            logger.info(
+                "Committed stock reservation",
+                inventory_item_id=str(reservation.inventory_item_id),
+                reservation_id=str(reservation.reservation_id),
+                order_id=str(event.order_id),
+            )

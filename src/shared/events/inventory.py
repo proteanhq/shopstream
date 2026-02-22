@@ -40,3 +40,20 @@ class ReservationReleased(BaseEvent):
     previous_available = Integer(required=True)
     new_available = Integer(required=True)
     released_at = DateTime(required=True)
+
+
+class LowStockDetected(BaseEvent):
+    """Available stock dropped below the reorder point.
+
+    Consumed by the Notifications domain to send internal alerts (Slack).
+    """
+
+    __version__ = "v1"
+
+    inventory_item_id = Identifier(required=True)
+    product_id = Identifier(required=True)
+    variant_id = Identifier(required=True)
+    sku = String(required=True)
+    current_available = Integer(required=True)
+    reorder_point = Integer(required=True)
+    detected_at = DateTime(required=True)

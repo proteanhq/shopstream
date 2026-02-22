@@ -38,3 +38,19 @@ class ReviewRemoved(BaseEvent):
     removed_by = String(required=True)
     reason = String(required=True)
     removed_at = DateTime(required=True)
+
+
+class ReviewRejected(BaseEvent):
+    """A review was rejected by moderation.
+
+    Consumed by the Notifications domain to inform the customer.
+    """
+
+    __version__ = "v1"
+
+    review_id = Identifier(required=True)
+    product_id = Identifier(required=True)
+    customer_id = Identifier(required=True)
+    moderator_id = Identifier(required=True)
+    reason = String(required=True)
+    rejected_at = DateTime(required=True)

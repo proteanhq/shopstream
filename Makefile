@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment
 
 # Default target
 help: ## Show this help message
@@ -21,16 +21,16 @@ test: ## Run all tests across all domains
 	poetry run pytest
 
 test-domain: ## Run domain layer tests across all domains
-	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/ tests/reviews/domain/
+	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/ tests/reviews/domain/ tests/notifications/domain/
 
 test-application: ## Run application layer tests across all domains
-	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ tests/reviews/application/
+	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ tests/reviews/application/ tests/notifications/application/
 
 test-integration: ## Run integration tests across all domains
-	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/reviews/integration/ tests/integration/
+	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/reviews/integration/ tests/notifications/integration/ tests/integration/
 
 test-fast: ## Run fast tests across all domains (domain + application)
-	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ tests/reviews/domain/ tests/reviews/application/ -m "not slow"
+	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ tests/reviews/domain/ tests/reviews/application/ tests/notifications/domain/ tests/notifications/application/ -m "not slow"
 
 # ──────────────────────────────────────────────
 # Memory-mode testing (no Docker/infrastructure needed)
@@ -40,22 +40,22 @@ test-memory: ## Run all tests with in-memory adapters (no Docker needed)
 	poetry run pytest --protean-env memory
 
 test-memory-domain: ## Run domain tests with in-memory adapters
-	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/ tests/reviews/domain/ --protean-env memory
+	poetry run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/ tests/reviews/domain/ tests/notifications/domain/ --protean-env memory
 
 test-memory-application: ## Run application tests with in-memory adapters
-	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ tests/reviews/application/ --protean-env memory
+	poetry run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ tests/reviews/application/ tests/notifications/application/ --protean-env memory
 
 test-memory-integration: ## Run integration tests with in-memory adapters
-	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/reviews/integration/ tests/integration/ --protean-env memory
+	poetry run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/reviews/integration/ tests/notifications/integration/ tests/integration/ --protean-env memory
 
 test-memory-fast: ## Run fast memory tests (domain + application, excludes slow)
-	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ tests/reviews/domain/ tests/reviews/application/ -m "not slow" --protean-env memory
+	poetry run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ tests/reviews/domain/ tests/reviews/application/ tests/notifications/domain/ tests/notifications/application/ -m "not slow" --protean-env memory
 
 test-memory-cov: ## Run all memory tests with coverage report
-	poetry run pytest --protean-env memory --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov=reviews --cov-report=term-missing --cov-report=html --cov-report=xml
+	poetry run pytest --protean-env memory --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov=reviews --cov=notifications --cov-report=term-missing --cov-report=html --cov-report=xml
 
 test-cov: ## Run all tests with combined coverage report
-	poetry run pytest --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov=reviews --cov-report=term-missing --cov-report=html --cov-report=xml
+	poetry run pytest --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov=reviews --cov=notifications --cov-report=term-missing --cov-report=html --cov-report=xml
 
 # ──────────────────────────────────────────────
 # Identity domain testing
@@ -184,6 +184,24 @@ test-reviews-cov: ## Run all reviews tests with coverage report
 	poetry run pytest tests/reviews/ --cov=reviews --cov-report=term-missing --cov-report=html:htmlcov/reviews
 
 # ──────────────────────────────────────────────
+# Notifications domain testing
+# ──────────────────────────────────────────────
+test-notifications: ## Run all notifications tests
+	poetry run pytest tests/notifications/
+
+test-notifications-domain: ## Run notifications domain layer tests
+	poetry run pytest tests/notifications/domain/ --cov=notifications --cov-report=term-missing
+
+test-notifications-application: ## Run notifications application layer tests
+	poetry run pytest tests/notifications/application/ --cov=notifications --cov-report=term-missing
+
+test-notifications-integration: ## Run notifications integration tests
+	poetry run pytest tests/notifications/integration/ --cov=notifications --cov-report=term-missing
+
+test-notifications-cov: ## Run all notifications tests with coverage report
+	poetry run pytest tests/notifications/ --cov=notifications --cov-report=term-missing --cov-report=html:htmlcov/notifications
+
+# ──────────────────────────────────────────────
 # Test utilities
 # ──────────────────────────────────────────────
 test-watch: ## Run tests in watch mode
@@ -235,6 +253,9 @@ engine-fulfillment: ## Start Fulfillment domain engine
 engine-reviews: ## Start Reviews domain engine
 	poetry run protean server --domain reviews.domain
 
+engine-notifications: ## Start Notifications domain engine
+	poetry run protean server --domain notifications.domain
+
 engine-identity-scaled: ## Start Identity engine with 4 workers
 	poetry run protean server --domain identity.domain --workers 4
 
@@ -257,7 +278,7 @@ engine-fulfillment-scaled: ## Start Fulfillment engine with 4 workers
 # Docker-based Engine Workers
 # ──────────────────────────────────────────────
 engine-docker: ## Start all engines in Docker (1 worker each)
-	docker compose up engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment
+	docker compose up engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-notifications
 
 engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue, 2 ordering, 2 inventory, 2 payments, 2 fulfillment)
 	docker compose up --scale engine-identity=3 --scale engine-catalogue=2 --scale engine-ordering=2 --scale engine-inventory=2 --scale engine-payments=2 --scale engine-fulfillment=2
@@ -266,7 +287,7 @@ engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue
 # Observability
 # ──────────────────────────────────────────────
 observatory: ## Start Observatory dashboard (port 9000, live message flow + Prometheus metrics)
-	poetry run protean observatory --domain identity.domain --domain catalogue.domain --domain ordering.domain --domain inventory.domain --domain payments.domain --domain fulfillment.domain --domain reviews.domain --title "ShopStream Observatory"
+	poetry run protean observatory --domain identity.domain --domain catalogue.domain --domain ordering.domain --domain inventory.domain --domain payments.domain --domain fulfillment.domain --domain reviews.domain --domain notifications.domain --title "ShopStream Observatory"
 
 # ──────────────────────────────────────────────
 # Database
@@ -279,6 +300,7 @@ setup-db: ## Create database schemas for all domains
 	poetry run protean db setup --domain payments.domain
 	poetry run protean db setup --domain fulfillment.domain
 	poetry run protean db setup --domain reviews.domain
+	poetry run protean db setup --domain notifications.domain
 
 drop-db: ## Drop database schemas for all domains
 	poetry run protean db drop --domain identity.domain --yes
@@ -288,6 +310,7 @@ drop-db: ## Drop database schemas for all domains
 	poetry run protean db drop --domain payments.domain --yes
 	poetry run protean db drop --domain fulfillment.domain --yes
 	poetry run protean db drop --domain reviews.domain --yes
+	poetry run protean db drop --domain notifications.domain --yes
 
 truncate-db: ## Delete all data from all tables (preserves schema)
 	poetry run protean db truncate --domain identity.domain --yes
@@ -297,6 +320,7 @@ truncate-db: ## Delete all data from all tables (preserves schema)
 	poetry run protean db truncate --domain payments.domain --yes
 	poetry run protean db truncate --domain fulfillment.domain --yes
 	poetry run protean db truncate --domain reviews.domain --yes
+	poetry run protean db truncate --domain notifications.domain --yes
 
 # Protean Commands
 shell: ## Start Protean shell

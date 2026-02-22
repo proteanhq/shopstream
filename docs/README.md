@@ -17,7 +17,7 @@ for how real-world e-commerce concepts map to DDD building blocks.
 
 ### Start with the Big Picture
 
-1. **[Context Map](context-map.md)** -- How the seven bounded contexts relate to each
+1. **[Context Map](context-map.md)** -- How the eight bounded contexts relate to each
    other. Understand the overall architecture and what each context owns.
 
 2. **[Glossary](glossary.md)** -- The ubiquitous language of ShopStream. Every term
@@ -37,6 +37,7 @@ Each bounded context has a **narrative** (the business story) and **scenarios**
 | **[Payments](payments/)** | [Domain narrative](payments/README.md) | [Payment Lifecycle](payments/scenarios/payment-lifecycle.md) |
 | **[Fulfillment](fulfillment/)** | [Domain narrative](fulfillment/README.md) | [Fulfillment Lifecycle](fulfillment/scenarios/fulfillment-lifecycle.md), [Delivery Exception](fulfillment/scenarios/delivery-exception.md) |
 | **[Reviews](reviews/)** | [Domain narrative](reviews/README.md) | [Review Submission](reviews/scenarios/review-submission.md), [Review Moderation](reviews/scenarios/review-moderation.md) |
+| **[Notifications](notifications/)** | [Domain narrative](notifications/README.md) | [Notification Dispatch](notifications/scenarios/notification-dispatch.md), [Preference Management](notifications/scenarios/preference-management.md) |
 
 ### Recommended Reading Order
 
@@ -54,6 +55,8 @@ Each bounded context has a **narrative** (the business story) and **scenarios**
 11. Fulfillment Lifecycle scenario (pick/pack/ship/deliver end-to-end)
 12. Reviews narrative (CQRS, moderation workflow, cross-domain verified purchase)
 13. Review Submission scenario (handler checks + aggregate creation)
+14. Notifications narrative (event consumer only, template pattern, channel adapters)
+15. Notification Dispatch scenario (cross-domain event → preference → template → channel)
 
 **For experienced DDD practitioners:**
 1. Ordering narrative (event sourcing + CQRS in same BC, design decisions)
@@ -63,7 +66,8 @@ Each bounded context has a **narrative** (the business story) and **scenarios**
 5. Fulfillment narrative (CQRS for warehouse ops, cross-domain event flow)
 6. Delivery Exception scenario (exception/recovery state transitions)
 7. Reviews narrative (cross-domain integration, moderation-before-publication design)
-8. Glossary (see how UL maps to code elements)
+8. Notifications narrative (pure consumer, template registry, port/adapter channels)
+9. Glossary (see how UL maps to code elements)
 
 ## Document Structure
 
@@ -99,25 +103,30 @@ docs/
 │   └── scenarios/
 │       ├── fulfillment-lifecycle.md
 │       └── delivery-exception.md
-└── reviews/
+├── reviews/
+│   ├── README.md
+│   └── scenarios/
+│       ├── review-submission.md
+│       └── review-moderation.md
+└── notifications/
     ├── README.md
     └── scenarios/
-        ├── review-submission.md
-        └── review-moderation.md
+        ├── notification-dispatch.md
+        └── preference-management.md
 ```
 
 ## Domain at a Glance
 
-| | Identity | Catalogue | Ordering | Inventory | Payments | Fulfillment | Reviews |
-|---|---------|-----------|----------|-----------|----------|-------------|---------|
-| **Aggregates** | Customer | Product, Category | Order (ES), ShoppingCart | InventoryItem (ES), Warehouse | Payment (ES), Invoice | Fulfillment | Review |
-| **Entities** | Address | Variant, Image | OrderItem, CartItem | Reservation, Zone | PaymentAttempt, Refund, InvoiceLineItem | FulfillmentItem, Package, TrackingEvent | ReviewImage, HelpfulVote, SellerReply |
-| **Value Objects** | Profile, EmailAddress, PhoneNumber, GeoCoordinates | SKU, Price, SEO, Dimensions, Weight, Money | ShippingAddress, OrderPricing | StockLevels, WarehouseAddress | Money, PaymentMethod, GatewayInfo | PickList, PackingInfo, ShipmentInfo, PackageDimensions | Rating |
-| **Events** | 10 | 13 | 25 | 18 | 10 | 11 | 8 |
-| **Commands** | 10 | 14 | 27 | 16 | 7 | 11 | 7 |
-| **Projections** | 4 | 5 | 6 | 6 | 5 | 5 | 6 |
-| **API Endpoints** | 10 | 14 | 25 | 16 | 9 | 12 | 7 |
-| **Persistence** | CQRS | CQRS | Event Sourced (Order) + CQRS (Cart) | Event Sourced (InventoryItem) + CQRS (Warehouse) | Event Sourced (Payment) + CQRS (Invoice) | CQRS | CQRS |
+| | Identity | Catalogue | Ordering | Inventory | Payments | Fulfillment | Reviews | Notifications |
+|---|---------|-----------|----------|-----------|----------|-------------|---------|---------------|
+| **Aggregates** | Customer | Product, Category | Order (ES), ShoppingCart | InventoryItem (ES), Warehouse | Payment (ES), Invoice | Fulfillment | Review | Notification, NotificationPreference |
+| **Entities** | Address | Variant, Image | OrderItem, CartItem | Reservation, Zone | PaymentAttempt, Refund, InvoiceLineItem | FulfillmentItem, Package, TrackingEvent | ReviewImage, HelpfulVote, SellerReply | -- |
+| **Value Objects** | Profile, EmailAddress, PhoneNumber, GeoCoordinates | SKU, Price, SEO, Dimensions, Weight, Money | ShippingAddress, OrderPricing | StockLevels, WarehouseAddress | Money, PaymentMethod, GatewayInfo | PickList, PackingInfo, ShipmentInfo, PackageDimensions | Rating | -- |
+| **Events** | 10 | 13 | 25 | 18 | 10 | 11 | 8 | 13 |
+| **Commands** | 10 | 14 | 27 | 16 | 7 | 11 | 7 | 8 |
+| **Projections** | 4 | 5 | 6 | 6 | 5 | 5 | 6 | 4 |
+| **API Endpoints** | 10 | 14 | 25 | 16 | 9 | 12 | 7 | 9 |
+| **Persistence** | CQRS | CQRS | Event Sourced (Order) + CQRS (Cart) | Event Sourced (InventoryItem) + CQRS (Warehouse) | Event Sourced (Payment) + CQRS (Invoice) | CQRS | CQRS | CQRS |
 
 ## Conventions in This Documentation
 

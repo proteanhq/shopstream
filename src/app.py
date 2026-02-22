@@ -18,6 +18,8 @@ from identity.api import router as identity_router
 from identity.domain import identity
 from inventory.api import inventory_router, warehouse_router
 from inventory.domain import inventory
+from notifications.api import notification_router
+from notifications.domain import notifications
 from ordering.api import cart_router, order_router
 from ordering.domain import ordering
 from payments.api import invoice_router, payment_router
@@ -40,6 +42,7 @@ inventory.init()
 payments.init()
 fulfillment.init()
 reviews.init()
+notifications.init()
 
 # ---------------------------------------------------------------------------
 # FastAPI app
@@ -73,6 +76,7 @@ app.add_middleware(
         "/invoices": payments,
         "/fulfillments": fulfillment,
         "/reviews": reviews,
+        "/notifications": notifications,
     },
 )
 
@@ -95,6 +99,7 @@ app.include_router(payment_router)
 app.include_router(invoice_router)
 app.include_router(fulfillment_router)
 app.include_router(review_router)
+app.include_router(notification_router)
 
 
 # ---------------------------------------------------------------------------
@@ -124,6 +129,7 @@ async def health():
                 "payments": {"name": payments.name},
                 "fulfillment": {"name": fulfillment.name},
                 "reviews": {"name": reviews.name},
+                "notifications": {"name": notifications.name},
             },
         }
     )
