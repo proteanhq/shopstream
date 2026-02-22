@@ -16,11 +16,11 @@ from fulfillment.api import fulfillment_router
 from fulfillment.domain import fulfillment
 from identity.api import router as identity_router
 from identity.domain import identity
-from inventory.api import inventory_router, warehouse_router
+from inventory.api import inventory_maintenance_router, inventory_router, warehouse_router
 from inventory.domain import inventory
 from notifications.api import notification_router
 from notifications.domain import notifications
-from ordering.api import cart_router, order_router
+from ordering.api import cart_router, order_router, ordering_maintenance_router
 from ordering.domain import ordering
 from payments.api import invoice_router, payment_router
 from payments.domain import payments
@@ -100,6 +100,10 @@ app.include_router(invoice_router)
 app.include_router(fulfillment_router)
 app.include_router(review_router)
 app.include_router(notification_router)
+
+# Maintenance routers (background job endpoints)
+app.include_router(inventory_maintenance_router)
+app.include_router(ordering_maintenance_router)
 
 
 # ---------------------------------------------------------------------------

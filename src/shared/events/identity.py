@@ -24,3 +24,22 @@ class CustomerRegistered(BaseEvent):
     first_name = String(required=True)
     last_name = String(required=True)
     registered_at = DateTime(required=True)
+
+
+class AccountSuspended(BaseEvent):
+    """A customer account was suspended, blocking further activity."""
+
+    __version__ = "v1"
+
+    customer_id = Identifier(required=True)
+    reason = String(required=True)
+    suspended_at = DateTime(required=True)
+
+
+class AccountReactivated(BaseEvent):
+    """A previously suspended customer account was restored to active status."""
+
+    __version__ = "v1"
+
+    customer_id = Identifier(required=True)
+    reactivated_at = DateTime(required=True)

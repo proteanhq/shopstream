@@ -155,6 +155,7 @@ class TestStockAdjustedEvent:
         now = datetime.now(UTC)
         event = StockAdjusted(
             inventory_item_id="inv-001",
+            product_id="prod-001",
             adjustment_type="Count",
             quantity_change=-5,
             reason="Physical count discrepancy",
@@ -179,6 +180,7 @@ class TestStockMarkedDamagedEvent:
         now = datetime.now(UTC)
         event = StockMarkedDamaged(
             inventory_item_id="inv-001",
+            product_id="prod-001",
             quantity=3,
             reason="Water damage",
             previous_on_hand=100,
@@ -203,6 +205,7 @@ class TestDamagedStockWrittenOffEvent:
         now = datetime.now(UTC)
         event = DamagedStockWrittenOff(
             inventory_item_id="inv-001",
+            product_id="prod-001",
             quantity=3,
             approved_by="manager-001",
             previous_damaged=5,

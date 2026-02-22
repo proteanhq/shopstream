@@ -5,6 +5,7 @@ No business logic — just schema→command→response translation.
 """
 
 import json
+from datetime import datetime as dt_datetime
 
 from fastapi import APIRouter
 from notifications.api.schemas import (
@@ -29,6 +30,7 @@ from notifications.preference.preference import NotificationPreference
 from notifications.preference.subscription import ResubscribeToType, UnsubscribeFromType
 from notifications.projections.customer_notifications import CustomerNotifications
 from protean.utils.globals import current_domain
+from pydantic import BaseModel as PydanticBaseModel
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 
@@ -177,3 +179,32 @@ async def cancel_notification(notification_id: str, body: CancelNotificationRequ
     )
     current_domain.process(command, asynchronous=False)
     return StatusResponse()
+
+
+# ---------------------------------------------------------------------------
+# Maintenance — periodic background job endpoints
+# ---------------------------------------------------------------------------
+
+
+class ProcessScheduledRequest(PydanticBaseModel):
+    as_of: dt_datetime | None = None
+
+
+class ProcessScheduledResponse(PydanticBaseModel):
+    status: str = "ok"
+
+
+@router.post("/maintenance/process-scheduled", response_model=ProcessScheduledResponse)
+async def process_scheduled_notifications(
+    body: ProcessScheduledRequest | None = None,
+) -> ProcessScheduledResponse:
+    """Dispatch due scheduled notifications.
+
+    Designed to be called periodically by an external scheduler (e.g., every 15 minutes).
+    Idempotent: already-sent notifications are skipped.
+    """
+    from notifications.notification.scheduler import ProcessScheduledNotifications
+
+    command = ProcessScheduledNotifications(as_of=body.as_of if body else None)
+    current_domain.process(command, asynchronous=False)
+    return ProcessScheduledResponse()

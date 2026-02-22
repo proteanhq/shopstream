@@ -345,6 +345,7 @@ class InventoryItem:
         self.raise_(
             StockAdjusted(
                 inventory_item_id=str(self.id),
+                product_id=str(self.product_id),
                 adjustment_type=adjustment_type,
                 quantity_change=quantity_change,
                 reason=reason,
@@ -406,6 +407,7 @@ class InventoryItem:
         self.raise_(
             StockMarkedDamaged(
                 inventory_item_id=str(self.id),
+                product_id=str(self.product_id),
                 quantity=quantity,
                 reason=reason,
                 previous_on_hand=on_hand,
@@ -430,6 +432,7 @@ class InventoryItem:
         self.raise_(
             DamagedStockWrittenOff(
                 inventory_item_id=str(self.id),
+                product_id=str(self.product_id),
                 quantity=quantity,
                 approved_by=approved_by,
                 previous_damaged=damaged,

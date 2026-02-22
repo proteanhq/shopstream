@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter
 from protean.utils.globals import current_domain
+from pydantic import BaseModel
 
 from inventory.api.schemas import (
     AddZoneRequest,
@@ -235,3 +236,34 @@ async def deactivate_warehouse(warehouse_id: str) -> StatusResponse:
     command = DeactivateWarehouse(warehouse_id=warehouse_id)
     current_domain.process(command, asynchronous=False)
     return StatusResponse()
+
+
+# ---------------------------------------------------------------------------
+# Maintenance Router — periodic background job endpoints
+# ---------------------------------------------------------------------------
+maintenance_router = APIRouter(prefix="/inventory/maintenance", tags=["inventory-maintenance"])
+
+
+class ExpireReservationsRequest(BaseModel):
+    older_than_minutes: int = 15
+
+
+class ExpireReservationsResponse(BaseModel):
+    expired_count: int
+
+
+@maintenance_router.post("/expire-reservations", response_model=ExpireReservationsResponse)
+async def expire_stale_reservations(
+    body: ExpireReservationsRequest | None = None,
+) -> ExpireReservationsResponse:
+    """Release stale reservations older than the specified threshold.
+
+    Designed to be called periodically by an external scheduler (e.g., every 5 minutes).
+    Idempotent: safe to call concurrently.
+    """
+    from inventory.stock.expiry import ExpireStaleReservations
+
+    minutes = body.older_than_minutes if body else 15
+    command = ExpireStaleReservations(older_than_minutes=minutes)
+    result = current_domain.process(command, asynchronous=False)
+    return ExpireReservationsResponse(expired_count=result or 0)

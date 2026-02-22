@@ -4,6 +4,7 @@ import json
 
 from fastapi import APIRouter
 from protean.utils.globals import current_domain
+from pydantic import BaseModel as PydanticBaseModel
 
 from ordering.api.schemas import (
     AddItemRequest,
@@ -387,3 +388,36 @@ async def refund_order(order_id: str, body: RefundOrderRequest) -> StatusRespons
     )
     current_domain.process(command, asynchronous=False)
     return StatusResponse()
+
+
+# ---------------------------------------------------------------------------
+# Maintenance Router — periodic background job endpoints
+# ---------------------------------------------------------------------------
+
+
+class DetectAbandonedRequest(PydanticBaseModel):
+    idle_threshold_hours: int = 24
+
+
+class DetectAbandonedResponse(PydanticBaseModel):
+    abandoned_count: int
+
+
+maintenance_router = APIRouter(prefix="/carts/maintenance", tags=["carts-maintenance"])
+
+
+@maintenance_router.post("/detect-abandoned", response_model=DetectAbandonedResponse)
+async def detect_abandoned_carts(
+    body: DetectAbandonedRequest | None = None,
+) -> DetectAbandonedResponse:
+    """Detect and flag carts idle beyond the specified threshold.
+
+    Designed to be called periodically by an external scheduler (e.g., every hour).
+    Idempotent: already-abandoned carts are skipped.
+    """
+    from ordering.cart.abandonment import DetectAbandonedCarts
+
+    hours = body.idle_threshold_hours if body else 24
+    command = DetectAbandonedCarts(idle_threshold_hours=hours)
+    result = current_domain.process(command, asynchronous=False)
+    return DetectAbandonedResponse(abandoned_count=result or 0)

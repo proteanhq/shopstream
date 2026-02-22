@@ -113,6 +113,7 @@ class StockAdjusted:
     __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
+    product_id = Identifier(required=True)
     adjustment_type = String(required=True)  # Count, Shrinkage, Correction, Receiving_Error
     quantity_change = Integer(required=True)  # Can be negative
     reason = String(required=True)
@@ -130,6 +131,7 @@ class StockMarkedDamaged:
     __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
+    product_id = Identifier(required=True)
     quantity = Integer(required=True)
     reason = String(required=True)
     previous_on_hand = Integer(required=True)
@@ -147,6 +149,7 @@ class DamagedStockWrittenOff:
     __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
+    product_id = Identifier(required=True)
     quantity = Integer(required=True)
     approved_by = String(required=True)
     previous_damaged = Integer(required=True)

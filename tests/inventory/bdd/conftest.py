@@ -163,6 +163,7 @@ def stock_committed(inventory_item_id, reservation_id):
 def stock_adjusted_down(inventory_item_id):
     return StockAdjusted(
         inventory_item_id=inventory_item_id,
+        product_id="prod-001",
         adjustment_type="Shrinkage",
         quantity_change=-10,
         reason="Inventory shrinkage",
@@ -178,6 +179,7 @@ def stock_adjusted_down(inventory_item_id):
 def stock_marked_damaged(inventory_item_id):
     return StockMarkedDamaged(
         inventory_item_id=inventory_item_id,
+        product_id="prod-001",
         quantity=5,
         reason="Water damage",
         previous_on_hand=100,
@@ -193,6 +195,7 @@ def stock_marked_damaged(inventory_item_id):
 def damaged_stock_written_off(inventory_item_id):
     return DamagedStockWrittenOff(
         inventory_item_id=inventory_item_id,
+        product_id="prod-001",
         quantity=3,
         approved_by="manager-001",
         previous_damaged=5,

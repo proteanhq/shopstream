@@ -73,6 +73,23 @@ class OrderDelivered(BaseEvent):
     delivered_at = DateTime(required=True)
 
 
+class OrderReturned(BaseEvent):
+    """Returned items were received back from the customer.
+
+    Consumed by the Inventory domain to restock items and the Payments
+    domain to initiate a refund.
+    """
+
+    __version__ = "v1"
+
+    order_id = Identifier(required=True)
+    customer_id = Identifier()
+    returned_item_ids = Text()  # JSON list of item IDs
+    items = Text()  # JSON list of {product_id, variant_id, quantity}
+    grand_total = Float()
+    returned_at = DateTime(required=True)
+
+
 class CartAbandoned(BaseEvent):
     """A shopping cart was marked as abandoned due to inactivity.
 
