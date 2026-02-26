@@ -1,10 +1,11 @@
 """RetryNotification command + handler — retry a failed notification."""
 
-from notifications.domain import notifications
-from notifications.notification.notification import Notification
 from protean.fields import Identifier
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
+
+from notifications.domain import notifications
+from notifications.notification.notification import Notification
 
 
 @notifications.command(part_of="Notification")

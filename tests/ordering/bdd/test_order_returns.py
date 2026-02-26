@@ -1,7 +1,8 @@
 """BDD tests for order returns."""
 
-from ordering.order.returns import RequestReturn
 from pytest_bdd import parsers, scenarios, when
+
+from ordering.order.returns import RequestReturn
 
 scenarios("features/order_returns.feature")
 

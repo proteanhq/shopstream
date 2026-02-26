@@ -1,9 +1,10 @@
 """Tests for order cancellation and refund."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from ordering.order.events import OrderCancelled, OrderRefunded
 from ordering.order.order import Order, OrderStatus
-from protean.exceptions import ValidationError
 
 
 def _make_order():

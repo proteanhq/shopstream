@@ -1,6 +1,7 @@
 """Tests for notification templates — rendering and registry."""
 
 import pytest
+
 from notifications.notification.notification import NotificationChannel, NotificationType
 from notifications.templates import TEMPLATE_REGISTRY, get_template
 from notifications.templates.cart_recovery import CartRecoveryTemplate

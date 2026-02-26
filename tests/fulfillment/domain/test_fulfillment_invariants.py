@@ -1,8 +1,9 @@
 """Tests for Fulfillment business rule invariants."""
 
 import pytest
-from fulfillment.fulfillment.fulfillment import Fulfillment, FulfillmentItemStatus
 from protean.exceptions import ValidationError
+
+from fulfillment.fulfillment.fulfillment import Fulfillment, FulfillmentItemStatus
 
 
 def _make_items(count=2):

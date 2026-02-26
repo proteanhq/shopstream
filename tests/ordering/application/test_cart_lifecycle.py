@@ -1,11 +1,12 @@
 """Application tests for cart lifecycle: create → add items → coupon → convert/abandon."""
 
+from protean import current_domain
+
 from ordering.cart.cart import CartStatus, ShoppingCart
 from ordering.cart.conversion import ConvertToOrder
 from ordering.cart.coupons import ApplyCouponToCart
 from ordering.cart.items import AddToCart
 from ordering.cart.management import AbandonCart, CreateCart, MergeGuestCart
-from protean import current_domain
 
 
 def _create_cart_with_item():

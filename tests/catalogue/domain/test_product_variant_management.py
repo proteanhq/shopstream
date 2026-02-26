@@ -1,9 +1,10 @@
 """Tests for Product variant management."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from catalogue.product.events import TierPriceSet, VariantAdded, VariantPriceChanged
 from catalogue.product.product import Dimensions, Price, Product, Weight
-from protean.exceptions import ValidationError
 
 
 def _make_product(**overrides):

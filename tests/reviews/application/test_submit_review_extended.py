@@ -1,6 +1,7 @@
 """Extended application tests for SubmitReview — edge cases."""
 
 from protean import current_domain
+
 from reviews.review.moderation import ModerateReview
 from reviews.review.removal import RemoveReview
 from reviews.review.review import Review

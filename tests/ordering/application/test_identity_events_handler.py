@@ -10,9 +10,10 @@ Covers:
 from datetime import UTC, datetime
 
 import pytest
+from protean import current_domain
+
 from ordering.order.identity_events import IdentityOrderEventHandler
 from ordering.projections.suspended_accounts import SuspendedAccount
-from protean import current_domain
 from shared.events.identity import AccountReactivated, AccountSuspended
 
 

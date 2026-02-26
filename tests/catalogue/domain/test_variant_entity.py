@@ -1,8 +1,9 @@
 """Tests for the Variant entity."""
 
+from protean.utils.reflection import declared_fields
+
 from catalogue.product.product import Price, Variant, Weight
 from catalogue.shared.sku import SKU
-from protean.utils.reflection import declared_fields
 
 
 class TestVariantConstruction:

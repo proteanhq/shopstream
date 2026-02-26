@@ -3,9 +3,10 @@
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from protean import current_domain
+
 from identity.api import router
 from identity.customer.customer import Customer, CustomerStatus, CustomerTier
-from protean import current_domain
 
 
 @pytest.fixture()

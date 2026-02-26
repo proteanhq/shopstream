@@ -4,6 +4,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from protean.integrations.fastapi import register_exception_handlers
+
 from reviews.api.routes import review_router
 
 

@@ -5,6 +5,8 @@ ship → deliver → complete, verifying state is correctly persisted and
 reconstructed from the event store at each step.
 """
 
+from protean import current_domain
+
 from ordering.order.cancellation import CancelOrder
 from ordering.order.completion import CompleteOrder
 from ordering.order.confirmation import ConfirmOrder
@@ -12,7 +14,6 @@ from ordering.order.creation import CreateOrder
 from ordering.order.fulfillment import MarkProcessing, RecordDelivery, RecordShipment
 from ordering.order.order import Order, OrderStatus
 from ordering.order.payment import RecordPaymentPending, RecordPaymentSuccess
-from protean import current_domain
 
 
 def _create_order():

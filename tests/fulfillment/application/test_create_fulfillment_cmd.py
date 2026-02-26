@@ -1,8 +1,9 @@
 """Application tests for fulfillment creation via domain.process()."""
 
+from protean import current_domain
+
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.fulfillment import Fulfillment, FulfillmentStatus
-from protean import current_domain
 
 
 def _items():

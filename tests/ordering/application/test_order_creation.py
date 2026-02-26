@@ -1,8 +1,9 @@
 """Application tests for order creation via domain.process()."""
 
+from protean import current_domain
+
 from ordering.order.creation import CreateOrder
 from ordering.order.order import Order, OrderStatus
-from protean import current_domain
 
 
 def _create_order(**overrides):

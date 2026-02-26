@@ -69,15 +69,16 @@ Examples:
     priority = priority_map[args.priority]
 
     from identity.customer.register_customer import RegisterCustomer
+
     from identity.domain import identity
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("  ShopStream Migration Demo — Priority Lanes")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"  Customers to migrate: {args.count:,}")
     print(f"  Processing priority:  {args.priority.upper()} ({int(priority)})")
     print(f"  Batch report every:   {args.batch_size:,} records")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
     success = 0
     errors = 0
@@ -91,14 +92,14 @@ Examples:
                         external_id=f"migration-{uuid.uuid4().hex[:8]}",
                         email=f"migrated-{uuid.uuid4().hex[:6]}@migration.example.com",
                         first_name="Migrated",
-                        last_name=f"User-{i+1}",
+                        last_name=f"User-{i + 1}",
                     )
                 )
                 success += 1
             except Exception as e:
                 errors += 1
                 if errors <= 5:
-                    print(f"  [ERROR] Record {i+1}: {e}")
+                    print(f"  [ERROR] Record {i + 1}: {e}")
                 elif errors == 6:
                     print("  [ERROR] Suppressing further error messages...")
 
@@ -106,22 +107,22 @@ Examples:
                 elapsed = time.monotonic() - start
                 rate = (i + 1) / elapsed
                 print(
-                    f"  [{time.strftime('%H:%M:%S')}] Migrated {i+1:,}/{args.count:,} "
+                    f"  [{time.strftime('%H:%M:%S')}] Migrated {i + 1:,}/{args.count:,} "
                     f"({rate:.1f} rec/sec, {errors} errors)"
                 )
 
     elapsed = time.monotonic() - start
     rate = success / elapsed if elapsed > 0 else 0
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("  Migration Complete")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"  Total time:   {elapsed:.1f}s")
     print(f"  Succeeded:    {success:,}")
     print(f"  Errors:       {errors:,}")
     print(f"  Rate:         {rate:.1f} records/sec")
     print(f"  Priority:     {args.priority.upper()} ({int(priority)})")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print("\n  Check Observatory at http://localhost:9000 to see events")
     print(f"  in the {'backfill lane' if priority < 0 else 'primary lane'}.\n")
 

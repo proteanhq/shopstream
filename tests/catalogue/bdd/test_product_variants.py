@@ -1,7 +1,8 @@
 """BDD tests for product variant management."""
 
-from catalogue.product.product import Price, Weight
 from pytest_bdd import parsers, scenarios, then, when
+
+from catalogue.product.product import Price, Weight
 
 scenarios("features/product_variants.feature")
 

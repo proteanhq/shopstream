@@ -1,7 +1,8 @@
 """BDD tests for order lifecycle."""
 
-from ordering.order.payment import RecordPaymentFailure
 from pytest_bdd import parsers, scenarios, when
+
+from ordering.order.payment import RecordPaymentFailure
 
 scenarios("features/order_lifecycle.feature")
 

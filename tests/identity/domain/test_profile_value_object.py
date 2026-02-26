@@ -1,10 +1,11 @@
 import datetime
 
 import pytest
-from identity.customer.customer import Profile
-from identity.shared.phone import PhoneNumber
 from protean.exceptions import ValidationError
 from protean.utils import DomainObjects
+
+from identity.customer.customer import Profile
+from identity.shared.phone import PhoneNumber
 
 
 def test_profile_element_type():

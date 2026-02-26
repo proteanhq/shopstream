@@ -1,6 +1,7 @@
 """Integration tests for Reviews projections — verify projectors maintain read models."""
 
 from protean import current_domain
+
 from reviews.projections.customer_reviews import CustomerReviews
 from reviews.projections.moderation_queue import ModerationQueue
 from reviews.projections.product_rating import ProductRating

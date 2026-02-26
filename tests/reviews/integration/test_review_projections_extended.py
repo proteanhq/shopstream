@@ -1,6 +1,7 @@
 """Extended projection tests covering edge cases and full lifecycle paths."""
 
 from protean import current_domain
+
 from reviews.projections.customer_reviews import CustomerReviews
 from reviews.projections.moderation_queue import ModerationQueue
 from reviews.projections.product_reviews import ProductReviews

@@ -6,7 +6,6 @@ Protean commands (internal domain concepts).
 
 from fastapi import APIRouter
 from protean.utils.globals import current_domain
-from shared.api.pagination import PaginatedResponse
 
 from reviews.api.schemas import (
     AddSellerReplyRequest,
@@ -30,6 +29,7 @@ from reviews.review.reply import AddSellerReply
 from reviews.review.reporting import ReportReview
 from reviews.review.submission import SubmitReview
 from reviews.review.voting import VoteOnReview
+from shared.api.pagination import PaginatedResponse
 
 review_router = APIRouter(prefix="/reviews", tags=["reviews"])
 

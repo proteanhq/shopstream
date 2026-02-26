@@ -1,6 +1,8 @@
 """Integration tests for Inventory projections — verify projectors update read models."""
 
 import pytest
+from protean import current_domain
+
 from inventory.projections.inventory_level import InventoryLevel
 from inventory.projections.low_stock_report import LowStockReport
 from inventory.projections.product_availability import ProductAvailability
@@ -15,7 +17,6 @@ from inventory.stock.reservation import ConfirmReservation, ReleaseReservation, 
 from inventory.stock.returns import ReturnToStock
 from inventory.stock.shipping import CommitStock
 from inventory.stock.stock import AdjustmentType, InventoryItem
-from protean import current_domain
 
 
 def _initialize_stock(**overrides):

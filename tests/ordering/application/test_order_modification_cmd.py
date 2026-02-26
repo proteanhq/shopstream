@@ -1,9 +1,10 @@
 """Application tests for order modification commands."""
 
+from protean import current_domain
+
 from ordering.order.creation import CreateOrder
 from ordering.order.modification import AddItem, ApplyCoupon, RemoveItem, UpdateItemQuantity
 from ordering.order.order import Order
-from protean import current_domain
 
 
 def _create_order():

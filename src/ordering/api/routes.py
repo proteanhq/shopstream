@@ -3,7 +3,6 @@
 from fastapi import APIRouter
 from protean.utils.globals import current_domain
 from pydantic import BaseModel as PydanticBaseModel
-from shared.api.pagination import PaginatedResponse
 
 from ordering.api.schemas import (
     AddItemRequest,
@@ -55,6 +54,7 @@ from ordering.order.payment import (
     RecordPaymentSuccess,
 )
 from ordering.order.returns import ApproveReturn, RecordReturn, RequestReturn
+from shared.api.pagination import PaginatedResponse
 
 # ---------------------------------------------------------------------------
 # Cart Router

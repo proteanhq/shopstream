@@ -1,6 +1,9 @@
 """Application tests for packing commands via domain.process()."""
 
 import pytest
+from protean import current_domain
+from protean.exceptions import ValidationError
+
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.fulfillment import (
     Fulfillment,
@@ -9,8 +12,6 @@ from fulfillment.fulfillment.fulfillment import (
 )
 from fulfillment.fulfillment.packing import GenerateShippingLabel, RecordPacking
 from fulfillment.fulfillment.picking import AssignPicker, CompletePickList, RecordItemPicked
-from protean import current_domain
-from protean.exceptions import ValidationError
 
 
 def _create_and_pick(item_count=1):

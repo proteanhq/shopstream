@@ -1,8 +1,9 @@
 """Tests for Order state machine — valid transitions and invalid transition guards."""
 
 import pytest
-from ordering.order.order import Order, OrderStatus
 from protean.exceptions import ValidationError
+
+from ordering.order.order import Order, OrderStatus
 
 
 def _make_order():

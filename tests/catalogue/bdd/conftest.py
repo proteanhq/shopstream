@@ -1,6 +1,9 @@
 """Shared BDD fixtures and step definitions for the Catalogue domain."""
 
 import pytest
+from protean.exceptions import ValidationError
+from pytest_bdd import given, parsers, then
+
 from catalogue.category.category import Category
 from catalogue.category.events import (
     CategoryCreated,
@@ -24,8 +27,6 @@ from catalogue.product.product import (
     Price,
     Product,
 )
-from protean.exceptions import ValidationError
-from pytest_bdd import given, parsers, then
 
 # Map event name strings to classes for dynamic lookup
 _PRODUCT_EVENT_CLASSES = {
@@ -194,14 +195,14 @@ def product_title_is(product, title):
 @then(parsers.cfparse("a {event_type} product event is raised"))
 def product_event_raised(product, event_type):
     event_cls = _PRODUCT_EVENT_CLASSES[event_type]
-    assert any(
-        isinstance(e, event_cls) for e in product._events
-    ), f"No {event_type} event found. Events: {[type(e).__name__ for e in product._events]}"
+    assert any(isinstance(e, event_cls) for e in product._events), (
+        f"No {event_type} event found. Events: {[type(e).__name__ for e in product._events]}"
+    )
 
 
 @then(parsers.cfparse("a {event_type} category event is raised"))
 def category_event_raised(category, event_type):
     event_cls = _CATEGORY_EVENT_CLASSES[event_type]
-    assert any(
-        isinstance(e, event_cls) for e in category._events
-    ), f"No {event_type} event found. Events: {[type(e).__name__ for e in category._events]}"
+    assert any(isinstance(e, event_cls) for e in category._events), (
+        f"No {event_type} event found. Events: {[type(e).__name__ for e in category._events]}"
+    )

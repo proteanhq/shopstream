@@ -1,13 +1,14 @@
 """Tests for Notification state machine — valid transitions and invalid transition guards."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from notifications.notification.notification import (
     Notification,
     NotificationChannel,
     NotificationStatus,
     NotificationType,
 )
-from protean.exceptions import ValidationError
 
 
 def _make_notification(**overrides):

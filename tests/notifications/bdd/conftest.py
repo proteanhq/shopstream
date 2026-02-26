@@ -1,6 +1,8 @@
 """Shared BDD fixtures and step definitions for the Notifications domain."""
 
 import pytest
+from pytest_bdd import given, parsers, then
+
 from notifications.notification.events import (
     NotificationCancelled,
     NotificationCreated,
@@ -13,7 +15,6 @@ from notifications.notification.notification import (
     NotificationType,
 )
 from notifications.preference.preference import NotificationPreference
-from pytest_bdd import given, parsers, then
 
 _NOTIFICATION_EVENT_CLASSES = {
     "NotificationCreated": NotificationCreated,
@@ -114,9 +115,9 @@ def notification_status_is(notification, status):
 @then(parsers.cfparse("a {event_type} event is raised"))
 def notification_event_raised(notification, event_type):
     event_cls = _NOTIFICATION_EVENT_CLASSES[event_type]
-    assert any(
-        isinstance(e, event_cls) for e in notification._events
-    ), f"No {event_type} event found. Events: {[type(e).__name__ for e in notification._events]}"
+    assert any(isinstance(e, event_cls) for e in notification._events), (
+        f"No {event_type} event found. Events: {[type(e).__name__ for e in notification._events]}"
+    )
 
 
 # ---------------------------------------------------------------------------

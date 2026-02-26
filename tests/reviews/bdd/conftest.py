@@ -3,6 +3,7 @@
 import pytest
 from protean.exceptions import ValidationError
 from pytest_bdd import given, parsers, then
+
 from reviews.review.events import (
     HelpfulVoteRecorded,
     ReviewApproved,
@@ -103,9 +104,9 @@ def review_action_fails(error):
 @then(parsers.cfparse("a {event_type} event is raised"))
 def review_event_raised(review, event_type):
     event_cls = _REVIEW_EVENT_CLASSES[event_type]
-    assert any(
-        isinstance(e, event_cls) for e in review._events
-    ), f"No {event_type} event found. Events: {[type(e).__name__ for e in review._events]}"
+    assert any(isinstance(e, event_cls) for e in review._events), (
+        f"No {event_type} event found. Events: {[type(e).__name__ for e in review._events]}"
+    )
 
 
 @then(parsers.cfparse("the review has {count:d} images"))

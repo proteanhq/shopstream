@@ -1,9 +1,10 @@
 """Tests for Product image management."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from catalogue.product.events import ProductImageAdded, ProductImageRemoved
 from catalogue.product.product import Product
-from protean.exceptions import ValidationError
 
 
 def _make_product(**overrides):

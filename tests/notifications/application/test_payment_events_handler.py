@@ -2,12 +2,13 @@
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from notifications.notification.notification import (
     Notification,
     NotificationType,
 )
 from notifications.notification.payment_events import PaymentEventsHandler
-from protean import current_domain
 from shared.events.payments import PaymentSucceeded, RefundCompleted
 
 

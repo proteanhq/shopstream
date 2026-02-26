@@ -8,11 +8,12 @@ Covers:
 
 from datetime import UTC, datetime, timedelta
 
+from protean import current_domain
+
 from inventory.stock.expiry import ExpireStaleReservations
 from inventory.stock.initialization import InitializeStock
 from inventory.stock.reservation import ReserveStock
 from inventory.stock.stock import InventoryItem
-from protean import current_domain
 
 
 def _initialize_stock(**overrides):
@@ -115,8 +116,9 @@ class TestExpireStaleReservationsProcessFailure:
     def test_continues_after_process_raises_validation_error(self):
         from unittest.mock import MagicMock, patch
 
-        from inventory.stock.expiry import ExpireStaleReservationsHandler
         from protean.exceptions import ValidationError
+
+        from inventory.stock.expiry import ExpireStaleReservationsHandler
 
         handler = ExpireStaleReservationsHandler()
 
@@ -152,8 +154,9 @@ class TestExpireStaleReservationsProcessFailure:
     def test_continues_after_process_raises_invalid_operation_error(self):
         from unittest.mock import MagicMock, patch
 
-        from inventory.stock.expiry import ExpireStaleReservationsHandler
         from protean.exceptions import InvalidOperationError
+
+        from inventory.stock.expiry import ExpireStaleReservationsHandler
 
         handler = ExpireStaleReservationsHandler()
 

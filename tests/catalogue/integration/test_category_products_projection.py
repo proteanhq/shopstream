@@ -11,13 +11,14 @@ Covers:
 
 from datetime import UTC, datetime
 
+from protean.utils.globals import current_domain
+
 from catalogue.category.management import CreateCategory
 from catalogue.product.creation import CreateProduct
 from catalogue.product.details import UpdateProductDetails
 from catalogue.product.lifecycle import ActivateProduct, ArchiveProduct, DiscontinueProduct
 from catalogue.product.variants import AddVariant
 from catalogue.projections.category_products import CategoryProducts
-from protean.utils.globals import current_domain
 
 
 def _create_category(name="Electronics"):
@@ -171,9 +172,10 @@ class TestCategoryProductsNotFound:
     def test_on_product_created_returns_when_category_not_found(self):
         from unittest.mock import MagicMock, patch
 
+        from protean.exceptions import ObjectNotFoundError
+
         from catalogue.product.events import ProductCreated
         from catalogue.projections.category_products import CategoryProductsProjector
-        from protean.exceptions import ObjectNotFoundError
 
         projector = CategoryProductsProjector()
         event = ProductCreated(

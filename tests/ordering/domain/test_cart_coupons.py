@@ -1,9 +1,10 @@
 """Tests for cart coupon management."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from ordering.cart.cart import ShoppingCart
 from ordering.cart.events import CartCouponApplied
-from protean.exceptions import ValidationError
 
 
 def _make_cart():

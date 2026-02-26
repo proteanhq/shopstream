@@ -1,8 +1,9 @@
 """BDD tests for customer tier management."""
 
-from identity.customer.events import TierUpgraded
 from protean.exceptions import ValidationError
 from pytest_bdd import parsers, scenarios, then, when
+
+from identity.customer.events import TierUpgraded
 
 scenarios("features/customer_tier.feature")
 

@@ -1,7 +1,8 @@
 """BDD tests for stock reservation."""
 
-from inventory.stock.reservation import ReserveStock
 from pytest_bdd import scenarios, when
+
+from inventory.stock.reservation import ReserveStock
 
 scenarios("features/stock_reservation.feature")
 

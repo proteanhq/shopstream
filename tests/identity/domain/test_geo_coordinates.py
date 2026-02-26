@@ -1,7 +1,8 @@
 import pytest
-from identity.customer.customer import GeoCoordinates
 from protean.exceptions import ValidationError
 from protean.utils import DomainObjects
+
+from identity.customer.customer import GeoCoordinates
 
 
 def test_geo_coordinates_element_type():

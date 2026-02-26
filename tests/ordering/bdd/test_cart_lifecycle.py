@@ -1,8 +1,9 @@
 """BDD tests for cart lifecycle."""
 
-from ordering.cart.cart import ShoppingCart
 from protean.exceptions import ValidationError
 from pytest_bdd import parsers, scenarios, then, when
+
+from ordering.cart.cart import ShoppingCart
 
 scenarios("features/cart_lifecycle.feature")
 

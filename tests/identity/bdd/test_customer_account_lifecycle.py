@@ -1,8 +1,9 @@
 """BDD tests for customer account lifecycle (suspend, reactivate, close)."""
 
-from identity.customer.events import AccountSuspended
 from protean.exceptions import ValidationError
 from pytest_bdd import parsers, scenarios, then, when
+
+from identity.customer.events import AccountSuspended
 
 scenarios("features/customer_account_lifecycle.feature")
 

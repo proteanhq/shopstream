@@ -1,10 +1,11 @@
 """Application tests for refund request command."""
 
+from protean import current_domain
+
 from payments.payment.initiation import InitiatePayment
 from payments.payment.payment import Payment
 from payments.payment.refund import RequestRefund
 from payments.payment.webhook import ProcessPaymentWebhook
-from protean import current_domain
 
 
 def _create_succeeded_payment():

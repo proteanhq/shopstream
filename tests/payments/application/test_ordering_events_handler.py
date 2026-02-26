@@ -8,12 +8,13 @@ Covers:
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from payments.payment.initiation import InitiatePayment
 from payments.payment.ordering_events import OrderingPaymentEventHandler
 from payments.payment.payment import Payment
 from payments.payment.webhook import ProcessPaymentWebhook
 from payments.projections.payment_status import PaymentStatusView
-from protean import current_domain
 from shared.events.ordering import OrderReturned
 
 

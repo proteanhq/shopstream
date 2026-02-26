@@ -3,6 +3,9 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from protean import current_domain
+from protean.exceptions import ValidationError
+
 from notifications.notification.cancellation import CancelNotification
 from notifications.notification.notification import (
     Notification,
@@ -10,8 +13,6 @@ from notifications.notification.notification import (
     NotificationStatus,
     NotificationType,
 )
-from protean import current_domain
-from protean.exceptions import ValidationError
 
 
 def _create_pending_notification(**overrides):

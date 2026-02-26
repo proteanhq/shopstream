@@ -1,9 +1,10 @@
 """Tests for cart management — merge and abandon."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from ordering.cart.cart import CartStatus, ShoppingCart
 from ordering.cart.events import CartAbandoned, CartsMerged
-from protean.exceptions import ValidationError
 
 
 def _make_cart():

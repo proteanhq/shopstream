@@ -1,8 +1,9 @@
 """BDD tests for order creation."""
 
-from ordering.order.order import Order
 from protean.testing import given as given_
 from pytest_bdd import parsers, scenarios, then, when
+
+from ordering.order.order import Order
 
 scenarios("features/order_creation.feature")
 

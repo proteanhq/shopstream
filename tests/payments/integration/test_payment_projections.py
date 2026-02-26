@@ -1,5 +1,7 @@
 """Integration tests for payment projections."""
 
+from protean import current_domain
+
 from payments.payment.initiation import InitiatePayment
 from payments.payment.payment import Payment
 from payments.payment.refund import ProcessRefundWebhook, RequestRefund
@@ -8,7 +10,6 @@ from payments.payment.webhook import ProcessPaymentWebhook
 from payments.projections.daily_revenue import DailyRevenue
 from payments.projections.failed_payments import FailedPayment
 from payments.projections.payment_status import PaymentStatusView
-from protean import current_domain
 
 _idem_counter = 0
 

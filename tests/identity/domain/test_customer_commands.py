@@ -1,6 +1,9 @@
 """Tests for Customer command DTOs."""
 
 import pytest
+from protean.exceptions import ValidationError
+from protean.utils import DomainObjects
+
 from identity.customer.account import CloseAccount, ReactivateAccount, SuspendAccount
 from identity.customer.addresses import (
     AddAddress,
@@ -11,8 +14,6 @@ from identity.customer.addresses import (
 from identity.customer.profile import UpdateProfile
 from identity.customer.registration import RegisterCustomer
 from identity.customer.tier import UpgradeTier
-from protean.exceptions import ValidationError
-from protean.utils import DomainObjects
 
 
 class TestRegisterCustomer:

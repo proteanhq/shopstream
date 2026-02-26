@@ -1,9 +1,10 @@
 """Tests for Product lifecycle state machine."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from catalogue.product.events import ProductActivated, ProductArchived, ProductDiscontinued
 from catalogue.product.product import Price, Product
-from protean.exceptions import ValidationError
 
 
 def _make_product(**overrides):

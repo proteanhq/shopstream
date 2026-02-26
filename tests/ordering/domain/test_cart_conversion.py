@@ -1,9 +1,10 @@
 """Tests for cart-to-order conversion."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from ordering.cart.cart import CartStatus, ShoppingCart
 from ordering.cart.events import CartConverted
-from protean.exceptions import ValidationError
 
 
 def _make_cart_with_items():

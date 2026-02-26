@@ -1,10 +1,11 @@
 """Integration tests for Cart projections — verify CartView projector."""
 
+from protean import current_domain
+
 from ordering.cart.coupons import ApplyCouponToCart
 from ordering.cart.items import AddToCart, RemoveFromCart
 from ordering.cart.management import AbandonCart, CreateCart
 from ordering.projections.cart_view import CartView
-from protean import current_domain
 
 
 def _create_cart(customer_id="cust-cv-001"):

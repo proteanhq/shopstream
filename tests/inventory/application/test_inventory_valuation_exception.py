@@ -7,6 +7,8 @@ fails and returns (repo, None), causing the handler to return early.
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
+from protean.exceptions import ObjectNotFoundError
+
 from inventory.projections.inventory_valuation import (
     InventoryValuationProjector,
 )
@@ -17,7 +19,6 @@ from inventory.stock.events import (
     StockReceived,
     StockReturned,
 )
-from protean.exceptions import ObjectNotFoundError
 
 
 class TestInventoryValuationNotFound:

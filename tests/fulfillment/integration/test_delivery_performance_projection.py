@@ -7,6 +7,8 @@ Covers:
 - DeliveryException updates exception_count
 """
 
+from protean import current_domain
+
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.delivery import RecordDeliveryConfirmation, RecordDeliveryException
 from fulfillment.fulfillment.fulfillment import Fulfillment
@@ -15,7 +17,6 @@ from fulfillment.fulfillment.picking import AssignPicker, CompletePickList, Reco
 from fulfillment.fulfillment.shipping import RecordHandoff
 from fulfillment.fulfillment.tracking import UpdateTrackingEvent
 from fulfillment.projections.delivery_performance import DeliveryPerformanceView
-from protean import current_domain
 
 
 def _single_item():

@@ -1,6 +1,8 @@
 """Tests for Customer address management behavior methods."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from identity.customer.customer import AddressLabel, Customer
 from identity.customer.events import (
     AddressAdded,
@@ -8,7 +10,6 @@ from identity.customer.events import (
     AddressUpdated,
     DefaultAddressChanged,
 )
-from protean.exceptions import ValidationError
 
 
 def _make_customer():

@@ -2,6 +2,8 @@
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from notifications.notification.inventory_events import InventoryEventsHandler
 from notifications.notification.notification import (
     Notification,
@@ -9,7 +11,6 @@ from notifications.notification.notification import (
     NotificationType,
     RecipientType,
 )
-from protean import current_domain
 from shared.events.inventory import LowStockDetected
 
 

@@ -1,8 +1,9 @@
 """Application tests for stock initialization via domain.process()."""
 
+from protean import current_domain
+
 from inventory.stock.initialization import InitializeStock
 from inventory.stock.stock import InventoryItem
-from protean import current_domain
 
 
 def _initialize_stock(**overrides):

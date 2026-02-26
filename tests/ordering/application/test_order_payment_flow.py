@@ -1,5 +1,7 @@
 """Application tests for the payment flow including failure and retry."""
 
+from protean import current_domain
+
 from ordering.order.confirmation import ConfirmOrder
 from ordering.order.creation import CreateOrder
 from ordering.order.order import Order, OrderStatus
@@ -8,7 +10,6 @@ from ordering.order.payment import (
     RecordPaymentPending,
     RecordPaymentSuccess,
 )
-from protean import current_domain
 
 
 def _create_confirmed_order():

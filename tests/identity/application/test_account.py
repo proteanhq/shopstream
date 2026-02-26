@@ -1,11 +1,12 @@
 """Application tests for account lifecycle via domain.process()."""
 
 import pytest
+from protean import current_domain
+from protean.exceptions import ValidationError
+
 from identity.customer.account import CloseAccount, ReactivateAccount, SuspendAccount
 from identity.customer.customer import Customer, CustomerStatus
 from identity.customer.registration import RegisterCustomer
-from protean import current_domain
-from protean.exceptions import ValidationError
 
 
 class TestAccountLifecycleFlow:

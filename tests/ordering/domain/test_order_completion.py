@@ -1,9 +1,10 @@
 """Tests for order completion."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from ordering.order.events import OrderCompleted
 from ordering.order.order import Order, OrderStatus
-from protean.exceptions import ValidationError
 
 
 def _make_delivered_order():

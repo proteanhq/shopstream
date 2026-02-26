@@ -9,6 +9,8 @@ we test the dispatcher behavior through the observable effects of creating notif
 
 from datetime import UTC, datetime, timedelta
 
+from protean import current_domain
+
 from notifications.channel import get_channel, reset_channels
 from notifications.notification.notification import (
     Notification,
@@ -16,7 +18,6 @@ from notifications.notification.notification import (
     NotificationStatus,
     NotificationType,
 )
-from protean import current_domain
 
 
 class TestNotificationAutoDispatch:

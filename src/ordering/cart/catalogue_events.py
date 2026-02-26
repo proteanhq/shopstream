@@ -17,11 +17,11 @@ as external events via ordering.register_external_event().
 import structlog
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
-from shared.events.catalogue import ProductDiscontinued
 
 from ordering.cart.cart import ShoppingCart
 from ordering.domain import ordering
 from ordering.projections.cart_view import CartView
+from shared.events.catalogue import ProductDiscontinued
 
 logger = structlog.get_logger(__name__)
 

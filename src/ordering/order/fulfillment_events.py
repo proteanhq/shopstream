@@ -10,11 +10,11 @@ as external events via ordering.register_external_event().
 import structlog
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
-from shared.events.fulfillment import DeliveryConfirmed, DeliveryException, ShipmentHandedOff
 
 from ordering.domain import ordering
 from ordering.order.fulfillment import RecordDelivery, RecordShipment
 from ordering.order.order import Order
+from shared.events.fulfillment import DeliveryConfirmed, DeliveryException, ShipmentHandedOff
 
 logger = structlog.get_logger(__name__)
 

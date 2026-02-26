@@ -1,8 +1,9 @@
 """Application tests for invoice generation command."""
 
+from protean import current_domain
+
 from payments.invoice.generation import GenerateInvoice
 from payments.invoice.invoice import Invoice, InvoiceStatus
-from protean import current_domain
 
 
 def _generate_invoice(**overrides):

@@ -5,6 +5,8 @@ Tests both the welcome notification handler and the preference auto-creation han
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from notifications.notification.identity_events import IdentityEventsHandler
 from notifications.notification.notification import (
     Notification,
@@ -13,7 +15,6 @@ from notifications.notification.notification import (
 )
 from notifications.preference.identity_events import PreferenceIdentityEventsHandler
 from notifications.preference.preference import NotificationPreference
-from protean import current_domain
 from shared.events.identity import CustomerRegistered
 
 

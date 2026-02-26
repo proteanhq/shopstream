@@ -1,10 +1,11 @@
 """Preference management commands + handlers — update channels and quiet hours."""
 
-from notifications.domain import notifications
-from notifications.preference.preference import NotificationPreference
 from protean.fields import Boolean, Identifier, String
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
+
+from notifications.domain import notifications
+from notifications.preference.preference import NotificationPreference
 
 
 @notifications.command(part_of="NotificationPreference")

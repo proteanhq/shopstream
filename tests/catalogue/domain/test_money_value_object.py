@@ -1,9 +1,10 @@
 """Tests for the Money value object."""
 
 import pytest
-from catalogue.shared.money import VALID_CURRENCIES, Money
 from protean.exceptions import ValidationError
 from protean.utils.reflection import declared_fields
+
+from catalogue.shared.money import VALID_CURRENCIES, Money
 
 
 class TestMoneyConstruction:

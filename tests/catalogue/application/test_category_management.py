@@ -1,6 +1,9 @@
 """Application tests for category management handlers."""
 
 import pytest
+from protean.exceptions import ValidationError
+from protean.utils.globals import current_domain
+
 from catalogue.category.category import Category
 from catalogue.category.management import (
     CreateCategory,
@@ -8,8 +11,6 @@ from catalogue.category.management import (
     ReorderCategory,
     UpdateCategory,
 )
-from protean.exceptions import ValidationError
-from protean.utils.globals import current_domain
 
 
 def _create_category(**overrides):

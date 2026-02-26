@@ -1,6 +1,8 @@
 """Tests for Invoice aggregate creation and lifecycle."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from payments.invoice.events import (
     InvoiceGenerated,
     InvoiceIssued,
@@ -8,7 +10,6 @@ from payments.invoice.events import (
     InvoiceVoided,
 )
 from payments.invoice.invoice import Invoice, InvoiceStatus
-from protean.exceptions import ValidationError
 
 
 def _make_invoice(**overrides):

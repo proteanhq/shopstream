@@ -7,9 +7,10 @@ Covers:
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from inventory.projections.inventory_level import InventoryLevel
 from inventory.stock.catalogue_events import CatalogueInventoryEventHandler
-from protean import current_domain
 from shared.events.catalogue import ProductCreated, VariantAdded
 
 

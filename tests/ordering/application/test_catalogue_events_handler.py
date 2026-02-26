@@ -7,10 +7,11 @@ Covers:
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from ordering.cart.catalogue_events import CatalogueCartEventHandler
 from ordering.cart.items import AddToCart
 from ordering.cart.management import CreateCart
-from protean import current_domain
 from shared.events.catalogue import ProductDiscontinued
 
 

@@ -8,12 +8,13 @@ Covers:
 
 from datetime import UTC, datetime, timedelta
 
+from protean import current_domain
+
 from ordering.cart.abandonment import DetectAbandonedCarts
 from ordering.cart.cart import ShoppingCart
 from ordering.cart.items import AddToCart
 from ordering.cart.management import CreateCart
 from ordering.projections.cart_view import CartView
-from protean import current_domain
 
 
 def _create_cart_with_items():
@@ -129,8 +130,9 @@ class TestDetectAbandonedCartsProcessFailure:
     def test_continues_after_process_raises_validation_error(self):
         from unittest.mock import MagicMock, patch
 
-        from ordering.cart.abandonment import DetectAbandonedCartsHandler
         from protean.exceptions import ValidationError
+
+        from ordering.cart.abandonment import DetectAbandonedCartsHandler
 
         handler = DetectAbandonedCartsHandler()
 
@@ -163,8 +165,9 @@ class TestDetectAbandonedCartsProcessFailure:
     def test_continues_after_process_raises_invalid_operation_error(self):
         from unittest.mock import MagicMock, patch
 
-        from ordering.cart.abandonment import DetectAbandonedCartsHandler
         from protean.exceptions import InvalidOperationError
+
+        from ordering.cart.abandonment import DetectAbandonedCartsHandler
 
         handler = DetectAbandonedCartsHandler()
 

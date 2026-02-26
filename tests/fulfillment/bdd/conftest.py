@@ -1,6 +1,9 @@
 """Shared BDD fixtures and step definitions for the Fulfillment domain."""
 
 import pytest
+from protean.exceptions import ValidationError
+from pytest_bdd import given, parsers, then
+
 from fulfillment.fulfillment.events import (
     DeliveryConfirmed,
     DeliveryException,
@@ -15,8 +18,6 @@ from fulfillment.fulfillment.events import (
     TrackingEventReceived,
 )
 from fulfillment.fulfillment.fulfillment import Fulfillment
-from protean.exceptions import ValidationError
-from pytest_bdd import given, parsers, then
 
 _FULFILLMENT_EVENT_CLASSES = {
     "FulfillmentCreated": FulfillmentCreated,
@@ -217,9 +218,9 @@ def fulfillment_action_fails(error):
 @then(parsers.cfparse("a {event_type} event is raised"))
 def fulfillment_event_raised(ff, event_type):
     event_cls = _FULFILLMENT_EVENT_CLASSES[event_type]
-    assert any(
-        isinstance(e, event_cls) for e in ff._events
-    ), f"No {event_type} event found. Events: {[type(e).__name__ for e in ff._events]}"
+    assert any(isinstance(e, event_cls) for e in ff._events), (
+        f"No {event_type} event found. Events: {[type(e).__name__ for e in ff._events]}"
+    )
 
 
 @then(parsers.cfparse("the fulfillment has {count:d} tracking events"))

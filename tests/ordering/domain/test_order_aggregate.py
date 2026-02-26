@@ -1,9 +1,10 @@
 """Tests for Order aggregate creation and structure."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from ordering.order.events import OrderCreated
 from ordering.order.order import Order, OrderPricing, OrderStatus, ShippingAddress
-from protean.exceptions import ValidationError
 
 
 def _make_order(**overrides):

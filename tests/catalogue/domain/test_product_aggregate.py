@@ -1,8 +1,9 @@
 """Tests for the Product aggregate root."""
 
+from protean.utils.reflection import declared_fields
+
 from catalogue.product.product import SEO, Product, ProductStatus, ProductVisibility
 from catalogue.shared.sku import SKU
-from protean.utils.reflection import declared_fields
 
 
 class TestProductConstruction:

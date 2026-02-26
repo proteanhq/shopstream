@@ -1,7 +1,8 @@
 """Tests for the Image entity."""
 
-from catalogue.product.product import Image
 from protean.utils.reflection import declared_fields
+
+from catalogue.product.product import Image
 
 
 class TestImageConstruction:

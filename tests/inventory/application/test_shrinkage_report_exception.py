@@ -7,12 +7,13 @@ repo.get() fails and a new ShrinkageReport record is created instead.
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
+from protean.exceptions import ObjectNotFoundError
+
 from inventory.projections.shrinkage_report import (
     ShrinkageReportProjector,
     _get_or_create,
 )
 from inventory.stock.events import DamagedStockWrittenOff, StockAdjusted, StockMarkedDamaged
-from protean.exceptions import ObjectNotFoundError
 
 
 class TestShrinkageReportGetOrCreate:

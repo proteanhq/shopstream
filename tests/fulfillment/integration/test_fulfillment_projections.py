@@ -1,5 +1,7 @@
 """Integration tests for fulfillment projections."""
 
+from protean import current_domain
+
 from fulfillment.fulfillment.cancellation import CancelFulfillment
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.delivery import RecordDeliveryConfirmation, RecordDeliveryException
@@ -11,7 +13,6 @@ from fulfillment.fulfillment.tracking import UpdateTrackingEvent
 from fulfillment.projections.fulfillment_status import FulfillmentStatusView
 from fulfillment.projections.shipment_tracking import ShipmentTrackingView
 from fulfillment.projections.warehouse_queue import WarehouseQueueView
-from protean import current_domain
 
 
 def _single_item():

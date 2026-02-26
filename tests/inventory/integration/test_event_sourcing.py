@@ -2,6 +2,8 @@
 event replay, and aggregate reconstruction.
 """
 
+from protean import current_domain
+
 from inventory.stock.adjustment import AdjustStock
 from inventory.stock.damage import MarkDamaged
 from inventory.stock.initialization import InitializeStock
@@ -10,7 +12,6 @@ from inventory.stock.reservation import ConfirmReservation, ReserveStock
 from inventory.stock.returns import ReturnToStock
 from inventory.stock.shipping import CommitStock
 from inventory.stock.stock import AdjustmentType, InventoryItem
-from protean import current_domain
 
 
 def _initialize_stock(**overrides):

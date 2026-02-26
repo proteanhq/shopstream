@@ -3,6 +3,7 @@
 import pytest
 from protean import current_domain
 from protean.exceptions import ValidationError
+
 from reviews.review.editing import EditReview
 from reviews.review.review import Review, ReviewStatus
 from reviews.review.submission import SubmitReview

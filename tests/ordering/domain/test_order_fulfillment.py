@@ -1,9 +1,10 @@
 """Tests for order fulfillment — processing, shipment, delivery."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from ordering.order.events import OrderDelivered, OrderPartiallyShipped, OrderProcessing, OrderShipped
 from ordering.order.order import ItemStatus, Order, OrderStatus
-from protean.exceptions import ValidationError
 
 
 def _make_paid_order():

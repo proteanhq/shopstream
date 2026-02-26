@@ -1,10 +1,11 @@
 """Integration tests for Customer persistence - full aggregate graph."""
 
+from protean import current_domain
+
 from identity.customer.addresses import AddAddress
 from identity.customer.customer import Customer
 from identity.customer.profile import UpdateProfile
 from identity.customer.registration import RegisterCustomer
-from protean import current_domain
 
 
 class TestCustomerPersistence:

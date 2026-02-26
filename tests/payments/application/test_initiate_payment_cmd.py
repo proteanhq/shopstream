@@ -1,8 +1,9 @@
 """Application tests for payment initiation via domain.process()."""
 
+from protean import current_domain
+
 from payments.payment.initiation import InitiatePayment
 from payments.payment.payment import Payment, PaymentStatus
-from protean import current_domain
 
 
 def _initiate_payment(**overrides):

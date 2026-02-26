@@ -3,9 +3,10 @@
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from protean import current_domain
+
 from inventory.api.routes import warehouse_router
 from inventory.warehouse.warehouse import Warehouse
-from protean import current_domain
 
 
 @pytest.fixture()

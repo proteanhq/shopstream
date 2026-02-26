@@ -3,6 +3,9 @@
 from datetime import date
 
 import pytest
+from protean.exceptions import ValidationError
+from pytest_bdd import given, parsers, then
+
 from identity.customer.customer import Customer, CustomerStatus, CustomerTier
 from identity.customer.events import (
     AccountClosed,
@@ -16,8 +19,6 @@ from identity.customer.events import (
     ProfileUpdated,
     TierUpgraded,
 )
-from protean.exceptions import ValidationError
-from pytest_bdd import given, parsers, then
 
 # Map event name strings to classes for dynamic lookup
 _EVENT_CLASSES = {
@@ -191,14 +192,14 @@ def no_last_login(customer):
 @then(parsers.cfparse("a {event_type} event is raised"))
 def generic_event_raised(customer, event_type):
     event_cls = _EVENT_CLASSES[event_type]
-    assert any(
-        isinstance(e, event_cls) for e in customer._events
-    ), f"No {event_type} event found. Events: {[type(e).__name__ for e in customer._events]}"
+    assert any(isinstance(e, event_cls) for e in customer._events), (
+        f"No {event_type} event found. Events: {[type(e).__name__ for e in customer._events]}"
+    )
 
 
 @then(parsers.cfparse("an {event_type} event is raised"))
 def generic_event_raised_an(customer, event_type):
     event_cls = _EVENT_CLASSES[event_type]
-    assert any(
-        isinstance(e, event_cls) for e in customer._events
-    ), f"No {event_type} event found. Events: {[type(e).__name__ for e in customer._events]}"
+    assert any(isinstance(e, event_cls) for e in customer._events), (
+        f"No {event_type} event found. Events: {[type(e).__name__ for e in customer._events]}"
+    )

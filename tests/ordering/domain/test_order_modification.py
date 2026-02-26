@@ -1,9 +1,10 @@
 """Tests for order modification — add/remove items, update quantities, apply coupons."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from ordering.order.events import CouponApplied, ItemAdded, ItemQuantityUpdated, ItemRemoved
 from ordering.order.order import Order
-from protean.exceptions import ValidationError
 
 
 def _make_order():

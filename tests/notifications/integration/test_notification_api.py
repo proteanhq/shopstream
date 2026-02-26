@@ -3,6 +3,8 @@
 from datetime import UTC, datetime, timedelta
 
 from fastapi.testclient import TestClient
+from protean import current_domain
+
 from notifications.channel import get_channel, reset_channels
 from notifications.notification.notification import (
     Notification,
@@ -11,12 +13,12 @@ from notifications.notification.notification import (
     NotificationType,
 )
 from notifications.preference.preference import NotificationPreference
-from protean import current_domain
 
 
 def _get_test_client():
     """Build a minimal FastAPI test client with notifications routes."""
     from fastapi import FastAPI
+
     from notifications.api.routes import router
 
     app = FastAPI()

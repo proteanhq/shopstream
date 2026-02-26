@@ -1,6 +1,9 @@
 """Shared BDD fixtures and step definitions for the Payments domain."""
 
 import pytest
+from protean.exceptions import ValidationError
+from pytest_bdd import given, parsers, then, when
+
 from payments.invoice.invoice import Invoice
 from payments.payment.events import (
     PaymentFailed,
@@ -11,8 +14,6 @@ from payments.payment.events import (
     RefundRequested,
 )
 from payments.payment.payment import MAX_PAYMENT_ATTEMPTS, Payment
-from protean.exceptions import ValidationError
-from pytest_bdd import given, parsers, then, when
 
 # Map event name strings to classes for dynamic lookup
 _PAYMENT_EVENT_CLASSES = {
@@ -162,9 +163,9 @@ def _retry_fails(payment):
 @then(parsers.cfparse("a {event_type} payment event is raised"))
 def _payment_event_raised(payment, event_type):
     event_cls = _PAYMENT_EVENT_CLASSES[event_type]
-    assert any(
-        isinstance(e, event_cls) for e in payment._events
-    ), f"No {event_type} event found. Events: {[type(e).__name__ for e in payment._events]}"
+    assert any(isinstance(e, event_cls) for e in payment._events), (
+        f"No {event_type} event found. Events: {[type(e).__name__ for e in payment._events]}"
+    )
 
 
 # ---------------------------------------------------------------------------

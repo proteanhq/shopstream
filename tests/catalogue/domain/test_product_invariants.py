@@ -1,8 +1,9 @@
 """Tests for Product aggregate invariants."""
 
 import pytest
-from catalogue.product.product import Price, Product
 from protean.exceptions import ValidationError
+
+from catalogue.product.product import Price, Product
 
 
 def _make_product(**overrides):

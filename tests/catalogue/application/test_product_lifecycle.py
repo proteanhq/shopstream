@@ -1,12 +1,13 @@
 """Application tests for product lifecycle handlers."""
 
 import pytest
+from protean.exceptions import ValidationError
+from protean.utils.globals import current_domain
+
 from catalogue.product.creation import CreateProduct
 from catalogue.product.lifecycle import ActivateProduct, ArchiveProduct, DiscontinueProduct
 from catalogue.product.product import Product
 from catalogue.product.variants import AddVariant
-from protean.exceptions import ValidationError
-from protean.utils.globals import current_domain
 
 
 def _create_product(**overrides):

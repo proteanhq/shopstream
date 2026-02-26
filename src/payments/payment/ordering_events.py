@@ -10,11 +10,11 @@ as external events via payments.register_external_event().
 import structlog
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
-from shared.events.ordering import OrderReturned
 
 from payments.domain import payments
 from payments.payment.payment import Payment
 from payments.projections.payment_status import PaymentStatusView
+from shared.events.ordering import OrderReturned
 
 logger = structlog.get_logger(__name__)
 

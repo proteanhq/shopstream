@@ -1,9 +1,10 @@
 """Application tests for variant management handlers."""
 
+from protean.utils.globals import current_domain
+
 from catalogue.product.creation import CreateProduct
 from catalogue.product.product import Product
 from catalogue.product.variants import AddVariant, SetTierPrice, UpdateVariantPrice
-from protean.utils.globals import current_domain
 
 
 def _create_product(**overrides):

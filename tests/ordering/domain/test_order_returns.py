@@ -1,9 +1,10 @@
 """Tests for order return lifecycle."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from ordering.order.events import OrderReturned, ReturnApproved, ReturnRequested
 from ordering.order.order import ItemStatus, Order, OrderStatus
-from protean.exceptions import ValidationError
 
 
 def _make_delivered_order():

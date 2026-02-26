@@ -3,6 +3,10 @@
 from datetime import UTC, datetime
 
 import pytest
+from protean.exceptions import ValidationError
+from protean.testing import given as given_
+from pytest_bdd import given, parsers, then
+
 from ordering.cart.cart import ShoppingCart
 from ordering.cart.events import (
     CartAbandoned,
@@ -42,9 +46,6 @@ from ordering.order.fulfillment import MarkProcessing, RecordDelivery, RecordShi
 from ordering.order.order import Order
 from ordering.order.payment import RecordPaymentPending
 from ordering.order.returns import ApproveReturn, RecordReturn
-from protean.exceptions import ValidationError
-from protean.testing import given as given_
-from pytest_bdd import given, parsers, then
 
 # Map event name strings to classes for dynamic lookup in Then steps
 _ORDER_EVENT_CLASSES = {
@@ -486,6 +487,6 @@ def cart_action_fails(error):
 @then(parsers.cfparse("a {event_type} cart event is raised"))
 def cart_event_raised(cart, event_type):
     event_cls = _CART_EVENT_CLASSES[event_type]
-    assert any(
-        isinstance(e, event_cls) for e in cart._events
-    ), f"No {event_type} event found. Events: {[type(e).__name__ for e in cart._events]}"
+    assert any(isinstance(e, event_cls) for e in cart._events), (
+        f"No {event_type} event found. Events: {[type(e).__name__ for e in cart._events]}"
+    )

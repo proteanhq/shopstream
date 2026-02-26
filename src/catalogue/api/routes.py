@@ -2,7 +2,6 @@
 
 from fastapi import APIRouter
 from protean.utils.globals import current_domain
-from shared.api.pagination import PaginatedResponse
 
 from catalogue.api.schemas import (
     AddProductImageRequest,
@@ -33,6 +32,7 @@ from catalogue.product.details import UpdateProductDetails
 from catalogue.product.images import AddProductImage, RemoveProductImage
 from catalogue.product.lifecycle import ActivateProduct, ArchiveProduct, DiscontinueProduct
 from catalogue.product.variants import AddVariant, SetTierPrice, UpdateVariantPrice
+from shared.api.pagination import PaginatedResponse
 
 product_router = APIRouter(prefix="/products", tags=["products"])
 category_router = APIRouter(prefix="/categories", tags=["categories"])

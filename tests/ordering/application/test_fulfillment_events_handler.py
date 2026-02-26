@@ -7,13 +7,14 @@ Covers:
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from ordering.order.confirmation import ConfirmOrder
 from ordering.order.creation import CreateOrder
 from ordering.order.fulfillment import MarkProcessing, RecordShipment
 from ordering.order.fulfillment_events import FulfillmentOrderEventHandler
 from ordering.order.order import Order, OrderStatus
 from ordering.order.payment import RecordPaymentPending, RecordPaymentSuccess
-from protean import current_domain
 from shared.events.fulfillment import DeliveryConfirmed, ShipmentHandedOff
 
 

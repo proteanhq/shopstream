@@ -1,7 +1,8 @@
 """BDD tests for stock returns."""
 
-from inventory.stock.returns import ReturnToStock
 from pytest_bdd import scenarios, when
+
+from inventory.stock.returns import ReturnToStock
 
 scenarios("features/stock_returns.feature")
 

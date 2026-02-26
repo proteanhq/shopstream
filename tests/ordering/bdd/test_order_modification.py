@@ -1,7 +1,8 @@
 """BDD tests for order modification."""
 
-from ordering.order.modification import AddItem, ApplyCoupon, RemoveItem, UpdateItemQuantity
 from pytest_bdd import parsers, scenarios, when
+
+from ordering.order.modification import AddItem, ApplyCoupon, RemoveItem, UpdateItemQuantity
 
 scenarios("features/order_modification.feature")
 

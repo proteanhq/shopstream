@@ -1,9 +1,10 @@
 """Tests for payment refund flows."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from payments.payment.events import RefundCompleted, RefundRequested
 from payments.payment.payment import Payment, PaymentStatus, RefundStatus
-from protean.exceptions import ValidationError
 
 
 def _make_succeeded_payment():

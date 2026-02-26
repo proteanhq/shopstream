@@ -1,8 +1,9 @@
 """BDD tests for stock adjustment."""
 
+from pytest_bdd import parsers, scenarios, when
+
 from inventory.stock.adjustment import AdjustStock
 from inventory.stock.stock import AdjustmentType
-from pytest_bdd import parsers, scenarios, when
 
 scenarios("features/stock_adjustment.feature")
 

@@ -4,10 +4,11 @@ Listens for ReviewApproved (review published) and ReviewRejected (review rejecte
 """
 
 import structlog
+from protean.utils.mixins import handle
+
 from notifications.domain import notifications
 from notifications.notification.helpers import create_notifications_for_customer
 from notifications.notification.notification import Notification, NotificationType
-from protean.utils.mixins import handle
 from shared.events.reviews import ReviewApproved, ReviewRejected
 
 logger = structlog.get_logger(__name__)

@@ -15,6 +15,9 @@ State Machine (6 states):
 from datetime import UTC, datetime
 from enum import Enum
 
+from protean.exceptions import ValidationError
+from protean.fields import DateTime, Dict, Identifier, Integer, String, Text
+
 from notifications.domain import notifications
 from notifications.notification.events import (
     NotificationBounced,
@@ -25,8 +28,6 @@ from notifications.notification.events import (
     NotificationRetried,
     NotificationSent,
 )
-from protean.exceptions import ValidationError
-from protean.fields import DateTime, Dict, Identifier, Integer, String, Text
 
 
 # ---------------------------------------------------------------------------

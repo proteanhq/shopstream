@@ -1,7 +1,8 @@
 """BDD tests for stock receiving."""
 
-from inventory.stock.receiving import ReceiveStock
 from pytest_bdd import scenarios, when
+
+from inventory.stock.receiving import ReceiveStock
 
 scenarios("features/stock_receiving.feature")
 

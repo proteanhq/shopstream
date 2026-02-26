@@ -12,11 +12,11 @@ import structlog
 from protean.exceptions import ObjectNotFoundError
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
-from shared.events.identity import AccountReactivated, AccountSuspended
 
 from ordering.domain import ordering
 from ordering.order.order import Order
 from ordering.projections.suspended_accounts import SuspendedAccount
+from shared.events.identity import AccountReactivated, AccountSuspended
 
 logger = structlog.get_logger(__name__)
 

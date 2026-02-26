@@ -2,12 +2,13 @@
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from notifications.notification.notification import (
     Notification,
     NotificationType,
 )
 from notifications.notification.ordering_events import OrderingEventsHandler
-from protean import current_domain
 from shared.events.ordering import OrderCancelled, OrderCreated, OrderDelivered
 
 

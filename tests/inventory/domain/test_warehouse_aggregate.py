@@ -1,6 +1,8 @@
 """Tests for Warehouse aggregate."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from inventory.warehouse.events import (
     WarehouseCreated,
     WarehouseDeactivated,
@@ -9,7 +11,6 @@ from inventory.warehouse.events import (
     ZoneRemoved,
 )
 from inventory.warehouse.warehouse import Warehouse, WarehouseAddress, ZoneType
-from protean.exceptions import ValidationError
 
 
 def _make_warehouse(**overrides):

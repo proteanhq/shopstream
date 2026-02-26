@@ -8,13 +8,14 @@ Covers:
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.fulfillment import Fulfillment, FulfillmentStatus
 from fulfillment.fulfillment.order_events import OrderEventHandler
 from fulfillment.fulfillment.packing import GenerateShippingLabel, RecordPacking
 from fulfillment.fulfillment.picking import AssignPicker, CompletePickList, RecordItemPicked
 from fulfillment.fulfillment.shipping import RecordHandoff
-from protean import current_domain
 from shared.events.ordering import OrderCancelled
 
 
