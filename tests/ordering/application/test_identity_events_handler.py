@@ -152,5 +152,5 @@ class TestAccountReactivatedMockNotFound:
                     reactivated_at=datetime.now(UTC),
                 )
             )
-            # _dao.delete should NOT have been called since get raised
-            mock_repo._dao.delete.assert_not_called()
+            # delete won't be reached since get() raised ObjectNotFoundError
+            mock_repo.query.filter.assert_not_called()

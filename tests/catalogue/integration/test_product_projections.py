@@ -238,7 +238,7 @@ class TestPriceHistoryProjection:
 
         # Check price history has an entry
         repo = current_domain.repository_for(PriceHistory)
-        results = repo._dao.query.all()
+        results = repo.query.all()
         matching = [r for r in results.items if r.product_id == product_id]
         assert len(matching) == 1
         assert matching[0].previous_price == 29.99

@@ -149,7 +149,7 @@ class TestOrderTimelineProjection:
         current_domain.process(ConfirmOrder(order_id=order_id), asynchronous=False)
 
         repo = current_domain.repository_for(OrderTimeline)
-        entries = repo._dao.query.filter(order_id=order_id).all().items
+        entries = repo.query.filter(order_id=order_id).all().items
 
         assert len(entries) >= 2
         event_types = [e.event_type for e in entries]
@@ -161,7 +161,7 @@ class TestOrderTimelineProjection:
         _advance_to_paid(order_id)
 
         repo = current_domain.repository_for(OrderTimeline)
-        entries = repo._dao.query.filter(order_id=order_id).all().items
+        entries = repo.query.filter(order_id=order_id).all().items
 
         # OrderCreated + OrderConfirmed + PaymentPending + PaymentSucceeded = 4
         assert len(entries) >= 4

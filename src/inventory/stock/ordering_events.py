@@ -39,9 +39,7 @@ class OrderingInventoryEventHandler:
         )
 
         # Find active or confirmed reservations for this order
-        reservations = (
-            current_domain.repository_for(ReservationStatus)._dao.query.filter(order_id=str(event.order_id)).all().items
-        )
+        reservations = current_domain.view_for(ReservationStatus).query.filter(order_id=str(event.order_id)).all().items
 
         releasable = [r for r in reservations if r.status in ("Active", "Confirmed")]
 
@@ -100,8 +98,8 @@ class OrderingInventoryEventHandler:
 
             # Find the inventory item for this variant
             inv_records = (
-                current_domain.repository_for(InventoryLevel)
-                ._dao.query.filter(
+                current_domain.view_for(InventoryLevel)
+                .query.filter(
                     product_id=str(product_id),
                     variant_id=str(variant_id),
                 )

@@ -55,7 +55,7 @@ class LowStockReportProjector:
 
         # Use event's new_available and report's stored reorder_point
         if event.new_available > report.reorder_point:
-            repo._dao.delete(report)
+            repo.query.filter(inventory_item_id=event.inventory_item_id).delete()
         else:
             report.current_available = event.new_available
             report.is_critical = event.new_available == 0
@@ -71,7 +71,7 @@ class LowStockReportProjector:
             return
 
         if event.new_available > report.reorder_point:
-            repo._dao.delete(report)
+            repo.query.filter(inventory_item_id=event.inventory_item_id).delete()
         else:
             report.current_available = event.new_available
             report.is_critical = event.new_available == 0

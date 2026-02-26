@@ -23,7 +23,7 @@ class TestCartRecoveryHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-cart-1",
                 notification_type=NotificationType.CART_RECOVERY.value,
             )
@@ -43,7 +43,7 @@ class TestCartRecoveryHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-cart-2",
             )
             .all()

@@ -136,11 +136,11 @@ class TestExpireStaleReservationsProcessFailure:
         mock_query_result = MagicMock()
         mock_query_result.items = [mock_reservation]
 
-        mock_repo = MagicMock()
-        mock_repo._dao.query.filter.return_value.all.return_value = mock_query_result
+        mock_view = MagicMock()
+        mock_view.query.filter.return_value.all.return_value = mock_query_result
 
         with patch("inventory.stock.expiry.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
+            mock_domain.view_for = MagicMock(return_value=mock_view)
             mock_domain.process = MagicMock(side_effect=ValidationError({"error": ["Reservation already released"]}))
             # Should not raise; catches the error, logs warning, and continues
             result = handler.expire_stale_reservations(mock_command)
@@ -178,11 +178,11 @@ class TestExpireStaleReservationsProcessFailure:
         mock_query_result = MagicMock()
         mock_query_result.items = [mock_res1, mock_res2]
 
-        mock_repo = MagicMock()
-        mock_repo._dao.query.filter.return_value.all.return_value = mock_query_result
+        mock_view = MagicMock()
+        mock_view.query.filter.return_value.all.return_value = mock_query_result
 
         with patch("inventory.stock.expiry.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
+            mock_domain.view_for = MagicMock(return_value=mock_view)
             # First call fails, second succeeds
             mock_domain.process = MagicMock(
                 side_effect=[

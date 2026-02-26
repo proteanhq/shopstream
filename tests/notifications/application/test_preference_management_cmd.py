@@ -31,7 +31,7 @@ class TestUpdatePreferencesCommand:
             asynchronous=False,
         )
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id=cid).all().items
+        prefs = repo.query.filter(customer_id=cid).all().items
         assert prefs[0].sms_enabled is True
 
     def test_update_disables_email(self):
@@ -41,7 +41,7 @@ class TestUpdatePreferencesCommand:
             asynchronous=False,
         )
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id=cid).all().items
+        prefs = repo.query.filter(customer_id=cid).all().items
         assert prefs[0].email_enabled is False
 
     def test_update_enables_push(self):
@@ -51,7 +51,7 @@ class TestUpdatePreferencesCommand:
             asynchronous=False,
         )
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id=cid).all().items
+        prefs = repo.query.filter(customer_id=cid).all().items
         assert prefs[0].push_enabled is True
 
 
@@ -66,7 +66,7 @@ class TestQuietHoursCommands:
             asynchronous=False,
         )
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id=cid).all().items
+        prefs = repo.query.filter(customer_id=cid).all().items
         assert prefs[0].quiet_hours_start == "22:00"
         assert prefs[0].quiet_hours_end == "08:00"
 
@@ -81,7 +81,7 @@ class TestQuietHoursCommands:
             asynchronous=False,
         )
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id=cid).all().items
+        prefs = repo.query.filter(customer_id=cid).all().items
         assert prefs[0].quiet_hours_start is None
         assert prefs[0].quiet_hours_end is None
 
@@ -97,7 +97,7 @@ class TestSubscriptionCommands:
             asynchronous=False,
         )
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id=cid).all().items
+        prefs = repo.query.filter(customer_id=cid).all().items
         types = json.loads(prefs[0].unsubscribed_types)
         assert "CartRecovery" in types
 
@@ -112,7 +112,7 @@ class TestSubscriptionCommands:
             asynchronous=False,
         )
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id=cid).all().items
+        prefs = repo.query.filter(customer_id=cid).all().items
         types = json.loads(prefs[0].unsubscribed_types)
         assert "CartRecovery" not in types
 

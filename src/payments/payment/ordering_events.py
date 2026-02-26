@@ -36,8 +36,8 @@ class OrderingPaymentEventHandler:
 
         # Find the payment for this order
         payment_records = (
-            current_domain.repository_for(PaymentStatusView)
-            ._dao.query.filter(
+            current_domain.view_for(PaymentStatusView)
+            .query.filter(
                 order_id=str(event.order_id),
                 status="Succeeded",
             )

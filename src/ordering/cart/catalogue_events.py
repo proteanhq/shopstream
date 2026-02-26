@@ -49,7 +49,7 @@ class CatalogueCartEventHandler:
         )
 
         # Find active carts containing this product
-        active_carts = current_domain.repository_for(CartView)._dao.query.filter(status="Active").all().items
+        active_carts = current_domain.view_for(CartView).query.filter(status="Active").all().items
 
         affected_count = 0
         for cart in active_carts:

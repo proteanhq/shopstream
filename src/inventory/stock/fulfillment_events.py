@@ -42,8 +42,8 @@ class FulfillmentInventoryEventHandler:
         # Query the ReservationStatus read model for confirmed reservations
         try:
             confirmed = (
-                current_domain.repository_for(ReservationStatus)
-                ._dao.query.filter(
+                current_domain.view_for(ReservationStatus)
+                .query.filter(
                     order_id=str(event.order_id),
                     status="Confirmed",
                 )

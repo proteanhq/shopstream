@@ -168,7 +168,7 @@ class TestDailyRevenueProjection:
         _create_and_succeed_payment(amount=200.00)
         # DailyRevenue is keyed by date string; find the record
         repo = current_domain.repository_for(DailyRevenue)
-        records = repo._dao.query.all().items
+        records = repo.query.all().items
         assert len(records) > 0
         # At least one record should have revenue
         total = sum(r.total_revenue for r in records)
@@ -199,7 +199,7 @@ class TestDailyRevenueProjection:
 
         # Check that refund was recorded in daily revenue
         repo = current_domain.repository_for(DailyRevenue)
-        records = repo._dao.query.all().items
+        records = repo.query.all().items
         total_refunded = sum(r.total_refunded for r in records)
         assert total_refunded >= 50.00
         # Net revenue should reflect the refund

@@ -35,7 +35,7 @@ class TestLowStockAlertHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 notification_type=NotificationType.LOW_STOCK_ALERT.value,
             )
             .all()
@@ -56,7 +56,7 @@ class TestLowStockAlertHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 notification_type=NotificationType.LOW_STOCK_ALERT.value,
                 channel=NotificationChannel.SLACK.value,
             )
@@ -79,7 +79,7 @@ class TestLowStockAlertHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 notification_type=NotificationType.LOW_STOCK_ALERT.value,
             )
             .all()

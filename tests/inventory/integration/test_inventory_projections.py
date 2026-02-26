@@ -534,7 +534,7 @@ class TestStockMovementLogProjection:
         item_id = _initialize_stock(initial_quantity=100)
 
         repo = current_domain.repository_for(StockMovementLog)
-        entries = repo._dao.query.filter(inventory_item_id=item_id).all().items
+        entries = repo.query.filter(inventory_item_id=item_id).all().items
         assert len(entries) >= 1
 
         event_types = [e.event_type for e in entries]
@@ -549,7 +549,7 @@ class TestStockMovementLogProjection:
         _reserve(item_id, quantity=10)
 
         repo = current_domain.repository_for(StockMovementLog)
-        entries = repo._dao.query.filter(inventory_item_id=item_id).all().items
+        entries = repo.query.filter(inventory_item_id=item_id).all().items
 
         # StockInitialized + StockReceived + StockReserved = 3 minimum
         assert len(entries) >= 3
@@ -572,7 +572,7 @@ class TestStockMovementLogProjection:
         )
 
         repo = current_domain.repository_for(StockMovementLog)
-        entries = repo._dao.query.filter(inventory_item_id=item_id).all().items
+        entries = repo.query.filter(inventory_item_id=item_id).all().items
 
         event_types = [e.event_type for e in entries]
         assert "StockInitialized" in event_types

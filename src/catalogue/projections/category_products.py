@@ -73,9 +73,9 @@ class CategoryProductsProjector:
     @on(ProductDetailsUpdated)
     def on_product_details_updated(self, event):
         # Update the product title in all category views containing it
-        repo = current_domain.repository_for(CategoryProducts)
-        all_categories = repo._dao.query.all().items
+        all_categories = current_domain.view_for(CategoryProducts).query.all().items
 
+        repo = current_domain.repository_for(CategoryProducts)
         for view in all_categories:
             products = json.loads(view.products) if isinstance(view.products, str) else (view.products or [])
             updated = False
@@ -100,8 +100,8 @@ class CategoryProductsProjector:
         self._update_product_status(str(event.product_id), "archived", event.archived_at)
 
     def _update_product_status(self, product_id, new_status, timestamp):
+        all_categories = current_domain.view_for(CategoryProducts).query.all().items
         repo = current_domain.repository_for(CategoryProducts)
-        all_categories = repo._dao.query.all().items
 
         for view in all_categories:
             products = json.loads(view.products) if isinstance(view.products, str) else (view.products or [])

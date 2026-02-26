@@ -35,7 +35,7 @@ class SubmitReviewHandler:
         repo = current_domain.repository_for(Review)
 
         # Enforce one review per customer per product (exclude removed)
-        existing = repo._dao.query.filter(
+        existing = repo.query.filter(
             customer_id=str(command.customer_id),
             product_id=str(command.product_id),
         ).all()
@@ -52,11 +52,14 @@ class SubmitReviewHandler:
         try:
             from reviews.projections.verified_purchases import VerifiedPurchases
 
-            vp_repo = current_domain.repository_for(VerifiedPurchases)
-            vps = vp_repo._dao.query.filter(
-                customer_id=str(command.customer_id),
-                product_id=str(command.product_id),
-            ).all()
+            vps = (
+                current_domain.view_for(VerifiedPurchases)
+                .query.filter(
+                    customer_id=str(command.customer_id),
+                    product_id=str(command.product_id),
+                )
+                .all()
+            )
             if vps.items:
                 verified = True
                 order_id = str(vps.items[0].order_id)

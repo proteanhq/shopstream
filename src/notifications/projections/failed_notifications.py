@@ -61,8 +61,8 @@ class FailedNotificationsProjector:
         """Remove from failed queue when retried (it goes back to pending)."""
         repo = current_domain.repository_for(FailedNotifications)
         try:
-            failed = repo.get(event.notification_id)
-            repo._dao.delete(failed)
+            repo.get(event.notification_id)
+            repo.query.filter(notification_id=event.notification_id).delete()
         except Exception:
             pass
 
@@ -71,7 +71,7 @@ class FailedNotificationsProjector:
         """Remove from failed queue when successfully sent."""
         repo = current_domain.repository_for(FailedNotifications)
         try:
-            failed = repo.get(event.notification_id)
-            repo._dao.delete(failed)
+            repo.get(event.notification_id)
+            repo.query.filter(notification_id=event.notification_id).delete()
         except Exception:
             pass

@@ -47,8 +47,8 @@ class AbandonedCheckoutProjector:
         """Remove from abandoned checkouts — order was confirmed."""
         repo = current_domain.repository_for(AbandonedCheckout)
         try:
-            record = repo.get(str(event.order_id))
-            repo._dao.delete(record)
+            repo.get(str(event.order_id))
+            repo.query.filter(order_id=str(event.order_id)).delete()
         except ObjectNotFoundError:
             pass
 
@@ -57,7 +57,7 @@ class AbandonedCheckoutProjector:
         """Remove from abandoned checkouts — order was explicitly cancelled."""
         repo = current_domain.repository_for(AbandonedCheckout)
         try:
-            record = repo.get(str(event.order_id))
-            repo._dao.delete(record)
+            repo.get(str(event.order_id))
+            repo.query.filter(order_id=str(event.order_id)).delete()
         except ObjectNotFoundError:
             pass

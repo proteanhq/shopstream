@@ -64,7 +64,7 @@ class DeliveryPerformanceProjector:
         date_str = _date_key(event.delivered_at)
         # We try all carriers for this date — in practice we'd key by fulfillment_id
         repo = current_domain.repository_for(DeliveryPerformanceView)
-        results = repo._dao.query.filter(date=date_str).all()
+        results = repo.query.filter(date=date_str).all()
         if results and results.items:
             view = results.first
             view.delivered_count = (view.delivered_count or 0) + 1
@@ -75,7 +75,7 @@ class DeliveryPerformanceProjector:
     def on_delivery_exception(self, event):
         date_str = _date_key(event.occurred_at)
         repo = current_domain.repository_for(DeliveryPerformanceView)
-        results = repo._dao.query.filter(date=date_str).all()
+        results = repo.query.filter(date=date_str).all()
         if results and results.items:
             view = results.first
             view.exception_count = (view.exception_count or 0) + 1

@@ -274,7 +274,7 @@ class TestNotificationStatsProjector:
         )
 
         repo = current_domain.repository_for(NotificationStats)
-        all_stats = repo._dao.query.all().items
+        all_stats = repo.query.all().items
         assert len(all_stats) >= 1
 
     def test_stat_incremented_on_second_sent(self):

@@ -37,7 +37,7 @@ class TestWelcomeNotificationHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-001",
                 notification_type=NotificationType.WELCOME.value,
             )
@@ -54,7 +54,7 @@ class TestWelcomeNotificationHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-welcome-1",
             )
             .all()
@@ -70,7 +70,7 @@ class TestWelcomeNotificationHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-welcome-2",
             )
             .all()
@@ -85,7 +85,7 @@ class TestWelcomeNotificationHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-welcome-3",
             )
             .all()
@@ -101,7 +101,7 @@ class TestPreferenceAutoCreationHandler:
         handler.on_customer_registered(event)
 
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id="cust-pref-1").all().items
+        prefs = repo.query.filter(customer_id="cust-pref-1").all().items
         assert len(prefs) == 1
         assert prefs[0].email_enabled is True
         assert prefs[0].sms_enabled is False
@@ -114,5 +114,5 @@ class TestPreferenceAutoCreationHandler:
         handler.on_customer_registered(event)
 
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id="cust-pref-2").all().items
+        prefs = repo.query.filter(customer_id="cust-pref-2").all().items
         assert len(prefs) == 1

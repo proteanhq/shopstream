@@ -38,7 +38,7 @@ class ManagePreferencesHandler:
     @handle(UpdateNotificationPreferences)
     def update_preferences(self, command: UpdateNotificationPreferences):
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id=str(command.customer_id)).all().items
+        prefs = repo.query.filter(customer_id=str(command.customer_id)).all().items
         preference = prefs[0]
         preference.update_channels(
             email=command.email_enabled,
@@ -50,7 +50,7 @@ class ManagePreferencesHandler:
     @handle(SetQuietHours)
     def set_quiet_hours(self, command: SetQuietHours):
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id=str(command.customer_id)).all().items
+        prefs = repo.query.filter(customer_id=str(command.customer_id)).all().items
         preference = prefs[0]
         preference.set_quiet_hours(command.start, command.end)
         repo.add(preference)
@@ -58,7 +58,7 @@ class ManagePreferencesHandler:
     @handle(ClearQuietHours)
     def clear_quiet_hours(self, command: ClearQuietHours):
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id=str(command.customer_id)).all().items
+        prefs = repo.query.filter(customer_id=str(command.customer_id)).all().items
         preference = prefs[0]
         preference.clear_quiet_hours()
         repo.add(preference)

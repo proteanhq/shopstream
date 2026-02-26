@@ -42,7 +42,7 @@ router = APIRouter(prefix="/notifications", tags=["notifications"])
 async def get_preferences(customer_id: str) -> PreferencesResponse:
     """Get a customer's notification preferences."""
     repo = current_domain.repository_for(NotificationPreference)
-    prefs = repo._dao.query.filter(customer_id=customer_id).all().items
+    prefs = repo.query.filter(customer_id=customer_id).all().items
     if not prefs:
         # Return defaults if no preferences exist
         return PreferencesResponse(
@@ -138,9 +138,8 @@ async def get_customer_notifications(
     customer_id: str,
 ) -> NotificationListResponse:
     """Get a customer's notification history."""
-    repo = current_domain.repository_for(CustomerNotifications)
     try:
-        results = repo._dao.query.filter(customer_id=customer_id).all().items
+        results = current_domain.view_for(CustomerNotifications).query.filter(customer_id=customer_id).all().items
     except Exception:
         results = []
 

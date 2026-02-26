@@ -45,7 +45,7 @@ class DetectAbandonedCartsHandler:
         )
 
         # Query active carts
-        active_carts = current_domain.repository_for(CartView)._dao.query.filter(status="Active").all().items
+        active_carts = current_domain.view_for(CartView).query.filter(status="Active").all().items
 
         # Filter idle carts with items
         abandoned = []

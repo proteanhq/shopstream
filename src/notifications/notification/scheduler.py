@@ -34,7 +34,7 @@ class ProcessScheduledNotificationsHandler:
 
         # Find pending notifications with scheduled_for <= now
         try:
-            pending = repo._dao.query.filter(status=NotificationStatus.PENDING.value).all().items
+            pending = repo.query.filter(status=NotificationStatus.PENDING.value).all().items
         except Exception:
             logger.info("No pending notifications found")
             return

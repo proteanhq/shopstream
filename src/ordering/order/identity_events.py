@@ -59,7 +59,7 @@ class IdentityOrderEventHandler:
         )
         repo = current_domain.repository_for(SuspendedAccount)
         try:
-            record = repo.get(str(event.customer_id))
-            repo._dao.delete(record)
+            repo.get(str(event.customer_id))
+            repo.query.filter(customer_id=str(event.customer_id)).delete()
         except ObjectNotFoundError:
             pass  # Already removed or never existed
