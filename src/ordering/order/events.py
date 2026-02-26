@@ -7,7 +7,7 @@ Events are persisted to the event store and used for:
 - Cross-domain communication via Redis Streams
 """
 
-from protean.fields import DateTime, Float, Identifier, String, Text
+from protean.fields import DateTime, Dict, Float, Identifier, List, String
 
 from ordering.domain import ordering
 
@@ -20,9 +20,9 @@ class OrderCreated:
 
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
-    items = Text(required=True)  # JSON: list of item dicts
-    shipping_address = Text(required=True)  # JSON: address dict
-    billing_address = Text(required=True)  # JSON: address dict
+    items = List(Dict(), required=True)
+    shipping_address = Dict(required=True)
+    billing_address = Dict(required=True)
     subtotal = Float(required=True)
     shipping_cost = Float()
     tax_total = Float()
@@ -157,7 +157,7 @@ class OrderShipped:
     shipment_id = String(required=True)
     carrier = String(required=True)
     tracking_number = String(required=True)
-    shipped_item_ids = Text()  # JSON: list of item IDs
+    shipped_item_ids = List(String())
     estimated_delivery = String()  # ISO date string
     shipped_at = DateTime(required=True)
 
@@ -172,7 +172,7 @@ class OrderPartiallyShipped:
     shipment_id = String(required=True)
     carrier = String(required=True)
     tracking_number = String(required=True)
-    shipped_item_ids = Text()  # JSON: list of item IDs
+    shipped_item_ids = List(String())
     shipped_at = DateTime(required=True)
 
 
@@ -224,7 +224,7 @@ class OrderReturned:
     __version__ = "v1"
 
     order_id = Identifier(required=True)
-    returned_item_ids = Text()  # JSON: list of item IDs
+    returned_item_ids = List(String())
     returned_at = DateTime(required=True)
 
 

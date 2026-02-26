@@ -1,9 +1,7 @@
 """Cart view — current cart state for UI rendering."""
 
-import json
-
 from protean.core.projector import on
-from protean.fields import DateTime, Identifier, Integer, String, Text
+from protean.fields import DateTime, Dict, Identifier, Integer, List, String
 from protean.utils.globals import current_domain
 
 from ordering.cart.cart import ShoppingCart
@@ -24,8 +22,8 @@ class CartView:
     cart_id = Identifier(identifier=True, required=True)
     customer_id = Identifier()
     session_id = String()
-    items = Text()  # JSON: list of {product_id, variant_id, quantity}
-    applied_coupons = Text()  # JSON: list of coupon codes
+    items = List(Dict())
+    applied_coupons = List(String())
     status = String(required=True)
     item_count = Integer(default=0)
     created_at = DateTime()
@@ -44,12 +42,12 @@ class CartViewProjector:
             view = CartView(
                 cart_id=event.cart_id,
                 status="Active",
-                items="[]",
-                applied_coupons="[]",
+                items=[],
+                applied_coupons=[],
                 item_count=0,
             )
 
-        items = json.loads(view.items) if view.items else []
+        items = list(view.items) if view.items else []
 
         # Check if item already exists
         existing = next(
@@ -72,7 +70,7 @@ class CartViewProjector:
                 }
             )
 
-        view.items = json.dumps(items)
+        view.items = items
         view.item_count = len(items)
         repo.add(view)
 
@@ -80,21 +78,21 @@ class CartViewProjector:
     def on_quantity_updated(self, event):
         repo = current_domain.repository_for(CartView)
         view = repo.get(event.cart_id)
-        items = json.loads(view.items) if view.items else []
+        items = list(view.items) if view.items else []
         for item in items:
             if item.get("item_id") == str(event.item_id):
                 item["quantity"] = event.new_quantity
                 break
-        view.items = json.dumps(items)
+        view.items = items
         repo.add(view)
 
     @on(CartItemRemoved)
     def on_item_removed(self, event):
         repo = current_domain.repository_for(CartView)
         view = repo.get(event.cart_id)
-        items = json.loads(view.items) if view.items else []
+        items = list(view.items) if view.items else []
         items = [i for i in items if i.get("item_id") != str(event.item_id)]
-        view.items = json.dumps(items)
+        view.items = items
         view.item_count = len(items)
         repo.add(view)
 
@@ -102,9 +100,9 @@ class CartViewProjector:
     def on_coupon_applied(self, event):
         repo = current_domain.repository_for(CartView)
         view = self._get_or_create_view(repo, event.cart_id)
-        coupons = json.loads(view.applied_coupons) if view.applied_coupons else []
+        coupons = list(view.applied_coupons) if view.applied_coupons else []
         coupons.append(event.coupon_code)
-        view.applied_coupons = json.dumps(coupons)
+        view.applied_coupons = coupons
         repo.add(view)
 
     @on(CartsMerged)
@@ -137,7 +135,7 @@ class CartViewProjector:
             return CartView(
                 cart_id=cart_id,
                 status="Active",
-                items="[]",
-                applied_coupons="[]",
+                items=[],
+                applied_coupons=[],
                 item_count=0,
             )

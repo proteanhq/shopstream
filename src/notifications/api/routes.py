@@ -4,7 +4,6 @@ Thin adapters that translate HTTP requests into domain commands.
 No business logic — just schema→command→response translation.
 """
 
-import json
 from datetime import datetime as dt_datetime
 
 from fastapi import APIRouter
@@ -54,7 +53,7 @@ async def get_preferences(customer_id: str) -> PreferencesResponse:
             unsubscribed_types=[],
         )
     pref = prefs[0]
-    unsub = json.loads(pref.unsubscribed_types) if pref.unsubscribed_types else []
+    unsub = pref.unsubscribed_types or []
     return PreferencesResponse(
         preference_id=str(pref.id),
         customer_id=str(pref.customer_id),

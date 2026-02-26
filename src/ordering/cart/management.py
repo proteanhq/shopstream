@@ -3,10 +3,8 @@
 Handles cart creation, guest cart merging, and abandonment.
 """
 
-import json
-
 from protean import handle
-from protean.fields import Identifier, String, Text
+from protean.fields import Dict, Identifier, List, String
 from protean.utils.globals import current_domain
 
 from ordering.cart.cart import ShoppingCart
@@ -26,7 +24,7 @@ class MergeGuestCart:
     """Merge items from a guest session cart into a registered customer's cart."""
 
     cart_id = Identifier(required=True)
-    guest_cart_items = Text(required=True)  # JSON: list of {product_id, variant_id, quantity}
+    guest_cart_items = List(Dict(), required=True)
 
 
 @ordering.command(part_of="ShoppingCart")
@@ -52,13 +50,7 @@ class ManageCartHandler:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
 
-        guest_items = (
-            json.loads(command.guest_cart_items)
-            if isinstance(command.guest_cart_items, str)
-            else command.guest_cart_items
-        )
-
-        cart.merge_guest_cart(guest_cart_items=guest_items)
+        cart.merge_guest_cart(guest_cart_items=command.guest_cart_items)
         repo.add(cart)
 
     @handle(AbandonCart)

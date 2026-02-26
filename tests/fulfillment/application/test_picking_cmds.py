@@ -1,7 +1,5 @@
 """Application tests for picking commands via domain.process()."""
 
-import json
-
 import pytest
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.fulfillment import Fulfillment, FulfillmentItemStatus, FulfillmentStatus
@@ -19,7 +17,7 @@ def _create_fulfillment(item_count=2):
         CreateFulfillment(
             order_id="ord-001",
             customer_id="cust-001",
-            items=json.dumps(items),
+            items=items,
         ),
         asynchronous=False,
     )

@@ -5,7 +5,6 @@ Covers:
 - on_delivery_confirmed: records delivery on order via RecordDelivery command
 """
 
-import json
 from datetime import UTC, datetime
 
 from ordering.order.confirmation import ConfirmOrder
@@ -23,24 +22,30 @@ def _create_paid_order():
     order_id = current_domain.process(
         CreateOrder(
             customer_id="cust-001",
-            items=json.dumps(
-                [
-                    {
-                        "product_id": "prod-001",
-                        "variant_id": "var-001",
-                        "sku": "SKU-001",
-                        "title": "Widget",
-                        "quantity": 2,
-                        "unit_price": 25.0,
-                    },
-                ]
-            ),
-            shipping_address=json.dumps(
-                {"street": "123 Main", "city": "Town", "state": "CA", "postal_code": "90210", "country": "US"}
-            ),
-            billing_address=json.dumps(
-                {"street": "123 Main", "city": "Town", "state": "CA", "postal_code": "90210", "country": "US"}
-            ),
+            items=[
+                {
+                    "product_id": "prod-001",
+                    "variant_id": "var-001",
+                    "sku": "SKU-001",
+                    "title": "Widget",
+                    "quantity": 2,
+                    "unit_price": 25.0,
+                },
+            ],
+            shipping_address={
+                "street": "123 Main",
+                "city": "Town",
+                "state": "CA",
+                "postal_code": "90210",
+                "country": "US",
+            },
+            billing_address={
+                "street": "123 Main",
+                "city": "Town",
+                "state": "CA",
+                "postal_code": "90210",
+                "country": "US",
+            },
             subtotal=50.0,
             grand_total=55.0,
         ),
@@ -77,7 +82,7 @@ class TestShipmentHandedOffHandler:
                 order_id=order_id,
                 carrier="FedEx",
                 tracking_number="TRACK-SHIP-001",
-                shipped_item_ids=json.dumps(["item-1", "item-2"]),
+                shipped_item_ids=["item-1", "item-2"],
                 shipped_at=datetime.now(UTC),
             )
         )

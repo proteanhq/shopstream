@@ -4,8 +4,6 @@ Each route translates between Pydantic schemas (external contract) and
 Protean commands (internal domain concepts).
 """
 
-import json
-
 from fastapi import APIRouter
 from protean.utils.globals import current_domain
 
@@ -41,9 +39,9 @@ async def submit_review(body: SubmitReviewRequest) -> ReviewIdResponse:
         title=body.title,
         body=body.body,
         variant_id=body.variant_id,
-        pros=json.dumps(body.pros) if body.pros else None,
-        cons=json.dumps(body.cons) if body.cons else None,
-        images=json.dumps([img.model_dump() for img in body.images]) if body.images else None,
+        pros=body.pros or [],
+        cons=body.cons or [],
+        images=[img.model_dump() for img in body.images] if body.images else [],
     )
     review_id = current_domain.process(command, asynchronous=False)
     return ReviewIdResponse(review_id=review_id)
@@ -58,8 +56,8 @@ async def edit_review(review_id: str, body: EditReviewRequest) -> StatusResponse
         title=body.title,
         body=body.body,
         rating=body.rating,
-        pros=json.dumps(body.pros) if body.pros else None,
-        cons=json.dumps(body.cons) if body.cons else None,
+        pros=body.pros or [],
+        cons=body.cons or [],
     )
     current_domain.process(command, asynchronous=False)
     return StatusResponse()

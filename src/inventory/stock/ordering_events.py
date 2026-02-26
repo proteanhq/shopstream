@@ -7,8 +7,6 @@ Cross-domain events are imported from shared.events.ordering and registered
 as external events via inventory.register_external_event().
 """
 
-import json
-
 import structlog
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
@@ -77,9 +75,7 @@ class OrderingInventoryEventHandler:
         )
 
         # Parse items to get product/variant info for stock lookup
-        items = []
-        if event.items:
-            items = json.loads(event.items) if isinstance(event.items, str) else event.items
+        items = event.items or []
 
         if not items:
             logger.info(

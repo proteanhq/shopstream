@@ -40,11 +40,8 @@ class TestProductCreationFactory:
         assert product.seo.slug == "test-product"
 
     def test_factory_with_dict_attributes(self):
-        import json
-
         product = _make_product(attributes={"color": "red"})
-        parsed = json.loads(product.attributes)
-        assert parsed["color"] == "red"
+        assert product.attributes["color"] == "red"
 
     def test_factory_without_optional_fields(self):
         product = Product.create(sku="MIN-001", title="Minimal")
@@ -79,15 +76,12 @@ class TestProductUpdateDetails:
         assert product.brand == "NewBrand"
 
     def test_update_with_dict_attributes(self):
-        import json
-
         product = _make_product()
         product._events.clear()
 
         product.update_details(attributes={"size": "L", "color": "blue"})
-        parsed = json.loads(product.attributes)
-        assert parsed["size"] == "L"
-        assert parsed["color"] == "blue"
+        assert product.attributes["size"] == "L"
+        assert product.attributes["color"] == "blue"
 
     def test_update_seo(self):
         product = _make_product()

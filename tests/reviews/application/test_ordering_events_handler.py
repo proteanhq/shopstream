@@ -1,6 +1,5 @@
 """Application tests for cross-domain OrderDelivered event handler."""
 
-import json
 from datetime import UTC, datetime
 
 from protean import current_domain
@@ -14,12 +13,10 @@ class TestOrderDeliveredHandler:
         event = OrderDelivered(
             order_id="order-001",
             customer_id="cust-001",
-            items=json.dumps(
-                [
-                    {"product_id": "prod-001", "variant_id": "var-001"},
-                    {"product_id": "prod-002"},
-                ]
-            ),
+            items=[
+                {"product_id": "prod-001", "variant_id": "var-001"},
+                {"product_id": "prod-002"},
+            ],
             delivered_at=datetime.now(UTC),
         )
 
@@ -57,11 +54,9 @@ class TestOrderDeliveredHandler:
         event = OrderDelivered(
             order_id="order-004",
             customer_id="cust-004",
-            items=json.dumps(
-                [
-                    {"variant_id": "var-only"},  # Missing product_id
-                ]
-            ),
+            items=[
+                {"variant_id": "var-only"},  # Missing product_id
+            ],
             delivered_at=datetime.now(UTC),
         )
         handler = OrderingEventsHandler()

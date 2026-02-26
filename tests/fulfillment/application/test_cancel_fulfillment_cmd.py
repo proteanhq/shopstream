@@ -1,7 +1,5 @@
 """Application tests for fulfillment cancellation via domain.process()."""
 
-import json
-
 import pytest
 from fulfillment.fulfillment.cancellation import CancelFulfillment
 from fulfillment.fulfillment.creation import CreateFulfillment
@@ -14,13 +12,13 @@ from protean import current_domain
 from protean.exceptions import ValidationError
 
 
-def _single_item_json():
-    return json.dumps([{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}])
+def _single_item():
+    return [{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}]
 
 
 def _create_fulfillment():
     return current_domain.process(
-        CreateFulfillment(order_id="ord-001", customer_id="cust-001", items=_single_item_json()),
+        CreateFulfillment(order_id="ord-001", customer_id="cust-001", items=_single_item()),
         asynchronous=False,
     )
 
@@ -35,7 +33,7 @@ def _advance_to_shipped(ff_id):
     )
     current_domain.process(CompletePickList(fulfillment_id=ff_id), asynchronous=False)
     current_domain.process(
-        RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps([{"weight": 1.0}])),
+        RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=[{"weight": 1.0}]),
         asynchronous=False,
     )
     current_domain.process(
@@ -114,7 +112,7 @@ class TestCancelFulfillmentFromReadyToShip:
         )
         current_domain.process(CompletePickList(fulfillment_id=ff_id), asynchronous=False)
         current_domain.process(
-            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps([{"weight": 1.0}])),
+            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=[{"weight": 1.0}]),
             asynchronous=False,
         )
         current_domain.process(

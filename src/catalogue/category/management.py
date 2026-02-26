@@ -2,7 +2,7 @@
 
 from protean import handle
 from protean.exceptions import ValidationError
-from protean.fields import Identifier, Integer, String, Text
+from protean.fields import Dict, Identifier, Integer, String
 
 from catalogue.category.category import Category
 from catalogue.domain import catalogue
@@ -14,7 +14,7 @@ class CreateCategory:
 
     name: String(required=True, max_length=100)
     parent_category_id: Identifier()
-    attributes: Text()
+    attributes: Dict()
 
 
 @catalogue.command(part_of="Category")
@@ -23,7 +23,7 @@ class UpdateCategory:
 
     category_id: Identifier(required=True)
     name: String(max_length=100)
-    attributes: Text()
+    attributes: Dict()
 
 
 @catalogue.command(part_of="Category")
@@ -57,17 +57,11 @@ class ManageCategoryHandler:
             if level > 4:
                 raise ValidationError({"level": ["Category hierarchy cannot exceed 5 levels (depth 0-4)"]})
 
-        attrs = None
-        if command.attributes:
-            import json
-
-            attrs = json.loads(command.attributes)
-
         category = Category.create(
             name=command.name,
             parent_category_id=parent_id,
             level=level,
-            attributes=attrs,
+            attributes=command.attributes,
         )
         current_domain.repository_for(Category).add(category)
         return str(category.id)
@@ -79,15 +73,9 @@ class ManageCategoryHandler:
         repo = current_domain.repository_for(Category)
         category = repo.get(command.category_id)
 
-        attrs = None
-        if command.attributes:
-            import json
-
-            attrs = json.loads(command.attributes)
-
         category.update_details(
             name=command.name,
-            attributes=attrs,
+            attributes=command.attributes,
         )
         repo.add(category)
 

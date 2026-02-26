@@ -3,6 +3,8 @@
 import json
 
 from catalogue.product.product import SEO
+
+# json kept: used to parse BDD feature step strings
 from pytest_bdd import parsers, scenarios, then, when
 
 scenarios("features/product_details.feature")

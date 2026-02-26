@@ -1,7 +1,5 @@
 """Tests for NotificationPreference aggregate creation and behavior."""
 
-import json
-
 import pytest
 from notifications.preference.preference import NotificationPreference
 from protean.exceptions import ValidationError
@@ -39,7 +37,7 @@ class TestPreferenceCreation:
 
     def test_create_default_sets_empty_unsubscribed_types(self):
         pref = _make_preference()
-        assert json.loads(pref.unsubscribed_types) == []
+        assert pref.unsubscribed_types == []
 
     def test_create_default_sets_no_quiet_hours(self):
         pref = _make_preference()
@@ -215,7 +213,7 @@ class TestTypeSubscription:
         pref = _make_preference()
         pref._events.clear()
         pref.unsubscribe_from("CartRecovery")
-        types = json.loads(pref.unsubscribed_types)
+        types = pref.unsubscribed_types
         assert "CartRecovery" in types
 
     def test_unsubscribe_raises_event(self):
@@ -242,7 +240,7 @@ class TestTypeSubscription:
         pref.unsubscribe_from("CartRecovery")
         pref._events.clear()
         pref.resubscribe_to("CartRecovery")
-        types = json.loads(pref.unsubscribed_types)
+        types = pref.unsubscribed_types
         assert "CartRecovery" not in types
 
     def test_resubscribe_raises_event(self):
@@ -269,7 +267,7 @@ class TestTypeSubscription:
         pref.unsubscribe_from("CartRecovery")
         pref._events.clear()
         pref.unsubscribe_from("ReviewPrompt")
-        types = json.loads(pref.unsubscribed_types)
+        types = pref.unsubscribed_types
         assert "CartRecovery" in types
         assert "ReviewPrompt" in types
 

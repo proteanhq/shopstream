@@ -1,7 +1,5 @@
 """Integration tests for category projections."""
 
-import json
-
 from catalogue.category.management import (
     CreateCategory,
     DeactivateCategory,
@@ -30,16 +28,14 @@ class TestCategoryTreeProjection:
         assert node.is_active is True
         assert node.product_count == 0
 
-        breadcrumb = json.loads(node.breadcrumb)
-        assert breadcrumb == ["Electronics"]
+        assert node.breadcrumb == ["Electronics"]
 
     def test_child_category_breadcrumb(self):
         parent_id = _create_category(name="Electronics")
         child_id = _create_category(name="Phones", parent_category_id=parent_id)
 
         node = current_domain.repository_for(CategoryTree).get(child_id)
-        breadcrumb = json.loads(node.breadcrumb)
-        assert breadcrumb == ["Electronics", "Phones"]
+        assert node.breadcrumb == ["Electronics", "Phones"]
 
     def test_deep_hierarchy_breadcrumb(self):
         l0 = _create_category(name="Electronics")
@@ -47,8 +43,7 @@ class TestCategoryTreeProjection:
         l2 = _create_category(name="Smartphones", parent_category_id=l1)
 
         node = current_domain.repository_for(CategoryTree).get(l2)
-        breadcrumb = json.loads(node.breadcrumb)
-        assert breadcrumb == ["Electronics", "Phones", "Smartphones"]
+        assert node.breadcrumb == ["Electronics", "Phones", "Smartphones"]
 
     def test_reorder_updates_projection(self):
         category_id = _create_category()
@@ -79,8 +74,7 @@ class TestCategoryTreeProjection:
 
         node = current_domain.repository_for(CategoryTree).get(category_id)
         assert node.name == "Updated Electronics"
-        breadcrumb = json.loads(node.breadcrumb)
-        assert breadcrumb == ["Updated Electronics"]
+        assert node.breadcrumb == ["Updated Electronics"]
 
     def test_product_count_incremented(self):
         category_id = _create_category()

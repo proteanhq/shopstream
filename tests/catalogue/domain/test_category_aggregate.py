@@ -1,7 +1,5 @@
 """Tests for the Category aggregate root."""
 
-import json
-
 from catalogue.category.category import Category
 from protean.utils.reflection import declared_fields
 
@@ -46,7 +44,7 @@ class TestCategoryConstruction:
     def test_create_category_with_attributes(self):
         attrs = {"filterable": ["brand", "screen_size"]}
         category = Category.create(name="Phones", attributes=attrs)
-        assert json.loads(category.attributes) == attrs
+        assert category.attributes == attrs
 
     def test_create_category_raises_event(self):
         category = Category.create(name="Electronics")
@@ -78,7 +76,7 @@ class TestCategoryMethods:
 
         new_attrs = {"filterable": ["brand", "color"]}
         category.update_details(attributes=new_attrs)
-        assert json.loads(category.attributes) == new_attrs
+        assert category.attributes == new_attrs
 
     def test_reorder(self):
         category = Category.create(name="Electronics")

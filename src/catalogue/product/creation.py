@@ -1,7 +1,7 @@
 """Product creation — command and handler."""
 
 from protean import handle
-from protean.fields import Identifier, String, Text
+from protean.fields import Dict, Identifier, String
 from protean.utils.globals import current_domain
 
 from catalogue.domain import catalogue
@@ -18,7 +18,7 @@ class CreateProduct:
     description: String()
     category_id: Identifier()
     brand: String(max_length=100)
-    attributes: Text()
+    attributes: Dict()
     visibility: String(max_length=20)
     meta_title: String(max_length=70)
     meta_description: String(max_length=160)

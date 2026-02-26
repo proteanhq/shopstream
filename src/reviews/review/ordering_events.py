@@ -47,10 +47,9 @@ class OrderingEventsHandler:
 
         # If items are available, create one record per product
         if hasattr(event, "items") and event.items:
-            import json
             import uuid
 
-            items = json.loads(event.items) if isinstance(event.items, str) else []
+            items = event.items or []
             for item in items:
                 try:
                     vp_repo.add(

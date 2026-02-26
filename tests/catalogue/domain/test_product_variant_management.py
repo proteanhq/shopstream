@@ -1,7 +1,5 @@
 """Tests for Product variant management."""
 
-import json
-
 import pytest
 from catalogue.product.events import TierPriceSet, VariantAdded, VariantPriceChanged
 from catalogue.product.product import Dimensions, Price, Product, Weight
@@ -56,8 +54,7 @@ class TestAddVariant:
             price=price,
             attributes={"size": "L", "color": "Blue"},
         )
-        parsed = json.loads(variant.attributes)
-        assert parsed["size"] == "L"
+        assert variant.attributes["size"] == "L"
 
     def test_add_variant_raises_event(self):
         product = _make_product()
@@ -118,7 +115,7 @@ class TestSetTierPrice:
 
         product.set_tier_price(variant.id, "Silver", 89.99)
 
-        tiers = json.loads(product.variants[0].price.tier_prices)
+        tiers = product.variants[0].price.tier_prices
         assert tiers["Silver"] == 89.99
         assert len(product._events) == 1
 
@@ -136,7 +133,7 @@ class TestSetTierPrice:
         product.set_tier_price(variant.id, "Silver", 89.99)
         product.set_tier_price(variant.id, "Gold", 79.99)
 
-        tiers = json.loads(product.variants[0].price.tier_prices)
+        tiers = product.variants[0].price.tier_prices
         assert tiers["Silver"] == 89.99
         assert tiers["Gold"] == 79.99
 

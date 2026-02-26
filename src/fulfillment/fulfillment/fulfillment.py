@@ -10,7 +10,6 @@ State Machine:
     {PENDING, PICKING, PACKING, READY_TO_SHIP} → CANCELLED
 """
 
-import json
 from datetime import UTC, datetime
 from enum import Enum
 
@@ -21,8 +20,8 @@ from protean.fields import (
     HasMany,
     Identifier,
     Integer,
+    List,
     String,
-    Text,
     ValueObject,
 )
 
@@ -156,7 +155,7 @@ class Package:
 
     weight = Float()
     dimensions = ValueObject(PackageDimensions)
-    item_ids = Text()  # JSON list of FulfillmentItem IDs
+    item_ids = List(String())
 
 
 @fulfillment.entity(part_of="Fulfillment")
@@ -220,7 +219,7 @@ class Fulfillment:
                 order_id=order_id,
                 customer_id=customer_id,
                 warehouse_id=warehouse_id or "",
-                items=json.dumps(items_data),
+                items=items_data,
                 item_count=len(items_data),
                 created_at=now,
             )
@@ -379,7 +378,7 @@ class Fulfillment:
                 order_id=str(self.order_id),
                 carrier=self.shipment.carrier,
                 tracking_number=tracking_number,
-                shipped_item_ids=json.dumps(shipped_item_ids),
+                shipped_item_ids=shipped_item_ids,
                 estimated_delivery=estimated_delivery,
                 shipped_at=now,
             )

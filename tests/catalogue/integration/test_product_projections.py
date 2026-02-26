@@ -1,7 +1,5 @@
 """Integration tests for product projections."""
 
-import json
-
 from catalogue.product.creation import CreateProduct
 from catalogue.product.details import UpdateProductDetails
 from catalogue.product.images import AddProductImage
@@ -50,7 +48,7 @@ class TestProductDetailProjection:
         )
 
         detail = current_domain.repository_for(ProductDetail).get(product_id)
-        variants = json.loads(detail.variants)
+        variants = detail.variants
         assert len(variants) == 1
         assert variants[0]["variant_sku"] == "V-001"
 
@@ -62,7 +60,7 @@ class TestProductDetailProjection:
         )
 
         detail = current_domain.repository_for(ProductDetail).get(product_id)
-        images = json.loads(detail.images)
+        images = detail.images
         assert len(images) == 1
 
     def test_variant_price_change_tracked(self):
@@ -81,7 +79,7 @@ class TestProductDetailProjection:
         )
 
         detail = current_domain.repository_for(ProductDetail).get(product_id)
-        variants = json.loads(detail.variants)
+        variants = detail.variants
         assert variants[0]["price_amount"] == 49.99
 
     def test_tier_price_tracked(self):
@@ -100,7 +98,7 @@ class TestProductDetailProjection:
         )
 
         detail = current_domain.repository_for(ProductDetail).get(product_id)
-        variants = json.loads(detail.variants)
+        variants = detail.variants
         assert variants[0]["tier_prices"]["Silver"] == 24.99
 
     def test_status_transitions_tracked(self):

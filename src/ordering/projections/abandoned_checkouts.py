@@ -28,9 +28,7 @@ class AbandonedCheckout:
 class AbandonedCheckoutProjector:
     @on(OrderCreated)
     def on_order_created(self, event):
-        import json
-
-        items = json.loads(event.items) if isinstance(event.items, str) else (event.items or [])
+        items = event.items or []
         current_domain.repository_for(AbandonedCheckout).add(
             AbandonedCheckout(
                 order_id=event.order_id,

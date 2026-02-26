@@ -1,7 +1,7 @@
 """ReviewDetail — full detail view of a single review."""
 
 from protean.core.projector import on
-from protean.fields import DateTime, Identifier, Integer, String, Text
+from protean.fields import DateTime, Identifier, Integer, List, String, Text
 from protean.utils.globals import current_domain
 
 from reviews.domain import reviews
@@ -28,8 +28,8 @@ class ReviewDetail:
     rating = Integer(required=True)
     title = String(required=True)
     body = Text(required=True)
-    pros = Text()
-    cons = Text()
+    pros = List(String())
+    cons = List(String())
     images = Text()
     verified_purchase = String()
     status = String(required=True)

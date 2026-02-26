@@ -1,6 +1,6 @@
 """Domain events for the ShoppingCart aggregate."""
 
-from protean.fields import DateTime, Identifier, Integer, String, Text
+from protean.fields import DateTime, Dict, Identifier, Integer, List, String
 
 from ordering.domain import ordering
 
@@ -69,7 +69,7 @@ class CartConverted:
 
     cart_id = Identifier(required=True)
     customer_id = Identifier()
-    items = Text(required=True)  # JSON: list of {product_id, variant_id, quantity}
+    items = List(Dict(), required=True)
 
 
 @ordering.event(part_of="ShoppingCart")

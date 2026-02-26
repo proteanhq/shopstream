@@ -4,7 +4,7 @@ import uuid
 from datetime import UTC, datetime
 
 from protean.core.projector import on
-from protean.fields import DateTime, Identifier, String, Text
+from protean.fields import DateTime, Dict, Identifier, String
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
@@ -39,7 +39,7 @@ class OrderTimeline:
     event_type = String(required=True)
     description = String(required=True)
     occurred_at = DateTime(required=True)
-    event_metadata = Text()  # JSON: extra event data
+    event_metadata = Dict()
 
 
 def _add_entry(order_id, event_type, description, occurred_at, event_metadata=None):
@@ -50,7 +50,7 @@ def _add_entry(order_id, event_type, description, occurred_at, event_metadata=No
             event_type=event_type,
             description=description,
             occurred_at=occurred_at,
-            event_metadata=event_metadata,
+            event_metadata=event_metadata or {},
         )
     )
 

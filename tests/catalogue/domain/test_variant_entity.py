@@ -39,13 +39,10 @@ class TestVariantConstruction:
         assert variant.weight.unit == "kg"
 
     def test_variant_with_attributes(self):
-        import json
-
         sku = SKU(code="VAR-003")
         price = Price(base_price=39.99)
-        attrs = json.dumps({"size": "L", "color": "Blue"})
+        attrs = {"size": "L", "color": "Blue"}
         variant = Variant(variant_sku=sku, price=price, attributes=attrs)
 
-        parsed = json.loads(variant.attributes)
-        assert parsed["size"] == "L"
-        assert parsed["color"] == "Blue"
+        assert variant.attributes["size"] == "L"
+        assert variant.attributes["color"] == "Blue"

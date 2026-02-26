@@ -12,7 +12,7 @@ src/ordering/cart/events.py.
 """
 
 from protean.core.event import BaseEvent
-from protean.fields import DateTime, Float, Identifier, String, Text
+from protean.fields import DateTime, Dict, Float, Identifier, List, String
 
 
 class OrderCreated(BaseEvent):
@@ -25,7 +25,7 @@ class OrderCreated(BaseEvent):
 
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
-    items = Text(required=True)  # JSON list of item dicts
+    items = List(Dict(), required=True)
     grand_total = Float(required=True)
     currency = String(default="USD")
     created_at = DateTime(required=True)
@@ -38,8 +38,8 @@ class OrderPaid(BaseEvent):
 
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
-    items = Text(required=True)  # JSON list of order items
-    shipping_address = Text()  # JSON address
+    items = List(Dict(), required=True)
+    shipping_address = Dict()
     grand_total = Float(required=True)
     currency = String(default="USD")
     paid_at = DateTime(required=True)
@@ -69,7 +69,7 @@ class OrderDelivered(BaseEvent):
 
     order_id = Identifier(required=True)
     customer_id = Identifier()
-    items = Text()  # JSON list of {product_id, variant_id}
+    items = List(Dict())
     delivered_at = DateTime(required=True)
 
 
@@ -84,8 +84,8 @@ class OrderReturned(BaseEvent):
 
     order_id = Identifier(required=True)
     customer_id = Identifier()
-    returned_item_ids = Text()  # JSON list of item IDs
-    items = Text()  # JSON list of {product_id, variant_id, quantity}
+    returned_item_ids = List(String())
+    items = List(Dict())
     grand_total = Float()
     returned_at = DateTime(required=True)
 
@@ -101,5 +101,5 @@ class CartAbandoned(BaseEvent):
 
     cart_id = Identifier(required=True)
     customer_id = Identifier()
-    items = Text()  # JSON list of {product_id, variant_id, quantity}
+    items = List(Dict())
     abandoned_at = DateTime(required=True)

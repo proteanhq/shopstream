@@ -4,8 +4,6 @@ Provides the common pattern: look up preferences → filter channels →
 render template → create Notification per channel.
 """
 
-import json
-
 import structlog
 from notifications.notification.notification import (
     Notification,
@@ -87,7 +85,7 @@ def create_notifications_for_customer(
             template_name=template_cls.__name__,
             source_event_type=source_event_type,
             source_event_id=source_event_id,
-            context_data=json.dumps(context),
+            context_data=context,
             scheduled_for=scheduled_for,
         )
         repo.add(notification)
@@ -134,7 +132,7 @@ def create_internal_notification(
         template_name=template_cls.__name__,
         source_event_type=source_event_type,
         source_event_id=source_event_id,
-        context_data=json.dumps(context),
+        context_data=context,
     )
     repo.add(notification)
 

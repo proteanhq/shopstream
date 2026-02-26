@@ -34,9 +34,9 @@ class TestOrderCreatedEvent:
         event = OrderCreated(
             order_id="ord-001",
             customer_id="cust-001",
-            items='[{"sku": "S1"}]',
-            shipping_address='{"street": "1 St"}',
-            billing_address='{"street": "2 St"}',
+            items=[{"sku": "S1"}],
+            shipping_address={"street": "1 St"},
+            billing_address={"street": "2 St"},
             subtotal=100.0,
             grand_total=110.0,
             created_at=now,
@@ -163,10 +163,10 @@ class TestOrderPartiallyShippedEvent:
             shipment_id="ship-001",
             carrier="FedEx",
             tracking_number="TRACK-P",
-            shipped_item_ids='["item-001"]',
+            shipped_item_ids=["item-001"],
             shipped_at=now,
         )
-        assert event.shipped_item_ids == '["item-001"]'
+        assert event.shipped_item_ids == ["item-001"]
 
 
 class TestOrderDeliveredEvent:
@@ -200,8 +200,8 @@ class TestReturnApprovedEvent:
 class TestOrderReturnedEvent:
     def test_construction(self):
         now = datetime.now(UTC)
-        event = OrderReturned(order_id="ord-001", returned_item_ids='["item-001"]', returned_at=now)
-        assert event.returned_item_ids == '["item-001"]'
+        event = OrderReturned(order_id="ord-001", returned_item_ids=["item-001"], returned_at=now)
+        assert event.returned_item_ids == ["item-001"]
 
 
 class TestOrderCancelledEvent:

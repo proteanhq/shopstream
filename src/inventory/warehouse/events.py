@@ -1,6 +1,6 @@
 """Domain events for the Warehouse aggregate."""
 
-from protean.fields import DateTime, Identifier, String, Text
+from protean.fields import DateTime, Dict, Identifier, String
 
 from inventory.domain import inventory
 
@@ -13,7 +13,7 @@ class WarehouseCreated:
 
     warehouse_id = Identifier(required=True)
     name = String(required=True)
-    address = Text(required=True)  # JSON-serialized address
+    address = Dict(required=True)
     capacity = Identifier(required=True)  # Stored as string to avoid Integer(0) issue
     created_at = DateTime(required=True)
 

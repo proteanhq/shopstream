@@ -1,7 +1,5 @@
 """Tests for cart coupon management."""
 
-import json
-
 import pytest
 from ordering.cart.cart import ShoppingCart
 from ordering.cart.events import CartCouponApplied
@@ -16,7 +14,7 @@ class TestApplyCoupon:
     def test_apply_coupon(self):
         cart = _make_cart()
         cart.apply_coupon("SAVE10")
-        coupons = json.loads(cart.applied_coupons)
+        coupons = cart.applied_coupons
         assert "SAVE10" in coupons
 
     def test_apply_coupon_raises_event(self):
@@ -30,7 +28,7 @@ class TestApplyCoupon:
         cart = _make_cart()
         cart.apply_coupon("SAVE10")
         cart.apply_coupon("FREESHIP")
-        coupons = json.loads(cart.applied_coupons)
+        coupons = cart.applied_coupons
         assert len(coupons) == 2
 
     def test_cannot_apply_duplicate_coupon(self):

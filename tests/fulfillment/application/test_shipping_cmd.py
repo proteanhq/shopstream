@@ -1,6 +1,5 @@
 """Application tests for shipping handoff command via domain.process()."""
 
-import json
 from datetime import UTC, datetime, timedelta
 
 import pytest
@@ -15,7 +14,7 @@ from protean.exceptions import ValidationError
 
 def _create_ready_to_ship():
     """Create a fulfillment in READY_TO_SHIP state."""
-    items = json.dumps([{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}])
+    items = [{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}]
     ff_id = current_domain.process(
         CreateFulfillment(order_id="ord-001", customer_id="cust-001", items=items),
         asynchronous=False,
@@ -28,7 +27,7 @@ def _create_ready_to_ship():
     )
     current_domain.process(CompletePickList(fulfillment_id=ff_id), asynchronous=False)
     current_domain.process(
-        RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps([{"weight": 1.5}])),
+        RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=[{"weight": 1.5}]),
         asynchronous=False,
     )
     current_domain.process(
@@ -82,7 +81,7 @@ class TestRecordHandoff:
         assert ff.shipment.estimated_delivery is not None
 
     def test_handoff_fails_from_pending(self):
-        items = json.dumps([{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}])
+        items = [{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}]
         ff_id = current_domain.process(
             CreateFulfillment(order_id="ord-001", customer_id="cust-001", items=items),
             asynchronous=False,

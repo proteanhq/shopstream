@@ -4,11 +4,9 @@ Tracks stock adjustments, damaged items, and write-offs per inventory item.
 Provides aggregate shrinkage data for loss prevention and auditing.
 """
 
-import json
-
 from protean.core.projector import on
 from protean.exceptions import ObjectNotFoundError
-from protean.fields import DateTime, Float, Identifier, Integer, String, Text
+from protean.fields import DateTime, Float, Identifier, Integer, List, String
 from protean.utils.globals import current_domain
 
 from inventory.domain import inventory
@@ -27,7 +25,7 @@ class ShrinkageReport:
     total_written_off = Integer(default=0)
     total_shrinkage_value = Float(default=0.0)
     last_adjustment_at = DateTime()
-    adjustment_reasons = Text(default="[]")  # JSON list of reason strings
+    adjustment_reasons = List(String())
 
 
 def _get_or_create(event):
@@ -44,7 +42,7 @@ def _get_or_create(event):
             total_damaged=0,
             total_written_off=0,
             total_shrinkage_value=0.0,
-            adjustment_reasons="[]",
+            adjustment_reasons=[],
         )
         return record
 
@@ -62,15 +60,11 @@ class ShrinkageReportProjector:
             view.total_adjustments = (view.total_adjustments or 0) + abs(qty_change)
 
         # Track reason
-        reasons = (
-            json.loads(view.adjustment_reasons)
-            if isinstance(view.adjustment_reasons, str)
-            else (view.adjustment_reasons or [])
-        )
+        reasons = list(view.adjustment_reasons or [])
         reason_entry = f"{event.adjustment_type}: {event.reason}"
         reasons.append(reason_entry)
         # Keep last 100 reasons
-        view.adjustment_reasons = json.dumps(reasons[-100:])
+        view.adjustment_reasons = reasons[-100:]
 
         view.last_adjustment_at = event.adjusted_at
         repo.add(view)

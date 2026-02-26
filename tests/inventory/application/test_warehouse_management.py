@@ -1,7 +1,5 @@
 """Application tests for warehouse management commands."""
 
-import json
-
 from inventory.warehouse.management import (
     AddZone,
     CreateWarehouse,
@@ -15,15 +13,13 @@ from protean import current_domain
 def _create_warehouse(**overrides):
     defaults = {
         "name": "Main Warehouse",
-        "address": json.dumps(
-            {
-                "street": "100 Industrial Blvd",
-                "city": "Chicago",
-                "state": "IL",
-                "postal_code": "60601",
-                "country": "US",
-            }
-        ),
+        "address": {
+            "street": "100 Industrial Blvd",
+            "city": "Chicago",
+            "state": "IL",
+            "postal_code": "60601",
+            "country": "US",
+        },
         "capacity": 10000,
     }
     defaults.update(overrides)

@@ -18,7 +18,7 @@ class CreateProductRequest(BaseModel):
                     "description": "Premium cotton crew-neck tee in black.",
                     "category_id": "cat-apparel-001",
                     "brand": "Acme Apparel",
-                    "attributes": '{"color": "black", "material": "cotton"}',
+                    "attributes": {"color": "black", "material": "cotton"},
                     "visibility": "Public",
                     "meta_title": "Classic Black T-Shirt | Acme Apparel",
                     "meta_description": "Premium cotton crew-neck tee available in multiple sizes.",
@@ -34,7 +34,7 @@ class CreateProductRequest(BaseModel):
     description: str | None = None
     category_id: str | None = None
     brand: str | None = Field(None, max_length=100)
-    attributes: str | None = None
+    attributes: dict | None = None
     visibility: str | None = Field(None, max_length=20)
     meta_title: str | None = Field(None, max_length=70)
     meta_description: str | None = Field(None, max_length=160)
@@ -59,7 +59,7 @@ class UpdateProductDetailsRequest(BaseModel):
     title: str | None = Field(None, max_length=255)
     description: str | None = None
     brand: str | None = Field(None, max_length=100)
-    attributes: str | None = None
+    attributes: dict | None = None
     meta_title: str | None = Field(None, max_length=70)
     meta_description: str | None = Field(None, max_length=160)
     slug: str | None = Field(None, max_length=200)
@@ -71,7 +71,7 @@ class AddVariantRequest(BaseModel):
             "examples": [
                 {
                     "variant_sku": "TSHIRT-BLK-L",
-                    "attributes": '{"size": "L"}',
+                    "attributes": {"size": "L"},
                     "base_price": 29.99,
                     "currency": "USD",
                     "weight_value": 0.25,
@@ -86,7 +86,7 @@ class AddVariantRequest(BaseModel):
     }
 
     variant_sku: str = Field(..., max_length=50)
-    attributes: str | None = None
+    attributes: dict | None = None
     base_price: float
     currency: str = Field("USD", max_length=3)
     weight_value: float | None = None
@@ -135,24 +135,24 @@ class AddProductImageRequest(BaseModel):
 class CreateCategoryRequest(BaseModel):
     model_config = {
         "json_schema_extra": {
-            "examples": [{"name": "Apparel", "parent_category_id": None, "attributes": '{"season": "all"}'}]
+            "examples": [{"name": "Apparel", "parent_category_id": None, "attributes": {"season": "all"}}]
         }
     }
 
     name: str = Field(..., max_length=100)
     parent_category_id: str | None = None
-    attributes: str | None = None
+    attributes: dict | None = None
 
 
 class UpdateCategoryRequest(BaseModel):
     model_config = {
         "json_schema_extra": {
-            "examples": [{"name": "Men's Apparel", "attributes": '{"season": "spring", "gender": "men"}'}]
+            "examples": [{"name": "Men's Apparel", "attributes": {"season": "spring", "gender": "men"}}]
         }
     }
 
     name: str | None = Field(None, max_length=100)
-    attributes: str | None = None
+    attributes: dict | None = None
 
 
 class ReorderCategoryRequest(BaseModel):

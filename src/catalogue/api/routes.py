@@ -45,7 +45,7 @@ async def create_product(body: CreateProductRequest) -> ProductIdResponse:
         description=body.description,
         category_id=body.category_id,
         brand=body.brand,
-        attributes=body.attributes,
+        attributes=body.attributes or {},
         visibility=body.visibility,
         meta_title=body.meta_title,
         meta_description=body.meta_description,
@@ -62,7 +62,7 @@ async def update_product_details(product_id: str, body: UpdateProductDetailsRequ
         title=body.title,
         description=body.description,
         brand=body.brand,
-        attributes=body.attributes,
+        attributes=body.attributes or {},
         meta_title=body.meta_title,
         meta_description=body.meta_description,
         slug=body.slug,
@@ -76,7 +76,7 @@ async def add_variant(product_id: str, body: AddVariantRequest) -> StatusRespons
     command = AddVariant(
         product_id=product_id,
         variant_sku=body.variant_sku,
-        attributes=body.attributes,
+        attributes=body.attributes or {},
         base_price=body.base_price,
         currency=body.currency,
         weight_value=body.weight_value,
@@ -165,7 +165,7 @@ async def create_category(body: CreateCategoryRequest) -> CategoryIdResponse:
     command = CreateCategory(
         name=body.name,
         parent_category_id=body.parent_category_id,
-        attributes=body.attributes,
+        attributes=body.attributes or {},
     )
     result = current_domain.process(command, asynchronous=False)
     return CategoryIdResponse(category_id=result)
@@ -176,7 +176,7 @@ async def update_category(category_id: str, body: UpdateCategoryRequest) -> Stat
     command = UpdateCategory(
         category_id=category_id,
         name=body.name,
-        attributes=body.attributes,
+        attributes=body.attributes or {},
     )
     current_domain.process(command, asynchronous=False)
     return StatusResponse()

@@ -1,9 +1,7 @@
 """Variant management — commands and handler."""
 
-import json
-
 from protean import handle
-from protean.fields import Float, Identifier, String, Text
+from protean.fields import Dict, Float, Identifier, String
 from protean.utils.globals import current_domain
 
 from catalogue.domain import catalogue
@@ -16,7 +14,7 @@ class AddVariant:
 
     product_id: Identifier(required=True)
     variant_sku: String(required=True, max_length=50)
-    attributes: Text()
+    attributes: Dict()
     base_price: Float(required=True)
     currency: String(max_length=3, default="USD")
     weight_value: Float()
@@ -75,14 +73,10 @@ class ManageVariantsHandler:
                 unit=command.dimension_unit or "cm",
             )
 
-        attrs = None
-        if command.attributes:
-            attrs = json.loads(command.attributes)
-
         product.add_variant(
             variant_sku=command.variant_sku,
             price=price,
-            attributes=attrs,
+            attributes=command.attributes,
             weight=weight,
             dimensions=dimensions,
         )

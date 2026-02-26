@@ -41,12 +41,11 @@ fulfillment_router = APIRouter(prefix="/fulfillments", tags=["fulfillments"])
 @fulfillment_router.post("", status_code=201, response_model=FulfillmentIdResponse)
 async def create_fulfillment(body: CreateFulfillmentRequest) -> FulfillmentIdResponse:
     """Create a new fulfillment for a paid order."""
-    items_json = json.dumps([item.model_dump() for item in body.items])
     command = CreateFulfillment(
         order_id=body.order_id,
         customer_id=body.customer_id,
         warehouse_id=body.warehouse_id,
-        items=items_json,
+        items=[item.model_dump() for item in body.items],
     )
     result = current_domain.process(command, asynchronous=False)
     return FulfillmentIdResponse(fulfillment_id=result)
@@ -89,7 +88,7 @@ async def record_packing(fulfillment_id: str, body: RecordPackingRequest) -> Sta
     command = RecordPacking(
         fulfillment_id=fulfillment_id,
         packed_by=body.packed_by,
-        packages=json.dumps(body.packages),
+        packages=body.packages,
     )
     current_domain.process(command, asynchronous=False)
     return StatusResponse(status="packing_completed")

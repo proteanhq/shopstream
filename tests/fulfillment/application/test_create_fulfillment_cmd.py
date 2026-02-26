@@ -1,26 +1,22 @@
 """Application tests for fulfillment creation via domain.process()."""
 
-import json
-
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.fulfillment import Fulfillment, FulfillmentStatus
 from protean import current_domain
 
 
-def _items_json():
-    return json.dumps(
-        [
-            {"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 2},
-            {"order_item_id": "oi-2", "product_id": "prod-2", "sku": "SKU-002", "quantity": 1},
-        ]
-    )
+def _items():
+    return [
+        {"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 2},
+        {"order_item_id": "oi-2", "product_id": "prod-2", "sku": "SKU-002", "quantity": 1},
+    ]
 
 
 def _create_fulfillment(**overrides):
     defaults = {
         "order_id": "ord-001",
         "customer_id": "cust-001",
-        "items": _items_json(),
+        "items": _items(),
     }
     defaults.update(overrides)
     command = CreateFulfillment(**defaults)

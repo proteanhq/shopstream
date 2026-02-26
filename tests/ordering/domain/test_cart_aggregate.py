@@ -1,7 +1,5 @@
 """Tests for ShoppingCart aggregate creation and structure."""
 
-import json
-
 from ordering.cart.cart import CartStatus, ShoppingCart
 
 
@@ -26,7 +24,7 @@ class TestCartCreation:
 
     def test_create_sets_empty_coupons(self):
         cart = ShoppingCart.create(customer_id="cust-001")
-        coupons = json.loads(cart.applied_coupons) if cart.applied_coupons else []
+        coupons = cart.applied_coupons if cart.applied_coupons else []
         assert coupons == []
 
     def test_create_sets_timestamps(self):

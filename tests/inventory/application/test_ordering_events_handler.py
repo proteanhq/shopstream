@@ -7,7 +7,6 @@ Covers:
 - on_order_returned: no-op with empty items
 """
 
-import json
 from datetime import UTC, datetime
 
 from inventory.projections.inventory_level import InventoryLevel
@@ -167,7 +166,7 @@ class TestOrderReturnedHandler:
             OrderReturned(
                 order_id="ord-ret-001",
                 customer_id="cust-001",
-                items=json.dumps([{"product_id": "prod-ret-001", "variant_id": "var-ret-001", "quantity": 5}]),
+                items=[{"product_id": "prod-ret-001", "variant_id": "var-ret-001", "quantity": 5}],
                 returned_at=datetime.now(UTC),
             )
         )
@@ -185,7 +184,7 @@ class TestOrderReturnedHandler:
             OrderReturned(
                 order_id="ord-ret-empty",
                 customer_id="cust-001",
-                items="[]",
+                items=[],
                 returned_at=datetime.now(UTC),
             )
         )

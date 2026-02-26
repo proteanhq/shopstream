@@ -4,7 +4,7 @@ All events are past tense, versioned, and carry sufficient data for
 downstream projectors and cross-domain event handlers.
 """
 
-from protean.fields import DateTime, Identifier, Integer, String, Text
+from protean.fields import DateTime, Dict, Identifier, Integer, List, String
 
 from fulfillment.domain import fulfillment
 
@@ -19,7 +19,7 @@ class FulfillmentCreated:
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
     warehouse_id = String()
-    items = Text(required=True)  # JSON list of item dicts
+    items = List(Dict(), required=True)
     item_count = Integer(required=True)
     created_at = DateTime(required=True)
 
@@ -92,7 +92,7 @@ class ShipmentHandedOff:
     order_id = Identifier(required=True)
     carrier = String(required=True)
     tracking_number = String(required=True)
-    shipped_item_ids = Text()  # JSON list of order item ID strings
+    shipped_item_ids = List(String())
     estimated_delivery = DateTime()
     shipped_at = DateTime(required=True)
 

@@ -12,7 +12,6 @@ State Machine (14 states):
     CANCELLED (from CREATED, CONFIRMED, PAYMENT_PENDING, PAID) → REFUNDED
 """
 
-import json
 from datetime import UTC, datetime
 from enum import Enum
 from uuid import uuid4
@@ -242,9 +241,9 @@ class Order:
             OrderCreated(
                 order_id=str(order.id),
                 customer_id=str(customer_id),
-                items=json.dumps(items_with_ids),
-                shipping_address=json.dumps(shipping_address),
-                billing_address=json.dumps(billing_address),
+                items=items_with_ids,
+                shipping_address=shipping_address,
+                billing_address=billing_address,
                 subtotal=pricing.get("subtotal", 0.0),
                 shipping_cost=pricing.get("shipping_cost", 0.0),
                 tax_total=pricing.get("tax_total", 0.0),
@@ -503,7 +502,7 @@ class Order:
                 shipment_id=shipment_id,
                 carrier=carrier,
                 tracking_number=tracking_number,
-                shipped_item_ids=json.dumps(shipped_item_ids or [str(i.id) for i in self.items]),
+                shipped_item_ids=shipped_item_ids or [str(i.id) for i in self.items],
                 estimated_delivery=estimated_delivery,
                 shipped_at=datetime.now(UTC),
             )
@@ -526,7 +525,7 @@ class Order:
                 shipment_id=shipment_id,
                 carrier=carrier,
                 tracking_number=tracking_number,
-                shipped_item_ids=json.dumps(shipped_item_ids),
+                shipped_item_ids=shipped_item_ids,
                 shipped_at=datetime.now(UTC),
             )
         )
@@ -582,7 +581,7 @@ class Order:
         self.raise_(
             OrderReturned(
                 order_id=str(self.id),
-                returned_item_ids=json.dumps(ids_to_return),
+                returned_item_ids=ids_to_return,
                 returned_at=datetime.now(UTC),
             )
         )
@@ -639,18 +638,16 @@ class Order:
         self.created_at = event.created_at
         self.updated_at = event.created_at
 
-        # Reconstruct items from JSON (includes IDs for deterministic replay)
-        items_data = json.loads(event.items) if isinstance(event.items, str) else []
+        # Reconstruct items (includes IDs for deterministic replay)
+        items_data = event.items or []
         self.items = [OrderItem(**item_data) for item_data in items_data]
 
         # Reconstruct addresses
-        ship_data = json.loads(event.shipping_address) if isinstance(event.shipping_address, str) else {}
-        if ship_data:
-            self.shipping_address = ShippingAddress(**ship_data)
+        if event.shipping_address:
+            self.shipping_address = ShippingAddress(**event.shipping_address)
 
-        bill_data = json.loads(event.billing_address) if isinstance(event.billing_address, str) else {}
-        if bill_data:
-            self.billing_address = ShippingAddress(**bill_data)
+        if event.billing_address:
+            self.billing_address = ShippingAddress(**event.billing_address)
 
         # Reconstruct pricing
         self.pricing = OrderPricing(
@@ -771,7 +768,7 @@ class Order:
         self.carrier = event.carrier
         self.tracking_number = event.tracking_number
         self.updated_at = event.shipped_at
-        shipped_ids = json.loads(event.shipped_item_ids) if event.shipped_item_ids else []
+        shipped_ids = event.shipped_item_ids or []
         for item in self.items:
             if str(item.id) in shipped_ids:
                 item.item_status = ItemStatus.SHIPPED.value
@@ -802,7 +799,7 @@ class Order:
     def _on_order_returned(self, event: OrderReturned):
         self.status = OrderStatus.RETURNED.value
         self.updated_at = event.returned_at
-        returned_ids = json.loads(event.returned_item_ids) if event.returned_item_ids else []
+        returned_ids = event.returned_item_ids or []
         for item in self.items:
             if str(item.id) in returned_ids:
                 item.item_status = ItemStatus.RETURNED.value

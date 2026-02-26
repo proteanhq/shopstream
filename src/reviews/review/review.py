@@ -13,7 +13,6 @@ State Machine (4 states):
     REMOVED → (terminal)
 """
 
-import json
 from datetime import UTC, datetime
 from enum import Enum
 
@@ -22,9 +21,11 @@ from protean.exceptions import ValidationError
 from protean.fields import (
     Boolean,
     DateTime,
+    Dict,
     HasMany,
     Identifier,
     Integer,
+    List,
     String,
     Text,
     ValueObject,
@@ -151,8 +152,8 @@ class Review:
     rating = ValueObject(Rating, required=True)
     title = String(required=True, max_length=200)
     body = Text(required=True)
-    pros = Text()  # JSON array of strings
-    cons = Text()  # JSON array of strings
+    pros = List(String())
+    cons = List(String())
 
     # Media
     images = HasMany(ReviewImage)
@@ -171,7 +172,7 @@ class Review:
 
     # Reporting
     report_count = Integer(default=0)
-    reported_reasons = Text()  # JSON: [{customer_id, reason, detail, reported_at}]
+    reported_reasons = List(Dict())
 
     # Seller engagement
     reply = HasMany(SellerReply)
@@ -236,14 +237,14 @@ class Review:
             rating=Rating(score=rating),
             title=title,
             body=body,
-            pros=json.dumps(pros) if pros else None,
-            cons=json.dumps(cons) if cons else None,
+            pros=pros or [],
+            cons=cons or [],
             verified_purchase=verified_purchase,
             status=ReviewStatus.PENDING.value,
             helpful_count=0,
             unhelpful_count=0,
             report_count=0,
-            reported_reasons=json.dumps([]),
+            reported_reasons=[],
             is_edited=False,
             created_at=now,
             updated_at=now,
@@ -270,8 +271,8 @@ class Review:
                 rating=rating,
                 title=title,
                 body=body,
-                pros=json.dumps(pros) if pros else None,
-                cons=json.dumps(cons) if cons else None,
+                pros=pros or [],
+                cons=cons or [],
                 verified_purchase=str(verified_purchase),
                 image_count=len(images) if images else 0,
                 submitted_at=now,
@@ -319,9 +320,9 @@ class Review:
             if rating is not _UNSET:
                 self.rating = Rating(score=rating)
             if pros is not _UNSET:
-                self.pros = json.dumps(pros) if pros else None
+                self.pros = pros or []
             if cons is not _UNSET:
-                self.cons = json.dumps(cons) if cons else None
+                self.cons = cons or []
 
             self.is_edited = True
             self.edited_at = now
@@ -440,8 +441,8 @@ class Review:
 
         now = datetime.now(UTC)
 
-        # Track report in JSON array
-        reports = json.loads(self.reported_reasons) if self.reported_reasons else []
+        # Track report
+        reports = list(self.reported_reasons) if self.reported_reasons else []
         reports.append(
             {
                 "customer_id": str(customer_id),
@@ -451,7 +452,7 @@ class Review:
             }
         )
 
-        self.reported_reasons = json.dumps(reports)
+        self.reported_reasons = reports
         self.report_count = self.report_count + 1
         self.updated_at = now
 

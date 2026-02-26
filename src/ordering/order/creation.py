@@ -1,9 +1,7 @@
 """Order creation — command and handler."""
 
-import json
-
 from protean import handle
-from protean.fields import Float, Identifier, String, Text
+from protean.fields import Dict, Float, Identifier, List, String
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
@@ -15,9 +13,9 @@ class CreateOrder:
     """Create a new order from a shopping cart's items, addresses, and pricing."""
 
     customer_id = Identifier(required=True)
-    items = Text(required=True)  # JSON: list of item dicts
-    shipping_address = Text(required=True)  # JSON: address dict
-    billing_address = Text(required=True)  # JSON: address dict
+    items = List(Dict(), required=True)
+    shipping_address = Dict(required=True)
+    billing_address = Dict(required=True)
     subtotal = Float(required=True)
     shipping_cost = Float(default=0.0)
     tax_total = Float(default=0.0)
@@ -30,15 +28,9 @@ class CreateOrder:
 class CreateOrderHandler:
     @handle(CreateOrder)
     def create_order(self, command):
-        items_data = json.loads(command.items) if isinstance(command.items, str) else command.items
-        shipping_address = (
-            json.loads(command.shipping_address)
-            if isinstance(command.shipping_address, str)
-            else command.shipping_address
-        )
-        billing_address = (
-            json.loads(command.billing_address) if isinstance(command.billing_address, str) else command.billing_address
-        )
+        items_data = command.items
+        shipping_address = command.shipping_address
+        billing_address = command.billing_address
 
         pricing = {
             "subtotal": command.subtotal,

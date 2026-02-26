@@ -33,7 +33,8 @@ class TestConvertToOrder:
         cart.convert_to_order()
         event = cart._events[0]
         assert event.items is not None
-        assert "prod-001" in event.items
+        product_ids = [item["product_id"] for item in event.items]
+        assert "prod-001" in product_ids
 
     def test_cannot_convert_empty_cart(self):
         cart = ShoppingCart.create(customer_id="cust-001")

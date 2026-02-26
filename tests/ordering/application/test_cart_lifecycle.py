@@ -1,7 +1,5 @@
 """Application tests for cart lifecycle: create → add items → coupon → convert/abandon."""
 
-import json
-
 from ordering.cart.cart import CartStatus, ShoppingCart
 from ordering.cart.conversion import ConvertToOrder
 from ordering.cart.coupons import ApplyCouponToCart
@@ -53,8 +51,7 @@ class TestCartCouponFlow:
             asynchronous=False,
         )
         cart = current_domain.repository_for(ShoppingCart).get(cart_id)
-        coupons = json.loads(cart.applied_coupons)
-        assert "SAVE10" in coupons
+        assert "SAVE10" in cart.applied_coupons
 
 
 class TestCartConversion:
@@ -85,11 +82,9 @@ class TestCartAbandonment:
 class TestGuestCartMerge:
     def test_merge_guest_cart_persists(self):
         cart_id = _create_cart_with_item()
-        guest_items = json.dumps(
-            [
-                {"product_id": "prod-002", "variant_id": "var-002", "quantity": 3},
-            ]
-        )
+        guest_items = [
+            {"product_id": "prod-002", "variant_id": "var-002", "quantity": 3},
+        ]
         current_domain.process(
             MergeGuestCart(cart_id=cart_id, guest_cart_items=guest_items),
             asynchronous=False,

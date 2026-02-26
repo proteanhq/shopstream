@@ -1,7 +1,5 @@
 """Tests for Review aggregate creation and structure."""
 
-import json
-
 from reviews.review.review import Review, ReviewStatus
 
 
@@ -104,8 +102,8 @@ class TestReviewWithProsAndCons:
             pros=["Durable", "Great value"],
             cons=["Heavy"],
         )
-        assert json.loads(review.pros) == ["Durable", "Great value"]
-        assert json.loads(review.cons) == ["Heavy"]
+        assert review.pros == ["Durable", "Great value"]
+        assert review.cons == ["Heavy"]
 
     def test_submit_without_pros_and_cons(self):
         review = Review.submit(
@@ -115,8 +113,8 @@ class TestReviewWithProsAndCons:
             title="Great product",
             body="I really enjoyed this product, it exceeded expectations.",
         )
-        assert review.pros is None
-        assert review.cons is None
+        assert review.pros == []
+        assert review.cons == []
 
 
 class TestReviewWithImages:

@@ -1,6 +1,6 @@
 """Domain events for the Category aggregate."""
 
-from protean.fields import DateTime, Identifier, Integer, String, Text
+from protean.fields import DateTime, Dict, Identifier, Integer, String
 
 from catalogue.domain import catalogue
 
@@ -25,7 +25,7 @@ class CategoryDetailsUpdated:
 
     category_id: Identifier(required=True)
     name: String(required=True)
-    attributes: Text()
+    attributes: Dict()
 
 
 @catalogue.event(part_of="Category")

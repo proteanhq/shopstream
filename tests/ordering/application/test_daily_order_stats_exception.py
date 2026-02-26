@@ -41,9 +41,9 @@ class TestDailyOrderStatsGetOrCreate:
         event = OrderCreated(
             order_id="ord-new-001",
             customer_id="cust-001",
-            items="[]",
-            shipping_address="{}",
-            billing_address="{}",
+            items=[],
+            shipping_address={},
+            billing_address={},
             subtotal=100.0,
             grand_total=110.0,
             created_at=datetime.now(UTC),

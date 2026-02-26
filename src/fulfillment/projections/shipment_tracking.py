@@ -1,9 +1,7 @@
 """Shipment tracking — customer-facing tracking page view."""
 
-import json
-
 from protean.core.projector import on
-from protean.fields import DateTime, Identifier, String, Text
+from protean.fields import DateTime, Dict, Identifier, List, String
 from protean.utils.globals import current_domain
 
 from fulfillment.domain import fulfillment
@@ -24,7 +22,7 @@ class ShipmentTrackingView:
     tracking_number = String()
     current_status = String(required=True)
     current_location = String()
-    events_json = Text()  # JSON list of tracking events
+    events = List(Dict())
     shipped_at = DateTime()
     delivered_at = DateTime()
 
@@ -40,7 +38,7 @@ class ShipmentTrackingProjector:
                 carrier=event.carrier,
                 tracking_number=event.tracking_number,
                 current_status="Shipped",
-                events_json=json.dumps([]),
+                events=[],
                 shipped_at=event.shipped_at,
             )
         )
@@ -53,7 +51,7 @@ class ShipmentTrackingProjector:
         view.current_location = event.location
 
         # Append tracking event to the log
-        existing = json.loads(view.events_json) if view.events_json else []
+        existing = list(view.events or [])
         existing.append(
             {
                 "status": event.status,
@@ -62,7 +60,7 @@ class ShipmentTrackingProjector:
                 "occurred_at": event.occurred_at.isoformat() if event.occurred_at else None,
             }
         )
-        view.events_json = json.dumps(existing)
+        view.events = existing
         repo.add(view)
 
     @on(DeliveryConfirmed)
@@ -72,7 +70,7 @@ class ShipmentTrackingProjector:
         view.current_status = "Delivered"
         view.delivered_at = event.delivered_at
 
-        existing = json.loads(view.events_json) if view.events_json else []
+        existing = list(view.events or [])
         existing.append(
             {
                 "status": "Delivered",
@@ -81,7 +79,7 @@ class ShipmentTrackingProjector:
                 "occurred_at": event.delivered_at.isoformat() if event.delivered_at else None,
             }
         )
-        view.events_json = json.dumps(existing)
+        view.events = existing
         repo.add(view)
 
     @on(DeliveryException)
@@ -91,7 +89,7 @@ class ShipmentTrackingProjector:
         view.current_status = "Exception"
         view.current_location = event.location
 
-        existing = json.loads(view.events_json) if view.events_json else []
+        existing = list(view.events or [])
         existing.append(
             {
                 "status": "Exception",
@@ -100,5 +98,5 @@ class ShipmentTrackingProjector:
                 "occurred_at": event.occurred_at.isoformat() if event.occurred_at else None,
             }
         )
-        view.events_json = json.dumps(existing)
+        view.events = existing
         repo.add(view)

@@ -1,7 +1,5 @@
 """Application tests for preference management command handlers."""
 
-import json
-
 import pytest
 from notifications.preference.management import (
     ClearQuietHours,
@@ -98,8 +96,7 @@ class TestSubscriptionCommands:
         )
         repo = current_domain.repository_for(NotificationPreference)
         prefs = repo.query.filter(customer_id=cid).all().items
-        types = json.loads(prefs[0].unsubscribed_types)
-        assert "CartRecovery" in types
+        assert "CartRecovery" in prefs[0].unsubscribed_types
 
     def test_resubscribe_to_type(self):
         cid = _create_preference()
@@ -113,8 +110,7 @@ class TestSubscriptionCommands:
         )
         repo = current_domain.repository_for(NotificationPreference)
         prefs = repo.query.filter(customer_id=cid).all().items
-        types = json.loads(prefs[0].unsubscribed_types)
-        assert "CartRecovery" not in types
+        assert "CartRecovery" not in prefs[0].unsubscribed_types
 
     def test_cannot_unsubscribe_twice(self):
         cid = _create_preference()

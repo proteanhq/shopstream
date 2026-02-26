@@ -47,7 +47,7 @@ class TestDailyShipmentsGetOrCreate:
             fulfillment_id="ful-new-001",
             order_id="ord-001",
             customer_id="cust-001",
-            items="[]",
+            items=[],
             item_count=2,
             created_at=now,
         )

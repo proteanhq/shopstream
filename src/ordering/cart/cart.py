@@ -5,13 +5,12 @@ selected by a customer or guest, supports coupon application, guest cart
 merging, and converts to an Order at checkout.
 """
 
-import json
 from datetime import UTC, datetime
 from enum import Enum
 
 from protean import invariant
 from protean.exceptions import ValidationError
-from protean.fields import DateTime, HasMany, Identifier, Integer, String, Text
+from protean.fields import DateTime, HasMany, Identifier, Integer, List, String
 
 from ordering.cart.events import (
     CartAbandoned,
@@ -50,7 +49,7 @@ class ShoppingCart:
     customer_id = Identifier()  # Nullable for guest carts
     session_id = String(max_length=255)  # For guest cart identification
     items = HasMany(CartItem)
-    applied_coupons = Text()  # JSON array of coupon codes
+    applied_coupons = List(String())
     status = String(choices=CartStatus, default=CartStatus.ACTIVE.value)
     created_at = DateTime()
     updated_at = DateTime()
@@ -70,7 +69,7 @@ class ShoppingCart:
             customer_id=customer_id,
             session_id=session_id,
             status=CartStatus.ACTIVE.value,
-            applied_coupons=json.dumps([]),
+            applied_coupons=[],
             created_at=now,
             updated_at=now,
         )
@@ -167,12 +166,12 @@ class ShoppingCart:
         if CartStatus(self.status) != CartStatus.ACTIVE:
             raise ValidationError({"status": ["Coupons can only be applied to an active cart"]})
 
-        coupons = json.loads(self.applied_coupons) if self.applied_coupons else []
+        coupons = list(self.applied_coupons) if self.applied_coupons else []
         if coupon_code in coupons:
             raise ValidationError({"coupon_code": ["Coupon already applied"]})
 
         coupons.append(coupon_code)
-        self.applied_coupons = json.dumps(coupons)
+        self.applied_coupons = coupons
         now = datetime.now(UTC)
         self.updated_at = now
 
@@ -259,7 +258,7 @@ class ShoppingCart:
             CartConverted(
                 cart_id=str(self.id),
                 customer_id=str(self.customer_id) if self.customer_id else None,
-                items=json.dumps(items_snapshot),
+                items=items_snapshot,
             )
         )
 

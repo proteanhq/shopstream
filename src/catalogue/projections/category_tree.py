@@ -1,9 +1,7 @@
 """Category tree — navigation hierarchy projection."""
 
-import json
-
 from protean.core.projector import on
-from protean.fields import Boolean, Identifier, Integer, String, Text
+from protean.fields import Boolean, Identifier, Integer, List, String
 from protean.utils.globals import current_domain
 
 from catalogue.category.category import Category
@@ -26,7 +24,7 @@ class CategoryTree:
     level: Integer(required=True)
     is_active: Boolean(default=True)
     display_order: Integer(default=0)
-    breadcrumb: Text()
+    breadcrumb: List(String())
     product_count: Integer(default=0)
 
 
@@ -47,7 +45,7 @@ class CategoryTreeProjector:
             except Exception:
                 break
 
-        return json.dumps(crumbs)
+        return crumbs
 
     @on(CategoryCreated)
     def on_category_created(self, event):
