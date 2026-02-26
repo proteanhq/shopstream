@@ -13,6 +13,7 @@ from payments.api.schemas import (
     InitiatePaymentRequest,
     InvoiceIdResponse,
     PaymentIdResponse,
+    PaymentStatusResponse,
     ProcessRefundWebhookRequest,
     ProcessWebhookRequest,
     RequestRefundRequest,
@@ -32,6 +33,14 @@ from payments.payment.webhook import ProcessPaymentWebhook
 # Payment Router
 # ---------------------------------------------------------------------------
 payment_router = APIRouter(prefix="/payments", tags=["payments"])
+
+
+@payment_router.get("/{payment_id}", response_model=PaymentStatusResponse)
+async def get_payment_status(payment_id: str) -> PaymentStatusResponse:
+    from payments.projections.payment_status_queries import GetPaymentStatus
+
+    result = current_domain.dispatch(GetPaymentStatus(payment_id=payment_id))
+    return PaymentStatusResponse(**result.to_dict())
 
 
 @payment_router.post("", status_code=201, response_model=PaymentIdResponse)

@@ -66,7 +66,7 @@ class AddSellerReplyRequest(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Response Schemas
+# Response Schemas — Write
 # ---------------------------------------------------------------------------
 class ReviewIdResponse(BaseModel):
     review_id: str
@@ -74,3 +74,72 @@ class ReviewIdResponse(BaseModel):
 
 class StatusResponse(BaseModel):
     status: str = "ok"
+
+
+# ---------------------------------------------------------------------------
+# Response Schemas — Read
+# ---------------------------------------------------------------------------
+class ReviewDetailResponse(BaseModel):
+    review_id: str
+    product_id: str
+    variant_id: str | None = None
+    customer_id: str
+    order_id: str | None = None
+    rating: int
+    title: str
+    body: str
+    pros: list[str] | None = None
+    cons: list[str] | None = None
+    images: str | None = None
+    verified_purchase: str | None = None
+    status: str
+    moderation_notes: str | None = None
+    helpful_count: int = 0
+    unhelpful_count: int = 0
+    report_count: int = 0
+    has_seller_reply: str = "False"
+    seller_reply_body: str | None = None
+    seller_reply_at: str | None = None
+    is_edited: str = "False"
+    created_at: str | None = None
+    updated_at: str | None = None
+
+
+class ProductReviewResponse(BaseModel):
+    review_id: str
+    product_id: str
+    variant_id: str | None = None
+    customer_id: str
+    rating: int
+    title: str
+    body: str
+    pros: list[str] | None = None
+    cons: list[str] | None = None
+    images: list[dict] | None = None
+    verified_purchase: str | None = None
+    helpful_count: int = 0
+    unhelpful_count: int = 0
+    has_seller_reply: str = "False"
+    seller_reply_body: str | None = None
+    is_edited: str = "False"
+    published_at: str | None = None
+
+
+class ProductRatingResponse(BaseModel):
+    product_id: str
+    average_rating: float = 0.0
+    total_reviews: int = 0
+    rating_distribution: dict | None = None
+    verified_review_count: int = 0
+    updated_at: str | None = None
+
+
+class CustomerReviewResponse(BaseModel):
+    review_id: str
+    customer_id: str
+    product_id: str
+    rating: int
+    title: str
+    status: str
+    created_at: str | None = None
+    updated_at: str | None = None

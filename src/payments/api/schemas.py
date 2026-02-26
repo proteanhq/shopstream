@@ -109,3 +109,21 @@ class GatewayConfigResponse(BaseModel):
     gateway: str
     should_succeed: bool
     failure_reason: str
+
+
+# ---------------------------------------------------------------------------
+# Read Response Schemas
+# ---------------------------------------------------------------------------
+class PaymentStatusResponse(BaseModel):
+    payment_id: str
+    order_id: str
+    customer_id: str
+    amount: float | None = None
+    currency: str | None = None
+    status: str
+    gateway_transaction_id: str | None = None
+    attempt_count: int | None = None
+    failure_reason: str | None = None
+    total_refunded: float | None = None
+    created_at: str | None = None
+    updated_at: str | None = None

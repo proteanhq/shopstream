@@ -180,3 +180,60 @@ class StatusResponse(BaseModel):
     model_config = {"json_schema_extra": {"examples": [{"status": "ok"}]}}
 
     status: str = "ok"
+
+
+# --- Read Response Schemas ---
+
+
+class ProductDetailResponse(BaseModel):
+    product_id: str
+    sku: str
+    seller_id: str | None = None
+    title: str
+    description: str | None = None
+    category_id: str | None = None
+    brand: str | None = None
+    attributes: dict | None = None
+    variants: list[dict] | None = None
+    images: list[dict] | None = None
+    status: str
+    visibility: str | None = None
+    meta_title: str | None = None
+    meta_description: str | None = None
+    slug: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+
+
+class ProductCardResponse(BaseModel):
+    product_id: str
+    sku: str
+    title: str
+    brand: str | None = None
+    category_id: str | None = None
+    primary_image_url: str | None = None
+    min_price: float | None = None
+    max_price: float | None = None
+    currency: str | None = None
+    status: str
+    variant_count: int = 0
+    created_at: str | None = None
+
+
+class CategoryTreeResponse(BaseModel):
+    category_id: str
+    name: str
+    parent_category_id: str | None = None
+    level: int
+    is_active: bool = True
+    display_order: int = 0
+    breadcrumb: list[str] | None = None
+    product_count: int = 0
+
+
+class CategoryProductsResponse(BaseModel):
+    category_id: str
+    category_name: str
+    product_count: int = 0
+    products: list[dict] | None = None
+    updated_at: str | None = None

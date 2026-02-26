@@ -19,6 +19,7 @@ from fulfillment.api.schemas import (
     RecordHandoffRequest,
     RecordItemPickedRequest,
     RecordPackingRequest,
+    ShipmentTrackingResponse,
     StatusResponse,
     UpdateTrackingRequest,
 )
@@ -36,6 +37,14 @@ from fulfillment.fulfillment.tracking import UpdateTrackingEvent
 # Fulfillment Router
 # ---------------------------------------------------------------------------
 fulfillment_router = APIRouter(prefix="/fulfillments", tags=["fulfillments"])
+
+
+@fulfillment_router.get("/{order_id}/tracking", response_model=ShipmentTrackingResponse)
+async def get_shipment_tracking(order_id: str) -> ShipmentTrackingResponse:
+    from fulfillment.projections.shipment_tracking_queries import GetShipmentTracking
+
+    result = current_domain.dispatch(GetShipmentTracking(order_id=order_id))
+    return ShipmentTrackingResponse(**result.to_dict())
 
 
 @fulfillment_router.post("", status_code=201, response_model=FulfillmentIdResponse)

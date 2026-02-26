@@ -123,3 +123,23 @@ class StatusResponse(BaseModel):
     model_config = {"json_schema_extra": {"examples": [{"status": "ok"}]}}
 
     status: str = "ok"
+
+
+# --- Read Response Schemas ---
+
+
+class CustomerCardResponse(BaseModel):
+    customer_id: str
+    external_id: str
+    email: str
+    first_name: str
+    last_name: str
+    phone: str | None = None
+    status: str
+    tier: str
+    registered_at: str | None = None
+
+
+class AddressBookResponse(BaseModel):
+    customer_id: str
+    addresses: list[dict] | None = None
