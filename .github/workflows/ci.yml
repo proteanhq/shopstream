@@ -96,6 +96,10 @@ jobs:
       TEST_PAYMENTS_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/payments_test
       FULFILLMENT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fulfillment_local
       TEST_FULFILLMENT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/fulfillment_test
+      REVIEWS_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/reviews_local
+      TEST_REVIEWS_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/reviews_test
+      NOTIFICATIONS_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/notifications_local
+      TEST_NOTIFICATIONS_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/notifications_test
       MESSAGE_DB_URL: postgresql://message_store:message_store@localhost:5433/message_store
       REDIS_URL: redis://127.0.0.1:6379/0
 
@@ -143,11 +147,17 @@ jobs:
       - name: Set up fulfillment database
         run: bash src/fulfillment/create_db.sh
 
+      - name: Set up reviews database
+        run: bash src/reviews/create_db.sh
+
+      - name: Set up notifications database
+        run: bash src/notifications/create_db.sh
+
       - name: Run linting
         run: poetry run ruff check src/ tests/
 
       - name: Run all tests with coverage
-        run: poetry run pytest --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov=src/inventory --cov=src/payments --cov=src/fulfillment --cov-report=xml --cov-report=term-missing
+        run: poetry run pytest --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov=src/inventory --cov=src/payments --cov=src/fulfillment --cov=src/reviews --cov=src/notifications --cov-report=xml --cov-report=term-missing
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.11'
