@@ -208,7 +208,7 @@ class RefundOrderRequest(BaseModel):
 
 
 # ---------------------------------------------------------------------------
-# Response Schemas
+# Response Schemas — Write
 # ---------------------------------------------------------------------------
 class CartIdResponse(BaseModel):
     cart_id: str
@@ -220,3 +220,76 @@ class OrderIdResponse(BaseModel):
 
 class StatusResponse(BaseModel):
     status: str = "ok"
+
+
+# ---------------------------------------------------------------------------
+# Response Schemas — Read
+# ---------------------------------------------------------------------------
+class CartViewResponse(BaseModel):
+    cart_id: str
+    customer_id: str | None = None
+    session_id: str | None = None
+    items: list[dict] | None = None
+    applied_coupons: list[str] | None = None
+    status: str
+    item_count: int = 0
+    created_at: str | None = None
+    updated_at: str | None = None
+
+
+class OrderDetailResponse(BaseModel):
+    order_id: str
+    customer_id: str
+    status: str
+    items: list[dict] | None = None
+    shipping_address: dict | None = None
+    billing_address: dict | None = None
+    subtotal: float | None = None
+    shipping_cost: float | None = None
+    tax_total: float | None = None
+    discount_total: float | None = None
+    grand_total: float | None = None
+    currency: str = "USD"
+    payment_id: str | None = None
+    payment_method: str | None = None
+    payment_status: str | None = None
+    shipment_id: str | None = None
+    carrier: str | None = None
+    tracking_number: str | None = None
+    estimated_delivery: str | None = None
+    cancellation_reason: str | None = None
+    cancelled_by: str | None = None
+    coupon_code: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+
+
+class OrderSummaryResponse(BaseModel):
+    order_id: str
+    customer_id: str
+    status: str
+    item_count: int = 0
+    grand_total: float | None = None
+    currency: str = "USD"
+    created_at: str | None = None
+    updated_at: str | None = None
+
+
+class TimelineEntryResponse(BaseModel):
+    entry_id: str
+    order_id: str
+    event_type: str
+    description: str
+    occurred_at: str | None = None
+    event_metadata: dict | None = None
+
+
+class CustomerOrderResponse(BaseModel):
+    order_id: str
+    customer_id: str
+    status: str
+    grand_total: float | None = None
+    currency: str = "USD"
+    item_count: int = 0
+    created_at: str | None = None
+    updated_at: str | None = None

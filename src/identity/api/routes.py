@@ -5,6 +5,8 @@ from protean.utils.globals import current_domain
 
 from identity.api.schemas import (
     AddAddressRequest,
+    AddressBookResponse,
+    CustomerCardResponse,
     CustomerIdResponse,
     RegisterCustomerRequest,
     StatusResponse,
@@ -25,6 +27,22 @@ from identity.customer.registration import RegisterCustomer
 from identity.customer.tier import UpgradeTier
 
 router = APIRouter(prefix="/customers", tags=["customers"])
+
+
+@router.get("/{customer_id}", response_model=CustomerCardResponse)
+async def get_customer(customer_id: str) -> CustomerCardResponse:
+    from identity.projections.customer_card_queries import GetCustomerCard
+
+    result = current_domain.dispatch(GetCustomerCard(customer_id=customer_id))
+    return CustomerCardResponse(**result.to_dict())
+
+
+@router.get("/{customer_id}/addresses", response_model=AddressBookResponse)
+async def get_address_book(customer_id: str) -> AddressBookResponse:
+    from identity.projections.address_book_queries import GetAddressBook
+
+    result = current_domain.dispatch(GetAddressBook(customer_id=customer_id))
+    return AddressBookResponse(**result.to_dict())
 
 
 @router.post("", status_code=201, response_model=CustomerIdResponse)

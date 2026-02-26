@@ -3,6 +3,7 @@
 from fastapi import APIRouter
 from protean.utils.globals import current_domain
 from pydantic import BaseModel as PydanticBaseModel
+from shared.api.pagination import PaginatedResponse
 
 from ordering.api.schemas import (
     AddItemRequest,
@@ -11,11 +12,15 @@ from ordering.api.schemas import (
     ApplyCouponToCartRequest,
     CancelOrderRequest,
     CartIdResponse,
+    CartViewResponse,
     CheckoutRequest,
     CreateCartRequest,
     CreateOrderRequest,
+    CustomerOrderResponse,
     MergeGuestCartRequest,
+    OrderDetailResponse,
     OrderIdResponse,
+    OrderSummaryResponse,
     RecordPartialShipmentRequest,
     RecordPaymentFailureRequest,
     RecordPaymentPendingRequest,
@@ -25,6 +30,7 @@ from ordering.api.schemas import (
     RefundOrderRequest,
     RequestReturnRequest,
     StatusResponse,
+    TimelineEntryResponse,
     UpdateCartQuantityRequest,
     UpdateItemQuantityRequest,
 )
@@ -54,6 +60,14 @@ from ordering.order.returns import ApproveReturn, RecordReturn, RequestReturn
 # Cart Router
 # ---------------------------------------------------------------------------
 cart_router = APIRouter(prefix="/carts", tags=["carts"])
+
+
+@cart_router.get("/{cart_id}", response_model=CartViewResponse)
+async def get_cart(cart_id: str) -> CartViewResponse:
+    from ordering.projections.cart_view_queries import GetCartView
+
+    result = current_domain.dispatch(GetCartView(cart_id=cart_id))
+    return CartViewResponse(**result.to_dict())
 
 
 @cart_router.post("", status_code=201, response_model=CartIdResponse)
@@ -190,6 +204,58 @@ async def merge_guest_cart(cart_id: str, body: MergeGuestCartRequest) -> StatusR
 # Order Router
 # ---------------------------------------------------------------------------
 order_router = APIRouter(prefix="/orders", tags=["orders"])
+
+
+@order_router.get("", response_model=PaginatedResponse)
+async def list_customer_orders(
+    customer_id: str,
+    status: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+) -> PaginatedResponse:
+    from ordering.projections.customer_orders_queries import ListCustomerOrders
+
+    result = current_domain.dispatch(
+        ListCustomerOrders(
+            customer_id=customer_id,
+            status=status or "",
+            page=page,
+            page_size=page_size,
+        )
+    )
+    return PaginatedResponse(
+        items=[CustomerOrderResponse(**item.to_dict()).model_dump() for item in result.items],
+        total=result.total,
+        page=page,
+        page_size=page_size,
+        total_pages=result.total_pages,
+        has_next=result.has_next,
+        has_prev=result.has_prev,
+    )
+
+
+@order_router.get("/{order_id}", response_model=OrderDetailResponse)
+async def get_order(order_id: str) -> OrderDetailResponse:
+    from ordering.projections.order_detail_queries import GetOrderDetail
+
+    result = current_domain.dispatch(GetOrderDetail(order_id=order_id))
+    return OrderDetailResponse(**result.to_dict())
+
+
+@order_router.get("/{order_id}/summary", response_model=OrderSummaryResponse)
+async def get_order_summary(order_id: str) -> OrderSummaryResponse:
+    from ordering.projections.order_summary_queries import GetOrderSummary
+
+    result = current_domain.dispatch(GetOrderSummary(order_id=order_id))
+    return OrderSummaryResponse(**result.to_dict())
+
+
+@order_router.get("/{order_id}/timeline", response_model=list[TimelineEntryResponse])
+async def get_order_timeline(order_id: str) -> list[TimelineEntryResponse]:
+    from ordering.projections.order_timeline_queries import GetOrderTimeline
+
+    result = current_domain.dispatch(GetOrderTimeline(order_id=order_id))
+    return [TimelineEntryResponse(**entry.to_dict()) for entry in result.items]
 
 
 @order_router.post("", status_code=201, response_model=OrderIdResponse)

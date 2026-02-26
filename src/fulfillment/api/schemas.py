@@ -84,3 +84,18 @@ class CarrierConfigResponse(BaseModel):
     carrier: str
     should_succeed: bool
     failure_reason: str
+
+
+# ---------------------------------------------------------------------------
+# Read Response Schemas
+# ---------------------------------------------------------------------------
+class ShipmentTrackingResponse(BaseModel):
+    fulfillment_id: str
+    order_id: str
+    carrier: str | None = None
+    tracking_number: str | None = None
+    current_status: str
+    current_location: str | None = None
+    events: list[dict] | None = None
+    shipped_at: str | None = None
+    delivered_at: str | None = None

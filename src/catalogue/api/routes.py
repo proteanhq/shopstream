@@ -2,13 +2,18 @@
 
 from fastapi import APIRouter
 from protean.utils.globals import current_domain
+from shared.api.pagination import PaginatedResponse
 
 from catalogue.api.schemas import (
     AddProductImageRequest,
     AddVariantRequest,
     CategoryIdResponse,
+    CategoryProductsResponse,
+    CategoryTreeResponse,
     CreateCategoryRequest,
     CreateProductRequest,
+    ProductCardResponse,
+    ProductDetailResponse,
     ProductIdResponse,
     ReorderCategoryRequest,
     SetTierPriceRequest,
@@ -34,6 +39,42 @@ category_router = APIRouter(prefix="/categories", tags=["categories"])
 
 
 # --- Product endpoints ---
+
+
+@product_router.get("", response_model=PaginatedResponse)
+async def list_products(
+    category_id: str | None = None,
+    status: str | None = None,
+    page: int = 1,
+    page_size: int = 20,
+) -> PaginatedResponse:
+    from catalogue.projections.product_card_queries import ListProductCards
+
+    result = current_domain.dispatch(
+        ListProductCards(
+            category_id=category_id or "",
+            status=status or "",
+            page=page,
+            page_size=page_size,
+        )
+    )
+    return PaginatedResponse(
+        items=[ProductCardResponse(**item.to_dict()).model_dump() for item in result.items],
+        total=result.total,
+        page=page,
+        page_size=page_size,
+        total_pages=result.total_pages,
+        has_next=result.has_next,
+        has_prev=result.has_prev,
+    )
+
+
+@product_router.get("/{product_id}", response_model=ProductDetailResponse)
+async def get_product(product_id: str) -> ProductDetailResponse:
+    from catalogue.projections.product_detail_queries import GetProductDetail
+
+    result = current_domain.dispatch(GetProductDetail(product_id=product_id))
+    return ProductDetailResponse(**result.to_dict())
 
 
 @product_router.post("", status_code=201, response_model=ProductIdResponse)
@@ -158,6 +199,22 @@ async def archive_product(product_id: str) -> StatusResponse:
 
 
 # --- Category endpoints ---
+
+
+@category_router.get("", response_model=list[CategoryTreeResponse])
+async def list_categories() -> list[CategoryTreeResponse]:
+    from catalogue.projections.category_tree_queries import ListCategoryTree
+
+    result = current_domain.dispatch(ListCategoryTree())
+    return [CategoryTreeResponse(**item.to_dict()) for item in result.items]
+
+
+@category_router.get("/{category_id}/products", response_model=CategoryProductsResponse)
+async def get_category_products(category_id: str) -> CategoryProductsResponse:
+    from catalogue.projections.category_products_queries import GetCategoryProducts
+
+    result = current_domain.dispatch(GetCategoryProducts(category_id=category_id))
+    return CategoryProductsResponse(**result.to_dict())
 
 
 @category_router.post("", status_code=201, response_model=CategoryIdResponse)
