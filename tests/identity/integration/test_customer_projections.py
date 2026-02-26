@@ -1,5 +1,7 @@
 """Integration tests for customer projections via domain.process()."""
 
+from protean import current_domain
+
 from identity.customer.account import SuspendAccount
 from identity.customer.addresses import AddAddress, UpdateAddress
 from identity.customer.customer import CustomerTier
@@ -9,7 +11,6 @@ from identity.projections.address_book import AddressBook
 from identity.projections.customer_card import CustomerCard
 from identity.projections.customer_lookup import CustomerLookup
 from identity.projections.customer_segments import CustomerSegments
-from protean import current_domain
 
 
 class TestCustomerCardProjection:

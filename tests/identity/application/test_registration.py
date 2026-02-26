@@ -1,8 +1,9 @@
 """Application tests for customer registration via domain.process()."""
 
+from protean import current_domain
+
 from identity.customer.customer import Customer
 from identity.customer.registration import RegisterCustomer
-from protean import current_domain
 
 
 class TestRegisterCustomerFlow:

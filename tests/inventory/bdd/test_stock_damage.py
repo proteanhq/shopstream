@@ -1,7 +1,8 @@
 """BDD tests for stock damage."""
 
-from inventory.stock.damage import MarkDamaged
 from pytest_bdd import scenarios, when
+
+from inventory.stock.damage import MarkDamaged
 
 scenarios("features/stock_damage.feature")
 

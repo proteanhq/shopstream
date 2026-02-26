@@ -1,8 +1,9 @@
 """Tests for the Price value object."""
 
 import pytest
-from catalogue.product.product import Price
 from protean.exceptions import ValidationError
+
+from catalogue.product.product import Price
 
 
 class TestPriceConstruction:

@@ -6,6 +6,9 @@ status to SENT or FAILED based on the result.
 """
 
 import structlog
+from protean.utils.globals import current_domain
+from protean.utils.mixins import handle
+
 from notifications.channel import get_channel
 from notifications.domain import notifications
 from notifications.notification.events import NotificationCreated
@@ -14,8 +17,6 @@ from notifications.notification.notification import (
     NotificationChannel,
     NotificationStatus,
 )
-from protean.utils.globals import current_domain
-from protean.utils.mixins import handle
 
 logger = structlog.get_logger(__name__)
 

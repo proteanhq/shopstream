@@ -1,9 +1,10 @@
 """Tests for the SKU value object."""
 
 import pytest
-from catalogue.shared.sku import SKU
 from protean.exceptions import ValidationError
 from protean.utils.reflection import declared_fields
+
+from catalogue.shared.sku import SKU
 
 
 class TestSKUConstruction:

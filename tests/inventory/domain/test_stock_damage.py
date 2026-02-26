@@ -1,9 +1,10 @@
 """Tests for damage tracking operations."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from inventory.stock.events import DamagedStockWrittenOff, LowStockDetected, StockMarkedDamaged
 from inventory.stock.stock import InventoryItem
-from protean.exceptions import ValidationError
 
 
 def _make_item(**overrides):

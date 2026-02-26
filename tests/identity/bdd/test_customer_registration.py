@@ -1,9 +1,10 @@
 """BDD tests for customer registration."""
 
-from identity.customer.customer import Customer
-from identity.customer.events import CustomerRegistered
 from protean.exceptions import ValidationError
 from pytest_bdd import parsers, scenarios, then, when
+
+from identity.customer.customer import Customer
+from identity.customer.events import CustomerRegistered
 
 scenarios("features/customer_registration.feature")
 

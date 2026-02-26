@@ -1,10 +1,11 @@
 """Subscription management commands + handlers — unsubscribe/resubscribe."""
 
-from notifications.domain import notifications
-from notifications.preference.preference import NotificationPreference
 from protean.fields import Identifier, String
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
+
+from notifications.domain import notifications
+from notifications.preference.preference import NotificationPreference
 
 
 @notifications.command(part_of="NotificationPreference")

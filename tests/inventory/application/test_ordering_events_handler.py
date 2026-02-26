@@ -9,13 +9,14 @@ Covers:
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from inventory.projections.inventory_level import InventoryLevel
 from inventory.projections.reservation_status import ReservationStatus as ReservationStatusProjection
 from inventory.stock.initialization import InitializeStock
 from inventory.stock.ordering_events import OrderingInventoryEventHandler
 from inventory.stock.reservation import ConfirmReservation, ReserveStock
 from inventory.stock.stock import InventoryItem
-from protean import current_domain
 from shared.events.ordering import OrderCancelled, OrderReturned
 
 

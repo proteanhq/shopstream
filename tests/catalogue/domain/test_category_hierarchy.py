@@ -1,8 +1,9 @@
 """Tests for Category hierarchy and depth validation."""
 
 import pytest
-from catalogue.category.category import Category
 from protean.exceptions import ValidationError
+
+from catalogue.category.category import Category
 
 
 class TestCategoryHierarchy:

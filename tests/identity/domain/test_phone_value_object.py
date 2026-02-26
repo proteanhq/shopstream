@@ -1,7 +1,8 @@
 import pytest
-from identity.shared.phone import PhoneNumber
 from protean.exceptions import ValidationError
 from protean.utils import DomainObjects
+
+from identity.shared.phone import PhoneNumber
 
 
 def test_phone_number_element_type():

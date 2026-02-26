@@ -1,7 +1,8 @@
 """BDD tests for order fulfillment."""
 
-from ordering.order.fulfillment import RecordShipment
 from pytest_bdd import parsers, scenarios, when
+
+from ordering.order.fulfillment import RecordShipment
 
 scenarios("features/order_fulfillment.feature")
 

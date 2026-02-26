@@ -1,9 +1,10 @@
 """Application tests for image management handlers."""
 
+from protean.utils.globals import current_domain
+
 from catalogue.product.creation import CreateProduct
 from catalogue.product.images import AddProductImage, RemoveProductImage
 from catalogue.product.product import Product
-from protean.utils.globals import current_domain
 
 
 def _create_product(**overrides):

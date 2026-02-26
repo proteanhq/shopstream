@@ -1,8 +1,9 @@
 """Tests for NotificationPreference aggregate creation and behavior."""
 
 import pytest
-from notifications.preference.preference import NotificationPreference
 from protean.exceptions import ValidationError
+
+from notifications.preference.preference import NotificationPreference
 
 
 def _make_preference(**overrides):

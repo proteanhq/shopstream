@@ -2,11 +2,11 @@
 
 import json
 
-from catalogue.category.category import Category
-
 # json kept: used to parse BDD feature step strings
 from protean.exceptions import ValidationError
 from pytest_bdd import parsers, scenarios, then, when
+
+from catalogue.category.category import Category
 
 scenarios("features/category_management.feature")
 

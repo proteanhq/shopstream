@@ -3,6 +3,10 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from protean.exceptions import ValidationError
+from protean.testing import given as given_
+from pytest_bdd import given, parsers, then
+
 from inventory.stock.adjustment import AdjustStock, RecordStockCheck
 from inventory.stock.damage import MarkDamaged, WriteOffDamaged
 from inventory.stock.events import (
@@ -25,9 +29,6 @@ from inventory.stock.reservation import ConfirmReservation, ReleaseReservation, 
 from inventory.stock.returns import ReturnToStock
 from inventory.stock.shipping import CommitStock
 from inventory.stock.stock import InventoryItem
-from protean.exceptions import ValidationError
-from protean.testing import given as given_
-from pytest_bdd import given, parsers, then
 
 # Map event name strings to classes for dynamic lookup in Then steps
 _INVENTORY_EVENT_CLASSES = {

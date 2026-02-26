@@ -1,8 +1,9 @@
 """Tests for Dimensions and Weight value objects."""
 
 import pytest
-from catalogue.product.product import Dimensions, Weight
 from protean.exceptions import ValidationError
+
+from catalogue.product.product import Dimensions, Weight
 
 
 class TestDimensionsConstruction:

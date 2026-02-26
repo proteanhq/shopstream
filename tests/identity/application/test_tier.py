@@ -1,11 +1,12 @@
 """Application tests for tier management via domain.process()."""
 
 import pytest
+from protean import current_domain
+from protean.exceptions import ValidationError
+
 from identity.customer.customer import Customer, CustomerTier
 from identity.customer.registration import RegisterCustomer
 from identity.customer.tier import UpgradeTier
-from protean import current_domain
-from protean.exceptions import ValidationError
 
 
 class TestTierManagementFlow:

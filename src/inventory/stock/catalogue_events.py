@@ -10,10 +10,10 @@ as external events via inventory.register_external_event().
 import structlog
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
-from shared.events.catalogue import ProductCreated, VariantAdded
 
 from inventory.domain import inventory
 from inventory.stock.stock import InventoryItem
+from shared.events.catalogue import ProductCreated, VariantAdded
 
 logger = structlog.get_logger(__name__)
 

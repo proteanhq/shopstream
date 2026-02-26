@@ -1,11 +1,12 @@
 """Application tests for order cancellation and refund commands."""
 
+from protean import current_domain
+
 from ordering.order.cancellation import CancelOrder, RefundOrder
 from ordering.order.confirmation import ConfirmOrder
 from ordering.order.creation import CreateOrder
 from ordering.order.order import Order, OrderStatus
 from ordering.order.payment import RecordPaymentPending, RecordPaymentSuccess
-from protean import current_domain
 
 
 def _create_order():

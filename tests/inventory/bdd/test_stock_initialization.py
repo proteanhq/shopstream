@@ -1,8 +1,9 @@
 """BDD tests for stock initialization."""
 
-from inventory.stock.stock import InventoryItem
 from protean.testing import given as given_
 from pytest_bdd import parsers, scenarios, then, when
+
+from inventory.stock.stock import InventoryItem
 
 scenarios("features/stock_initialization.feature")
 

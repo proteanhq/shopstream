@@ -2,6 +2,8 @@
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from notifications.channel import get_channel, reset_channels
 from notifications.notification.dispatch import (
     NotificationDispatcher,
@@ -14,7 +16,6 @@ from notifications.notification.notification import (
     NotificationStatus,
     NotificationType,
 )
-from protean import current_domain
 
 
 class TestDispatcherEdgeCases:

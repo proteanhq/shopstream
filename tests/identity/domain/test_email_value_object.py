@@ -1,6 +1,7 @@
 import pytest
-from identity.shared.email import EmailAddress
 from protean.exceptions import ValidationError
+
+from identity.shared.email import EmailAddress
 
 
 def test_email_address_element_type():

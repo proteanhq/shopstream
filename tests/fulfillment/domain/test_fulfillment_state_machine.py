@@ -1,11 +1,12 @@
 """Tests for Fulfillment state machine — valid and invalid transitions."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from fulfillment.fulfillment.fulfillment import (
     Fulfillment,
     FulfillmentStatus,
 )
-from protean.exceptions import ValidationError
 
 
 def _make_items():

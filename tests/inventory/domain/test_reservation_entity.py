@@ -3,8 +3,9 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from inventory.stock.stock import Reservation, ReservationStatus
 from protean.exceptions import ValidationError
+
+from inventory.stock.stock import Reservation, ReservationStatus
 
 
 class TestReservationConstruction:

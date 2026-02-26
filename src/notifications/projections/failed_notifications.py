@@ -1,5 +1,9 @@
 """FailedNotifications — queue of failed notifications for retry/investigation."""
 
+from protean.core.projector import on
+from protean.fields import DateTime, Identifier, Integer, String
+from protean.utils.globals import current_domain
+
 from notifications.domain import notifications
 from notifications.notification.events import (
     NotificationFailed,
@@ -7,9 +11,6 @@ from notifications.notification.events import (
     NotificationSent,
 )
 from notifications.notification.notification import Notification
-from protean.core.projector import on
-from protean.fields import DateTime, Identifier, Integer, String
-from protean.utils.globals import current_domain
 
 
 @notifications.projection

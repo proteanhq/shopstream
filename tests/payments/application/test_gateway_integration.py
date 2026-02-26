@@ -1,6 +1,7 @@
 """Tests for gateway port/adapter integration."""
 
 import pytest
+
 from payments.gateway import get_gateway, reset_gateway, set_gateway
 from payments.gateway.fake_adapter import FakeGateway
 from payments.gateway.port import ChargeResult, RefundResult

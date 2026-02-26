@@ -7,6 +7,9 @@ No business logic — just schema→command→response translation.
 from datetime import datetime as dt_datetime
 
 from fastapi import APIRouter
+from protean.utils.globals import current_domain
+from pydantic import BaseModel as PydanticBaseModel
+
 from notifications.api.schemas import (
     CancelNotificationRequest,
     NotificationListResponse,
@@ -28,8 +31,6 @@ from notifications.preference.management import (
 from notifications.preference.preference import NotificationPreference
 from notifications.preference.subscription import ResubscribeToType, UnsubscribeFromType
 from notifications.projections.customer_notifications import CustomerNotifications
-from protean.utils.globals import current_domain
-from pydantic import BaseModel as PydanticBaseModel
 
 router = APIRouter(prefix="/notifications", tags=["notifications"])
 

@@ -1,9 +1,10 @@
 """Tests for Customer.upgrade_tier() behavior."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from identity.customer.customer import Customer, CustomerTier
 from identity.customer.events import TierUpgraded
-from protean.exceptions import ValidationError
 
 
 def _make_customer():

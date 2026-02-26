@@ -1,9 +1,10 @@
 """Application tests for cart item management commands."""
 
+from protean import current_domain
+
 from ordering.cart.cart import ShoppingCart
 from ordering.cart.items import AddToCart, RemoveFromCart, UpdateCartQuantity
 from ordering.cart.management import CreateCart
-from protean import current_domain
 
 
 def _create_cart(**overrides):

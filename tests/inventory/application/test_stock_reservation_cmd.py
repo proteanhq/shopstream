@@ -1,9 +1,10 @@
 """Application tests for stock reservation commands."""
 
+from protean import current_domain
+
 from inventory.stock.initialization import InitializeStock
 from inventory.stock.reservation import ConfirmReservation, ReleaseReservation, ReserveStock
 from inventory.stock.stock import InventoryItem, ReservationStatus
-from protean import current_domain
 
 
 def _initialize_stock(**overrides):

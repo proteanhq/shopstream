@@ -5,9 +5,10 @@ confirmation), and DeliveryException (delivery issue alert).
 """
 
 import structlog
+from protean.utils.mixins import handle
+
 from notifications.domain import notifications
 from notifications.notification.notification import Notification
-from protean.utils.mixins import handle
 from shared.events.fulfillment import (
     DeliveryConfirmed,
     DeliveryException,

@@ -1,8 +1,9 @@
 """Tests for Customer aggregate invariants."""
 
 import pytest
-from identity.customer.customer import Customer
 from protean.exceptions import ValidationError
+
+from identity.customer.customer import Customer
 
 
 def _make_customer():

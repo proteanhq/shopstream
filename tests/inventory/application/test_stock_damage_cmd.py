@@ -1,9 +1,10 @@
 """Application tests for stock damage commands."""
 
+from protean import current_domain
+
 from inventory.stock.damage import MarkDamaged, WriteOffDamaged
 from inventory.stock.initialization import InitializeStock
 from inventory.stock.stock import InventoryItem
-from protean import current_domain
 
 
 def _initialize_stock(**overrides):

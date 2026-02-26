@@ -1,6 +1,9 @@
 """Application tests for address management via domain.process()."""
 
 import pytest
+from protean import current_domain
+from protean.exceptions import ValidationError
+
 from identity.customer.addresses import (
     AddAddress,
     RemoveAddress,
@@ -9,8 +12,6 @@ from identity.customer.addresses import (
 )
 from identity.customer.customer import Customer
 from identity.customer.registration import RegisterCustomer
-from protean import current_domain
-from protean.exceptions import ValidationError
 
 
 class TestAddressManagementFlow:

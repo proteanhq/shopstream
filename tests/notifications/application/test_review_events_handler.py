@@ -2,12 +2,13 @@
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from notifications.notification.notification import (
     Notification,
     NotificationType,
 )
 from notifications.notification.review_events import ReviewEventsHandler
-from protean import current_domain
 from shared.events.reviews import ReviewApproved, ReviewRejected
 
 

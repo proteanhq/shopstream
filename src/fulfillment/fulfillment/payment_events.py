@@ -10,10 +10,10 @@ as external events via fulfillment.register_external_event().
 
 import structlog
 from protean.utils.mixins import handle
-from shared.events.payments import PaymentSucceeded
 
 from fulfillment.domain import fulfillment
 from fulfillment.fulfillment.fulfillment import Fulfillment
+from shared.events.payments import PaymentSucceeded
 
 logger = structlog.get_logger(__name__)
 

@@ -1,7 +1,8 @@
 """BDD tests for product creation."""
 
-from catalogue.product.product import Product
 from pytest_bdd import parsers, scenarios, then, when
+
+from catalogue.product.product import Product
 
 scenarios("features/product_creation.feature")
 

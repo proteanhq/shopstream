@@ -1,12 +1,13 @@
 """Integration tests for FastAPI endpoints."""
 
 import pytest
-from catalogue.api import category_router, product_router
-from catalogue.category.category import Category
-from catalogue.product.product import Product
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from protean.utils.globals import current_domain
+
+from catalogue.api import category_router, product_router
+from catalogue.category.category import Category
+from catalogue.product.product import Product
 
 
 @pytest.fixture()

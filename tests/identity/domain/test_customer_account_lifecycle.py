@@ -1,9 +1,10 @@
 """Tests for Customer account lifecycle: suspend, reactivate, close."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from identity.customer.customer import Customer, CustomerStatus
 from identity.customer.events import AccountClosed, AccountReactivated, AccountSuspended
-from protean.exceptions import ValidationError
 
 
 def _make_active_customer():

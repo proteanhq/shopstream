@@ -8,11 +8,12 @@ Covers the ObjectNotFoundError branches in:
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
+from protean.exceptions import ObjectNotFoundError
+
 from ordering.order.events import OrderCancelled, OrderConfirmed
 from ordering.projections.abandoned_checkouts import (
     AbandonedCheckoutProjector,
 )
-from protean.exceptions import ObjectNotFoundError
 
 
 class TestAbandonedCheckoutNotFound:

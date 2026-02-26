@@ -3,6 +3,9 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from protean import current_domain
+from protean.exceptions import ValidationError
+
 from notifications.channel import get_channel, reset_channels
 from notifications.notification.notification import (
     Notification,
@@ -11,8 +14,6 @@ from notifications.notification.notification import (
     NotificationType,
 )
 from notifications.notification.retry import RetryNotification
-from protean import current_domain
-from protean.exceptions import ValidationError
 
 
 def _create_pending_notification(**overrides):

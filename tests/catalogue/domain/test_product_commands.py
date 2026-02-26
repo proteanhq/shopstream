@@ -1,12 +1,13 @@
 """Tests for Product command structure and fields."""
 
+from protean.utils import DomainObjects
+
 from catalogue.category.management import CreateCategory, DeactivateCategory, ReorderCategory, UpdateCategory
 from catalogue.product.creation import CreateProduct
 from catalogue.product.details import UpdateProductDetails
 from catalogue.product.images import AddProductImage, RemoveProductImage
 from catalogue.product.lifecycle import ActivateProduct, ArchiveProduct, DiscontinueProduct
 from catalogue.product.variants import AddVariant, SetTierPrice, UpdateVariantPrice
-from protean.utils import DomainObjects
 
 
 class TestCreateProductCommand:

@@ -1,5 +1,7 @@
 """Integration tests for Order projections — verify projectors update read models."""
 
+from protean import current_domain
+
 from ordering.order.cancellation import CancelOrder
 from ordering.order.completion import CompleteOrder
 from ordering.order.confirmation import ConfirmOrder
@@ -12,7 +14,6 @@ from ordering.projections.order_detail import OrderDetail
 from ordering.projections.order_summary import OrderSummary
 from ordering.projections.order_timeline import OrderTimeline
 from ordering.projections.orders_by_status import OrdersByStatus
-from protean import current_domain
 
 
 def _create_order(customer_id="cust-proj-001"):

@@ -3,6 +3,7 @@
 from datetime import UTC, datetime
 
 from protean import current_domain
+
 from reviews.projections.verified_purchases import VerifiedPurchases
 from reviews.review.ordering_events import OrderingEventsHandler
 from shared.events.ordering import OrderDelivered

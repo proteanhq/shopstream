@@ -4,10 +4,11 @@ Listens for LowStockDetected to send internal alerts via Slack.
 """
 
 import structlog
+from protean.utils.mixins import handle
+
 from notifications.domain import notifications
 from notifications.notification.helpers import create_internal_notification
 from notifications.notification.notification import Notification, NotificationType
-from protean.utils.mixins import handle
 from shared.events.inventory import LowStockDetected
 
 logger = structlog.get_logger(__name__)

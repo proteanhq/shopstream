@@ -1,9 +1,10 @@
 """Application tests for stock adjustment commands."""
 
+from protean import current_domain
+
 from inventory.stock.adjustment import AdjustStock, RecordStockCheck
 from inventory.stock.initialization import InitializeStock
 from inventory.stock.stock import AdjustmentType, InventoryItem
-from protean import current_domain
 
 
 def _initialize_stock(**overrides):

@@ -7,6 +7,7 @@ or projection records were never created (e.g., during recovery/replay).
 from datetime import UTC, datetime
 
 from protean import current_domain
+
 from reviews.projections.customer_reviews import (
     CustomerReviews,
     CustomerReviewsProjector,

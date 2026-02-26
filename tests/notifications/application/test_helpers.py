@@ -1,5 +1,7 @@
 """Application tests for notification helper functions."""
 
+from protean import current_domain
+
 from notifications.channel import reset_channels
 from notifications.notification.helpers import (
     create_internal_notification,
@@ -12,7 +14,6 @@ from notifications.notification.notification import (
     RecipientType,
 )
 from notifications.preference.preference import NotificationPreference
-from protean import current_domain
 
 
 class TestCreateNotificationsForCustomer:

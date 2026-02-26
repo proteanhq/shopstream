@@ -1,9 +1,10 @@
 """Application tests for product details update handler."""
 
+from protean.utils.globals import current_domain
+
 from catalogue.product.creation import CreateProduct
 from catalogue.product.details import UpdateProductDetails
 from catalogue.product.product import Product
-from protean.utils.globals import current_domain
 
 
 def _create_product(**overrides):

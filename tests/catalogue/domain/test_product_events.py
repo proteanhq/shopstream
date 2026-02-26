@@ -2,6 +2,8 @@
 
 from datetime import datetime
 
+from protean.utils import DomainObjects
+
 from catalogue.product.events import (
     ProductActivated,
     ProductArchived,
@@ -14,7 +16,6 @@ from catalogue.product.events import (
     VariantAdded,
     VariantPriceChanged,
 )
-from protean.utils import DomainObjects
 
 
 class TestProductCreatedEvent:

@@ -1,8 +1,9 @@
 """Integration tests for category aggregate persistence."""
 
+from protean.utils.globals import current_domain
+
 from catalogue.category.category import Category
 from catalogue.category.management import CreateCategory, DeactivateCategory, ReorderCategory, UpdateCategory
-from protean.utils.globals import current_domain
 
 
 def _create_category(**overrides):

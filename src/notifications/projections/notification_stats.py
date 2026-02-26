@@ -1,11 +1,12 @@
 """NotificationStats — daily counts by notification type and channel."""
 
-from notifications.domain import notifications
-from notifications.notification.events import NotificationSent
-from notifications.notification.notification import Notification
 from protean.core.projector import on
 from protean.fields import DateTime, Integer, String
 from protean.utils.globals import current_domain
+
+from notifications.domain import notifications
+from notifications.notification.events import NotificationSent
+from notifications.notification.notification import Notification
 
 
 @notifications.projection

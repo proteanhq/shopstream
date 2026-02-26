@@ -1,8 +1,9 @@
 """BDD tests for fulfillment lifecycle."""
 
-from fulfillment.fulfillment.fulfillment import Fulfillment
 from protean.exceptions import ValidationError
 from pytest_bdd import parsers, scenarios, when
+
+from fulfillment.fulfillment.fulfillment import Fulfillment
 
 scenarios("features/fulfillment_lifecycle.feature")
 

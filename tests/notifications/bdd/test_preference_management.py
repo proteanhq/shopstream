@@ -1,7 +1,8 @@
 """BDD tests for preference management."""
 
-from notifications.preference.preference import NotificationPreference
 from pytest_bdd import parsers, scenarios, when
+
+from notifications.preference.preference import NotificationPreference
 
 scenarios("features/preference_management.feature")
 

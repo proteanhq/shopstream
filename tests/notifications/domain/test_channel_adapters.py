@@ -1,6 +1,7 @@
 """Tests for channel adapters — fake adapters for testing."""
 
 import pytest
+
 from notifications.channel import get_channel, reset_channels
 from notifications.channel.fake_email import FakeEmailAdapter
 from notifications.channel.fake_push import FakePushAdapter

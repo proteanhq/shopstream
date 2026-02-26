@@ -1,9 +1,10 @@
 """Tests for order payment lifecycle."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from ordering.order.events import PaymentFailed, PaymentPending, PaymentSucceeded
 from ordering.order.order import Order, OrderStatus
-from protean.exceptions import ValidationError
 
 
 def _make_confirmed_order():

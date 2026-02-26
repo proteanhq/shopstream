@@ -1,9 +1,10 @@
 """Application tests for stock return commands."""
 
+from protean import current_domain
+
 from inventory.stock.initialization import InitializeStock
 from inventory.stock.returns import ReturnToStock
 from inventory.stock.stock import InventoryItem
-from protean import current_domain
 
 
 def _initialize_stock(**overrides):

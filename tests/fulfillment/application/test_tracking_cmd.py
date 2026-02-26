@@ -1,14 +1,15 @@
 """Application tests for tracking event command via domain.process()."""
 
 import pytest
+from protean import current_domain
+from protean.exceptions import ValidationError
+
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.fulfillment import Fulfillment, FulfillmentStatus
 from fulfillment.fulfillment.packing import GenerateShippingLabel, RecordPacking
 from fulfillment.fulfillment.picking import AssignPicker, CompletePickList, RecordItemPicked
 from fulfillment.fulfillment.shipping import RecordHandoff
 from fulfillment.fulfillment.tracking import UpdateTrackingEvent
-from protean import current_domain
-from protean.exceptions import ValidationError
 
 
 def _create_shipped():

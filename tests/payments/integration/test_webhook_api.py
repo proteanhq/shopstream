@@ -3,9 +3,10 @@
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from protean import current_domain
+
 from payments.api.routes import payment_router
 from payments.payment.payment import Payment, PaymentStatus, RefundStatus
-from protean import current_domain
 
 
 @pytest.fixture()

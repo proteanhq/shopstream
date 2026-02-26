@@ -7,6 +7,9 @@ automatically when a customer registers.
 
 from datetime import UTC, datetime
 
+from protean.exceptions import ValidationError
+from protean.fields import Boolean, DateTime, Identifier, List, String
+
 from notifications.domain import notifications
 from notifications.preference.events import (
     ChannelsUpdated,
@@ -16,8 +19,6 @@ from notifications.preference.events import (
     TypeResubscribed,
     TypeUnsubscribed,
 )
-from protean.exceptions import ValidationError
-from protean.fields import Boolean, DateTime, Identifier, List, String
 
 
 # ---------------------------------------------------------------------------

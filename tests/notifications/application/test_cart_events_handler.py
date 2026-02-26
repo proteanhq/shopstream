@@ -2,12 +2,13 @@
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from notifications.notification.cart_events import CartEventsHandler
 from notifications.notification.notification import (
     Notification,
     NotificationType,
 )
-from protean import current_domain
 from shared.events.ordering import CartAbandoned
 
 

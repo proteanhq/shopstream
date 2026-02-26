@@ -1,5 +1,7 @@
 """Integration tests for product projections."""
 
+from protean.utils.globals import current_domain
+
 from catalogue.product.creation import CreateProduct
 from catalogue.product.details import UpdateProductDetails
 from catalogue.product.images import AddProductImage
@@ -10,7 +12,6 @@ from catalogue.projections.price_history import PriceHistory
 from catalogue.projections.product_card import ProductCard
 from catalogue.projections.product_detail import ProductDetail
 from catalogue.projections.seller_catalogue import SellerCatalogue
-from protean.utils.globals import current_domain
 
 
 def _create_product(**overrides):

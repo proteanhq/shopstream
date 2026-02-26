@@ -1,8 +1,9 @@
 """Tests for the SEO value object."""
 
 import pytest
-from catalogue.product.product import SEO
 from protean.exceptions import ValidationError
+
+from catalogue.product.product import SEO
 
 
 class TestSEOConstruction:

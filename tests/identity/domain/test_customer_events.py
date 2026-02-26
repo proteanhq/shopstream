@@ -2,6 +2,8 @@
 
 from datetime import datetime
 
+from protean.utils import DomainObjects
+
 from identity.customer.events import (
     AccountClosed,
     AccountReactivated,
@@ -14,7 +16,6 @@ from identity.customer.events import (
     ProfileUpdated,
     TierUpgraded,
 )
-from protean.utils import DomainObjects
 
 
 class TestCustomerRegistered:

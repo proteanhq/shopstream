@@ -1,5 +1,7 @@
 """Application tests for order return flow."""
 
+from protean import current_domain
+
 from ordering.order.cancellation import RefundOrder
 from ordering.order.confirmation import ConfirmOrder
 from ordering.order.creation import CreateOrder
@@ -11,7 +13,6 @@ from ordering.order.fulfillment import (
 from ordering.order.order import Order, OrderStatus
 from ordering.order.payment import RecordPaymentPending, RecordPaymentSuccess
 from ordering.order.returns import ApproveReturn, RecordReturn, RequestReturn
-from protean import current_domain
 
 
 def _create_delivered_order():

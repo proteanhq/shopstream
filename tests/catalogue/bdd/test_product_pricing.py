@@ -1,8 +1,9 @@
 """BDD tests for product pricing."""
 
-from catalogue.product.product import Price
 from protean.exceptions import ValidationError
 from pytest_bdd import parsers, scenarios, then, when
+
+from catalogue.product.product import Price
 
 scenarios("features/product_pricing.feature")
 

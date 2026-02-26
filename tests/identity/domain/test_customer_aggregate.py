@@ -1,4 +1,8 @@
 import pytest
+from protean.exceptions import ValidationError
+from protean.utils import DomainObjects
+from protean.utils.reflection import declared_fields
+
 from identity.customer.customer import (
     Address,
     Customer,
@@ -8,9 +12,6 @@ from identity.customer.customer import (
 )
 from identity.shared.email import EmailAddress
 from identity.shared.phone import PhoneNumber
-from protean.exceptions import ValidationError
-from protean.utils import DomainObjects
-from protean.utils.reflection import declared_fields
 
 
 def test_customer_aggregate_element_type():

@@ -1,5 +1,7 @@
 """Application tests for warehouse management commands."""
 
+from protean import current_domain
+
 from inventory.warehouse.management import (
     AddZone,
     CreateWarehouse,
@@ -7,7 +9,6 @@ from inventory.warehouse.management import (
     UpdateWarehouse,
 )
 from inventory.warehouse.warehouse import Warehouse
-from protean import current_domain
 
 
 def _create_warehouse(**overrides):

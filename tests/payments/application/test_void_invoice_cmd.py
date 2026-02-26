@@ -1,9 +1,10 @@
 """Application tests for invoice voiding command."""
 
+from protean import current_domain
+
 from payments.invoice.generation import GenerateInvoice
 from payments.invoice.invoice import Invoice, InvoiceStatus
 from payments.invoice.voiding import VoidInvoice
-from protean import current_domain
 
 
 def _create_invoice():

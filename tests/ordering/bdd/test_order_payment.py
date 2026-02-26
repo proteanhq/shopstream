@@ -1,11 +1,12 @@
 """BDD tests for order payment."""
 
+from pytest_bdd import parsers, scenarios, when
+
 from ordering.order.payment import (
     RecordPaymentFailure,
     RecordPaymentPending,
     RecordPaymentSuccess,
 )
-from pytest_bdd import parsers, scenarios, when
 
 scenarios("features/order_payment.feature")
 

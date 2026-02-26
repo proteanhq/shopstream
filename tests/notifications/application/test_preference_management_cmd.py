@@ -1,6 +1,9 @@
 """Application tests for preference management command handlers."""
 
 import pytest
+from protean import current_domain
+from protean.exceptions import ValidationError
+
 from notifications.preference.management import (
     ClearQuietHours,
     SetQuietHours,
@@ -8,8 +11,6 @@ from notifications.preference.management import (
 )
 from notifications.preference.preference import NotificationPreference
 from notifications.preference.subscription import ResubscribeToType, UnsubscribeFromType
-from protean import current_domain
-from protean.exceptions import ValidationError
 
 
 def _create_preference(customer_id="cust-001"):

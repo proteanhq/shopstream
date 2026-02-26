@@ -7,12 +7,13 @@ repo.get() fails and a new DailyOrderStats record is created instead.
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
+from protean.exceptions import ObjectNotFoundError
+
 from ordering.order.events import OrderCancelled, OrderCreated
 from ordering.projections.daily_order_stats import (
     DailyOrderStatsProjector,
     _get_or_create,
 )
-from protean.exceptions import ObjectNotFoundError
 
 
 class TestDailyOrderStatsGetOrCreate:

@@ -9,6 +9,9 @@ on "Pending" status use scheduled notifications to avoid auto-dispatch interfere
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from protean import current_domain
+from protean.exceptions import ObjectNotFoundError
+
 from notifications.channel import get_channel, reset_channels
 from notifications.notification.notification import (
     Notification,
@@ -21,8 +24,6 @@ from notifications.projections.customer_notifications import CustomerNotificatio
 from notifications.projections.failed_notifications import FailedNotifications
 from notifications.projections.notification_log import NotificationLog
 from notifications.projections.notification_stats import NotificationStats
-from protean import current_domain
-from protean.exceptions import ObjectNotFoundError
 
 
 def _create_notification(

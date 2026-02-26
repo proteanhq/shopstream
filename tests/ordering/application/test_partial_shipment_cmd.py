@@ -9,13 +9,14 @@ Covers:
 """
 
 import pytest
+from protean import current_domain
+from protean.exceptions import ValidationError
+
 from ordering.order.confirmation import ConfirmOrder
 from ordering.order.creation import CreateOrder
 from ordering.order.fulfillment import MarkProcessing, RecordPartialShipment, RecordShipment
 from ordering.order.order import ItemStatus, Order, OrderStatus
 from ordering.order.payment import RecordPaymentPending, RecordPaymentSuccess
-from protean import current_domain
-from protean.exceptions import ValidationError
 
 
 def _create_processing_order():

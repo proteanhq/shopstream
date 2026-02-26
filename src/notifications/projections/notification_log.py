@@ -1,5 +1,9 @@
 """NotificationLog — full audit trail of all notifications."""
 
+from protean.core.projector import on
+from protean.fields import DateTime, Identifier, Integer, String
+from protean.utils.globals import current_domain
+
 from notifications.domain import notifications
 from notifications.notification.events import (
     NotificationBounced,
@@ -11,9 +15,6 @@ from notifications.notification.events import (
     NotificationSent,
 )
 from notifications.notification.notification import Notification
-from protean.core.projector import on
-from protean.fields import DateTime, Identifier, Integer, String
-from protean.utils.globals import current_domain
 
 
 @notifications.projection

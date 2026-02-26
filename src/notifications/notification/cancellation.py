@@ -1,10 +1,11 @@
 """CancelNotification command + handler — cancel a pending notification."""
 
-from notifications.domain import notifications
-from notifications.notification.notification import Notification
 from protean.fields import Identifier, String
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
+
+from notifications.domain import notifications
+from notifications.notification.notification import Notification
 
 
 @notifications.command(part_of="Notification")

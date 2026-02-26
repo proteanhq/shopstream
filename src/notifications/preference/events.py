@@ -1,7 +1,8 @@
 """Domain events for the NotificationPreference aggregate."""
 
-from notifications.domain import notifications
 from protean.fields import Boolean, DateTime, Identifier, String
+
+from notifications.domain import notifications
 
 
 @notifications.event(part_of="NotificationPreference")

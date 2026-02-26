@@ -10,10 +10,11 @@ Covers:
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from protean import current_domain
+
 from fulfillment.api.routes import fulfillment_router
 from fulfillment.carrier.fake_adapter import FakeCarrier
 from fulfillment.fulfillment.fulfillment import Fulfillment, FulfillmentStatus
-from protean import current_domain
 
 
 @pytest.fixture()

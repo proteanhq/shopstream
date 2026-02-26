@@ -1,7 +1,8 @@
 """Tests for the Category aggregate root."""
 
-from catalogue.category.category import Category
 from protean.utils.reflection import declared_fields
+
+from catalogue.category.category import Category
 
 
 class TestCategoryConstruction:

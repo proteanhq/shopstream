@@ -3,6 +3,8 @@
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from protean.exceptions import ValidationError
+
 from inventory.stock.events import (
     LowStockDetected,
     ReservationConfirmed,
@@ -10,7 +12,6 @@ from inventory.stock.events import (
     StockReserved,
 )
 from inventory.stock.stock import InventoryItem, ReservationStatus
-from protean.exceptions import ValidationError
 
 
 def _make_item(**overrides):

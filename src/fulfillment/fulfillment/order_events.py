@@ -12,10 +12,10 @@ as external events via fulfillment.register_external_event().
 import structlog
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
-from shared.events.ordering import OrderCancelled
 
 from fulfillment.domain import fulfillment
 from fulfillment.fulfillment.fulfillment import Fulfillment
+from shared.events.ordering import OrderCancelled
 
 logger = structlog.get_logger(__name__)
 

@@ -3,10 +3,11 @@
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from protean import current_domain
+
 from ordering.api.routes import cart_router, order_router
 from ordering.cart.cart import CartStatus, ShoppingCart
 from ordering.order.order import Order
-from protean import current_domain
 
 
 @pytest.fixture()

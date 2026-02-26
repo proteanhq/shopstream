@@ -1,8 +1,9 @@
 """Tests for payment state machine and amount guard invariants."""
 
 import pytest
-from payments.payment.payment import MAX_PAYMENT_ATTEMPTS, Payment, PaymentStatus
 from protean.exceptions import ValidationError
+
+from payments.payment.payment import MAX_PAYMENT_ATTEMPTS, Payment, PaymentStatus
 
 
 def _make_payment():

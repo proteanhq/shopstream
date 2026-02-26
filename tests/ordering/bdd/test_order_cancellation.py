@@ -1,7 +1,8 @@
 """BDD tests for order cancellation."""
 
-from ordering.order.cancellation import CancelOrder
 from pytest_bdd import parsers, scenarios, when
+
+from ordering.order.cancellation import CancelOrder
 
 scenarios("features/order_cancellation.feature")
 

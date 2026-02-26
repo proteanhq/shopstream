@@ -1,8 +1,9 @@
 """Application tests for product creation command handler."""
 
+from protean.utils.globals import current_domain
+
 from catalogue.product.creation import CreateProduct
 from catalogue.product.product import Product
-from protean.utils.globals import current_domain
 
 
 def _create_product(**overrides):

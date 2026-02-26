@@ -4,10 +4,11 @@ Listens for CustomerRegistered to create default notification preferences.
 """
 
 import structlog
-from notifications.domain import notifications
-from notifications.preference.preference import NotificationPreference
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
+
+from notifications.domain import notifications
+from notifications.preference.preference import NotificationPreference
 from shared.events.identity import CustomerRegistered
 
 logger = structlog.get_logger(__name__)

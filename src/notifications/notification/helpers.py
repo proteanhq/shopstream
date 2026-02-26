@@ -5,6 +5,8 @@ render template → create Notification per channel.
 """
 
 import structlog
+from protean.utils.globals import current_domain
+
 from notifications.notification.notification import (
     Notification,
     NotificationChannel,
@@ -12,7 +14,6 @@ from notifications.notification.notification import (
 )
 from notifications.preference.preference import NotificationPreference
 from notifications.templates import get_template
-from protean.utils.globals import current_domain
 
 logger = structlog.get_logger(__name__)
 

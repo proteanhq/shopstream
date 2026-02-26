@@ -11,11 +11,11 @@ as external events via reviews.register_external_event().
 import structlog
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
-from shared.events.ordering import OrderDelivered
 
 from reviews.domain import reviews
 from reviews.projections.verified_purchases import VerifiedPurchases
 from reviews.review.review import Review
+from shared.events.ordering import OrderDelivered
 
 logger = structlog.get_logger(__name__)
 

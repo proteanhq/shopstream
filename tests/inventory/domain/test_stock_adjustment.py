@@ -1,9 +1,10 @@
 """Tests for stock adjustment operations."""
 
 import pytest
+from protean.exceptions import ValidationError
+
 from inventory.stock.events import LowStockDetected, StockAdjusted, StockCheckRecorded
 from inventory.stock.stock import AdjustmentType, InventoryItem
-from protean.exceptions import ValidationError
 
 
 def _make_item(**overrides):

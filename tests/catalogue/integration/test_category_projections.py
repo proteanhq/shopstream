@@ -1,5 +1,7 @@
 """Integration tests for category projections."""
 
+from protean.utils.globals import current_domain
+
 from catalogue.category.management import (
     CreateCategory,
     DeactivateCategory,
@@ -8,7 +10,6 @@ from catalogue.category.management import (
 )
 from catalogue.product.creation import CreateProduct
 from catalogue.projections.category_tree import CategoryTree
-from protean.utils.globals import current_domain
 
 
 def _create_category(**overrides):

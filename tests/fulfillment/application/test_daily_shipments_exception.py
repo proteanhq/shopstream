@@ -7,6 +7,8 @@ repo.get() fails and a new DailyShipmentsView record is created instead.
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
+from protean.exceptions import ObjectNotFoundError
+
 from fulfillment.fulfillment.events import (
     DeliveryConfirmed,
     DeliveryException,
@@ -17,7 +19,6 @@ from fulfillment.projections.daily_shipments import (
     DailyShipmentsProjector,
     _get_or_create,
 )
-from protean.exceptions import ObjectNotFoundError
 
 
 class TestDailyShipmentsGetOrCreate:

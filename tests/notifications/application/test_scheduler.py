@@ -2,6 +2,8 @@
 
 from datetime import UTC, datetime, timedelta
 
+from protean import current_domain
+
 from notifications.channel import get_channel, reset_channels
 from notifications.notification.notification import (
     Notification,
@@ -10,7 +12,6 @@ from notifications.notification.notification import (
     NotificationType,
 )
 from notifications.notification.scheduler import ProcessScheduledNotifications
-from protean import current_domain
 
 
 def _create_scheduled_notification(

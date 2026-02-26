@@ -8,11 +8,12 @@ Covers:
 
 from datetime import UTC, datetime
 
+from protean import current_domain
+
 from inventory.stock.fulfillment_events import FulfillmentInventoryEventHandler
 from inventory.stock.initialization import InitializeStock
 from inventory.stock.reservation import ConfirmReservation, ReserveStock
 from inventory.stock.stock import InventoryItem
-from protean import current_domain
 from shared.events.fulfillment import ShipmentHandedOff
 
 

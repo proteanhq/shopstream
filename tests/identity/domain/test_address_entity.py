@@ -1,8 +1,9 @@
 import pytest
-from identity.customer.customer import Address, AddressLabel, GeoCoordinates
 from protean.exceptions import ValidationError
 from protean.utils import DomainObjects
 from protean.utils.reflection import declared_fields
+
+from identity.customer.customer import Address, AddressLabel, GeoCoordinates
 
 
 def test_address_element_type():

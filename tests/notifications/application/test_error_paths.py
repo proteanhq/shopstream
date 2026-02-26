@@ -7,12 +7,13 @@ occur with in-memory adapters. We patch at the module level to simulate failures
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
+from protean import current_domain
+
 from notifications.channel import reset_channels
 from notifications.notification.notification import (
     NotificationType,
 )
 from notifications.preference.preference import NotificationPreference
-from protean import current_domain
 
 
 class TestHelpersPreferenceLookupFailure:

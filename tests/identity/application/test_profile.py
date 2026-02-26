@@ -1,9 +1,10 @@
 """Application tests for profile management via domain.process()."""
 
+from protean import current_domain
+
 from identity.customer.customer import Customer
 from identity.customer.profile import UpdateProfile
 from identity.customer.registration import RegisterCustomer
-from protean import current_domain
 
 
 class TestUpdateProfileFlow:

@@ -7,6 +7,9 @@ UoW. These tests directly call projector methods to cover update/delete paths.
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from protean import current_domain
+from protean.exceptions import ObjectNotFoundError
+
 from notifications.channel import reset_channels
 from notifications.notification.events import (
     NotificationBounced,
@@ -37,8 +40,6 @@ from notifications.projections.notification_stats import (
     NotificationStats,
     NotificationStatsProjector,
 )
-from protean import current_domain
-from protean.exceptions import ObjectNotFoundError
 
 
 def _create_notification_and_log(recipient_id="cust-proj-edge"):
