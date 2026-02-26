@@ -1,7 +1,5 @@
 """Application tests for invoice generation command."""
 
-import json
-
 from payments.invoice.generation import GenerateInvoice
 from payments.invoice.invoice import Invoice, InvoiceStatus
 from protean import current_domain
@@ -11,12 +9,10 @@ def _generate_invoice(**overrides):
     defaults = {
         "order_id": "ord-001",
         "customer_id": "cust-001",
-        "line_items": json.dumps(
-            [
-                {"description": "Widget A", "quantity": 2, "unit_price": 25.00},
-                {"description": "Widget B", "quantity": 1, "unit_price": 50.00},
-            ]
-        ),
+        "line_items": [
+            {"description": "Widget A", "quantity": 2, "unit_price": 25.00},
+            {"description": "Widget B", "quantity": 1, "unit_price": 50.00},
+        ],
         "tax": 8.00,
     }
     defaults.update(overrides)

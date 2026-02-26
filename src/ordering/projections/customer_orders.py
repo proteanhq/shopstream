@@ -1,7 +1,5 @@
 """Customer orders — per-customer order listing projection."""
 
-import json
-
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -43,7 +41,7 @@ class CustomerOrders:
 class CustomerOrdersProjector:
     @on(OrderCreated)
     def on_order_created(self, event):
-        items = json.loads(event.items) if isinstance(event.items, str) else []
+        items = event.items or []
         current_domain.repository_for(CustomerOrders).add(
             CustomerOrders(
                 order_id=event.order_id,

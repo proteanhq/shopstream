@@ -69,10 +69,10 @@ class TestCartConvertedEvent:
         event = CartConverted(
             cart_id="cart-001",
             customer_id="cust-001",
-            items='[{"product_id": "p1", "variant_id": "v1", "quantity": 2}]',
+            items=[{"product_id": "p1", "variant_id": "v1", "quantity": 2}],
         )
         assert event.customer_id == "cust-001"
-        assert "p1" in event.items
+        assert event.items[0]["product_id"] == "p1"
 
 
 class TestCartAbandonedEvent:

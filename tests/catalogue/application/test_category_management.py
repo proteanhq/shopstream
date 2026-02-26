@@ -1,7 +1,5 @@
 """Application tests for category management handlers."""
 
-import json
-
 import pytest
 from catalogue.category.category import Category
 from catalogue.category.management import (
@@ -62,12 +60,11 @@ class TestCreateCategoryHandler:
         assert "cannot exceed 5 levels" in str(exc.value)
 
     def test_create_category_with_attributes(self):
-        attrs = json.dumps({"filterable": ["brand", "screen_size"]})
+        attrs = {"filterable": ["brand", "screen_size"]}
         category_id = _create_category(name="Phones", attributes=attrs)
 
         category = current_domain.repository_for(Category).get(category_id)
-        parsed = json.loads(category.attributes)
-        assert parsed["filterable"] == ["brand", "screen_size"]
+        assert category.attributes["filterable"] == ["brand", "screen_size"]
 
 
 class TestUpdateCategoryHandler:
@@ -81,12 +78,12 @@ class TestUpdateCategoryHandler:
 
     def test_update_category_attributes(self):
         category_id = _create_category()
-        attrs = json.dumps({"filterable": ["brand"]})
+        attrs = {"filterable": ["brand"]}
         command = UpdateCategory(category_id=category_id, attributes=attrs)
         current_domain.process(command, asynchronous=False)
 
         category = current_domain.repository_for(Category).get(category_id)
-        assert json.loads(category.attributes) == {"filterable": ["brand"]}
+        assert category.attributes == {"filterable": ["brand"]}
 
 
 class TestReorderCategoryHandler:

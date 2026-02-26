@@ -14,8 +14,6 @@ Cross-domain events are imported from shared.events.catalogue and registered
 as external events via ordering.register_external_event().
 """
 
-import json
-
 import structlog
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
@@ -53,7 +51,7 @@ class CatalogueCartEventHandler:
 
         affected_count = 0
         for cart in active_carts:
-            items = json.loads(cart.items) if isinstance(cart.items, str) else (cart.items or [])
+            items = cart.items or []
             has_product = any(item.get("product_id") == str(event.product_id) for item in items)
             if has_product:
                 affected_count += 1

@@ -1,7 +1,7 @@
 """ProductReviews — published reviews for a product detail page."""
 
 from protean.core.projector import on
-from protean.fields import DateTime, Identifier, Integer, String, Text
+from protean.fields import DateTime, Dict, Identifier, Integer, List, String, Text
 from protean.utils.globals import current_domain
 
 from reviews.domain import reviews
@@ -23,9 +23,9 @@ class ProductReviews:
     rating = Integer(required=True)
     title = String(required=True)
     body = Text(required=True)
-    pros = Text()
-    cons = Text()
-    images = Text()  # JSON array
+    pros = List(String())
+    cons = List(String())
+    images = List(Dict())
     verified_purchase = String()
     helpful_count = Integer(default=0)
     unhelpful_count = Integer(default=0)
@@ -53,7 +53,7 @@ class ProductReviewsProjector:
                 body=review.body,
                 pros=review.pros,
                 cons=review.cons,
-                images=None,  # Could serialize review.images if needed
+                images=[],  # Could serialize review.images if needed
                 verified_purchase=str(review.verified_purchase),
                 helpful_count=review.helpful_count,
                 unhelpful_count=review.unhelpful_count,

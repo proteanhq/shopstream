@@ -1,6 +1,5 @@
 """FastAPI routes for the Inventory domain — stock and warehouses."""
 
-import json
 from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter
@@ -192,7 +191,7 @@ warehouse_router = APIRouter(prefix="/warehouses", tags=["warehouses"])
 async def create_warehouse(body: CreateWarehouseRequest) -> WarehouseIdResponse:
     command = CreateWarehouse(
         name=body.name,
-        address=json.dumps(body.address.model_dump()),
+        address=body.address.model_dump(),
         capacity=body.capacity,
     )
     result = current_domain.process(command, asynchronous=False)

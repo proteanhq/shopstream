@@ -3,10 +3,8 @@
 Handles the packing phase: recording packed items and generating shipping labels.
 """
 
-import json
-
 from protean import handle
-from protean.fields import Identifier, String, Text
+from protean.fields import Dict, Identifier, List, String
 from protean.utils.globals import current_domain
 
 from fulfillment.domain import fulfillment
@@ -19,7 +17,7 @@ class RecordPacking:
 
     fulfillment_id = Identifier(required=True)
     packed_by = String(required=True, max_length=100)
-    packages = Text(required=True)  # JSON list of package dicts
+    packages = List(Dict(), required=True)
 
 
 @fulfillment.command(part_of="Fulfillment")
@@ -38,8 +36,7 @@ class PackingHandler:
     def record_packing(self, command):
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
-        packages_data = json.loads(command.packages) if isinstance(command.packages, str) else command.packages
-        ff.record_packing(command.packed_by, packages_data)
+        ff.record_packing(command.packed_by, command.packages)
         repo.add(ff)
 
     @handle(GenerateShippingLabel)

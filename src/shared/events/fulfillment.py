@@ -10,7 +10,7 @@ The source-of-truth events are in src/fulfillment/fulfillment/events.py.
 """
 
 from protean.core.event import BaseEvent
-from protean.fields import DateTime, Identifier, String, Text
+from protean.fields import DateTime, Identifier, List, String
 
 
 class ShipmentHandedOff(BaseEvent):
@@ -22,7 +22,7 @@ class ShipmentHandedOff(BaseEvent):
     order_id = Identifier(required=True)
     carrier = String(required=True)
     tracking_number = String(required=True)
-    shipped_item_ids = Text()  # JSON list of order item ID strings
+    shipped_item_ids = List(String())
     estimated_delivery = DateTime()
     shipped_at = DateTime(required=True)
 

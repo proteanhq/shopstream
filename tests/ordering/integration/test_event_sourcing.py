@@ -2,8 +2,6 @@
 event replay, and aggregate reconstruction.
 """
 
-import json
-
 from ordering.order.confirmation import ConfirmOrder
 from ordering.order.creation import CreateOrder
 from ordering.order.modification import AddItem, ApplyCoupon
@@ -16,24 +14,18 @@ def _create_order():
     return current_domain.process(
         CreateOrder(
             customer_id="cust-es-001",
-            items=json.dumps(
-                [
-                    {
-                        "product_id": "prod-001",
-                        "variant_id": "var-001",
-                        "sku": "SKU-001",
-                        "title": "Widget",
-                        "quantity": 2,
-                        "unit_price": 25.0,
-                    }
-                ]
-            ),
-            shipping_address=json.dumps(
-                {"street": "1 St", "city": "C", "state": "S", "postal_code": "00000", "country": "US"}
-            ),
-            billing_address=json.dumps(
-                {"street": "1 St", "city": "C", "state": "S", "postal_code": "00000", "country": "US"}
-            ),
+            items=[
+                {
+                    "product_id": "prod-001",
+                    "variant_id": "var-001",
+                    "sku": "SKU-001",
+                    "title": "Widget",
+                    "quantity": 2,
+                    "unit_price": 25.0,
+                }
+            ],
+            shipping_address={"street": "1 St", "city": "C", "state": "S", "postal_code": "00000", "country": "US"},
+            billing_address={"street": "1 St", "city": "C", "state": "S", "postal_code": "00000", "country": "US"},
             subtotal=50.0,
             grand_total=55.0,
         ),

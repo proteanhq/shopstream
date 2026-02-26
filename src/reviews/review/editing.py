@@ -4,10 +4,8 @@ Only the original author can edit, only in PENDING or REJECTED status.
 Editing a rejected review re-submits it to moderation (PENDING).
 """
 
-import json
-
 from protean.exceptions import ValidationError
-from protean.fields import Identifier, Integer, String, Text
+from protean.fields import Identifier, Integer, List, String, Text
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
 
@@ -22,8 +20,8 @@ class EditReview:
     title = String(max_length=200)
     body = Text()
     rating = Integer()
-    pros = Text()  # JSON array of strings
-    cons = Text()  # JSON array of strings
+    pros = List(String())
+    cons = List(String())
 
 
 @reviews.command_handler(part_of=Review)
@@ -46,9 +44,9 @@ class EditReviewHandler:
         if command.rating is not None:
             kwargs["rating"] = command.rating
         if command.pros is not None:
-            kwargs["pros"] = json.loads(command.pros)
+            kwargs["pros"] = command.pros
         if command.cons is not None:
-            kwargs["cons"] = json.loads(command.cons)
+            kwargs["cons"] = command.cons
 
         review.edit(**kwargs)
         repo.add(review)

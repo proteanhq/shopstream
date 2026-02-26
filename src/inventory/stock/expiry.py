@@ -35,11 +35,13 @@ class ExpireStaleReservationsHandler:
     def expire_stale_reservations(self, command):
         as_of = command.as_of or datetime.now(UTC)
         threshold_minutes = command.older_than_minutes or 15
-        cutoff = (as_of - timedelta(minutes=threshold_minutes)).replace(tzinfo=None)
+        cutoff = as_of - timedelta(minutes=threshold_minutes)
+        # Strip tzinfo for comparison with naive datetimes from DB
+        cutoff_naive = cutoff.replace(tzinfo=None)
 
         logger.info(
             "Checking for stale reservations",
-            cutoff=cutoff.isoformat(),
+            cutoff=cutoff_naive.isoformat(),
             threshold_minutes=threshold_minutes,
         )
 
@@ -49,8 +51,15 @@ class ExpireStaleReservationsHandler:
         # Filter expired ones
         expired = []
         for reservation in active_reservations:
-            if reservation.expires_at and reservation.expires_at <= cutoff:
-                expired.append(reservation)
+            if reservation.expires_at:
+                # Normalize both to naive for comparison
+                expires = (
+                    reservation.expires_at.replace(tzinfo=None)
+                    if reservation.expires_at.tzinfo
+                    else reservation.expires_at
+                )
+                if expires <= cutoff_naive:
+                    expired.append(reservation)
 
         if not expired:
             logger.info("No stale reservations found")

@@ -3,10 +3,8 @@
 Handles the return lifecycle: request, approval, and recording.
 """
 
-import json
-
 from protean import handle
-from protean.fields import Identifier, String, Text
+from protean.fields import Identifier, List, String
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
@@ -33,7 +31,7 @@ class RecordReturn:
     """Record that returned items have been received back from the customer."""
 
     order_id = Identifier(required=True)
-    returned_item_ids = Text()  # JSON: list of item ID strings (optional — all items if omitted)
+    returned_item_ids = List(String())
 
 
 @ordering.command_handler(part_of=Order)
@@ -57,13 +55,5 @@ class ManageReturnsHandler:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
 
-        returned_item_ids = None
-        if command.returned_item_ids:
-            returned_item_ids = (
-                json.loads(command.returned_item_ids)
-                if isinstance(command.returned_item_ids, str)
-                else command.returned_item_ids
-            )
-
-        order.record_return(returned_item_ids=returned_item_ids)
+        order.record_return(returned_item_ids=command.returned_item_ids or None)
         repo.add(order)

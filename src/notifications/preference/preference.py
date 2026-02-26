@@ -5,7 +5,6 @@ quiet hours (DND), and per-type unsubscribe. Default preferences are created
 automatically when a customer registers.
 """
 
-import json
 from datetime import UTC, datetime
 
 from notifications.domain import notifications
@@ -18,7 +17,7 @@ from notifications.preference.events import (
     TypeUnsubscribed,
 )
 from protean.exceptions import ValidationError
-from protean.fields import Boolean, DateTime, Identifier, String, Text
+from protean.fields import Boolean, DateTime, Identifier, List, String
 
 
 # ---------------------------------------------------------------------------
@@ -45,7 +44,7 @@ class NotificationPreference:
     quiet_hours_end: String(max_length=5)  # "08:00" format
 
     # Per-type unsubscribe
-    unsubscribed_types: Text()  # JSON list of NotificationType values
+    unsubscribed_types: List(String())
 
     # Timestamps
     created_at: DateTime()
@@ -67,7 +66,7 @@ class NotificationPreference:
             email_enabled=True,
             sms_enabled=False,
             push_enabled=False,
-            unsubscribed_types=json.dumps([]),
+            unsubscribed_types=[],
             created_at=now,
             updated_at=now,
         )
@@ -169,14 +168,14 @@ class NotificationPreference:
     # -------------------------------------------------------------------
     def unsubscribe_from(self, notification_type):
         """Unsubscribe from a specific notification type."""
-        types = json.loads(self.unsubscribed_types) if self.unsubscribed_types else []
+        types = list(self.unsubscribed_types or [])
 
         if notification_type in types:
             raise ValidationError({"unsubscribed_types": [f"Already unsubscribed from {notification_type}"]})
 
         types.append(notification_type)
         now = datetime.now(UTC)
-        self.unsubscribed_types = json.dumps(types)
+        self.unsubscribed_types = types
         self.updated_at = now
 
         self.raise_(
@@ -190,14 +189,14 @@ class NotificationPreference:
 
     def resubscribe_to(self, notification_type):
         """Resubscribe to a previously unsubscribed notification type."""
-        types = json.loads(self.unsubscribed_types) if self.unsubscribed_types else []
+        types = list(self.unsubscribed_types or [])
 
         if notification_type not in types:
             raise ValidationError({"unsubscribed_types": [f"Not currently unsubscribed from {notification_type}"]})
 
         types.remove(notification_type)
         now = datetime.now(UTC)
-        self.unsubscribed_types = json.dumps(types)
+        self.unsubscribed_types = types
         self.updated_at = now
 
         self.raise_(
@@ -214,7 +213,7 @@ class NotificationPreference:
     # -------------------------------------------------------------------
     def is_subscribed_to(self, notification_type):
         """Check if the customer is subscribed to a notification type."""
-        types = json.loads(self.unsubscribed_types) if self.unsubscribed_types else []
+        types = self.unsubscribed_types or []
         return notification_type not in types
 
     def get_enabled_channels(self):

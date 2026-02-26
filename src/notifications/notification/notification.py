@@ -26,7 +26,7 @@ from notifications.notification.events import (
     NotificationSent,
 )
 from protean.exceptions import ValidationError
-from protean.fields import DateTime, Identifier, Integer, String, Text
+from protean.fields import DateTime, Dict, Identifier, Integer, String, Text
 
 
 # ---------------------------------------------------------------------------
@@ -121,7 +121,7 @@ class Notification:
     # Source event correlation
     source_event_type: String(max_length=200)
     source_event_id: String(max_length=200)
-    context_data: Text()  # JSON — data used to render the template
+    context_data: Dict()  # Data used to render the template
 
     # Status
     status: String(choices=NotificationStatus, default=NotificationStatus.PENDING.value)
@@ -174,7 +174,7 @@ class Notification:
             template_name=template_name,
             source_event_type=source_event_type,
             source_event_id=source_event_id,
-            context_data=context_data,
+            context_data=context_data or {},
             scheduled_for=scheduled_for,
             status=NotificationStatus.PENDING.value,
             retry_count=0,

@@ -1,7 +1,5 @@
 """BDD tests for product pricing."""
 
-import json
-
 from catalogue.product.product import Price
 from protean.exceptions import ValidationError
 from pytest_bdd import parsers, scenarios, then, when
@@ -38,5 +36,5 @@ def variant_base_price_is(product, price):
 @then(parsers.cfparse("the variant has a {tier} tier price of {price:f}"))
 def variant_has_tier_price(product, tier, price):
     variant = product.variants[0]
-    tiers = json.loads(variant.price.tier_prices)
+    tiers = variant.price.tier_prices
     assert tiers[tier] == price

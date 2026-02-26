@@ -1,7 +1,7 @@
 """Warehouse management — commands and handler."""
 
 from protean import handle
-from protean.fields import Identifier, Integer, String, Text
+from protean.fields import Dict, Identifier, Integer, String
 from protean.utils.globals import current_domain
 
 from inventory.domain import inventory
@@ -13,7 +13,7 @@ class CreateWarehouse:
     """Create a new warehouse."""
 
     name = String(required=True, max_length=255)
-    address = Text(required=True)  # JSON-encoded address
+    address = Dict(required=True)
     capacity = Integer(default=0)
 
 
@@ -54,12 +54,9 @@ class DeactivateWarehouse:
 class WarehouseManagementHandler:
     @handle(CreateWarehouse)
     def create_warehouse(self, command):
-        import json
-
-        address = json.loads(command.address) if isinstance(command.address, str) else command.address
         warehouse = Warehouse.create(
             name=command.name,
-            address=address,
+            address=command.address,
             capacity=command.capacity or 0,
         )
         current_domain.repository_for(Warehouse).add(warehouse)

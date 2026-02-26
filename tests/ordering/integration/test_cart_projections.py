@@ -1,7 +1,5 @@
 """Integration tests for Cart projections — verify CartView projector."""
 
-import json
-
 from ordering.cart.coupons import ApplyCouponToCart
 from ordering.cart.items import AddToCart, RemoveFromCart
 from ordering.cart.management import AbandonCart, CreateCart
@@ -26,10 +24,9 @@ class TestCartViewProjection:
         assert view.status == "Active"
         assert view.item_count == 1
 
-        items = json.loads(view.items)
-        assert len(items) == 1
-        assert items[0]["product_id"] == "prod-001"
-        assert items[0]["quantity"] == 2
+        assert len(view.items) == 1
+        assert view.items[0]["product_id"] == "prod-001"
+        assert view.items[0]["quantity"] == 2
 
     def test_cart_view_tracks_multiple_items(self):
         cart_id = _create_cart()
@@ -57,8 +54,7 @@ class TestCartViewProjection:
         )
 
         view = current_domain.repository_for(CartView).get(cart_id)
-        coupons = json.loads(view.applied_coupons)
-        assert "SAVE10" in coupons
+        assert "SAVE10" in view.applied_coupons
 
     def test_cart_view_abandoned(self):
         cart_id = _create_cart()

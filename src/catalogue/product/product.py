@@ -1,6 +1,5 @@
 """Product aggregate root with Variant entity, Image entity, and value objects."""
 
-import json
 from datetime import datetime
 from enum import Enum
 
@@ -9,6 +8,7 @@ from protean.exceptions import ValidationError
 from protean.fields import (
     Boolean,
     DateTime,
+    Dict,
     Float,
     HasMany,
     Identifier,
@@ -53,17 +53,14 @@ class Price:
 
     base_price: Float(required=True, min_value=0.01)
     currency: String(max_length=3, default="USD")
-    tier_prices: Text()
+    tier_prices: Dict()
 
     @invariant.post
     def tier_prices_must_be_valid(self):
         if not self.tier_prices:
             return
 
-        try:
-            tiers = json.loads(self.tier_prices)
-        except (json.JSONDecodeError, TypeError):
-            raise ValidationError({"tier_prices": ["Tier prices must be valid JSON"]}) from None
+        tiers = self.tier_prices
 
         if not isinstance(tiers, dict):
             raise ValidationError({"tier_prices": ["Tier prices must be a JSON object"]})
@@ -155,7 +152,7 @@ class Variant:
     """
 
     variant_sku: ValueObject(SKU, required=True)
-    attributes: Text()
+    attributes: Dict()
     price: ValueObject(Price, required=True)
     weight: ValueObject(Weight)
     dimensions: ValueObject(Dimensions)
@@ -192,7 +189,7 @@ class Product:
     description: Text()
     category_id: Identifier()
     brand: String(max_length=100)
-    attributes: Text()
+    attributes: Dict()
     variants: HasMany(Variant)
     images: HasMany(Image)
     status: String(choices=ProductStatus, default=ProductStatus.DRAFT.value)
@@ -231,7 +228,6 @@ class Product:
 
         sku_vo = SKU(code=sku) if isinstance(sku, str) else sku
         now = datetime.now()
-        attrs_json = json.dumps(attributes) if attributes and isinstance(attributes, dict) else attributes
 
         product = cls(
             sku=sku_vo,
@@ -240,7 +236,7 @@ class Product:
             description=description,
             category_id=category_id,
             brand=brand,
-            attributes=attrs_json,
+            attributes=attributes or {},
             visibility=visibility or ProductVisibility.PUBLIC.value,
             seo=seo,
             created_at=now,
@@ -269,7 +265,7 @@ class Product:
         if brand is not None:
             self.brand = brand
         if attributes is not None:
-            self.attributes = json.dumps(attributes) if isinstance(attributes, dict) else attributes
+            self.attributes = attributes
         if seo is not None:
             self.seo = seo
 
@@ -288,11 +284,10 @@ class Product:
         from catalogue.product.events import VariantAdded
 
         sku_vo = SKU(code=variant_sku) if isinstance(variant_sku, str) else variant_sku
-        attrs_json = json.dumps(attributes) if attributes and isinstance(attributes, dict) else attributes
 
         variant = Variant(
             variant_sku=sku_vo,
-            attributes=attrs_json,
+            attributes=attributes or {},
             price=price,
             weight=weight,
             dimensions=dimensions,
@@ -340,16 +335,14 @@ class Product:
         if variant is None:
             raise ValidationError({"variants": [f"Variant {variant_id} not found"]})
 
-        existing_tiers = {}
-        if variant.price.tier_prices:
-            existing_tiers = json.loads(variant.price.tier_prices)
+        existing_tiers = dict(variant.price.tier_prices) if variant.price.tier_prices else {}
 
         existing_tiers[tier] = price
 
         variant.price = Price(
             base_price=variant.price.base_price,
             currency=variant.price.currency,
-            tier_prices=json.dumps(existing_tiers),
+            tier_prices=existing_tiers,
         )
         self.updated_at = datetime.now()
 

@@ -1,7 +1,5 @@
 """FastAPI routes for the Ordering domain — carts and orders."""
 
-import json
-
 from fastapi import APIRouter
 from protean.utils.globals import current_domain
 from pydantic import BaseModel as PydanticBaseModel
@@ -146,9 +144,9 @@ async def checkout_cart(cart_id: str, body: CheckoutRequest) -> OrderIdResponse:
     # Create order
     create_cmd = CreateOrder(
         customer_id=str(cart.customer_id) if cart.customer_id else "guest",
-        items=json.dumps(items_data),
-        shipping_address=json.dumps(shipping_dict),
-        billing_address=json.dumps(billing_dict),
+        items=items_data,
+        shipping_address=shipping_dict,
+        billing_address=billing_dict,
         subtotal=subtotal,
         grand_total=grand_total,
         currency="USD",
@@ -182,7 +180,7 @@ async def merge_guest_cart(cart_id: str, body: MergeGuestCartRequest) -> StatusR
 
     command = MergeGuestCart(
         cart_id=cart_id,
-        guest_cart_items=json.dumps(guest_items),
+        guest_cart_items=guest_items,
     )
     current_domain.process(command, asynchronous=False)
     return StatusResponse()
@@ -202,9 +200,9 @@ async def create_order(body: CreateOrderRequest) -> OrderIdResponse:
 
     command = CreateOrder(
         customer_id=body.customer_id,
-        items=json.dumps(items_data),
-        shipping_address=json.dumps(body.shipping_address.model_dump()),
-        billing_address=json.dumps(body.billing_address.model_dump()),
+        items=items_data,
+        shipping_address=body.shipping_address.model_dump(),
+        billing_address=body.billing_address.model_dump(),
         subtotal=subtotal,
         shipping_cost=body.shipping_cost,
         tax_total=body.tax_total,
@@ -311,7 +309,7 @@ async def record_shipment(order_id: str, body: RecordShipmentRequest) -> StatusR
         shipment_id=body.shipment_id,
         carrier=body.carrier,
         tracking_number=body.tracking_number,
-        shipped_item_ids=json.dumps(body.shipped_item_ids) if body.shipped_item_ids else None,
+        shipped_item_ids=body.shipped_item_ids or [],
         estimated_delivery=body.estimated_delivery,
     )
     current_domain.process(command, asynchronous=False)
@@ -325,7 +323,7 @@ async def record_partial_shipment(order_id: str, body: RecordPartialShipmentRequ
         shipment_id=body.shipment_id,
         carrier=body.carrier,
         tracking_number=body.tracking_number,
-        shipped_item_ids=json.dumps(body.shipped_item_ids),
+        shipped_item_ids=body.shipped_item_ids,
     )
     current_domain.process(command, asynchronous=False)
     return StatusResponse()
@@ -363,7 +361,7 @@ async def approve_return(order_id: str) -> StatusResponse:
 async def record_return(order_id: str, body: RecordReturnRequest) -> StatusResponse:
     command = RecordReturn(
         order_id=order_id,
-        returned_item_ids=json.dumps(body.returned_item_ids) if body.returned_item_ids else None,
+        returned_item_ids=body.returned_item_ids or [],
     )
     current_domain.process(command, asynchronous=False)
     return StatusResponse()

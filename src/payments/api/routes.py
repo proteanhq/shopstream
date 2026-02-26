@@ -143,11 +143,10 @@ invoice_router = APIRouter(prefix="/invoices", tags=["invoices"])
 @invoice_router.post("", status_code=201, response_model=InvoiceIdResponse)
 async def generate_invoice(body: GenerateInvoiceRequest) -> InvoiceIdResponse:
     """Generate a new invoice for an order."""
-    line_items_json = json.dumps([item.model_dump() for item in body.line_items])
     command = GenerateInvoice(
         order_id=body.order_id,
         customer_id=body.customer_id,
-        line_items=line_items_json,
+        line_items=[item.model_dump() for item in body.line_items],
         tax=body.tax,
     )
     result = current_domain.process(command, asynchronous=False)

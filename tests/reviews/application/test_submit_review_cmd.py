@@ -1,7 +1,5 @@
 """Application tests for SubmitReview command handler."""
 
-import json
-
 import pytest
 from protean import current_domain
 from protean.exceptions import ValidationError
@@ -33,20 +31,18 @@ class TestSubmitReviewCommand:
 
     def test_submit_with_pros_and_cons(self):
         review_id = _submit_review(
-            pros=json.dumps(["Good quality", "Fast shipping"]),
-            cons=json.dumps(["A bit pricey"]),
+            pros=["Good quality", "Fast shipping"],
+            cons=["A bit pricey"],
         )
         review = current_domain.repository_for(Review).get(review_id)
-        assert json.loads(review.pros) == ["Good quality", "Fast shipping"]
-        assert json.loads(review.cons) == ["A bit pricey"]
+        assert review.pros == ["Good quality", "Fast shipping"]
+        assert review.cons == ["A bit pricey"]
 
     def test_submit_with_images(self):
         review_id = _submit_review(
-            images=json.dumps(
-                [
-                    {"url": "https://cdn.example.com/img1.jpg", "alt_text": "Front"},
-                ]
-            )
+            images=[
+                {"url": "https://cdn.example.com/img1.jpg", "alt_text": "Front"},
+            ]
         )
         review = current_domain.repository_for(Review).get(review_id)
         assert len(review.images) == 1

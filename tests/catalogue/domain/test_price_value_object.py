@@ -1,7 +1,5 @@
 """Tests for the Price value object."""
 
-import json
-
 import pytest
 from catalogue.product.product import Price
 from protean.exceptions import ValidationError
@@ -17,7 +15,7 @@ class TestPriceConstruction:
         price = Price(base_price=99.99)
         assert price.base_price == 99.99
         assert price.currency == "USD"
-        assert price.tier_prices is None
+        assert price.tier_prices == {}
 
     def test_valid_price_with_explicit_currency(self):
         price = Price(base_price=49.99, currency="EUR")
@@ -25,11 +23,10 @@ class TestPriceConstruction:
         assert price.currency == "EUR"
 
     def test_valid_price_with_tier_prices(self):
-        tiers = json.dumps({"Silver": 89.99, "Gold": 79.99, "Platinum": 69.99})
+        tiers = {"Silver": 89.99, "Gold": 79.99, "Platinum": 69.99}
         price = Price(base_price=99.99, tier_prices=tiers)
         assert price.base_price == 99.99
-        parsed = json.loads(price.tier_prices)
-        assert parsed["Silver"] == 89.99
+        assert price.tier_prices["Silver"] == 89.99
 
 
 class TestPriceInvariants:
@@ -46,42 +43,42 @@ class TestPriceInvariants:
             Price(currency="USD")
 
     def test_tier_price_equal_to_base_rejected(self):
-        tiers = json.dumps({"Silver": 99.99})
+        tiers = {"Silver": 99.99}
         with pytest.raises(ValidationError) as exc:
             Price(base_price=99.99, tier_prices=tiers)
         assert "must be less than base price" in str(exc.value)
 
     def test_tier_price_greater_than_base_rejected(self):
-        tiers = json.dumps({"Silver": 109.99})
+        tiers = {"Silver": 109.99}
         with pytest.raises(ValidationError) as exc:
             Price(base_price=99.99, tier_prices=tiers)
         assert "must be less than base price" in str(exc.value)
 
     def test_tier_price_negative_rejected(self):
-        tiers = json.dumps({"Silver": -10.0})
+        tiers = {"Silver": -10.0}
         with pytest.raises(ValidationError) as exc:
             Price(base_price=99.99, tier_prices=tiers)
         assert "must be a positive number" in str(exc.value)
 
     def test_tier_price_zero_rejected(self):
-        tiers = json.dumps({"Silver": 0})
+        tiers = {"Silver": 0}
         with pytest.raises(ValidationError) as exc:
             Price(base_price=99.99, tier_prices=tiers)
         assert "must be a positive number" in str(exc.value)
 
-    def test_invalid_tier_prices_json(self):
+    def test_invalid_tier_prices_type(self):
         with pytest.raises(ValidationError) as exc:
             Price(base_price=99.99, tier_prices="not-json")
-        assert "valid JSON" in str(exc.value)
+        assert "Invalid value" in str(exc.value) or "valid dictionary" in str(exc.value)
 
-    def test_tier_prices_must_be_object(self):
-        tiers = json.dumps([89.99, 79.99])
+    def test_tier_prices_must_be_dict(self):
+        tiers = [89.99, 79.99]
         with pytest.raises(ValidationError) as exc:
             Price(base_price=99.99, tier_prices=tiers)
-        assert "must be a JSON object" in str(exc.value)
+        assert "must be a JSON object" in str(exc.value) or "Invalid value" in str(exc.value)
 
     def test_tier_price_string_value_rejected(self):
-        tiers = json.dumps({"Silver": "free"})
+        tiers = {"Silver": "free"}
         with pytest.raises(ValidationError) as exc:
             Price(base_price=99.99, tier_prices=tiers)
         assert "must be a positive number" in str(exc.value)

@@ -1,9 +1,7 @@
 """Product detail — full PDP (Product Detail Page) projection."""
 
-import json
-
 from protean.core.projector import on
-from protean.fields import DateTime, Identifier, String, Text
+from protean.fields import DateTime, Dict, Identifier, List, String, Text
 from protean.utils.globals import current_domain
 
 from catalogue.domain import catalogue
@@ -31,9 +29,9 @@ class ProductDetail:
     description: Text()
     category_id: Identifier()
     brand: String()
-    attributes: Text()
-    variants: Text()
-    images: Text()
+    attributes: Dict()
+    variants: List(Dict())
+    images: List(Dict())
     status: String(required=True)
     visibility: String()
     meta_title: String()
@@ -55,8 +53,8 @@ class ProductDetailProjector:
                 title=event.title,
                 category_id=event.category_id,
                 status=event.status,
-                variants="[]",
-                images="[]",
+                variants=[],
+                images=[],
                 created_at=event.created_at,
                 updated_at=event.created_at,
             )
@@ -77,7 +75,7 @@ class ProductDetailProjector:
     def on_variant_added(self, event):
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
-        variants = json.loads(detail.variants) if detail.variants else []
+        variants = list(detail.variants or [])
         variants.append(
             {
                 "variant_id": event.variant_id,
@@ -86,41 +84,41 @@ class ProductDetailProjector:
                 "price_currency": event.price_currency,
             }
         )
-        detail.variants = json.dumps(variants)
+        detail.variants = variants
         repo.add(detail)
 
     @on(VariantPriceChanged)
     def on_variant_price_changed(self, event):
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
-        variants = json.loads(detail.variants) if detail.variants else []
+        variants = list(detail.variants or [])
         for v in variants:
             if v["variant_id"] == event.variant_id:
                 v["price_amount"] = event.new_price
                 v["price_currency"] = event.currency
                 break
-        detail.variants = json.dumps(variants)
+        detail.variants = variants
         repo.add(detail)
 
     @on(TierPriceSet)
     def on_tier_price_set(self, event):
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
-        variants = json.loads(detail.variants) if detail.variants else []
+        variants = list(detail.variants or [])
         for v in variants:
             if v["variant_id"] == event.variant_id:
                 tier_prices = v.get("tier_prices", {})
                 tier_prices[event.tier] = event.price
                 v["tier_prices"] = tier_prices
                 break
-        detail.variants = json.dumps(variants)
+        detail.variants = variants
         repo.add(detail)
 
     @on(ProductImageAdded)
     def on_image_added(self, event):
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
-        images = json.loads(detail.images) if detail.images else []
+        images = list(detail.images or [])
         images.append(
             {
                 "image_id": event.image_id,
@@ -128,16 +126,16 @@ class ProductDetailProjector:
                 "is_primary": event.is_primary,
             }
         )
-        detail.images = json.dumps(images)
+        detail.images = images
         repo.add(detail)
 
     @on(ProductImageRemoved)
     def on_image_removed(self, event):
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
-        images = json.loads(detail.images) if detail.images else []
+        images = list(detail.images or [])
         images = [i for i in images if i["image_id"] != event.image_id]
-        detail.images = json.dumps(images)
+        detail.images = images
         repo.add(detail)
 
     @on(ProductActivated)

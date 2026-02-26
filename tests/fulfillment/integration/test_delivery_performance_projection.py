@@ -7,8 +7,6 @@ Covers:
 - DeliveryException updates exception_count
 """
 
-import json
-
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.delivery import RecordDeliveryConfirmation, RecordDeliveryException
 from fulfillment.fulfillment.fulfillment import Fulfillment
@@ -20,13 +18,13 @@ from fulfillment.projections.delivery_performance import DeliveryPerformanceView
 from protean import current_domain
 
 
-def _single_item_json():
-    return json.dumps([{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}])
+def _single_item():
+    return [{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}]
 
 
 def _create_fulfillment(order_id="ord-perf-001"):
     return current_domain.process(
-        CreateFulfillment(order_id=order_id, customer_id="cust-perf-001", items=_single_item_json()),
+        CreateFulfillment(order_id=order_id, customer_id="cust-perf-001", items=_single_item()),
         asynchronous=False,
     )
 
@@ -40,7 +38,7 @@ def _walk_to_shipped(ff_id, tracking_number="TRACK-PERF-001"):
     )
     current_domain.process(CompletePickList(fulfillment_id=ff_id), asynchronous=False)
     current_domain.process(
-        RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps([{"weight": 1.0}])),
+        RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=[{"weight": 1.0}]),
         asynchronous=False,
     )
     current_domain.process(

@@ -1,7 +1,5 @@
 """Application tests for order return flow."""
 
-import json
-
 from ordering.order.cancellation import RefundOrder
 from ordering.order.confirmation import ConfirmOrder
 from ordering.order.creation import CreateOrder
@@ -20,24 +18,18 @@ def _create_delivered_order():
     order_id = current_domain.process(
         CreateOrder(
             customer_id="cust-001",
-            items=json.dumps(
-                [
-                    {
-                        "product_id": "p1",
-                        "variant_id": "v1",
-                        "sku": "S1",
-                        "title": "Item",
-                        "quantity": 1,
-                        "unit_price": 100.0,
-                    }
-                ]
-            ),
-            shipping_address=json.dumps(
-                {"street": "1 St", "city": "C", "state": "S", "postal_code": "00000", "country": "US"}
-            ),
-            billing_address=json.dumps(
-                {"street": "1 St", "city": "C", "state": "S", "postal_code": "00000", "country": "US"}
-            ),
+            items=[
+                {
+                    "product_id": "p1",
+                    "variant_id": "v1",
+                    "sku": "S1",
+                    "title": "Item",
+                    "quantity": 1,
+                    "unit_price": 100.0,
+                }
+            ],
+            shipping_address={"street": "1 St", "city": "C", "state": "S", "postal_code": "00000", "country": "US"},
+            billing_address={"street": "1 St", "city": "C", "state": "S", "postal_code": "00000", "country": "US"},
             subtotal=100.0,
             grand_total=110.0,
         ),
@@ -88,7 +80,7 @@ class TestFullReturnFlow:
         assert order.status == OrderStatus.RETURN_APPROVED.value
 
         # Record return
-        item_ids = json.dumps([str(order.items[0].id)])
+        item_ids = [str(order.items[0].id)]
         current_domain.process(
             RecordReturn(order_id=order_id, returned_item_ids=item_ids),
             asynchronous=False,

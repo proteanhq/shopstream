@@ -1,7 +1,5 @@
 """Tests for Review reporting — report reasons, self-report guard, count tracking."""
 
-import json
-
 import pytest
 from protean.exceptions import ValidationError
 from reviews.review.review import ReportReason, Review
@@ -34,7 +32,7 @@ class TestReportReview:
             reason=ReportReason.SPAM.value,
             detail="Contains promotional links",
         )
-        reports = json.loads(review.reported_reasons)
+        reports = review.reported_reasons
         assert len(reports) == 1
         assert reports[0]["customer_id"] == "cust-002"
         assert reports[0]["reason"] == ReportReason.SPAM.value
@@ -47,7 +45,7 @@ class TestReportReview:
         review._events.clear()
         review.report(customer_id="cust-003", reason=ReportReason.OFFENSIVE.value)
         assert review.report_count == 2
-        reports = json.loads(review.reported_reasons)
+        reports = review.reported_reasons
         assert len(reports) == 2
 
     def test_report_updates_timestamp(self):

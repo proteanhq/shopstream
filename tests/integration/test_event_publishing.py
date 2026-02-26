@@ -220,7 +220,7 @@ class TestCatalogueEventOutbox:
             AddVariant(
                 product_id=product_id,
                 variant_sku="VAR-SKU-001",
-                attributes='{"size": "L", "color": "Blue"}',
+                attributes={"size": "L", "color": "Blue"},
                 base_price=29.99,
                 currency="USD",
             ),
@@ -256,7 +256,7 @@ class TestCatalogueEventOutbox:
             AddVariant(
                 product_id=product_id,
                 variant_sku="LIFE-VAR-001",
-                attributes='{"size": "M"}',
+                attributes={"size": "M"},
                 base_price=19.99,
                 currency="USD",
             ),
@@ -394,7 +394,7 @@ class TestEventPayloadIntegrity:
             AddVariant(
                 product_id=product_id,
                 variant_sku="PRICE-VAR-001",
-                attributes='{"size": "S"}',
+                attributes={"size": "S"},
                 base_price=10.00,
                 currency="USD",
             ),

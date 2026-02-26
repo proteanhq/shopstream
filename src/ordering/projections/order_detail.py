@@ -1,9 +1,7 @@
 """Order detail — full order view for detail pages."""
 
-import json
-
 from protean.core.projector import on
-from protean.fields import DateTime, Float, Identifier, String, Text
+from protean.fields import DateTime, Dict, Float, Identifier, List, String
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
@@ -36,9 +34,9 @@ class OrderDetail:
     order_id = Identifier(identifier=True, required=True)
     customer_id = Identifier(required=True)
     status = String(required=True)
-    items = Text()  # JSON: list of item dicts
-    shipping_address = Text()  # JSON: address dict
-    billing_address = Text()  # JSON: address dict
+    items = List(Dict())
+    shipping_address = Dict()
+    billing_address = Dict()
     subtotal = Float()
     shipping_cost = Float()
     tax_total = Float()
@@ -86,7 +84,7 @@ class OrderDetailProjector:
     def on_item_added(self, event):
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
-        items = json.loads(detail.items) if detail.items else []
+        items = list(detail.items) if detail.items else []
         items.append(
             {
                 "item_id": event.item_id,
@@ -98,7 +96,7 @@ class OrderDetailProjector:
                 "unit_price": event.unit_price,
             }
         )
-        detail.items = json.dumps(items)
+        detail.items = items
         detail.subtotal = event.new_subtotal
         detail.grand_total = event.new_grand_total
         repo.add(detail)
@@ -107,9 +105,9 @@ class OrderDetailProjector:
     def on_item_removed(self, event):
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
-        items = json.loads(detail.items) if detail.items else []
+        items = list(detail.items) if detail.items else []
         items = [i for i in items if i.get("item_id") != str(event.item_id)]
-        detail.items = json.dumps(items)
+        detail.items = items
         detail.subtotal = event.new_subtotal
         detail.grand_total = event.new_grand_total
         repo.add(detail)
@@ -118,12 +116,12 @@ class OrderDetailProjector:
     def on_item_quantity_updated(self, event):
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
-        items = json.loads(detail.items) if detail.items else []
+        items = list(detail.items) if detail.items else []
         for item in items:
             if item.get("item_id") == str(event.item_id):
                 item["quantity"] = event.new_quantity
                 break
-        detail.items = json.dumps(items)
+        detail.items = items
         detail.subtotal = event.new_subtotal
         detail.grand_total = event.new_grand_total
         repo.add(detail)

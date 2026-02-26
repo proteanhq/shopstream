@@ -9,7 +9,6 @@ Covers:
 - Product details update (title change) updates title in the projection
 """
 
-import json
 from datetime import UTC, datetime
 
 from catalogue.category.management import CreateCategory
@@ -49,8 +48,7 @@ class TestCategoryProductsProjection:
         view = current_domain.repository_for(CategoryProducts).get(category_id)
         assert view.category_name == "Clothing"
         assert view.product_count == 0
-        products = json.loads(view.products)
-        assert products == []
+        assert view.products == []
 
     def test_product_creation_adds_to_category(self):
         """Creating a product with a category_id adds it to the CategoryProducts projection."""
@@ -59,12 +57,11 @@ class TestCategoryProductsProjection:
 
         view = current_domain.repository_for(CategoryProducts).get(category_id)
         assert view.product_count == 1
-        products = json.loads(view.products)
-        assert len(products) == 1
-        assert products[0]["product_id"] == product_id
-        assert products[0]["title"] == "Python Cookbook"
-        assert products[0]["sku"] == "BOOK-001"
-        assert products[0]["status"] == "Draft"
+        assert len(view.products) == 1
+        assert view.products[0]["product_id"] == product_id
+        assert view.products[0]["title"] == "Python Cookbook"
+        assert view.products[0]["sku"] == "BOOK-001"
+        assert view.products[0]["status"] == "Draft"
 
     def test_multiple_products_in_category(self):
         """Multiple products in the same category should all appear in the projection."""
@@ -74,8 +71,7 @@ class TestCategoryProductsProjection:
 
         view = current_domain.repository_for(CategoryProducts).get(category_id)
         assert view.product_count == 2
-        products = json.loads(view.products)
-        titles = {p["title"] for p in products}
+        titles = {p["title"] for p in view.products}
         assert titles == {"Widget A", "Widget B"}
 
     def test_product_activation_updates_status(self):
@@ -95,8 +91,7 @@ class TestCategoryProductsProjection:
         )
 
         view = current_domain.repository_for(CategoryProducts).get(category_id)
-        products = json.loads(view.products)
-        product = next(p for p in products if p["product_id"] == product_id)
+        product = next(p for p in view.products if p["product_id"] == product_id)
         assert product["status"] == "active"
 
     def test_product_discontinuation_updates_status(self):
@@ -121,8 +116,7 @@ class TestCategoryProductsProjection:
         )
 
         view = current_domain.repository_for(CategoryProducts).get(category_id)
-        products = json.loads(view.products)
-        product = next(p for p in products if p["product_id"] == product_id)
+        product = next(p for p in view.products if p["product_id"] == product_id)
         assert product["status"] == "discontinued"
 
     def test_product_archival_updates_status(self):
@@ -140,8 +134,7 @@ class TestCategoryProductsProjection:
         current_domain.process(ArchiveProduct(product_id=product_id), asynchronous=False)
 
         view = current_domain.repository_for(CategoryProducts).get(category_id)
-        products = json.loads(view.products)
-        product = next(p for p in products if p["product_id"] == product_id)
+        product = next(p for p in view.products if p["product_id"] == product_id)
         assert product["status"] == "archived"
 
     def test_product_title_update_reflected_in_projection(self):
@@ -155,8 +148,7 @@ class TestCategoryProductsProjection:
         )
 
         view = current_domain.repository_for(CategoryProducts).get(category_id)
-        products = json.loads(view.products)
-        product = next(p for p in products if p["product_id"] == product_id)
+        product = next(p for p in view.products if p["product_id"] == product_id)
         assert product["title"] == "Premium Desk Lamp"
 
     def test_product_without_category_does_not_appear(self):

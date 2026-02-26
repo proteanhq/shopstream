@@ -6,7 +6,7 @@ Events are used for:
 - Cross-domain communication via Redis Streams
 """
 
-from protean.fields import DateTime, Identifier, Integer, String, Text
+from protean.fields import DateTime, Identifier, Integer, List, String, Text
 
 from reviews.domain import reviews
 
@@ -25,8 +25,8 @@ class ReviewSubmitted:
     rating = Integer(required=True)
     title = String(required=True)
     body = Text(required=True)
-    pros = Text()
-    cons = Text()
+    pros = List(String())
+    cons = List(String())
     verified_purchase = String(required=True)  # "True"/"False"
     image_count = Integer(default=0)
     submitted_at = DateTime(required=True)

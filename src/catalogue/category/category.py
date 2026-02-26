@@ -1,10 +1,9 @@
 """Category aggregate root for product categorization."""
 
-import json
 from datetime import datetime
 
 from protean.exceptions import ValidationError
-from protean.fields import Boolean, DateTime, Identifier, Integer, String, Text
+from protean.fields import Boolean, DateTime, Dict, Identifier, Integer, String
 
 from catalogue.domain import catalogue
 
@@ -20,7 +19,7 @@ class Category:
     name: String(required=True, max_length=100)
     parent_category_id: Identifier()
     level: Integer(default=0, min_value=0, max_value=4)
-    attributes: Text()
+    attributes: Dict()
     is_active: Boolean(default=True)
     display_order: Integer(default=0)
     created_at: DateTime(default=datetime.now)
@@ -31,13 +30,12 @@ class Category:
         from catalogue.category.events import CategoryCreated
 
         now = datetime.now()
-        attrs_json = json.dumps(attributes) if attributes else None
 
         category = cls(
             name=name,
             parent_category_id=parent_category_id,
             level=level,
-            attributes=attrs_json,
+            attributes=attributes or {},
             created_at=now,
             updated_at=now,
         )
@@ -57,10 +55,8 @@ class Category:
         if name is not None:
             self.name = name
 
-        attrs_json = None
         if attributes is not None:
-            attrs_json = json.dumps(attributes)
-            self.attributes = attrs_json
+            self.attributes = attributes
 
         self.updated_at = datetime.now()
 
@@ -68,7 +64,7 @@ class Category:
             CategoryDetailsUpdated(
                 category_id=self.id,
                 name=self.name,
-                attributes=attrs_json,
+                attributes=attributes or {},
             )
         )
 

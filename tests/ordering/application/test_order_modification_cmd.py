@@ -1,7 +1,5 @@
 """Application tests for order modification commands."""
 
-import json
-
 from ordering.order.creation import CreateOrder
 from ordering.order.modification import AddItem, ApplyCoupon, RemoveItem, UpdateItemQuantity
 from ordering.order.order import Order
@@ -11,24 +9,18 @@ from protean import current_domain
 def _create_order():
     command = CreateOrder(
         customer_id="cust-001",
-        items=json.dumps(
-            [
-                {
-                    "product_id": "prod-001",
-                    "variant_id": "var-001",
-                    "sku": "SKU-001",
-                    "title": "Widget",
-                    "quantity": 2,
-                    "unit_price": 25.0,
-                },
-            ]
-        ),
-        shipping_address=json.dumps(
-            {"street": "123 Main", "city": "Town", "state": "CA", "postal_code": "90210", "country": "US"}
-        ),
-        billing_address=json.dumps(
-            {"street": "123 Main", "city": "Town", "state": "CA", "postal_code": "90210", "country": "US"}
-        ),
+        items=[
+            {
+                "product_id": "prod-001",
+                "variant_id": "var-001",
+                "sku": "SKU-001",
+                "title": "Widget",
+                "quantity": 2,
+                "unit_price": 25.0,
+            },
+        ],
+        shipping_address={"street": "123 Main", "city": "Town", "state": "CA", "postal_code": "90210", "country": "US"},
+        billing_address={"street": "123 Main", "city": "Town", "state": "CA", "postal_code": "90210", "country": "US"},
         subtotal=50.0,
         grand_total=55.0,
     )

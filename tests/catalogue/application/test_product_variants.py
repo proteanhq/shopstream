@@ -1,7 +1,5 @@
 """Application tests for variant management handlers."""
 
-import json
-
 from catalogue.product.creation import CreateProduct
 from catalogue.product.product import Product
 from catalogue.product.variants import AddVariant, SetTierPrice, UpdateVariantPrice
@@ -54,12 +52,11 @@ class TestAddVariantHandler:
 
     def test_add_variant_with_attributes(self):
         product_id = _create_product()
-        attrs = json.dumps({"size": "L", "color": "Blue"})
+        attrs = {"size": "L", "color": "Blue"}
         _add_variant(product_id, attributes=attrs)
 
         product = current_domain.repository_for(Product).get(product_id)
-        parsed = json.loads(product.variants[0].attributes)
-        assert parsed["size"] == "L"
+        assert product.variants[0].attributes["size"] == "L"
 
     def test_add_multiple_variants(self):
         product_id = _create_product()
@@ -107,5 +104,5 @@ class TestSetTierPriceHandler:
         current_domain.process(command, asynchronous=False)
 
         product = current_domain.repository_for(Product).get(product_id)
-        tiers = json.loads(product.variants[0].price.tier_prices)
+        tiers = product.variants[0].price.tier_prices
         assert tiers["Silver"] == 89.99

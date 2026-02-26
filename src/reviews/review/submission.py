@@ -5,9 +5,7 @@ check requires repository query). Checks VerifiedPurchases projection to flag
 verified purchases.
 """
 
-import json
-
-from protean.fields import Identifier, Integer, String, Text
+from protean.fields import Dict, Identifier, Integer, List, String, Text
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
 
@@ -23,9 +21,9 @@ class SubmitReview:
     title = String(required=True, max_length=200)
     body = Text(required=True)
     variant_id = Identifier()
-    pros = Text()  # JSON array of strings
-    cons = Text()  # JSON array of strings
-    images = Text()  # JSON array of {url, alt_text}
+    pros = List(String())
+    cons = List(String())
+    images = List(Dict())
 
 
 @reviews.command_handler(part_of=Review)
@@ -66,11 +64,6 @@ class SubmitReviewHandler:
         except Exception:
             pass  # If projection not available, proceed unverified
 
-        # Parse images
-        images_data = json.loads(command.images) if command.images else []
-        pros_data = json.loads(command.pros) if command.pros else None
-        cons_data = json.loads(command.cons) if command.cons else None
-
         review = Review.submit(
             product_id=command.product_id,
             customer_id=command.customer_id,
@@ -80,9 +73,9 @@ class SubmitReviewHandler:
             variant_id=command.variant_id,
             order_id=order_id,
             verified_purchase=verified,
-            pros=pros_data,
-            cons=cons_data,
-            images=images_data,
+            pros=command.pros or None,
+            cons=command.cons or None,
+            images=command.images or [],
         )
         repo.add(review)
         return str(review.id)

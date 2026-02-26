@@ -1,7 +1,7 @@
 """Product details management — command and handler."""
 
 from protean import handle
-from protean.fields import Identifier, String, Text
+from protean.fields import Dict, Identifier, String
 from protean.utils.globals import current_domain
 
 from catalogue.domain import catalogue
@@ -16,7 +16,7 @@ class UpdateProductDetails:
     title: String(max_length=255)
     description: String()
     brand: String(max_length=100)
-    attributes: Text()
+    attributes: Dict()
     meta_title: String(max_length=70)
     meta_description: String(max_length=160)
     slug: String(max_length=200)

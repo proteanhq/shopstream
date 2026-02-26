@@ -145,17 +145,18 @@ class TestOrderCreatedEvent:
         assert event.subtotal == 59.98
         assert event.grand_total == 70.77
 
-    def test_event_contains_items_json(self):
+    def test_event_contains_items(self):
         order = _make_order()
         event = order._events[0]
         assert event.items is not None
-        assert "TSHIRT-BLK-M" in event.items
+        skus = [item["sku"] for item in event.items]
+        assert "TSHIRT-BLK-M" in skus
 
-    def test_event_contains_addresses_json(self):
+    def test_event_contains_addresses(self):
         order = _make_order()
         event = order._events[0]
-        assert "123 Main St" in event.shipping_address
-        assert "456 Oak Ave" in event.billing_address
+        assert event.shipping_address["street"] == "123 Main St"
+        assert event.billing_address["street"] == "456 Oak Ave"
 
     def test_event_contains_timestamp(self):
         order = _make_order()

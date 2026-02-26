@@ -36,11 +36,13 @@ class DetectAbandonedCartsHandler:
     def detect_abandoned_carts(self, command):
         as_of = command.as_of or datetime.now(UTC)
         threshold_hours = command.idle_threshold_hours or 24
-        cutoff = (as_of - timedelta(hours=threshold_hours)).replace(tzinfo=None)
+        cutoff = as_of - timedelta(hours=threshold_hours)
+        # Strip tzinfo for comparison with naive datetimes from DB
+        cutoff_naive = cutoff.replace(tzinfo=None)
 
         logger.info(
             "Checking for abandoned carts",
-            cutoff=cutoff.isoformat(),
+            cutoff=cutoff_naive.isoformat(),
             threshold_hours=threshold_hours,
         )
 
@@ -50,8 +52,11 @@ class DetectAbandonedCartsHandler:
         # Filter idle carts with items
         abandoned = []
         for cart in active_carts:
-            if cart.updated_at and cart.updated_at <= cutoff and (cart.item_count or 0) > 0:
-                abandoned.append(cart)
+            if cart.updated_at:
+                # Normalize both to naive for comparison
+                cart_updated = cart.updated_at.replace(tzinfo=None) if cart.updated_at.tzinfo else cart.updated_at
+                if cart_updated <= cutoff_naive and (cart.item_count or 0) > 0:
+                    abandoned.append(cart)
 
         if not abandoned:
             logger.info("No abandoned carts found")

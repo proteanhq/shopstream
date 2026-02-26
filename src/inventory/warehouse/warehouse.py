@@ -4,7 +4,6 @@ Warehouses contain zones (regular, cold storage, hazmat) and track capacity.
 This is a standard CQRS aggregate (not event sourced).
 """
 
-import json
 from datetime import UTC, datetime
 from enum import Enum
 from uuid import uuid4
@@ -77,7 +76,7 @@ class Warehouse:
             WarehouseCreated(
                 warehouse_id=str(warehouse.id),
                 name=name,
-                address=json.dumps(address if isinstance(address, dict) else address.to_dict()),
+                address=address if isinstance(address, dict) else address.to_dict(),
                 capacity=str(capacity),
                 created_at=now,
             )

@@ -1,7 +1,5 @@
 """Application tests for delivery commands via domain.process()."""
 
-import json
-
 import pytest
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.delivery import RecordDeliveryConfirmation, RecordDeliveryException
@@ -16,7 +14,7 @@ from protean.exceptions import ValidationError
 
 def _create_in_transit():
     """Create a fulfillment in IN_TRANSIT state."""
-    items = json.dumps([{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}])
+    items = [{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}]
     ff_id = current_domain.process(
         CreateFulfillment(order_id="ord-001", customer_id="cust-001", items=items),
         asynchronous=False,
@@ -29,7 +27,7 @@ def _create_in_transit():
     )
     current_domain.process(CompletePickList(fulfillment_id=ff_id), asynchronous=False)
     current_domain.process(
-        RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps([{"weight": 1.5}])),
+        RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=[{"weight": 1.5}]),
         asynchronous=False,
     )
     current_domain.process(
@@ -72,7 +70,7 @@ class TestRecordDeliveryConfirmation:
         assert ff.shipment.actual_delivery is not None
 
     def test_delivery_fails_from_pending(self):
-        items = json.dumps([{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}])
+        items = [{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}]
         ff_id = current_domain.process(
             CreateFulfillment(order_id="ord-001", customer_id="cust-001", items=items),
             asynchronous=False,
@@ -135,7 +133,7 @@ class TestRecordDeliveryException:
         assert ff.status == FulfillmentStatus.DELIVERED.value
 
     def test_exception_fails_from_pending(self):
-        items = json.dumps([{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}])
+        items = [{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}]
         ff_id = current_domain.process(
             CreateFulfillment(order_id="ord-001", customer_id="cust-001", items=items),
             asynchronous=False,

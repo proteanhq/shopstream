@@ -1,7 +1,5 @@
 """Integration tests for customer projections via domain.process()."""
 
-import json
-
 from identity.customer.account import SuspendAccount
 from identity.customer.addresses import AddAddress, UpdateAddress
 from identity.customer.customer import CustomerTier
@@ -148,9 +146,8 @@ class TestAddressBookProjection:
         )
 
         book = current_domain.repository_for(AddressBook).get(customer_id)
-        entries = json.loads(book.addresses)
-        assert len(entries) == 1
-        assert entries[0]["street"] == "123 Main St"
+        assert len(book.addresses) == 1
+        assert book.addresses[0]["street"] == "123 Main St"
 
     def test_address_book_updated_on_address_update(self):
         """Cover projector branches: loop skips non-matching entry (62->61)
@@ -201,7 +198,6 @@ class TestAddressBookProjection:
         )
 
         book = current_domain.repository_for(AddressBook).get(customer_id)
-        entries = json.loads(book.addresses)
-        assert len(entries) == 2
-        updated = next(e for e in entries if e["address_id"] == second_addr_id)
+        assert len(book.addresses) == 2
+        updated = next(e for e in book.addresses if e["address_id"] == second_addr_id)
         assert updated["street"] == "222 Updated St"

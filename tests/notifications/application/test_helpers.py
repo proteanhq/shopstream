@@ -118,10 +118,8 @@ class TestCreateNotificationsForCustomer:
         n = repo.get(nids[0])
         assert n.template_name is not None
 
-    def test_context_data_stored_as_json(self):
-        """Context data is serialized to JSON on the notification."""
-        import json
-
+    def test_context_data_stored(self):
+        """Context data is stored on the notification."""
         nids = create_notifications_for_customer(
             customer_id="cust-ctx",
             notification_type=NotificationType.WELCOME.value,
@@ -130,8 +128,7 @@ class TestCreateNotificationsForCustomer:
         assert len(nids) >= 1
         repo = current_domain.repository_for(Notification)
         n = repo.get(nids[0])
-        ctx = json.loads(n.context_data)
-        assert ctx["customer_name"] == "Grace"
+        assert n.context_data["customer_name"] == "Grace"
 
     def test_no_email_in_template_defaults_and_no_prefs(self):
         """If the template doesn't include EMAIL and there are no prefs,

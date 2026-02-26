@@ -1,6 +1,5 @@
 """Shared BDD fixtures and step definitions for the Ordering domain."""
 
-import json
 from datetime import UTC, datetime
 
 import pytest
@@ -108,37 +107,31 @@ def order_created(order_id, customer_id):
     return OrderCreated(
         order_id=order_id,
         customer_id=customer_id,
-        items=json.dumps(
-            [
-                {
-                    "id": "item-1",
-                    "product_id": "prod-001",
-                    "variant_id": "var-001",
-                    "sku": "SKU-001",
-                    "title": "Test Product",
-                    "quantity": 2,
-                    "unit_price": 25.0,
-                }
-            ]
-        ),
-        shipping_address=json.dumps(
+        items=[
             {
-                "street": "123 Main St",
-                "city": "Springfield",
-                "state": "IL",
-                "postal_code": "62701",
-                "country": "US",
+                "id": "item-1",
+                "product_id": "prod-001",
+                "variant_id": "var-001",
+                "sku": "SKU-001",
+                "title": "Test Product",
+                "quantity": 2,
+                "unit_price": 25.0,
             }
-        ),
-        billing_address=json.dumps(
-            {
-                "street": "123 Main St",
-                "city": "Springfield",
-                "state": "IL",
-                "postal_code": "62701",
-                "country": "US",
-            }
-        ),
+        ],
+        shipping_address={
+            "street": "123 Main St",
+            "city": "Springfield",
+            "state": "IL",
+            "postal_code": "62701",
+            "country": "US",
+        },
+        billing_address={
+            "street": "123 Main St",
+            "city": "Springfield",
+            "state": "IL",
+            "postal_code": "62701",
+            "country": "US",
+        },
         subtotal=50.0,
         shipping_cost=5.0,
         tax_total=4.0,
@@ -184,7 +177,7 @@ def order_shipped(order_id):
         shipment_id="ship-001",
         carrier="FedEx",
         tracking_number="TRACK-001",
-        shipped_item_ids=json.dumps(["item-1"]),
+        shipped_item_ids=["item-1"],
         shipped_at=datetime.now(UTC),
     )
 
@@ -212,7 +205,7 @@ def return_approved(order_id):
 def order_returned(order_id):
     return OrderReturned(
         order_id=order_id,
-        returned_item_ids=json.dumps(["item-1"]),
+        returned_item_ids=["item-1"],
         returned_at=datetime.now(UTC),
     )
 
@@ -244,36 +237,30 @@ def order_refunded(order_id):
 def create_order(customer_id):
     return CreateOrder(
         customer_id=customer_id,
-        items=json.dumps(
-            [
-                {
-                    "product_id": "prod-001",
-                    "variant_id": "var-001",
-                    "sku": "SKU-001",
-                    "title": "Test Product",
-                    "quantity": 2,
-                    "unit_price": 25.0,
-                }
-            ]
-        ),
-        shipping_address=json.dumps(
+        items=[
             {
-                "street": "123 Main St",
-                "city": "Springfield",
-                "state": "IL",
-                "postal_code": "62701",
-                "country": "US",
+                "product_id": "prod-001",
+                "variant_id": "var-001",
+                "sku": "SKU-001",
+                "title": "Test Product",
+                "quantity": 2,
+                "unit_price": 25.0,
             }
-        ),
-        billing_address=json.dumps(
-            {
-                "street": "123 Main St",
-                "city": "Springfield",
-                "state": "IL",
-                "postal_code": "62701",
-                "country": "US",
-            }
-        ),
+        ],
+        shipping_address={
+            "street": "123 Main St",
+            "city": "Springfield",
+            "state": "IL",
+            "postal_code": "62701",
+            "country": "US",
+        },
+        billing_address={
+            "street": "123 Main St",
+            "city": "Springfield",
+            "state": "IL",
+            "postal_code": "62701",
+            "country": "US",
+        },
         subtotal=50.0,
         shipping_cost=5.0,
         tax_total=4.0,

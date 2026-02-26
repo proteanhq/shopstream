@@ -1,7 +1,5 @@
 """Integration tests for category aggregate persistence."""
 
-import json
-
 from catalogue.category.category import Category
 from catalogue.category.management import CreateCategory, DeactivateCategory, ReorderCategory, UpdateCategory
 from protean.utils.globals import current_domain
@@ -33,7 +31,7 @@ class TestCategoryPersistence:
 
     def test_update_persists(self):
         category_id = _create_category()
-        attrs = json.dumps({"filterable": ["brand"]})
+        attrs = {"filterable": ["brand"]}
         current_domain.process(
             UpdateCategory(category_id=category_id, name="Updated Name", attributes=attrs),
             asynchronous=False,
@@ -41,7 +39,7 @@ class TestCategoryPersistence:
 
         category = current_domain.repository_for(Category).get(category_id)
         assert category.name == "Updated Name"
-        assert json.loads(category.attributes) == {"filterable": ["brand"]}
+        assert category.attributes == {"filterable": ["brand"]}
 
     def test_reorder_persists(self):
         category_id = _create_category()

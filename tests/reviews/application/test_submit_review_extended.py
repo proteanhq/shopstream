@@ -1,7 +1,5 @@
 """Extended application tests for SubmitReview — edge cases."""
 
-import json
-
 from protean import current_domain
 from reviews.review.moderation import ModerateReview
 from reviews.review.removal import RemoveReview
@@ -73,12 +71,12 @@ class TestEditPartialUpdates:
             EditReview(
                 review_id=review_id,
                 customer_id="cust-partial-1",
-                pros=json.dumps(["Good quality"]),
+                pros=["Good quality"],
             ),
             asynchronous=False,
         )
         review = current_domain.repository_for(Review).get(review_id)
-        assert json.loads(review.pros) == ["Good quality"]
+        assert review.pros == ["Good quality"]
 
     def test_edit_only_cons(self):
         from reviews.review.editing import EditReview
@@ -97,12 +95,12 @@ class TestEditPartialUpdates:
             EditReview(
                 review_id=review_id,
                 customer_id="cust-partial-2",
-                cons=json.dumps(["Fragile"]),
+                cons=["Fragile"],
             ),
             asynchronous=False,
         )
         review = current_domain.repository_for(Review).get(review_id)
-        assert json.loads(review.cons) == ["Fragile"]
+        assert review.cons == ["Fragile"]
 
     def test_edit_body_only(self):
         from reviews.review.editing import EditReview

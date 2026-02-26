@@ -1,6 +1,5 @@
 """Application tests for Ordering cross-domain event handlers."""
 
-import json
 from datetime import UTC, datetime
 
 from notifications.notification.notification import (
@@ -21,7 +20,7 @@ def _fire_order_created(
     return OrderCreated(
         order_id=order_id,
         customer_id=customer_id,
-        items=json.dumps([{"product_id": "prod-1", "quantity": 1}]),
+        items=[{"product_id": "prod-1", "quantity": 1}],
         grand_total=grand_total,
         currency=currency,
         created_at=datetime.now(UTC),

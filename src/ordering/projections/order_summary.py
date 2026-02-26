@@ -1,7 +1,5 @@
 """Order summary — lightweight listing/history view."""
 
-import json
-
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -46,7 +44,7 @@ class OrderSummary:
 class OrderSummaryProjector:
     @on(OrderCreated)
     def on_order_created(self, event):
-        items = json.loads(event.items) if isinstance(event.items, str) else []
+        items = event.items or []
         current_domain.repository_for(OrderSummary).add(
             OrderSummary(
                 order_id=event.order_id,

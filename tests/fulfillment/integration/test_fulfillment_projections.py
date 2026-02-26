@@ -1,7 +1,5 @@
 """Integration tests for fulfillment projections."""
 
-import json
-
 from fulfillment.fulfillment.cancellation import CancelFulfillment
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.delivery import RecordDeliveryConfirmation, RecordDeliveryException
@@ -16,13 +14,13 @@ from fulfillment.projections.warehouse_queue import WarehouseQueueView
 from protean import current_domain
 
 
-def _single_item_json():
-    return json.dumps([{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}])
+def _single_item():
+    return [{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}]
 
 
 def _create_fulfillment():
     return current_domain.process(
-        CreateFulfillment(order_id="ord-proj-001", customer_id="cust-proj-001", items=_single_item_json()),
+        CreateFulfillment(order_id="ord-proj-001", customer_id="cust-proj-001", items=_single_item()),
         asynchronous=False,
     )
 
@@ -36,7 +34,7 @@ def _walk_to_shipped(ff_id):
     )
     current_domain.process(CompletePickList(fulfillment_id=ff_id), asynchronous=False)
     current_domain.process(
-        RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps([{"weight": 1.0}])),
+        RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=[{"weight": 1.0}]),
         asynchronous=False,
     )
     current_domain.process(
@@ -91,7 +89,7 @@ class TestFulfillmentStatusProjection:
         )
         current_domain.process(CompletePickList(fulfillment_id=ff_id), asynchronous=False)
         current_domain.process(
-            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps([{"weight": 1.0}])),
+            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=[{"weight": 1.0}]),
             asynchronous=False,
         )
         current_domain.process(
@@ -203,7 +201,7 @@ class TestShipmentTrackingProjection:
         view = current_domain.repository_for(ShipmentTrackingView).get(ff_id)
         assert view.current_status == "in_transit"
         assert view.current_location == "Distribution Center, NY"
-        events = json.loads(view.events_json)
+        events = view.events
         assert len(events) == 1
         assert events[0]["status"] == "in_transit"
 
@@ -218,7 +216,7 @@ class TestShipmentTrackingProjection:
         view = current_domain.repository_for(ShipmentTrackingView).get(ff_id)
         assert view.current_status == "Delivered"
         assert view.delivered_at is not None
-        events = json.loads(view.events_json)
+        events = view.events
         assert len(events) == 2  # tracking event + delivery
 
     def test_tracking_view_updated_on_exception(self):
@@ -234,6 +232,6 @@ class TestShipmentTrackingProjection:
         )
         view = current_domain.repository_for(ShipmentTrackingView).get(ff_id)
         assert view.current_status == "Exception"
-        events = json.loads(view.events_json)
+        events = view.events
         assert len(events) == 2
         assert events[-1]["status"] == "Exception"

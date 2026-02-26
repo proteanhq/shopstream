@@ -1,7 +1,5 @@
 """Application tests for packing commands via domain.process()."""
 
-import json
-
 import pytest
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.fulfillment import (
@@ -22,7 +20,7 @@ def _create_and_pick(item_count=1):
         for i in range(1, item_count + 1)
     ]
     ff_id = current_domain.process(
-        CreateFulfillment(order_id="ord-001", customer_id="cust-001", items=json.dumps(items)),
+        CreateFulfillment(order_id="ord-001", customer_id="cust-001", items=items),
         asynchronous=False,
     )
     current_domain.process(AssignPicker(fulfillment_id=ff_id, picker_name="Alice"), asynchronous=False)
@@ -41,7 +39,7 @@ class TestRecordPacking:
         ff_id = _create_and_pick()
         packages = [{"weight": 1.5}]
         current_domain.process(
-            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps(packages)),
+            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=packages),
             asynchronous=False,
         )
         ff = current_domain.repository_for(Fulfillment).get(ff_id)
@@ -51,7 +49,7 @@ class TestRecordPacking:
         ff_id = _create_and_pick()
         packages = [{"weight": 2.0}]
         current_domain.process(
-            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps(packages)),
+            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=packages),
             asynchronous=False,
         )
         ff = current_domain.repository_for(Fulfillment).get(ff_id)
@@ -62,7 +60,7 @@ class TestRecordPacking:
         ff_id = _create_and_pick(item_count=2)
         packages = [{"weight": 3.0}]
         current_domain.process(
-            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps(packages)),
+            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=packages),
             asynchronous=False,
         )
         ff = current_domain.repository_for(Fulfillment).get(ff_id)
@@ -70,14 +68,14 @@ class TestRecordPacking:
             assert item.status == FulfillmentItemStatus.PACKED.value
 
     def test_record_packing_fails_when_not_in_packing_phase(self):
-        items = json.dumps([{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}])
+        items = [{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}]
         ff_id = current_domain.process(
             CreateFulfillment(order_id="ord-001", customer_id="cust-001", items=items),
             asynchronous=False,
         )
         with pytest.raises(ValidationError):
             current_domain.process(
-                RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps([{"weight": 1.0}])),
+                RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=[{"weight": 1.0}]),
                 asynchronous=False,
             )
 
@@ -86,7 +84,7 @@ class TestGenerateShippingLabel:
     def test_generate_label_transitions_to_ready_to_ship(self):
         ff_id = _create_and_pick()
         current_domain.process(
-            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps([{"weight": 1.0}])),
+            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=[{"weight": 1.0}]),
             asynchronous=False,
         )
         current_domain.process(
@@ -104,7 +102,7 @@ class TestGenerateShippingLabel:
     def test_generate_label_sets_shipment_info(self):
         ff_id = _create_and_pick()
         current_domain.process(
-            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=json.dumps([{"weight": 1.0}])),
+            RecordPacking(fulfillment_id=ff_id, packed_by="Bob", packages=[{"weight": 1.0}]),
             asynchronous=False,
         )
         current_domain.process(
@@ -135,7 +133,7 @@ class TestGenerateShippingLabel:
             )
 
     def test_generate_label_fails_when_not_in_packing_phase(self):
-        items = json.dumps([{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}])
+        items = [{"order_item_id": "oi-1", "product_id": "prod-1", "sku": "SKU-001", "quantity": 1}]
         ff_id = current_domain.process(
             CreateFulfillment(order_id="ord-001", customer_id="cust-001", items=items),
             asynchronous=False,

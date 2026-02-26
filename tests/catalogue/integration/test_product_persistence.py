@@ -1,7 +1,5 @@
 """Integration tests for product aggregate persistence round-trip."""
 
-import json
-
 from catalogue.product.creation import CreateProduct
 from catalogue.product.details import UpdateProductDetails
 from catalogue.product.images import AddProductImage
@@ -98,15 +96,14 @@ class TestProductPersistence:
 
     def test_variant_with_attributes_persists(self):
         product_id = _create_product()
-        attrs = json.dumps({"size": "XL", "color": "Red"})
+        attrs = {"size": "XL", "color": "Red"}
         current_domain.process(
             AddVariant(product_id=product_id, variant_sku="VAR-A", base_price=29.99, attributes=attrs),
             asynchronous=False,
         )
 
         product = current_domain.repository_for(Product).get(product_id)
-        parsed = json.loads(product.variants[0].attributes)
-        assert parsed["size"] == "XL"
+        assert product.variants[0].attributes["size"] == "XL"
 
     def test_images_persist(self):
         product_id = _create_product()

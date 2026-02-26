@@ -4,11 +4,9 @@ Maintains a denormalized view of products per category, updated as products
 are created, activated, discontinued, or archived.
 """
 
-import json
-
 from protean.core.projector import on
 from protean.exceptions import ObjectNotFoundError
-from protean.fields import DateTime, Identifier, Integer, String, Text
+from protean.fields import DateTime, Dict, Identifier, Integer, List, String
 from protean.utils.globals import current_domain
 
 from catalogue.category.category import Category
@@ -29,7 +27,7 @@ class CategoryProducts:
     category_id = Identifier(identifier=True, required=True)
     category_name = String(required=True, max_length=255)
     product_count = Integer(default=0)
-    products = Text(default="[]")  # JSON list of product summaries
+    products = List(Dict())
     updated_at = DateTime()
 
 
@@ -42,7 +40,7 @@ class CategoryProductsProjector:
                 category_id=event.category_id,
                 category_name=event.name,
                 product_count=0,
-                products="[]",
+                products=[],
             )
         )
 
@@ -56,7 +54,7 @@ class CategoryProductsProjector:
         except ObjectNotFoundError:
             return
 
-        products = json.loads(view.products) if isinstance(view.products, str) else (view.products or [])
+        products = list(view.products or [])
         products.append(
             {
                 "product_id": str(event.product_id),
@@ -65,7 +63,7 @@ class CategoryProductsProjector:
                 "status": event.status,
             }
         )
-        view.products = json.dumps(products)
+        view.products = products
         view.product_count = len(products)
         view.updated_at = event.created_at
         repo.add(view)
@@ -77,14 +75,14 @@ class CategoryProductsProjector:
 
         repo = current_domain.repository_for(CategoryProducts)
         for view in all_categories:
-            products = json.loads(view.products) if isinstance(view.products, str) else (view.products or [])
+            products = list(view.products or [])
             updated = False
             for p in products:
                 if p.get("product_id") == str(event.product_id):
                     p["title"] = event.title
                     updated = True
             if updated:
-                view.products = json.dumps(products)
+                view.products = products
                 repo.add(view)
 
     @on(ProductActivated)
@@ -104,13 +102,13 @@ class CategoryProductsProjector:
         repo = current_domain.repository_for(CategoryProducts)
 
         for view in all_categories:
-            products = json.loads(view.products) if isinstance(view.products, str) else (view.products or [])
+            products = list(view.products or [])
             updated = False
             for p in products:
                 if p.get("product_id") == product_id:
                     p["status"] = new_status
                     updated = True
             if updated:
-                view.products = json.dumps(products)
+                view.products = products
                 view.updated_at = timestamp
                 repo.add(view)

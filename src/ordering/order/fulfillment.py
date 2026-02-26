@@ -4,10 +4,8 @@ Handles the fulfillment pipeline: processing, shipment (full and partial),
 and delivery recording.
 """
 
-import json
-
 from protean import handle
-from protean.fields import Identifier, String, Text
+from protean.fields import Identifier, List, String
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
@@ -29,7 +27,7 @@ class RecordShipment:
     shipment_id = String(required=True, max_length=255)
     carrier = String(required=True, max_length=100)
     tracking_number = String(required=True, max_length=255)
-    shipped_item_ids = Text()  # JSON: list of item ID strings
+    shipped_item_ids = List(String())
     estimated_delivery = String(max_length=10)  # ISO date string
 
 
@@ -41,7 +39,7 @@ class RecordPartialShipment:
     shipment_id = String(required=True, max_length=255)
     carrier = String(required=True, max_length=100)
     tracking_number = String(required=True, max_length=255)
-    shipped_item_ids = Text(required=True)  # JSON: list of item ID strings
+    shipped_item_ids = List(String(), required=True)
 
 
 @ordering.command(part_of="Order")
@@ -65,19 +63,11 @@ class RecordFulfillmentHandler:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
 
-        shipped_item_ids = None
-        if command.shipped_item_ids:
-            shipped_item_ids = (
-                json.loads(command.shipped_item_ids)
-                if isinstance(command.shipped_item_ids, str)
-                else command.shipped_item_ids
-            )
-
         order.record_shipment(
             shipment_id=command.shipment_id,
             carrier=command.carrier,
             tracking_number=command.tracking_number,
-            shipped_item_ids=shipped_item_ids,
+            shipped_item_ids=command.shipped_item_ids or None,
             estimated_delivery=command.estimated_delivery,
         )
         repo.add(order)
@@ -87,17 +77,11 @@ class RecordFulfillmentHandler:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
 
-        shipped_item_ids = (
-            json.loads(command.shipped_item_ids)
-            if isinstance(command.shipped_item_ids, str)
-            else command.shipped_item_ids
-        )
-
         order.record_partial_shipment(
             shipment_id=command.shipment_id,
             carrier=command.carrier,
             tracking_number=command.tracking_number,
-            shipped_item_ids=shipped_item_ids,
+            shipped_item_ids=command.shipped_item_ids,
         )
         repo.add(order)
 

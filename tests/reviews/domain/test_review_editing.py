@@ -1,6 +1,5 @@
 """Tests for Review.edit() behavior — partial updates, re-submission, sentinel handling."""
 
-import json
 from datetime import UTC, datetime
 
 import pytest
@@ -48,8 +47,8 @@ class TestPartialUpdate:
         review = _make_review()
         review._events.clear()
         review.edit(pros=["New pro"], cons=["New con"])
-        assert json.loads(review.pros) == ["New pro"]
-        assert json.loads(review.cons) == ["New con"]
+        assert review.pros == ["New pro"]
+        assert review.cons == ["New con"]
 
     def test_edit_multiple_fields(self):
         review = _make_review()

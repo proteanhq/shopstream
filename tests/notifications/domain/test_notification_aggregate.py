@@ -95,8 +95,8 @@ class TestNotificationOptionalFields:
         assert n.source_event_id == "evt-abc-123"
 
     def test_create_with_context_data(self):
-        n = _make_notification(context_data='{"first_name": "John"}')
-        assert n.context_data == '{"first_name": "John"}'
+        n = _make_notification(context_data={"first_name": "John"})
+        assert n.context_data == {"first_name": "John"}
 
     def test_create_with_scheduled_for(self):
         future = datetime.now(UTC) + timedelta(days=7)

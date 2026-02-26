@@ -5,10 +5,8 @@ Covers:
 - Partial shipment marks only specified items as shipped
 - Subsequent full shipment moves order to SHIPPED
 - Partial shipment fails from non-PROCESSING state
-- shipped_item_ids parsing from JSON string
+- shipped_item_ids as native list
 """
-
-import json
 
 import pytest
 from ordering.order.confirmation import ConfirmOrder
@@ -25,32 +23,38 @@ def _create_processing_order():
     order_id = current_domain.process(
         CreateOrder(
             customer_id="cust-001",
-            items=json.dumps(
-                [
-                    {
-                        "product_id": "prod-001",
-                        "variant_id": "var-001",
-                        "sku": "SKU-001",
-                        "title": "Widget A",
-                        "quantity": 1,
-                        "unit_price": 25.0,
-                    },
-                    {
-                        "product_id": "prod-002",
-                        "variant_id": "var-002",
-                        "sku": "SKU-002",
-                        "title": "Widget B",
-                        "quantity": 1,
-                        "unit_price": 30.0,
-                    },
-                ]
-            ),
-            shipping_address=json.dumps(
-                {"street": "123 Main", "city": "Town", "state": "CA", "postal_code": "90210", "country": "US"}
-            ),
-            billing_address=json.dumps(
-                {"street": "123 Main", "city": "Town", "state": "CA", "postal_code": "90210", "country": "US"}
-            ),
+            items=[
+                {
+                    "product_id": "prod-001",
+                    "variant_id": "var-001",
+                    "sku": "SKU-001",
+                    "title": "Widget A",
+                    "quantity": 1,
+                    "unit_price": 25.0,
+                },
+                {
+                    "product_id": "prod-002",
+                    "variant_id": "var-002",
+                    "sku": "SKU-002",
+                    "title": "Widget B",
+                    "quantity": 1,
+                    "unit_price": 30.0,
+                },
+            ],
+            shipping_address={
+                "street": "123 Main",
+                "city": "Town",
+                "state": "CA",
+                "postal_code": "90210",
+                "country": "US",
+            },
+            billing_address={
+                "street": "123 Main",
+                "city": "Town",
+                "state": "CA",
+                "postal_code": "90210",
+                "country": "US",
+            },
             subtotal=55.0,
             grand_total=60.0,
         ),
@@ -81,7 +85,7 @@ class TestRecordPartialShipment:
                 shipment_id="ship-partial-001",
                 carrier="FedEx",
                 tracking_number="TRACK-P-001",
-                shipped_item_ids=json.dumps([first_item_id]),
+                shipped_item_ids=[first_item_id],
             ),
             asynchronous=False,
         )
@@ -101,7 +105,7 @@ class TestRecordPartialShipment:
                 shipment_id="ship-partial-002",
                 carrier="FedEx",
                 tracking_number="TRACK-P-002",
-                shipped_item_ids=json.dumps([first_item_id]),
+                shipped_item_ids=[first_item_id],
             ),
             asynchronous=False,
         )
@@ -124,7 +128,7 @@ class TestRecordPartialShipment:
                 shipment_id="ship-partial-003",
                 carrier="FedEx",
                 tracking_number="TRACK-P-003",
-                shipped_item_ids=json.dumps([first_item_id]),
+                shipped_item_ids=[first_item_id],
             ),
             asynchronous=False,
         )
@@ -148,24 +152,30 @@ class TestRecordPartialShipment:
         order_id = current_domain.process(
             CreateOrder(
                 customer_id="cust-002",
-                items=json.dumps(
-                    [
-                        {
-                            "product_id": "prod-001",
-                            "variant_id": "var-001",
-                            "sku": "SKU-001",
-                            "title": "Widget",
-                            "quantity": 1,
-                            "unit_price": 25.0,
-                        }
-                    ]
-                ),
-                shipping_address=json.dumps(
-                    {"street": "123 Main", "city": "Town", "state": "CA", "postal_code": "90210", "country": "US"}
-                ),
-                billing_address=json.dumps(
-                    {"street": "123 Main", "city": "Town", "state": "CA", "postal_code": "90210", "country": "US"}
-                ),
+                items=[
+                    {
+                        "product_id": "prod-001",
+                        "variant_id": "var-001",
+                        "sku": "SKU-001",
+                        "title": "Widget",
+                        "quantity": 1,
+                        "unit_price": 25.0,
+                    }
+                ],
+                shipping_address={
+                    "street": "123 Main",
+                    "city": "Town",
+                    "state": "CA",
+                    "postal_code": "90210",
+                    "country": "US",
+                },
+                billing_address={
+                    "street": "123 Main",
+                    "city": "Town",
+                    "state": "CA",
+                    "postal_code": "90210",
+                    "country": "US",
+                },
                 subtotal=25.0,
                 grand_total=25.0,
             ),
@@ -189,25 +199,25 @@ class TestRecordPartialShipment:
                     shipment_id="ship-fail",
                     carrier="FedEx",
                     tracking_number="TRACK-FAIL",
-                    shipped_item_ids=json.dumps(["item-1"]),
+                    shipped_item_ids=["item-1"],
                 ),
                 asynchronous=False,
             )
 
-    def test_shipped_item_ids_json_string_parsing(self):
-        """Verify that shipped_item_ids as JSON string is parsed correctly."""
+    def test_shipped_item_ids_list_handling(self):
+        """Verify that shipped_item_ids as native list is handled correctly."""
         order_id = _create_processing_order()
         order = current_domain.repository_for(Order).get(order_id)
         first_item_id = str(order.items[0].id)
 
-        # Pass shipped_item_ids as a JSON string
+        # Pass shipped_item_ids as a native list
         current_domain.process(
             RecordPartialShipment(
                 order_id=order_id,
                 shipment_id="ship-json-001",
                 carrier="UPS",
                 tracking_number="TRACK-JSON-001",
-                shipped_item_ids=json.dumps([first_item_id]),
+                shipped_item_ids=[first_item_id],
             ),
             asynchronous=False,
         )
