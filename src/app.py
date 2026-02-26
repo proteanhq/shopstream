@@ -7,11 +7,20 @@ Usage:
     uvicorn app:app --host 0.0.0.0 --port 8000 --reload --app-dir src
 """
 
-from catalogue.api import category_router, product_router
-from catalogue.domain import catalogue
+import uuid
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from protean import g
+from protean.integrations.fastapi import (
+    DomainContextMiddleware,
+    register_exception_handlers,
+)
+from scalar_fastapi import get_scalar_api_reference
+
+from catalogue.api import category_router, product_router
+from catalogue.domain import catalogue
 from fulfillment.api import fulfillment_router
 from fulfillment.domain import fulfillment
 from identity.api import router as identity_router
@@ -24,13 +33,8 @@ from ordering.api import cart_router, order_router, ordering_maintenance_router
 from ordering.domain import ordering
 from payments.api import invoice_router, payment_router
 from payments.domain import payments
-from protean.integrations.fastapi import (
-    DomainContextMiddleware,
-    register_exception_handlers,
-)
 from reviews.api import review_router
 from reviews.domain import reviews
-from scalar_fastapi import get_scalar_api_reference
 
 # ---------------------------------------------------------------------------
 # Domain initialization
@@ -79,6 +83,40 @@ app.add_middleware(
         "/notifications": notifications,
     },
 )
+
+
+# ---------------------------------------------------------------------------
+# Request context middleware — populates Protean's `g` for message enrichment
+# ---------------------------------------------------------------------------
+class RequestContextMiddleware:
+    """Extract request_id and user_id from headers into Protean's thread-local g."""
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http":
+            headers = dict(scope.get("headers", []))
+            # Headers arrive as bytes tuples
+            request_id = headers.get(b"x-request-id", b"").decode() or str(uuid.uuid4())
+            user_id = headers.get(b"x-user-id", b"").decode() or None
+
+            g.request_id = request_id
+            g.user_id = user_id
+
+            async def send_with_request_id(message):
+                if message["type"] == "http.response.start":
+                    headers = list(message.get("headers", []))
+                    headers.append((b"x-request-id", request_id.encode()))
+                    message["headers"] = headers
+                await send(message)
+
+            await self.app(scope, receive, send_with_request_id)
+        else:
+            await self.app(scope, receive, send)
+
+
+app.add_middleware(RequestContextMiddleware)
 
 # ---------------------------------------------------------------------------
 # Exception handlers (from Protean)

@@ -13,6 +13,7 @@ from protean import handle
 from protean.exceptions import InvalidOperationError, ValidationError
 from protean.fields import DateTime, Integer
 from protean.utils.globals import current_domain
+from protean.utils.processing import Priority, processing_priority
 
 from inventory.domain import inventory
 from inventory.projections.reservation_status import ReservationStatus
@@ -33,64 +34,65 @@ class ExpireStaleReservations:
 class ExpireStaleReservationsHandler:
     @handle(ExpireStaleReservations)
     def expire_stale_reservations(self, command):
-        as_of = command.as_of or datetime.now(UTC)
-        threshold_minutes = command.older_than_minutes or 15
-        cutoff = as_of - timedelta(minutes=threshold_minutes)
-        # Strip tzinfo for comparison with naive datetimes from DB
-        cutoff_naive = cutoff.replace(tzinfo=None)
+        with processing_priority(Priority.LOW):
+            as_of = command.as_of or datetime.now(UTC)
+            threshold_minutes = command.older_than_minutes or 15
+            cutoff = as_of - timedelta(minutes=threshold_minutes)
+            # Strip tzinfo for comparison with naive datetimes from DB
+            cutoff_naive = cutoff.replace(tzinfo=None)
 
-        logger.info(
-            "Checking for stale reservations",
-            cutoff=cutoff_naive.isoformat(),
-            threshold_minutes=threshold_minutes,
-        )
+            logger.info(
+                "Checking for stale reservations",
+                cutoff=cutoff_naive.isoformat(),
+                threshold_minutes=threshold_minutes,
+            )
 
-        # Query active reservations
-        active_reservations = current_domain.view_for(ReservationStatus).query.filter(status="Active").all().items
+            # Query active reservations
+            active_reservations = current_domain.view_for(ReservationStatus).query.filter(status="Active").all().items
 
-        # Filter expired ones
-        expired = []
-        for reservation in active_reservations:
-            if reservation.expires_at:
-                # Normalize both to naive for comparison
-                expires = (
-                    reservation.expires_at.replace(tzinfo=None)
-                    if reservation.expires_at.tzinfo
-                    else reservation.expires_at
-                )
-                if expires <= cutoff_naive:
-                    expired.append(reservation)
+            # Filter expired ones
+            expired = []
+            for reservation in active_reservations:
+                if reservation.expires_at:
+                    # Normalize both to naive for comparison
+                    expires = (
+                        reservation.expires_at.replace(tzinfo=None)
+                        if reservation.expires_at.tzinfo
+                        else reservation.expires_at
+                    )
+                    if expires <= cutoff_naive:
+                        expired.append(reservation)
 
-        if not expired:
-            logger.info("No stale reservations found")
-            return 0
+            if not expired:
+                logger.info("No stale reservations found")
+                return 0
 
-        from inventory.stock.reservation import ReleaseReservation
+            from inventory.stock.reservation import ReleaseReservation
 
-        expired_count = 0
-        for reservation in expired:
-            try:
-                current_domain.process(
-                    ReleaseReservation(
-                        inventory_item_id=str(reservation.inventory_item_id),
+            expired_count = 0
+            for reservation in expired:
+                try:
+                    current_domain.process(
+                        ReleaseReservation(
+                            inventory_item_id=str(reservation.inventory_item_id),
+                            reservation_id=str(reservation.reservation_id),
+                            reason="timeout",
+                        ),
+                        asynchronous=False,
+                    )
+                    expired_count += 1
+                    logger.info(
+                        "Released stale reservation",
                         reservation_id=str(reservation.reservation_id),
-                        reason="timeout",
-                    ),
-                    asynchronous=False,
-                )
-                expired_count += 1
-                logger.info(
-                    "Released stale reservation",
-                    reservation_id=str(reservation.reservation_id),
-                    order_id=str(reservation.order_id),
-                    expired_at=str(reservation.expires_at),
-                )
-            except (ValidationError, InvalidOperationError) as exc:
-                logger.warning(
-                    "Failed to release stale reservation",
-                    reservation_id=str(reservation.reservation_id),
-                    error=str(exc),
-                )
+                        order_id=str(reservation.order_id),
+                        expired_at=str(reservation.expires_at),
+                    )
+                except (ValidationError, InvalidOperationError) as exc:
+                    logger.warning(
+                        "Failed to release stale reservation",
+                        reservation_id=str(reservation.reservation_id),
+                        error=str(exc),
+                    )
 
-        logger.info("Stale reservation cleanup complete", expired_count=expired_count)
-        return expired_count
+            logger.info("Stale reservation cleanup complete", expired_count=expired_count)
+            return expired_count

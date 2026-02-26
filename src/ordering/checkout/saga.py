@@ -19,11 +19,12 @@ as external events via ordering.register_external_event().
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
-from shared.events.inventory import ReservationReleased, StockReserved
-from shared.events.payments import PaymentFailed, PaymentSucceeded
+from protean.utils.processing import Priority
 
 from ordering.domain import ordering
 from ordering.order.events import OrderConfirmed
+from shared.events.inventory import ReservationReleased, StockReserved
+from shared.events.payments import PaymentFailed, PaymentSucceeded
 
 # Register external events from other domains so Protean can deserialize them
 ordering.register_external_event(StockReserved, "Inventory.StockReserved.v1")
@@ -77,6 +78,7 @@ class OrderCheckoutSaga:
                 payment_method="credit_card",
             ),
             asynchronous=False,
+            priority=Priority.HIGH,
         )
 
     @handle(PaymentSucceeded, correlate="order_id")
@@ -96,6 +98,7 @@ class OrderCheckoutSaga:
                 payment_method="credit_card",
             ),
             asynchronous=False,
+            priority=Priority.HIGH,
         )
         self.mark_as_complete()
 
@@ -119,6 +122,7 @@ class OrderCheckoutSaga:
                     cancelled_by="System",
                 ),
                 asynchronous=False,
+                priority=Priority.HIGH,
             )
             self.mark_as_complete()
 
@@ -137,4 +141,5 @@ class OrderCheckoutSaga:
                 cancelled_by="System",
             ),
             asynchronous=False,
+            priority=Priority.HIGH,
         )
