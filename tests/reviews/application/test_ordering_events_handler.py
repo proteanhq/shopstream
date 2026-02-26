@@ -26,7 +26,7 @@ class TestOrderDeliveredHandler:
         handler = OrderingEventsHandler()
         handler.on_order_delivered(event)
 
-        vps = current_domain.repository_for(VerifiedPurchases)._dao.query.filter(customer_id="cust-001").all()
+        vps = current_domain.repository_for(VerifiedPurchases).query.filter(customer_id="cust-001").all()
         assert len(vps.items) == 2
 
     def test_skips_when_no_customer_id(self):
@@ -37,7 +37,7 @@ class TestOrderDeliveredHandler:
         handler = OrderingEventsHandler()
         handler.on_order_delivered(event)
         # Should not raise, just log and skip
-        vps = current_domain.repository_for(VerifiedPurchases)._dao.query.filter(order_id="order-002").all()
+        vps = current_domain.repository_for(VerifiedPurchases).query.filter(order_id="order-002").all()
         assert len(vps.items) == 0
 
     def test_skips_when_no_items(self):
@@ -49,7 +49,7 @@ class TestOrderDeliveredHandler:
         handler = OrderingEventsHandler()
         handler.on_order_delivered(event)
         # Should log and skip, no records created
-        vps = current_domain.repository_for(VerifiedPurchases)._dao.query.filter(order_id="order-003").all()
+        vps = current_domain.repository_for(VerifiedPurchases).query.filter(order_id="order-003").all()
         assert len(vps.items) == 0
 
     def test_handles_malformed_items_gracefully(self):

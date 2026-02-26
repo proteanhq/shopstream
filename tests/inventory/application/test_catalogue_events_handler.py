@@ -28,7 +28,7 @@ class TestProductCreatedHandler:
         )
         # No InventoryLevel projection should have been created
         try:
-            levels = current_domain.repository_for(InventoryLevel)._dao.query.all().items
+            levels = current_domain.repository_for(InventoryLevel).query.all().items
         except Exception:
             levels = []
         matching = [lv for lv in levels if str(lv.product_id) == "prod-cat-001"]
@@ -56,7 +56,7 @@ class TestVariantAddedHandler:
 
         # The InventoryLevel projection should show the new item
         try:
-            levels = current_domain.repository_for(InventoryLevel)._dao.query.all().items
+            levels = current_domain.repository_for(InventoryLevel).query.all().items
         except Exception:
             levels = []
         matching = [lv for lv in levels if str(lv.product_id) == "prod-cat-002" and str(lv.variant_id) == "var-cat-002"]
@@ -94,7 +94,7 @@ class TestVariantAddedHandler:
         )
 
         try:
-            levels = current_domain.repository_for(InventoryLevel)._dao.query.all().items
+            levels = current_domain.repository_for(InventoryLevel).query.all().items
         except Exception:
             levels = []
 

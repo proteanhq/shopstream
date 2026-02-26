@@ -30,7 +30,7 @@ class PreferenceIdentityEventsHandler:
 
         # Check if preferences already exist (idempotency)
         try:
-            existing = repo._dao.query.filter(customer_id=str(event.customer_id)).all().items
+            existing = repo.query.filter(customer_id=str(event.customer_id)).all().items
             if existing:
                 logger.info(
                     "Preferences already exist for customer",

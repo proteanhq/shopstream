@@ -28,7 +28,7 @@ class ManageSubscriptionsHandler:
     @handle(UnsubscribeFromType)
     def unsubscribe(self, command: UnsubscribeFromType):
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id=str(command.customer_id)).all().items
+        prefs = repo.query.filter(customer_id=str(command.customer_id)).all().items
         preference = prefs[0]
         preference.unsubscribe_from(command.notification_type)
         repo.add(preference)
@@ -36,7 +36,7 @@ class ManageSubscriptionsHandler:
     @handle(ResubscribeToType)
     def resubscribe(self, command: ResubscribeToType):
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo._dao.query.filter(customer_id=str(command.customer_id)).all().items
+        prefs = repo.query.filter(customer_id=str(command.customer_id)).all().items
         preference = prefs[0]
         preference.resubscribe_to(command.notification_type)
         repo.add(preference)

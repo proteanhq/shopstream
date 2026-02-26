@@ -42,7 +42,7 @@ def create_notifications_for_customer(
     # Look up customer preferences
     pref_repo = current_domain.repository_for(NotificationPreference)
     try:
-        prefs = pref_repo._dao.query.filter(customer_id=customer_id).all().items
+        prefs = pref_repo.query.filter(customer_id=customer_id).all().items
         pref = prefs[0] if prefs else None
     except Exception:
         pref = None

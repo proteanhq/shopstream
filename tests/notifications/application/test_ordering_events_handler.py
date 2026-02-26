@@ -47,7 +47,7 @@ class TestOrderConfirmationHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-ord-1",
                 notification_type=NotificationType.ORDER_CONFIRMATION.value,
             )
@@ -63,7 +63,7 @@ class TestOrderConfirmationHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-ord-2",
             )
             .all()
@@ -80,7 +80,7 @@ class TestReviewPromptHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-del-1",
                 notification_type=NotificationType.REVIEW_PROMPT.value,
             )

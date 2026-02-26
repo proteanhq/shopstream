@@ -176,7 +176,7 @@ class TestModerationQueueProjectorEdgeCases:
 
         # Manually delete the MQ entry at the DAO level so get() will fail
         repo = current_domain.repository_for(ModerationQueue)
-        repo._dao.delete(repo.get(review_id))
+        repo.query.filter(review_id=review_id).delete()
 
         # Verify it's actually gone
         try:

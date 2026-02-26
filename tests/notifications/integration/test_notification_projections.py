@@ -198,7 +198,7 @@ class TestNotificationStatsProjection:
         # Stats may or may not be projected in sync mode depending on event ordering
         repo = current_domain.repository_for(NotificationStats)
         try:
-            all_stats = repo._dao.query.all().items
+            all_stats = repo.query.all().items
             # If stats are created, verify structure
             if all_stats:
                 stat = all_stats[-1]

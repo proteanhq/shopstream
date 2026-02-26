@@ -33,7 +33,7 @@ class OrderEventHandler:
         repo = current_domain.repository_for(Fulfillment)
 
         # Find fulfillment by order_id
-        results = repo._dao.query.filter(order_id=str(event.order_id)).all()
+        results = repo.query.filter(order_id=str(event.order_id)).all()
         if not results or not results.items:
             logger.info(
                 "No fulfillment found for cancelled order",

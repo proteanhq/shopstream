@@ -26,7 +26,7 @@ class TestReviewPublishedHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-rev-1",
                 notification_type=NotificationType.REVIEW_PUBLISHED.value,
             )
@@ -51,7 +51,7 @@ class TestReviewRejectedHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-rev-2",
                 notification_type=NotificationType.REVIEW_REJECTED.value,
             )

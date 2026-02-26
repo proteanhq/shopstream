@@ -29,7 +29,7 @@ class TestHelpersPreferenceLookupFailure:
         def mock_repo_for(cls):
             if cls is NotificationPreference:
                 mock_repo = MagicMock()
-                mock_repo._dao.query.filter.side_effect = RuntimeError("DB failed")
+                mock_repo.query.filter.side_effect = RuntimeError("DB failed")
                 return mock_repo
             return real_repo_for(cls)
 
@@ -63,7 +63,7 @@ class TestSchedulerErrorPaths:
         handler = ProcessScheduledNotificationsHandler()
 
         mock_repo = MagicMock()
-        mock_repo._dao.query.filter.side_effect = RuntimeError("DB error")
+        mock_repo.query.filter.side_effect = RuntimeError("DB error")
 
         with patch("notifications.notification.scheduler.current_domain") as mock_domain:
             mock_domain.repository_for.return_value = mock_repo
@@ -86,7 +86,7 @@ class TestSchedulerErrorPaths:
         mock_notification.status = "Pending"
 
         mock_repo = MagicMock()
-        mock_repo._dao.query.filter.return_value.all.return_value.items = [mock_notification]
+        mock_repo.query.filter.return_value.all.return_value.items = [mock_notification]
 
         with patch("notifications.notification.scheduler.current_domain") as mock_domain:
             mock_domain.repository_for.return_value = mock_repo

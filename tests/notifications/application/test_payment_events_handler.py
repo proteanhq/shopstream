@@ -27,7 +27,7 @@ class TestPaymentReceiptHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-pay-1",
                 notification_type=NotificationType.PAYMENT_RECEIPT.value,
             )
@@ -54,7 +54,7 @@ class TestRefundNotificationHandler:
 
         repo = current_domain.repository_for(Notification)
         notifications = (
-            repo._dao.query.filter(
+            repo.query.filter(
                 recipient_id="cust-refund-1",
                 notification_type=NotificationType.REFUND_NOTIFICATION.value,
             )

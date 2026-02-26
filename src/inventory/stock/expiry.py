@@ -44,9 +44,7 @@ class ExpireStaleReservationsHandler:
         )
 
         # Query active reservations
-        active_reservations = (
-            current_domain.repository_for(ReservationStatus)._dao.query.filter(status="Active").all().items
-        )
+        active_reservations = current_domain.view_for(ReservationStatus).query.filter(status="Active").all().items
 
         # Filter expired ones
         expired = []

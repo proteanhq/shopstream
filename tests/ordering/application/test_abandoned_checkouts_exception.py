@@ -31,8 +31,8 @@ class TestAbandonedCheckoutNotFound:
             mock_domain.repository_for = MagicMock(return_value=mock_repo)
             # Should not raise
             projector.on_order_confirmed(event)
-            # _dao.delete should NOT be called since get raised
-            mock_repo._dao.delete.assert_not_called()
+            # delete won't be reached since get() raised ObjectNotFoundError
+            mock_repo.query.filter.assert_not_called()
 
     def test_on_order_cancelled_passes_when_not_found(self):
         projector = AbandonedCheckoutProjector()
@@ -49,4 +49,4 @@ class TestAbandonedCheckoutNotFound:
             mock_domain.repository_for = MagicMock(return_value=mock_repo)
             # Should not raise
             projector.on_order_cancelled(event)
-            mock_repo._dao.delete.assert_not_called()
+            mock_repo.query.filter.assert_not_called()

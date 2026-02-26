@@ -73,7 +73,7 @@ class TestDeliveryPerformanceProjection:
         _walk_to_shipped(ff_id)
 
         # Query for the projection
-        results = current_domain.repository_for(DeliveryPerformanceView)._dao.query.all()
+        results = current_domain.repository_for(DeliveryPerformanceView).query.all()
         assert results and len(results.items) > 0
 
         view = results.first
@@ -90,7 +90,7 @@ class TestDeliveryPerformanceProjection:
         ff_id2 = _create_fulfillment(order_id="ord-perf-inc2")
         _walk_to_shipped(ff_id2, tracking_number="TRACK-INC-002")
 
-        results = current_domain.repository_for(DeliveryPerformanceView)._dao.query.all()
+        results = current_domain.repository_for(DeliveryPerformanceView).query.all()
         assert results and len(results.items) > 0
         view = results.first
         assert view.total_shipments >= 2
@@ -103,7 +103,7 @@ class TestDeliveryPerformanceProjection:
         # Record delivery
         current_domain.process(RecordDeliveryConfirmation(fulfillment_id=ff_id), asynchronous=False)
 
-        results = current_domain.repository_for(DeliveryPerformanceView)._dao.query.all()
+        results = current_domain.repository_for(DeliveryPerformanceView).query.all()
         assert results and len(results.items) > 0
         view = results.first
         assert view.delivered_count >= 1
@@ -119,7 +119,7 @@ class TestDeliveryPerformanceProjection:
             asynchronous=False,
         )
 
-        results = current_domain.repository_for(DeliveryPerformanceView)._dao.query.all()
+        results = current_domain.repository_for(DeliveryPerformanceView).query.all()
         assert results and len(results.items) > 0
         view = results.first
         assert view.exception_count >= 1
