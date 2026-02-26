@@ -33,6 +33,7 @@ from payments.domain import payments
 from payments.payment.events import (
     PaymentFailed,
     PaymentInitiated,
+    PaymentProcessing,
     PaymentRetryInitiated,
     PaymentSucceeded,
     RefundCompleted,
@@ -205,8 +206,13 @@ class Payment:
     def record_processing(self) -> None:
         """Record that the payment is being processed by the gateway."""
         self._assert_can_transition(PaymentStatus.PROCESSING)
-        # State mutation happens in @apply — no explicit state changes here
-        # This is a live-path convenience; the event drives state
+        self.raise_(
+            PaymentProcessing(
+                payment_id=str(self.id),
+                order_id=str(self.order_id),
+                processing_at=datetime.now(UTC),
+            )
+        )
 
     def record_success(self, gateway_transaction_id: str) -> None:
         """Record successful payment capture from gateway webhook."""
@@ -350,6 +356,11 @@ class Payment:
                 status="processing",
             )
         )
+
+    @apply
+    def _on_payment_processing(self, event: PaymentProcessing):
+        self.status = PaymentStatus.PROCESSING.value
+        self.updated_at = event.processing_at
 
     @apply
     def _on_payment_succeeded(self, event: PaymentSucceeded):

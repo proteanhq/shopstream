@@ -265,17 +265,18 @@ class Order:
         if target_status not in _VALID_TRANSITIONS.get(current, set()):
             raise ValidationError({"status": [f"Cannot transition from {current.value} to {target_status.value}"]})
 
-    def _recalculate_pricing(self):
-        """Recalculate subtotal and grand total from items."""
-        subtotal = sum(item.unit_price * item.quantity - item.discount for item in self.items)
-        grand_total = subtotal + self.pricing.shipping_cost + self.pricing.tax_total - self.pricing.discount_total
-        self.pricing = OrderPricing(
+    @staticmethod
+    def _calculate_pricing(items, shipping_cost=0.0, tax_total=0.0, discount_total=0.0, currency="USD"):
+        """Pure pricing calculation — returns new OrderPricing without side effects."""
+        subtotal = sum(item.unit_price * item.quantity - item.discount for item in items)
+        grand_total = subtotal + shipping_cost + tax_total - discount_total
+        return OrderPricing(
             subtotal=subtotal,
-            shipping_cost=self.pricing.shipping_cost,
-            tax_total=self.pricing.tax_total,
-            discount_total=self.pricing.discount_total,
+            shipping_cost=shipping_cost,
+            tax_total=tax_total,
+            discount_total=discount_total,
             grand_total=grand_total,
-            currency=self.pricing.currency,
+            currency=currency,
         )
 
     # -------------------------------------------------------------------
@@ -285,7 +286,10 @@ class Order:
         """Add an item to the order. Only allowed in CREATED state."""
         self._assert_can_transition(OrderStatus.CONFIRMED)  # Proxy: if we can confirm, we can modify
 
-        item = OrderItem(
+        # Compute projected pricing with the new item (pure calculation, no mutation)
+        item_id = str(uuid4())
+        new_item = OrderItem(
+            id=item_id,
             product_id=product_id,
             variant_id=variant_id,
             sku=sku,
@@ -293,23 +297,28 @@ class Order:
             quantity=quantity,
             unit_price=unit_price,
         )
-        self.add_items(item)
-        self._recalculate_pricing()
-        now = datetime.now(UTC)
-        self.updated_at = now
+        projected_items = list(self.items) + [new_item]
+        projected_pricing = self._calculate_pricing(
+            projected_items,
+            self.pricing.shipping_cost if self.pricing else 0.0,
+            self.pricing.tax_total if self.pricing else 0.0,
+            self.pricing.discount_total if self.pricing else 0.0,
+            self.pricing.currency if self.pricing else "USD",
+        )
 
         self.raise_(
             ItemAdded(
                 order_id=str(self.id),
-                item_id=str(item.id),
+                item_id=item_id,
                 product_id=str(product_id),
                 variant_id=str(variant_id),
                 sku=sku,
                 title=title,
                 quantity=str(quantity),
                 unit_price=str(unit_price),
-                new_subtotal=self.pricing.subtotal,
-                new_grand_total=self.pricing.grand_total,
+                new_subtotal=projected_pricing.subtotal,
+                new_grand_total=projected_pricing.grand_total,
+                added_at=datetime.now(UTC),
             )
         )
 
@@ -322,17 +331,23 @@ class Order:
         if item is None:
             raise ValidationError({"item_id": ["Item not found"]})
 
-        self.remove_items(item)
-        self._recalculate_pricing()
-        now = datetime.now(UTC)
-        self.updated_at = now
+        # Compute projected pricing without the removed item (pure calculation)
+        remaining_items = [i for i in self.items if str(i.id) != str(item_id)]
+        projected_pricing = self._calculate_pricing(
+            remaining_items,
+            self.pricing.shipping_cost if self.pricing else 0.0,
+            self.pricing.tax_total if self.pricing else 0.0,
+            self.pricing.discount_total if self.pricing else 0.0,
+            self.pricing.currency if self.pricing else "USD",
+        )
 
         self.raise_(
             ItemRemoved(
                 order_id=str(self.id),
                 item_id=str(item_id),
-                new_subtotal=self.pricing.subtotal,
-                new_grand_total=self.pricing.grand_total,
+                new_subtotal=projected_pricing.subtotal,
+                new_grand_total=projected_pricing.grand_total,
+                removed_at=datetime.now(UTC),
             )
         )
 
@@ -348,10 +363,35 @@ class Order:
             raise ValidationError({"item_id": ["Item not found"]})
 
         previous_quantity = item.quantity
-        item.quantity = new_quantity
-        self._recalculate_pricing()
-        now = datetime.now(UTC)
-        self.updated_at = now
+
+        # Compute projected pricing with the updated quantity (pure calculation)
+        projected_items = []
+        for i in self.items:
+            if str(i.id) == str(item_id):
+                # Create a temporary copy with new quantity for calculation
+                projected_items.append(
+                    OrderItem(
+                        id=str(i.id),
+                        product_id=i.product_id,
+                        variant_id=i.variant_id,
+                        sku=i.sku,
+                        title=i.title,
+                        quantity=new_quantity,
+                        unit_price=i.unit_price,
+                        discount=i.discount,
+                        tax_amount=i.tax_amount,
+                        item_status=i.item_status,
+                    )
+                )
+            else:
+                projected_items.append(i)
+        projected_pricing = self._calculate_pricing(
+            projected_items,
+            self.pricing.shipping_cost if self.pricing else 0.0,
+            self.pricing.tax_total if self.pricing else 0.0,
+            self.pricing.discount_total if self.pricing else 0.0,
+            self.pricing.currency if self.pricing else "USD",
+        )
 
         self.raise_(
             ItemQuantityUpdated(
@@ -359,8 +399,9 @@ class Order:
                 item_id=str(item_id),
                 previous_quantity=str(previous_quantity),
                 new_quantity=str(new_quantity),
-                new_subtotal=self.pricing.subtotal,
-                new_grand_total=self.pricing.grand_total,
+                new_subtotal=projected_pricing.subtotal,
+                new_grand_total=projected_pricing.grand_total,
+                updated_at=datetime.now(UTC),
             )
         )
 
@@ -369,14 +410,11 @@ class Order:
         if OrderStatus(self.status) != OrderStatus.CREATED:
             raise ValidationError({"status": ["Coupons can only be applied in Created state"]})
 
-        self.coupon_code = coupon_code
-        now = datetime.now(UTC)
-        self.updated_at = now
-
         self.raise_(
             CouponApplied(
                 order_id=str(self.id),
                 coupon_code=coupon_code,
+                applied_at=datetime.now(UTC),
             )
         )
 
@@ -396,30 +434,19 @@ class Order:
     def record_payment_pending(self, payment_id, payment_method):
         """Record that payment has been initiated."""
         self._assert_can_transition(OrderStatus.PAYMENT_PENDING)
-        self.status = OrderStatus.PAYMENT_PENDING.value
-        self.payment_id = payment_id
-        self.payment_method = payment_method
-        self.payment_status = "pending"
-        now = datetime.now(UTC)
-        self.updated_at = now
 
         self.raise_(
             PaymentPending(
                 order_id=str(self.id),
                 payment_id=payment_id,
                 payment_method=payment_method,
+                initiated_at=datetime.now(UTC),
             )
         )
 
     def record_payment_success(self, payment_id, amount, payment_method):
         """Record successful payment capture."""
         self._assert_can_transition(OrderStatus.PAID)
-        self.status = OrderStatus.PAID.value
-        self.payment_id = payment_id
-        self.payment_method = payment_method
-        self.payment_status = "succeeded"
-        now = datetime.now(UTC)
-        self.updated_at = now
 
         self.raise_(
             PaymentSucceeded(
@@ -427,22 +454,20 @@ class Order:
                 payment_id=payment_id,
                 amount=amount,
                 payment_method=payment_method,
+                paid_at=datetime.now(UTC),
             )
         )
 
     def record_payment_failure(self, payment_id, reason):
         """Record payment failure. Returns order to CONFIRMED for retry."""
         self._assert_can_transition(OrderStatus.CONFIRMED)
-        self.status = OrderStatus.CONFIRMED.value
-        self.payment_status = "failed"
-        now = datetime.now(UTC)
-        self.updated_at = now
 
         self.raise_(
             PaymentFailed(
                 order_id=str(self.id),
                 payment_id=payment_id,
                 reason=reason,
+                failed_at=datetime.now(UTC),
             )
         )
 
@@ -639,20 +664,17 @@ class Order:
 
     @apply
     def _on_item_added(self, event: ItemAdded):
-        # Idempotent: skip if already added (live path pre-mutates)
-        existing = next((i for i in (self.items or []) if str(i.id) == str(event.item_id)), None)
-        if not existing:
-            self.add_items(
-                OrderItem(
-                    id=event.item_id,
-                    product_id=event.product_id,
-                    variant_id=event.variant_id,
-                    sku=event.sku,
-                    title=event.title,
-                    quantity=int(event.quantity),
-                    unit_price=float(event.unit_price),
-                )
+        self.add_items(
+            OrderItem(
+                id=event.item_id,
+                product_id=event.product_id,
+                variant_id=event.variant_id,
+                sku=event.sku,
+                title=event.title,
+                quantity=int(event.quantity),
+                unit_price=float(event.unit_price),
             )
+        )
         self.pricing = OrderPricing(
             subtotal=event.new_subtotal,
             shipping_cost=self.pricing.shipping_cost if self.pricing else 0.0,
@@ -661,6 +683,7 @@ class Order:
             grand_total=event.new_grand_total,
             currency=self.pricing.currency if self.pricing else "USD",
         )
+        self.updated_at = event.added_at
 
     @apply
     def _on_item_removed(self, event: ItemRemoved):
@@ -675,6 +698,7 @@ class Order:
             grand_total=event.new_grand_total,
             currency=self.pricing.currency if self.pricing else "USD",
         )
+        self.updated_at = event.removed_at
 
     @apply
     def _on_item_quantity_updated(self, event: ItemQuantityUpdated):
@@ -689,10 +713,12 @@ class Order:
             grand_total=event.new_grand_total,
             currency=self.pricing.currency if self.pricing else "USD",
         )
+        self.updated_at = event.updated_at
 
     @apply
     def _on_coupon_applied(self, event: CouponApplied):
         self.coupon_code = event.coupon_code
+        self.updated_at = event.applied_at
 
     @apply
     def _on_order_confirmed(self, event: OrderConfirmed):
@@ -705,6 +731,7 @@ class Order:
         self.payment_id = event.payment_id
         self.payment_method = event.payment_method
         self.payment_status = "pending"
+        self.updated_at = event.initiated_at
 
     @apply
     def _on_payment_succeeded(self, event: PaymentSucceeded):
@@ -712,11 +739,13 @@ class Order:
         self.payment_id = event.payment_id
         self.payment_method = event.payment_method
         self.payment_status = "succeeded"
+        self.updated_at = event.paid_at
 
     @apply
-    def _on_payment_failed(self, event: PaymentFailed):  # noqa: ARG002
+    def _on_payment_failed(self, event: PaymentFailed):
         self.status = OrderStatus.CONFIRMED.value
         self.payment_status = "failed"
+        self.updated_at = event.failed_at
 
     @apply
     def _on_order_processing(self, event: OrderProcessing):

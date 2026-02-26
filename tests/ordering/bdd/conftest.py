@@ -156,7 +156,9 @@ def order_confirmed(order_id):
 
 @pytest.fixture()
 def payment_pending(order_id):
-    return PaymentPending(order_id=order_id, payment_id="pay-001", payment_method="credit_card")
+    return PaymentPending(
+        order_id=order_id, payment_id="pay-001", payment_method="credit_card", initiated_at=datetime.now(UTC)
+    )
 
 
 @pytest.fixture()
@@ -166,6 +168,7 @@ def payment_succeeded(order_id):
         payment_id="pay-001",
         amount=59.0,
         payment_method="credit_card",
+        paid_at=datetime.now(UTC),
     )
 
 
