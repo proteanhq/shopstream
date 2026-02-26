@@ -31,6 +31,17 @@ class PaymentInitiated:
 
 
 @payments.event(part_of="Payment")
+class PaymentProcessing:
+    """Payment was sent to the gateway for processing."""
+
+    __version__ = "v1"
+
+    payment_id = Identifier(required=True)
+    order_id = Identifier(required=True)
+    processing_at = DateTime(required=True)
+
+
+@payments.event(part_of="Payment")
 class PaymentSucceeded:
     """Payment was successfully captured by the gateway."""
 

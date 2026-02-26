@@ -51,6 +51,7 @@ class TestItemAddedEvent:
         assert ItemAdded.__version__ == "v1"
 
     def test_construction(self):
+        now = datetime.now(UTC)
         event = ItemAdded(
             order_id="ord-001",
             item_id="item-001",
@@ -62,6 +63,7 @@ class TestItemAddedEvent:
             unit_price="29.99",
             new_subtotal=59.98,
             new_grand_total=65.97,
+            added_at=now,
         )
         assert event.sku == "SKU-001"
         assert event.new_subtotal == 59.98
@@ -69,17 +71,20 @@ class TestItemAddedEvent:
 
 class TestItemRemovedEvent:
     def test_construction(self):
+        now = datetime.now(UTC)
         event = ItemRemoved(
             order_id="ord-001",
             item_id="item-001",
             new_subtotal=0.0,
             new_grand_total=5.99,
+            removed_at=now,
         )
         assert event.item_id == "item-001"
 
 
 class TestItemQuantityUpdatedEvent:
     def test_construction(self):
+        now = datetime.now(UTC)
         event = ItemQuantityUpdated(
             order_id="ord-001",
             item_id="item-001",
@@ -87,6 +92,7 @@ class TestItemQuantityUpdatedEvent:
             new_quantity="3",
             new_subtotal=75.0,
             new_grand_total=80.0,
+            updated_at=now,
         )
         assert event.previous_quantity == "1"
         assert event.new_quantity == "3"
@@ -94,7 +100,8 @@ class TestItemQuantityUpdatedEvent:
 
 class TestCouponAppliedEvent:
     def test_construction(self):
-        event = CouponApplied(order_id="ord-001", coupon_code="SAVE10")
+        now = datetime.now(UTC)
+        event = CouponApplied(order_id="ord-001", coupon_code="SAVE10", applied_at=now)
         assert event.coupon_code == "SAVE10"
 
 
@@ -107,19 +114,24 @@ class TestOrderConfirmedEvent:
 
 class TestPaymentPendingEvent:
     def test_construction(self):
-        event = PaymentPending(order_id="ord-001", payment_id="pay-001", payment_method="credit_card")
+        now = datetime.now(UTC)
+        event = PaymentPending(order_id="ord-001", payment_id="pay-001", payment_method="credit_card", initiated_at=now)
         assert event.payment_method == "credit_card"
 
 
 class TestPaymentSucceededEvent:
     def test_construction(self):
-        event = PaymentSucceeded(order_id="ord-001", payment_id="pay-001", amount=100.0, payment_method="credit_card")
+        now = datetime.now(UTC)
+        event = PaymentSucceeded(
+            order_id="ord-001", payment_id="pay-001", amount=100.0, payment_method="credit_card", paid_at=now
+        )
         assert event.amount == 100.0
 
 
 class TestPaymentFailedEvent:
     def test_construction(self):
-        event = PaymentFailed(order_id="ord-001", payment_id="pay-001", reason="Card declined")
+        now = datetime.now(UTC)
+        event = PaymentFailed(order_id="ord-001", payment_id="pay-001", reason="Card declined", failed_at=now)
         assert event.reason == "Card declined"
 
 

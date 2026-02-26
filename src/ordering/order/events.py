@@ -48,6 +48,7 @@ class ItemAdded:
     unit_price = String(required=True)  # serialized float
     new_subtotal = Float(required=True)
     new_grand_total = Float(required=True)
+    added_at = DateTime(required=True)
 
 
 @ordering.event(part_of="Order")
@@ -60,6 +61,7 @@ class ItemRemoved:
     item_id = Identifier(required=True)
     new_subtotal = Float(required=True)
     new_grand_total = Float(required=True)
+    removed_at = DateTime(required=True)
 
 
 @ordering.event(part_of="Order")
@@ -74,6 +76,7 @@ class ItemQuantityUpdated:
     new_quantity = String(required=True)
     new_subtotal = Float(required=True)
     new_grand_total = Float(required=True)
+    updated_at = DateTime(required=True)
 
 
 @ordering.event(part_of="Order")
@@ -84,6 +87,7 @@ class CouponApplied:
 
     order_id = Identifier(required=True)
     coupon_code = String(required=True)
+    applied_at = DateTime(required=True)
 
 
 @ordering.event(part_of="Order")
@@ -105,6 +109,7 @@ class PaymentPending:
     order_id = Identifier(required=True)
     payment_id = String(required=True)
     payment_method = String(required=True)
+    initiated_at = DateTime(required=True)
 
 
 @ordering.event(part_of="Order")
@@ -117,6 +122,7 @@ class PaymentSucceeded:
     payment_id = String(required=True)
     amount = Float(required=True)
     payment_method = String(required=True)
+    paid_at = DateTime(required=True)
 
 
 @ordering.event(part_of="Order")
@@ -128,6 +134,7 @@ class PaymentFailed:
     order_id = Identifier(required=True)
     payment_id = String(required=True)
     reason = String(required=True)
+    failed_at = DateTime(required=True)
 
 
 @ordering.event(part_of="Order")

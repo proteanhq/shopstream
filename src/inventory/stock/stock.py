@@ -216,15 +216,7 @@ class InventoryItem:
 
         reservation_id = str(uuid4())
         new_available = available - quantity
-
-        reservation = Reservation(
-            id=reservation_id,
-            order_id=order_id,
-            quantity=quantity,
-            reserved_at=datetime.now(UTC),
-            expires_at=expires_at,
-        )
-        self.add_reservations(reservation)
+        now = datetime.now(UTC)
 
         self.raise_(
             StockReserved(
@@ -234,7 +226,7 @@ class InventoryItem:
                 quantity=quantity,
                 previous_available=available,
                 new_available=new_available,
-                reserved_at=datetime.now(UTC),
+                reserved_at=now,
                 expires_at=expires_at,
             )
         )
@@ -254,8 +246,6 @@ class InventoryItem:
 
         available = self.levels.available if self.levels else 0
         new_available = available + reservation.quantity
-
-        reservation.status = ReservationStatus.RELEASED.value
 
         self.raise_(
             ReservationReleased(
@@ -281,8 +271,6 @@ class InventoryItem:
 
         if ReservationStatus(reservation.status) != ReservationStatus.ACTIVE:
             raise ValidationError({"reservation_id": [f"Cannot confirm reservation in {reservation.status} state"]})
-
-        reservation.status = ReservationStatus.CONFIRMED.value
 
         self.raise_(
             ReservationConfirmed(
@@ -501,25 +489,18 @@ class InventoryItem:
 
     @apply
     def _on_stock_reserved(self, event: StockReserved):
-        # Idempotent: skip if reservation already exists (live path pre-mutates)
-        existing = next(
-            (r for r in (self.reservations or []) if str(r.id) == str(event.reservation_id)),
-            None,
-        )
-        if not existing:
-            self.add_reservations(
-                Reservation(
-                    id=event.reservation_id,
-                    order_id=event.order_id,
-                    quantity=event.quantity,
-                    reserved_at=event.reserved_at,
-                    expires_at=event.expires_at,
-                )
+        self.add_reservations(
+            Reservation(
+                id=event.reservation_id,
+                order_id=event.order_id,
+                quantity=event.quantity,
+                reserved_at=event.reserved_at,
+                expires_at=event.expires_at,
             )
+        )
 
         on_hand = self.levels.on_hand if self.levels else 0
         new_reserved = (self.levels.reserved if self.levels else 0) + event.quantity
-        # Use the event's new_available for consistency during replay
         self.levels = StockLevels(
             on_hand=on_hand,
             reserved=new_reserved,
