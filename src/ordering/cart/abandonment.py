@@ -14,6 +14,7 @@ from protean import handle
 from protean.exceptions import InvalidOperationError, ValidationError
 from protean.fields import DateTime, Integer
 from protean.utils.globals import current_domain
+from protean.utils.processing import Priority, processing_priority
 
 from ordering.cart.cart import ShoppingCart
 from ordering.domain import ordering
@@ -34,57 +35,58 @@ class DetectAbandonedCarts:
 class DetectAbandonedCartsHandler:
     @handle(DetectAbandonedCarts)
     def detect_abandoned_carts(self, command):
-        as_of = command.as_of or datetime.now(UTC)
-        threshold_hours = command.idle_threshold_hours or 24
-        cutoff = as_of - timedelta(hours=threshold_hours)
-        # Strip tzinfo for comparison with naive datetimes from DB
-        cutoff_naive = cutoff.replace(tzinfo=None)
+        with processing_priority(Priority.LOW):
+            as_of = command.as_of or datetime.now(UTC)
+            threshold_hours = command.idle_threshold_hours or 24
+            cutoff = as_of - timedelta(hours=threshold_hours)
+            # Strip tzinfo for comparison with naive datetimes from DB
+            cutoff_naive = cutoff.replace(tzinfo=None)
 
-        logger.info(
-            "Checking for abandoned carts",
-            cutoff=cutoff_naive.isoformat(),
-            threshold_hours=threshold_hours,
-        )
+            logger.info(
+                "Checking for abandoned carts",
+                cutoff=cutoff_naive.isoformat(),
+                threshold_hours=threshold_hours,
+            )
 
-        # Query active carts
-        active_carts = current_domain.view_for(CartView).query.filter(status="Active").all().items
+            # Query active carts
+            active_carts = current_domain.view_for(CartView).query.filter(status="Active").all().items
 
-        # Filter idle carts with items
-        abandoned = []
-        for cart in active_carts:
-            if cart.updated_at:
-                # Normalize both to naive for comparison
-                cart_updated = cart.updated_at.replace(tzinfo=None) if cart.updated_at.tzinfo else cart.updated_at
-                if cart_updated <= cutoff_naive and (cart.item_count or 0) > 0:
-                    abandoned.append(cart)
+            # Filter idle carts with items
+            abandoned = []
+            for cart in active_carts:
+                if cart.updated_at:
+                    # Normalize both to naive for comparison
+                    cart_updated = cart.updated_at.replace(tzinfo=None) if cart.updated_at.tzinfo else cart.updated_at
+                    if cart_updated <= cutoff_naive and (cart.item_count or 0) > 0:
+                        abandoned.append(cart)
 
-        if not abandoned:
-            logger.info("No abandoned carts found")
-            return 0
+            if not abandoned:
+                logger.info("No abandoned carts found")
+                return 0
 
-        from ordering.cart.management import AbandonCart
+            from ordering.cart.management import AbandonCart
 
-        abandoned_count = 0
-        for cart in abandoned:
-            try:
-                current_domain.process(
-                    AbandonCart(cart_id=str(cart.cart_id)),
-                    asynchronous=False,
-                )
-                abandoned_count += 1
-                logger.info(
-                    "Marked cart as abandoned",
-                    cart_id=str(cart.cart_id),
-                    customer_id=str(cart.customer_id) if cart.customer_id else None,
-                    item_count=cart.item_count,
-                    last_updated=str(cart.updated_at),
-                )
-            except (ValidationError, InvalidOperationError) as exc:
-                logger.warning(
-                    "Failed to abandon cart",
-                    cart_id=str(cart.cart_id),
-                    error=str(exc),
-                )
+            abandoned_count = 0
+            for cart in abandoned:
+                try:
+                    current_domain.process(
+                        AbandonCart(cart_id=str(cart.cart_id)),
+                        asynchronous=False,
+                    )
+                    abandoned_count += 1
+                    logger.info(
+                        "Marked cart as abandoned",
+                        cart_id=str(cart.cart_id),
+                        customer_id=str(cart.customer_id) if cart.customer_id else None,
+                        item_count=cart.item_count,
+                        last_updated=str(cart.updated_at),
+                    )
+                except (ValidationError, InvalidOperationError) as exc:
+                    logger.warning(
+                        "Failed to abandon cart",
+                        cart_id=str(cart.cart_id),
+                        error=str(exc),
+                    )
 
-        logger.info("Cart abandonment detection complete", abandoned_count=abandoned_count)
-        return abandoned_count
+            logger.info("Cart abandonment detection complete", abandoned_count=abandoned_count)
+            return abandoned_count

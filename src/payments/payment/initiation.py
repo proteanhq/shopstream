@@ -6,6 +6,7 @@ Creates a new Payment aggregate and initiates a charge via the gateway.
 from protean import handle
 from protean.fields import Float, Identifier, String
 from protean.utils.globals import current_domain
+from protean.utils.processing import Priority, processing_priority
 
 from payments.domain import payments
 from payments.gateway import get_gateway
@@ -29,17 +30,18 @@ class InitiatePayment:
 class InitiatePaymentHandler:
     @handle(InitiatePayment)
     def initiate_payment(self, command):
-        gateway = get_gateway()
+        with processing_priority(Priority.CRITICAL):
+            gateway = get_gateway()
 
-        payment = Payment.create(
-            order_id=command.order_id,
-            customer_id=command.customer_id,
-            amount=command.amount,
-            currency=command.currency or "USD",
-            payment_method_type=command.payment_method_type,
-            last4=command.last4,
-            gateway_name=type(gateway).__name__,
-            idempotency_key=command.idempotency_key,
-        )
-        current_domain.repository_for(Payment).add(payment)
-        return str(payment.id)
+            payment = Payment.create(
+                order_id=command.order_id,
+                customer_id=command.customer_id,
+                amount=command.amount,
+                currency=command.currency or "USD",
+                payment_method_type=command.payment_method_type,
+                last4=command.last4,
+                gateway_name=type(gateway).__name__,
+                idempotency_key=command.idempotency_key,
+            )
+            current_domain.repository_for(Payment).add(payment)
+            return str(payment.id)
