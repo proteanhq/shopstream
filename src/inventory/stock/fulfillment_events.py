@@ -14,12 +14,34 @@ from protean.utils.mixins import handle
 from inventory.domain import inventory
 from inventory.projections.reservation_status import ReservationStatus
 from inventory.stock.stock import InventoryItem
-from shared.events.fulfillment import ShipmentHandedOff
+from shared.events.fulfillment import (
+    DeliveryConfirmed,
+    DeliveryException,
+    FulfillmentCancelled,
+    FulfillmentCreated,
+    ItemPicked,
+    PackingCompleted,
+    PickerAssigned,
+    PickingCompleted,
+    ShipmentHandedOff,
+    ShippingLabelGenerated,
+    TrackingEventReceived,
+)
 
 logger = structlog.get_logger(__name__)
 
-# Register external event so Protean can deserialize it
+# Register external events so Protean can deserialize them
+inventory.register_external_event(FulfillmentCreated, "Fulfillment.FulfillmentCreated.v1")
+inventory.register_external_event(PickerAssigned, "Fulfillment.PickerAssigned.v1")
+inventory.register_external_event(ItemPicked, "Fulfillment.ItemPicked.v1")
+inventory.register_external_event(PickingCompleted, "Fulfillment.PickingCompleted.v1")
+inventory.register_external_event(PackingCompleted, "Fulfillment.PackingCompleted.v1")
+inventory.register_external_event(ShippingLabelGenerated, "Fulfillment.ShippingLabelGenerated.v1")
 inventory.register_external_event(ShipmentHandedOff, "Fulfillment.ShipmentHandedOff.v1")
+inventory.register_external_event(DeliveryConfirmed, "Fulfillment.DeliveryConfirmed.v1")
+inventory.register_external_event(DeliveryException, "Fulfillment.DeliveryException.v1")
+inventory.register_external_event(TrackingEventReceived, "Fulfillment.TrackingEventReceived.v1")
+inventory.register_external_event(FulfillmentCancelled, "Fulfillment.FulfillmentCancelled.v1")
 
 
 @inventory.event_handler(part_of=InventoryItem, stream_category="fulfillment::fulfillment")

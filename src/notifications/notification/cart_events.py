@@ -11,10 +11,24 @@ from protean.utils.mixins import handle
 from notifications.domain import notifications
 from notifications.notification.helpers import create_notifications_for_customer
 from notifications.notification.notification import Notification, NotificationType
-from shared.events.ordering import CartAbandoned
+from shared.events.ordering import (
+    CartAbandoned,
+    CartConverted,
+    CartCouponApplied,
+    CartItemAdded,
+    CartItemRemoved,
+    CartQuantityUpdated,
+    CartsMerged,
+)
 
 logger = structlog.get_logger(__name__)
 
+notifications.register_external_event(CartItemAdded, "Ordering.CartItemAdded.v1")
+notifications.register_external_event(CartQuantityUpdated, "Ordering.CartQuantityUpdated.v1")
+notifications.register_external_event(CartItemRemoved, "Ordering.CartItemRemoved.v1")
+notifications.register_external_event(CartCouponApplied, "Ordering.CartCouponApplied.v1")
+notifications.register_external_event(CartsMerged, "Ordering.CartsMerged.v1")
+notifications.register_external_event(CartConverted, "Ordering.CartConverted.v1")
 notifications.register_external_event(CartAbandoned, "Ordering.CartAbandoned.v1")
 
 

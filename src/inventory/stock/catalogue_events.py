@@ -13,13 +13,32 @@ from protean.utils.mixins import handle
 
 from inventory.domain import inventory
 from inventory.stock.stock import InventoryItem
-from shared.events.catalogue import ProductCreated, VariantAdded
+from shared.events.catalogue import (
+    ProductActivated,
+    ProductArchived,
+    ProductCreated,
+    ProductDetailsUpdated,
+    ProductDiscontinued,
+    ProductImageAdded,
+    ProductImageRemoved,
+    TierPriceSet,
+    VariantAdded,
+    VariantPriceChanged,
+)
 
 logger = structlog.get_logger(__name__)
 
 # Register external events so Protean can deserialize them
 inventory.register_external_event(ProductCreated, "Catalogue.ProductCreated.v1")
 inventory.register_external_event(VariantAdded, "Catalogue.VariantAdded.v1")
+inventory.register_external_event(VariantPriceChanged, "Catalogue.VariantPriceChanged.v1")
+inventory.register_external_event(TierPriceSet, "Catalogue.TierPriceSet.v1")
+inventory.register_external_event(ProductActivated, "Catalogue.ProductActivated.v1")
+inventory.register_external_event(ProductDiscontinued, "Catalogue.ProductDiscontinued.v1")
+inventory.register_external_event(ProductDetailsUpdated, "Catalogue.ProductDetailsUpdated.v1")
+inventory.register_external_event(ProductImageAdded, "Catalogue.ProductImageAdded.v1")
+inventory.register_external_event(ProductImageRemoved, "Catalogue.ProductImageRemoved.v1")
+inventory.register_external_event(ProductArchived, "Catalogue.ProductArchived.v1")
 
 # Default warehouse for auto-initialized stock
 _DEFAULT_WAREHOUSE_ID = "default-warehouse"

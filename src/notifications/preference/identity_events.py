@@ -9,7 +9,18 @@ from protean.utils.mixins import handle
 
 from notifications.domain import notifications
 from notifications.preference.preference import NotificationPreference
-from shared.events.identity import CustomerRegistered
+from shared.events.identity import (
+    AccountClosed,
+    AccountReactivated,
+    AccountSuspended,
+    AddressAdded,
+    AddressRemoved,
+    AddressUpdated,
+    CustomerRegistered,
+    DefaultAddressChanged,
+    ProfileUpdated,
+    TierUpgraded,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -18,6 +29,15 @@ logger = structlog.get_logger(__name__)
 # However, we do need to register it here as well since this is a separate
 # handler class attached to a different aggregate.
 notifications.register_external_event(CustomerRegistered, "Identity.CustomerRegistered.v1")
+notifications.register_external_event(ProfileUpdated, "Identity.ProfileUpdated.v1")
+notifications.register_external_event(AddressAdded, "Identity.AddressAdded.v1")
+notifications.register_external_event(AddressUpdated, "Identity.AddressUpdated.v1")
+notifications.register_external_event(AddressRemoved, "Identity.AddressRemoved.v1")
+notifications.register_external_event(DefaultAddressChanged, "Identity.DefaultAddressChanged.v1")
+notifications.register_external_event(AccountSuspended, "Identity.AccountSuspended.v1")
+notifications.register_external_event(AccountReactivated, "Identity.AccountReactivated.v1")
+notifications.register_external_event(AccountClosed, "Identity.AccountClosed.v1")
+notifications.register_external_event(TierUpgraded, "Identity.TierUpgraded.v1")
 
 
 @notifications.event_handler(part_of=NotificationPreference, stream_category="identity::customer")

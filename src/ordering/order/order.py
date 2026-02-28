@@ -283,7 +283,8 @@ class Order:
     # -------------------------------------------------------------------
     def add_item(self, product_id, variant_id, sku, title, quantity, unit_price):
         """Add an item to the order. Only allowed in CREATED state."""
-        self._assert_can_transition(OrderStatus.CONFIRMED)  # Proxy: if we can confirm, we can modify
+        if OrderStatus(self.status) != OrderStatus.CREATED:
+            raise ValidationError({"status": ["Items can only be added in Created state"]})
 
         # Compute projected pricing with the new item (pure calculation, no mutation)
         item_id = str(uuid4())

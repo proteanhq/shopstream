@@ -479,6 +479,7 @@ loadtest-fulfillment: ## Run fulfillment workflow load test (web UI)
 	poetry run locust -f loadtests/locustfile.py --host http://localhost:8000 FulfillmentUser
 
 loadtest-clean: truncate-db ## Clean all data for a fresh load test run
+	docker exec shopstream-redis-1 redis-cli FLUSHDB
 
 # Documentation
 docs: ## Build documentation

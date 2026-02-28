@@ -23,14 +23,50 @@ from protean.utils.processing import Priority
 
 from ordering.domain import ordering
 from ordering.order.events import OrderConfirmed
-from shared.events.inventory import ReservationReleased, StockReserved
-from shared.events.payments import PaymentFailed, PaymentSucceeded
+from shared.events.inventory import (
+    DamagedStockWrittenOff,
+    LowStockDetected,
+    ReservationConfirmed,
+    ReservationReleased,
+    StockAdjusted,
+    StockCheckRecorded,
+    StockCommitted,
+    StockInitialized,
+    StockMarkedDamaged,
+    StockReceived,
+    StockReserved,
+    StockReturned,
+)
+from shared.events.payments import (
+    PaymentFailed,
+    PaymentInitiated,
+    PaymentProcessing,
+    PaymentRetryInitiated,
+    PaymentSucceeded,
+    RefundCompleted,
+    RefundRequested,
+)
 
 # Register external events from other domains so Protean can deserialize them
+ordering.register_external_event(StockInitialized, "Inventory.StockInitialized.v1")
+ordering.register_external_event(StockReceived, "Inventory.StockReceived.v1")
 ordering.register_external_event(StockReserved, "Inventory.StockReserved.v1")
 ordering.register_external_event(ReservationReleased, "Inventory.ReservationReleased.v1")
+ordering.register_external_event(ReservationConfirmed, "Inventory.ReservationConfirmed.v1")
+ordering.register_external_event(StockCommitted, "Inventory.StockCommitted.v1")
+ordering.register_external_event(StockAdjusted, "Inventory.StockAdjusted.v1")
+ordering.register_external_event(StockMarkedDamaged, "Inventory.StockMarkedDamaged.v1")
+ordering.register_external_event(DamagedStockWrittenOff, "Inventory.DamagedStockWrittenOff.v1")
+ordering.register_external_event(StockReturned, "Inventory.StockReturned.v1")
+ordering.register_external_event(StockCheckRecorded, "Inventory.StockCheckRecorded.v1")
+ordering.register_external_event(LowStockDetected, "Inventory.LowStockDetected.v1")
+ordering.register_external_event(PaymentInitiated, "Payments.PaymentInitiated.v1")
+ordering.register_external_event(PaymentProcessing, "Payments.PaymentProcessing.v1")
 ordering.register_external_event(PaymentSucceeded, "Payments.PaymentSucceeded.v1")
 ordering.register_external_event(PaymentFailed, "Payments.PaymentFailed.v1")
+ordering.register_external_event(PaymentRetryInitiated, "Payments.PaymentRetryInitiated.v1")
+ordering.register_external_event(RefundRequested, "Payments.RefundRequested.v1")
+ordering.register_external_event(RefundCompleted, "Payments.RefundCompleted.v1")
 
 MAX_PAYMENT_RETRIES = 3
 

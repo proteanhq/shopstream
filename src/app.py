@@ -101,8 +101,11 @@ class RequestContextMiddleware:
             request_id = headers.get(b"x-request-id", b"").decode() or str(uuid.uuid4())
             user_id = headers.get(b"x-user-id", b"").decode() or None
 
-            g.request_id = request_id
-            g.user_id = user_id
+            try:
+                g.request_id = request_id
+                g.user_id = user_id
+            except AttributeError:
+                pass  # No domain context active (e.g. /docs, /health)
 
             async def send_with_request_id(message):
                 if message["type"] == "http.response.start":

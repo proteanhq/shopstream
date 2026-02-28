@@ -5,7 +5,6 @@ Each generator produces payloads that pass the domain's validation rules
 names expected by the API's Pydantic request schemas.
 """
 
-import json
 import random
 import uuid
 
@@ -96,7 +95,7 @@ def variant_data(variant_sku: str | None = None) -> dict:
     """Generate AddVariantRequest payload matching schema field names."""
     return {
         "variant_sku": variant_sku or valid_sku("VAR"),
-        "attributes": json.dumps({"size": random.choice(["S", "M", "L", "XL"])}),
+        "attributes": {"size": random.choice(["S", "M", "L", "XL"])},
         "base_price": round(random.uniform(9.99, 299.99), 2),
         "currency": "USD",
         "weight_value": round(random.uniform(0.1, 5.0), 2),
@@ -117,16 +116,12 @@ def image_data(is_primary: bool = False) -> dict:
     }
 
 
-def category_attributes() -> str:
-    """Generate valid JSON string for category attributes.
-
-    The command handler does json.loads() on this field, so it must be valid JSON.
-    """
-    attrs = {
+def category_attributes() -> dict:
+    """Generate category attributes dict."""
+    return {
         "season": random.choice(["spring", "summer", "fall", "winter", "all"]),
         "gender": random.choice(["men", "women", "unisex", "kids"]),
     }
-    return json.dumps(attrs)
 
 
 def category_name() -> str:

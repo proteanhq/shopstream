@@ -16,13 +16,32 @@ from protean.utils.mixins import handle
 from ordering.domain import ordering
 from ordering.order.order import Order
 from ordering.projections.suspended_accounts import SuspendedAccount
-from shared.events.identity import AccountReactivated, AccountSuspended
+from shared.events.identity import (
+    AccountClosed,
+    AccountReactivated,
+    AccountSuspended,
+    AddressAdded,
+    AddressRemoved,
+    AddressUpdated,
+    CustomerRegistered,
+    DefaultAddressChanged,
+    ProfileUpdated,
+    TierUpgraded,
+)
 
 logger = structlog.get_logger(__name__)
 
 # Register external events so Protean can deserialize them
+ordering.register_external_event(CustomerRegistered, "Identity.CustomerRegistered.v1")
+ordering.register_external_event(ProfileUpdated, "Identity.ProfileUpdated.v1")
+ordering.register_external_event(AddressAdded, "Identity.AddressAdded.v1")
+ordering.register_external_event(AddressUpdated, "Identity.AddressUpdated.v1")
+ordering.register_external_event(AddressRemoved, "Identity.AddressRemoved.v1")
+ordering.register_external_event(DefaultAddressChanged, "Identity.DefaultAddressChanged.v1")
 ordering.register_external_event(AccountSuspended, "Identity.AccountSuspended.v1")
 ordering.register_external_event(AccountReactivated, "Identity.AccountReactivated.v1")
+ordering.register_external_event(AccountClosed, "Identity.AccountClosed.v1")
+ordering.register_external_event(TierUpgraded, "Identity.TierUpgraded.v1")
 
 
 @ordering.event_handler(part_of=Order, stream_category="identity::customer")

@@ -12,13 +12,49 @@ from protean.utils.mixins import handle
 from notifications.domain import notifications
 from notifications.notification.helpers import create_notifications_for_customer
 from notifications.notification.notification import Notification, NotificationType
-from shared.events.ordering import OrderCancelled, OrderCreated, OrderDelivered
+from shared.events.ordering import (
+    CouponApplied,
+    ItemAdded,
+    ItemQuantityUpdated,
+    ItemRemoved,
+    OrderCancelled,
+    OrderCompleted,
+    OrderConfirmed,
+    OrderCreated,
+    OrderDelivered,
+    OrderPartiallyShipped,
+    OrderProcessing,
+    OrderRefunded,
+    OrderReturned,
+    OrderShipped,
+    PaymentFailed,
+    PaymentPending,
+    PaymentSucceeded,
+    ReturnApproved,
+    ReturnRequested,
+)
 
 logger = structlog.get_logger(__name__)
 
 notifications.register_external_event(OrderCreated, "Ordering.OrderCreated.v1")
-notifications.register_external_event(OrderCancelled, "Ordering.OrderCancelled.v1")
+notifications.register_external_event(ItemAdded, "Ordering.ItemAdded.v1")
+notifications.register_external_event(ItemRemoved, "Ordering.ItemRemoved.v1")
+notifications.register_external_event(ItemQuantityUpdated, "Ordering.ItemQuantityUpdated.v1")
+notifications.register_external_event(CouponApplied, "Ordering.CouponApplied.v1")
+notifications.register_external_event(OrderConfirmed, "Ordering.OrderConfirmed.v1")
+notifications.register_external_event(PaymentPending, "Ordering.PaymentPending.v1")
+notifications.register_external_event(PaymentSucceeded, "Ordering.PaymentSucceeded.v1")
+notifications.register_external_event(PaymentFailed, "Ordering.PaymentFailed.v1")
+notifications.register_external_event(OrderProcessing, "Ordering.OrderProcessing.v1")
+notifications.register_external_event(OrderShipped, "Ordering.OrderShipped.v1")
+notifications.register_external_event(OrderPartiallyShipped, "Ordering.OrderPartiallyShipped.v1")
 notifications.register_external_event(OrderDelivered, "Ordering.OrderDelivered.v1")
+notifications.register_external_event(OrderCompleted, "Ordering.OrderCompleted.v1")
+notifications.register_external_event(ReturnRequested, "Ordering.ReturnRequested.v1")
+notifications.register_external_event(ReturnApproved, "Ordering.ReturnApproved.v1")
+notifications.register_external_event(OrderReturned, "Ordering.OrderReturned.v1")
+notifications.register_external_event(OrderCancelled, "Ordering.OrderCancelled.v1")
+notifications.register_external_event(OrderRefunded, "Ordering.OrderRefunded.v1")
 
 
 @notifications.event_handler(part_of=Notification, stream_category="ordering::order")

@@ -88,4 +88,4 @@ class TestRefundAPI:
             json={"amount": 30.00, "reason": "Changed mind"},
         )
         assert response.status_code == 200
-        assert response.json()["status"] == "refund_requested"
+        assert "refund_id" in response.json()

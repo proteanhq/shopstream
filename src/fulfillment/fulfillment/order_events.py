@@ -15,12 +15,50 @@ from protean.utils.mixins import handle
 
 from fulfillment.domain import fulfillment
 from fulfillment.fulfillment.fulfillment import Fulfillment
-from shared.events.ordering import OrderCancelled
+from shared.events.ordering import (
+    CouponApplied,
+    ItemAdded,
+    ItemQuantityUpdated,
+    ItemRemoved,
+    OrderCancelled,
+    OrderCompleted,
+    OrderConfirmed,
+    OrderCreated,
+    OrderDelivered,
+    OrderPartiallyShipped,
+    OrderProcessing,
+    OrderRefunded,
+    OrderReturned,
+    OrderShipped,
+    PaymentFailed,
+    PaymentPending,
+    PaymentSucceeded,
+    ReturnApproved,
+    ReturnRequested,
+)
 
 logger = structlog.get_logger(__name__)
 
 # Register external events so Protean can deserialize them
+fulfillment.register_external_event(OrderCreated, "Ordering.OrderCreated.v1")
+fulfillment.register_external_event(ItemAdded, "Ordering.ItemAdded.v1")
+fulfillment.register_external_event(ItemRemoved, "Ordering.ItemRemoved.v1")
+fulfillment.register_external_event(ItemQuantityUpdated, "Ordering.ItemQuantityUpdated.v1")
+fulfillment.register_external_event(CouponApplied, "Ordering.CouponApplied.v1")
+fulfillment.register_external_event(OrderConfirmed, "Ordering.OrderConfirmed.v1")
+fulfillment.register_external_event(PaymentPending, "Ordering.PaymentPending.v1")
+fulfillment.register_external_event(PaymentSucceeded, "Ordering.PaymentSucceeded.v1")
+fulfillment.register_external_event(PaymentFailed, "Ordering.PaymentFailed.v1")
+fulfillment.register_external_event(OrderProcessing, "Ordering.OrderProcessing.v1")
+fulfillment.register_external_event(OrderShipped, "Ordering.OrderShipped.v1")
+fulfillment.register_external_event(OrderPartiallyShipped, "Ordering.OrderPartiallyShipped.v1")
+fulfillment.register_external_event(OrderDelivered, "Ordering.OrderDelivered.v1")
+fulfillment.register_external_event(OrderCompleted, "Ordering.OrderCompleted.v1")
+fulfillment.register_external_event(ReturnRequested, "Ordering.ReturnRequested.v1")
+fulfillment.register_external_event(ReturnApproved, "Ordering.ReturnApproved.v1")
+fulfillment.register_external_event(OrderReturned, "Ordering.OrderReturned.v1")
 fulfillment.register_external_event(OrderCancelled, "Ordering.OrderCancelled.v1")
+fulfillment.register_external_event(OrderRefunded, "Ordering.OrderRefunded.v1")
 
 
 @fulfillment.event_handler(part_of=Fulfillment, stream_category="ordering::order")

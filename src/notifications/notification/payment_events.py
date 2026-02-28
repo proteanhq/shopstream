@@ -9,11 +9,24 @@ from protean.utils.mixins import handle
 from notifications.domain import notifications
 from notifications.notification.helpers import create_notifications_for_customer
 from notifications.notification.notification import Notification, NotificationType
-from shared.events.payments import PaymentSucceeded, RefundCompleted
+from shared.events.payments import (
+    PaymentFailed,
+    PaymentInitiated,
+    PaymentProcessing,
+    PaymentRetryInitiated,
+    PaymentSucceeded,
+    RefundCompleted,
+    RefundRequested,
+)
 
 logger = structlog.get_logger(__name__)
 
+notifications.register_external_event(PaymentInitiated, "Payments.PaymentInitiated.v1")
+notifications.register_external_event(PaymentProcessing, "Payments.PaymentProcessing.v1")
 notifications.register_external_event(PaymentSucceeded, "Payments.PaymentSucceeded.v1")
+notifications.register_external_event(PaymentFailed, "Payments.PaymentFailed.v1")
+notifications.register_external_event(PaymentRetryInitiated, "Payments.PaymentRetryInitiated.v1")
+notifications.register_external_event(RefundRequested, "Payments.RefundRequested.v1")
 notifications.register_external_event(RefundCompleted, "Payments.RefundCompleted.v1")
 
 

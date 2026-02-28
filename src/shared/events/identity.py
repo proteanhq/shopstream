@@ -43,3 +43,85 @@ class AccountReactivated(BaseEvent):
 
     customer_id = Identifier(required=True)
     reactivated_at = DateTime(required=True)
+
+
+class ProfileUpdated(BaseEvent):
+    """A customer's personal profile information was changed."""
+
+    __version__ = "v1"
+
+    customer_id = Identifier(required=True)
+    first_name = String(required=True)
+    last_name = String(required=True)
+    phone = String()
+    date_of_birth = String()
+
+
+class AddressAdded(BaseEvent):
+    """A new address was added to a customer's address book."""
+
+    __version__ = "v1"
+
+    customer_id = Identifier(required=True)
+    address_id = Identifier(required=True)
+    label = String(required=True)
+    street = String(required=True)
+    city = String(required=True)
+    state = String()
+    postal_code = String(required=True)
+    country = String(required=True)
+    is_default = String(required=True)
+
+
+class AddressUpdated(BaseEvent):
+    """An existing address in a customer's address book was modified."""
+
+    __version__ = "v1"
+
+    customer_id = Identifier(required=True)
+    address_id = Identifier(required=True)
+    label = String()
+    street = String()
+    city = String()
+    state = String()
+    postal_code = String()
+    country = String()
+
+
+class AddressRemoved(BaseEvent):
+    """An address was removed from a customer's address book."""
+
+    __version__ = "v1"
+
+    customer_id = Identifier(required=True)
+    address_id = Identifier(required=True)
+
+
+class DefaultAddressChanged(BaseEvent):
+    """A different address was designated as the customer's default."""
+
+    __version__ = "v1"
+
+    customer_id = Identifier(required=True)
+    address_id = Identifier(required=True)
+    previous_default_address_id = Identifier()
+
+
+class AccountClosed(BaseEvent):
+    """A customer account was permanently closed."""
+
+    __version__ = "v1"
+
+    customer_id = Identifier(required=True)
+    closed_at = DateTime(required=True)
+
+
+class TierUpgraded(BaseEvent):
+    """A customer was promoted to a higher loyalty tier."""
+
+    __version__ = "v1"
+
+    customer_id = Identifier(required=True)
+    previous_tier = String(required=True)
+    new_tier = String(required=True)
+    upgraded_at = DateTime(required=True)

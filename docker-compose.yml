@@ -67,6 +67,9 @@ services:
       - ORDERING_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/ordering_local
       - INVENTORY_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/inventory_local
       - PAYMENTS_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/payments_local
+      - FULFILLMENT_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/fulfillment_local
+      - REVIEWS_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/reviews_local
+      - NOTIFICATIONS_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/notifications_local
       - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
       - REDIS_URL=redis://redis:6379/0
     depends_on:
@@ -184,6 +187,75 @@ services:
       - ../protean:/protean
     environment:
       - PAYMENTS_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/payments_local
+      - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      message-db:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
+  engine-fulfillment:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: protean server --domain fulfillment.domain
+    volumes:
+      - ./src:/app/src
+      - ../protean:/protean
+    environment:
+      - FULFILLMENT_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/fulfillment_local
+      - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      message-db:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
+  engine-reviews:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: protean server --domain reviews.domain
+    volumes:
+      - ./src:/app/src
+      - ../protean:/protean
+    environment:
+      - REVIEWS_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/reviews_local
+      - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      message-db:
+        condition: service_healthy
+    restart: unless-stopped
+    deploy:
+      replicas: 1
+
+  engine-notifications:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: protean server --domain notifications.domain
+    volumes:
+      - ./src:/app/src
+      - ../protean:/protean
+    environment:
+      - NOTIFICATIONS_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/notifications_local
       - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
       - REDIS_URL=redis://redis:6379/0
     depends_on:

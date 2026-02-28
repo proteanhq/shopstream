@@ -12,14 +12,30 @@ from notifications.notification.notification import Notification
 from shared.events.fulfillment import (
     DeliveryConfirmed,
     DeliveryException,
+    FulfillmentCancelled,
+    FulfillmentCreated,
+    ItemPicked,
+    PackingCompleted,
+    PickerAssigned,
+    PickingCompleted,
     ShipmentHandedOff,
+    ShippingLabelGenerated,
+    TrackingEventReceived,
 )
 
 logger = structlog.get_logger(__name__)
 
+notifications.register_external_event(FulfillmentCreated, "Fulfillment.FulfillmentCreated.v1")
+notifications.register_external_event(PickerAssigned, "Fulfillment.PickerAssigned.v1")
+notifications.register_external_event(ItemPicked, "Fulfillment.ItemPicked.v1")
+notifications.register_external_event(PickingCompleted, "Fulfillment.PickingCompleted.v1")
+notifications.register_external_event(PackingCompleted, "Fulfillment.PackingCompleted.v1")
+notifications.register_external_event(ShippingLabelGenerated, "Fulfillment.ShippingLabelGenerated.v1")
 notifications.register_external_event(ShipmentHandedOff, "Fulfillment.ShipmentHandedOff.v1")
 notifications.register_external_event(DeliveryConfirmed, "Fulfillment.DeliveryConfirmed.v1")
 notifications.register_external_event(DeliveryException, "Fulfillment.DeliveryException.v1")
+notifications.register_external_event(TrackingEventReceived, "Fulfillment.TrackingEventReceived.v1")
+notifications.register_external_event(FulfillmentCancelled, "Fulfillment.FulfillmentCancelled.v1")
 
 
 @notifications.event_handler(part_of=Notification, stream_category="fulfillment::fulfillment")

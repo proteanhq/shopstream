@@ -40,6 +40,40 @@ class VariantAdded(BaseEvent):
     created_at = DateTime(required=True)
 
 
+class VariantPriceChanged(BaseEvent):
+    """A variant's base price was updated."""
+
+    __version__ = "v1"
+
+    product_id = Identifier(required=True)
+    variant_id = Identifier(required=True)
+    previous_price = Float(required=True)
+    new_price = Float(required=True)
+    currency = String(required=True)
+
+
+class TierPriceSet(BaseEvent):
+    """A loyalty-tier-specific price was set on a variant."""
+
+    __version__ = "v1"
+
+    product_id = Identifier(required=True)
+    variant_id = Identifier(required=True)
+    tier = String(required=True)
+    price = Float(required=True)
+    currency = String(required=True)
+
+
+class ProductActivated(BaseEvent):
+    """A draft product was activated and made available for sale."""
+
+    __version__ = "v1"
+
+    product_id = Identifier(required=True)
+    sku = String(required=True)
+    activated_at = DateTime(required=True)
+
+
 class ProductDiscontinued(BaseEvent):
     """An active product was discontinued and removed from sale."""
 
@@ -48,3 +82,43 @@ class ProductDiscontinued(BaseEvent):
     product_id = Identifier(required=True)
     sku = String(required=True)
     discontinued_at = DateTime(required=True)
+
+
+class ProductDetailsUpdated(BaseEvent):
+    """A product's title, description, brand, or attributes were changed."""
+
+    __version__ = "v1"
+
+    product_id = Identifier(required=True)
+    title = String(required=True)
+    description = String()
+    brand = String()
+
+
+class ProductImageAdded(BaseEvent):
+    """A new image was uploaded for a product."""
+
+    __version__ = "v1"
+
+    product_id = Identifier(required=True)
+    image_id = Identifier(required=True)
+    url = String(required=True)
+    is_primary = String(required=True)
+
+
+class ProductImageRemoved(BaseEvent):
+    """An image was removed from a product's gallery."""
+
+    __version__ = "v1"
+
+    product_id = Identifier(required=True)
+    image_id = Identifier(required=True)
+
+
+class ProductArchived(BaseEvent):
+    """A discontinued product was archived for permanent storage."""
+
+    __version__ = "v1"
+
+    product_id = Identifier(required=True)
+    archived_at = DateTime(required=True)

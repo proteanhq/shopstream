@@ -40,6 +40,57 @@ class PaymentFailed(BaseEvent):
     failed_at = DateTime(required=True)
 
 
+class PaymentInitiated(BaseEvent):
+    """A new payment was created for an order."""
+
+    __version__ = "v1"
+
+    payment_id = Identifier(required=True)
+    order_id = Identifier(required=True)
+    customer_id = Identifier(required=True)
+    amount = Float(required=True)
+    currency = String(required=True)
+    payment_method_type = String(required=True)
+    last4 = String()
+    gateway_name = String(required=True)
+    idempotency_key = String(required=True)
+    initiated_at = DateTime(required=True)
+
+
+class PaymentProcessing(BaseEvent):
+    """Payment was sent to the gateway for processing."""
+
+    __version__ = "v1"
+
+    payment_id = Identifier(required=True)
+    order_id = Identifier(required=True)
+    processing_at = DateTime(required=True)
+
+
+class PaymentRetryInitiated(BaseEvent):
+    """A failed payment is being retried."""
+
+    __version__ = "v1"
+
+    payment_id = Identifier(required=True)
+    order_id = Identifier(required=True)
+    attempt_number = Integer(required=True)
+    retried_at = DateTime(required=True)
+
+
+class RefundRequested(BaseEvent):
+    """A refund was requested for a successful payment."""
+
+    __version__ = "v1"
+
+    payment_id = Identifier(required=True)
+    refund_id = Identifier(required=True)
+    order_id = Identifier(required=True)
+    amount = Float(required=True)
+    reason = String(required=True)
+    requested_at = DateTime(required=True)
+
+
 class RefundCompleted(BaseEvent):
     """A refund was completed by the payment gateway.
 

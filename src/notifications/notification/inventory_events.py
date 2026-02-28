@@ -9,10 +9,34 @@ from protean.utils.mixins import handle
 from notifications.domain import notifications
 from notifications.notification.helpers import create_internal_notification
 from notifications.notification.notification import Notification, NotificationType
-from shared.events.inventory import LowStockDetected
+from shared.events.inventory import (
+    DamagedStockWrittenOff,
+    LowStockDetected,
+    ReservationConfirmed,
+    ReservationReleased,
+    StockAdjusted,
+    StockCheckRecorded,
+    StockCommitted,
+    StockInitialized,
+    StockMarkedDamaged,
+    StockReceived,
+    StockReserved,
+    StockReturned,
+)
 
 logger = structlog.get_logger(__name__)
 
+notifications.register_external_event(StockInitialized, "Inventory.StockInitialized.v1")
+notifications.register_external_event(StockReceived, "Inventory.StockReceived.v1")
+notifications.register_external_event(StockReserved, "Inventory.StockReserved.v1")
+notifications.register_external_event(ReservationReleased, "Inventory.ReservationReleased.v1")
+notifications.register_external_event(ReservationConfirmed, "Inventory.ReservationConfirmed.v1")
+notifications.register_external_event(StockCommitted, "Inventory.StockCommitted.v1")
+notifications.register_external_event(StockAdjusted, "Inventory.StockAdjusted.v1")
+notifications.register_external_event(StockMarkedDamaged, "Inventory.StockMarkedDamaged.v1")
+notifications.register_external_event(DamagedStockWrittenOff, "Inventory.DamagedStockWrittenOff.v1")
+notifications.register_external_event(StockReturned, "Inventory.StockReturned.v1")
+notifications.register_external_event(StockCheckRecorded, "Inventory.StockCheckRecorded.v1")
 notifications.register_external_event(LowStockDetected, "Inventory.LowStockDetected.v1")
 
 

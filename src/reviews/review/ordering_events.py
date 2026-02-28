@@ -15,12 +15,50 @@ from protean.utils.mixins import handle
 from reviews.domain import reviews
 from reviews.projections.verified_purchases import VerifiedPurchases
 from reviews.review.review import Review
-from shared.events.ordering import OrderDelivered
+from shared.events.ordering import (
+    CouponApplied,
+    ItemAdded,
+    ItemQuantityUpdated,
+    ItemRemoved,
+    OrderCancelled,
+    OrderCompleted,
+    OrderConfirmed,
+    OrderCreated,
+    OrderDelivered,
+    OrderPartiallyShipped,
+    OrderProcessing,
+    OrderRefunded,
+    OrderReturned,
+    OrderShipped,
+    PaymentFailed,
+    PaymentPending,
+    PaymentSucceeded,
+    ReturnApproved,
+    ReturnRequested,
+)
 
 logger = structlog.get_logger(__name__)
 
-# Register external event so Protean can deserialize it
+# Register external events so Protean can deserialize them
+reviews.register_external_event(OrderCreated, "Ordering.OrderCreated.v1")
+reviews.register_external_event(ItemAdded, "Ordering.ItemAdded.v1")
+reviews.register_external_event(ItemRemoved, "Ordering.ItemRemoved.v1")
+reviews.register_external_event(ItemQuantityUpdated, "Ordering.ItemQuantityUpdated.v1")
+reviews.register_external_event(CouponApplied, "Ordering.CouponApplied.v1")
+reviews.register_external_event(OrderConfirmed, "Ordering.OrderConfirmed.v1")
+reviews.register_external_event(PaymentPending, "Ordering.PaymentPending.v1")
+reviews.register_external_event(PaymentSucceeded, "Ordering.PaymentSucceeded.v1")
+reviews.register_external_event(PaymentFailed, "Ordering.PaymentFailed.v1")
+reviews.register_external_event(OrderProcessing, "Ordering.OrderProcessing.v1")
+reviews.register_external_event(OrderShipped, "Ordering.OrderShipped.v1")
+reviews.register_external_event(OrderPartiallyShipped, "Ordering.OrderPartiallyShipped.v1")
 reviews.register_external_event(OrderDelivered, "Ordering.OrderDelivered.v1")
+reviews.register_external_event(OrderCompleted, "Ordering.OrderCompleted.v1")
+reviews.register_external_event(ReturnRequested, "Ordering.ReturnRequested.v1")
+reviews.register_external_event(ReturnApproved, "Ordering.ReturnApproved.v1")
+reviews.register_external_event(OrderReturned, "Ordering.OrderReturned.v1")
+reviews.register_external_event(OrderCancelled, "Ordering.OrderCancelled.v1")
+reviews.register_external_event(OrderRefunded, "Ordering.OrderRefunded.v1")
 
 
 @reviews.event_handler(part_of=Review, stream_category="ordering::order")

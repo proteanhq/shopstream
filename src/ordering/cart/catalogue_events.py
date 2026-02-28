@@ -21,12 +21,32 @@ from protean.utils.mixins import handle
 from ordering.cart.cart import ShoppingCart
 from ordering.domain import ordering
 from ordering.projections.cart_view import CartView
-from shared.events.catalogue import ProductDiscontinued
+from shared.events.catalogue import (
+    ProductActivated,
+    ProductArchived,
+    ProductCreated,
+    ProductDetailsUpdated,
+    ProductDiscontinued,
+    ProductImageAdded,
+    ProductImageRemoved,
+    TierPriceSet,
+    VariantAdded,
+    VariantPriceChanged,
+)
 
 logger = structlog.get_logger(__name__)
 
-# Register external event so Protean can deserialize it
+# Register external events so Protean can deserialize them
+ordering.register_external_event(ProductCreated, "Catalogue.ProductCreated.v1")
+ordering.register_external_event(VariantAdded, "Catalogue.VariantAdded.v1")
+ordering.register_external_event(VariantPriceChanged, "Catalogue.VariantPriceChanged.v1")
+ordering.register_external_event(TierPriceSet, "Catalogue.TierPriceSet.v1")
+ordering.register_external_event(ProductActivated, "Catalogue.ProductActivated.v1")
 ordering.register_external_event(ProductDiscontinued, "Catalogue.ProductDiscontinued.v1")
+ordering.register_external_event(ProductDetailsUpdated, "Catalogue.ProductDetailsUpdated.v1")
+ordering.register_external_event(ProductImageAdded, "Catalogue.ProductImageAdded.v1")
+ordering.register_external_event(ProductImageRemoved, "Catalogue.ProductImageRemoved.v1")
+ordering.register_external_event(ProductArchived, "Catalogue.ProductArchived.v1")
 
 
 @ordering.event_handler(part_of=ShoppingCart, stream_category="catalogue::product")
