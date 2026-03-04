@@ -5,7 +5,7 @@ from protean.fields import DateTime, Identifier, String
 from identity.domain import identity
 
 
-@identity.event(part_of="Customer")
+@identity.event(part_of="Customer", published=True)
 class CustomerRegistered:
     """A new customer account was created on the platform."""
 
@@ -86,7 +86,7 @@ class DefaultAddressChanged:
     previous_default_address_id: Identifier()
 
 
-@identity.event(part_of="Customer")
+@identity.event(part_of="Customer", published=True)
 class AccountSuspended:
     """A customer account was suspended, blocking further activity."""
 
@@ -97,7 +97,7 @@ class AccountSuspended:
     suspended_at: DateTime(required=True)
 
 
-@identity.event(part_of="Customer")
+@identity.event(part_of="Customer", published=True)
 class AccountReactivated:
     """A previously suspended customer account was restored to active status."""
 

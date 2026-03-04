@@ -53,6 +53,7 @@ from loadtests.scenarios.priority_lanes import (  # noqa: F401
     PriorityLanesDisabledBaseline,
     PriorityStarvationTestUser,
 )
+from loadtests.scenarios.reviews import ReviewsUser  # noqa: F401
 from loadtests.scenarios.stress import EventFloodUser, SpikeUser  # noqa: F401
 
 logger = logging.getLogger("loadtest")

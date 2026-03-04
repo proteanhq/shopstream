@@ -328,3 +328,55 @@ def fulfillment_data(
         "customer_id": customer_id or f"cust-{uuid.uuid4().hex[:8]}",
         "items": [fulfillment_item_data() for _ in range(num)],
     }
+
+
+# ---------- Reviews Domain ----------
+
+
+_REVIEW_PROS = [
+    "Great quality",
+    "Fast shipping",
+    "Good value",
+    "Easy to use",
+    "Durable",
+    "Looks great",
+    "Comfortable",
+    "As described",
+]
+
+_REVIEW_CONS = [
+    "Pricey",
+    "Slow delivery",
+    "Bulky packaging",
+    "Minor defect",
+    "Runs small",
+    "Color slightly off",
+    "Instructions unclear",
+]
+
+
+def review_data(
+    product_id: str | None = None,
+    customer_id: str | None = None,
+) -> dict:
+    """Generate SubmitReviewRequest payload."""
+    rating = random.choices([1, 2, 3, 4, 5], weights=[5, 10, 15, 35, 35])[0]
+    return {
+        "product_id": product_id or f"prod-{uuid.uuid4().hex[:8]}",
+        "customer_id": customer_id or f"cust-{uuid.uuid4().hex[:8]}",
+        "rating": rating,
+        "title": fake.sentence(nb_words=random.randint(3, 8))[:200],
+        "body": fake.paragraph(nb_sentences=random.randint(2, 5)),
+        "pros": random.sample(_REVIEW_PROS, k=random.randint(1, 3)),
+        "cons": random.sample(_REVIEW_CONS, k=random.randint(0, 2)),
+    }
+
+
+def edit_review_data(customer_id: str) -> dict:
+    """Generate EditReviewRequest payload with updated content."""
+    return {
+        "customer_id": customer_id,
+        "title": fake.sentence(nb_words=random.randint(3, 8))[:200],
+        "body": fake.paragraph(nb_sentences=random.randint(2, 5)),
+        "rating": random.randint(1, 5),
+    }

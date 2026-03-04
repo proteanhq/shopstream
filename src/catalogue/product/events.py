@@ -7,7 +7,7 @@ from catalogue.domain import catalogue
 # Cross-cutting events (for future consumers: Inventory, Order, Search)
 
 
-@catalogue.event(part_of="Product")
+@catalogue.event(part_of="Product", published=True)
 class ProductCreated:
     """A new product was added to the catalogue in Draft status."""
 
@@ -22,7 +22,7 @@ class ProductCreated:
     created_at: DateTime(required=True)
 
 
-@catalogue.event(part_of="Product")
+@catalogue.event(part_of="Product", published=True)
 class VariantAdded:
     """A new purchasable variant was added to a product."""
 
@@ -73,7 +73,7 @@ class ProductActivated:
     activated_at: DateTime(required=True)
 
 
-@catalogue.event(part_of="Product")
+@catalogue.event(part_of="Product", published=True)
 class ProductDiscontinued:
     """An active product was discontinued and removed from sale."""
 

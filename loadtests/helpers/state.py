@@ -89,6 +89,16 @@ class FulfillmentState:
 
 
 @dataclass
+class ReviewState:
+    """Tracks state for a single review lifecycle."""
+
+    review_id: str | None = None
+    product_id: str | None = None
+    customer_id: str | None = None
+    current_status: str = "Pending"
+
+
+@dataclass
 class CrossDomainState:
     """Tracks state across domains for end-to-end scenarios.
 

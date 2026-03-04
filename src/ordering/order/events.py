@@ -12,7 +12,7 @@ from protean.fields import DateTime, Dict, Float, Identifier, List, String
 from ordering.domain import ordering
 
 
-@ordering.event(part_of="Order")
+@ordering.event(part_of="Order", published=True)
 class OrderCreated:
     """A new order was created from a shopping cart at checkout."""
 
@@ -176,7 +176,7 @@ class OrderPartiallyShipped:
     shipped_at = DateTime(required=True)
 
 
-@ordering.event(part_of="Order")
+@ordering.event(part_of="Order", published=True)
 class OrderDelivered:
     """The carrier confirmed delivery of the order to the customer."""
 
@@ -217,7 +217,7 @@ class ReturnApproved:
     approved_at = DateTime(required=True)
 
 
-@ordering.event(part_of="Order")
+@ordering.event(part_of="Order", published=True)
 class OrderReturned:
     """Returned items were received back from the customer."""
 
@@ -228,7 +228,7 @@ class OrderReturned:
     returned_at = DateTime(required=True)
 
 
-@ordering.event(part_of="Order")
+@ordering.event(part_of="Order", published=True)
 class OrderCancelled:
     """The order was cancelled before fulfillment began."""
 

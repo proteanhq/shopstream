@@ -67,7 +67,7 @@ class TestSchedulerErrorPaths:
         mock_repo.query.filter.side_effect = RuntimeError("DB error")
 
         with patch("notifications.notification.scheduler.current_domain") as mock_domain:
-            mock_domain.repository_for.return_value = mock_repo
+            mock_domain.repository_for = MagicMock(return_value=mock_repo)
 
             from notifications.notification.scheduler import ProcessScheduledNotifications
 
@@ -90,7 +90,7 @@ class TestSchedulerErrorPaths:
         mock_repo.query.filter.return_value.all.return_value.items = [mock_notification]
 
         with patch("notifications.notification.scheduler.current_domain") as mock_domain:
-            mock_domain.repository_for.return_value = mock_repo
+            mock_domain.repository_for = MagicMock(return_value=mock_repo)
 
             from notifications.notification.scheduler import ProcessScheduledNotifications
 

@@ -45,7 +45,7 @@ class ReviewEdited:
     edited_at = DateTime(required=True)
 
 
-@reviews.event(part_of="Review")
+@reviews.event(part_of="Review", published=True)
 class ReviewApproved:
     """A moderator approved the review for publication."""
 
@@ -59,7 +59,7 @@ class ReviewApproved:
     approved_at = DateTime(required=True)
 
 
-@reviews.event(part_of="Review")
+@reviews.event(part_of="Review", published=True)
 class ReviewRejected:
     """A moderator rejected the review."""
 

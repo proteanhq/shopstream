@@ -41,7 +41,7 @@ class PaymentProcessing:
     processing_at = DateTime(required=True)
 
 
-@payments.event(part_of="Payment")
+@payments.event(part_of="Payment", published=True)
 class PaymentSucceeded:
     """Payment was successfully captured by the gateway."""
 
@@ -56,7 +56,7 @@ class PaymentSucceeded:
     succeeded_at = DateTime(required=True)
 
 
-@payments.event(part_of="Payment")
+@payments.event(part_of="Payment", published=True)
 class PaymentFailed:
     """Payment processing failed at the gateway."""
 
@@ -97,7 +97,7 @@ class RefundRequested:
     requested_at = DateTime(required=True)
 
 
-@payments.event(part_of="Payment")
+@payments.event(part_of="Payment", published=True)
 class RefundCompleted:
     """A refund was completed by the gateway."""
 

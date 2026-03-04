@@ -245,3 +245,29 @@ class TestFullLifecycleViaApi:
         assert item.levels.on_hand == 120  # 100 + 50 - 30
         assert item.levels.reserved == 0
         assert item.levels.available == 120
+
+
+class TestMaintenanceEndpoints:
+    @pytest.fixture()
+    def maint_client(self):
+        from inventory.api.routes import maintenance_router
+
+        app = FastAPI()
+        app.include_router(inventory_router)
+        app.include_router(maintenance_router)
+        return TestClient(app)
+
+    def test_expire_stale_reservations_no_body(self, maint_client):
+        response = maint_client.post("/inventory/maintenance/expire-reservations")
+        assert response.status_code == 200
+        data = response.json()
+        assert "expired_count" in data
+
+    def test_expire_stale_reservations_with_body(self, maint_client):
+        response = maint_client.post(
+            "/inventory/maintenance/expire-reservations",
+            json={"older_than_minutes": 30},
+        )
+        assert response.status_code == 200
+        data = response.json()
+        assert "expired_count" in data

@@ -6,7 +6,7 @@ the saga's decision logic, not the downstream command handlers.
 """
 
 from datetime import UTC, datetime
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from ordering.checkout.saga import OrderCheckoutSaga
 from ordering.order.events import OrderConfirmed
@@ -36,6 +36,7 @@ class TestOnOrderConfirmed:
 class TestOnStockReserved:
     @patch("ordering.checkout.saga.current_domain")
     def test_sets_status_awaiting_payment(self, mock_domain):
+        mock_domain.process = MagicMock()
         saga = OrderCheckoutSaga()
         saga.order_id = "ord-001"
         saga.status = "awaiting_reservation"
@@ -58,6 +59,7 @@ class TestOnStockReserved:
 class TestOnPaymentSucceeded:
     @patch("ordering.checkout.saga.current_domain")
     def test_sets_status_completed(self, mock_domain):
+        mock_domain.process = MagicMock()
         saga = OrderCheckoutSaga()
         saga.order_id = "ord-001"
         saga.status = "awaiting_payment"
@@ -95,6 +97,7 @@ class TestOnPaymentFailed:
 
     @patch("ordering.checkout.saga.current_domain")
     def test_failed_when_cannot_retry(self, mock_domain):
+        mock_domain.process = MagicMock()
         saga = OrderCheckoutSaga()
         saga.order_id = "ord-001"
         saga.status = "awaiting_payment"
@@ -115,6 +118,7 @@ class TestOnPaymentFailed:
 class TestOnReservationReleased:
     @patch("ordering.checkout.saga.current_domain")
     def test_sets_status_failed(self, mock_domain):
+        mock_domain.process = MagicMock()
         saga = OrderCheckoutSaga()
         saga.order_id = "ord-001"
         saga.status = "awaiting_payment"

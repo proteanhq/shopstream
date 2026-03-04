@@ -72,7 +72,7 @@ class CartConverted:
     items = List(Dict(), required=True)
 
 
-@ordering.event(part_of="ShoppingCart")
+@ordering.event(part_of="ShoppingCart", published=True)
 class CartAbandoned:
     """A shopping cart was marked as abandoned due to inactivity."""
 

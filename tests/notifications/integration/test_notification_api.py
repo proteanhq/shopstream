@@ -195,3 +195,25 @@ class TestNotificationLifecycleAPI:
         resp = client.post(f"/notifications/{nid}/retry")
         assert resp.status_code == 201
         assert resp.json()["status"] == "ok"
+
+
+# ---------------------------------------------------------------
+# Maintenance endpoints
+# ---------------------------------------------------------------
+class TestMaintenanceAPI:
+    def test_process_scheduled_no_body(self):
+        client = _get_test_client()
+        resp = client.post("/notifications/maintenance/process-scheduled")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"
+
+    def test_process_scheduled_with_body(self):
+        client = _get_test_client()
+        resp = client.post(
+            "/notifications/maintenance/process-scheduled",
+            json={"as_of": "2026-03-03T12:00:00"},
+        )
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"

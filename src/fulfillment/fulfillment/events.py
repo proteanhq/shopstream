@@ -82,7 +82,7 @@ class ShippingLabelGenerated:
     generated_at = DateTime(required=True)
 
 
-@fulfillment.event(part_of="Fulfillment")
+@fulfillment.event(part_of="Fulfillment", published=True)
 class ShipmentHandedOff:
     """The shipment was handed off to the carrier."""
 
@@ -110,7 +110,7 @@ class TrackingEventReceived:
     occurred_at = DateTime(required=True)
 
 
-@fulfillment.event(part_of="Fulfillment")
+@fulfillment.event(part_of="Fulfillment", published=True)
 class DeliveryConfirmed:
     """The carrier confirmed delivery to the customer."""
 
@@ -122,7 +122,7 @@ class DeliveryConfirmed:
     delivered_at = DateTime(required=True)
 
 
-@fulfillment.event(part_of="Fulfillment")
+@fulfillment.event(part_of="Fulfillment", published=True)
 class DeliveryException:
     """The carrier reported a delivery exception."""
 

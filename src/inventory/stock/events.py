@@ -44,7 +44,7 @@ class StockReceived:
     received_at = DateTime(required=True)
 
 
-@inventory.event(part_of="InventoryItem")
+@inventory.event(part_of="InventoryItem", published=True)
 class StockReserved:
     """Stock was reserved for an order, decreasing available quantity."""
 
@@ -60,7 +60,7 @@ class StockReserved:
     expires_at = DateTime(required=True)
 
 
-@inventory.event(part_of="InventoryItem")
+@inventory.event(part_of="InventoryItem", published=True)
 class ReservationReleased:
     """A stock reservation was released, returning quantity to available."""
 
@@ -186,7 +186,7 @@ class StockCheckRecorded:
     checked_at = DateTime(required=True)
 
 
-@inventory.event(part_of="InventoryItem")
+@inventory.event(part_of="InventoryItem", published=True)
 class LowStockDetected:
     """Available stock dropped below the reorder point."""
 
