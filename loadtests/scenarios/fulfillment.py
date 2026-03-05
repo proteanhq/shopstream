@@ -210,12 +210,25 @@ class FulfillmentPickerCancelJourney(SequentialTaskSet):
 class FulfillmentTrackingWebhookJourney(SequentialTaskSet):
     """Create -> Multiple Tracking Webhooks -> Get Tracking.
 
-    Models carrier tracking webhook updates flowing in for a fulfillment.
-    Exercises the tracking webhook endpoint and read model queries.
+    WARNING: This is a timing-sensitive scenario that generates expected
+    handler failures. It sends tracking webhooks to a fulfillment that
+    hasn't been shipped yet, violating the state machine invariant
+    "Tracking events can only be added after shipment".
 
-    Note: These tracking updates may not advance fulfillment state correctly
-    since the fulfillment isn't in Shipped state, but they exercise the
-    webhook endpoint and tracking event processing.
+    The HTTP requests succeed (the API accepts the webhook), but the
+    async TrackingHandler fails when it tries to apply the tracking
+    event to a non-shipped fulfillment. These failures appear in the
+    Observatory's Failed Messages page.
+
+    Purpose: Exercises the tracking webhook endpoint and tests how the
+    system handles out-of-order events. Useful for verifying that the
+    TrackingHandler correctly rejects invalid state transitions and that
+    failed messages are properly tracked.
+
+    This journey is excluded from default FulfillmentUser discovery.
+    Run explicitly via FulfillmentTrackingUser:
+
+        locust -f loadtests/locustfile.py FulfillmentTrackingUser
     """
 
     def on_start(self):
@@ -297,16 +310,38 @@ class FulfillmentUser(HttpUser):
     """Locust user simulating Fulfillment domain interactions.
 
     Weighted distribution:
-    - 30% Creation + picker assignment (exercises create + assign)
-    - 25% Cancellation journey (during picking)
-    - 25% Tracking webhook journey (carrier updates)
-    - 20% Exception journey (exception + cancel)
+    - 40% Creation + picker assignment (exercises create + assign)
+    - 30% Cancellation journey (during picking)
+    - 30% Exception journey (exception + cancel)
+
+    Note: FulfillmentTrackingWebhookJourney is excluded from default
+    discovery — it sends tracking webhooks before shipment, generating
+    expected TrackingHandler failures. Run via FulfillmentTrackingUser.
     """
 
     wait_time = between(0.5, 2.0)
     tasks = {
-        FulfillmentCreationJourney: 6,
-        FulfillmentCancellationJourney: 5,
-        FulfillmentTrackingWebhookJourney: 5,
-        FulfillmentPickerCancelJourney: 4,
+        FulfillmentCreationJourney: 4,
+        FulfillmentCancellationJourney: 3,
+        FulfillmentPickerCancelJourney: 3,
+    }
+
+
+class FulfillmentTrackingUser(HttpUser):
+    """Specialty scenario: tracking webhooks on non-shipped fulfillments.
+
+    WARNING: Generates expected TrackingHandler failures because tracking
+    events are sent before the fulfillment is shipped. These are NOT bugs —
+    they test how the system handles out-of-order webhook events.
+
+    Expected failures: TrackingHandler → "Tracking events can only be added
+    after shipment"
+
+    Run explicitly:
+        locust -f loadtests/locustfile.py FulfillmentTrackingUser --headless -u 10 -t 60s
+    """
+
+    wait_time = between(0.5, 2.0)
+    tasks = {
+        FulfillmentTrackingWebhookJourney: 1,
     }

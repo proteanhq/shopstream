@@ -547,15 +547,27 @@ class OrderReturnJourney(SequentialTaskSet):
 class OrderCheckoutSagaJourney(SequentialTaskSet):
     """Cart -> Checkout -> Confirm -> Pay -> Ship -> Deliver -> Complete.
 
-    The most realistic e-commerce flow: a customer builds a cart, checks out
-    (which creates an order via cart conversion), then the order flows through
-    the OrderCheckoutSaga — confirm, payment, fulfillment, delivery, completion.
+    WARNING: This is a timing-sensitive scenario that generates expected
+    handler failures. It fires BOTH a payment webhook (which triggers
+    the OrderCheckoutSaga's async RecordPaymentSuccess) AND a direct
+    /payment/success API call. These two RecordPaymentSuccess commands
+    race — the saga's typically wins, causing the direct call to fail
+    with "Cannot transition from Confirmed to Paid" (because the saga
+    already moved the order through PaymentPending → Paid).
 
-    70% of journeys complete the happy path (payment succeeds).
-    30% simulate payment failure with compensation (cancel order).
+    Expected failures:
+    - RecordPaymentHandler → "Cannot transition from Confirmed to Paid"
+    - ProcessWebhookHandler → "Payment does not exist" (webhook arrives
+      before payment aggregate is persisted — eventual consistency)
 
-    Exercises: Ordering (cart + order), Payments (webhook), and the
-    OrderCheckoutSaga process manager coordination.
+    Purpose: Tests the saga's coordination of cross-domain events under
+    realistic timing conditions. Verifies that idempotency guards and
+    ValidationError catches in the saga prevent duplicate state transitions.
+
+    This journey is excluded from default OrderingUser discovery.
+    Run explicitly via OrderingSagaUser:
+
+        locust -f loadtests/locustfile.py OrderingSagaUser --headless -u 10 -t 60s
     """
 
     def on_start(self):
@@ -739,20 +751,44 @@ class OrderingUser(HttpUser):
     """Locust user simulating Ordering domain interactions.
 
     Weighted distribution:
-    - 25% Cart lifecycle (browsing, abandonment)
-    - 20% Full order lifecycle (happy path)
-    - 20% Checkout saga (cart → checkout → pay → ship → deliver)
-    - 15% Cart to checkout conversion
-    - 10% Order cancellation + refund
-    - 10% Order return flow
+    - 30% Cart lifecycle (browsing, abandonment)
+    - 25% Full order lifecycle (happy path)
+    - 20% Cart to checkout conversion
+    - 13% Order cancellation + refund
+    - 12% Order return flow
+
+    Note: OrderCheckoutSagaJourney is excluded from default discovery —
+    it races the saga's RecordPaymentSuccess against a direct API call,
+    generating expected handler failures. Run via OrderingSagaUser.
     """
 
     wait_time = between(0.5, 2.0)
     tasks = {
-        CartLifecycleJourney: 5,
-        OrderFullLifecycleJourney: 4,
-        OrderCheckoutSagaJourney: 4,
-        CartToCheckoutJourney: 3,
-        OrderCancellationJourney: 2,
+        CartLifecycleJourney: 6,
+        OrderFullLifecycleJourney: 5,
+        CartToCheckoutJourney: 4,
+        OrderCancellationJourney: 3,
         OrderReturnJourney: 2,
+    }
+
+
+class OrderingSagaUser(HttpUser):
+    """Specialty scenario: saga timing race conditions.
+
+    WARNING: Generates expected handler failures because the journey fires
+    BOTH a payment webhook (triggering the saga's async RecordPaymentSuccess)
+    AND a direct /payment/success API call. These race — whichever arrives
+    second fails with a state machine violation.
+
+    Expected failures:
+    - RecordPaymentHandler → "Cannot transition from Confirmed to Paid"
+    - ProcessWebhookHandler → "Payment does not exist"
+
+    Run explicitly:
+        locust -f loadtests/locustfile.py OrderingSagaUser --headless -u 10 -t 60s
+    """
+
+    wait_time = between(0.5, 2.0)
+    tasks = {
+        OrderCheckoutSagaJourney: 1,
     }

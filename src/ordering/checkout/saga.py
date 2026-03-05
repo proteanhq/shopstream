@@ -16,6 +16,9 @@ Cross-domain events are imported from shared.events module and registered
 as external events via ordering.register_external_event().
 """
 
+import logging
+
+from protean.exceptions import ValidationError
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
@@ -46,6 +49,8 @@ from shared.events.payments import (
     RefundCompleted,
     RefundRequested,
 )
+
+logger = logging.getLogger(__name__)
 
 # Register external events from other domains so Protean can deserialize them
 ordering.register_external_event(StockInitialized, "Inventory.StockInitialized.v1")
@@ -107,40 +112,53 @@ class OrderCheckoutSaga:
         # Dispatch command to ordering domain to record payment pending
         from ordering.order.payment import RecordPaymentPending
 
-        current_domain.process(
-            RecordPaymentPending(
-                order_id=self.order_id,
-                payment_id=f"saga-pay-{self.order_id}",
-                payment_method="credit_card",
-            ),
-            asynchronous=False,
-            priority=Priority.HIGH,
-        )
+        try:
+            current_domain.process(
+                RecordPaymentPending(
+                    order_id=self.order_id,
+                    payment_id=f"saga-pay-{self.order_id}",
+                    payment_method="credit_card",
+                ),
+                asynchronous=False,
+                priority=Priority.HIGH,
+            )
+        except ValidationError:
+            logger.info("Order %s already transitioned; skipping RecordPaymentPending", self.order_id)
 
     @handle(PaymentSucceeded, correlate="order_id")
     def on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         """Step 3a: Payment succeeded — record success and complete saga."""
+        if self.status in ("completed", "failed"):
+            return  # Already reached terminal state; skip duplicate
+
         self.payment_id = event.payment_id
         self.amount = event.amount
         self.status = "completed"
 
         from ordering.order.payment import RecordPaymentSuccess
 
-        current_domain.process(
-            RecordPaymentSuccess(
-                order_id=self.order_id,
-                payment_id=event.payment_id,
-                amount=event.amount,
-                payment_method="credit_card",
-            ),
-            asynchronous=False,
-            priority=Priority.HIGH,
-        )
+        try:
+            current_domain.process(
+                RecordPaymentSuccess(
+                    order_id=self.order_id,
+                    payment_id=event.payment_id,
+                    amount=event.amount,
+                    payment_method="credit_card",
+                ),
+                asynchronous=False,
+                priority=Priority.HIGH,
+            )
+        except ValidationError:
+            logger.info("Order %s already transitioned; skipping RecordPaymentSuccess", self.order_id)
+
         self.mark_as_complete()
 
     @handle(PaymentFailed, correlate="order_id")
     def on_payment_failed(self, event: PaymentFailed) -> None:
         """Step 3b: Payment failed — retry or cancel order."""
+        if self.status in ("completed", "failed"):
+            return  # Already reached terminal state; skip duplicate
+
         self.retry_count = event.attempt_number
         self.failure_reason = event.reason
 
@@ -151,31 +169,41 @@ class OrderCheckoutSaga:
             self.status = "failed"
             from ordering.order.cancellation import CancelOrder
 
-            current_domain.process(
-                CancelOrder(
-                    order_id=self.order_id,
-                    reason=f"Payment failed: {event.reason}",
-                    cancelled_by="System",
-                ),
-                asynchronous=False,
-                priority=Priority.HIGH,
-            )
+            try:
+                current_domain.process(
+                    CancelOrder(
+                        order_id=self.order_id,
+                        reason=f"Payment failed: {event.reason}",
+                        cancelled_by="System",
+                    ),
+                    asynchronous=False,
+                    priority=Priority.HIGH,
+                )
+            except ValidationError:
+                logger.info("Order %s already cancelled; skipping CancelOrder", self.order_id)
+
             self.mark_as_complete()
 
     @handle(ReservationReleased, correlate="order_id", end=True)
     def on_reservation_released(self, event: ReservationReleased) -> None:
         """Step 4: Reservation released (timeout or cancellation) — cancel order."""
+        if self.status in ("completed", "failed"):
+            return  # Already reached terminal state; skip duplicate
+
         self.status = "failed"
         self.failure_reason = f"Reservation released: {event.reason}"
 
         from ordering.order.cancellation import CancelOrder
 
-        current_domain.process(
-            CancelOrder(
-                order_id=self.order_id,
-                reason=f"Inventory reservation released: {event.reason}",
-                cancelled_by="System",
-            ),
-            asynchronous=False,
-            priority=Priority.HIGH,
-        )
+        try:
+            current_domain.process(
+                CancelOrder(
+                    order_id=self.order_id,
+                    reason=f"Inventory reservation released: {event.reason}",
+                    cancelled_by="System",
+                ),
+                asynchronous=False,
+                priority=Priority.HIGH,
+            )
+        except ValidationError:
+            logger.info("Order %s already cancelled; skipping CancelOrder", self.order_id)

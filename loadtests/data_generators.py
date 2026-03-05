@@ -186,6 +186,19 @@ def cart_item_data() -> dict:
     }
 
 
+def saga_cart_item_data(product_id: str, variant_id: str, quantity: int = 1) -> dict:
+    """Generate AddToCartRequest payload with specific product/variant IDs.
+
+    Used by saga journeys where cart items must reference inventory stock
+    that was explicitly created earlier in the journey.
+    """
+    return {
+        "product_id": product_id,
+        "variant_id": variant_id,
+        "quantity": quantity,
+    }
+
+
 def checkout_data() -> dict:
     """Generate CheckoutRequest payload."""
     return {

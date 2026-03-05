@@ -108,6 +108,27 @@ class NotificationState:
 
 
 @dataclass
+class SagaState:
+    """Tracks state for cross-domain saga exercise journeys.
+
+    Threads IDs from Inventory, Ordering, and Payments domains
+    so the OrderCheckoutSaga process manager can correlate events.
+    """
+
+    warehouse_id: str | None = None
+    inventory_item_id: str | None = None
+    product_id: str = ""
+    variant_id: str = ""
+    cart_id: str | None = None
+    order_id: str | None = None
+    customer_id: str = ""
+    payment_id: str | None = None
+    quantity: int = 1
+    unit_price: float = 0.0
+    order_status: str = ""
+
+
+@dataclass
 class CrossDomainState:
     """Tracks state across domains for end-to-end scenarios.
 

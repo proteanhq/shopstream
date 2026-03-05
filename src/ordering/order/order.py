@@ -433,6 +433,11 @@ class Order:
 
     def record_payment_pending(self, payment_id, payment_method):
         """Record that payment has been initiated."""
+        current = OrderStatus(self.status)
+        if current == OrderStatus.PAYMENT_PENDING:
+            return  # Already pending — idempotent
+        if current in (OrderStatus.CANCELLED, OrderStatus.REFUNDED):
+            return  # Lost race — order already cancelled/refunded
         self._assert_can_transition(OrderStatus.PAYMENT_PENDING)
 
         self.raise_(
@@ -446,6 +451,11 @@ class Order:
 
     def record_payment_success(self, payment_id, amount, payment_method):
         """Record successful payment capture."""
+        current = OrderStatus(self.status)
+        if current == OrderStatus.PAID:
+            return  # Already paid — idempotent
+        if current in (OrderStatus.CANCELLED, OrderStatus.REFUNDED):
+            return  # Lost race — order already cancelled/refunded
         self._assert_can_transition(OrderStatus.PAID)
 
         self.raise_(
@@ -460,6 +470,9 @@ class Order:
 
     def record_payment_failure(self, payment_id, reason):
         """Record payment failure. Returns order to CONFIRMED for retry."""
+        current = OrderStatus(self.status)
+        if current in (OrderStatus.CANCELLED, OrderStatus.REFUNDED):
+            return  # Lost race — order already cancelled/refunded
         self._assert_can_transition(OrderStatus.CONFIRMED)
 
         self.raise_(
@@ -537,6 +550,7 @@ class Order:
         self.raise_(
             OrderDelivered(
                 order_id=str(self.id),
+                customer_id=str(self.customer_id),
                 delivered_at=datetime.now(UTC),
             )
         )
@@ -593,6 +607,8 @@ class Order:
     def cancel(self, reason, cancelled_by):
         """Cancel the order."""
         current = OrderStatus(self.status)
+        if current == OrderStatus.CANCELLED:
+            return  # Already cancelled — idempotent
         if current not in _CANCELLABLE_STATES:
             raise ValidationError(
                 {
@@ -616,6 +632,8 @@ class Order:
     def refund(self, refund_amount=None):
         """Refund a cancelled or returned order."""
         current = OrderStatus(self.status)
+        if current == OrderStatus.REFUNDED:
+            return  # Already refunded — idempotent
         if current not in (OrderStatus.CANCELLED, OrderStatus.RETURNED):
             raise ValidationError({"status": ["Only cancelled or returned orders can be refunded"]})
 

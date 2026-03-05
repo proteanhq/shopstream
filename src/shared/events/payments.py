@@ -104,6 +104,8 @@ class RefundCompleted(BaseEvent):
     order_id = Identifier(required=True)
     customer_id = Identifier()
     amount = Float(required=True)
+    gateway_refund_id = String(required=True)
+    completed_at = DateTime(required=True)
     currency = String(default="USD")
     reason = String()
     completed_at = DateTime(required=True)

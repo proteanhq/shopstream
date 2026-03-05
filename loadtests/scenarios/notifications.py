@@ -263,8 +263,19 @@ class UnsubscribeResubscribeJourney(SequentialTaskSet):
 class NotificationCancelJourney(SequentialTaskSet):
     """Register Customer -> Update Preferences -> Process Scheduled -> Cancel.
 
-    Exercises the maintenance endpoint and notification cancellation.
-    Process scheduled notifications, then cancel one if available.
+    WARNING: This is a timing-sensitive scenario that generates expected
+    CancelNotificationHandler failures. The process-scheduled endpoint
+    transitions notifications from Scheduled → Sent. A subsequent cancel
+    request may arrive after the notification is already Sent, causing
+    "Cannot transition from Sent to Cancelled" at the handler level.
+
+    The HTTP API handles this gracefully (400/409), but the async event
+    handler still records a failure trace.
+
+    This journey is excluded from default NotificationsUser discovery.
+    Run explicitly via NotificationsCancelUser:
+
+        locust -f loadtests/scenarios/notifications.py NotificationsCancelUser
     """
 
     def on_start(self):
@@ -345,16 +356,35 @@ class NotificationsUser(HttpUser):
     """Locust user simulating Notifications domain interactions.
 
     Weighted distribution:
-    - 35% Preference management (most common)
-    - 25% Unsubscribe/resubscribe flow
-    - 25% Quiet hours lifecycle
-    - 15% Notification cancel flow
+    - 40% Preference management (most common)
+    - 30% Unsubscribe/resubscribe flow
+    - 30% Quiet hours lifecycle
+
+    Note: NotificationCancelJourney is excluded — process-scheduled
+    transitions to Sent, racing with cancel requests and generating
+    expected CancelNotificationHandler failures. Run via NotificationsCancelUser.
     """
 
     wait_time = between(0.5, 2.0)
     tasks = {
-        PreferenceManagementJourney: 7,
-        UnsubscribeResubscribeJourney: 5,
-        QuietHoursLifecycleJourney: 5,
-        NotificationCancelJourney: 3,
+        PreferenceManagementJourney: 4,
+        UnsubscribeResubscribeJourney: 3,
+        QuietHoursLifecycleJourney: 3,
+    }
+
+
+class NotificationsCancelUser(HttpUser):
+    """Specialty scenario: notification cancel after processing.
+
+    WARNING: Generates expected CancelNotificationHandler failures because
+    process-scheduled moves notifications to Sent state, and the subsequent
+    cancel request fails with "Cannot transition from Sent to Cancelled".
+
+    Run explicitly:
+        locust -f loadtests/scenarios/notifications.py NotificationsCancelUser --headless -u 5 -t 60s
+    """
+
+    wait_time = between(0.5, 2.0)
+    tasks = {
+        NotificationCancelJourney: 1,
     }

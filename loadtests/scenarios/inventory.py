@@ -381,7 +381,18 @@ class WarehouseManagementJourney(SequentialTaskSet):
 class ExpireReservationsJourney(SequentialTaskSet):
     """Init Stock -> Reserve -> Expire Reservations.
 
-    Exercises the maintenance endpoint for expiring stale reservations.
+    WARNING: This is a timing-sensitive scenario that generates expected
+    ReservationHandler failures. The expire-reservations maintenance endpoint
+    releases ALL matching reservations globally. When multiple concurrent users
+    call it, the same reservation may be released twice, causing "Cannot
+    release reservation in Released state" errors.
+
+    This journey is excluded from default InventoryUser discovery.
+    Run explicitly via InventoryMaintenanceUser:
+
+        locust -f loadtests/scenarios/inventory.py InventoryMaintenanceUser --headless -u 1 -t 60s
+
+    Note: Use -u 1 (single user) to avoid concurrent expire calls.
     """
 
     def on_start(self):
@@ -435,12 +446,15 @@ class InventoryUser(HttpUser):
 
     Weighted distribution:
     - 25% Stock init & receive (most common warehouse operation)
-    - 15% Reservation creation (order flow)
-    - 15% Reservation release (cancellations)
-    - 15% Damage write-off
-    - 10% Return to stock (order returns)
+    - 18% Reservation creation (order flow)
+    - 18% Reservation release (cancellations)
+    - 18% Damage write-off
+    - 11% Return to stock (order returns)
     - 10% Warehouse management
-    - 10% Expire reservations (maintenance)
+
+    Note: ExpireReservationsJourney is excluded — the global maintenance
+    endpoint causes duplicate releases under concurrent load. Run via
+    InventoryMaintenanceUser with a single user.
     """
 
     wait_time = between(0.5, 2.0)
@@ -451,5 +465,24 @@ class InventoryUser(HttpUser):
         DamageWriteOffJourney: 3,
         ReturnToStockJourney: 2,
         WarehouseManagementJourney: 2,
-        ExpireReservationsJourney: 2,
+    }
+
+
+class InventoryMaintenanceUser(HttpUser):
+    """Specialty scenario: inventory maintenance operations.
+
+    WARNING: The expire-reservations endpoint operates globally, releasing
+    ALL matching reservations. Running multiple concurrent users causes
+    duplicate releases and ReservationHandler failures.
+
+    Expected failures when run with multiple users:
+    - ReservationHandler → "Cannot release reservation in Released state"
+
+    Run with a single user to avoid duplicate releases:
+        locust -f loadtests/scenarios/inventory.py InventoryMaintenanceUser --headless -u 1 -t 60s
+    """
+
+    wait_time = between(1.0, 3.0)
+    tasks = {
+        ExpireReservationsJourney: 1,
     }

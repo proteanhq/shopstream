@@ -126,6 +126,12 @@ class EventFloodUser(HttpUser):
 class SpikeUser(HttpUser):
     """Spike test: rapid-fire customer registration.
 
+    WARNING: This is a specialty scenario excluded from default Locust
+    discovery. It generates extreme load that can saturate the outbox
+    and overwhelm engines. Run explicitly:
+
+        locust -f loadtests/locustfile.py SpikeUser --headless -u 50 -t 30s
+
     Use with high user count and instant spawn rate to simulate
     sudden traffic bursts. Spawn 50-100 of these simultaneously
     to see how the system handles sudden load.

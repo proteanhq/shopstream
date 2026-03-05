@@ -172,7 +172,8 @@ class TestOrderPartiallyShippedEvent:
 class TestOrderDeliveredEvent:
     def test_construction(self):
         now = datetime.now(UTC)
-        event = OrderDelivered(order_id="ord-001", delivered_at=now)
+        event = OrderDelivered(order_id="ord-001", customer_id="cust-001", delivered_at=now)
+        assert event.customer_id == "cust-001"
         assert event.delivered_at == now
 
 

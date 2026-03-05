@@ -105,61 +105,15 @@ class OrderingInventoryEventHandler:
 
     @handle(OrderReturned)
     def on_order_returned(self, event: OrderReturned) -> None:
-        """Return items to stock when an order is returned."""
+        """Return items to stock when an order is returned.
+
+        Note: OrderReturned carries returned_item_ids (order item UUIDs),
+        not product/variant details needed for stock lookup. Restocking
+        requires a separate enrichment step or a query back to the order.
+        For now we log the return for auditing.
+        """
         logger.info(
-            "Restocking items for returned order",
+            "Order returned — items noted for restocking",
             order_id=str(event.order_id),
+            returned_item_ids=event.returned_item_ids,
         )
-
-        # Parse items to get product/variant info for stock lookup
-        items = event.items or []
-
-        if not items:
-            logger.info(
-                "No item details in return event — cannot restock",
-                order_id=str(event.order_id),
-            )
-            return
-
-        from inventory.projections.inventory_level import InventoryLevel
-        from inventory.stock.returns import ReturnToStock
-
-        for item in items:
-            product_id = item.get("product_id")
-            variant_id = item.get("variant_id")
-            quantity = item.get("quantity", 1)
-
-            # Find the inventory item for this variant
-            inv_records = (
-                current_domain.view_for(InventoryLevel)
-                .query.filter(
-                    product_id=str(product_id),
-                    variant_id=str(variant_id),
-                )
-                .all()
-                .items
-            )
-
-            if not inv_records:
-                logger.warning(
-                    "No inventory record found for returned item",
-                    product_id=str(product_id),
-                    variant_id=str(variant_id),
-                )
-                continue
-
-            inv_record = inv_records[0]
-            current_domain.process(
-                ReturnToStock(
-                    inventory_item_id=str(inv_record.inventory_item_id),
-                    quantity=quantity,
-                    order_id=event.order_id,
-                ),
-                asynchronous=False,
-            )
-            logger.info(
-                "Restocked returned item",
-                inventory_item_id=str(inv_record.inventory_item_id),
-                quantity=quantity,
-                order_id=str(event.order_id),
-            )

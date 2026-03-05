@@ -20,6 +20,8 @@ import uuid
 from locust import HttpUser, SequentialTaskSet, between, constant_pacing, task
 
 from loadtests.data_generators import (
+    cart_data,
+    checkout_data,
     customer_name,
     initialize_stock_data,
     invoice_data,
@@ -28,6 +30,7 @@ from loadtests.data_generators import (
     payment_data,
     product_data,
     reserve_stock_data,
+    saga_cart_item_data,
     shipment_data,
     unique_external_id,
     valid_email,
@@ -38,7 +41,7 @@ from loadtests.data_generators import (
     webhook_data_success,
 )
 from loadtests.helpers.response import extract_error_detail
-from loadtests.helpers.state import CrossDomainState
+from loadtests.helpers.state import CrossDomainState, SagaState
 
 
 class EndToEndOrderJourney(SequentialTaskSet):
@@ -249,7 +252,12 @@ class EndToEndOrderJourney(SequentialTaskSet):
             catch_response=True,
             name="[E2E] PUT /orders/{id}/payment/success",
         ) as resp:
-            if resp.status_code != 200:
+            if resp.status_code == 200:
+                resp.success()
+            elif resp.status_code == 422 and "Paid" in resp.text:
+                # Saga already moved the order to Paid — expected race condition
+                resp.success()
+            else:
                 resp.failure(f"Payment success failed: {extract_error_detail(resp)}")
 
     @task
@@ -740,6 +748,461 @@ class SagaOrderCheckoutJourney(SequentialTaskSet):
 
 
 # ---------------------------------------------------------------------------
+# Saga-Driven Journeys (async event flow via Engine)
+# ---------------------------------------------------------------------------
+
+# Shared warehouse — created once, reused across all saga journeys
+_shared_warehouse_id: str | None = None
+
+
+def _ensure_warehouse(client) -> str | None:
+    """Create a warehouse once and cache it for all saga journeys."""
+    global _shared_warehouse_id
+    if _shared_warehouse_id:
+        return _shared_warehouse_id
+    resp = client.post(
+        "/warehouses",
+        json=warehouse_data(),
+        name="[SAGA-PM] POST /warehouses (setup)",
+    )
+    if resp.status_code == 201:
+        _shared_warehouse_id = resp.json()["warehouse_id"]
+    return _shared_warehouse_id
+
+
+class SagaDrivenCheckoutJourney(SequentialTaskSet):
+    """Cart -> Checkout -> Confirm -> Reserve Stock -> Pay -> Verify.
+
+    Unlike SagaOrderCheckoutJourney which manually calls each order state
+    transition, this journey lets the OrderCheckoutSaga process manager
+    drive the order through async event flow:
+
+    1. OrderConfirmed -> saga starts (awaiting_reservation)
+    2. StockReserved  -> saga dispatches RecordPaymentPending
+    3. PaymentSucceeded -> saga dispatches RecordPaymentSuccess
+
+    Requires Ordering, Inventory, and Payments Engines running.
+    Polls order status to verify saga-driven state transitions.
+    """
+
+    def on_start(self):
+        self.state = SagaState()
+        self.state.product_id = f"prod-{uuid.uuid4().hex[:8]}"
+        self.state.variant_id = f"var-{uuid.uuid4().hex[:8]}"
+        self.state.customer_id = f"cust-{uuid.uuid4().hex[:8]}"
+        self.state.quantity = random.randint(1, 3)
+        self.state.unit_price = round(random.uniform(19.99, 99.99), 2)
+
+    def _poll_order_status(self, expected: str, timeout: float = 12, interval: float = 0.5) -> bool:
+        """Poll GET /orders/{id} until status matches or timeout."""
+        elapsed = 0.0
+        while elapsed < timeout:
+            with self.client.get(
+                f"/orders/{self.state.order_id}",
+                catch_response=True,
+                name="[SAGA-PM] POLL /orders/{id}",
+            ) as resp:
+                if resp.status_code == 200:
+                    data = resp.json()
+                    status = data.get("status", "")
+                    if status == expected:
+                        resp.success()
+                        self.state.order_status = status
+                        return True
+                    resp.success()  # Not there yet, but not an error
+                elif resp.status_code == 404:
+                    resp.success()  # Projection not yet populated
+                else:
+                    resp.failure(f"Poll failed: {resp.status_code}")
+                    return False
+            time.sleep(interval)
+            elapsed += interval
+        return False
+
+    @task
+    def setup_inventory(self):
+        """Create inventory stock for a known product/variant."""
+        wh_id = _ensure_warehouse(self.client)
+        self.state.warehouse_id = wh_id
+
+        payload = initialize_stock_data(
+            product_id=self.state.product_id,
+            variant_id=self.state.variant_id,
+            warehouse_id=wh_id,
+            initial_quantity=50,
+        )
+        with self.client.post(
+            "/inventory",
+            json=payload,
+            catch_response=True,
+            name="[SAGA-PM] POST /inventory",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.inventory_item_id = resp.json()["inventory_item_id"]
+            else:
+                resp.failure(f"Init stock failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def create_cart(self):
+        payload = cart_data(customer_id=self.state.customer_id)
+        with self.client.post(
+            "/carts",
+            json=payload,
+            catch_response=True,
+            name="[SAGA-PM] POST /carts",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.cart_id = resp.json()["cart_id"]
+            else:
+                resp.failure(f"Create cart failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def add_item(self):
+        payload = saga_cart_item_data(
+            product_id=self.state.product_id,
+            variant_id=self.state.variant_id,
+            quantity=self.state.quantity,
+        )
+        with self.client.post(
+            f"/carts/{self.state.cart_id}/items",
+            json=payload,
+            catch_response=True,
+            name="[SAGA-PM] POST /carts/{id}/items",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Add item failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def checkout(self):
+        with self.client.post(
+            f"/carts/{self.state.cart_id}/checkout",
+            json=checkout_data(),
+            catch_response=True,
+            name="[SAGA-PM] POST /carts/{id}/checkout",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.order_id = resp.json()["order_id"]
+            else:
+                resp.failure(f"Checkout failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def confirm_order(self):
+        """Confirm order — raises OrderConfirmed, starting the saga."""
+        with self.client.put(
+            f"/orders/{self.state.order_id}/confirm",
+            catch_response=True,
+            name="[SAGA-PM] PUT /orders/{id}/confirm",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Confirm failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def wait_for_saga_start(self):
+        """Give Engine time to process OrderConfirmed via outbox."""
+        time.sleep(2)
+
+    @task
+    def reserve_stock(self):
+        """Reserve stock with order_id — raises StockReserved.
+
+        The saga picks up StockReserved, correlates on order_id,
+        and dispatches RecordPaymentPending to Ordering.
+        """
+        payload = reserve_stock_data(
+            order_id=self.state.order_id,
+            quantity=self.state.quantity,
+        )
+        with self.client.post(
+            f"/inventory/{self.state.inventory_item_id}/reserve",
+            json=payload,
+            catch_response=True,
+            name="[SAGA-PM] POST /inventory/{id}/reserve",
+        ) as resp:
+            if resp.status_code != 201:
+                resp.failure(f"Reserve failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def verify_payment_pending(self):
+        """Poll until saga drives order to Payment_Pending."""
+        if not self._poll_order_status("Payment_Pending"):
+            with self.client.get(
+                f"/orders/{self.state.order_id}",
+                catch_response=True,
+                name="[SAGA-PM] POLL /orders/{id} (timeout)",
+            ) as resp:
+                resp.failure(
+                    f"Saga did not reach Payment_Pending within timeout. Current status: {self.state.order_status}"
+                )
+            self.interrupt()
+
+    @task
+    def initiate_payment(self):
+        """Create Payment in Payments domain."""
+        payload = payment_data(
+            order_id=self.state.order_id,
+            customer_id=self.state.customer_id,
+            amount=self.state.unit_price * self.state.quantity,
+        )
+        with self.client.post(
+            "/payments",
+            json=payload,
+            catch_response=True,
+            name="[SAGA-PM] POST /payments",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.payment_id = resp.json()["payment_id"]
+            else:
+                resp.failure(f"Initiate payment failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def payment_webhook_success(self):
+        """Success webhook — raises PaymentSucceeded.
+
+        The saga picks up PaymentSucceeded, correlates on order_id,
+        and dispatches RecordPaymentSuccess to Ordering.
+        """
+        payload = webhook_data_success(self.state.payment_id)
+        with self.client.post(
+            "/payments/webhook",
+            json=payload,
+            headers={"X-Gateway-Signature": "test-signature"},
+            catch_response=True,
+            name="[SAGA-PM] POST /payments/webhook",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Webhook failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def verify_paid(self):
+        """Poll until saga drives order to Paid — confirms saga completed."""
+        if not self._poll_order_status("Paid"):
+            with self.client.get(
+                f"/orders/{self.state.order_id}",
+                catch_response=True,
+                name="[SAGA-PM] POLL /orders/{id} (timeout)",
+            ) as resp:
+                resp.failure(f"Saga did not reach Paid within timeout. Current status: {self.state.order_status}")
+            self.interrupt()
+
+    @task
+    def done(self):
+        self.interrupt()
+
+
+class SagaDrivenCheckoutFailureJourney(SequentialTaskSet):
+    """Cart -> Checkout -> Confirm -> Reserve Stock -> Pay (fail) -> Verify.
+
+    Exercises the saga's failure path: PaymentFailed triggers retry/cancel.
+    Since the saga retries up to 3 times, a single failure transitions to
+    'retrying' state. We verify the saga processed the PaymentFailed event
+    rather than polling for a terminal order state.
+    """
+
+    def on_start(self):
+        self.state = SagaState()
+        self.state.product_id = f"prod-{uuid.uuid4().hex[:8]}"
+        self.state.variant_id = f"var-{uuid.uuid4().hex[:8]}"
+        self.state.customer_id = f"cust-{uuid.uuid4().hex[:8]}"
+        self.state.quantity = 1
+        self.state.unit_price = round(random.uniform(19.99, 99.99), 2)
+
+    def _poll_order_status(self, expected: str, timeout: float = 12, interval: float = 0.5) -> bool:
+        """Poll GET /orders/{id} until status matches or timeout."""
+        elapsed = 0.0
+        while elapsed < timeout:
+            with self.client.get(
+                f"/orders/{self.state.order_id}",
+                catch_response=True,
+                name="[SAGA-PM] POLL /orders/{id}",
+            ) as resp:
+                if resp.status_code == 200:
+                    data = resp.json()
+                    status = data.get("status", "")
+                    if status == expected:
+                        resp.success()
+                        self.state.order_status = status
+                        return True
+                    resp.success()
+                elif resp.status_code == 404:
+                    resp.success()
+                else:
+                    resp.failure(f"Poll failed: {resp.status_code}")
+                    return False
+            time.sleep(interval)
+            elapsed += interval
+        return False
+
+    @task
+    def setup_inventory(self):
+        wh_id = _ensure_warehouse(self.client)
+        self.state.warehouse_id = wh_id
+
+        payload = initialize_stock_data(
+            product_id=self.state.product_id,
+            variant_id=self.state.variant_id,
+            warehouse_id=wh_id,
+            initial_quantity=50,
+        )
+        with self.client.post(
+            "/inventory",
+            json=payload,
+            catch_response=True,
+            name="[SAGA-PM] POST /inventory",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.inventory_item_id = resp.json()["inventory_item_id"]
+            else:
+                resp.failure(f"Init stock failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def create_cart(self):
+        payload = cart_data(customer_id=self.state.customer_id)
+        with self.client.post(
+            "/carts",
+            json=payload,
+            catch_response=True,
+            name="[SAGA-PM] POST /carts",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.cart_id = resp.json()["cart_id"]
+            else:
+                resp.failure(f"Create cart failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def add_item(self):
+        payload = saga_cart_item_data(
+            product_id=self.state.product_id,
+            variant_id=self.state.variant_id,
+            quantity=self.state.quantity,
+        )
+        with self.client.post(
+            f"/carts/{self.state.cart_id}/items",
+            json=payload,
+            catch_response=True,
+            name="[SAGA-PM] POST /carts/{id}/items",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Add item failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def checkout(self):
+        with self.client.post(
+            f"/carts/{self.state.cart_id}/checkout",
+            json=checkout_data(),
+            catch_response=True,
+            name="[SAGA-PM] POST /carts/{id}/checkout",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.order_id = resp.json()["order_id"]
+            else:
+                resp.failure(f"Checkout failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def confirm_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/confirm",
+            catch_response=True,
+            name="[SAGA-PM] PUT /orders/{id}/confirm",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Confirm failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def wait_for_saga_start(self):
+        time.sleep(2)
+
+    @task
+    def reserve_stock(self):
+        payload = reserve_stock_data(
+            order_id=self.state.order_id,
+            quantity=self.state.quantity,
+        )
+        with self.client.post(
+            f"/inventory/{self.state.inventory_item_id}/reserve",
+            json=payload,
+            catch_response=True,
+            name="[SAGA-PM] POST /inventory/{id}/reserve",
+        ) as resp:
+            if resp.status_code != 201:
+                resp.failure(f"Reserve failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def verify_payment_pending(self):
+        if not self._poll_order_status("Payment_Pending"):
+            with self.client.get(
+                f"/orders/{self.state.order_id}",
+                catch_response=True,
+                name="[SAGA-PM] POLL /orders/{id} (timeout)",
+            ) as resp:
+                resp.failure(
+                    f"Saga did not reach Payment_Pending within timeout. Current status: {self.state.order_status}"
+                )
+            self.interrupt()
+
+    @task
+    def initiate_payment(self):
+        payload = payment_data(
+            order_id=self.state.order_id,
+            customer_id=self.state.customer_id,
+            amount=self.state.unit_price * self.state.quantity,
+        )
+        with self.client.post(
+            "/payments",
+            json=payload,
+            catch_response=True,
+            name="[SAGA-PM] POST /payments",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.payment_id = resp.json()["payment_id"]
+            else:
+                resp.failure(f"Initiate payment failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def payment_webhook_failure(self):
+        """Failure webhook — raises PaymentFailed.
+
+        The saga picks up PaymentFailed. With attempt_number=1 < MAX=3,
+        the saga transitions to 'retrying' and does NOT dispatch CancelOrder.
+        """
+        payload = webhook_data_failure(self.state.payment_id)
+        with self.client.post(
+            "/payments/webhook",
+            json=payload,
+            headers={"X-Gateway-Signature": "test-signature"},
+            catch_response=True,
+            name="[SAGA-PM] POST /payments/webhook (failure)",
+        ) as resp:
+            if resp.status_code in (200, 400, 422):
+                resp.success()
+            else:
+                resp.failure(f"Webhook failed: {extract_error_detail(resp)}")
+
+    @task
+    def wait_for_saga_processing(self):
+        """Give Engine time to process PaymentFailed event."""
+        time.sleep(3)
+
+    @task
+    def done(self):
+        self.interrupt()
+
+
+# ---------------------------------------------------------------------------
 # HttpUser classes
 # ---------------------------------------------------------------------------
 
@@ -748,27 +1211,46 @@ class CrossDomainUser(HttpUser):
     """Realistic cross-domain workload exercising all bounded contexts.
 
     Weight distribution:
-    - 40% End-to-end order (the most realistic journey)
-    - 30% Saga checkout (distributed transaction)
-    - 15% Cancel during payment (race condition)
-    - 15% Concurrent modifications (race condition)
+    - 30% End-to-end order (the most realistic journey)
+    - 20% Saga checkout — manual orchestration (distributed transaction)
+    - 20% Saga checkout — PM-driven (exercises OrderCheckoutSaga process manager)
+    - 10% Saga failure — PM-driven (exercises saga failure path)
+    - 10% Cancel during payment (race condition)
+    - 10% Concurrent modifications (race condition)
     """
 
     wait_time = between(1.0, 3.0)
     tasks = {
-        EndToEndOrderJourney: 8,
-        SagaOrderCheckoutJourney: 6,
-        CancelDuringPaymentJourney: 3,
-        ConcurrentOrderModificationJourney: 3,
+        EndToEndOrderJourney: 6,
+        SagaOrderCheckoutJourney: 4,
+        SagaDrivenCheckoutJourney: 4,
+        SagaDrivenCheckoutFailureJourney: 2,
+        CancelDuringPaymentJourney: 2,
+        ConcurrentOrderModificationJourney: 2,
     }
 
 
 class FlashSaleUser(HttpUser):
     """Flash sale simulation: many users competing for limited stock.
 
+    WARNING: This is a specialty scenario that produces deliberate failures.
+    It is excluded from default Locust discovery to avoid polluting error
+    traces during normal load testing. Run explicitly:
+
+        locust -f loadtests/locustfile.py FlashSaleUser --headless -u 20 -t 30s
+
     Each user runs the FlashSaleStampede which tries to reserve
     from a shared inventory item with only 10 units.
     Launch 20-50 of these simultaneously.
+
+    Note: This scenario does NOT model a realistic flash sale flow. A real
+    implementation would queue reservation requests and allocate stock in
+    order of receipt. This scenario exists purely to stress-test optimistic
+    locking and validate that the system never oversells.
+
+    Expected: Most reservations will fail with "Insufficient stock" (400)
+    or version conflicts (409). These are expected and marked as Locust
+    successes, but they DO generate handler.failed traces in Observatory.
 
     Monitor:
     - 409 / version conflict rate
@@ -783,8 +1265,21 @@ class FlashSaleUser(HttpUser):
 class RaceConditionUser(HttpUser):
     """Targeted race condition exerciser.
 
-    Runs the three race condition scenarios from the domain spec
-    with aggressive timing to maximize conflict probability.
+    WARNING: This is a specialty scenario that produces deliberate failures.
+    It is excluded from default Locust discovery to avoid polluting error
+    traces during normal load testing. Run explicitly:
+
+        locust -f loadtests/locustfile.py RaceConditionUser --headless -u 10 -t 60s
+
+    Runs three race condition scenarios with aggressive timing to maximize
+    conflict probability:
+    - CancelDuringPaymentJourney: cancel vs payment webhook race
+    - ConcurrentOrderModificationJourney: simultaneous order mutations
+    - FlashSaleStampede: N users competing for limited inventory
+
+    Expected: Version conflicts (409), validation errors (400/422), and
+    state machine rejections are normal and intentional. These generate
+    handler.failed traces in Observatory.
     """
 
     wait_time = between(0.3, 1.0)

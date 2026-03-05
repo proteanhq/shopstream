@@ -130,5 +130,7 @@ class TestRefundOrder:
         order = _make_order()
         order.cancel("Test", "System")
         order.refund()
-        with pytest.raises(ValidationError):
-            order.refund()
+        order._events.clear()
+        order.refund()  # Idempotent no-op
+        assert order.status == OrderStatus.REFUNDED.value
+        assert len(order._events) == 0

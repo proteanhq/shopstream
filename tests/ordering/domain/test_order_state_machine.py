@@ -277,5 +277,55 @@ class TestInvalidTransitions:
 
     def test_refunded_is_terminal(self):
         order = _order_at_state(OrderStatus.REFUNDED)
-        with pytest.raises(ValidationError):
-            order.refund()
+        order.refund()  # Idempotent no-op
+        assert order.status == OrderStatus.REFUNDED.value
+        assert len(order._events) == 0
+
+
+# ---------------------------------------------------------------
+# Idempotent transitions (race condition resilience)
+# ---------------------------------------------------------------
+class TestIdempotentTransitions:
+    def test_cancel_already_cancelled_is_noop(self):
+        order = _order_at_state(OrderStatus.CANCELLED)
+        order.cancel("Duplicate", "System")
+        assert order.status == OrderStatus.CANCELLED.value
+        assert len(order._events) == 0
+
+    def test_payment_pending_already_pending_is_noop(self):
+        order = _order_at_state(OrderStatus.PAYMENT_PENDING)
+        order._events.clear()
+        order.record_payment_pending("pay-002", "debit")
+        assert order.status == OrderStatus.PAYMENT_PENDING.value
+        assert len(order._events) == 0
+
+    def test_payment_pending_on_cancelled_is_noop(self):
+        order = _order_at_state(OrderStatus.CANCELLED)
+        order.record_payment_pending("pay-001", "credit_card")
+        assert order.status == OrderStatus.CANCELLED.value
+        assert len(order._events) == 0
+
+    def test_payment_success_already_paid_is_noop(self):
+        order = _order_at_state(OrderStatus.PAID)
+        order._events.clear()
+        order.record_payment_success("pay-001", 50.0, "credit_card")
+        assert order.status == OrderStatus.PAID.value
+        assert len(order._events) == 0
+
+    def test_payment_success_on_cancelled_is_noop(self):
+        order = _order_at_state(OrderStatus.CANCELLED)
+        order.record_payment_success("pay-001", 50.0, "credit_card")
+        assert order.status == OrderStatus.CANCELLED.value
+        assert len(order._events) == 0
+
+    def test_payment_failure_on_cancelled_is_noop(self):
+        order = _order_at_state(OrderStatus.CANCELLED)
+        order.record_payment_failure("pay-001", "declined")
+        assert order.status == OrderStatus.CANCELLED.value
+        assert len(order._events) == 0
+
+    def test_refund_already_refunded_is_noop(self):
+        order = _order_at_state(OrderStatus.REFUNDED)
+        order.refund()
+        assert order.status == OrderStatus.REFUNDED.value
+        assert len(order._events) == 0

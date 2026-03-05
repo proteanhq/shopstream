@@ -90,7 +90,7 @@ class CouponApplied:
     applied_at = DateTime(required=True)
 
 
-@ordering.event(part_of="Order")
+@ordering.event(part_of="Order", published=True)
 class OrderConfirmed:
     """The customer confirmed the order, committing to the purchase."""
 
@@ -183,6 +183,7 @@ class OrderDelivered:
     __version__ = "v1"
 
     order_id = Identifier(required=True)
+    customer_id = Identifier(required=True)
     delivered_at = DateTime(required=True)
 
 

@@ -1,11 +1,26 @@
 """Preference management commands + handlers — update channels and quiet hours."""
 
+import logging
+
 from protean.fields import Boolean, Identifier, String
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
 
 from notifications.domain import notifications
 from notifications.preference.preference import NotificationPreference
+
+logger = logging.getLogger(__name__)
+
+
+def _get_or_create_preference(repo, customer_id: str) -> "NotificationPreference":
+    """Fetch preference for customer, creating default if not yet provisioned."""
+    prefs = repo.query.filter(customer_id=customer_id).all().items
+    if prefs:
+        return prefs[0]
+    # Preference not yet created (race: command arrived before CustomerRegistered handler ran)
+    preference = NotificationPreference.create_default(customer_id=customer_id)
+    repo.add(preference)
+    return preference
 
 
 @notifications.command(part_of="NotificationPreference")
@@ -39,8 +54,7 @@ class ManagePreferencesHandler:
     @handle(UpdateNotificationPreferences)
     def update_preferences(self, command: UpdateNotificationPreferences):
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo.query.filter(customer_id=str(command.customer_id)).all().items
-        preference = prefs[0]
+        preference = _get_or_create_preference(repo, str(command.customer_id))
         preference.update_channels(
             email=command.email_enabled,
             sms=command.sms_enabled,
@@ -51,15 +65,13 @@ class ManagePreferencesHandler:
     @handle(SetQuietHours)
     def set_quiet_hours(self, command: SetQuietHours):
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo.query.filter(customer_id=str(command.customer_id)).all().items
-        preference = prefs[0]
+        preference = _get_or_create_preference(repo, str(command.customer_id))
         preference.set_quiet_hours(command.start, command.end)
         repo.add(preference)
 
     @handle(ClearQuietHours)
     def clear_quiet_hours(self, command: ClearQuietHours):
         repo = current_domain.repository_for(NotificationPreference)
-        prefs = repo.query.filter(customer_id=str(command.customer_id)).all().items
-        preference = prefs[0]
+        preference = _get_or_create_preference(repo, str(command.customer_id))
         preference.clear_quiet_hours()
         repo.add(preference)
