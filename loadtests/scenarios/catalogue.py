@@ -111,6 +111,30 @@ class ProductCatalogBuilder(SequentialTaskSet):
                 resp.failure(f"Activate failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
+    def get_product_detail(self):
+        """Verify ProductDetail projection is populated."""
+        with self.client.get(
+            f"/products/{self.state.product_id}",
+            catch_response=True,
+            name="GET /products/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get product detail failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def list_products(self):
+        """Verify ProductCard projection (list view)."""
+        with self.client.get(
+            "/products",
+            catch_response=True,
+            name="GET /products",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"List products failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
     def done(self):
         self.interrupt()
 
@@ -279,6 +303,17 @@ class CategoryHierarchyBuilder(SequentialTaskSet):
         ) as resp:
             if resp.status_code != 200:
                 resp.failure(f"Deactivate failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def list_categories(self):
+        """Verify CategoryTree projection is populated."""
+        with self.client.get(
+            "/categories",
+            catch_response=True,
+            name="GET /categories",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"List categories failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):

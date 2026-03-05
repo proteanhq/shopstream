@@ -236,12 +236,16 @@ def initialize_stock_data(
     }
 
 
-def reserve_stock_data(order_id: str | None = None, quantity: int = 1) -> dict:
+def reserve_stock_data(
+    order_id: str | None = None,
+    quantity: int = 1,
+    expires_in_minutes: int = 15,
+) -> dict:
     """Generate ReserveStockRequest payload."""
     return {
         "order_id": order_id or f"ord-{uuid.uuid4().hex[:8]}",
         "quantity": quantity,
-        "expires_in_minutes": 15,
+        "expires_in_minutes": expires_in_minutes,
     }
 
 
@@ -361,12 +365,15 @@ def review_data(
 ) -> dict:
     """Generate SubmitReviewRequest payload."""
     rating = random.choices([1, 2, 3, 4, 5], weights=[5, 10, 15, 35, 35])[0]
+    body = fake.paragraph(nb_sentences=random.randint(3, 5))
+    if len(body) < 20:
+        body = body + " " + fake.sentence()
     return {
         "product_id": product_id or f"prod-{uuid.uuid4().hex[:8]}",
         "customer_id": customer_id or f"cust-{uuid.uuid4().hex[:8]}",
         "rating": rating,
         "title": fake.sentence(nb_words=random.randint(3, 8))[:200],
-        "body": fake.paragraph(nb_sentences=random.randint(2, 5)),
+        "body": body,
         "pros": random.sample(_REVIEW_PROS, k=random.randint(1, 3)),
         "cons": random.sample(_REVIEW_CONS, k=random.randint(0, 2)),
     }
@@ -374,9 +381,50 @@ def review_data(
 
 def edit_review_data(customer_id: str) -> dict:
     """Generate EditReviewRequest payload with updated content."""
+    body = fake.paragraph(nb_sentences=random.randint(3, 5))
+    if len(body) < 20:
+        body = body + " " + fake.sentence()
     return {
         "customer_id": customer_id,
         "title": fake.sentence(nb_words=random.randint(3, 8))[:200],
-        "body": fake.paragraph(nb_sentences=random.randint(2, 5)),
+        "body": body,
         "rating": random.randint(1, 5),
     }
+
+
+# ---------- Notifications Domain ----------
+
+_NOTIFICATION_TYPES = [
+    "CartRecovery",
+    "OrderConfirmation",
+    "ShippingUpdate",
+    "DeliveryConfirmation",
+    "ReviewRequest",
+    "PriceAlert",
+    "BackInStock",
+    "Promotional",
+]
+
+
+def notification_preferences_data() -> dict:
+    """Generate UpdatePreferencesRequest payload."""
+    return {
+        "email_enabled": random.choice([True, False]),
+        "sms_enabled": random.choice([True, False]),
+        "push_enabled": random.choice([True, False]),
+    }
+
+
+def quiet_hours_data() -> dict:
+    """Generate SetQuietHoursRequest payload."""
+    start_hour = random.randint(20, 23)
+    end_hour = random.randint(6, 9)
+    return {
+        "start": f"{start_hour:02d}:00",
+        "end": f"{end_hour:02d}:00",
+    }
+
+
+def notification_type() -> str:
+    """Return a random NotificationType enum value."""
+    return random.choice(_NOTIFICATION_TYPES)

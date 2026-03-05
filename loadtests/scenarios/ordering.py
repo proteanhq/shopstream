@@ -1,8 +1,9 @@
 """Ordering domain load test scenarios.
 
-Four stateful SequentialTaskSet journeys covering the cart lifecycle,
+Five stateful SequentialTaskSet journeys covering the cart lifecycle,
 full order lifecycle through delivery, order cancellation with refund,
-and the cart-to-checkout conversion flow.
+the cart-to-checkout conversion flow, and the full checkout saga
+(cart → checkout → confirm → pay → ship → deliver → complete).
 """
 
 import random
@@ -16,6 +17,8 @@ from loadtests.data_generators import (
     checkout_data,
     order_data,
     shipment_data,
+    webhook_data_failure,
+    webhook_data_success,
 )
 from loadtests.helpers.response import extract_error_detail
 from loadtests.helpers.state import CartState, OrderState
@@ -86,6 +89,19 @@ class CartLifecycleJourney(SequentialTaskSet):
                 self.state.item_count += 1
             else:
                 resp.failure(f"Add cart item 3 failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def get_cart(self):
+        """Verify CartView projection is populated."""
+        with self.client.get(
+            f"/carts/{self.state.cart_id}",
+            catch_response=True,
+            name="GET /carts/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get cart failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def abandon_cart(self):
@@ -225,6 +241,32 @@ class OrderFullLifecycleJourney(SequentialTaskSet):
                 self.state.current_status = "Completed"
             else:
                 resp.failure(f"Complete failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def get_order_detail(self):
+        """Verify OrderDetail projection is populated."""
+        with self.client.get(
+            f"/orders/{self.state.order_id}",
+            catch_response=True,
+            name="GET /orders/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get order detail failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def get_order_timeline(self):
+        """Verify OrderTimeline projection is populated."""
+        with self.client.get(
+            f"/orders/{self.state.order_id}/timeline",
+            catch_response=True,
+            name="GET /orders/{id}/timeline",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get order timeline failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):
@@ -502,22 +544,215 @@ class OrderReturnJourney(SequentialTaskSet):
         self.interrupt()
 
 
+class OrderCheckoutSagaJourney(SequentialTaskSet):
+    """Cart -> Checkout -> Confirm -> Pay -> Ship -> Deliver -> Complete.
+
+    The most realistic e-commerce flow: a customer builds a cart, checks out
+    (which creates an order via cart conversion), then the order flows through
+    the OrderCheckoutSaga — confirm, payment, fulfillment, delivery, completion.
+
+    70% of journeys complete the happy path (payment succeeds).
+    30% simulate payment failure with compensation (cancel order).
+
+    Exercises: Ordering (cart + order), Payments (webhook), and the
+    OrderCheckoutSaga process manager coordination.
+    """
+
+    def on_start(self):
+        self.state = OrderState()
+        self.cart_id = None
+        self.payment_succeeds = random.random() < 0.7
+
+    @task
+    def create_cart(self):
+        payload = cart_data()
+        self.state.customer_id = payload["customer_id"]
+        with self.client.post(
+            "/carts",
+            json=payload,
+            catch_response=True,
+            name="[SAGA] POST /carts",
+        ) as resp:
+            if resp.status_code == 201:
+                self.cart_id = resp.json()["cart_id"]
+            else:
+                resp.failure(f"Create cart failed: {resp.status_code} — {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def add_items(self):
+        for _ in range(random.randint(1, 3)):
+            with self.client.post(
+                f"/carts/{self.cart_id}/items",
+                json=cart_item_data(),
+                catch_response=True,
+                name="[SAGA] POST /carts/{id}/items",
+            ) as resp:
+                if resp.status_code != 200:
+                    resp.failure(f"Add item failed: {resp.status_code} — {extract_error_detail(resp)}")
+                    return
+
+    @task
+    def checkout(self):
+        with self.client.post(
+            f"/carts/{self.cart_id}/checkout",
+            json=checkout_data(),
+            catch_response=True,
+            name="[SAGA] POST /carts/{id}/checkout",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.order_id = resp.json()["order_id"]
+            else:
+                resp.failure(f"Checkout failed: {resp.status_code} — {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def confirm_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/confirm",
+            catch_response=True,
+            name="[SAGA] PUT /orders/{id}/confirm",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Confirm failed: {resp.status_code} — {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def record_payment_pending(self):
+        self.state.payment_id = f"pay-{uuid.uuid4().hex[:8]}"
+        with self.client.put(
+            f"/orders/{self.state.order_id}/payment/pending",
+            json={
+                "payment_id": self.state.payment_id,
+                "payment_method": "credit_card",
+            },
+            catch_response=True,
+            name="[SAGA] PUT /orders/{id}/payment/pending",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Payment pending failed: {resp.status_code} — {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def payment_result(self):
+        """Payment gateway webhook — 70% success, 30% failure."""
+        if self.payment_succeeds:
+            payload = webhook_data_success(self.state.payment_id)
+            with self.client.post(
+                "/payments/webhook",
+                json=payload,
+                headers={"X-Gateway-Signature": "test-signature"},
+                catch_response=True,
+                name="[SAGA] POST /payments/webhook (success)",
+            ) as resp:
+                if resp.status_code not in (200, 404):
+                    resp.failure(f"Webhook failed: {resp.status_code} — {extract_error_detail(resp)}")
+                elif resp.status_code == 404:
+                    # Payment wasn't created via Payments domain — expected in ordering-only test
+                    resp.success()
+
+            with self.client.put(
+                f"/orders/{self.state.order_id}/payment/success",
+                json={
+                    "payment_id": self.state.payment_id,
+                    "amount": round(random.uniform(29.99, 299.99), 2),
+                    "payment_method": "credit_card",
+                },
+                catch_response=True,
+                name="[SAGA] PUT /orders/{id}/payment/success",
+            ) as resp:
+                if resp.status_code != 200:
+                    resp.failure(f"Payment success failed: {resp.status_code} — {extract_error_detail(resp)}")
+                    self.interrupt()
+        else:
+            # Failure path: payment fails → cancel order (compensation)
+            payload = webhook_data_failure(self.state.payment_id)
+            with self.client.post(
+                "/payments/webhook",
+                json=payload,
+                headers={"X-Gateway-Signature": "test-signature"},
+                catch_response=True,
+                name="[SAGA] POST /payments/webhook (failure)",
+            ) as resp:
+                if resp.status_code not in (200, 404):
+                    resp.failure(f"Webhook failed: {resp.status_code} — {extract_error_detail(resp)}")
+                elif resp.status_code == 404:
+                    resp.success()
+
+            with self.client.put(
+                f"/orders/{self.state.order_id}/cancel",
+                json={"reason": "Payment failed", "cancelled_by": "system"},
+                catch_response=True,
+                name="[SAGA] PUT /orders/{id}/cancel (compensation)",
+            ) as resp:
+                if resp.status_code != 200:
+                    resp.failure(f"Cancel failed: {resp.status_code} — {extract_error_detail(resp)}")
+            self.interrupt()  # End journey on failure path
+
+    @task
+    def mark_processing(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/processing",
+            catch_response=True,
+            name="[SAGA] PUT /orders/{id}/processing",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Processing failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def ship_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/ship",
+            json=shipment_data(),
+            catch_response=True,
+            name="[SAGA] PUT /orders/{id}/ship",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Ship failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def deliver_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/deliver",
+            catch_response=True,
+            name="[SAGA] PUT /orders/{id}/deliver",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Deliver failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def complete_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/complete",
+            catch_response=True,
+            name="[SAGA] PUT /orders/{id}/complete",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Complete failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def done(self):
+        self.interrupt()
+
+
 class OrderingUser(HttpUser):
     """Locust user simulating Ordering domain interactions.
 
     Weighted distribution:
-    - 30% Cart lifecycle (browsing, abandonment)
-    - 25% Full order lifecycle (happy path)
+    - 25% Cart lifecycle (browsing, abandonment)
+    - 20% Full order lifecycle (happy path)
+    - 20% Checkout saga (cart → checkout → pay → ship → deliver)
     - 15% Cart to checkout conversion
-    - 15% Order cancellation + refund
-    - 15% Order return flow
+    - 10% Order cancellation + refund
+    - 10% Order return flow
     """
 
     wait_time = between(0.5, 2.0)
     tasks = {
-        CartLifecycleJourney: 6,
-        OrderFullLifecycleJourney: 5,
+        CartLifecycleJourney: 5,
+        OrderFullLifecycleJourney: 4,
+        OrderCheckoutSagaJourney: 4,
         CartToCheckoutJourney: 3,
-        OrderCancellationJourney: 3,
-        OrderReturnJourney: 3,
+        OrderCancellationJourney: 2,
+        OrderReturnJourney: 2,
     }

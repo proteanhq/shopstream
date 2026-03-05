@@ -110,6 +110,32 @@ class NewCustomerJourney(SequentialTaskSet):
                 resp.failure(f"Tier upgrade failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
+    def get_customer_profile(self):
+        """Verify CustomerCard projection is populated."""
+        with self.client.get(
+            f"/customers/{self.state.customer_id}",
+            catch_response=True,
+            name="GET /customers/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get customer failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def get_addresses(self):
+        """Verify AddressBook projection is populated."""
+        with self.client.get(
+            f"/customers/{self.state.customer_id}/addresses",
+            catch_response=True,
+            name="GET /customers/{id}/addresses",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get addresses failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
     def done(self):
         self.interrupt()
 

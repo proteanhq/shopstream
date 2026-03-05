@@ -45,6 +45,7 @@ from loadtests.scenarios.fulfillment import FulfillmentUser  # noqa: F401
 from loadtests.scenarios.identity import IdentityUser  # noqa: F401
 from loadtests.scenarios.inventory import InventoryUser  # noqa: F401
 from loadtests.scenarios.mixed import MixedWorkloadUser  # noqa: F401
+from loadtests.scenarios.notifications import NotificationsUser  # noqa: F401
 from loadtests.scenarios.ordering import OrderingUser  # noqa: F401
 from loadtests.scenarios.payments import PaymentsUser  # noqa: F401
 from loadtests.scenarios.priority_lanes import (  # noqa: F401

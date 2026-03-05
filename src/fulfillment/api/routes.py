@@ -44,6 +44,8 @@ async def get_shipment_tracking(order_id: str) -> ShipmentTrackingResponse:
     from fulfillment.projections.shipment_tracking_queries import GetShipmentTracking
 
     result = current_domain.dispatch(GetShipmentTracking(order_id=order_id))
+    if result is None:
+        raise HTTPException(status_code=404, detail="Shipment tracking not found")
     return ShipmentTrackingResponse(**result.to_dict())
 
 

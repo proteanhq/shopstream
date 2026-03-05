@@ -99,6 +99,15 @@ class ReviewState:
 
 
 @dataclass
+class NotificationState:
+    """Tracks state for a notification preference/lifecycle journey."""
+
+    customer_id: str | None = None
+    preference_id: str | None = None
+    notification_ids: list[str] = field(default_factory=list)
+
+
+@dataclass
 class CrossDomainState:
     """Tracks state across domains for end-to-end scenarios.
 
