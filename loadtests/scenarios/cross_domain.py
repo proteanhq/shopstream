@@ -1,4 +1,4 @@
-"""Cross-domain load test scenarios targeting race conditions.
+"""Cross-domain load test scenarios targeting race conditions and subscriber flows.
 
 These scenarios weave threads across multiple bounded contexts, exercising
 the same resources concurrently to surface race conditions, version
@@ -11,6 +11,9 @@ Scenarios:
 3. CancelDuringPayment — Cancel arrives while payment webhook is in-flight
 4. ConcurrentCheckout — Two users checkout the same cart/product
 5. OrderPaymentSaga — Full saga: order + reserve stock + pay + confirm
+6. SubscriberVariantStockJourney — Catalogue → Inventory via subscriber
+7. SubscriberOrderRefundJourney — Ordering → Payments via subscriber
+8. SubscriberVerifiedPurchaseJourney — Ordering → Reviews via subscriber
 """
 
 import random
@@ -30,6 +33,7 @@ from loadtests.data_generators import (
     payment_data,
     product_data,
     reserve_stock_data,
+    review_data,
     saga_cart_item_data,
     shipment_data,
     unique_external_id,
@@ -1287,4 +1291,411 @@ class RaceConditionUser(HttpUser):
         CancelDuringPaymentJourney: 4,
         ConcurrentOrderModificationJourney: 4,
         FlashSaleStampede: 2,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Subscriber ACL happy-path scenarios
+# ---------------------------------------------------------------------------
+
+
+class SubscriberVariantStockJourney(SequentialTaskSet):
+    """Subscriber flow: Catalogue → Inventory via CatalogueVariantSubscriber.
+
+    Creates a product with a variant and verifies that the subscriber
+    auto-initializes inventory stock for the new variant.
+
+    Thread: Catalogue → Inventory (async via subscriber)
+    """
+
+    def on_start(self):
+        self.state = CrossDomainState()
+
+    @task
+    def create_product(self):
+        with self.client.post(
+            "/products",
+            json=product_data(),
+            catch_response=True,
+            name="[Sub:Stock] POST /products",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.product_id = resp.json()["product_id"]
+            else:
+                resp.failure(f"Create product failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def add_variant(self):
+        vd = variant_data()
+        with self.client.post(
+            f"/products/{self.state.product_id}/variants",
+            json=vd,
+            catch_response=True,
+            name="[Sub:Stock] POST /products/{id}/variants",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.variant_id = vd["variant_sku"]
+            else:
+                resp.failure(f"Add variant failed: {extract_error_detail(resp)}")
+
+    @task
+    def activate_product(self):
+        with self.client.put(
+            f"/products/{self.state.product_id}/activate",
+            catch_response=True,
+            name="[Sub:Stock] PUT /products/{id}/activate",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Activate failed: {extract_error_detail(resp)}")
+
+    @task
+    def done(self):
+        self.interrupt()
+
+
+class SubscriberOrderRefundJourney(SequentialTaskSet):
+    """Subscriber flow: Ordering → Payments via OrderReturnedSubscriber.
+
+    Walks an order through the full lifecycle to Returned, triggering the
+    subscriber to auto-initiate a refund for the succeeded payment.
+
+    Thread: Identity → Ordering → Payments → Ordering (return lifecycle)
+    """
+
+    def on_start(self):
+        self.state = CrossDomainState()
+
+    @task
+    def register_customer(self):
+        first, last = customer_name()
+        with self.client.post(
+            "/customers",
+            json={
+                "external_id": unique_external_id(),
+                "email": valid_email(),
+                "first_name": first,
+                "last_name": last,
+                "phone": valid_phone(),
+            },
+            catch_response=True,
+            name="[Sub:Refund] POST /customers",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.customer_id = resp.json()["customer_id"]
+            else:
+                resp.failure(f"Register failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def create_order(self):
+        payload = order_data(customer_id=self.state.customer_id, num_items=2)
+        with self.client.post(
+            "/orders",
+            json=payload,
+            catch_response=True,
+            name="[Sub:Refund] POST /orders",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.order_id = resp.json()["order_id"]
+            else:
+                resp.failure(f"Create order failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def confirm_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/confirm",
+            catch_response=True,
+            name="[Sub:Refund] PUT /orders/{id}/confirm",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Confirm failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def initiate_payment(self):
+        payload = payment_data(
+            order_id=self.state.order_id,
+            customer_id=self.state.customer_id,
+        )
+        with self.client.post(
+            "/payments",
+            json=payload,
+            catch_response=True,
+            name="[Sub:Refund] POST /payments",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.payment_id = resp.json()["payment_id"]
+            else:
+                resp.failure(f"Payment init failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def payment_webhook_success(self):
+        payload = webhook_data_success(self.state.payment_id)
+        with self.client.post(
+            "/payments/webhook",
+            json=payload,
+            headers={"X-Gateway-Signature": "test-signature"},
+            catch_response=True,
+            name="[Sub:Refund] POST /payments/webhook",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Webhook failed: {extract_error_detail(resp)}")
+
+    @task
+    def record_payment_success_on_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/payment/success",
+            json={
+                "payment_id": self.state.payment_id,
+                "amount": round(random.uniform(29.99, 199.99), 2),
+                "payment_method": "credit_card",
+            },
+            catch_response=True,
+            name="[Sub:Refund] PUT /orders/{id}/payment/success",
+        ) as resp:
+            if resp.status_code == 200:
+                resp.success()
+            elif resp.status_code == 422 and "Paid" in resp.text:
+                resp.success()  # Saga already moved to Paid
+            else:
+                resp.failure(f"Payment success failed: {extract_error_detail(resp)}")
+
+    @task
+    def ship_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/ship",
+            json=shipment_data(),
+            catch_response=True,
+            name="[Sub:Refund] PUT /orders/{id}/ship",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Ship failed: {extract_error_detail(resp)}")
+
+    @task
+    def deliver_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/deliver",
+            catch_response=True,
+            name="[Sub:Refund] PUT /orders/{id}/deliver",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Deliver failed: {extract_error_detail(resp)}")
+
+    @task
+    def request_return(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/return/request",
+            json={"reason": "Product not as described"},
+            catch_response=True,
+            name="[Sub:Refund] PUT /orders/{id}/return/request",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Return request failed: {extract_error_detail(resp)}")
+
+    @task
+    def approve_return(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/return/approve",
+            catch_response=True,
+            name="[Sub:Refund] PUT /orders/{id}/return/approve",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Return approve failed: {extract_error_detail(resp)}")
+
+    @task
+    def record_return(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/return/record",
+            json={"returned_item_ids": None},
+            catch_response=True,
+            name="[Sub:Refund] PUT /orders/{id}/return/record",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Record return failed: {extract_error_detail(resp)}")
+
+    @task
+    def done(self):
+        self.interrupt()
+
+
+class SubscriberVerifiedPurchaseJourney(SequentialTaskSet):
+    """Subscriber flow: Ordering → Reviews via OrderDeliveredSubscriber.
+
+    Walks an order through delivery, then submits a review. The subscriber
+    creates VerifiedPurchases records on delivery, allowing the review to be
+    flagged as a verified purchase.
+
+    Thread: Identity → Ordering → Payments → Reviews
+    """
+
+    def on_start(self):
+        self.state = CrossDomainState()
+
+    @task
+    def register_customer(self):
+        first, last = customer_name()
+        with self.client.post(
+            "/customers",
+            json={
+                "external_id": unique_external_id(),
+                "email": valid_email(),
+                "first_name": first,
+                "last_name": last,
+                "phone": valid_phone(),
+            },
+            catch_response=True,
+            name="[Sub:VP] POST /customers",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.customer_id = resp.json()["customer_id"]
+            else:
+                resp.failure(f"Register failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def create_order(self):
+        payload = order_data(customer_id=self.state.customer_id, num_items=1)
+        # Track product_id for the review
+        self.state.product_id = payload["items"][0]["product_id"]
+        with self.client.post(
+            "/orders",
+            json=payload,
+            catch_response=True,
+            name="[Sub:VP] POST /orders",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.order_id = resp.json()["order_id"]
+            else:
+                resp.failure(f"Create order failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def confirm_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/confirm",
+            catch_response=True,
+            name="[Sub:VP] PUT /orders/{id}/confirm",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Confirm failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def initiate_payment(self):
+        payload = payment_data(
+            order_id=self.state.order_id,
+            customer_id=self.state.customer_id,
+        )
+        with self.client.post(
+            "/payments",
+            json=payload,
+            catch_response=True,
+            name="[Sub:VP] POST /payments",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.payment_id = resp.json()["payment_id"]
+            else:
+                resp.failure(f"Payment init failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def payment_webhook_success(self):
+        payload = webhook_data_success(self.state.payment_id)
+        with self.client.post(
+            "/payments/webhook",
+            json=payload,
+            headers={"X-Gateway-Signature": "test-signature"},
+            catch_response=True,
+            name="[Sub:VP] POST /payments/webhook",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Webhook failed: {extract_error_detail(resp)}")
+
+    @task
+    def record_payment_success_on_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/payment/success",
+            json={
+                "payment_id": self.state.payment_id,
+                "amount": round(random.uniform(29.99, 199.99), 2),
+                "payment_method": "credit_card",
+            },
+            catch_response=True,
+            name="[Sub:VP] PUT /orders/{id}/payment/success",
+        ) as resp:
+            if resp.status_code == 200:
+                resp.success()
+            elif resp.status_code == 422 and "Paid" in resp.text:
+                resp.success()  # Saga already moved to Paid
+            else:
+                resp.failure(f"Payment success failed: {extract_error_detail(resp)}")
+
+    @task
+    def ship_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/ship",
+            json=shipment_data(),
+            catch_response=True,
+            name="[Sub:VP] PUT /orders/{id}/ship",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Ship failed: {extract_error_detail(resp)}")
+
+    @task
+    def deliver_order(self):
+        with self.client.put(
+            f"/orders/{self.state.order_id}/deliver",
+            catch_response=True,
+            name="[Sub:VP] PUT /orders/{id}/deliver",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Deliver failed: {extract_error_detail(resp)}")
+
+    @task
+    def submit_review(self):
+        payload = review_data(
+            product_id=self.state.product_id,
+            customer_id=self.state.customer_id,
+        )
+        with self.client.post(
+            "/reviews",
+            json=payload,
+            catch_response=True,
+            name="[Sub:VP] POST /reviews",
+        ) as resp:
+            if resp.status_code == 201:
+                resp.success()
+            else:
+                # Review submission may fail if verified purchase record
+                # hasn't propagated yet — this is acceptable under load
+                resp.failure(f"Submit review failed: {extract_error_detail(resp)}")
+
+    @task
+    def done(self):
+        self.interrupt()
+
+
+class SubscriberUser(HttpUser):
+    """Subscriber ACL happy-path scenarios.
+
+    Exercises the three subscriber-based cross-domain flows:
+    - CatalogueVariantSubscriber: Catalogue → Inventory stock initialization
+    - OrderReturnedSubscriber: Ordering → Payments refund initiation
+    - OrderDeliveredSubscriber: Ordering → Reviews verified purchase tracking
+
+    These are happy-path scenarios with no expected failures.
+
+    Usage:
+        locust -f loadtests/scenarios/cross_domain.py SubscriberUser
+        locust -f loadtests/scenarios/cross_domain.py SubscriberUser --headless -u 3 -r 1 -t 30s
+    """
+
+    wait_time = between(1.0, 3.0)
+    tasks = {
+        SubscriberVariantStockJourney: 1,
+        SubscriberOrderRefundJourney: 1,
+        SubscriberVerifiedPurchaseJourney: 1,
     }

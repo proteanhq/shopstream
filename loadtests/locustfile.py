@@ -60,6 +60,9 @@ from loadtests.scenarios.catalogue import CatalogueUser  # noqa: F401
 #   locust -f loadtests/scenarios/cross_domain.py CrossDomainUser
 #   locust -f loadtests/scenarios/cross_domain.py FlashSaleUser
 #   locust -f loadtests/scenarios/cross_domain.py RaceConditionUser
+# SubscriberUser is included — happy-path subscriber ACL flows (no expected failures):
+from loadtests.scenarios.cross_domain import SubscriberUser  # noqa: F401
+
 # FulfillmentTrackingUser excluded — sends tracking webhooks before shipment,
 # generating expected TrackingHandler failures. Run explicitly:
 #   locust -f loadtests/locustfile.py FulfillmentTrackingUser

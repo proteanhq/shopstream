@@ -47,6 +47,7 @@ class TestRefundNotificationHandler:
             customer_id="cust-refund-1",
             amount=25.00,
             currency="USD",
+            gateway_refund_id="gw-ref-001",
             reason="Item returned",
             completed_at=datetime.now(UTC),
         )
@@ -69,9 +70,9 @@ class TestRefundNotificationHandler:
             payment_id="pay-003",
             refund_id="ref-002",
             order_id="ord-003",
-            customer_id=None,
             amount=10.00,
             currency="USD",
+            gateway_refund_id="gw-ref-002",
             completed_at=datetime.now(UTC),
         )
         handler = PaymentEventsHandler()

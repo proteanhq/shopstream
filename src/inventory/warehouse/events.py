@@ -9,8 +9,6 @@ from inventory.domain import inventory
 class WarehouseCreated:
     """A new warehouse was created."""
 
-    __version__ = "v1"
-
     warehouse_id = Identifier(required=True)
     name = String(required=True)
     address = Dict(required=True)
@@ -22,8 +20,6 @@ class WarehouseCreated:
 class WarehouseUpdated:
     """Warehouse details were updated."""
 
-    __version__ = "v1"
-
     warehouse_id = Identifier(required=True)
     name = String(required=True)
     capacity = Identifier(required=True)
@@ -33,8 +29,6 @@ class WarehouseUpdated:
 @inventory.event(part_of="Warehouse")
 class ZoneAdded:
     """A zone was added to a warehouse."""
-
-    __version__ = "v1"
 
     warehouse_id = Identifier(required=True)
     zone_id = Identifier(required=True)
@@ -47,8 +41,6 @@ class ZoneAdded:
 class ZoneRemoved:
     """A zone was removed from a warehouse."""
 
-    __version__ = "v1"
-
     warehouse_id = Identifier(required=True)
     zone_id = Identifier(required=True)
     removed_at = DateTime(required=True)
@@ -57,8 +49,6 @@ class ZoneRemoved:
 @inventory.event(part_of="Warehouse")
 class WarehouseDeactivated:
     """A warehouse was deactivated."""
-
-    __version__ = "v1"
 
     warehouse_id = Identifier(required=True)
     deactivated_at = DateTime(required=True)

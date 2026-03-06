@@ -9,8 +9,6 @@ from notifications.domain import notifications
 class NotificationCreated:
     """A notification was created and queued for dispatch."""
 
-    __version__ = "v1"
-
     notification_id: Identifier(required=True)
     recipient_id: Identifier(required=True)
     recipient_type: String(required=True)
@@ -27,8 +25,6 @@ class NotificationCreated:
 class NotificationSent:
     """A notification was sent to the channel adapter."""
 
-    __version__ = "v1"
-
     notification_id: Identifier(required=True)
     recipient_id: Identifier(required=True)
     channel: String(required=True)
@@ -39,8 +35,6 @@ class NotificationSent:
 class NotificationDelivered:
     """A notification was confirmed delivered to the recipient."""
 
-    __version__ = "v1"
-
     notification_id: Identifier(required=True)
     recipient_id: Identifier(required=True)
     channel: String(required=True)
@@ -50,8 +44,6 @@ class NotificationDelivered:
 @notifications.event(part_of="Notification")
 class NotificationFailed:
     """A notification failed to send or deliver."""
-
-    __version__ = "v1"
 
     notification_id: Identifier(required=True)
     recipient_id: Identifier(required=True)
@@ -66,8 +58,6 @@ class NotificationFailed:
 class NotificationBounced:
     """A notification bounced (permanent delivery failure)."""
 
-    __version__ = "v1"
-
     notification_id: Identifier(required=True)
     recipient_id: Identifier(required=True)
     channel: String(required=True)
@@ -79,8 +69,6 @@ class NotificationBounced:
 class NotificationCancelled:
     """A pending notification was cancelled."""
 
-    __version__ = "v1"
-
     notification_id: Identifier(required=True)
     recipient_id: Identifier(required=True)
     channel: String(required=True)
@@ -91,8 +79,6 @@ class NotificationCancelled:
 @notifications.event(part_of="Notification")
 class NotificationRetried:
     """A failed notification was retried."""
-
-    __version__ = "v1"
 
     notification_id: Identifier(required=True)
     recipient_id: Identifier(required=True)

@@ -2356,6 +2356,7 @@ fastapi = ">=0.110.0"
 greenlet = "^3.0.3"
 inflection = ">=0.5.1"
 ipython = ">=8.23,<10.0"
+jinja2 = ">=3.1.0"
 marshmallow = ">=3.15.0"
 message-db-py = {version = ">=0.3.2", optional = true}
 psycopg2-binary = {version = ">=2.9.9", optional = true}
@@ -2382,7 +2383,7 @@ sqlite = ["sqlalchemy (>=2.0.30,<2.1.0)"]
 type = "git"
 url = "https://github.com/proteanhq/protean.git"
 reference = "main"
-resolved_reference = "b8c4c56582197790b0407968c0e618879acc3c7e"
+resolved_reference = "ca9c7fdc11bb850bbeda637311c58e73f7530d5f"
 
 [[package]]
 name = "psutil"

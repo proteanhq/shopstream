@@ -39,9 +39,6 @@ class TestCustomerRegistered:
         assert event.last_name == "Doe"
         assert event.registered_at == now
 
-    def test_version(self):
-        assert CustomerRegistered.__version__ == "v1"
-
 
 class TestProfileUpdated:
     def test_element_type(self):

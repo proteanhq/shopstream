@@ -9,8 +9,6 @@ from ordering.domain import ordering
 class CartItemAdded:
     """A product was added to the shopping cart."""
 
-    __version__ = "v1"
-
     cart_id = Identifier(required=True)
     item_id = Identifier(required=True)
     product_id = Identifier(required=True)
@@ -22,8 +20,6 @@ class CartItemAdded:
 class CartQuantityUpdated:
     """The quantity of a cart item was changed."""
 
-    __version__ = "v1"
-
     cart_id = Identifier(required=True)
     item_id = Identifier(required=True)
     previous_quantity = Integer(required=True)
@@ -34,8 +30,6 @@ class CartQuantityUpdated:
 class CartItemRemoved:
     """An item was removed from the shopping cart."""
 
-    __version__ = "v1"
-
     cart_id = Identifier(required=True)
     item_id = Identifier(required=True)
 
@@ -44,8 +38,6 @@ class CartItemRemoved:
 class CartCouponApplied:
     """A coupon code was applied to the shopping cart."""
 
-    __version__ = "v1"
-
     cart_id = Identifier(required=True)
     coupon_code = String(required=True)
 
@@ -53,8 +45,6 @@ class CartCouponApplied:
 @ordering.event(part_of="ShoppingCart")
 class CartsMerged:
     """A guest cart's items were merged into a registered customer's cart."""
-
-    __version__ = "v1"
 
     cart_id = Identifier(required=True)
     source_session_id = String()
@@ -65,8 +55,6 @@ class CartsMerged:
 class CartConverted:
     """A shopping cart was converted into an order at checkout."""
 
-    __version__ = "v1"
-
     cart_id = Identifier(required=True)
     customer_id = Identifier()
     items = List(Dict(), required=True)
@@ -75,8 +63,6 @@ class CartConverted:
 @ordering.event(part_of="ShoppingCart", published=True)
 class CartAbandoned:
     """A shopping cart was marked as abandoned due to inactivity."""
-
-    __version__ = "v1"
 
     cart_id = Identifier(required=True)
     abandoned_at = DateTime(required=True)

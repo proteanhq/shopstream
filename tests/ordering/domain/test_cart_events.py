@@ -14,9 +14,6 @@ from ordering.cart.events import (
 
 
 class TestCartItemAddedEvent:
-    def test_version(self):
-        assert CartItemAdded.__version__ == "v1"
-
     def test_construction(self):
         event = CartItemAdded(
             cart_id="cart-001",

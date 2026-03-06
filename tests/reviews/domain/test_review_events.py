@@ -1,4 +1,4 @@
-"""Tests for Review event structure — all 8 events have correct fields and versions."""
+"""Tests for Review event structure — all 8 events have correct fields."""
 
 from reviews.review.events import (
     HelpfulVoteRecorded,
@@ -31,32 +31,6 @@ def _published_review():
     review.approve(moderator_id="mod-001")
     review._events.clear()
     return review
-
-
-class TestEventVersions:
-    def test_review_submitted_version(self):
-        assert ReviewSubmitted.__version__ == "v1"
-
-    def test_review_edited_version(self):
-        assert ReviewEdited.__version__ == "v1"
-
-    def test_review_approved_version(self):
-        assert ReviewApproved.__version__ == "v1"
-
-    def test_review_rejected_version(self):
-        assert ReviewRejected.__version__ == "v1"
-
-    def test_helpful_vote_recorded_version(self):
-        assert HelpfulVoteRecorded.__version__ == "v1"
-
-    def test_review_reported_version(self):
-        assert ReviewReported.__version__ == "v1"
-
-    def test_review_removed_version(self):
-        assert ReviewRemoved.__version__ == "v1"
-
-    def test_seller_reply_added_version(self):
-        assert SellerReplyAdded.__version__ == "v1"
 
 
 class TestReviewSubmittedEvent:

@@ -184,8 +184,8 @@ def order_shipped(order_id):
 
 
 @pytest.fixture()
-def order_delivered(order_id):
-    return OrderDelivered(order_id=order_id, delivered_at=datetime.now(UTC))
+def order_delivered(order_id, customer_id):
+    return OrderDelivered(order_id=order_id, customer_id=customer_id, delivered_at=datetime.now(UTC))
 
 
 @pytest.fixture()

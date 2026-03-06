@@ -9,8 +9,6 @@ from catalogue.domain import catalogue
 class CategoryCreated:
     """A new product category was added to the catalogue hierarchy."""
 
-    __version__ = "v1"
-
     category_id: Identifier(required=True)
     name: String(required=True)
     parent_category_id: Identifier()
@@ -21,8 +19,6 @@ class CategoryCreated:
 class CategoryDetailsUpdated:
     """A category's name or attributes were changed."""
 
-    __version__ = "v1"
-
     category_id: Identifier(required=True)
     name: String(required=True)
     attributes: Dict()
@@ -32,8 +28,6 @@ class CategoryDetailsUpdated:
 class CategoryReordered:
     """A category's display position was changed."""
 
-    __version__ = "v1"
-
     category_id: Identifier(required=True)
     previous_order: Integer(required=True)
     new_order: Integer(required=True)
@@ -42,8 +36,6 @@ class CategoryReordered:
 @catalogue.event(part_of="Category")
 class CategoryDeactivated:
     """A category was deactivated and hidden from the storefront."""
-
-    __version__ = "v1"
 
     category_id: Identifier(required=True)
     deactivated_at: DateTime(required=True)

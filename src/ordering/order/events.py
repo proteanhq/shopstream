@@ -16,8 +16,6 @@ from ordering.domain import ordering
 class OrderCreated:
     """A new order was created from a shopping cart at checkout."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
     items = List(Dict(), required=True)
@@ -36,8 +34,6 @@ class OrderCreated:
 class ItemAdded:
     """A new line item was added to an order (only in Created state)."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     item_id = Identifier(required=True)
     product_id = Identifier(required=True)
@@ -55,8 +51,6 @@ class ItemAdded:
 class ItemRemoved:
     """A line item was removed from an order (only in Created state)."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     item_id = Identifier(required=True)
     new_subtotal = Float(required=True)
@@ -67,8 +61,6 @@ class ItemRemoved:
 @ordering.event(part_of="Order")
 class ItemQuantityUpdated:
     """The quantity of an order line item was changed."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     item_id = Identifier(required=True)
@@ -83,8 +75,6 @@ class ItemQuantityUpdated:
 class CouponApplied:
     """A coupon code was applied to an order."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     coupon_code = String(required=True)
     applied_at = DateTime(required=True)
@@ -94,8 +84,6 @@ class CouponApplied:
 class OrderConfirmed:
     """The customer confirmed the order, committing to the purchase."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     confirmed_at = DateTime(required=True)
 
@@ -103,8 +91,6 @@ class OrderConfirmed:
 @ordering.event(part_of="Order")
 class PaymentPending:
     """Payment processing was initiated for the order."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     payment_id = String(required=True)
@@ -115,8 +101,6 @@ class PaymentPending:
 @ordering.event(part_of="Order")
 class PaymentSucceeded:
     """Payment was successfully captured for the order."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     payment_id = String(required=True)
@@ -129,8 +113,6 @@ class PaymentSucceeded:
 class PaymentFailed:
     """Payment processing failed; the order returns to Confirmed for retry."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     payment_id = String(required=True)
     reason = String(required=True)
@@ -141,8 +123,6 @@ class PaymentFailed:
 class OrderProcessing:
     """The warehouse began picking and packing the order."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     started_at = DateTime(required=True)
 
@@ -150,8 +130,6 @@ class OrderProcessing:
 @ordering.event(part_of="Order")
 class OrderShipped:
     """All order items were shipped with a carrier."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     shipment_id = String(required=True)
@@ -166,8 +144,6 @@ class OrderShipped:
 class OrderPartiallyShipped:
     """Some (but not all) order items were shipped."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     shipment_id = String(required=True)
     carrier = String(required=True)
@@ -180,8 +156,6 @@ class OrderPartiallyShipped:
 class OrderDelivered:
     """The carrier confirmed delivery of the order to the customer."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
     delivered_at = DateTime(required=True)
@@ -191,8 +165,6 @@ class OrderDelivered:
 class OrderCompleted:
     """The order was finalized after delivery and return window expiry."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     completed_at = DateTime(required=True)
 
@@ -200,8 +172,6 @@ class OrderCompleted:
 @ordering.event(part_of="Order")
 class ReturnRequested:
     """The customer requested a return of a delivered order."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     reason = String(required=True)
@@ -212,8 +182,6 @@ class ReturnRequested:
 class ReturnApproved:
     """A return request was approved by the system or an admin."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     approved_at = DateTime(required=True)
 
@@ -221,8 +189,6 @@ class ReturnApproved:
 @ordering.event(part_of="Order", published=True)
 class OrderReturned:
     """Returned items were received back from the customer."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     returned_item_ids = List(String())
@@ -233,8 +199,6 @@ class OrderReturned:
 class OrderCancelled:
     """The order was cancelled before fulfillment began."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     reason = String(required=True)
     cancelled_by = String(required=True)
@@ -244,8 +208,6 @@ class OrderCancelled:
 @ordering.event(part_of="Order")
 class OrderRefunded:
     """A refund was issued for a cancelled or returned order."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     refund_amount = Float(required=True)

@@ -9,8 +9,6 @@ from notifications.domain import notifications
 class PreferencesCreated:
     """Default notification preferences were created for a customer."""
 
-    __version__ = "v1"
-
     preference_id: Identifier(required=True)
     customer_id: Identifier(required=True)
     email_enabled: Boolean(required=True)
@@ -22,8 +20,6 @@ class PreferencesCreated:
 @notifications.event(part_of="NotificationPreference")
 class ChannelsUpdated:
     """A customer's notification channel preferences were changed."""
-
-    __version__ = "v1"
 
     preference_id: Identifier(required=True)
     customer_id: Identifier(required=True)
@@ -37,8 +33,6 @@ class ChannelsUpdated:
 class QuietHoursSet:
     """A customer set their do-not-disturb window."""
 
-    __version__ = "v1"
-
     preference_id: Identifier(required=True)
     customer_id: Identifier(required=True)
     start: String(required=True)
@@ -50,8 +44,6 @@ class QuietHoursSet:
 class QuietHoursCleared:
     """A customer cleared their do-not-disturb window."""
 
-    __version__ = "v1"
-
     preference_id: Identifier(required=True)
     customer_id: Identifier(required=True)
     cleared_at: DateTime(required=True)
@@ -60,8 +52,6 @@ class QuietHoursCleared:
 @notifications.event(part_of="NotificationPreference")
 class TypeUnsubscribed:
     """A customer unsubscribed from a specific notification type."""
-
-    __version__ = "v1"
 
     preference_id: Identifier(required=True)
     customer_id: Identifier(required=True)
@@ -72,8 +62,6 @@ class TypeUnsubscribed:
 @notifications.event(part_of="NotificationPreference")
 class TypeResubscribed:
     """A customer resubscribed to a previously unsubscribed notification type."""
-
-    __version__ = "v1"
 
     preference_id: Identifier(required=True)
     customer_id: Identifier(required=True)

@@ -26,9 +26,6 @@ from ordering.order.events import (
 
 
 class TestOrderCreatedEvent:
-    def test_version(self):
-        assert OrderCreated.__version__ == "v1"
-
     def test_construction(self):
         now = datetime.now(UTC)
         event = OrderCreated(
@@ -47,9 +44,6 @@ class TestOrderCreatedEvent:
 
 
 class TestItemAddedEvent:
-    def test_version(self):
-        assert ItemAdded.__version__ == "v1"
-
     def test_construction(self):
         now = datetime.now(UTC)
         event = ItemAdded(

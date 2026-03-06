@@ -12,8 +12,6 @@ from payments.domain import payments
 class InvoiceGenerated:
     """A new invoice was generated for an order."""
 
-    __version__ = "v1"
-
     invoice_id = Identifier(required=True)
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
@@ -26,8 +24,6 @@ class InvoiceGenerated:
 class InvoiceIssued:
     """An invoice was sent/issued to the customer."""
 
-    __version__ = "v1"
-
     invoice_id = Identifier(required=True)
     order_id = Identifier(required=True)
     invoice_number = String(required=True)
@@ -38,8 +34,6 @@ class InvoiceIssued:
 class InvoicePaid:
     """An invoice was marked as paid."""
 
-    __version__ = "v1"
-
     invoice_id = Identifier(required=True)
     order_id = Identifier(required=True)
     paid_at = DateTime(required=True)
@@ -48,8 +42,6 @@ class InvoicePaid:
 @payments.event(part_of="Invoice")
 class InvoiceVoided:
     """An invoice was voided/cancelled."""
-
-    __version__ = "v1"
 
     invoice_id = Identifier(required=True)
     order_id = Identifier(required=True)

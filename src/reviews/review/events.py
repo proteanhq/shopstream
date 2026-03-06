@@ -15,8 +15,6 @@ from reviews.domain import reviews
 class ReviewSubmitted:
     """A customer submitted a new product review."""
 
-    __version__ = "v1"
-
     review_id = Identifier(required=True)
     product_id = Identifier(required=True)
     variant_id = Identifier()
@@ -36,8 +34,6 @@ class ReviewSubmitted:
 class ReviewEdited:
     """A customer edited their review content."""
 
-    __version__ = "v1"
-
     review_id = Identifier(required=True)
     title = String()
     body = Text()
@@ -48,8 +44,6 @@ class ReviewEdited:
 @reviews.event(part_of="Review", published=True)
 class ReviewApproved:
     """A moderator approved the review for publication."""
-
-    __version__ = "v1"
 
     review_id = Identifier(required=True)
     product_id = Identifier(required=True)
@@ -63,8 +57,6 @@ class ReviewApproved:
 class ReviewRejected:
     """A moderator rejected the review."""
 
-    __version__ = "v1"
-
     review_id = Identifier(required=True)
     product_id = Identifier(required=True)
     customer_id = Identifier(required=True)
@@ -76,8 +68,6 @@ class ReviewRejected:
 @reviews.event(part_of="Review")
 class HelpfulVoteRecorded:
     """A customer voted on whether a review was helpful."""
-
-    __version__ = "v1"
 
     review_id = Identifier(required=True)
     voter_id = Identifier(required=True)
@@ -91,8 +81,6 @@ class HelpfulVoteRecorded:
 class ReviewReported:
     """A customer reported a review for moderation."""
 
-    __version__ = "v1"
-
     review_id = Identifier(required=True)
     reporter_id = Identifier(required=True)
     reason = String(required=True)
@@ -104,8 +92,6 @@ class ReviewReported:
 @reviews.event(part_of="Review")
 class ReviewRemoved:
     """A published review was removed."""
-
-    __version__ = "v1"
 
     review_id = Identifier(required=True)
     product_id = Identifier(required=True)
@@ -119,8 +105,6 @@ class ReviewRemoved:
 @reviews.event(part_of="Review")
 class SellerReplyAdded:
     """A seller added a reply to a review."""
-
-    __version__ = "v1"
 
     review_id = Identifier(required=True)
     seller_id = Identifier(required=True)

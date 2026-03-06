@@ -15,8 +15,6 @@ from protean.fields import DateTime, Identifier, Integer, String
 class StockReserved(BaseEvent):
     """Stock was reserved for an order."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     reservation_id = Identifier(required=True)
     order_id = Identifier(required=True)
@@ -30,8 +28,6 @@ class StockReserved(BaseEvent):
 class ReservationReleased(BaseEvent):
     """A stock reservation was released."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     reservation_id = Identifier(required=True)
     order_id = Identifier(required=True)
@@ -44,8 +40,6 @@ class ReservationReleased(BaseEvent):
 
 class StockInitialized(BaseEvent):
     """A new inventory record was created for a product variant."""
-
-    __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
     product_id = Identifier(required=True)
@@ -61,8 +55,6 @@ class StockInitialized(BaseEvent):
 class StockReceived(BaseEvent):
     """Stock was received into the warehouse."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     quantity = Integer(required=True)
     previous_on_hand = Integer(required=True)
@@ -75,8 +67,6 @@ class StockReceived(BaseEvent):
 class ReservationConfirmed(BaseEvent):
     """A stock reservation was confirmed after order payment."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     reservation_id = Identifier(required=True)
     order_id = Identifier(required=True)
@@ -86,8 +76,6 @@ class ReservationConfirmed(BaseEvent):
 
 class StockCommitted(BaseEvent):
     """Reserved stock was committed (shipped)."""
-
-    __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
     reservation_id = Identifier(required=True)
@@ -102,8 +90,6 @@ class StockCommitted(BaseEvent):
 
 class StockAdjusted(BaseEvent):
     """Stock was manually adjusted."""
-
-    __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
     product_id = Identifier(required=True)
@@ -120,8 +106,6 @@ class StockAdjusted(BaseEvent):
 class StockMarkedDamaged(BaseEvent):
     """Stock was identified as damaged."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     product_id = Identifier(required=True)
     quantity = Integer(required=True)
@@ -137,8 +121,6 @@ class StockMarkedDamaged(BaseEvent):
 class DamagedStockWrittenOff(BaseEvent):
     """Damaged stock was written off."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     product_id = Identifier(required=True)
     quantity = Integer(required=True)
@@ -151,8 +133,6 @@ class DamagedStockWrittenOff(BaseEvent):
 class StockReturned(BaseEvent):
     """Returned items were added back to on-hand inventory."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     quantity = Integer(required=True)
     order_id = Identifier(required=True)
@@ -164,8 +144,6 @@ class StockReturned(BaseEvent):
 
 class StockCheckRecorded(BaseEvent):
     """A physical stock count was recorded."""
-
-    __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
     counted_quantity = Integer(required=True)
@@ -180,8 +158,6 @@ class LowStockDetected(BaseEvent):
 
     Consumed by the Notifications domain to send internal alerts (Slack).
     """
-
-    __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
     product_id = Identifier(required=True)

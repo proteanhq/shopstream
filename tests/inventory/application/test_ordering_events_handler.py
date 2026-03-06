@@ -11,7 +11,6 @@ from datetime import UTC, datetime
 
 from protean import current_domain
 
-from inventory.projections.inventory_level import InventoryLevel
 from inventory.projections.reservation_status import ReservationStatus as ReservationStatusProjection
 from inventory.stock.initialization import InitializeStock
 from inventory.stock.ordering_events import OrderingInventoryEventHandler
@@ -149,49 +148,37 @@ class TestOrderCancelledHandler:
 
 
 class TestOrderReturnedHandler:
-    def test_restocks_items_on_return(self):
-        """When an order is returned, items should be restocked."""
-        item_id = _initialize_stock(
-            product_id="prod-ret-001",
-            variant_id="var-ret-001",
-            initial_quantity=50,
-        )
+    def test_logs_return_for_restocking(self):
+        """When an order is returned, handler logs item IDs for restocking.
 
-        # Verify initial state via InventoryLevel projection
-        inv_level = current_domain.repository_for(InventoryLevel).get(item_id)
-        assert inv_level.on_hand == 50
-        assert inv_level.available == 50
-
+        Note: OrderReturned carries returned_item_ids (order item UUIDs),
+        not product/variant details. The handler logs for auditing; actual
+        restocking requires enrichment from the order aggregate.
+        """
         handler = OrderingInventoryEventHandler()
+        # Should not raise — handler logs returned_item_ids
         handler.on_order_returned(
             OrderReturned(
                 order_id="ord-ret-001",
-                customer_id="cust-001",
-                items=[{"product_id": "prod-ret-001", "variant_id": "var-ret-001", "quantity": 5}],
+                returned_item_ids=["item-001", "item-002"],
                 returned_at=datetime.now(UTC),
             )
         )
 
-        # Stock should increase by the returned quantity
-        item = current_domain.repository_for(InventoryItem).get(item_id)
-        assert item.levels.on_hand == 55
-        assert item.levels.available == 55
-
-    def test_empty_items_is_noop(self):
-        """If the return event has no items, handler logs and returns without error."""
+    def test_empty_returned_item_ids_is_noop(self):
+        """If the return event has no returned_item_ids, handler logs and returns."""
         handler = OrderingInventoryEventHandler()
         # Should not raise
         handler.on_order_returned(
             OrderReturned(
                 order_id="ord-ret-empty",
-                customer_id="cust-001",
-                items=[],
+                returned_item_ids=[],
                 returned_at=datetime.now(UTC),
             )
         )
 
-    def test_no_items_field_is_noop(self):
-        """If the return event has no items field, handler logs and returns without error."""
+    def test_no_returned_item_ids_is_noop(self):
+        """If returned_item_ids is not provided, handler logs and returns."""
         handler = OrderingInventoryEventHandler()
         # Should not raise
         handler.on_order_returned(

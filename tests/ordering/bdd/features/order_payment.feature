@@ -29,10 +29,10 @@ Feature: Order payment
     When payment is initiated with ID "pay-001" method "credit_card"
     Then the order action fails with a validation error
 
-  Scenario: Cannot pay an already paid order
+  Scenario: Duplicate payment on a paid order is idempotent
     Given an order was created
     And the order was confirmed
     And the order payment is pending
     And the order was paid
     When payment succeeds with ID "pay-002" amount 59.0 method "credit_card"
-    Then the order action fails with a validation error
+    Then the order status is "Paid"

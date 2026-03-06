@@ -21,8 +21,6 @@ class OrderCreated(BaseEvent):
     Consumed by the Notifications domain to send order confirmation emails.
     """
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
     items = List(Dict(), required=True)
@@ -40,8 +38,6 @@ class OrderCreated(BaseEvent):
 class OrderPaid(BaseEvent):
     """Payment was recorded successfully on the order."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
     items = List(Dict(), required=True)
@@ -53,8 +49,6 @@ class OrderPaid(BaseEvent):
 
 class OrderCancelled(BaseEvent):
     """An order was cancelled."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     reason = String(required=True)
@@ -68,8 +62,6 @@ class OrderDelivered(BaseEvent):
     Consumed by the Reviews domain to track verified purchases.
     """
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
     delivered_at = DateTime(required=True)
@@ -82,8 +74,6 @@ class OrderReturned(BaseEvent):
     domain to initiate a refund.
     """
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     returned_item_ids = List(String())
     returned_at = DateTime(required=True)
@@ -91,8 +81,6 @@ class OrderReturned(BaseEvent):
 
 class ItemAdded(BaseEvent):
     """A new line item was added to an order."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     item_id = Identifier(required=True)
@@ -110,8 +98,6 @@ class ItemAdded(BaseEvent):
 class ItemRemoved(BaseEvent):
     """A line item was removed from an order."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     item_id = Identifier(required=True)
     new_subtotal = Float(required=True)
@@ -121,8 +107,6 @@ class ItemRemoved(BaseEvent):
 
 class ItemQuantityUpdated(BaseEvent):
     """The quantity of an order line item was changed."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     item_id = Identifier(required=True)
@@ -136,8 +120,6 @@ class ItemQuantityUpdated(BaseEvent):
 class CouponApplied(BaseEvent):
     """A coupon code was applied to an order."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     coupon_code = String(required=True)
     applied_at = DateTime(required=True)
@@ -146,16 +128,12 @@ class CouponApplied(BaseEvent):
 class OrderConfirmed(BaseEvent):
     """The customer confirmed the order."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     confirmed_at = DateTime(required=True)
 
 
 class PaymentPending(BaseEvent):
     """Payment processing was initiated for the order."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     payment_id = String(required=True)
@@ -165,8 +143,6 @@ class PaymentPending(BaseEvent):
 
 class PaymentSucceeded(BaseEvent):
     """Payment was successfully captured for the order."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     payment_id = String(required=True)
@@ -178,8 +154,6 @@ class PaymentSucceeded(BaseEvent):
 class PaymentFailed(BaseEvent):
     """Payment processing failed."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     payment_id = String(required=True)
     reason = String(required=True)
@@ -189,16 +163,12 @@ class PaymentFailed(BaseEvent):
 class OrderProcessing(BaseEvent):
     """The warehouse began picking and packing the order."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     started_at = DateTime(required=True)
 
 
 class OrderShipped(BaseEvent):
     """All order items were shipped with a carrier."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     shipment_id = String(required=True)
@@ -212,8 +182,6 @@ class OrderShipped(BaseEvent):
 class OrderPartiallyShipped(BaseEvent):
     """Some (but not all) order items were shipped."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     shipment_id = String(required=True)
     carrier = String(required=True)
@@ -225,16 +193,12 @@ class OrderPartiallyShipped(BaseEvent):
 class OrderCompleted(BaseEvent):
     """The order was finalized after delivery and return window expiry."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     completed_at = DateTime(required=True)
 
 
 class ReturnRequested(BaseEvent):
     """The customer requested a return of a delivered order."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     reason = String(required=True)
@@ -244,16 +208,12 @@ class ReturnRequested(BaseEvent):
 class ReturnApproved(BaseEvent):
     """A return request was approved."""
 
-    __version__ = "v1"
-
     order_id = Identifier(required=True)
     approved_at = DateTime(required=True)
 
 
 class OrderRefunded(BaseEvent):
     """A refund was issued for a cancelled or returned order."""
-
-    __version__ = "v1"
 
     order_id = Identifier(required=True)
     refund_amount = Float(required=True)
@@ -267,8 +227,6 @@ class CartAbandoned(BaseEvent):
     (scheduled 24 hours after abandonment).
     """
 
-    __version__ = "v1"
-
     cart_id = Identifier(required=True)
     customer_id = Identifier()
     items = List(Dict())
@@ -277,8 +235,6 @@ class CartAbandoned(BaseEvent):
 
 class CartItemAdded(BaseEvent):
     """An item was added to a shopping cart."""
-
-    __version__ = "v1"
 
     cart_id = Identifier(required=True)
     item_id = Identifier(required=True)
@@ -291,8 +247,6 @@ class CartItemAdded(BaseEvent):
 class CartQuantityUpdated(BaseEvent):
     """The quantity of a cart item was changed."""
 
-    __version__ = "v1"
-
     cart_id = Identifier(required=True)
     item_id = Identifier(required=True)
     previous_quantity = String(required=True)
@@ -303,8 +257,6 @@ class CartQuantityUpdated(BaseEvent):
 class CartItemRemoved(BaseEvent):
     """An item was removed from a shopping cart."""
 
-    __version__ = "v1"
-
     cart_id = Identifier(required=True)
     item_id = Identifier(required=True)
     removed_at = DateTime(required=True)
@@ -312,8 +264,6 @@ class CartItemRemoved(BaseEvent):
 
 class CartCouponApplied(BaseEvent):
     """A coupon was applied to a shopping cart."""
-
-    __version__ = "v1"
 
     cart_id = Identifier(required=True)
     coupon_code = String(required=True)
@@ -323,8 +273,6 @@ class CartCouponApplied(BaseEvent):
 class CartsMerged(BaseEvent):
     """Two shopping carts were merged."""
 
-    __version__ = "v1"
-
     cart_id = Identifier(required=True)
     source_cart_id = Identifier(required=True)
     merged_at = DateTime(required=True)
@@ -332,8 +280,6 @@ class CartsMerged(BaseEvent):
 
 class CartConverted(BaseEvent):
     """A shopping cart was converted to an order."""
-
-    __version__ = "v1"
 
     cart_id = Identifier(required=True)
     order_id = Identifier(required=True)

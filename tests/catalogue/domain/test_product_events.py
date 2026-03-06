@@ -22,10 +22,6 @@ class TestProductCreatedEvent:
     def test_element_type(self):
         assert ProductCreated.element_type == DomainObjects.EVENT
 
-    def test_version(self):
-        event = ProductCreated(product_id="p-1", sku="SKU-001", title="Test", status="Draft", created_at=datetime.now())
-        assert event.__version__ == "v1"
-
     def test_fields(self):
         now = datetime.now()
         event = ProductCreated(

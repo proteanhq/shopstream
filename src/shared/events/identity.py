@@ -16,8 +16,6 @@ from protean.fields import DateTime, Identifier, String
 class CustomerRegistered(BaseEvent):
     """A new customer account was created on the platform."""
 
-    __version__ = "v1"
-
     customer_id = Identifier(required=True)
     external_id = String(required=True)
     email = String(required=True)
@@ -29,8 +27,6 @@ class CustomerRegistered(BaseEvent):
 class AccountSuspended(BaseEvent):
     """A customer account was suspended, blocking further activity."""
 
-    __version__ = "v1"
-
     customer_id = Identifier(required=True)
     reason = String(required=True)
     suspended_at = DateTime(required=True)
@@ -39,16 +35,12 @@ class AccountSuspended(BaseEvent):
 class AccountReactivated(BaseEvent):
     """A previously suspended customer account was restored to active status."""
 
-    __version__ = "v1"
-
     customer_id = Identifier(required=True)
     reactivated_at = DateTime(required=True)
 
 
 class ProfileUpdated(BaseEvent):
     """A customer's personal profile information was changed."""
-
-    __version__ = "v1"
 
     customer_id = Identifier(required=True)
     first_name = String(required=True)
@@ -59,8 +51,6 @@ class ProfileUpdated(BaseEvent):
 
 class AddressAdded(BaseEvent):
     """A new address was added to a customer's address book."""
-
-    __version__ = "v1"
 
     customer_id = Identifier(required=True)
     address_id = Identifier(required=True)
@@ -76,8 +66,6 @@ class AddressAdded(BaseEvent):
 class AddressUpdated(BaseEvent):
     """An existing address in a customer's address book was modified."""
 
-    __version__ = "v1"
-
     customer_id = Identifier(required=True)
     address_id = Identifier(required=True)
     label = String()
@@ -91,16 +79,12 @@ class AddressUpdated(BaseEvent):
 class AddressRemoved(BaseEvent):
     """An address was removed from a customer's address book."""
 
-    __version__ = "v1"
-
     customer_id = Identifier(required=True)
     address_id = Identifier(required=True)
 
 
 class DefaultAddressChanged(BaseEvent):
     """A different address was designated as the customer's default."""
-
-    __version__ = "v1"
 
     customer_id = Identifier(required=True)
     address_id = Identifier(required=True)
@@ -110,16 +94,12 @@ class DefaultAddressChanged(BaseEvent):
 class AccountClosed(BaseEvent):
     """A customer account was permanently closed."""
 
-    __version__ = "v1"
-
     customer_id = Identifier(required=True)
     closed_at = DateTime(required=True)
 
 
 class TierUpgraded(BaseEvent):
     """A customer was promoted to a higher loyalty tier."""
-
-    __version__ = "v1"
 
     customer_id = Identifier(required=True)
     previous_tier = String(required=True)

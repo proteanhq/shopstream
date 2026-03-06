@@ -22,6 +22,9 @@ def _fire_order_created(
         order_id=order_id,
         customer_id=customer_id,
         items=[{"product_id": "prod-1", "quantity": 1}],
+        shipping_address={"street": "1 Main St", "city": "NYC", "state": "NY", "postal_code": "10001", "country": "US"},
+        billing_address={"street": "1 Main St", "city": "NYC", "state": "NY", "postal_code": "10001", "country": "US"},
+        subtotal=grand_total,
         grand_total=grand_total,
         currency=currency,
         created_at=datetime.now(UTC),
@@ -89,16 +92,6 @@ class TestReviewPromptHandler:
         )
         assert len(notifications) >= 1
         assert notifications[0].scheduled_for is not None
-
-    def test_skips_when_no_customer_id(self):
-        event = OrderDelivered(
-            order_id="ord-x",
-            customer_id=None,
-            delivered_at=datetime.now(UTC),
-        )
-        handler = OrderingEventsHandler()
-        handler.on_order_delivered(event)
-        # Should not create any notifications — just logs
 
 
 class TestOrderCancelledHandler:

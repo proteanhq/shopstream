@@ -16,8 +16,6 @@ from protean.fields import DateTime, Dict, Identifier, Integer, List, String
 class FulfillmentCreated(BaseEvent):
     """A fulfillment was created for a paid order."""
 
-    __version__ = "v1"
-
     fulfillment_id = Identifier(required=True)
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
@@ -30,8 +28,6 @@ class FulfillmentCreated(BaseEvent):
 class PickerAssigned(BaseEvent):
     """A warehouse picker was assigned to a fulfillment."""
 
-    __version__ = "v1"
-
     fulfillment_id = Identifier(required=True)
     assigned_to = String(required=True)
     assigned_at = DateTime(required=True)
@@ -39,8 +35,6 @@ class PickerAssigned(BaseEvent):
 
 class ItemPicked(BaseEvent):
     """A single item was picked from its warehouse location."""
-
-    __version__ = "v1"
 
     fulfillment_id = Identifier(required=True)
     item_id = Identifier(required=True)
@@ -51,16 +45,12 @@ class ItemPicked(BaseEvent):
 class PickingCompleted(BaseEvent):
     """All items in the pick list have been picked."""
 
-    __version__ = "v1"
-
     fulfillment_id = Identifier(required=True)
     completed_at = DateTime(required=True)
 
 
 class PackingCompleted(BaseEvent):
     """Items have been packed into shipping packages."""
-
-    __version__ = "v1"
 
     fulfillment_id = Identifier(required=True)
     packed_by = String(required=True)
@@ -71,8 +61,6 @@ class PackingCompleted(BaseEvent):
 class ShippingLabelGenerated(BaseEvent):
     """A shipping label was generated for the fulfillment."""
 
-    __version__ = "v1"
-
     fulfillment_id = Identifier(required=True)
     label_url = String(required=True)
     carrier = String(required=True)
@@ -82,8 +70,6 @@ class ShippingLabelGenerated(BaseEvent):
 
 class ShipmentHandedOff(BaseEvent):
     """Shipment was handed off to the carrier."""
-
-    __version__ = "v1"
 
     fulfillment_id = Identifier(required=True)
     order_id = Identifier(required=True)
@@ -97,8 +83,6 @@ class ShipmentHandedOff(BaseEvent):
 class DeliveryConfirmed(BaseEvent):
     """Carrier confirmed delivery to the customer."""
 
-    __version__ = "v1"
-
     fulfillment_id = Identifier(required=True)
     order_id = Identifier(required=True)
     actual_delivery = DateTime(required=True)
@@ -107,8 +91,6 @@ class DeliveryConfirmed(BaseEvent):
 
 class DeliveryException(BaseEvent):
     """Carrier reported a delivery exception."""
-
-    __version__ = "v1"
 
     fulfillment_id = Identifier(required=True)
     order_id = Identifier(required=True)
@@ -120,8 +102,6 @@ class DeliveryException(BaseEvent):
 class TrackingEventReceived(BaseEvent):
     """A tracking event was received from the carrier."""
 
-    __version__ = "v1"
-
     fulfillment_id = Identifier(required=True)
     status = String(required=True)
     location = String()
@@ -131,8 +111,6 @@ class TrackingEventReceived(BaseEvent):
 
 class FulfillmentCancelled(BaseEvent):
     """Fulfillment was cancelled before shipment."""
-
-    __version__ = "v1"
 
     fulfillment_id = Identifier(required=True)
     order_id = Identifier(required=True)

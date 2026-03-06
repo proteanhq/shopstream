@@ -16,8 +16,6 @@ from protean.fields import DateTime, Identifier, Integer, List, String, Text
 class ReviewSubmitted(BaseEvent):
     """A customer submitted a new product review."""
 
-    __version__ = "v1"
-
     review_id = Identifier(required=True)
     product_id = Identifier(required=True)
     variant_id = Identifier()
@@ -36,8 +34,6 @@ class ReviewSubmitted(BaseEvent):
 class ReviewEdited(BaseEvent):
     """A customer edited their review content."""
 
-    __version__ = "v1"
-
     review_id = Identifier(required=True)
     title = String()
     body = Text()
@@ -47,8 +43,6 @@ class ReviewEdited(BaseEvent):
 
 class ReviewApproved(BaseEvent):
     """A review was approved for publication."""
-
-    __version__ = "v1"
 
     review_id = Identifier(required=True)
     product_id = Identifier(required=True)
@@ -60,8 +54,6 @@ class ReviewApproved(BaseEvent):
 
 class ReviewRemoved(BaseEvent):
     """A published review was removed."""
-
-    __version__ = "v1"
 
     review_id = Identifier(required=True)
     product_id = Identifier(required=True)
@@ -78,8 +70,6 @@ class ReviewRejected(BaseEvent):
     Consumed by the Notifications domain to inform the customer.
     """
 
-    __version__ = "v1"
-
     review_id = Identifier(required=True)
     product_id = Identifier(required=True)
     customer_id = Identifier(required=True)
@@ -90,8 +80,6 @@ class ReviewRejected(BaseEvent):
 
 class HelpfulVoteRecorded(BaseEvent):
     """A customer voted on whether a review was helpful."""
-
-    __version__ = "v1"
 
     review_id = Identifier(required=True)
     voter_id = Identifier(required=True)
@@ -104,8 +92,6 @@ class HelpfulVoteRecorded(BaseEvent):
 class ReviewReported(BaseEvent):
     """A customer reported a review for moderation."""
 
-    __version__ = "v1"
-
     review_id = Identifier(required=True)
     reporter_id = Identifier(required=True)
     reason = String(required=True)
@@ -116,8 +102,6 @@ class ReviewReported(BaseEvent):
 
 class SellerReplyAdded(BaseEvent):
     """A seller added a reply to a review."""
-
-    __version__ = "v1"
 
     review_id = Identifier(required=True)
     seller_id = Identifier(required=True)

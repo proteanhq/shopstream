@@ -16,8 +16,6 @@ from inventory.domain import inventory
 class StockInitialized:
     """A new inventory record was created for a product variant at a warehouse."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     product_id = Identifier(required=True)
     variant_id = Identifier(required=True)
@@ -33,8 +31,6 @@ class StockInitialized:
 class StockReceived:
     """Stock was received into the warehouse, increasing on-hand quantity."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     quantity = Integer(required=True)
     previous_on_hand = Integer(required=True)
@@ -47,8 +43,6 @@ class StockReceived:
 @inventory.event(part_of="InventoryItem", published=True)
 class StockReserved:
     """Stock was reserved for an order, decreasing available quantity."""
-
-    __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
     reservation_id = Identifier(required=True)
@@ -64,8 +58,6 @@ class StockReserved:
 class ReservationReleased:
     """A stock reservation was released, returning quantity to available."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     reservation_id = Identifier(required=True)
     order_id = Identifier(required=True)
@@ -80,8 +72,6 @@ class ReservationReleased:
 class ReservationConfirmed:
     """A stock reservation was confirmed after order payment."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     reservation_id = Identifier(required=True)
     order_id = Identifier(required=True)
@@ -92,8 +82,6 @@ class ReservationConfirmed:
 @inventory.event(part_of="InventoryItem")
 class StockCommitted:
     """Reserved stock was committed (shipped), reducing on-hand quantity."""
-
-    __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
     reservation_id = Identifier(required=True)
@@ -109,8 +97,6 @@ class StockCommitted:
 @inventory.event(part_of="InventoryItem")
 class StockAdjusted:
     """Stock was manually adjusted (count, shrinkage, correction)."""
-
-    __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
     product_id = Identifier(required=True)
@@ -128,8 +114,6 @@ class StockAdjusted:
 class StockMarkedDamaged:
     """Stock was identified as damaged, moving from on-hand to damaged."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     product_id = Identifier(required=True)
     quantity = Integer(required=True)
@@ -146,8 +130,6 @@ class StockMarkedDamaged:
 class DamagedStockWrittenOff:
     """Damaged stock was written off (removed from inventory)."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     product_id = Identifier(required=True)
     quantity = Integer(required=True)
@@ -160,8 +142,6 @@ class DamagedStockWrittenOff:
 @inventory.event(part_of="InventoryItem")
 class StockReturned:
     """Returned items were added back to on-hand inventory."""
-
-    __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
     quantity = Integer(required=True)
@@ -176,8 +156,6 @@ class StockReturned:
 class StockCheckRecorded:
     """A physical stock count was recorded."""
 
-    __version__ = "v1"
-
     inventory_item_id = Identifier(required=True)
     counted_quantity = Integer(required=True)
     expected_quantity = Integer(required=True)
@@ -189,8 +167,6 @@ class StockCheckRecorded:
 @inventory.event(part_of="InventoryItem", published=True)
 class LowStockDetected:
     """Available stock dropped below the reorder point."""
-
-    __version__ = "v1"
 
     inventory_item_id = Identifier(required=True)
     product_id = Identifier(required=True)

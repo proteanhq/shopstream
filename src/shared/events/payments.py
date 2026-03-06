@@ -15,8 +15,6 @@ from protean.fields import Boolean, DateTime, Float, Identifier, Integer, String
 class PaymentSucceeded(BaseEvent):
     """Payment was successfully captured by the gateway."""
 
-    __version__ = "v1"
-
     payment_id = Identifier(required=True)
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
@@ -29,8 +27,6 @@ class PaymentSucceeded(BaseEvent):
 class PaymentFailed(BaseEvent):
     """Payment processing failed at the gateway."""
 
-    __version__ = "v1"
-
     payment_id = Identifier(required=True)
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
@@ -42,8 +38,6 @@ class PaymentFailed(BaseEvent):
 
 class PaymentInitiated(BaseEvent):
     """A new payment was created for an order."""
-
-    __version__ = "v1"
 
     payment_id = Identifier(required=True)
     order_id = Identifier(required=True)
@@ -60,8 +54,6 @@ class PaymentInitiated(BaseEvent):
 class PaymentProcessing(BaseEvent):
     """Payment was sent to the gateway for processing."""
 
-    __version__ = "v1"
-
     payment_id = Identifier(required=True)
     order_id = Identifier(required=True)
     processing_at = DateTime(required=True)
@@ -69,8 +61,6 @@ class PaymentProcessing(BaseEvent):
 
 class PaymentRetryInitiated(BaseEvent):
     """A failed payment is being retried."""
-
-    __version__ = "v1"
 
     payment_id = Identifier(required=True)
     order_id = Identifier(required=True)
@@ -80,8 +70,6 @@ class PaymentRetryInitiated(BaseEvent):
 
 class RefundRequested(BaseEvent):
     """A refund was requested for a successful payment."""
-
-    __version__ = "v1"
 
     payment_id = Identifier(required=True)
     refund_id = Identifier(required=True)
@@ -96,8 +84,6 @@ class RefundCompleted(BaseEvent):
 
     Consumed by the Notifications domain to send refund confirmation emails.
     """
-
-    __version__ = "v1"
 
     payment_id = Identifier(required=True)
     refund_id = Identifier(required=True)

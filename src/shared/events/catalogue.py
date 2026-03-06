@@ -16,8 +16,6 @@ from protean.fields import DateTime, Float, Identifier, String
 class ProductCreated(BaseEvent):
     """A new product was added to the catalogue in Draft status."""
 
-    __version__ = "v1"
-
     product_id = Identifier(required=True)
     sku = String(required=True)
     seller_id = Identifier()
@@ -30,8 +28,6 @@ class ProductCreated(BaseEvent):
 class VariantAdded(BaseEvent):
     """A new purchasable variant was added to a product."""
 
-    __version__ = "v1"
-
     product_id = Identifier(required=True)
     variant_id = Identifier(required=True)
     variant_sku = String(required=True)
@@ -43,8 +39,6 @@ class VariantAdded(BaseEvent):
 class VariantPriceChanged(BaseEvent):
     """A variant's base price was updated."""
 
-    __version__ = "v1"
-
     product_id = Identifier(required=True)
     variant_id = Identifier(required=True)
     previous_price = Float(required=True)
@@ -54,8 +48,6 @@ class VariantPriceChanged(BaseEvent):
 
 class TierPriceSet(BaseEvent):
     """A loyalty-tier-specific price was set on a variant."""
-
-    __version__ = "v1"
 
     product_id = Identifier(required=True)
     variant_id = Identifier(required=True)
@@ -67,8 +59,6 @@ class TierPriceSet(BaseEvent):
 class ProductActivated(BaseEvent):
     """A draft product was activated and made available for sale."""
 
-    __version__ = "v1"
-
     product_id = Identifier(required=True)
     sku = String(required=True)
     activated_at = DateTime(required=True)
@@ -77,8 +67,6 @@ class ProductActivated(BaseEvent):
 class ProductDiscontinued(BaseEvent):
     """An active product was discontinued and removed from sale."""
 
-    __version__ = "v1"
-
     product_id = Identifier(required=True)
     sku = String(required=True)
     discontinued_at = DateTime(required=True)
@@ -86,8 +74,6 @@ class ProductDiscontinued(BaseEvent):
 
 class ProductDetailsUpdated(BaseEvent):
     """A product's title, description, brand, or attributes were changed."""
-
-    __version__ = "v1"
 
     product_id = Identifier(required=True)
     title = String(required=True)
@@ -98,8 +84,6 @@ class ProductDetailsUpdated(BaseEvent):
 class ProductImageAdded(BaseEvent):
     """A new image was uploaded for a product."""
 
-    __version__ = "v1"
-
     product_id = Identifier(required=True)
     image_id = Identifier(required=True)
     url = String(required=True)
@@ -109,16 +93,12 @@ class ProductImageAdded(BaseEvent):
 class ProductImageRemoved(BaseEvent):
     """An image was removed from a product's gallery."""
 
-    __version__ = "v1"
-
     product_id = Identifier(required=True)
     image_id = Identifier(required=True)
 
 
 class ProductArchived(BaseEvent):
     """A discontinued product was archived for permanent storage."""
-
-    __version__ = "v1"
 
     product_id = Identifier(required=True)
     archived_at = DateTime(required=True)
