@@ -81,9 +81,9 @@ class OrderEventHandler:
 
         ff = results.first
         # Only cancel if still cancellable
-        from fulfillment.fulfillment.fulfillment import _CANCELLABLE_STATUSES, FulfillmentStatus
+        from fulfillment.fulfillment.fulfillment import FulfillmentStatus
 
-        if FulfillmentStatus(ff.status) in _CANCELLABLE_STATUSES:
+        if ff.can_transition_to("status", FulfillmentStatus.CANCELLED.value):
             ff.cancel(reason=f"Order cancelled: {event.reason}")
             repo.add(ff)
             logger.info(

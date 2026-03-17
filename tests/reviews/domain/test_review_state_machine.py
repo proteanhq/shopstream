@@ -79,37 +79,37 @@ class TestInvalidTransitions:
         review = _review_at_state(ReviewStatus.PUBLISHED)
         with pytest.raises(ValidationError) as exc:
             review.approve(moderator_id="mod-002")
-        assert "Cannot transition" in str(exc.value)
+        assert "already published" in str(exc.value)
 
     def test_cannot_reject_published_review(self):
         review = _review_at_state(ReviewStatus.PUBLISHED)
         with pytest.raises(ValidationError) as exc:
             review.reject(moderator_id="mod-002", reason="Too late")
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
     def test_cannot_approve_removed_review(self):
         review = _review_at_state(ReviewStatus.REMOVED)
         with pytest.raises(ValidationError) as exc:
             review.approve(moderator_id="mod-002")
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
     def test_cannot_reject_removed_review(self):
         review = _review_at_state(ReviewStatus.REMOVED)
         with pytest.raises(ValidationError) as exc:
             review.reject(moderator_id="mod-002", reason="Too late")
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
     def test_cannot_remove_pending_review(self):
         review = _review_at_state(ReviewStatus.PENDING)
         with pytest.raises(ValidationError) as exc:
             review.remove(removed_by="Admin", reason="Policy")
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
     def test_cannot_remove_rejected_review(self):
         review = _review_at_state(ReviewStatus.REJECTED)
         with pytest.raises(ValidationError) as exc:
             review.remove(removed_by="Admin", reason="Policy")
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
     def test_removed_is_terminal(self):
         review = _review_at_state(ReviewStatus.REMOVED)
@@ -120,7 +120,7 @@ class TestInvalidTransitions:
         review = _review_at_state(ReviewStatus.REJECTED)
         with pytest.raises(ValidationError) as exc:
             review.approve(moderator_id="mod-002")
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
 
 # ---------------------------------------------------------------

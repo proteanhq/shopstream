@@ -26,6 +26,7 @@ from protean.fields import (
     Identifier,
     Integer,
     List,
+    Status,
     String,
     Text,
     ValueObject,
@@ -73,17 +74,6 @@ class ReportReason(Enum):
 class ModerationAction(Enum):
     APPROVE = "Approve"
     REJECT = "Reject"
-
-
-# ---------------------------------------------------------------------------
-# State Machine
-# ---------------------------------------------------------------------------
-_VALID_TRANSITIONS = {
-    ReviewStatus.PENDING: {ReviewStatus.PUBLISHED, ReviewStatus.REJECTED},
-    ReviewStatus.PUBLISHED: {ReviewStatus.REMOVED},
-    ReviewStatus.REJECTED: {ReviewStatus.PENDING},  # Re-submit after edit
-    ReviewStatus.REMOVED: set(),  # Terminal state
-}
 
 
 # ---------------------------------------------------------------------------
@@ -162,7 +152,15 @@ class Review:
     verified_purchase = Boolean(default=False)
 
     # Status
-    status = String(choices=ReviewStatus, default=ReviewStatus.PENDING.value)
+    status = Status(
+        ReviewStatus,
+        default=ReviewStatus.PENDING.value,
+        transitions={
+            ReviewStatus.PENDING: [ReviewStatus.PUBLISHED, ReviewStatus.REJECTED],
+            ReviewStatus.PUBLISHED: [ReviewStatus.REMOVED],
+            ReviewStatus.REJECTED: [ReviewStatus.PENDING],  # Re-submit after edit
+        },
+    )
     moderation_notes = Text()
 
     # Voting
@@ -282,15 +280,6 @@ class Review:
         return review
 
     # -------------------------------------------------------------------
-    # State transitions
-    # -------------------------------------------------------------------
-    def _assert_can_transition(self, target_status):
-        """Validate state machine transition."""
-        current = ReviewStatus(self.status)
-        if target_status not in _VALID_TRANSITIONS.get(current, set()):
-            raise ValidationError({"status": [f"Cannot transition from {current.value} to {target_status.value}"]})
-
-    # -------------------------------------------------------------------
     # Edit
     # -------------------------------------------------------------------
     def edit(
@@ -347,7 +336,8 @@ class Review:
     # -------------------------------------------------------------------
     def approve(self, moderator_id, notes=None):
         """Approve the review for publication."""
-        self._assert_can_transition(ReviewStatus.PUBLISHED)
+        if self.status == ReviewStatus.PUBLISHED.value:
+            raise ValidationError({"status": ["Review is already published"]})
 
         now = datetime.now(UTC)
         self.status = ReviewStatus.PUBLISHED.value
@@ -367,7 +357,8 @@ class Review:
 
     def reject(self, moderator_id, reason):
         """Reject the review."""
-        self._assert_can_transition(ReviewStatus.REJECTED)
+        if self.status == ReviewStatus.REJECTED.value:
+            raise ValidationError({"status": ["Review is already rejected"]})
 
         now = datetime.now(UTC)
         self.status = ReviewStatus.REJECTED.value
@@ -472,7 +463,8 @@ class Review:
     # -------------------------------------------------------------------
     def remove(self, removed_by, reason):
         """Remove a published review."""
-        self._assert_can_transition(ReviewStatus.REMOVED)
+        if self.status == ReviewStatus.REMOVED.value:
+            raise ValidationError({"status": ["Review is already removed"]})
 
         now = datetime.now(UTC)
         self.status = ReviewStatus.REMOVED.value

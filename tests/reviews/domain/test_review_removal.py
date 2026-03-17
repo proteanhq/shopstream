@@ -48,7 +48,7 @@ class TestRemoveReview:
         review._events.clear()
         with pytest.raises(ValidationError) as exc:
             review.remove(removed_by="Admin", reason="Policy")
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
     def test_cannot_remove_already_removed_review(self):
         review = _published_review()

@@ -13,6 +13,7 @@ from protean.fields import (
     HasMany,
     Identifier,
     Integer,
+    Status,
     String,
     Text,
     ValueObject,
@@ -192,7 +193,15 @@ class Product:
     attributes: Dict()
     variants: HasMany(Variant)
     images: HasMany(Image)
-    status: String(choices=ProductStatus, default=ProductStatus.DRAFT.value)
+    status: Status(
+        ProductStatus,
+        default=ProductStatus.DRAFT.value,
+        transitions={
+            ProductStatus.DRAFT: [ProductStatus.ACTIVE, ProductStatus.ARCHIVED],
+            ProductStatus.ACTIVE: [ProductStatus.DISCONTINUED, ProductStatus.ARCHIVED],
+            ProductStatus.DISCONTINUED: [ProductStatus.ACTIVE, ProductStatus.ARCHIVED],
+        },
+    )
     visibility: String(choices=ProductVisibility, default=ProductVisibility.PUBLIC.value)
     seo: ValueObject(SEO)
     created_at: DateTime(default=datetime.now)

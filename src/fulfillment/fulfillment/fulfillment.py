@@ -21,6 +21,7 @@ from protean.fields import (
     Identifier,
     Integer,
     List,
+    Status,
     String,
     ValueObject,
 )
@@ -66,26 +67,6 @@ class ServiceLevel(Enum):
     STANDARD = "Standard"
     EXPRESS = "Express"
     OVERNIGHT = "Overnight"
-
-
-_VALID_TRANSITIONS = {
-    FulfillmentStatus.PENDING: {FulfillmentStatus.PICKING, FulfillmentStatus.CANCELLED},
-    FulfillmentStatus.PICKING: {FulfillmentStatus.PACKING, FulfillmentStatus.CANCELLED},
-    FulfillmentStatus.PACKING: {FulfillmentStatus.READY_TO_SHIP, FulfillmentStatus.CANCELLED},
-    FulfillmentStatus.READY_TO_SHIP: {FulfillmentStatus.SHIPPED, FulfillmentStatus.CANCELLED},
-    FulfillmentStatus.SHIPPED: {FulfillmentStatus.IN_TRANSIT},
-    FulfillmentStatus.IN_TRANSIT: {FulfillmentStatus.DELIVERED, FulfillmentStatus.EXCEPTION},
-    FulfillmentStatus.EXCEPTION: {FulfillmentStatus.IN_TRANSIT, FulfillmentStatus.DELIVERED},
-    FulfillmentStatus.DELIVERED: set(),  # terminal
-    FulfillmentStatus.CANCELLED: set(),  # terminal
-}
-
-_CANCELLABLE_STATUSES = {
-    FulfillmentStatus.PENDING,
-    FulfillmentStatus.PICKING,
-    FulfillmentStatus.PACKING,
-    FulfillmentStatus.READY_TO_SHIP,
-}
 
 
 # ---------------------------------------------------------------------------
@@ -142,10 +123,14 @@ class FulfillmentItem:
     sku = String(required=True, max_length=100)
     quantity = Integer(required=True, min_value=1)
     pick_location = String(max_length=100)
-    status = String(
-        max_length=50,
-        choices=FulfillmentItemStatus,
+    status = Status(
+        FulfillmentItemStatus,
         default=FulfillmentItemStatus.PENDING.value,
+        transitions={
+            FulfillmentItemStatus.PENDING: [FulfillmentItemStatus.PICKED],
+            FulfillmentItemStatus.PICKED: [FulfillmentItemStatus.PACKED],
+            # PACKED is terminal
+        },
     )
 
 
@@ -176,9 +161,19 @@ class Fulfillment:
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
     warehouse_id = Identifier()
-    status = String(
-        choices=FulfillmentStatus,
+    status = Status(
+        FulfillmentStatus,
         default=FulfillmentStatus.PENDING.value,
+        transitions={
+            FulfillmentStatus.PENDING: [FulfillmentStatus.PICKING, FulfillmentStatus.CANCELLED],
+            FulfillmentStatus.PICKING: [FulfillmentStatus.PACKING, FulfillmentStatus.CANCELLED],
+            FulfillmentStatus.PACKING: [FulfillmentStatus.READY_TO_SHIP, FulfillmentStatus.CANCELLED],
+            FulfillmentStatus.READY_TO_SHIP: [FulfillmentStatus.SHIPPED, FulfillmentStatus.CANCELLED],
+            FulfillmentStatus.SHIPPED: [FulfillmentStatus.IN_TRANSIT],
+            FulfillmentStatus.IN_TRANSIT: [FulfillmentStatus.DELIVERED, FulfillmentStatus.EXCEPTION],
+            FulfillmentStatus.EXCEPTION: [FulfillmentStatus.IN_TRANSIT, FulfillmentStatus.DELIVERED],
+            # DELIVERED and CANCELLED are terminal
+        },
     )
     items = HasMany(FulfillmentItem)
     pick_list = ValueObject(PickList)
@@ -227,19 +222,12 @@ class Fulfillment:
         return ff
 
     # -------------------------------------------------------------------
-    # State transition helper
-    # -------------------------------------------------------------------
-    def _assert_can_transition(self, target_status: FulfillmentStatus) -> None:
-        current = FulfillmentStatus(self.status)
-        if target_status not in _VALID_TRANSITIONS.get(current, set()):
-            raise ValidationError({"status": [f"Cannot transition from {current.value} to {target_status.value}"]})
-
-    # -------------------------------------------------------------------
     # Picking
     # -------------------------------------------------------------------
     def assign_picker(self, picker_name: str) -> None:
         """Assign a warehouse picker and begin the picking process."""
-        self._assert_can_transition(FulfillmentStatus.PICKING)
+        if FulfillmentStatus(self.status) != FulfillmentStatus.PENDING:
+            raise ValidationError({"status": ["Picker can only be assigned to a PENDING fulfillment"]})
         now = datetime.now(UTC)
         self.status = FulfillmentStatus.PICKING.value
         self.pick_list = PickList(assigned_to=picker_name, assigned_at=now)
@@ -358,7 +346,6 @@ class Fulfillment:
     # -------------------------------------------------------------------
     def record_handoff(self, tracking_number: str, estimated_delivery: datetime | None = None) -> None:
         """Record carrier handoff — the shipment has left the warehouse."""
-        self._assert_can_transition(FulfillmentStatus.SHIPPED)
         now = datetime.now(UTC)
         self.status = FulfillmentStatus.SHIPPED.value
         self.shipment = ShipmentInfo(
@@ -431,7 +418,6 @@ class Fulfillment:
     # -------------------------------------------------------------------
     def record_delivery(self) -> None:
         """Record confirmed delivery from the carrier."""
-        self._assert_can_transition(FulfillmentStatus.DELIVERED)
         now = datetime.now(UTC)
         self.status = FulfillmentStatus.DELIVERED.value
         if self.shipment:
@@ -454,7 +440,6 @@ class Fulfillment:
 
     def record_exception(self, reason: str, location: str | None = None) -> None:
         """Record a delivery exception from the carrier."""
-        self._assert_can_transition(FulfillmentStatus.EXCEPTION)
         now = datetime.now(UTC)
         self.status = FulfillmentStatus.EXCEPTION.value
         self.add_tracking_events(
@@ -482,7 +467,9 @@ class Fulfillment:
     def cancel(self, reason: str) -> None:
         """Cancel the fulfillment (only before shipment)."""
         current = FulfillmentStatus(self.status)
-        if current not in _CANCELLABLE_STATUSES:
+        if current == FulfillmentStatus.CANCELLED or not self.can_transition_to(
+            "status", FulfillmentStatus.CANCELLED.value
+        ):
             raise ValidationError({"status": [f"Cannot cancel fulfillment in {current.value} state"]})
 
         now = datetime.now(UTC)

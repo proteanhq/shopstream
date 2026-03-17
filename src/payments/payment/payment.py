@@ -25,6 +25,7 @@ from protean.fields import (
     HasMany,
     Identifier,
     Integer,
+    Status,
     String,
     ValueObject,
 )
@@ -60,16 +61,6 @@ class RefundStatus(Enum):
     PROCESSING = "Processing"
     COMPLETED = "Completed"
     FAILED = "Failed"
-
-
-_VALID_TRANSITIONS = {
-    PaymentStatus.PENDING: {PaymentStatus.PROCESSING, PaymentStatus.SUCCEEDED, PaymentStatus.FAILED},
-    PaymentStatus.PROCESSING: {PaymentStatus.SUCCEEDED, PaymentStatus.FAILED},
-    PaymentStatus.FAILED: {PaymentStatus.PENDING},  # retry
-    PaymentStatus.SUCCEEDED: {PaymentStatus.REFUNDED, PaymentStatus.PARTIALLY_REFUNDED},
-    PaymentStatus.REFUNDED: set(),  # Terminal
-    PaymentStatus.PARTIALLY_REFUNDED: {PaymentStatus.REFUNDED},
-}
 
 
 # ---------------------------------------------------------------------------
@@ -140,9 +131,16 @@ class Payment:
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
     amount = ValueObject(Money)
-    status = String(
-        choices=PaymentStatus,
+    status = Status(
+        PaymentStatus,
         default=PaymentStatus.PENDING.value,
+        transitions={
+            PaymentStatus.PENDING: [PaymentStatus.PROCESSING, PaymentStatus.SUCCEEDED, PaymentStatus.FAILED],
+            PaymentStatus.PROCESSING: [PaymentStatus.SUCCEEDED, PaymentStatus.FAILED],
+            PaymentStatus.FAILED: [PaymentStatus.PENDING],  # retry
+            PaymentStatus.SUCCEEDED: [PaymentStatus.REFUNDED, PaymentStatus.PARTIALLY_REFUNDED],
+            PaymentStatus.PARTIALLY_REFUNDED: [PaymentStatus.REFUNDED],
+        },
     )
     payment_method = ValueObject(PaymentMethod)
     gateway_info = ValueObject(GatewayInfo)
@@ -193,19 +191,10 @@ class Payment:
         return payment
 
     # -------------------------------------------------------------------
-    # State transition helper
-    # -------------------------------------------------------------------
-    def _assert_can_transition(self, target_status: PaymentStatus) -> None:
-        current = PaymentStatus(self.status)
-        if target_status not in _VALID_TRANSITIONS.get(current, set()):
-            raise ValidationError({"status": [f"Cannot transition from {current.value} to {target_status.value}"]})
-
-    # -------------------------------------------------------------------
     # Payment lifecycle
     # -------------------------------------------------------------------
     def record_processing(self) -> None:
         """Record that the payment is being processed by the gateway."""
-        self._assert_can_transition(PaymentStatus.PROCESSING)
         self.raise_(
             PaymentProcessing(
                 payment_id=str(self.id),
@@ -216,7 +205,6 @@ class Payment:
 
     def record_success(self, gateway_transaction_id: str) -> None:
         """Record successful payment capture from gateway webhook."""
-        self._assert_can_transition(PaymentStatus.SUCCEEDED)
         now = datetime.now(UTC)
         self.raise_(
             PaymentSucceeded(
@@ -232,7 +220,6 @@ class Payment:
 
     def record_failure(self, reason: str) -> None:
         """Record payment failure from gateway webhook."""
-        self._assert_can_transition(PaymentStatus.FAILED)
         now = datetime.now(UTC)
         can_retry = self.attempt_count < MAX_PAYMENT_ATTEMPTS
         self.raise_(
@@ -258,7 +245,6 @@ class Payment:
                 raise ValidationError({"attempts": [f"Maximum retry attempts ({MAX_PAYMENT_ATTEMPTS}) exceeded"]})
             raise ValidationError({"status": ["Payment can only be retried from Failed state"]})
 
-        self._assert_can_transition(PaymentStatus.PENDING)
         now = datetime.now(UTC)
         self.raise_(
             PaymentRetryInitiated(

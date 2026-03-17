@@ -65,4 +65,4 @@ class TestRemoveReviewCommand:
                 ),
                 asynchronous=False,
             )
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)

@@ -14,8 +14,7 @@ from datetime import UTC, datetime
 from enum import Enum
 from uuid import uuid4
 
-from protean.exceptions import ValidationError
-from protean.fields import DateTime, Float, HasMany, Identifier, String
+from protean.fields import DateTime, Float, HasMany, Identifier, Status, String
 
 from payments.domain import payments
 from payments.invoice.events import (
@@ -31,14 +30,6 @@ class InvoiceStatus(Enum):
     ISSUED = "Issued"
     PAID = "Paid"
     VOIDED = "Voided"
-
-
-_VALID_TRANSITIONS = {
-    InvoiceStatus.DRAFT: {InvoiceStatus.ISSUED, InvoiceStatus.VOIDED},
-    InvoiceStatus.ISSUED: {InvoiceStatus.PAID, InvoiceStatus.VOIDED},
-    InvoiceStatus.PAID: set(),  # Terminal
-    InvoiceStatus.VOIDED: set(),  # Terminal
-}
 
 
 @payments.entity(part_of="Invoice")
@@ -60,19 +51,18 @@ class Invoice:
     subtotal = Float(default=0.0)
     tax = Float(default=0.0)
     total = Float(default=0.0)
-    status = String(
-        choices=InvoiceStatus,
+    status = Status(
+        InvoiceStatus,
         default=InvoiceStatus.DRAFT.value,
+        transitions={
+            InvoiceStatus.DRAFT: [InvoiceStatus.ISSUED, InvoiceStatus.VOIDED],
+            InvoiceStatus.ISSUED: [InvoiceStatus.PAID, InvoiceStatus.VOIDED],
+        },
     )
     issued_at = DateTime()
     paid_at = DateTime()
     created_at = DateTime()
     updated_at = DateTime()
-
-    def _assert_can_transition(self, target_status: InvoiceStatus) -> None:
-        current = InvoiceStatus(self.status)
-        if target_status not in _VALID_TRANSITIONS.get(current, set()):
-            raise ValidationError({"status": [f"Cannot transition from {current.value} to {target_status.value}"]})
 
     @classmethod
     def create(
@@ -129,7 +119,6 @@ class Invoice:
 
     def issue(self) -> None:
         """Issue the invoice to the customer."""
-        self._assert_can_transition(InvoiceStatus.ISSUED)
         now = datetime.now(UTC)
         self.status = InvoiceStatus.ISSUED.value
         self.issued_at = now
@@ -145,7 +134,6 @@ class Invoice:
 
     def mark_paid(self) -> None:
         """Mark the invoice as paid."""
-        self._assert_can_transition(InvoiceStatus.PAID)
         now = datetime.now(UTC)
         self.status = InvoiceStatus.PAID.value
         self.paid_at = now
@@ -160,7 +148,6 @@ class Invoice:
 
     def void(self, reason: str) -> None:
         """Void the invoice."""
-        self._assert_can_transition(InvoiceStatus.VOIDED)
         now = datetime.now(UTC)
         self.status = InvoiceStatus.VOIDED.value
         self.updated_at = now
