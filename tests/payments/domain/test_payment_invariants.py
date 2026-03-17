@@ -94,7 +94,7 @@ class TestRecordProcessing:
     def test_cannot_process_from_succeeded(self):
         payment = _make_payment()
         payment.record_success(gateway_transaction_id="txn-1")
-        with pytest.raises(ValidationError, match="Cannot transition"):
+        with pytest.raises(ValidationError, match="Invalid status transition"):
             payment.record_processing()
 
 

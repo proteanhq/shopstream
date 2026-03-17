@@ -16,7 +16,7 @@ from datetime import UTC, datetime
 from enum import Enum
 
 from protean.exceptions import ValidationError
-from protean.fields import DateTime, Dict, Identifier, Integer, String, Text
+from protean.fields import DateTime, Dict, Identifier, Integer, Status, String, Text
 
 from notifications.domain import notifications
 from notifications.notification.events import (
@@ -71,29 +71,6 @@ class RecipientType(Enum):
 
 
 # ---------------------------------------------------------------------------
-# State Machine
-# ---------------------------------------------------------------------------
-_VALID_TRANSITIONS = {
-    NotificationStatus.PENDING: {
-        NotificationStatus.SENT,
-        NotificationStatus.FAILED,
-        NotificationStatus.CANCELLED,
-    },
-    NotificationStatus.SENT: {
-        NotificationStatus.DELIVERED,
-        NotificationStatus.FAILED,
-        NotificationStatus.BOUNCED,
-    },
-    NotificationStatus.FAILED: {
-        NotificationStatus.PENDING,  # Via retry
-    },
-    NotificationStatus.DELIVERED: set(),  # Terminal
-    NotificationStatus.BOUNCED: set(),  # Terminal
-    NotificationStatus.CANCELLED: set(),  # Terminal
-}
-
-
-# ---------------------------------------------------------------------------
 # Aggregate Root
 # ---------------------------------------------------------------------------
 @notifications.aggregate
@@ -125,7 +102,25 @@ class Notification:
     context_data: Dict()  # Data used to render the template
 
     # Status
-    status: String(choices=NotificationStatus, default=NotificationStatus.PENDING.value)
+    status: Status(
+        NotificationStatus,
+        default=NotificationStatus.PENDING.value,
+        transitions={
+            NotificationStatus.PENDING: [
+                NotificationStatus.SENT,
+                NotificationStatus.FAILED,
+                NotificationStatus.CANCELLED,
+            ],
+            NotificationStatus.SENT: [
+                NotificationStatus.DELIVERED,
+                NotificationStatus.FAILED,
+                NotificationStatus.BOUNCED,
+            ],
+            NotificationStatus.FAILED: [
+                NotificationStatus.PENDING,  # Via retry
+            ],
+        },
+    )
 
     # Scheduling
     scheduled_for: DateTime()  # Null means immediate
@@ -204,15 +199,10 @@ class Notification:
     # -------------------------------------------------------------------
     # State transitions
     # -------------------------------------------------------------------
-    def _assert_can_transition(self, target_status):
-        """Validate state machine transition."""
-        current = NotificationStatus(self.status)
-        if target_status not in _VALID_TRANSITIONS.get(current, set()):
-            raise ValidationError({"status": [f"Cannot transition from {current.value} to {target_status.value}"]})
-
     def mark_sent(self, sent_at=None):
         """Mark notification as successfully sent to the channel."""
-        self._assert_can_transition(NotificationStatus.SENT)
+        if self.status == NotificationStatus.SENT.value:
+            raise ValidationError({"status": ["Notification has already been sent"]})
 
         now = sent_at or datetime.now(UTC)
         self.status = NotificationStatus.SENT.value
@@ -230,8 +220,6 @@ class Notification:
 
     def mark_delivered(self, delivered_at=None):
         """Mark notification as confirmed delivered."""
-        self._assert_can_transition(NotificationStatus.DELIVERED)
-
         now = delivered_at or datetime.now(UTC)
         self.status = NotificationStatus.DELIVERED.value
         self.delivered_at = now
@@ -248,8 +236,6 @@ class Notification:
 
     def mark_failed(self, reason):
         """Mark notification as failed."""
-        self._assert_can_transition(NotificationStatus.FAILED)
-
         now = datetime.now(UTC)
         self.status = NotificationStatus.FAILED.value
         self.failure_reason = reason
@@ -270,8 +256,6 @@ class Notification:
 
     def mark_bounced(self, reason):
         """Mark notification as bounced (permanent delivery failure)."""
-        self._assert_can_transition(NotificationStatus.BOUNCED)
-
         now = datetime.now(UTC)
         self.status = NotificationStatus.BOUNCED.value
         self.failure_reason = reason
@@ -289,8 +273,6 @@ class Notification:
 
     def cancel(self, reason):
         """Cancel a pending notification."""
-        self._assert_can_transition(NotificationStatus.CANCELLED)
-
         now = datetime.now(UTC)
         self.status = NotificationStatus.CANCELLED.value
         self.failure_reason = reason

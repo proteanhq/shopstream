@@ -24,6 +24,7 @@ from protean.fields import (
     HasMany,
     Identifier,
     Integer,
+    Status,
     String,
     ValueObject,
 )
@@ -86,37 +87,6 @@ class CancellationActor(Enum):
     ADMIN = "Admin"
 
 
-# State machine transition map
-_VALID_TRANSITIONS = {
-    OrderStatus.CREATED: {OrderStatus.CONFIRMED, OrderStatus.CANCELLED},
-    OrderStatus.CONFIRMED: {OrderStatus.PAYMENT_PENDING, OrderStatus.CANCELLED},
-    OrderStatus.PAYMENT_PENDING: {
-        OrderStatus.PAID,
-        OrderStatus.CONFIRMED,  # Payment failure → retry
-        OrderStatus.CANCELLED,
-    },
-    OrderStatus.PAID: {OrderStatus.PROCESSING, OrderStatus.CANCELLED},
-    OrderStatus.PROCESSING: {OrderStatus.SHIPPED, OrderStatus.PARTIALLY_SHIPPED},
-    OrderStatus.PARTIALLY_SHIPPED: {OrderStatus.SHIPPED},
-    OrderStatus.SHIPPED: {OrderStatus.DELIVERED},
-    OrderStatus.DELIVERED: {OrderStatus.COMPLETED, OrderStatus.RETURN_REQUESTED},
-    OrderStatus.RETURN_REQUESTED: {OrderStatus.RETURN_APPROVED},
-    OrderStatus.RETURN_APPROVED: {OrderStatus.RETURNED},
-    OrderStatus.RETURNED: {OrderStatus.REFUNDED},
-    OrderStatus.CANCELLED: {OrderStatus.REFUNDED},
-    OrderStatus.COMPLETED: set(),  # Terminal
-    OrderStatus.REFUNDED: set(),  # Terminal
-}
-
-# States from which cancellation is allowed
-_CANCELLABLE_STATES = {
-    OrderStatus.CREATED,
-    OrderStatus.CONFIRMED,
-    OrderStatus.PAYMENT_PENDING,
-    OrderStatus.PAID,
-}
-
-
 # ---------------------------------------------------------------------------
 # Value Objects
 # ---------------------------------------------------------------------------
@@ -171,9 +141,15 @@ class OrderItem:
     unit_price = Float(required=True, min_value=0.0)
     discount = Float(default=0.0)
     tax_amount = Float(default=0.0)
-    item_status = String(
-        choices=ItemStatus,
+    item_status = Status(
+        ItemStatus,
         default=ItemStatus.PENDING.value,
+        transitions={
+            ItemStatus.PENDING: [ItemStatus.RESERVED],
+            ItemStatus.RESERVED: [ItemStatus.SHIPPED],
+            ItemStatus.SHIPPED: [ItemStatus.DELIVERED],
+            ItemStatus.DELIVERED: [ItemStatus.RETURNED],
+        },
     )
 
 
@@ -183,9 +159,32 @@ class OrderItem:
 @ordering.aggregate(is_event_sourced=True)
 class Order:
     customer_id = Identifier(required=True)
-    status = String(
-        choices=OrderStatus,
+    status = Status(
+        OrderStatus,
         default=OrderStatus.CREATED.value,
+        transitions={
+            OrderStatus.CREATED: [OrderStatus.CONFIRMED, OrderStatus.CANCELLED],
+            OrderStatus.CONFIRMED: [OrderStatus.PAYMENT_PENDING, OrderStatus.CANCELLED],
+            OrderStatus.PAYMENT_PENDING: [
+                OrderStatus.PAID,
+                OrderStatus.CONFIRMED,  # Payment failure → retry
+                OrderStatus.CANCELLED,
+            ],
+            OrderStatus.PAID: [
+                OrderStatus.PROCESSING,
+                OrderStatus.SHIPPED,
+                OrderStatus.PARTIALLY_SHIPPED,
+                OrderStatus.CANCELLED,
+            ],
+            OrderStatus.PROCESSING: [OrderStatus.SHIPPED, OrderStatus.PARTIALLY_SHIPPED],
+            OrderStatus.PARTIALLY_SHIPPED: [OrderStatus.SHIPPED],
+            OrderStatus.SHIPPED: [OrderStatus.DELIVERED],
+            OrderStatus.DELIVERED: [OrderStatus.COMPLETED, OrderStatus.RETURN_REQUESTED],
+            OrderStatus.RETURN_REQUESTED: [OrderStatus.RETURN_APPROVED],
+            OrderStatus.RETURN_APPROVED: [OrderStatus.RETURNED],
+            OrderStatus.RETURNED: [OrderStatus.REFUNDED],
+            OrderStatus.CANCELLED: [OrderStatus.REFUNDED],
+        },
     )
     items = HasMany(OrderItem)
     shipping_address = ValueObject(ShippingAddress)
@@ -254,15 +253,6 @@ class Order:
             )
         )
         return order
-
-    # -------------------------------------------------------------------
-    # State transition helper
-    # -------------------------------------------------------------------
-    def _assert_can_transition(self, target_status):
-        """Validate that the current state allows transition to target."""
-        current = OrderStatus(self.status)
-        if target_status not in _VALID_TRANSITIONS.get(current, set()):
-            raise ValidationError({"status": [f"Cannot transition from {current.value} to {target_status.value}"]})
 
     @staticmethod
     def _calculate_pricing(items, shipping_cost=0.0, tax_total=0.0, discount_total=0.0, currency="USD"):
@@ -423,7 +413,9 @@ class Order:
     # -------------------------------------------------------------------
     def confirm(self):
         """Confirm the order (inventory reserved)."""
-        self._assert_can_transition(OrderStatus.CONFIRMED)
+        if self.status == OrderStatus.CONFIRMED.value:
+            raise ValidationError({"status": ["Order is already confirmed"]})
+
         self.raise_(
             OrderConfirmed(
                 order_id=str(self.id),
@@ -438,7 +430,6 @@ class Order:
             return  # Already pending — idempotent
         if current in (OrderStatus.CANCELLED, OrderStatus.REFUNDED):
             return  # Lost race — order already cancelled/refunded
-        self._assert_can_transition(OrderStatus.PAYMENT_PENDING)
 
         self.raise_(
             PaymentPending(
@@ -456,7 +447,6 @@ class Order:
             return  # Already paid — idempotent
         if current in (OrderStatus.CANCELLED, OrderStatus.REFUNDED):
             return  # Lost race — order already cancelled/refunded
-        self._assert_can_transition(OrderStatus.PAID)
 
         self.raise_(
             PaymentSucceeded(
@@ -473,7 +463,6 @@ class Order:
         current = OrderStatus(self.status)
         if current in (OrderStatus.CANCELLED, OrderStatus.REFUNDED):
             return  # Lost race — order already cancelled/refunded
-        self._assert_can_transition(OrderStatus.CONFIRMED)
 
         self.raise_(
             PaymentFailed(
@@ -486,7 +475,6 @@ class Order:
 
     def mark_processing(self):
         """Mark order as being processed (fulfillment started)."""
-        self._assert_can_transition(OrderStatus.PROCESSING)
         self.raise_(
             OrderProcessing(
                 order_id=str(self.id),
@@ -546,7 +534,6 @@ class Order:
 
     def record_delivery(self):
         """Record that the order has been delivered."""
-        self._assert_can_transition(OrderStatus.DELIVERED)
         self.raise_(
             OrderDelivered(
                 order_id=str(self.id),
@@ -557,7 +544,9 @@ class Order:
 
     def complete(self):
         """Complete the order (return window expired)."""
-        self._assert_can_transition(OrderStatus.COMPLETED)
+        if self.status == OrderStatus.COMPLETED.value:
+            raise ValidationError({"status": ["Order is already completed"]})
+
         self.raise_(
             OrderCompleted(
                 order_id=str(self.id),
@@ -570,7 +559,6 @@ class Order:
     # -------------------------------------------------------------------
     def request_return(self, reason):
         """Request a return (within return window)."""
-        self._assert_can_transition(OrderStatus.RETURN_REQUESTED)
         self.raise_(
             ReturnRequested(
                 order_id=str(self.id),
@@ -581,7 +569,6 @@ class Order:
 
     def approve_return(self):
         """Approve a return request."""
-        self._assert_can_transition(OrderStatus.RETURN_APPROVED)
         self.raise_(
             ReturnApproved(
                 order_id=str(self.id),
@@ -591,7 +578,6 @@ class Order:
 
     def record_return(self, returned_item_ids=None):
         """Record that returned items have been received."""
-        self._assert_can_transition(OrderStatus.RETURNED)
         ids_to_return = returned_item_ids or [str(i.id) for i in self.items]
         self.raise_(
             OrderReturned(
@@ -609,13 +595,13 @@ class Order:
         current = OrderStatus(self.status)
         if current == OrderStatus.CANCELLED:
             return  # Already cancelled — idempotent
-        if current not in _CANCELLABLE_STATES:
+        if not self.can_transition_to("status", OrderStatus.CANCELLED.value):
             raise ValidationError(
                 {
                     "status": [
                         f"Cannot cancel order in {current.value} state. "
                         f"Cancellation is only allowed from: "
-                        f"{', '.join(s.value for s in _CANCELLABLE_STATES)}"
+                        f"Created, Confirmed, Payment_Pending, Paid"
                     ]
                 }
             )

@@ -5,7 +5,7 @@ from enum import Enum
 
 from protean import atomic_change, invariant
 from protean.exceptions import ValidationError
-from protean.fields import Boolean, Date, DateTime, Float, HasMany, String, ValueObject
+from protean.fields import Boolean, Date, DateTime, Float, HasMany, Status, String, ValueObject
 
 from identity.domain import identity
 from identity.shared.email import EmailAddress
@@ -105,8 +105,23 @@ class Customer:
     email: ValueObject(EmailAddress, required=True)
     profile: ValueObject(Profile)
     addresses: HasMany(Address)
-    status: String(choices=CustomerStatus, default=CustomerStatus.ACTIVE.value)
-    tier: String(choices=CustomerTier, default=CustomerTier.STANDARD.value)
+    status: Status(
+        CustomerStatus,
+        default=CustomerStatus.ACTIVE.value,
+        transitions={
+            CustomerStatus.ACTIVE: [CustomerStatus.SUSPENDED, CustomerStatus.CLOSED],
+            CustomerStatus.SUSPENDED: [CustomerStatus.ACTIVE, CustomerStatus.CLOSED],
+        },
+    )
+    tier: Status(
+        CustomerTier,
+        default=CustomerTier.STANDARD.value,
+        transitions={
+            CustomerTier.STANDARD: [CustomerTier.SILVER, CustomerTier.GOLD, CustomerTier.PLATINUM],
+            CustomerTier.SILVER: [CustomerTier.GOLD, CustomerTier.PLATINUM],
+            CustomerTier.GOLD: [CustomerTier.PLATINUM],
+        },
+    )
     registered_at: DateTime(default=datetime.now)
     last_login_at: DateTime()
 

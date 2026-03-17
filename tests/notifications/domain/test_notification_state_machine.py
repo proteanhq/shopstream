@@ -110,25 +110,25 @@ class TestInvalidTransitions:
         n = _notification_at_state(NotificationStatus.SENT)
         with pytest.raises(ValidationError) as exc:
             n.mark_sent()
-        assert "Cannot transition" in str(exc.value)
+        assert "already been sent" in str(exc.value)
 
     def test_cannot_deliver_pending(self):
         n = _notification_at_state(NotificationStatus.PENDING)
         with pytest.raises(ValidationError) as exc:
             n.mark_delivered()
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
     def test_cannot_cancel_sent(self):
         n = _notification_at_state(NotificationStatus.SENT)
         with pytest.raises(ValidationError) as exc:
             n.cancel("Too late")
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
     def test_cannot_bounce_pending(self):
         n = _notification_at_state(NotificationStatus.PENDING)
         with pytest.raises(ValidationError) as exc:
             n.mark_bounced("Bad address")
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
     def test_delivered_is_terminal(self):
         n = _notification_at_state(NotificationStatus.DELIVERED)
@@ -149,19 +149,19 @@ class TestInvalidTransitions:
         n = _notification_at_state(NotificationStatus.FAILED)
         with pytest.raises(ValidationError) as exc:
             n.cancel("Giving up")
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
     def test_cannot_deliver_failed(self):
         n = _notification_at_state(NotificationStatus.FAILED)
         with pytest.raises(ValidationError) as exc:
             n.mark_delivered()
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
     def test_cannot_bounce_failed(self):
         n = _notification_at_state(NotificationStatus.FAILED)
         with pytest.raises(ValidationError) as exc:
             n.mark_bounced("Bad address")
-        assert "Cannot transition" in str(exc.value)
+        assert "Invalid status transition" in str(exc.value)
 
 
 # ---------------------------------------------------------------

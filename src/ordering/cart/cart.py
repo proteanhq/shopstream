@@ -10,7 +10,7 @@ from enum import Enum
 
 from protean import invariant
 from protean.exceptions import ValidationError
-from protean.fields import DateTime, HasMany, Identifier, Integer, List, String
+from protean.fields import DateTime, HasMany, Identifier, Integer, List, Status, String
 
 from ordering.cart.events import (
     CartAbandoned,
@@ -50,7 +50,11 @@ class ShoppingCart:
     session_id = String(max_length=255)  # For guest cart identification
     items = HasMany(CartItem)
     applied_coupons = List(String())
-    status = String(choices=CartStatus, default=CartStatus.ACTIVE.value)
+    status = Status(
+        CartStatus,
+        default=CartStatus.ACTIVE.value,
+        transitions={CartStatus.ACTIVE: [CartStatus.CONVERTED, CartStatus.ABANDONED]},
+    )
     created_at = DateTime()
     updated_at = DateTime()
 
