@@ -8,6 +8,7 @@ from payments.domain import payments
 from payments.payment.events import (
     PaymentFailed,
     PaymentInitiated,
+    PaymentProcessing,
     PaymentRetryInitiated,
     PaymentSucceeded,
     RefundCompleted,
@@ -49,6 +50,14 @@ class PaymentStatusProjector:
                 updated_at=event.initiated_at,
             )
         )
+
+    @on(PaymentProcessing)
+    def on_payment_processing(self, event):
+        repo = current_domain.repository_for(PaymentStatusView)
+        view = repo.get(event.payment_id)
+        view.status = "Processing"
+        view.updated_at = event.processing_at
+        repo.add(view)
 
     @on(PaymentSucceeded)
     def on_payment_succeeded(self, event):

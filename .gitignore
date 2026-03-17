@@ -175,3 +175,4 @@ todo/
 *.todo
 *.temp
 CLAUDE.md
+.DS_Store

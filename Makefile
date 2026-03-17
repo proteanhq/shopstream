@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment
 
 # Default target
 help: ## Show this help message
@@ -221,6 +221,41 @@ check: lint typecheck test ## Run all checks (lint, typecheck, test)
 
 pre-commit: ## Run pre-commit hooks on all files
 	poetry run pre-commit run --all-files
+
+# ──────────────────────────────────────────────
+# Domain diagnostics (protean check)
+# ──────────────────────────────────────────────
+domain-check: ## Run protean check on all domains
+	@failed=0; \
+	for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \
+		PYTHONPATH=src poetry run protean check --domain=$$d.domain || \
+			if [ $$? -eq 1 ]; then failed=1; fi; \
+	done; \
+	exit $$failed
+
+domain-check-identity: ## Run protean check on identity domain
+	PYTHONPATH=src poetry run protean check --domain=identity.domain
+
+domain-check-catalogue: ## Run protean check on catalogue domain
+	PYTHONPATH=src poetry run protean check --domain=catalogue.domain
+
+domain-check-ordering: ## Run protean check on ordering domain
+	PYTHONPATH=src poetry run protean check --domain=ordering.domain
+
+domain-check-inventory: ## Run protean check on inventory domain
+	PYTHONPATH=src poetry run protean check --domain=inventory.domain
+
+domain-check-payments: ## Run protean check on payments domain
+	PYTHONPATH=src poetry run protean check --domain=payments.domain
+
+domain-check-fulfillment: ## Run protean check on fulfillment domain
+	PYTHONPATH=src poetry run protean check --domain=fulfillment.domain
+
+domain-check-reviews: ## Run protean check on reviews domain
+	PYTHONPATH=src poetry run protean check --domain=reviews.domain
+
+domain-check-notifications: ## Run protean check on notifications domain
+	PYTHONPATH=src poetry run protean check --domain=notifications.domain
 
 # ──────────────────────────────────────────────
 # Web Server
