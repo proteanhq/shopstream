@@ -10,6 +10,7 @@ from fulfillment.fulfillment.events import (
     DeliveryException,
     FulfillmentCancelled,
     FulfillmentCreated,
+    ItemPicked,
     PackingCompleted,
     PickerAssigned,
     PickingCompleted,
@@ -59,6 +60,13 @@ class FulfillmentStatusProjector:
         view.status = "Picking"
         view.assigned_to = event.assigned_to
         view.updated_at = event.assigned_at
+        repo.add(view)
+
+    @on(ItemPicked)
+    def on_item_picked(self, event):
+        repo = current_domain.repository_for(FulfillmentStatusView)
+        view = repo.get(event.fulfillment_id)
+        view.updated_at = event.picked_at
         repo.add(view)
 
     @on(PickingCompleted)
