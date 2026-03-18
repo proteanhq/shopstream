@@ -1,51 +1,58 @@
 """Tests for order confirmation."""
 
-import pytest
-from protean.exceptions import ValidationError
+from protean.testing import given
 
+from ordering.order.confirmation import ConfirmOrder
+from ordering.order.creation import CreateOrder
 from ordering.order.events import OrderConfirmed
 from ordering.order.order import Order, OrderStatus
+from ordering.order.payment import RecordPaymentPending, RecordPaymentSuccess
 
-
-def _make_order():
-    return Order.create(
-        customer_id="cust-001",
-        items_data=[
-            {"product_id": "p1", "variant_id": "v1", "sku": "S1", "title": "T", "quantity": 1, "unit_price": 10.0}
-        ],
-        shipping_address={"street": "1 St", "city": "C", "postal_code": "00000", "country": "US"},
-        billing_address={"street": "1 St", "city": "C", "postal_code": "00000", "country": "US"},
-        pricing={"subtotal": 10.0, "grand_total": 10.0},
-    )
+CREATE_ORDER_ARGS = {
+    "customer_id": "cust-001",
+    "items": [{"product_id": "p1", "variant_id": "v1", "sku": "S1", "title": "T", "quantity": 1, "unit_price": 10.0}],
+    "shipping_address": {"street": "1 St", "city": "C", "postal_code": "00000", "country": "US"},
+    "billing_address": {"street": "1 St", "city": "C", "postal_code": "00000", "country": "US"},
+    "subtotal": 10.0,
+    "shipping_cost": 0.0,
+    "tax_total": 0.0,
+    "discount_total": 0.0,
+    "grand_total": 10.0,
+    "currency": "USD",
+}
 
 
 class TestConfirmOrder:
     def test_confirm_transitions_to_confirmed(self):
-        order = _make_order()
-        order._events.clear()
-        order.confirm()
-        assert order.status == OrderStatus.CONFIRMED.value
+        result = given(Order).process(CreateOrder(**CREATE_ORDER_ARGS))
+        order_id = str(result.aggregate.id)
+        result = result.process(ConfirmOrder(order_id=order_id))
+        assert result.status == OrderStatus.CONFIRMED.value
 
     def test_confirm_raises_event(self):
-        order = _make_order()
-        order._events.clear()
-        order.confirm()
-        assert len(order._events) == 1
-        event = order._events[0]
-        assert isinstance(event, OrderConfirmed)
-        assert event.order_id == str(order.id)
+        result = given(Order).process(CreateOrder(**CREATE_ORDER_ARGS))
+        order_id = str(result.aggregate.id)
+        result = result.process(ConfirmOrder(order_id=order_id))
+        assert len(result.events) == 1
+        assert OrderConfirmed in result.events
+        event = result.events[OrderConfirmed]
+        assert event.order_id == order_id
         assert event.confirmed_at is not None
 
     def test_confirm_updates_timestamp(self):
-        order = _make_order()
-        original_updated = order.updated_at
-        order.confirm()
-        assert order.updated_at >= original_updated
+        result = given(Order).process(CreateOrder(**CREATE_ORDER_ARGS))
+        original_updated = result.aggregate.updated_at
+        order_id = str(result.aggregate.id)
+        result = result.process(ConfirmOrder(order_id=order_id))
+        assert result.aggregate.updated_at >= original_updated
 
     def test_cannot_confirm_from_paid(self):
-        order = _make_order()
-        order.confirm()
-        order.record_payment_pending("pay-001", "cc")
-        order.record_payment_success("pay-001", 10.0, "cc")
-        with pytest.raises(ValidationError):
-            order.confirm()
+        result = given(Order).process(CreateOrder(**CREATE_ORDER_ARGS))
+        order_id = str(result.aggregate.id)
+        result = result.process(ConfirmOrder(order_id=order_id))
+        result = result.process(RecordPaymentPending(order_id=order_id, payment_id="pay-001", payment_method="cc"))
+        result = result.process(
+            RecordPaymentSuccess(order_id=order_id, payment_id="pay-001", amount=10.0, payment_method="cc")
+        )
+        result = result.process(ConfirmOrder(order_id=order_id))
+        assert result.rejected

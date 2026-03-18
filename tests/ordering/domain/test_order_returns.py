@@ -1,120 +1,149 @@
 """Tests for order return lifecycle."""
 
-import pytest
-from protean.exceptions import ValidationError
+from protean.testing import given
 
+from ordering.order.cancellation import RefundOrder
+from ordering.order.confirmation import ConfirmOrder
+from ordering.order.creation import CreateOrder
 from ordering.order.events import OrderReturned, ReturnApproved, ReturnRequested
+from ordering.order.fulfillment import RecordDelivery, RecordShipment
 from ordering.order.order import ItemStatus, Order, OrderStatus
+from ordering.order.payment import RecordPaymentPending, RecordPaymentSuccess
+from ordering.order.returns import ApproveReturn, RecordReturn, RequestReturn
+
+CREATE_ORDER_ARGS = {
+    "customer_id": "cust-001",
+    "items": [
+        {"product_id": "p1", "variant_id": "v1", "sku": "S1", "title": "P1", "quantity": 1, "unit_price": 30.0},
+        {"product_id": "p2", "variant_id": "v2", "sku": "S2", "title": "P2", "quantity": 1, "unit_price": 20.0},
+    ],
+    "shipping_address": {"street": "1 St", "city": "C", "postal_code": "00000", "country": "US"},
+    "billing_address": {"street": "1 St", "city": "C", "postal_code": "00000", "country": "US"},
+    "subtotal": 50.0,
+    "shipping_cost": 0.0,
+    "tax_total": 0.0,
+    "discount_total": 0.0,
+    "grand_total": 50.0,
+    "currency": "USD",
+}
 
 
-def _make_delivered_order():
-    order = Order.create(
-        customer_id="cust-001",
-        items_data=[
-            {"product_id": "p1", "variant_id": "v1", "sku": "S1", "title": "P1", "quantity": 1, "unit_price": 30.0},
-            {"product_id": "p2", "variant_id": "v2", "sku": "S2", "title": "P2", "quantity": 1, "unit_price": 20.0},
-        ],
-        shipping_address={"street": "1 St", "city": "C", "postal_code": "00000", "country": "US"},
-        billing_address={"street": "1 St", "city": "C", "postal_code": "00000", "country": "US"},
-        pricing={"subtotal": 50.0, "grand_total": 50.0},
+def _delivered_result():
+    result = given(Order).process(CreateOrder(**CREATE_ORDER_ARGS))
+    order_id = str(result.aggregate.id)
+    result = (
+        result.process(ConfirmOrder(order_id=order_id))
+        .process(RecordPaymentPending(order_id=order_id, payment_id="pay-001", payment_method="cc"))
+        .process(RecordPaymentSuccess(order_id=order_id, payment_id="pay-001", amount=50.0, payment_method="cc"))
+        .process(
+            RecordShipment(order_id=order_id, shipment_id="ship-001", carrier="FedEx", tracking_number="TRACK-001")
+        )
+        .process(RecordDelivery(order_id=order_id))
     )
-    order.confirm()
-    order.record_payment_pending("pay-001", "cc")
-    order.record_payment_success("pay-001", 50.0, "cc")
-    order.record_shipment("ship-001", "FedEx", "TRACK-001")
-    order.record_delivery()
-    order._events.clear()
-    return order
+    return result, order_id
 
 
 class TestRequestReturn:
     def test_transitions_to_return_requested(self):
-        order = _make_delivered_order()
-        order.request_return("Defective product")
-        assert order.status == OrderStatus.RETURN_REQUESTED.value
+        result, order_id = _delivered_result()
+        result = result.process(RequestReturn(order_id=order_id, reason="Defective product"))
+        assert result.status == OrderStatus.RETURN_REQUESTED.value
 
     def test_raises_event(self):
-        order = _make_delivered_order()
-        order.request_return("Wrong size")
-        assert len(order._events) == 1
-        event = order._events[0]
-        assert isinstance(event, ReturnRequested)
+        result, order_id = _delivered_result()
+        result = result.process(RequestReturn(order_id=order_id, reason="Wrong size"))
+        assert len(result.events) == 1
+        assert ReturnRequested in result.events
+        event = result.events[ReturnRequested]
         assert event.reason == "Wrong size"
 
     def test_cannot_return_from_created(self):
-        order = Order.create(
-            customer_id="c",
-            items_data=[
-                {"product_id": "p", "variant_id": "v", "sku": "S", "title": "T", "quantity": 1, "unit_price": 10.0}
-            ],
-            shipping_address={"street": "1 St", "city": "C", "postal_code": "00000", "country": "US"},
-            billing_address={"street": "1 St", "city": "C", "postal_code": "00000", "country": "US"},
-            pricing={"subtotal": 10.0, "grand_total": 10.0},
+        result = given(Order).process(
+            CreateOrder(
+                customer_id="c",
+                items=[
+                    {"product_id": "p", "variant_id": "v", "sku": "S", "title": "T", "quantity": 1, "unit_price": 10.0}
+                ],
+                shipping_address={"street": "1 St", "city": "C", "postal_code": "00000", "country": "US"},
+                billing_address={"street": "1 St", "city": "C", "postal_code": "00000", "country": "US"},
+                subtotal=10.0,
+                shipping_cost=0.0,
+                tax_total=0.0,
+                discount_total=0.0,
+                grand_total=10.0,
+                currency="USD",
+            )
         )
-        with pytest.raises(ValidationError):
-            order.request_return("reason")
+        order_id = str(result.aggregate.id)
+        result = result.process(RequestReturn(order_id=order_id, reason="reason"))
+        assert result.rejected
 
 
 class TestApproveReturn:
     def test_transitions_to_return_approved(self):
-        order = _make_delivered_order()
-        order.request_return("Defective")
-        order._events.clear()
-        order.approve_return()
-        assert order.status == OrderStatus.RETURN_APPROVED.value
+        result, order_id = _delivered_result()
+        result = result.process(RequestReturn(order_id=order_id, reason="Defective")).process(
+            ApproveReturn(order_id=order_id)
+        )
+        assert result.status == OrderStatus.RETURN_APPROVED.value
 
     def test_raises_event(self):
-        order = _make_delivered_order()
-        order.request_return("Defective")
-        order._events.clear()
-        order.approve_return()
-        assert len(order._events) == 1
-        assert isinstance(order._events[0], ReturnApproved)
+        result, order_id = _delivered_result()
+        result = result.process(RequestReturn(order_id=order_id, reason="Defective")).process(
+            ApproveReturn(order_id=order_id)
+        )
+        assert len(result.events) == 1
+        assert ReturnApproved in result.events
 
 
 class TestRecordReturn:
     def test_transitions_to_returned(self):
-        order = _make_delivered_order()
-        order.request_return("Defective")
-        order.approve_return()
-        order._events.clear()
-        order.record_return()
-        assert order.status == OrderStatus.RETURNED.value
+        result, order_id = _delivered_result()
+        result = (
+            result.process(RequestReturn(order_id=order_id, reason="Defective"))
+            .process(ApproveReturn(order_id=order_id))
+            .process(RecordReturn(order_id=order_id))
+        )
+        assert result.status == OrderStatus.RETURNED.value
 
     def test_marks_items_as_returned(self):
-        order = _make_delivered_order()
-        order.request_return("Defective")
-        order.approve_return()
-        order._events.clear()
-        order.record_return()
-        for item in order.items:
+        result, order_id = _delivered_result()
+        result = (
+            result.process(RequestReturn(order_id=order_id, reason="Defective"))
+            .process(ApproveReturn(order_id=order_id))
+            .process(RecordReturn(order_id=order_id))
+        )
+        for item in result.aggregate.items:
             assert item.item_status == ItemStatus.RETURNED.value
 
     def test_partial_return(self):
-        order = _make_delivered_order()
-        order.request_return("Defective")
-        order.approve_return()
-        order._events.clear()
-        item_id = str(order.items[0].id)
-        order.record_return(returned_item_ids=[item_id])
-        assert order.items[0].item_status == ItemStatus.RETURNED.value
-        assert order.items[1].item_status == ItemStatus.DELIVERED.value
+        result, order_id = _delivered_result()
+        result = result.process(RequestReturn(order_id=order_id, reason="Defective")).process(
+            ApproveReturn(order_id=order_id)
+        )
+        item_id = str(result.aggregate.items[0].id)
+        result = result.process(RecordReturn(order_id=order_id, returned_item_ids=[item_id]))
+        assert result.aggregate.items[0].item_status == ItemStatus.RETURNED.value
+        assert result.aggregate.items[1].item_status == ItemStatus.DELIVERED.value
 
     def test_raises_event(self):
-        order = _make_delivered_order()
-        order.request_return("Defective")
-        order.approve_return()
-        order._events.clear()
-        order.record_return()
-        assert len(order._events) == 1
-        assert isinstance(order._events[0], OrderReturned)
+        result, order_id = _delivered_result()
+        result = (
+            result.process(RequestReturn(order_id=order_id, reason="Defective"))
+            .process(ApproveReturn(order_id=order_id))
+            .process(RecordReturn(order_id=order_id))
+        )
+        assert len(result.events) == 1
+        assert OrderReturned in result.events
 
 
 class TestFullReturnLifecycle:
     def test_delivered_to_return_to_refunded(self):
-        order = _make_delivered_order()
-        order.request_return("Defective")
-        order.approve_return()
-        order.record_return()
-        order.refund()
-        assert order.status == OrderStatus.REFUNDED.value
+        result, order_id = _delivered_result()
+        result = (
+            result.process(RequestReturn(order_id=order_id, reason="Defective"))
+            .process(ApproveReturn(order_id=order_id))
+            .process(RecordReturn(order_id=order_id))
+            .process(RefundOrder(order_id=order_id))
+        )
+        assert result.status == OrderStatus.REFUNDED.value
