@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Remove an image from a product's gallery.",
+  "properties": {
+    "image_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "image_id",
+    "product_id"
+  ],
+  "title": "RemoveProductImage",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "catalogue.product.images.RemoveProductImage",
+  "x-protean-type": "Catalogue.RemoveProductImage.v1",
+  "x-protean-version": 1
+}

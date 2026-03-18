@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A moderator approved the review for publication.",
+  "properties": {
+    "approved_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "moderator_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "rating": {
+      "type": "integer"
+    },
+    "review_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "approved_at",
+    "customer_id",
+    "moderator_id",
+    "product_id",
+    "rating",
+    "review_id"
+  ],
+  "title": "ReviewApproved",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "reviews.review.events.ReviewApproved",
+  "x-protean-published": true,
+  "x-protean-type": "Reviews.ReviewApproved.v1",
+  "x-protean-version": 1
+}

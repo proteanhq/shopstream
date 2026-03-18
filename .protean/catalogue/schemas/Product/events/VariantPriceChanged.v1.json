@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A variant's base price was updated.",
+  "properties": {
+    "currency": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_price": {
+      "type": "number"
+    },
+    "previous_price": {
+      "type": "number"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "currency",
+    "new_price",
+    "previous_price",
+    "product_id",
+    "variant_id"
+  ],
+  "title": "VariantPriceChanged",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "catalogue.product.events.VariantPriceChanged",
+  "x-protean-type": "Catalogue.VariantPriceChanged.v1",
+  "x-protean-version": 1
+}

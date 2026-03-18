@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A customer cleared their do-not-disturb window.",
+  "properties": {
+    "cleared_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "preference_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "cleared_at",
+    "customer_id",
+    "preference_id"
+  ],
+  "title": "QuietHoursCleared",
+  "type": "object",
+  "x-protean-aggregate": "notifications.preference.preference.NotificationPreference",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "notifications.preference.events.QuietHoursCleared",
+  "x-protean-type": "Notifications.QuietHoursCleared.v1",
+  "x-protean-version": 1
+}

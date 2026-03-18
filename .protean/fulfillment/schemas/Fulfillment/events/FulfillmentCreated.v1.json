@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A fulfillment was created for a paid order.",
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "item_count": {
+      "type": "integer"
+    },
+    "items": {
+      "type": "array"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "warehouse_id": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "created_at",
+    "customer_id",
+    "fulfillment_id",
+    "item_count",
+    "items",
+    "order_id"
+  ],
+  "title": "FulfillmentCreated",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "fulfillment.fulfillment.events.FulfillmentCreated",
+  "x-protean-type": "Fulfillment.FulfillmentCreated.v1",
+  "x-protean-version": 1
+}

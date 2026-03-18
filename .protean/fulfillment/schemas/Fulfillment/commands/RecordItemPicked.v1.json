@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Record that a single item has been picked from its location.",
+  "properties": {
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "pick_location": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "fulfillment_id",
+    "item_id",
+    "pick_location"
+  ],
+  "title": "RecordItemPicked",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "fulfillment.fulfillment.picking.RecordItemPicked",
+  "x-protean-type": "Fulfillment.RecordItemPicked.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Physical dimensions (length, width, height) of a product or variant.\n\nSupports centimeters (cm) and inches (in) as measurement units.",
+  "properties": {
+    "height": {
+      "anyOf": [
+        {
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "length": {
+      "anyOf": [
+        {
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "unit": {
+      "anyOf": [
+        {
+          "maxLength": 2,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "cm"
+    },
+    "width": {
+      "anyOf": [
+        {
+          "minimum": 0.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "title": "Dimensions",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "value_object",
+  "x-protean-fqn": "catalogue.product.product.Dimensions"
+}

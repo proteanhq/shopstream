@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A logical area within a warehouse (e.g., cold storage, hazmat).",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "warehouse": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "zone_name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "zone_type": {
+      "anyOf": [
+        {
+          "enum": [
+            "Cold",
+            "Hazmat",
+            "Regular"
+          ],
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "Regular"
+    }
+  },
+  "required": [
+    "id",
+    "zone_name"
+  ],
+  "title": "Zone",
+  "type": "object",
+  "x-protean-aggregate": "inventory.warehouse.warehouse.Warehouse",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "inventory.warehouse.warehouse.Zone",
+  "x-protean-identity-field": "id"
+}

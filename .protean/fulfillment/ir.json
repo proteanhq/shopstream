@@ -1,0 +1,2484 @@
+{
+  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
+  "checksum": "sha256:1bb512ca032f95045e4470e9798423926ddedeb93223330e34a7d6f469a02297",
+  "clusters": {
+    "abc.DefaultOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.DefaultOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "DefaultOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "outbox",
+          "stream_category": "fulfillment::default_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.DefaultOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.DefaultOutboxRepository",
+          "module": "protean.utils",
+          "name": "DefaultOutboxRepository",
+          "part_of": "abc.DefaultOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "abc.MemoryOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.MemoryOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "MemoryOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "memory",
+          "schema_name": "outbox",
+          "stream_category": "fulfillment::memory_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.MemoryOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.MemoryOutboxRepository",
+          "module": "protean.utils",
+          "name": "MemoryOutboxRepository",
+          "part_of": "abc.MemoryOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "fulfillment.fulfillment.fulfillment.Fulfillment": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "cancellation_reason": {
+            "kind": "standard",
+            "max_length": 500,
+            "sanitize": true,
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "items": {
+            "kind": "has_many",
+            "target": "fulfillment.fulfillment.fulfillment.FulfillmentItem"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "packages": {
+            "kind": "has_many",
+            "target": "fulfillment.fulfillment.fulfillment.Package"
+          },
+          "packing_info": {
+            "kind": "value_object",
+            "target": "fulfillment.fulfillment.fulfillment.PackingInfo"
+          },
+          "pick_list": {
+            "kind": "value_object",
+            "target": "fulfillment.fulfillment.fulfillment.PickList"
+          },
+          "shipment": {
+            "kind": "value_object",
+            "target": "fulfillment.fulfillment.fulfillment.ShipmentInfo"
+          },
+          "status": {
+            "choices": [
+              "Cancelled",
+              "Delivered",
+              "Exception",
+              "In_Transit",
+              "Packing",
+              "Pending",
+              "Picking",
+              "Ready_To_Ship",
+              "Shipped"
+            ],
+            "default": "Pending",
+            "kind": "status",
+            "transitions": {
+              "Exception": [
+                "In_Transit",
+                "Delivered"
+              ],
+              "In_Transit": [
+                "Delivered",
+                "Exception"
+              ],
+              "Packing": [
+                "Ready_To_Ship",
+                "Cancelled"
+              ],
+              "Pending": [
+                "Picking",
+                "Cancelled"
+              ],
+              "Picking": [
+                "Packing",
+                "Cancelled"
+              ],
+              "Ready_To_Ship": [
+                "Shipped",
+                "Cancelled"
+              ],
+              "Shipped": [
+                "In_Transit"
+              ]
+            },
+            "type": "Status"
+          },
+          "tracking_events": {
+            "kind": "has_many",
+            "target": "fulfillment.fulfillment.fulfillment.TrackingEvent"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "warehouse_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          }
+        },
+        "fqn": "fulfillment.fulfillment.fulfillment.Fulfillment",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "fulfillment.fulfillment.fulfillment",
+        "name": "Fulfillment",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "fulfillment",
+          "stream_category": "fulfillment::fulfillment"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "fulfillment.fulfillment.cancellation.CancelFulfillmentHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "fulfillment.fulfillment.cancellation.CancelFulfillmentHandler",
+          "handlers": {
+            "Fulfillment.CancelFulfillment.v1": [
+              "cancel_fulfillment"
+            ]
+          },
+          "module": "fulfillment.fulfillment.cancellation",
+          "name": "CancelFulfillmentHandler",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment",
+          "stream_category": "fulfillment::fulfillment:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "fulfillment.fulfillment.creation.CreateFulfillmentHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "fulfillment.fulfillment.creation.CreateFulfillmentHandler",
+          "handlers": {
+            "Fulfillment.CreateFulfillment.v1": [
+              "create_fulfillment"
+            ]
+          },
+          "module": "fulfillment.fulfillment.creation",
+          "name": "CreateFulfillmentHandler",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment",
+          "stream_category": "fulfillment::fulfillment:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "fulfillment.fulfillment.delivery.DeliveryHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "fulfillment.fulfillment.delivery.DeliveryHandler",
+          "handlers": {
+            "Fulfillment.RecordDeliveryConfirmation.v1": [
+              "record_delivery"
+            ],
+            "Fulfillment.RecordDeliveryException.v1": [
+              "record_exception"
+            ]
+          },
+          "module": "fulfillment.fulfillment.delivery",
+          "name": "DeliveryHandler",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment",
+          "stream_category": "fulfillment::fulfillment:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "fulfillment.fulfillment.packing.PackingHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "fulfillment.fulfillment.packing.PackingHandler",
+          "handlers": {
+            "Fulfillment.GenerateShippingLabel.v1": [
+              "generate_shipping_label"
+            ],
+            "Fulfillment.RecordPacking.v1": [
+              "record_packing"
+            ]
+          },
+          "module": "fulfillment.fulfillment.packing",
+          "name": "PackingHandler",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment",
+          "stream_category": "fulfillment::fulfillment:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "fulfillment.fulfillment.picking.PickingHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "fulfillment.fulfillment.picking.PickingHandler",
+          "handlers": {
+            "Fulfillment.AssignPicker.v1": [
+              "assign_picker"
+            ],
+            "Fulfillment.CompletePickList.v1": [
+              "complete_pick_list"
+            ],
+            "Fulfillment.RecordItemPicked.v1": [
+              "record_item_picked"
+            ]
+          },
+          "module": "fulfillment.fulfillment.picking",
+          "name": "PickingHandler",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment",
+          "stream_category": "fulfillment::fulfillment:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "fulfillment.fulfillment.shipping.ShippingHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "fulfillment.fulfillment.shipping.ShippingHandler",
+          "handlers": {
+            "Fulfillment.RecordHandoff.v1": [
+              "record_handoff"
+            ]
+          },
+          "module": "fulfillment.fulfillment.shipping",
+          "name": "ShippingHandler",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment",
+          "stream_category": "fulfillment::fulfillment:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "fulfillment.fulfillment.tracking.TrackingHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "fulfillment.fulfillment.tracking.TrackingHandler",
+          "handlers": {
+            "Fulfillment.UpdateTrackingEvent.v1": [
+              "update_tracking"
+            ]
+          },
+          "module": "fulfillment.fulfillment.tracking",
+          "name": "TrackingHandler",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment",
+          "stream_category": "fulfillment::fulfillment:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "fulfillment.fulfillment.cancellation.CancelFulfillment": {
+          "__type__": "Fulfillment.CancelFulfillment.v1",
+          "__version__": 1,
+          "description": "Cancel a fulfillment before it has been shipped.",
+          "element_type": "COMMAND",
+          "fields": {
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.cancellation.CancelFulfillment",
+          "module": "fulfillment.fulfillment.cancellation",
+          "name": "CancelFulfillment",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.creation.CreateFulfillment": {
+          "__type__": "Fulfillment.CreateFulfillment.v1",
+          "__version__": 1,
+          "description": "Create a new fulfillment for a paid order.",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "items": {
+              "content_type": "dict",
+              "kind": "list",
+              "required": true,
+              "type": "List"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "warehouse_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.creation.CreateFulfillment",
+          "module": "fulfillment.fulfillment.creation",
+          "name": "CreateFulfillment",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.delivery.RecordDeliveryConfirmation": {
+          "__type__": "Fulfillment.RecordDeliveryConfirmation.v1",
+          "__version__": 1,
+          "description": "Record confirmed delivery from the carrier.",
+          "element_type": "COMMAND",
+          "fields": {
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.delivery.RecordDeliveryConfirmation",
+          "module": "fulfillment.fulfillment.delivery",
+          "name": "RecordDeliveryConfirmation",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.delivery.RecordDeliveryException": {
+          "__type__": "Fulfillment.RecordDeliveryException.v1",
+          "__version__": 1,
+          "description": "Record a delivery exception from the carrier.",
+          "element_type": "COMMAND",
+          "fields": {
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "location": {
+              "kind": "standard",
+              "max_length": 200,
+              "sanitize": true,
+              "type": "String"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.delivery.RecordDeliveryException",
+          "module": "fulfillment.fulfillment.delivery",
+          "name": "RecordDeliveryException",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.packing.GenerateShippingLabel": {
+          "__type__": "Fulfillment.GenerateShippingLabel.v1",
+          "__version__": 1,
+          "description": "Record that a shipping label has been generated.",
+          "element_type": "COMMAND",
+          "fields": {
+            "carrier": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "label_url": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "service_level": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.packing.GenerateShippingLabel",
+          "module": "fulfillment.fulfillment.packing",
+          "name": "GenerateShippingLabel",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.packing.RecordPacking": {
+          "__type__": "Fulfillment.RecordPacking.v1",
+          "__version__": 1,
+          "description": "Record that items have been packed into shipping packages.",
+          "element_type": "COMMAND",
+          "fields": {
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "packages": {
+              "content_type": "dict",
+              "kind": "list",
+              "required": true,
+              "type": "List"
+            },
+            "packed_by": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.packing.RecordPacking",
+          "module": "fulfillment.fulfillment.packing",
+          "name": "RecordPacking",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.picking.AssignPicker": {
+          "__type__": "Fulfillment.AssignPicker.v1",
+          "__version__": 1,
+          "description": "Assign a warehouse picker to begin the picking process.",
+          "element_type": "COMMAND",
+          "fields": {
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "picker_name": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.picking.AssignPicker",
+          "module": "fulfillment.fulfillment.picking",
+          "name": "AssignPicker",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.picking.CompletePickList": {
+          "__type__": "Fulfillment.CompletePickList.v1",
+          "__version__": 1,
+          "description": "Complete the pick list \u2014 all items must have been picked.",
+          "element_type": "COMMAND",
+          "fields": {
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.picking.CompletePickList",
+          "module": "fulfillment.fulfillment.picking",
+          "name": "CompletePickList",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.picking.RecordItemPicked": {
+          "__type__": "Fulfillment.RecordItemPicked.v1",
+          "__version__": 1,
+          "description": "Record that a single item has been picked from its location.",
+          "element_type": "COMMAND",
+          "fields": {
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "pick_location": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.picking.RecordItemPicked",
+          "module": "fulfillment.fulfillment.picking",
+          "name": "RecordItemPicked",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.shipping.RecordHandoff": {
+          "__type__": "Fulfillment.RecordHandoff.v1",
+          "__version__": 1,
+          "description": "Record that the shipment has been handed off to the carrier.",
+          "element_type": "COMMAND",
+          "fields": {
+            "estimated_delivery": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "tracking_number": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.shipping.RecordHandoff",
+          "module": "fulfillment.fulfillment.shipping",
+          "name": "RecordHandoff",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.tracking.UpdateTrackingEvent": {
+          "__type__": "Fulfillment.UpdateTrackingEvent.v1",
+          "__version__": 1,
+          "description": "Record a tracking event from the carrier webhook.",
+          "element_type": "COMMAND",
+          "fields": {
+            "description": {
+              "kind": "standard",
+              "max_length": 500,
+              "sanitize": true,
+              "type": "String"
+            },
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "location": {
+              "kind": "standard",
+              "max_length": 200,
+              "sanitize": true,
+              "type": "String"
+            },
+            "status": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.tracking.UpdateTrackingEvent",
+          "module": "fulfillment.fulfillment.tracking",
+          "name": "UpdateTrackingEvent",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        }
+      },
+      "database_models": {},
+      "entities": {
+        "fulfillment.fulfillment.fulfillment.FulfillmentItem": {
+          "description": "A single line item being fulfilled.",
+          "element_type": "ENTITY",
+          "fields": {
+            "fulfillment": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "fulfillment.fulfillment.fulfillment.Fulfillment"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "order_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "pick_location": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "min_value": 1,
+              "required": true,
+              "type": "Integer"
+            },
+            "sku": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "status": {
+              "choices": [
+                "Packed",
+                "Pending",
+                "Picked"
+              ],
+              "default": "Pending",
+              "kind": "status",
+              "transitions": {
+                "Pending": [
+                  "Picked"
+                ],
+                "Picked": [
+                  "Packed"
+                ]
+              },
+              "type": "Status"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.fulfillment.FulfillmentItem",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "fulfillment.fulfillment.fulfillment",
+          "name": "FulfillmentItem",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "fulfillment_item"
+          },
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.fulfillment.Package": {
+          "description": "A physical package in the shipment.",
+          "element_type": "ENTITY",
+          "fields": {
+            "dimensions": {
+              "kind": "value_object",
+              "target": "fulfillment.fulfillment.fulfillment.PackageDimensions"
+            },
+            "fulfillment": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "fulfillment.fulfillment.fulfillment.Fulfillment"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "item_ids": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            },
+            "weight": {
+              "kind": "standard",
+              "type": "Float"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.fulfillment.Package",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "fulfillment.fulfillment.fulfillment",
+          "name": "Package",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "package"
+          },
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.fulfillment.TrackingEvent": {
+          "description": "A carrier tracking event.",
+          "element_type": "ENTITY",
+          "fields": {
+            "description": {
+              "kind": "standard",
+              "max_length": 500,
+              "sanitize": true,
+              "type": "String"
+            },
+            "fulfillment": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "fulfillment.fulfillment.fulfillment.Fulfillment"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "location": {
+              "kind": "standard",
+              "max_length": 200,
+              "sanitize": true,
+              "type": "String"
+            },
+            "occurred_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "status": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.fulfillment.TrackingEvent",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "fulfillment.fulfillment.fulfillment",
+          "name": "TrackingEvent",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "tracking_event"
+          },
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        }
+      },
+      "event_handlers": {},
+      "events": {
+        "fulfillment.fulfillment.events.DeliveryConfirmed": {
+          "__type__": "Fulfillment.DeliveryConfirmed.v1",
+          "__version__": 1,
+          "description": "The carrier confirmed delivery to the customer.",
+          "element_type": "EVENT",
+          "fields": {
+            "actual_delivery": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "delivered_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.events.DeliveryConfirmed",
+          "is_fact_event": false,
+          "module": "fulfillment.fulfillment.events",
+          "name": "DeliveryConfirmed",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment",
+          "published": true
+        },
+        "fulfillment.fulfillment.events.DeliveryException": {
+          "__type__": "Fulfillment.DeliveryException.v1",
+          "__version__": 1,
+          "description": "The carrier reported a delivery exception.",
+          "element_type": "EVENT",
+          "fields": {
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "location": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "occurred_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.events.DeliveryException",
+          "is_fact_event": false,
+          "module": "fulfillment.fulfillment.events",
+          "name": "DeliveryException",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment",
+          "published": true
+        },
+        "fulfillment.fulfillment.events.FulfillmentCancelled": {
+          "__type__": "Fulfillment.FulfillmentCancelled.v1",
+          "__version__": 1,
+          "description": "The fulfillment was cancelled before shipment.",
+          "element_type": "EVENT",
+          "fields": {
+            "cancelled_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.events.FulfillmentCancelled",
+          "is_fact_event": false,
+          "module": "fulfillment.fulfillment.events",
+          "name": "FulfillmentCancelled",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.events.FulfillmentCreated": {
+          "__type__": "Fulfillment.FulfillmentCreated.v1",
+          "__version__": 1,
+          "description": "A fulfillment was created for a paid order.",
+          "element_type": "EVENT",
+          "fields": {
+            "created_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "item_count": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "items": {
+              "content_type": "dict",
+              "kind": "list",
+              "required": true,
+              "type": "List"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "warehouse_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.events.FulfillmentCreated",
+          "is_fact_event": false,
+          "module": "fulfillment.fulfillment.events",
+          "name": "FulfillmentCreated",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.events.ItemPicked": {
+          "__type__": "Fulfillment.ItemPicked.v1",
+          "__version__": 1,
+          "description": "A single item was picked from its warehouse location.",
+          "element_type": "EVENT",
+          "fields": {
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "pick_location": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "picked_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.events.ItemPicked",
+          "is_fact_event": false,
+          "module": "fulfillment.fulfillment.events",
+          "name": "ItemPicked",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.events.PackingCompleted": {
+          "__type__": "Fulfillment.PackingCompleted.v1",
+          "__version__": 1,
+          "description": "Items have been packed into shipping packages.",
+          "element_type": "EVENT",
+          "fields": {
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "package_count": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "packed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "packed_by": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.events.PackingCompleted",
+          "is_fact_event": false,
+          "module": "fulfillment.fulfillment.events",
+          "name": "PackingCompleted",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.events.PickerAssigned": {
+          "__type__": "Fulfillment.PickerAssigned.v1",
+          "__version__": 1,
+          "description": "A warehouse picker was assigned to a fulfillment.",
+          "element_type": "EVENT",
+          "fields": {
+            "assigned_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "assigned_to": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.events.PickerAssigned",
+          "is_fact_event": false,
+          "module": "fulfillment.fulfillment.events",
+          "name": "PickerAssigned",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.events.PickingCompleted": {
+          "__type__": "Fulfillment.PickingCompleted.v1",
+          "__version__": 1,
+          "description": "All items in the pick list have been picked.",
+          "element_type": "EVENT",
+          "fields": {
+            "completed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.events.PickingCompleted",
+          "is_fact_event": false,
+          "module": "fulfillment.fulfillment.events",
+          "name": "PickingCompleted",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.events.ShipmentHandedOff": {
+          "__type__": "Fulfillment.ShipmentHandedOff.v1",
+          "__version__": 1,
+          "description": "The shipment was handed off to the carrier.",
+          "element_type": "EVENT",
+          "fields": {
+            "carrier": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "estimated_delivery": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "shipped_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "shipped_item_ids": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            },
+            "tracking_number": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.events.ShipmentHandedOff",
+          "is_fact_event": false,
+          "module": "fulfillment.fulfillment.events",
+          "name": "ShipmentHandedOff",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment",
+          "published": true
+        },
+        "fulfillment.fulfillment.events.ShippingLabelGenerated": {
+          "__type__": "Fulfillment.ShippingLabelGenerated.v1",
+          "__version__": 1,
+          "description": "A shipping label was generated for the fulfillment.",
+          "element_type": "EVENT",
+          "fields": {
+            "carrier": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "generated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "label_url": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "service_level": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.events.ShippingLabelGenerated",
+          "is_fact_event": false,
+          "module": "fulfillment.fulfillment.events",
+          "name": "ShippingLabelGenerated",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.events.TrackingEventReceived": {
+          "__type__": "Fulfillment.TrackingEventReceived.v1",
+          "__version__": 1,
+          "description": "A tracking event was received from the carrier.",
+          "element_type": "EVENT",
+          "fields": {
+            "description": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "fulfillment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "location": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "occurred_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "status": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.events.TrackingEventReceived",
+          "is_fact_event": false,
+          "module": "fulfillment.fulfillment.events",
+          "name": "TrackingEventReceived",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        }
+      },
+      "repositories": {},
+      "value_objects": {
+        "fulfillment.fulfillment.fulfillment.PackageDimensions": {
+          "description": "Physical dimensions and weight of a package.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "height": {
+              "kind": "standard",
+              "type": "Float"
+            },
+            "length": {
+              "kind": "standard",
+              "type": "Float"
+            },
+            "weight": {
+              "kind": "standard",
+              "type": "Float"
+            },
+            "width": {
+              "kind": "standard",
+              "type": "Float"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.fulfillment.PackageDimensions",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "fulfillment.fulfillment.fulfillment",
+          "name": "PackageDimensions",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.fulfillment.PackingInfo": {
+          "description": "Packing completion details.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "packed_at": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "packed_by": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "shipping_label_url": {
+              "kind": "standard",
+              "max_length": 500,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.fulfillment.PackingInfo",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "fulfillment.fulfillment.fulfillment",
+          "name": "PackingInfo",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.fulfillment.PickList": {
+          "description": "Picking assignment details.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "assigned_at": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "assigned_to": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "completed_at": {
+              "kind": "standard",
+              "type": "DateTime"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.fulfillment.PickList",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "fulfillment.fulfillment.fulfillment",
+          "name": "PickList",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        },
+        "fulfillment.fulfillment.fulfillment.ShipmentInfo": {
+          "description": "Carrier shipment details.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "actual_delivery": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "carrier": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "estimated_delivery": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "service_level": {
+              "choices": [
+                "Express",
+                "Overnight",
+                "Standard"
+              ],
+              "kind": "standard",
+              "max_length": 50,
+              "sanitize": true,
+              "type": "String"
+            },
+            "tracking_number": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "fulfillment.fulfillment.fulfillment.ShipmentInfo",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "fulfillment.fulfillment.fulfillment",
+          "name": "ShipmentInfo",
+          "part_of": "fulfillment.fulfillment.fulfillment.Fulfillment"
+        }
+      }
+    }
+  },
+  "contracts": {
+    "events": [
+      {
+        "fields": {
+          "actual_delivery": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "delivered_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "fulfillment_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "fulfillment.fulfillment.events.DeliveryConfirmed",
+        "type": "Fulfillment.DeliveryConfirmed.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "fulfillment_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "location": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "occurred_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "fulfillment.fulfillment.events.DeliveryException",
+        "type": "Fulfillment.DeliveryException.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "carrier": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "estimated_delivery": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "fulfillment_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "shipped_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "shipped_item_ids": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "tracking_number": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "fulfillment.fulfillment.events.ShipmentHandedOff",
+        "type": "Fulfillment.ShipmentHandedOff.v1",
+        "version": 1
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.DefaultOutbox",
+      "level": "warning",
+      "message": "Aggregate `DefaultOutbox` has no command handler \u2014 no write path exists"
+    },
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.MemoryOutbox",
+      "level": "warning",
+      "message": "Aggregate `MemoryOutbox` has no command handler \u2014 no write path exists"
+    }
+  ],
+  "domain": {
+    "camel_case_name": "Fulfillment",
+    "command_processing": "sync",
+    "event_processing": "async",
+    "identity_strategy": "uuid",
+    "identity_type": "string",
+    "name": "fulfillment",
+    "normalized_name": "fulfillment"
+  },
+  "elements": {
+    "AGGREGATE": [
+      "abc.DefaultOutbox",
+      "abc.MemoryOutbox",
+      "fulfillment.fulfillment.fulfillment.Fulfillment"
+    ],
+    "APPLICATION_SERVICE": [],
+    "COMMAND": [
+      "fulfillment.fulfillment.cancellation.CancelFulfillment",
+      "fulfillment.fulfillment.creation.CreateFulfillment",
+      "fulfillment.fulfillment.delivery.RecordDeliveryConfirmation",
+      "fulfillment.fulfillment.delivery.RecordDeliveryException",
+      "fulfillment.fulfillment.packing.GenerateShippingLabel",
+      "fulfillment.fulfillment.packing.RecordPacking",
+      "fulfillment.fulfillment.picking.AssignPicker",
+      "fulfillment.fulfillment.picking.CompletePickList",
+      "fulfillment.fulfillment.picking.RecordItemPicked",
+      "fulfillment.fulfillment.shipping.RecordHandoff",
+      "fulfillment.fulfillment.tracking.UpdateTrackingEvent"
+    ],
+    "COMMAND_HANDLER": [
+      "fulfillment.fulfillment.cancellation.CancelFulfillmentHandler",
+      "fulfillment.fulfillment.creation.CreateFulfillmentHandler",
+      "fulfillment.fulfillment.delivery.DeliveryHandler",
+      "fulfillment.fulfillment.packing.PackingHandler",
+      "fulfillment.fulfillment.picking.PickingHandler",
+      "fulfillment.fulfillment.shipping.ShippingHandler",
+      "fulfillment.fulfillment.tracking.TrackingHandler"
+    ],
+    "DATABASE_MODEL": [],
+    "DOMAIN_SERVICE": [],
+    "ENTITY": [
+      "fulfillment.fulfillment.fulfillment.FulfillmentItem",
+      "fulfillment.fulfillment.fulfillment.Package",
+      "fulfillment.fulfillment.fulfillment.TrackingEvent"
+    ],
+    "EVENT": [
+      "fulfillment.fulfillment.events.DeliveryConfirmed",
+      "fulfillment.fulfillment.events.DeliveryException",
+      "fulfillment.fulfillment.events.FulfillmentCancelled",
+      "fulfillment.fulfillment.events.FulfillmentCreated",
+      "fulfillment.fulfillment.events.ItemPicked",
+      "fulfillment.fulfillment.events.PackingCompleted",
+      "fulfillment.fulfillment.events.PickerAssigned",
+      "fulfillment.fulfillment.events.PickingCompleted",
+      "fulfillment.fulfillment.events.ShipmentHandedOff",
+      "fulfillment.fulfillment.events.ShippingLabelGenerated",
+      "fulfillment.fulfillment.events.TrackingEventReceived"
+    ],
+    "EVENT_HANDLER": [],
+    "PROCESS_MANAGER": [],
+    "PROJECTION": [
+      "fulfillment.projections.daily_shipments.DailyShipmentsView",
+      "fulfillment.projections.delivery_performance.DeliveryPerformanceView",
+      "fulfillment.projections.fulfillment_status.FulfillmentStatusView",
+      "fulfillment.projections.shipment_tracking.ShipmentTrackingView",
+      "fulfillment.projections.warehouse_queue.WarehouseQueueView"
+    ],
+    "PROJECTOR": [
+      "fulfillment.projections.daily_shipments.DailyShipmentsProjector",
+      "fulfillment.projections.delivery_performance.DeliveryPerformanceProjector",
+      "fulfillment.projections.fulfillment_status.FulfillmentStatusProjector",
+      "fulfillment.projections.shipment_tracking.ShipmentTrackingProjector",
+      "fulfillment.projections.warehouse_queue.WarehouseQueueProjector"
+    ],
+    "QUERY": [
+      "fulfillment.projections.shipment_tracking_queries.GetShipmentTracking"
+    ],
+    "QUERY_HANDLER": [
+      "fulfillment.projections.shipment_tracking_queries.ShipmentTrackingQueryHandler"
+    ],
+    "REPOSITORY": [
+      "protean.utils.DefaultOutboxRepository",
+      "protean.utils.MemoryOutboxRepository"
+    ],
+    "SUBSCRIBER": [
+      "fulfillment.fulfillment.order_subscriber.OrderEventsSubscriber",
+      "fulfillment.fulfillment.payment_subscriber.PaymentEventsSubscriber"
+    ],
+    "VALUE_OBJECT": [
+      "fulfillment.fulfillment.fulfillment.PackageDimensions",
+      "fulfillment.fulfillment.fulfillment.PackingInfo",
+      "fulfillment.fulfillment.fulfillment.PickList",
+      "fulfillment.fulfillment.fulfillment.ShipmentInfo"
+    ]
+  },
+  "flows": {
+    "domain_services": {},
+    "process_managers": {},
+    "subscribers": {
+      "fulfillment.fulfillment.order_subscriber.OrderEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Ordering domain events relevant to Fulfillment.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and performs domain actions. Ignores all event\ntypes not relevant to the Fulfillment domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "fulfillment.fulfillment.order_subscriber.OrderEventsSubscriber",
+        "module": "fulfillment.fulfillment.order_subscriber",
+        "name": "OrderEventsSubscriber",
+        "stream": "ordering::order"
+      },
+      "fulfillment.fulfillment.payment_subscriber.PaymentEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Payment domain events to create fulfillments.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and performs domain actions. Ignores all event\ntypes not relevant to the Fulfillment domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "fulfillment.fulfillment.payment_subscriber.PaymentEventsSubscriber",
+        "module": "fulfillment.fulfillment.payment_subscriber",
+        "name": "PaymentEventsSubscriber",
+        "stream": "payments::payment"
+      }
+    }
+  },
+  "generated_at": "2026-03-18T13:30:26Z",
+  "ir_version": "0.1.0",
+  "projections": {
+    "fulfillment.projections.daily_shipments.DailyShipmentsView": {
+      "projection": {
+        "description": "Daily aggregate of fulfillment operations.",
+        "element_type": "PROJECTION",
+        "fields": {
+          "date": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "total_created": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "total_delivered": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "total_exceptions": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "total_shipped": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "fulfillment.projections.daily_shipments.DailyShipmentsView",
+        "identity_field": "id",
+        "module": "fulfillment.projections.daily_shipments",
+        "name": "DailyShipmentsView",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "daily_shipments_view"
+        }
+      },
+      "projectors": {
+        "fulfillment.projections.daily_shipments.DailyShipmentsProjector": {
+          "aggregates": [
+            "fulfillment.fulfillment.fulfillment.Fulfillment"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "fulfillment.projections.daily_shipments.DailyShipmentsProjector",
+          "handlers": {
+            "Fulfillment.DeliveryConfirmed.v1": [
+              "on_delivery_confirmed"
+            ],
+            "Fulfillment.DeliveryException.v1": [
+              "on_delivery_exception"
+            ],
+            "Fulfillment.FulfillmentCreated.v1": [
+              "on_fulfillment_created"
+            ],
+            "Fulfillment.ShipmentHandedOff.v1": [
+              "on_shipment_handed_off"
+            ]
+          },
+          "module": "fulfillment.projections.daily_shipments",
+          "name": "DailyShipmentsProjector",
+          "projector_for": "fulfillment.projections.daily_shipments.DailyShipmentsView",
+          "stream_categories": [
+            "fulfillment::fulfillment"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "fulfillment.projections.delivery_performance.DeliveryPerformanceView": {
+      "projection": {
+        "description": "Carrier delivery performance aggregated by carrier and date.",
+        "element_type": "PROJECTION",
+        "fields": {
+          "carrier": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "date": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "delivered_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "exception_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "total_delivery_hours": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "total_shipments": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "fulfillment.projections.delivery_performance.DeliveryPerformanceView",
+        "identity_field": "id",
+        "module": "fulfillment.projections.delivery_performance",
+        "name": "DeliveryPerformanceView",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "delivery_performance_view"
+        }
+      },
+      "projectors": {
+        "fulfillment.projections.delivery_performance.DeliveryPerformanceProjector": {
+          "aggregates": [
+            "fulfillment.fulfillment.fulfillment.Fulfillment"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "fulfillment.projections.delivery_performance.DeliveryPerformanceProjector",
+          "handlers": {
+            "Fulfillment.DeliveryConfirmed.v1": [
+              "on_delivery_confirmed"
+            ],
+            "Fulfillment.DeliveryException.v1": [
+              "on_delivery_exception"
+            ],
+            "Fulfillment.ShipmentHandedOff.v1": [
+              "on_shipment_handed_off"
+            ]
+          },
+          "module": "fulfillment.projections.delivery_performance",
+          "name": "DeliveryPerformanceProjector",
+          "projector_for": "fulfillment.projections.delivery_performance.DeliveryPerformanceView",
+          "stream_categories": [
+            "fulfillment::fulfillment"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "fulfillment.projections.fulfillment_status.FulfillmentStatusView": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "assigned_to": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "carrier": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "fulfillment_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "item_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "tracking_number": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "warehouse_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "fulfillment.projections.fulfillment_status.FulfillmentStatusView",
+        "identity_field": "fulfillment_id",
+        "module": "fulfillment.projections.fulfillment_status",
+        "name": "FulfillmentStatusView",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "fulfillment_status_view"
+        }
+      },
+      "projectors": {
+        "fulfillment.projections.fulfillment_status.FulfillmentStatusProjector": {
+          "aggregates": [
+            "fulfillment.fulfillment.fulfillment.Fulfillment"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "fulfillment.projections.fulfillment_status.FulfillmentStatusProjector",
+          "handlers": {
+            "Fulfillment.DeliveryConfirmed.v1": [
+              "on_delivery_confirmed"
+            ],
+            "Fulfillment.DeliveryException.v1": [
+              "on_delivery_exception"
+            ],
+            "Fulfillment.FulfillmentCancelled.v1": [
+              "on_fulfillment_cancelled"
+            ],
+            "Fulfillment.FulfillmentCreated.v1": [
+              "on_fulfillment_created"
+            ],
+            "Fulfillment.ItemPicked.v1": [
+              "on_item_picked"
+            ],
+            "Fulfillment.PackingCompleted.v1": [
+              "on_packing_completed"
+            ],
+            "Fulfillment.PickerAssigned.v1": [
+              "on_picker_assigned"
+            ],
+            "Fulfillment.PickingCompleted.v1": [
+              "on_picking_completed"
+            ],
+            "Fulfillment.ShipmentHandedOff.v1": [
+              "on_shipment_handed_off"
+            ],
+            "Fulfillment.ShippingLabelGenerated.v1": [
+              "on_shipping_label_generated"
+            ],
+            "Fulfillment.TrackingEventReceived.v1": [
+              "on_tracking_event_received"
+            ]
+          },
+          "module": "fulfillment.projections.fulfillment_status",
+          "name": "FulfillmentStatusProjector",
+          "projector_for": "fulfillment.projections.fulfillment_status.FulfillmentStatusView",
+          "stream_categories": [
+            "fulfillment::fulfillment"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "fulfillment.projections.shipment_tracking.ShipmentTrackingView": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "carrier": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "current_location": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "current_status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "delivered_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "events": {
+            "content_type": "dict",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "fulfillment_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "shipped_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "tracking_number": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "fulfillment.projections.shipment_tracking.ShipmentTrackingView",
+        "identity_field": "fulfillment_id",
+        "module": "fulfillment.projections.shipment_tracking",
+        "name": "ShipmentTrackingView",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "shipment_tracking_view"
+        }
+      },
+      "projectors": {
+        "fulfillment.projections.shipment_tracking.ShipmentTrackingProjector": {
+          "aggregates": [
+            "fulfillment.fulfillment.fulfillment.Fulfillment"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "fulfillment.projections.shipment_tracking.ShipmentTrackingProjector",
+          "handlers": {
+            "Fulfillment.DeliveryConfirmed.v1": [
+              "on_delivery_confirmed"
+            ],
+            "Fulfillment.DeliveryException.v1": [
+              "on_delivery_exception"
+            ],
+            "Fulfillment.ShipmentHandedOff.v1": [
+              "on_shipment_handed_off"
+            ],
+            "Fulfillment.TrackingEventReceived.v1": [
+              "on_tracking_event_received"
+            ]
+          },
+          "module": "fulfillment.projections.shipment_tracking",
+          "name": "ShipmentTrackingProjector",
+          "projector_for": "fulfillment.projections.shipment_tracking.ShipmentTrackingView",
+          "stream_categories": [
+            "fulfillment::fulfillment"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "fulfillment.projections.shipment_tracking_queries.GetShipmentTracking": {
+          "__type__": "Fulfillment.GetShipmentTracking",
+          "element_type": "QUERY",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "fulfillment.projections.shipment_tracking_queries.GetShipmentTracking",
+          "module": "fulfillment.projections.shipment_tracking_queries",
+          "name": "GetShipmentTracking",
+          "part_of": "fulfillment.projections.shipment_tracking.ShipmentTrackingView"
+        }
+      },
+      "query_handlers": {
+        "fulfillment.projections.shipment_tracking_queries.ShipmentTrackingQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "fulfillment.projections.shipment_tracking_queries.ShipmentTrackingQueryHandler",
+          "handlers": {
+            "Fulfillment.GetShipmentTracking": [
+              "get_shipment_tracking"
+            ]
+          },
+          "module": "fulfillment.projections.shipment_tracking_queries",
+          "name": "ShipmentTrackingQueryHandler",
+          "part_of": "fulfillment.projections.shipment_tracking.ShipmentTrackingView"
+        }
+      }
+    },
+    "fulfillment.projections.warehouse_queue.WarehouseQueueView": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "assigned_to": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "fulfillment_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "item_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "warehouse_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "fulfillment.projections.warehouse_queue.WarehouseQueueView",
+        "identity_field": "fulfillment_id",
+        "module": "fulfillment.projections.warehouse_queue",
+        "name": "WarehouseQueueView",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "warehouse_queue_view"
+        }
+      },
+      "projectors": {
+        "fulfillment.projections.warehouse_queue.WarehouseQueueProjector": {
+          "aggregates": [
+            "fulfillment.fulfillment.fulfillment.Fulfillment"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "fulfillment.projections.warehouse_queue.WarehouseQueueProjector",
+          "handlers": {
+            "Fulfillment.FulfillmentCancelled.v1": [
+              "on_fulfillment_cancelled"
+            ],
+            "Fulfillment.FulfillmentCreated.v1": [
+              "on_fulfillment_created"
+            ],
+            "Fulfillment.PackingCompleted.v1": [
+              "on_packing_completed"
+            ],
+            "Fulfillment.PickerAssigned.v1": [
+              "on_picker_assigned"
+            ],
+            "Fulfillment.PickingCompleted.v1": [
+              "on_picking_completed"
+            ],
+            "Fulfillment.ShipmentHandedOff.v1": [
+              "on_shipment_handed_off"
+            ]
+          },
+          "module": "fulfillment.projections.warehouse_queue",
+          "name": "WarehouseQueueProjector",
+          "projector_for": "fulfillment.projections.warehouse_queue.WarehouseQueueView",
+          "stream_categories": [
+            "fulfillment::fulfillment"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    }
+  }
+}

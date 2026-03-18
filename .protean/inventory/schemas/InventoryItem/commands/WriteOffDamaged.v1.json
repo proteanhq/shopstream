@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Write off damaged stock.",
+  "properties": {
+    "approved_by": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "approved_by",
+    "inventory_item_id",
+    "quantity"
+  ],
+  "title": "WriteOffDamaged",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "inventory.stock.damage.WriteOffDamaged",
+  "x-protean-type": "Inventory.WriteOffDamaged.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Record that items have been packed into shipping packages.",
+  "properties": {
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "packages": {
+      "type": "array"
+    },
+    "packed_by": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "fulfillment_id",
+    "packages",
+    "packed_by"
+  ],
+  "title": "RecordPacking",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "fulfillment.fulfillment.packing.RecordPacking",
+  "x-protean-type": "Fulfillment.RecordPacking.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,2209 @@
+{
+  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
+  "checksum": "sha256:534a91f549e60b2fc0857afb1f369cd3a9b3444d4bf5951d97f465f37cad4146",
+  "clusters": {
+    "abc.DefaultOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.DefaultOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "DefaultOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "outbox",
+          "stream_category": "notifications::default_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.DefaultOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.DefaultOutboxRepository",
+          "module": "protean.utils",
+          "name": "DefaultOutboxRepository",
+          "part_of": "abc.DefaultOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "abc.MemoryOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.MemoryOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "MemoryOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "memory",
+          "schema_name": "outbox",
+          "stream_category": "notifications::memory_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.MemoryOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.MemoryOutboxRepository",
+          "module": "protean.utils",
+          "name": "MemoryOutboxRepository",
+          "part_of": "abc.MemoryOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "notifications.notification.notification.Notification": {
+      "aggregate": {
+        "description": "A single notification dispatched to a recipient via a channel.\n\nNotifications are created reactively from cross-domain events. Each\nnotification tracks its delivery lifecycle for audit and retry.",
+        "element_type": "AGGREGATE",
+        "fields": {
+          "body": {
+            "kind": "text",
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "Text"
+          },
+          "channel": {
+            "choices": [
+              "Email",
+              "Push",
+              "SMS",
+              "Slack"
+            ],
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "context_data": {
+            "default": "<callable>",
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "delivered_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "failure_reason": {
+            "kind": "standard",
+            "max_length": 500,
+            "sanitize": true,
+            "type": "String"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "notification_type": {
+            "choices": [
+              "CartRecovery",
+              "DeliveryConfirmation",
+              "DeliveryException",
+              "LowStockAlert",
+              "OrderCancellation",
+              "OrderConfirmation",
+              "PaymentReceipt",
+              "RefundNotification",
+              "ReviewPrompt",
+              "ReviewPublished",
+              "ReviewRejected",
+              "ShippingUpdate",
+              "Welcome"
+            ],
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "recipient_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "recipient_type": {
+            "choices": [
+              "Customer",
+              "Internal"
+            ],
+            "default": "Customer",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "scheduled_for": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "sent_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "source_event_id": {
+            "kind": "standard",
+            "max_length": 200,
+            "sanitize": true,
+            "type": "String"
+          },
+          "source_event_type": {
+            "kind": "standard",
+            "max_length": 200,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "choices": [
+              "Bounced",
+              "Cancelled",
+              "Delivered",
+              "Failed",
+              "Pending",
+              "Sent"
+            ],
+            "default": "Pending",
+            "kind": "status",
+            "transitions": {
+              "Failed": [
+                "Pending"
+              ],
+              "Pending": [
+                "Sent",
+                "Failed",
+                "Cancelled"
+              ],
+              "Sent": [
+                "Delivered",
+                "Failed",
+                "Bounced"
+              ]
+            },
+            "type": "Status"
+          },
+          "subject": {
+            "kind": "standard",
+            "max_length": 500,
+            "sanitize": true,
+            "type": "String"
+          },
+          "template_name": {
+            "kind": "standard",
+            "max_length": 200,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "notifications.notification.notification.Notification",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "notifications.notification.notification",
+        "name": "Notification",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "notification",
+          "stream_category": "notifications::notification"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "notifications.notification.cancellation.CancelNotificationHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "notifications.notification.cancellation.CancelNotificationHandler",
+          "handlers": {
+            "Notifications.CancelNotification.v1": [
+              "cancel_notification"
+            ]
+          },
+          "module": "notifications.notification.cancellation",
+          "name": "CancelNotificationHandler",
+          "part_of": "notifications.notification.notification.Notification",
+          "stream_category": "notifications::notification:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "notifications.notification.retry.RetryNotificationHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "notifications.notification.retry.RetryNotificationHandler",
+          "handlers": {
+            "Notifications.RetryNotification.v1": [
+              "retry_notification"
+            ]
+          },
+          "module": "notifications.notification.retry",
+          "name": "RetryNotificationHandler",
+          "part_of": "notifications.notification.notification.Notification",
+          "stream_category": "notifications::notification:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "notifications.notification.scheduler.ProcessScheduledNotificationsHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "notifications.notification.scheduler.ProcessScheduledNotificationsHandler",
+          "handlers": {
+            "Notifications.ProcessScheduledNotifications.v1": [
+              "process_scheduled"
+            ]
+          },
+          "module": "notifications.notification.scheduler",
+          "name": "ProcessScheduledNotificationsHandler",
+          "part_of": "notifications.notification.notification.Notification",
+          "stream_category": "notifications::notification:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "notifications.notification.cancellation.CancelNotification": {
+          "__type__": "Notifications.CancelNotification.v1",
+          "__version__": 1,
+          "description": "Request to cancel a pending or scheduled notification.",
+          "element_type": "COMMAND",
+          "fields": {
+            "notification_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "notifications.notification.cancellation.CancelNotification",
+          "module": "notifications.notification.cancellation",
+          "name": "CancelNotification",
+          "part_of": "notifications.notification.notification.Notification"
+        },
+        "notifications.notification.retry.RetryNotification": {
+          "__type__": "Notifications.RetryNotification.v1",
+          "__version__": 1,
+          "description": "Request to retry a failed notification.",
+          "element_type": "COMMAND",
+          "fields": {
+            "notification_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "notifications.notification.retry.RetryNotification",
+          "module": "notifications.notification.retry",
+          "name": "RetryNotification",
+          "part_of": "notifications.notification.notification.Notification"
+        },
+        "notifications.notification.scheduler.ProcessScheduledNotifications": {
+          "__type__": "Notifications.ProcessScheduledNotifications.v1",
+          "__version__": 1,
+          "description": "Request to process all due scheduled notifications.",
+          "element_type": "COMMAND",
+          "fields": {
+            "as_of": {
+              "kind": "standard",
+              "type": "DateTime"
+            }
+          },
+          "fqn": "notifications.notification.scheduler.ProcessScheduledNotifications",
+          "module": "notifications.notification.scheduler",
+          "name": "ProcessScheduledNotifications",
+          "part_of": "notifications.notification.notification.Notification"
+        }
+      },
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {
+        "notifications.notification.dispatch.NotificationDispatcher": {
+          "description": "Dispatches notifications via channel adapters when they are created.",
+          "element_type": "EVENT_HANDLER",
+          "fqn": "notifications.notification.dispatch.NotificationDispatcher",
+          "handlers": {
+            "Notifications.NotificationCreated.v1": [
+              "on_notification_created"
+            ]
+          },
+          "module": "notifications.notification.dispatch",
+          "name": "NotificationDispatcher",
+          "part_of": "notifications.notification.notification.Notification",
+          "source_stream": null,
+          "stream_category": "notifications::notification",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "events": {
+        "notifications.notification.events.NotificationBounced": {
+          "__type__": "Notifications.NotificationBounced.v1",
+          "__version__": 1,
+          "description": "A notification bounced (permanent delivery failure).",
+          "element_type": "EVENT",
+          "fields": {
+            "bounced_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "channel": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "notification_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "recipient_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "notifications.notification.events.NotificationBounced",
+          "is_fact_event": false,
+          "module": "notifications.notification.events",
+          "name": "NotificationBounced",
+          "part_of": "notifications.notification.notification.Notification"
+        },
+        "notifications.notification.events.NotificationCancelled": {
+          "__type__": "Notifications.NotificationCancelled.v1",
+          "__version__": 1,
+          "description": "A pending notification was cancelled.",
+          "element_type": "EVENT",
+          "fields": {
+            "cancelled_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "channel": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "notification_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "recipient_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "notifications.notification.events.NotificationCancelled",
+          "is_fact_event": false,
+          "module": "notifications.notification.events",
+          "name": "NotificationCancelled",
+          "part_of": "notifications.notification.notification.Notification"
+        },
+        "notifications.notification.events.NotificationCreated": {
+          "__type__": "Notifications.NotificationCreated.v1",
+          "__version__": 1,
+          "description": "A notification was created and queued for dispatch.",
+          "element_type": "EVENT",
+          "fields": {
+            "channel": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "created_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "notification_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "notification_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "recipient_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "recipient_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "scheduled_for": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "source_event_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "subject": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "template_name": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "notifications.notification.events.NotificationCreated",
+          "is_fact_event": false,
+          "module": "notifications.notification.events",
+          "name": "NotificationCreated",
+          "part_of": "notifications.notification.notification.Notification"
+        },
+        "notifications.notification.events.NotificationDelivered": {
+          "__type__": "Notifications.NotificationDelivered.v1",
+          "__version__": 1,
+          "description": "A notification was confirmed delivered to the recipient.",
+          "element_type": "EVENT",
+          "fields": {
+            "channel": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "delivered_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "notification_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "recipient_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "notifications.notification.events.NotificationDelivered",
+          "is_fact_event": false,
+          "module": "notifications.notification.events",
+          "name": "NotificationDelivered",
+          "part_of": "notifications.notification.notification.Notification"
+        },
+        "notifications.notification.events.NotificationFailed": {
+          "__type__": "Notifications.NotificationFailed.v1",
+          "__version__": 1,
+          "description": "A notification failed to send or deliver.",
+          "element_type": "EVENT",
+          "fields": {
+            "channel": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "failed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "max_retries": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "notification_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "recipient_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "retry_count": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            }
+          },
+          "fqn": "notifications.notification.events.NotificationFailed",
+          "is_fact_event": false,
+          "module": "notifications.notification.events",
+          "name": "NotificationFailed",
+          "part_of": "notifications.notification.notification.Notification"
+        },
+        "notifications.notification.events.NotificationRetried": {
+          "__type__": "Notifications.NotificationRetried.v1",
+          "__version__": 1,
+          "description": "A failed notification was retried.",
+          "element_type": "EVENT",
+          "fields": {
+            "channel": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "notification_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "recipient_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "retried_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "retry_count": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            }
+          },
+          "fqn": "notifications.notification.events.NotificationRetried",
+          "is_fact_event": false,
+          "module": "notifications.notification.events",
+          "name": "NotificationRetried",
+          "part_of": "notifications.notification.notification.Notification"
+        },
+        "notifications.notification.events.NotificationSent": {
+          "__type__": "Notifications.NotificationSent.v1",
+          "__version__": 1,
+          "description": "A notification was sent to the channel adapter.",
+          "element_type": "EVENT",
+          "fields": {
+            "channel": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "notification_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "recipient_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "sent_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "notifications.notification.events.NotificationSent",
+          "is_fact_event": false,
+          "module": "notifications.notification.events",
+          "name": "NotificationSent",
+          "part_of": "notifications.notification.notification.Notification"
+        }
+      },
+      "repositories": {},
+      "value_objects": {}
+    },
+    "notifications.preference.preference.NotificationPreference": {
+      "aggregate": {
+        "description": "A customer's notification channel preferences.\n\nControls which channels (email, SMS, push) the customer receives\nnotifications on, quiet hours, and per-type unsubscribe.",
+        "element_type": "AGGREGATE",
+        "fields": {
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier",
+            "unique": true
+          },
+          "email_enabled": {
+            "default": true,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "push_enabled": {
+            "default": false,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "quiet_hours_end": {
+            "kind": "standard",
+            "max_length": 5,
+            "sanitize": true,
+            "type": "String"
+          },
+          "quiet_hours_start": {
+            "kind": "standard",
+            "max_length": 5,
+            "sanitize": true,
+            "type": "String"
+          },
+          "sms_enabled": {
+            "default": false,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "unsubscribed_types": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "notifications.preference.preference.NotificationPreference",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "notifications.preference.preference",
+        "name": "NotificationPreference",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "notification_preference",
+          "stream_category": "notifications::notification_preference"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "notifications.preference.management.ManagePreferencesHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "notifications.preference.management.ManagePreferencesHandler",
+          "handlers": {
+            "Notifications.ClearQuietHours.v1": [
+              "clear_quiet_hours"
+            ],
+            "Notifications.SetQuietHours.v1": [
+              "set_quiet_hours"
+            ],
+            "Notifications.UpdateNotificationPreferences.v1": [
+              "update_preferences"
+            ]
+          },
+          "module": "notifications.preference.management",
+          "name": "ManagePreferencesHandler",
+          "part_of": "notifications.preference.preference.NotificationPreference",
+          "stream_category": "notifications::notification_preference:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "notifications.preference.subscription.ManageSubscriptionsHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "notifications.preference.subscription.ManageSubscriptionsHandler",
+          "handlers": {
+            "Notifications.ResubscribeToType.v1": [
+              "resubscribe"
+            ],
+            "Notifications.UnsubscribeFromType.v1": [
+              "unsubscribe"
+            ]
+          },
+          "module": "notifications.preference.subscription",
+          "name": "ManageSubscriptionsHandler",
+          "part_of": "notifications.preference.preference.NotificationPreference",
+          "stream_category": "notifications::notification_preference:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "notifications.preference.management.ClearQuietHours": {
+          "__type__": "Notifications.ClearQuietHours.v1",
+          "__version__": 1,
+          "description": "Remove a customer's do-not-disturb window.",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "notifications.preference.management.ClearQuietHours",
+          "module": "notifications.preference.management",
+          "name": "ClearQuietHours",
+          "part_of": "notifications.preference.preference.NotificationPreference"
+        },
+        "notifications.preference.management.SetQuietHours": {
+          "__type__": "Notifications.SetQuietHours.v1",
+          "__version__": 1,
+          "description": "Set a customer's do-not-disturb window.",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "end": {
+              "kind": "standard",
+              "max_length": 5,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "start": {
+              "kind": "standard",
+              "max_length": 5,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "notifications.preference.management.SetQuietHours",
+          "module": "notifications.preference.management",
+          "name": "SetQuietHours",
+          "part_of": "notifications.preference.preference.NotificationPreference"
+        },
+        "notifications.preference.management.UpdateNotificationPreferences": {
+          "__type__": "Notifications.UpdateNotificationPreferences.v1",
+          "__version__": 1,
+          "description": "Update a customer's notification channel preferences.",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "email_enabled": {
+              "kind": "standard",
+              "type": "Boolean"
+            },
+            "push_enabled": {
+              "kind": "standard",
+              "type": "Boolean"
+            },
+            "sms_enabled": {
+              "kind": "standard",
+              "type": "Boolean"
+            }
+          },
+          "fqn": "notifications.preference.management.UpdateNotificationPreferences",
+          "module": "notifications.preference.management",
+          "name": "UpdateNotificationPreferences",
+          "part_of": "notifications.preference.preference.NotificationPreference"
+        },
+        "notifications.preference.subscription.ResubscribeToType": {
+          "__type__": "Notifications.ResubscribeToType.v1",
+          "__version__": 1,
+          "description": "Resubscribe a customer to a previously unsubscribed notification type.",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "notification_type": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "notifications.preference.subscription.ResubscribeToType",
+          "module": "notifications.preference.subscription",
+          "name": "ResubscribeToType",
+          "part_of": "notifications.preference.preference.NotificationPreference"
+        },
+        "notifications.preference.subscription.UnsubscribeFromType": {
+          "__type__": "Notifications.UnsubscribeFromType.v1",
+          "__version__": 1,
+          "description": "Unsubscribe a customer from a specific notification type.",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "notification_type": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "notifications.preference.subscription.UnsubscribeFromType",
+          "module": "notifications.preference.subscription",
+          "name": "UnsubscribeFromType",
+          "part_of": "notifications.preference.preference.NotificationPreference"
+        }
+      },
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {
+        "notifications.preference.events.ChannelsUpdated": {
+          "__type__": "Notifications.ChannelsUpdated.v1",
+          "__version__": 1,
+          "description": "A customer's notification channel preferences were changed.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "email_enabled": {
+              "kind": "standard",
+              "required": true,
+              "type": "Boolean"
+            },
+            "preference_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "push_enabled": {
+              "kind": "standard",
+              "required": true,
+              "type": "Boolean"
+            },
+            "sms_enabled": {
+              "kind": "standard",
+              "required": true,
+              "type": "Boolean"
+            },
+            "updated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "notifications.preference.events.ChannelsUpdated",
+          "is_fact_event": false,
+          "module": "notifications.preference.events",
+          "name": "ChannelsUpdated",
+          "part_of": "notifications.preference.preference.NotificationPreference"
+        },
+        "notifications.preference.events.PreferencesCreated": {
+          "__type__": "Notifications.PreferencesCreated.v1",
+          "__version__": 1,
+          "description": "Default notification preferences were created for a customer.",
+          "element_type": "EVENT",
+          "fields": {
+            "created_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "email_enabled": {
+              "kind": "standard",
+              "required": true,
+              "type": "Boolean"
+            },
+            "preference_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "push_enabled": {
+              "kind": "standard",
+              "required": true,
+              "type": "Boolean"
+            },
+            "sms_enabled": {
+              "kind": "standard",
+              "required": true,
+              "type": "Boolean"
+            }
+          },
+          "fqn": "notifications.preference.events.PreferencesCreated",
+          "is_fact_event": false,
+          "module": "notifications.preference.events",
+          "name": "PreferencesCreated",
+          "part_of": "notifications.preference.preference.NotificationPreference"
+        },
+        "notifications.preference.events.QuietHoursCleared": {
+          "__type__": "Notifications.QuietHoursCleared.v1",
+          "__version__": 1,
+          "description": "A customer cleared their do-not-disturb window.",
+          "element_type": "EVENT",
+          "fields": {
+            "cleared_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "preference_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "notifications.preference.events.QuietHoursCleared",
+          "is_fact_event": false,
+          "module": "notifications.preference.events",
+          "name": "QuietHoursCleared",
+          "part_of": "notifications.preference.preference.NotificationPreference"
+        },
+        "notifications.preference.events.QuietHoursSet": {
+          "__type__": "Notifications.QuietHoursSet.v1",
+          "__version__": 1,
+          "description": "A customer set their do-not-disturb window.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "end": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "preference_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "start": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "updated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "notifications.preference.events.QuietHoursSet",
+          "is_fact_event": false,
+          "module": "notifications.preference.events",
+          "name": "QuietHoursSet",
+          "part_of": "notifications.preference.preference.NotificationPreference"
+        },
+        "notifications.preference.events.TypeResubscribed": {
+          "__type__": "Notifications.TypeResubscribed.v1",
+          "__version__": 1,
+          "description": "A customer resubscribed to a previously unsubscribed notification type.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "notification_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "preference_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "resubscribed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "notifications.preference.events.TypeResubscribed",
+          "is_fact_event": false,
+          "module": "notifications.preference.events",
+          "name": "TypeResubscribed",
+          "part_of": "notifications.preference.preference.NotificationPreference"
+        },
+        "notifications.preference.events.TypeUnsubscribed": {
+          "__type__": "Notifications.TypeUnsubscribed.v1",
+          "__version__": 1,
+          "description": "A customer unsubscribed from a specific notification type.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "notification_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "preference_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "unsubscribed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "notifications.preference.events.TypeUnsubscribed",
+          "is_fact_event": false,
+          "module": "notifications.preference.events",
+          "name": "TypeUnsubscribed",
+          "part_of": "notifications.preference.preference.NotificationPreference"
+        }
+      },
+      "repositories": {},
+      "value_objects": {}
+    }
+  },
+  "contracts": {
+    "events": []
+  },
+  "diagnostics": [
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.DefaultOutbox",
+      "level": "warning",
+      "message": "Aggregate `DefaultOutbox` has no command handler \u2014 no write path exists"
+    },
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.MemoryOutbox",
+      "level": "warning",
+      "message": "Aggregate `MemoryOutbox` has no command handler \u2014 no write path exists"
+    }
+  ],
+  "domain": {
+    "camel_case_name": "Notifications",
+    "command_processing": "sync",
+    "event_processing": "async",
+    "identity_strategy": "uuid",
+    "identity_type": "string",
+    "name": "notifications",
+    "normalized_name": "notifications"
+  },
+  "elements": {
+    "AGGREGATE": [
+      "abc.DefaultOutbox",
+      "abc.MemoryOutbox",
+      "notifications.notification.notification.Notification",
+      "notifications.preference.preference.NotificationPreference"
+    ],
+    "APPLICATION_SERVICE": [],
+    "COMMAND": [
+      "notifications.notification.cancellation.CancelNotification",
+      "notifications.notification.retry.RetryNotification",
+      "notifications.notification.scheduler.ProcessScheduledNotifications",
+      "notifications.preference.management.ClearQuietHours",
+      "notifications.preference.management.SetQuietHours",
+      "notifications.preference.management.UpdateNotificationPreferences",
+      "notifications.preference.subscription.ResubscribeToType",
+      "notifications.preference.subscription.UnsubscribeFromType"
+    ],
+    "COMMAND_HANDLER": [
+      "notifications.notification.cancellation.CancelNotificationHandler",
+      "notifications.notification.retry.RetryNotificationHandler",
+      "notifications.notification.scheduler.ProcessScheduledNotificationsHandler",
+      "notifications.preference.management.ManagePreferencesHandler",
+      "notifications.preference.subscription.ManageSubscriptionsHandler"
+    ],
+    "DATABASE_MODEL": [],
+    "DOMAIN_SERVICE": [],
+    "ENTITY": [],
+    "EVENT": [
+      "notifications.notification.events.NotificationBounced",
+      "notifications.notification.events.NotificationCancelled",
+      "notifications.notification.events.NotificationCreated",
+      "notifications.notification.events.NotificationDelivered",
+      "notifications.notification.events.NotificationFailed",
+      "notifications.notification.events.NotificationRetried",
+      "notifications.notification.events.NotificationSent",
+      "notifications.preference.events.ChannelsUpdated",
+      "notifications.preference.events.PreferencesCreated",
+      "notifications.preference.events.QuietHoursCleared",
+      "notifications.preference.events.QuietHoursSet",
+      "notifications.preference.events.TypeResubscribed",
+      "notifications.preference.events.TypeUnsubscribed"
+    ],
+    "EVENT_HANDLER": [
+      "notifications.notification.dispatch.NotificationDispatcher"
+    ],
+    "PROCESS_MANAGER": [],
+    "PROJECTION": [
+      "notifications.projections.customer_notifications.CustomerNotifications",
+      "notifications.projections.customer_preferences.CustomerPreferences",
+      "notifications.projections.failed_notifications.FailedNotifications",
+      "notifications.projections.notification_log.NotificationLog",
+      "notifications.projections.notification_stats.NotificationStats"
+    ],
+    "PROJECTOR": [
+      "notifications.projections.customer_notifications.CustomerNotificationsProjector",
+      "notifications.projections.customer_preferences.CustomerPreferencesProjector",
+      "notifications.projections.failed_notifications.FailedNotificationsProjector",
+      "notifications.projections.notification_log.NotificationLogProjector",
+      "notifications.projections.notification_stats.NotificationStatsProjector"
+    ],
+    "QUERY": [],
+    "QUERY_HANDLER": [],
+    "REPOSITORY": [
+      "protean.utils.DefaultOutboxRepository",
+      "protean.utils.MemoryOutboxRepository"
+    ],
+    "SUBSCRIBER": [
+      "notifications.notification.cart_subscriber.CartEventsSubscriber",
+      "notifications.notification.fulfillment_subscriber.FulfillmentEventsSubscriber",
+      "notifications.notification.identity_subscriber.IdentityEventsSubscriber",
+      "notifications.notification.inventory_subscriber.InventoryEventsSubscriber",
+      "notifications.notification.ordering_subscriber.OrderingEventsSubscriber",
+      "notifications.notification.payment_subscriber.PaymentEventsSubscriber",
+      "notifications.notification.review_subscriber.ReviewEventsSubscriber",
+      "notifications.preference.identity_subscriber.PreferenceIdentitySubscriber"
+    ],
+    "VALUE_OBJECT": []
+  },
+  "flows": {
+    "domain_services": {},
+    "process_managers": {},
+    "subscribers": {
+      "notifications.notification.cart_subscriber.CartEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Cart events to send recovery notifications.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and creates notifications. Ignores all event\ntypes not relevant to the Notifications domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "notifications.notification.cart_subscriber.CartEventsSubscriber",
+        "module": "notifications.notification.cart_subscriber",
+        "name": "CartEventsSubscriber",
+        "stream": "ordering::cart"
+      },
+      "notifications.notification.fulfillment_subscriber.FulfillmentEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Fulfillment domain events to send customer notifications.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and creates notifications. Ignores all event\ntypes not relevant to the Notifications domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "notifications.notification.fulfillment_subscriber.FulfillmentEventsSubscriber",
+        "module": "notifications.notification.fulfillment_subscriber",
+        "name": "FulfillmentEventsSubscriber",
+        "stream": "fulfillment::fulfillment"
+      },
+      "notifications.notification.identity_subscriber.IdentityEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Identity domain events to send customer notifications.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and creates notifications. Ignores all event\ntypes not relevant to the Notifications domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "notifications.notification.identity_subscriber.IdentityEventsSubscriber",
+        "module": "notifications.notification.identity_subscriber",
+        "name": "IdentityEventsSubscriber",
+        "stream": "identity::customer"
+      },
+      "notifications.notification.inventory_subscriber.InventoryEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Inventory domain events to send internal alerts.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and creates notifications. Ignores all event\ntypes not relevant to the Notifications domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "notifications.notification.inventory_subscriber.InventoryEventsSubscriber",
+        "module": "notifications.notification.inventory_subscriber",
+        "name": "InventoryEventsSubscriber",
+        "stream": "inventory::inventory_item"
+      },
+      "notifications.notification.ordering_subscriber.OrderingEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Ordering domain events to send customer notifications.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and creates notifications. Ignores all event\ntypes not relevant to the Notifications domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "notifications.notification.ordering_subscriber.OrderingEventsSubscriber",
+        "module": "notifications.notification.ordering_subscriber",
+        "name": "OrderingEventsSubscriber",
+        "stream": "ordering::order"
+      },
+      "notifications.notification.payment_subscriber.PaymentEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Payment domain events to send customer notifications.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and creates notifications. Ignores all event\ntypes not relevant to the Notifications domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "notifications.notification.payment_subscriber.PaymentEventsSubscriber",
+        "module": "notifications.notification.payment_subscriber",
+        "name": "PaymentEventsSubscriber",
+        "stream": "payments::payment"
+      },
+      "notifications.notification.review_subscriber.ReviewEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Reviews domain events to send customer notifications.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and creates notifications. Ignores all event\ntypes not relevant to the Notifications domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "notifications.notification.review_subscriber.ReviewEventsSubscriber",
+        "module": "notifications.notification.review_subscriber",
+        "name": "ReviewEventsSubscriber",
+        "stream": "reviews::review"
+      },
+      "notifications.preference.identity_subscriber.PreferenceIdentitySubscriber": {
+        "broker": "global",
+        "description": "Creates default notification preferences when a customer registers.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and creates preferences. Ignores all event\ntypes not relevant to preference management.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "notifications.preference.identity_subscriber.PreferenceIdentitySubscriber",
+        "module": "notifications.preference.identity_subscriber",
+        "name": "PreferenceIdentitySubscriber",
+        "stream": "identity::customer"
+      }
+    }
+  },
+  "generated_at": "2026-03-18T13:30:28Z",
+  "ir_version": "0.1.0",
+  "projections": {
+    "notifications.projections.customer_notifications.CustomerNotifications": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "channel": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "notification_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "notification_type": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "subject": {
+            "kind": "standard",
+            "max_length": 500,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "notifications.projections.customer_notifications.CustomerNotifications",
+        "identity_field": "notification_id",
+        "module": "notifications.projections.customer_notifications",
+        "name": "CustomerNotifications",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "customer_notifications"
+        }
+      },
+      "projectors": {
+        "notifications.projections.customer_notifications.CustomerNotificationsProjector": {
+          "aggregates": [
+            "notifications.notification.notification.Notification"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "notifications.projections.customer_notifications.CustomerNotificationsProjector",
+          "handlers": {
+            "Notifications.NotificationCreated.v1": [
+              "on_notification_created"
+            ],
+            "Notifications.NotificationDelivered.v1": [
+              "on_notification_delivered"
+            ],
+            "Notifications.NotificationFailed.v1": [
+              "on_notification_failed"
+            ],
+            "Notifications.NotificationSent.v1": [
+              "on_notification_sent"
+            ]
+          },
+          "module": "notifications.projections.customer_notifications",
+          "name": "CustomerNotificationsProjector",
+          "projector_for": "notifications.projections.customer_notifications.CustomerNotifications",
+          "stream_categories": [
+            "notifications::notification"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "notifications.projections.customer_preferences.CustomerPreferences": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "email_enabled": {
+            "default": true,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "preference_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "push_enabled": {
+            "default": false,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "quiet_hours_end": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "quiet_hours_start": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "sms_enabled": {
+            "default": false,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "unsubscribed_types": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "notifications.projections.customer_preferences.CustomerPreferences",
+        "identity_field": "preference_id",
+        "module": "notifications.projections.customer_preferences",
+        "name": "CustomerPreferences",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "customer_preferences"
+        }
+      },
+      "projectors": {
+        "notifications.projections.customer_preferences.CustomerPreferencesProjector": {
+          "aggregates": [
+            "notifications.preference.preference.NotificationPreference"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "notifications.projections.customer_preferences.CustomerPreferencesProjector",
+          "handlers": {
+            "Notifications.ChannelsUpdated.v1": [
+              "on_channels_updated"
+            ],
+            "Notifications.PreferencesCreated.v1": [
+              "on_preferences_created"
+            ],
+            "Notifications.QuietHoursCleared.v1": [
+              "on_quiet_hours_cleared"
+            ],
+            "Notifications.QuietHoursSet.v1": [
+              "on_quiet_hours_set"
+            ],
+            "Notifications.TypeResubscribed.v1": [
+              "on_type_resubscribed"
+            ],
+            "Notifications.TypeUnsubscribed.v1": [
+              "on_type_unsubscribed"
+            ]
+          },
+          "module": "notifications.projections.customer_preferences",
+          "name": "CustomerPreferencesProjector",
+          "projector_for": "notifications.projections.customer_preferences.CustomerPreferences",
+          "stream_categories": [
+            "notifications::notification_preference"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "notifications.projections.failed_notifications.FailedNotifications": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "channel": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "failed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "failure_reason": {
+            "kind": "standard",
+            "max_length": 500,
+            "sanitize": true,
+            "type": "String"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "notification_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "notification_type": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "recipient_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          }
+        },
+        "fqn": "notifications.projections.failed_notifications.FailedNotifications",
+        "identity_field": "notification_id",
+        "module": "notifications.projections.failed_notifications",
+        "name": "FailedNotifications",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "failed_notifications"
+        }
+      },
+      "projectors": {
+        "notifications.projections.failed_notifications.FailedNotificationsProjector": {
+          "aggregates": [
+            "notifications.notification.notification.Notification"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "notifications.projections.failed_notifications.FailedNotificationsProjector",
+          "handlers": {
+            "Notifications.NotificationFailed.v1": [
+              "on_notification_failed"
+            ],
+            "Notifications.NotificationRetried.v1": [
+              "on_notification_retried"
+            ],
+            "Notifications.NotificationSent.v1": [
+              "on_notification_sent"
+            ]
+          },
+          "module": "notifications.projections.failed_notifications",
+          "name": "FailedNotificationsProjector",
+          "projector_for": "notifications.projections.failed_notifications.FailedNotifications",
+          "stream_categories": [
+            "notifications::notification"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "notifications.projections.notification_log.NotificationLog": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "channel": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "delivered_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "failure_reason": {
+            "kind": "standard",
+            "max_length": 500,
+            "sanitize": true,
+            "type": "String"
+          },
+          "notification_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "notification_type": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "recipient_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "recipient_type": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "scheduled_for": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "sent_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "source_event_type": {
+            "kind": "standard",
+            "max_length": 200,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "subject": {
+            "kind": "standard",
+            "max_length": 500,
+            "sanitize": true,
+            "type": "String"
+          },
+          "template_name": {
+            "kind": "standard",
+            "max_length": 200,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "notifications.projections.notification_log.NotificationLog",
+        "identity_field": "notification_id",
+        "module": "notifications.projections.notification_log",
+        "name": "NotificationLog",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "notification_log"
+        }
+      },
+      "projectors": {
+        "notifications.projections.notification_log.NotificationLogProjector": {
+          "aggregates": [
+            "notifications.notification.notification.Notification"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "notifications.projections.notification_log.NotificationLogProjector",
+          "handlers": {
+            "Notifications.NotificationBounced.v1": [
+              "on_notification_bounced"
+            ],
+            "Notifications.NotificationCancelled.v1": [
+              "on_notification_cancelled"
+            ],
+            "Notifications.NotificationCreated.v1": [
+              "on_notification_created"
+            ],
+            "Notifications.NotificationDelivered.v1": [
+              "on_notification_delivered"
+            ],
+            "Notifications.NotificationFailed.v1": [
+              "on_notification_failed"
+            ],
+            "Notifications.NotificationRetried.v1": [
+              "on_notification_retried"
+            ],
+            "Notifications.NotificationSent.v1": [
+              "on_notification_sent"
+            ]
+          },
+          "module": "notifications.projections.notification_log",
+          "name": "NotificationLogProjector",
+          "projector_for": "notifications.projections.notification_log.NotificationLog",
+          "stream_categories": [
+            "notifications::notification"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "notifications.projections.notification_stats.NotificationStats": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "channel": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "date": {
+            "kind": "standard",
+            "max_length": 10,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "notification_type": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "stat_key": {
+            "identifier": true,
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "notifications.projections.notification_stats.NotificationStats",
+        "identity_field": "stat_key",
+        "module": "notifications.projections.notification_stats",
+        "name": "NotificationStats",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "notification_stats"
+        }
+      },
+      "projectors": {
+        "notifications.projections.notification_stats.NotificationStatsProjector": {
+          "aggregates": [
+            "notifications.notification.notification.Notification"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "notifications.projections.notification_stats.NotificationStatsProjector",
+          "handlers": {
+            "Notifications.NotificationSent.v1": [
+              "on_notification_sent"
+            ]
+          },
+          "module": "notifications.projections.notification_stats",
+          "name": "NotificationStatsProjector",
+          "projector_for": "notifications.projections.notification_stats.NotificationStats",
+          "stream_categories": [
+            "notifications::notification"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    }
+  }
+}

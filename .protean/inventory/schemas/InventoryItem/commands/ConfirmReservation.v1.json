@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Confirm a stock reservation after order payment.",
+  "properties": {
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reservation_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "inventory_item_id",
+    "reservation_id"
+  ],
+  "title": "ConfirmReservation",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "inventory.stock.reservation.ConfirmReservation",
+  "x-protean-type": "Inventory.ConfirmReservation.v1",
+  "x-protean-version": 1
+}

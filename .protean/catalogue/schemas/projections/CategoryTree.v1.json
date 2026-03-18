@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "breadcrumb": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "category_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "display_order": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "is_active": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": true
+    },
+    "level": {
+      "type": "integer"
+    },
+    "name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "parent_category_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "product_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    }
+  },
+  "required": [
+    "category_id",
+    "level",
+    "name"
+  ],
+  "title": "CategoryTree",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "catalogue.projections.category_tree.CategoryTree",
+  "x-protean-identity-field": "category_id"
+}

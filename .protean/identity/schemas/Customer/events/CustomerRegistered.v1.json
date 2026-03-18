@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A new customer account was created on the platform.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "email": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "external_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "first_name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "last_name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "registered_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "email",
+    "external_id",
+    "first_name",
+    "last_name",
+    "registered_at"
+  ],
+  "title": "CustomerRegistered",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "identity.customer.events.CustomerRegistered",
+  "x-protean-published": true,
+  "x-protean-type": "Identity.CustomerRegistered.v1",
+  "x-protean-version": 1
+}

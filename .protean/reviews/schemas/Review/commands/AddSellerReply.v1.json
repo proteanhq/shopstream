@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "body": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "review_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "seller_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "body",
+    "review_id",
+    "seller_id"
+  ],
+  "title": "AddSellerReply",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "reviews.review.reply.AddSellerReply",
+  "x-protean-type": "Reviews.AddSellerReply.v1",
+  "x-protean-version": 1
+}

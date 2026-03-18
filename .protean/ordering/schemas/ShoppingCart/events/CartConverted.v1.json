@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A shopping cart was converted into an order at checkout.",
+  "properties": {
+    "cart_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "customer_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "items": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "cart_id",
+    "items"
+  ],
+  "title": "CartConverted",
+  "type": "object",
+  "x-protean-aggregate": "ordering.cart.cart.ShoppingCart",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.cart.events.CartConverted",
+  "x-protean-type": "Ordering.CartConverted.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A refund was requested for a successful payment.",
+  "properties": {
+    "amount": {
+      "type": "number"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "refund_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "requested_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "amount",
+    "order_id",
+    "payment_id",
+    "reason",
+    "refund_id",
+    "requested_at"
+  ],
+  "title": "RefundRequested",
+  "type": "object",
+  "x-protean-aggregate": "payments.payment.payment.Payment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "payments.payment.events.RefundRequested",
+  "x-protean-type": "Payments.RefundRequested.v1",
+  "x-protean-version": 1
+}

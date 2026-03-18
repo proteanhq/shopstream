@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Request to process all due scheduled notifications.",
+  "properties": {
+    "as_of": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "title": "ProcessScheduledNotifications",
+  "type": "object",
+  "x-protean-aggregate": "notifications.notification.notification.Notification",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "notifications.notification.scheduler.ProcessScheduledNotifications",
+  "x-protean-type": "Notifications.ProcessScheduledNotifications.v1",
+  "x-protean-version": 1
+}

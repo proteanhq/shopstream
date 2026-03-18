@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Deactivate a warehouse.",
+  "properties": {
+    "warehouse_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "warehouse_id"
+  ],
+  "title": "DeactivateWarehouse",
+  "type": "object",
+  "x-protean-aggregate": "inventory.warehouse.warehouse.Warehouse",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "inventory.warehouse.management.DeactivateWarehouse",
+  "x-protean-type": "Inventory.DeactivateWarehouse.v1",
+  "x-protean-version": 1
+}

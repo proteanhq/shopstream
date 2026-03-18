@@ -1,0 +1,108 @@
+{
+  "$defs": {
+    "PackageDimensions": {
+      "properties": {
+        "height": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "length": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "weight": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "width": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A physical package in the shipment.",
+  "properties": {
+    "dimensions": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PackageDimensions"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fulfillment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "item_ids": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "weight": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "title": "Package",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "fulfillment.fulfillment.fulfillment.Package",
+  "x-protean-identity-field": "id"
+}

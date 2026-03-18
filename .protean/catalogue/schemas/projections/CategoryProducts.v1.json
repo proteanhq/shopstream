@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "category_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "category_name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "products": {
+      "anyOf": [
+        {
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "category_id",
+    "category_name"
+  ],
+  "title": "CategoryProducts",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "catalogue.projections.category_products.CategoryProducts",
+  "x-protean-identity-field": "category_id"
+}

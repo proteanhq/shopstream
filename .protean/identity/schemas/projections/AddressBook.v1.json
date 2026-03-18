@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "addresses": {
+      "anyOf": [
+        {
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id"
+  ],
+  "title": "AddressBook",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "identity.projections.address_book.AddressBook",
+  "x-protean-identity-field": "customer_id"
+}

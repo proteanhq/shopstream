@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "All items in the pick list have been picked.",
+  "properties": {
+    "completed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "completed_at",
+    "fulfillment_id"
+  ],
+  "title": "PickingCompleted",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "fulfillment.fulfillment.events.PickingCompleted",
+  "x-protean-type": "Fulfillment.PickingCompleted.v1",
+  "x-protean-version": 1
+}

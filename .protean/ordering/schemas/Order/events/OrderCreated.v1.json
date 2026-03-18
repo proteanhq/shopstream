@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A new order was created from a shopping cart at checkout.",
+  "properties": {
+    "billing_address": {
+      "type": "object"
+    },
+    "created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "currency": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "USD"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "discount_total": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "grand_total": {
+      "type": "number"
+    },
+    "items": {
+      "type": "array"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "shipping_address": {
+      "type": "object"
+    },
+    "shipping_cost": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "tax_total": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "billing_address",
+    "created_at",
+    "customer_id",
+    "grand_total",
+    "items",
+    "order_id",
+    "shipping_address",
+    "subtotal"
+  ],
+  "title": "OrderCreated",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.OrderCreated",
+  "x-protean-published": true,
+  "x-protean-type": "Ordering.OrderCreated.v1",
+  "x-protean-version": 1
+}

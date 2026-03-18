@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A customer account was suspended, blocking further activity.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "suspended_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "reason",
+    "suspended_at"
+  ],
+  "title": "AccountSuspended",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "identity.customer.events.AccountSuspended",
+  "x-protean-published": true,
+  "x-protean-type": "Identity.AccountSuspended.v1",
+  "x-protean-version": 1
+}

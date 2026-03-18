@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A coupon code was applied to an order.",
+  "properties": {
+    "applied_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "coupon_code": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "applied_at",
+    "coupon_code",
+    "order_id"
+  ],
+  "title": "CouponApplied",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.CouponApplied",
+  "x-protean-type": "Ordering.CouponApplied.v1",
+  "x-protean-version": 1
+}

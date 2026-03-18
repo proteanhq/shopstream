@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The quantity of a cart item was changed.",
+  "properties": {
+    "cart_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_quantity": {
+      "type": "integer"
+    },
+    "previous_quantity": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "cart_id",
+    "item_id",
+    "new_quantity",
+    "previous_quantity"
+  ],
+  "title": "CartQuantityUpdated",
+  "type": "object",
+  "x-protean-aggregate": "ordering.cart.cart.ShoppingCart",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.cart.events.CartQuantityUpdated",
+  "x-protean-type": "Ordering.CartQuantityUpdated.v1",
+  "x-protean-version": 1
+}

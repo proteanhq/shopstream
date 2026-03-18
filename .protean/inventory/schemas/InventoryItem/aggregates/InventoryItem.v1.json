@@ -1,0 +1,238 @@
+{
+  "$defs": {
+    "Reservation": {
+      "properties": {
+        "expires_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "inventory_item": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "order_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "quantity": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "reserved_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "enum": [
+                "Active",
+                "Confirmed",
+                "Expired",
+                "Released"
+              ],
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "Active"
+        }
+      },
+      "required": [
+        "expires_at",
+        "id",
+        "order_id",
+        "quantity",
+        "reserved_at"
+      ],
+      "type": "object"
+    },
+    "StockLevels": {
+      "properties": {
+        "available": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0
+        },
+        "damaged": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0
+        },
+        "in_transit": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0
+        },
+        "on_hand": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0
+        },
+        "reserved": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Event-sourced aggregate tracking stock for one product variant at one warehouse.",
+  "properties": {
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "last_stock_check": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "levels": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StockLevels"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reorder_point": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 10
+    },
+    "reorder_quantity": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 50
+    },
+    "reservations": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Reservation"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sku": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "warehouse_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "product_id",
+    "sku",
+    "variant_id",
+    "warehouse_id"
+  ],
+  "title": "InventoryItem",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "inventory.stock.stock.InventoryItem",
+  "x-protean-identity-field": "id",
+  "x-protean-is-event-sourced": true
+}

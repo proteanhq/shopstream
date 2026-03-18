@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A guest cart's items were merged into a registered customer's cart.",
+  "properties": {
+    "cart_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "items_merged_count": {
+      "type": "integer"
+    },
+    "source_session_id": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "cart_id",
+    "items_merged_count"
+  ],
+  "title": "CartsMerged",
+  "type": "object",
+  "x-protean-aggregate": "ordering.cart.cart.ShoppingCart",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.cart.events.CartsMerged",
+  "x-protean-type": "Ordering.CartsMerged.v1",
+  "x-protean-version": 1
+}

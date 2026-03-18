@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Payment method details captured at initiation time.",
+  "properties": {
+    "expiry_month": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "expiry_year": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "last4": {
+      "anyOf": [
+        {
+          "maxLength": 4,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "method_type": {
+      "anyOf": [
+        {
+          "maxLength": 50,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "title": "PaymentMethod",
+  "type": "object",
+  "x-protean-aggregate": "payments.payment.payment.Payment",
+  "x-protean-element-type": "value_object",
+  "x-protean-fqn": "payments.payment.payment.PaymentMethod"
+}

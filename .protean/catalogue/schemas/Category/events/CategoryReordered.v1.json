@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A category's display position was changed.",
+  "properties": {
+    "category_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_order": {
+      "type": "integer"
+    },
+    "previous_order": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "category_id",
+    "new_order",
+    "previous_order"
+  ],
+  "title": "CategoryReordered",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.category.category.Category",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "catalogue.category.events.CategoryReordered",
+  "x-protean-type": "Catalogue.CategoryReordered.v1",
+  "x-protean-version": 1
+}

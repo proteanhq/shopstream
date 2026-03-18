@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Request to retry a failed notification.",
+  "properties": {
+    "notification_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "notification_id"
+  ],
+  "title": "RetryNotification",
+  "type": "object",
+  "x-protean-aggregate": "notifications.notification.notification.Notification",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "notifications.notification.retry.RetryNotification",
+  "x-protean-type": "Notifications.RetryNotification.v1",
+  "x-protean-version": 1
+}

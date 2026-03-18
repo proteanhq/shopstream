@@ -1,0 +1,2999 @@
+{
+  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
+  "checksum": "sha256:8b7be751e2369ddf1dd0c4b704e68cf5db47216440698d464d6c8108d1d40840",
+  "clusters": {
+    "abc.DefaultOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.DefaultOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "DefaultOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "outbox",
+          "stream_category": "catalogue::default_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.DefaultOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.DefaultOutboxRepository",
+          "module": "protean.utils",
+          "name": "DefaultOutboxRepository",
+          "part_of": "abc.DefaultOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "abc.MemoryOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.MemoryOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "MemoryOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "memory",
+          "schema_name": "outbox",
+          "stream_category": "catalogue::memory_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.MemoryOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.MemoryOutboxRepository",
+          "module": "protean.utils",
+          "name": "MemoryOutboxRepository",
+          "part_of": "abc.MemoryOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "catalogue.category.category.Category": {
+      "aggregate": {
+        "description": "A hierarchical grouping for organizing products in the catalogue.\n\nCategories form a tree up to 5 levels deep (0-4). Each category can have a\nparent, custom attributes, and a display order for controlling presentation.",
+        "element_type": "AGGREGATE",
+        "fields": {
+          "attributes": {
+            "default": "<callable>",
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "created_at": {
+            "default": "<callable>",
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "display_order": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "is_active": {
+            "default": true,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "level": {
+            "default": 0,
+            "kind": "standard",
+            "max_value": 4,
+            "min_value": 0,
+            "type": "Integer"
+          },
+          "name": {
+            "kind": "standard",
+            "max_length": 100,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "parent_category_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "updated_at": {
+            "default": "<callable>",
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "catalogue.category.category.Category",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "catalogue.category.category",
+        "name": "Category",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "category",
+          "stream_category": "catalogue::category"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "catalogue.category.management.ManageCategoryHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "catalogue.category.management.ManageCategoryHandler",
+          "handlers": {
+            "Catalogue.CreateCategory.v1": [
+              "create_category"
+            ],
+            "Catalogue.DeactivateCategory.v1": [
+              "deactivate_category"
+            ],
+            "Catalogue.ReorderCategory.v1": [
+              "reorder_category"
+            ],
+            "Catalogue.UpdateCategory.v1": [
+              "update_category"
+            ]
+          },
+          "module": "catalogue.category.management",
+          "name": "ManageCategoryHandler",
+          "part_of": "catalogue.category.category.Category",
+          "stream_category": "catalogue::category:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "catalogue.category.management.CreateCategory": {
+          "__type__": "Catalogue.CreateCategory.v1",
+          "__version__": 1,
+          "description": "Add a new category to the product hierarchy.",
+          "element_type": "COMMAND",
+          "fields": {
+            "attributes": {
+              "default": "<callable>",
+              "kind": "dict",
+              "type": "Dict"
+            },
+            "name": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "parent_category_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.category.management.CreateCategory",
+          "module": "catalogue.category.management",
+          "name": "CreateCategory",
+          "part_of": "catalogue.category.category.Category"
+        },
+        "catalogue.category.management.DeactivateCategory": {
+          "__type__": "Catalogue.DeactivateCategory.v1",
+          "__version__": 1,
+          "description": "Deactivate a category, hiding it from the storefront.",
+          "element_type": "COMMAND",
+          "fields": {
+            "category_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.category.management.DeactivateCategory",
+          "module": "catalogue.category.management",
+          "name": "DeactivateCategory",
+          "part_of": "catalogue.category.category.Category"
+        },
+        "catalogue.category.management.ReorderCategory": {
+          "__type__": "Catalogue.ReorderCategory.v1",
+          "__version__": 1,
+          "description": "Change a category's display position in the hierarchy.",
+          "element_type": "COMMAND",
+          "fields": {
+            "category_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_display_order": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            }
+          },
+          "fqn": "catalogue.category.management.ReorderCategory",
+          "module": "catalogue.category.management",
+          "name": "ReorderCategory",
+          "part_of": "catalogue.category.category.Category"
+        },
+        "catalogue.category.management.UpdateCategory": {
+          "__type__": "Catalogue.UpdateCategory.v1",
+          "__version__": 1,
+          "description": "Change a category's name or attributes.",
+          "element_type": "COMMAND",
+          "fields": {
+            "attributes": {
+              "default": "<callable>",
+              "kind": "dict",
+              "type": "Dict"
+            },
+            "category_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "name": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.category.management.UpdateCategory",
+          "module": "catalogue.category.management",
+          "name": "UpdateCategory",
+          "part_of": "catalogue.category.category.Category"
+        }
+      },
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {
+        "catalogue.category.events.CategoryCreated": {
+          "__type__": "Catalogue.CategoryCreated.v1",
+          "__version__": 1,
+          "description": "A new product category was added to the catalogue hierarchy.",
+          "element_type": "EVENT",
+          "fields": {
+            "category_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "level": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "parent_category_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.category.events.CategoryCreated",
+          "is_fact_event": false,
+          "module": "catalogue.category.events",
+          "name": "CategoryCreated",
+          "part_of": "catalogue.category.category.Category"
+        },
+        "catalogue.category.events.CategoryDeactivated": {
+          "__type__": "Catalogue.CategoryDeactivated.v1",
+          "__version__": 1,
+          "description": "A category was deactivated and hidden from the storefront.",
+          "element_type": "EVENT",
+          "fields": {
+            "category_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "deactivated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "catalogue.category.events.CategoryDeactivated",
+          "is_fact_event": false,
+          "module": "catalogue.category.events",
+          "name": "CategoryDeactivated",
+          "part_of": "catalogue.category.category.Category"
+        },
+        "catalogue.category.events.CategoryDetailsUpdated": {
+          "__type__": "Catalogue.CategoryDetailsUpdated.v1",
+          "__version__": 1,
+          "description": "A category's name or attributes were changed.",
+          "element_type": "EVENT",
+          "fields": {
+            "attributes": {
+              "default": "<callable>",
+              "kind": "dict",
+              "type": "Dict"
+            },
+            "category_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.category.events.CategoryDetailsUpdated",
+          "is_fact_event": false,
+          "module": "catalogue.category.events",
+          "name": "CategoryDetailsUpdated",
+          "part_of": "catalogue.category.category.Category"
+        },
+        "catalogue.category.events.CategoryReordered": {
+          "__type__": "Catalogue.CategoryReordered.v1",
+          "__version__": 1,
+          "description": "A category's display position was changed.",
+          "element_type": "EVENT",
+          "fields": {
+            "category_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_order": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "previous_order": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            }
+          },
+          "fqn": "catalogue.category.events.CategoryReordered",
+          "is_fact_event": false,
+          "module": "catalogue.category.events",
+          "name": "CategoryReordered",
+          "part_of": "catalogue.category.category.Category"
+        }
+      },
+      "repositories": {},
+      "value_objects": {}
+    },
+    "catalogue.product.product.Product": {
+      "aggregate": {
+        "description": "A sellable item in the catalogue, identified by a unique SKU.\n\nThe Product aggregate groups variants, images, pricing, and SEO metadata\ninto a single transactional boundary. Its lifecycle follows a forward-only\nstate machine: Draft -> Active -> Discontinued -> Archived. A product must\nhave at least one variant before activation.",
+        "element_type": "AGGREGATE",
+        "fields": {
+          "attributes": {
+            "default": "<callable>",
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "brand": {
+            "kind": "standard",
+            "max_length": 100,
+            "sanitize": true,
+            "type": "String"
+          },
+          "category_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "created_at": {
+            "default": "<callable>",
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "description": {
+            "kind": "text",
+            "sanitize": true,
+            "type": "Text"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "images": {
+            "kind": "has_many",
+            "target": "catalogue.product.product.Image"
+          },
+          "seller_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "seo": {
+            "kind": "value_object",
+            "target": "catalogue.product.product.SEO"
+          },
+          "sku": {
+            "kind": "value_object",
+            "required": true,
+            "target": "catalogue.shared.sku.SKU"
+          },
+          "status": {
+            "choices": [
+              "Active",
+              "Archived",
+              "Discontinued",
+              "Draft"
+            ],
+            "default": "Draft",
+            "kind": "status",
+            "transitions": {
+              "Active": [
+                "Discontinued",
+                "Archived"
+              ],
+              "Discontinued": [
+                "Active",
+                "Archived"
+              ],
+              "Draft": [
+                "Active",
+                "Archived"
+              ]
+            },
+            "type": "Status"
+          },
+          "title": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "default": "<callable>",
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "variants": {
+            "kind": "has_many",
+            "target": "catalogue.product.product.Variant"
+          },
+          "visibility": {
+            "choices": [
+              "Public",
+              "Tier_Restricted",
+              "Unlisted"
+            ],
+            "default": "Public",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "catalogue.product.product.Product",
+        "identity_field": "id",
+        "invariants": {
+          "post": [
+            "exactly_one_primary_image_when_images_exist",
+            "images_cannot_exceed_maximum"
+          ],
+          "pre": []
+        },
+        "module": "catalogue.product.product",
+        "name": "Product",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "product",
+          "stream_category": "catalogue::product"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "catalogue.product.creation.CreateProductHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "catalogue.product.creation.CreateProductHandler",
+          "handlers": {
+            "Catalogue.CreateProduct.v1": [
+              "create_product"
+            ]
+          },
+          "module": "catalogue.product.creation",
+          "name": "CreateProductHandler",
+          "part_of": "catalogue.product.product.Product",
+          "stream_category": "catalogue::product:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "catalogue.product.details.ManageProductDetailsHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "catalogue.product.details.ManageProductDetailsHandler",
+          "handlers": {
+            "Catalogue.UpdateProductDetails.v1": [
+              "update_details"
+            ]
+          },
+          "module": "catalogue.product.details",
+          "name": "ManageProductDetailsHandler",
+          "part_of": "catalogue.product.product.Product",
+          "stream_category": "catalogue::product:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "catalogue.product.images.ManageImagesHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "catalogue.product.images.ManageImagesHandler",
+          "handlers": {
+            "Catalogue.AddProductImage.v1": [
+              "add_image"
+            ],
+            "Catalogue.RemoveProductImage.v1": [
+              "remove_image"
+            ]
+          },
+          "module": "catalogue.product.images",
+          "name": "ManageImagesHandler",
+          "part_of": "catalogue.product.product.Product",
+          "stream_category": "catalogue::product:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "catalogue.product.lifecycle.ManageLifecycleHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "catalogue.product.lifecycle.ManageLifecycleHandler",
+          "handlers": {
+            "Catalogue.ActivateProduct.v1": [
+              "activate_product"
+            ],
+            "Catalogue.ArchiveProduct.v1": [
+              "archive_product"
+            ],
+            "Catalogue.DiscontinueProduct.v1": [
+              "discontinue_product"
+            ]
+          },
+          "module": "catalogue.product.lifecycle",
+          "name": "ManageLifecycleHandler",
+          "part_of": "catalogue.product.product.Product",
+          "stream_category": "catalogue::product:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "catalogue.product.variants.ManageVariantsHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "catalogue.product.variants.ManageVariantsHandler",
+          "handlers": {
+            "Catalogue.AddVariant.v1": [
+              "add_variant"
+            ],
+            "Catalogue.SetTierPrice.v1": [
+              "set_tier_price"
+            ],
+            "Catalogue.UpdateVariantPrice.v1": [
+              "update_variant_price"
+            ]
+          },
+          "module": "catalogue.product.variants",
+          "name": "ManageVariantsHandler",
+          "part_of": "catalogue.product.product.Product",
+          "stream_category": "catalogue::product:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "catalogue.product.creation.CreateProduct": {
+          "__type__": "Catalogue.CreateProduct.v1",
+          "__version__": 1,
+          "description": "Add a new product to the catalogue in Draft status.",
+          "element_type": "COMMAND",
+          "fields": {
+            "attributes": {
+              "default": "<callable>",
+              "kind": "dict",
+              "type": "Dict"
+            },
+            "brand": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "category_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            },
+            "description": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "meta_description": {
+              "kind": "standard",
+              "max_length": 160,
+              "sanitize": true,
+              "type": "String"
+            },
+            "meta_title": {
+              "kind": "standard",
+              "max_length": 70,
+              "sanitize": true,
+              "type": "String"
+            },
+            "seller_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            },
+            "sku": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "slug": {
+              "kind": "standard",
+              "max_length": 200,
+              "sanitize": true,
+              "type": "String"
+            },
+            "title": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "visibility": {
+              "kind": "standard",
+              "max_length": 20,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.product.creation.CreateProduct",
+          "module": "catalogue.product.creation",
+          "name": "CreateProduct",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.details.UpdateProductDetails": {
+          "__type__": "Catalogue.UpdateProductDetails.v1",
+          "__version__": 1,
+          "description": "Change a product's title, description, brand, attributes, or SEO metadata.",
+          "element_type": "COMMAND",
+          "fields": {
+            "attributes": {
+              "default": "<callable>",
+              "kind": "dict",
+              "type": "Dict"
+            },
+            "brand": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "description": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "meta_description": {
+              "kind": "standard",
+              "max_length": 160,
+              "sanitize": true,
+              "type": "String"
+            },
+            "meta_title": {
+              "kind": "standard",
+              "max_length": 70,
+              "sanitize": true,
+              "type": "String"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "slug": {
+              "kind": "standard",
+              "max_length": 200,
+              "sanitize": true,
+              "type": "String"
+            },
+            "title": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.product.details.UpdateProductDetails",
+          "module": "catalogue.product.details",
+          "name": "UpdateProductDetails",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.images.AddProductImage": {
+          "__type__": "Catalogue.AddProductImage.v1",
+          "__version__": 1,
+          "description": "Upload a new image for a product.",
+          "element_type": "COMMAND",
+          "fields": {
+            "alt_text": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "is_primary": {
+              "default": false,
+              "kind": "standard",
+              "type": "Boolean"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "url": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.product.images.AddProductImage",
+          "module": "catalogue.product.images",
+          "name": "AddProductImage",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.images.RemoveProductImage": {
+          "__type__": "Catalogue.RemoveProductImage.v1",
+          "__version__": 1,
+          "description": "Remove an image from a product's gallery.",
+          "element_type": "COMMAND",
+          "fields": {
+            "image_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.product.images.RemoveProductImage",
+          "module": "catalogue.product.images",
+          "name": "RemoveProductImage",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.lifecycle.ActivateProduct": {
+          "__type__": "Catalogue.ActivateProduct.v1",
+          "__version__": 1,
+          "description": "Make a draft product available for sale (requires at least one variant).",
+          "element_type": "COMMAND",
+          "fields": {
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.product.lifecycle.ActivateProduct",
+          "module": "catalogue.product.lifecycle",
+          "name": "ActivateProduct",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.lifecycle.ArchiveProduct": {
+          "__type__": "Catalogue.ArchiveProduct.v1",
+          "__version__": 1,
+          "description": "Archive a discontinued product for permanent storage.",
+          "element_type": "COMMAND",
+          "fields": {
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.product.lifecycle.ArchiveProduct",
+          "module": "catalogue.product.lifecycle",
+          "name": "ArchiveProduct",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.lifecycle.DiscontinueProduct": {
+          "__type__": "Catalogue.DiscontinueProduct.v1",
+          "__version__": 1,
+          "description": "Remove an active product from sale.",
+          "element_type": "COMMAND",
+          "fields": {
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.product.lifecycle.DiscontinueProduct",
+          "module": "catalogue.product.lifecycle",
+          "name": "DiscontinueProduct",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.variants.AddVariant": {
+          "__type__": "Catalogue.AddVariant.v1",
+          "__version__": 1,
+          "description": "Add a new purchasable variant (size, color, etc.) to a product.",
+          "element_type": "COMMAND",
+          "fields": {
+            "attributes": {
+              "default": "<callable>",
+              "kind": "dict",
+              "type": "Dict"
+            },
+            "base_price": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "currency": {
+              "default": "USD",
+              "kind": "standard",
+              "max_length": 3,
+              "sanitize": true,
+              "type": "String"
+            },
+            "dimension_unit": {
+              "kind": "standard",
+              "max_length": 2,
+              "sanitize": true,
+              "type": "String"
+            },
+            "height": {
+              "kind": "standard",
+              "type": "Float"
+            },
+            "length": {
+              "kind": "standard",
+              "type": "Float"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "variant_sku": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "weight_unit": {
+              "kind": "standard",
+              "max_length": 2,
+              "sanitize": true,
+              "type": "String"
+            },
+            "weight_value": {
+              "kind": "standard",
+              "type": "Float"
+            },
+            "width": {
+              "kind": "standard",
+              "type": "Float"
+            }
+          },
+          "fqn": "catalogue.product.variants.AddVariant",
+          "module": "catalogue.product.variants",
+          "name": "AddVariant",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.variants.SetTierPrice": {
+          "__type__": "Catalogue.SetTierPrice.v1",
+          "__version__": 1,
+          "description": "Set a loyalty-tier-specific discount price on a variant.",
+          "element_type": "COMMAND",
+          "fields": {
+            "price": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "tier": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.product.variants.SetTierPrice",
+          "module": "catalogue.product.variants",
+          "name": "SetTierPrice",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.variants.UpdateVariantPrice": {
+          "__type__": "Catalogue.UpdateVariantPrice.v1",
+          "__version__": 1,
+          "description": "Change the base price of an existing variant.",
+          "element_type": "COMMAND",
+          "fields": {
+            "base_price": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "currency": {
+              "default": "USD",
+              "kind": "standard",
+              "max_length": 3,
+              "sanitize": true,
+              "type": "String"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.product.variants.UpdateVariantPrice",
+          "module": "catalogue.product.variants",
+          "name": "UpdateVariantPrice",
+          "part_of": "catalogue.product.product.Product"
+        }
+      },
+      "database_models": {},
+      "entities": {
+        "catalogue.product.product.Image": {
+          "description": "A visual representation of a Product, with URL and display ordering.\n\nA product may have up to 10 images, with exactly one marked as primary.\nThe first image added is automatically set as primary.",
+          "element_type": "ENTITY",
+          "fields": {
+            "alt_text": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "display_order": {
+              "default": 0,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "is_primary": {
+              "default": false,
+              "kind": "standard",
+              "type": "Boolean"
+            },
+            "product": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "catalogue.product.product.Product"
+            },
+            "url": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.product.product.Image",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "catalogue.product.product",
+          "name": "Image",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "image"
+          },
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.product.Variant": {
+          "description": "A purchasable configuration of a Product, such as a specific size or color.\n\nEach variant has its own SKU, pricing (with optional tier discounts), and\nphysical attributes (weight, dimensions). A product must have at least one\nvariant to be activated for sale.",
+          "element_type": "ENTITY",
+          "fields": {
+            "attributes": {
+              "default": "<callable>",
+              "kind": "dict",
+              "type": "Dict"
+            },
+            "dimensions": {
+              "kind": "value_object",
+              "target": "catalogue.product.product.Dimensions"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "is_active": {
+              "default": true,
+              "kind": "standard",
+              "type": "Boolean"
+            },
+            "price": {
+              "kind": "value_object",
+              "required": true,
+              "target": "catalogue.product.product.Price"
+            },
+            "product": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "catalogue.product.product.Product"
+            },
+            "variant_sku": {
+              "kind": "value_object",
+              "required": true,
+              "target": "catalogue.shared.sku.SKU"
+            },
+            "weight": {
+              "kind": "value_object",
+              "target": "catalogue.product.product.Weight"
+            }
+          },
+          "fqn": "catalogue.product.product.Variant",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "catalogue.product.product",
+          "name": "Variant",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "variant"
+          },
+          "part_of": "catalogue.product.product.Product"
+        }
+      },
+      "event_handlers": {},
+      "events": {
+        "catalogue.product.events.ProductActivated": {
+          "__type__": "Catalogue.ProductActivated.v1",
+          "__version__": 1,
+          "description": "A draft product was activated and made available for sale.",
+          "element_type": "EVENT",
+          "fields": {
+            "activated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "sku": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.product.events.ProductActivated",
+          "is_fact_event": false,
+          "module": "catalogue.product.events",
+          "name": "ProductActivated",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.events.ProductArchived": {
+          "__type__": "Catalogue.ProductArchived.v1",
+          "__version__": 1,
+          "description": "A discontinued product was archived for permanent storage.",
+          "element_type": "EVENT",
+          "fields": {
+            "archived_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.product.events.ProductArchived",
+          "is_fact_event": false,
+          "module": "catalogue.product.events",
+          "name": "ProductArchived",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.events.ProductCreated": {
+          "__type__": "Catalogue.ProductCreated.v1",
+          "__version__": 1,
+          "description": "A new product was added to the catalogue in Draft status.",
+          "element_type": "EVENT",
+          "fields": {
+            "category_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            },
+            "created_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "seller_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            },
+            "sku": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "status": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "title": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.product.events.ProductCreated",
+          "is_fact_event": false,
+          "module": "catalogue.product.events",
+          "name": "ProductCreated",
+          "part_of": "catalogue.product.product.Product",
+          "published": true
+        },
+        "catalogue.product.events.ProductDetailsUpdated": {
+          "__type__": "Catalogue.ProductDetailsUpdated.v1",
+          "__version__": 1,
+          "description": "A product's title, description, brand, or attributes were changed.",
+          "element_type": "EVENT",
+          "fields": {
+            "brand": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "description": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "title": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.product.events.ProductDetailsUpdated",
+          "is_fact_event": false,
+          "module": "catalogue.product.events",
+          "name": "ProductDetailsUpdated",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.events.ProductDiscontinued": {
+          "__type__": "Catalogue.ProductDiscontinued.v1",
+          "__version__": 1,
+          "description": "An active product was discontinued and removed from sale.",
+          "element_type": "EVENT",
+          "fields": {
+            "discontinued_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "sku": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.product.events.ProductDiscontinued",
+          "is_fact_event": false,
+          "module": "catalogue.product.events",
+          "name": "ProductDiscontinued",
+          "part_of": "catalogue.product.product.Product",
+          "published": true
+        },
+        "catalogue.product.events.ProductImageAdded": {
+          "__type__": "Catalogue.ProductImageAdded.v1",
+          "__version__": 1,
+          "description": "A new image was uploaded for a product.",
+          "element_type": "EVENT",
+          "fields": {
+            "image_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "is_primary": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "url": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.product.events.ProductImageAdded",
+          "is_fact_event": false,
+          "module": "catalogue.product.events",
+          "name": "ProductImageAdded",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.events.ProductImageRemoved": {
+          "__type__": "Catalogue.ProductImageRemoved.v1",
+          "__version__": 1,
+          "description": "An image was removed from a product's gallery.",
+          "element_type": "EVENT",
+          "fields": {
+            "image_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.product.events.ProductImageRemoved",
+          "is_fact_event": false,
+          "module": "catalogue.product.events",
+          "name": "ProductImageRemoved",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.events.TierPriceSet": {
+          "__type__": "Catalogue.TierPriceSet.v1",
+          "__version__": 1,
+          "description": "A loyalty-tier-specific price was set on a variant.",
+          "element_type": "EVENT",
+          "fields": {
+            "currency": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "price": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "tier": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.product.events.TierPriceSet",
+          "is_fact_event": false,
+          "module": "catalogue.product.events",
+          "name": "TierPriceSet",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.events.VariantAdded": {
+          "__type__": "Catalogue.VariantAdded.v1",
+          "__version__": 1,
+          "description": "A new purchasable variant was added to a product.",
+          "element_type": "EVENT",
+          "fields": {
+            "created_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "price_amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "price_currency": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "variant_sku": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.product.events.VariantAdded",
+          "is_fact_event": false,
+          "module": "catalogue.product.events",
+          "name": "VariantAdded",
+          "part_of": "catalogue.product.product.Product",
+          "published": true
+        },
+        "catalogue.product.events.VariantPriceChanged": {
+          "__type__": "Catalogue.VariantPriceChanged.v1",
+          "__version__": 1,
+          "description": "A variant's base price was updated.",
+          "element_type": "EVENT",
+          "fields": {
+            "currency": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "new_price": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "previous_price": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.product.events.VariantPriceChanged",
+          "is_fact_event": false,
+          "module": "catalogue.product.events",
+          "name": "VariantPriceChanged",
+          "part_of": "catalogue.product.product.Product"
+        }
+      },
+      "repositories": {},
+      "value_objects": {
+        "catalogue.product.product.Dimensions": {
+          "description": "Physical dimensions (length, width, height) of a product or variant.\n\nSupports centimeters (cm) and inches (in) as measurement units.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "height": {
+              "kind": "standard",
+              "min_value": 0.0,
+              "type": "Float"
+            },
+            "length": {
+              "kind": "standard",
+              "min_value": 0.0,
+              "type": "Float"
+            },
+            "unit": {
+              "default": "cm",
+              "kind": "standard",
+              "max_length": 2,
+              "sanitize": true,
+              "type": "String"
+            },
+            "width": {
+              "kind": "standard",
+              "min_value": 0.0,
+              "type": "Float"
+            }
+          },
+          "fqn": "catalogue.product.product.Dimensions",
+          "invariants": {
+            "post": [
+              "unit_must_be_valid"
+            ],
+            "pre": []
+          },
+          "module": "catalogue.product.product",
+          "name": "Dimensions",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.product.Price": {
+          "description": "The monetary cost of a variant, with optional loyalty-tier discounts.\n\nBase price is the standard retail price. Tier prices (stored as JSON) allow\ndifferent pricing for Silver, Gold, and Platinum customers. Tier prices must\nalways be lower than the base price.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "base_price": {
+              "kind": "standard",
+              "min_value": 0.01,
+              "required": true,
+              "type": "Float"
+            },
+            "currency": {
+              "default": "USD",
+              "kind": "standard",
+              "max_length": 3,
+              "sanitize": true,
+              "type": "String"
+            },
+            "tier_prices": {
+              "default": "<callable>",
+              "kind": "dict",
+              "type": "Dict"
+            }
+          },
+          "fqn": "catalogue.product.product.Price",
+          "invariants": {
+            "post": [
+              "tier_prices_must_be_valid"
+            ],
+            "pre": []
+          },
+          "module": "catalogue.product.product",
+          "name": "Price",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.product.SEO": {
+          "description": "Search engine optimization metadata for a product page.\n\nContains meta title (max 70 chars), meta description (max 160 chars), and a\nURL-safe slug. The slug must be lowercase alphanumeric with hyphens only.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "meta_description": {
+              "kind": "standard",
+              "max_length": 160,
+              "sanitize": true,
+              "type": "String"
+            },
+            "meta_title": {
+              "kind": "standard",
+              "max_length": 70,
+              "sanitize": true,
+              "type": "String"
+            },
+            "slug": {
+              "kind": "standard",
+              "max_length": 200,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.product.product.SEO",
+          "invariants": {
+            "post": [
+              "slug_must_be_url_safe"
+            ],
+            "pre": []
+          },
+          "module": "catalogue.product.product",
+          "name": "SEO",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.product.Weight": {
+          "description": "Physical weight of a product or variant, used for shipping calculations.\n\nSupports kilograms (kg), pounds (lb), grams (g), and ounces (oz).",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "unit": {
+              "default": "kg",
+              "kind": "standard",
+              "max_length": 2,
+              "sanitize": true,
+              "type": "String"
+            },
+            "value": {
+              "kind": "standard",
+              "min_value": 0.0,
+              "type": "Float"
+            }
+          },
+          "fqn": "catalogue.product.product.Weight",
+          "invariants": {
+            "post": [
+              "unit_must_be_valid"
+            ],
+            "pre": []
+          },
+          "module": "catalogue.product.product",
+          "name": "Weight",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.shared.sku.SKU": {
+          "description": "Value object for stock keeping unit codes.\n\nFormat: alphanumeric + hyphens, 3-50 chars.\nE.g., \"ELEC-PHN-001\", \"SHOE-RUN-BLK-42\"",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "code": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 3,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.shared.sku.SKU",
+          "invariants": {
+            "post": [
+              "code_must_be_valid_format"
+            ],
+            "pre": []
+          },
+          "module": "catalogue.shared.sku",
+          "name": "SKU",
+          "part_of": "catalogue.product.product.Product"
+        }
+      }
+    }
+  },
+  "contracts": {
+    "events": [
+      {
+        "fields": {
+          "category_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "created_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "seller_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "sku": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "title": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "catalogue.product.events.ProductCreated",
+        "type": "Catalogue.ProductCreated.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "discontinued_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "sku": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "catalogue.product.events.ProductDiscontinued",
+        "type": "Catalogue.ProductDiscontinued.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "created_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "price_amount": {
+            "kind": "standard",
+            "required": true,
+            "type": "Float"
+          },
+          "price_currency": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "variant_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "variant_sku": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "catalogue.product.events.VariantAdded",
+        "type": "Catalogue.VariantAdded.v1",
+        "version": 1
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.DefaultOutbox",
+      "level": "warning",
+      "message": "Aggregate `DefaultOutbox` has no command handler \u2014 no write path exists"
+    },
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.MemoryOutbox",
+      "level": "warning",
+      "message": "Aggregate `MemoryOutbox` has no command handler \u2014 no write path exists"
+    }
+  ],
+  "domain": {
+    "camel_case_name": "Catalogue",
+    "command_processing": "sync",
+    "event_processing": "async",
+    "identity_strategy": "uuid",
+    "identity_type": "string",
+    "name": "catalogue",
+    "normalized_name": "catalogue"
+  },
+  "elements": {
+    "AGGREGATE": [
+      "abc.DefaultOutbox",
+      "abc.MemoryOutbox",
+      "catalogue.category.category.Category",
+      "catalogue.product.product.Product"
+    ],
+    "APPLICATION_SERVICE": [],
+    "COMMAND": [
+      "catalogue.category.management.CreateCategory",
+      "catalogue.category.management.DeactivateCategory",
+      "catalogue.category.management.ReorderCategory",
+      "catalogue.category.management.UpdateCategory",
+      "catalogue.product.creation.CreateProduct",
+      "catalogue.product.details.UpdateProductDetails",
+      "catalogue.product.images.AddProductImage",
+      "catalogue.product.images.RemoveProductImage",
+      "catalogue.product.lifecycle.ActivateProduct",
+      "catalogue.product.lifecycle.ArchiveProduct",
+      "catalogue.product.lifecycle.DiscontinueProduct",
+      "catalogue.product.variants.AddVariant",
+      "catalogue.product.variants.SetTierPrice",
+      "catalogue.product.variants.UpdateVariantPrice"
+    ],
+    "COMMAND_HANDLER": [
+      "catalogue.category.management.ManageCategoryHandler",
+      "catalogue.product.creation.CreateProductHandler",
+      "catalogue.product.details.ManageProductDetailsHandler",
+      "catalogue.product.images.ManageImagesHandler",
+      "catalogue.product.lifecycle.ManageLifecycleHandler",
+      "catalogue.product.variants.ManageVariantsHandler"
+    ],
+    "DATABASE_MODEL": [],
+    "DOMAIN_SERVICE": [],
+    "ENTITY": [
+      "catalogue.product.product.Image",
+      "catalogue.product.product.Variant"
+    ],
+    "EVENT": [
+      "catalogue.category.events.CategoryCreated",
+      "catalogue.category.events.CategoryDeactivated",
+      "catalogue.category.events.CategoryDetailsUpdated",
+      "catalogue.category.events.CategoryReordered",
+      "catalogue.product.events.ProductActivated",
+      "catalogue.product.events.ProductArchived",
+      "catalogue.product.events.ProductCreated",
+      "catalogue.product.events.ProductDetailsUpdated",
+      "catalogue.product.events.ProductDiscontinued",
+      "catalogue.product.events.ProductImageAdded",
+      "catalogue.product.events.ProductImageRemoved",
+      "catalogue.product.events.TierPriceSet",
+      "catalogue.product.events.VariantAdded",
+      "catalogue.product.events.VariantPriceChanged"
+    ],
+    "EVENT_HANDLER": [],
+    "PROCESS_MANAGER": [],
+    "PROJECTION": [
+      "catalogue.projections.category_products.CategoryProducts",
+      "catalogue.projections.category_tree.CategoryTree",
+      "catalogue.projections.price_history.PriceHistory",
+      "catalogue.projections.product_card.ProductCard",
+      "catalogue.projections.product_detail.ProductDetail",
+      "catalogue.projections.seller_catalogue.SellerCatalogue"
+    ],
+    "PROJECTOR": [
+      "catalogue.projections.category_products.CategoryProductsProjector",
+      "catalogue.projections.category_tree.CategoryTreeProjector",
+      "catalogue.projections.price_history.PriceHistoryProjector",
+      "catalogue.projections.product_card.ProductCardProjector",
+      "catalogue.projections.product_detail.ProductDetailProjector",
+      "catalogue.projections.seller_catalogue.SellerCatalogueProjector"
+    ],
+    "QUERY": [
+      "catalogue.projections.category_products_queries.GetCategoryProducts",
+      "catalogue.projections.category_tree_queries.ListCategoryTree",
+      "catalogue.projections.product_card_queries.ListProductCards",
+      "catalogue.projections.product_detail_queries.GetProductDetail"
+    ],
+    "QUERY_HANDLER": [
+      "catalogue.projections.category_products_queries.CategoryProductsQueryHandler",
+      "catalogue.projections.category_tree_queries.CategoryTreeQueryHandler",
+      "catalogue.projections.product_card_queries.ProductCardQueryHandler",
+      "catalogue.projections.product_detail_queries.ProductDetailQueryHandler"
+    ],
+    "REPOSITORY": [
+      "protean.utils.DefaultOutboxRepository",
+      "protean.utils.MemoryOutboxRepository"
+    ],
+    "SUBSCRIBER": [],
+    "VALUE_OBJECT": [
+      "catalogue.product.product.Dimensions",
+      "catalogue.product.product.Price",
+      "catalogue.product.product.SEO",
+      "catalogue.product.product.Weight",
+      "catalogue.shared.money.Money",
+      "catalogue.shared.sku.SKU"
+    ]
+  },
+  "flows": {
+    "domain_services": {},
+    "process_managers": {},
+    "subscribers": {}
+  },
+  "generated_at": "2026-03-18T13:30:23Z",
+  "ir_version": "0.1.0",
+  "projections": {
+    "catalogue.projections.category_products.CategoryProducts": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "category_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "category_name": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "product_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "products": {
+            "content_type": "dict",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "catalogue.projections.category_products.CategoryProducts",
+        "identity_field": "category_id",
+        "module": "catalogue.projections.category_products",
+        "name": "CategoryProducts",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "category_products"
+        }
+      },
+      "projectors": {
+        "catalogue.projections.category_products.CategoryProductsProjector": {
+          "aggregates": [
+            "catalogue.category.category.Category",
+            "catalogue.product.product.Product"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "catalogue.projections.category_products.CategoryProductsProjector",
+          "handlers": {
+            "Catalogue.CategoryCreated.v1": [
+              "on_category_created"
+            ],
+            "Catalogue.ProductActivated.v1": [
+              "on_product_activated"
+            ],
+            "Catalogue.ProductArchived.v1": [
+              "on_product_archived"
+            ],
+            "Catalogue.ProductCreated.v1": [
+              "on_product_created"
+            ],
+            "Catalogue.ProductDetailsUpdated.v1": [
+              "on_product_details_updated"
+            ],
+            "Catalogue.ProductDiscontinued.v1": [
+              "on_product_discontinued"
+            ]
+          },
+          "module": "catalogue.projections.category_products",
+          "name": "CategoryProductsProjector",
+          "projector_for": "catalogue.projections.category_products.CategoryProducts",
+          "stream_categories": [
+            "catalogue::category",
+            "catalogue::product"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "catalogue.projections.category_products_queries.GetCategoryProducts": {
+          "__type__": "Catalogue.GetCategoryProducts",
+          "element_type": "QUERY",
+          "fields": {
+            "category_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.projections.category_products_queries.GetCategoryProducts",
+          "module": "catalogue.projections.category_products_queries",
+          "name": "GetCategoryProducts",
+          "part_of": "catalogue.projections.category_products.CategoryProducts"
+        }
+      },
+      "query_handlers": {
+        "catalogue.projections.category_products_queries.CategoryProductsQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "catalogue.projections.category_products_queries.CategoryProductsQueryHandler",
+          "handlers": {
+            "Catalogue.GetCategoryProducts": [
+              "get_category_products"
+            ]
+          },
+          "module": "catalogue.projections.category_products_queries",
+          "name": "CategoryProductsQueryHandler",
+          "part_of": "catalogue.projections.category_products.CategoryProducts"
+        }
+      }
+    },
+    "catalogue.projections.category_tree.CategoryTree": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "breadcrumb": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "category_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "display_order": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "is_active": {
+            "default": true,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "level": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "name": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "parent_category_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "product_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          }
+        },
+        "fqn": "catalogue.projections.category_tree.CategoryTree",
+        "identity_field": "category_id",
+        "module": "catalogue.projections.category_tree",
+        "name": "CategoryTree",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "category_tree"
+        }
+      },
+      "projectors": {
+        "catalogue.projections.category_tree.CategoryTreeProjector": {
+          "aggregates": [
+            "catalogue.category.category.Category",
+            "catalogue.product.product.Product"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "catalogue.projections.category_tree.CategoryTreeProjector",
+          "handlers": {
+            "Catalogue.CategoryCreated.v1": [
+              "on_category_created"
+            ],
+            "Catalogue.CategoryDeactivated.v1": [
+              "on_category_deactivated"
+            ],
+            "Catalogue.CategoryDetailsUpdated.v1": [
+              "on_category_details_updated"
+            ],
+            "Catalogue.CategoryReordered.v1": [
+              "on_category_reordered"
+            ],
+            "Catalogue.ProductCreated.v1": [
+              "on_product_created"
+            ]
+          },
+          "module": "catalogue.projections.category_tree",
+          "name": "CategoryTreeProjector",
+          "projector_for": "catalogue.projections.category_tree.CategoryTree",
+          "stream_categories": [
+            "catalogue::category",
+            "catalogue::product"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "catalogue.projections.category_tree_queries.ListCategoryTree": {
+          "__type__": "Catalogue.ListCategoryTree",
+          "element_type": "QUERY",
+          "fields": {},
+          "fqn": "catalogue.projections.category_tree_queries.ListCategoryTree",
+          "module": "catalogue.projections.category_tree_queries",
+          "name": "ListCategoryTree",
+          "part_of": "catalogue.projections.category_tree.CategoryTree"
+        }
+      },
+      "query_handlers": {
+        "catalogue.projections.category_tree_queries.CategoryTreeQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "catalogue.projections.category_tree_queries.CategoryTreeQueryHandler",
+          "handlers": {
+            "Catalogue.ListCategoryTree": [
+              "list_category_tree"
+            ]
+          },
+          "module": "catalogue.projections.category_tree_queries",
+          "name": "CategoryTreeQueryHandler",
+          "part_of": "catalogue.projections.category_tree.CategoryTree"
+        }
+      }
+    },
+    "catalogue.projections.price_history.PriceHistory": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "changed_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "currency": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "entry_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "new_price": {
+            "kind": "standard",
+            "required": true,
+            "type": "Float"
+          },
+          "previous_price": {
+            "kind": "standard",
+            "required": true,
+            "type": "Float"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "variant_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "catalogue.projections.price_history.PriceHistory",
+        "identity_field": "entry_id",
+        "module": "catalogue.projections.price_history",
+        "name": "PriceHistory",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "price_history"
+        }
+      },
+      "projectors": {
+        "catalogue.projections.price_history.PriceHistoryProjector": {
+          "aggregates": [
+            "catalogue.product.product.Product"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "catalogue.projections.price_history.PriceHistoryProjector",
+          "handlers": {
+            "Catalogue.VariantPriceChanged.v1": [
+              "on_variant_price_changed"
+            ]
+          },
+          "module": "catalogue.projections.price_history",
+          "name": "PriceHistoryProjector",
+          "projector_for": "catalogue.projections.price_history.PriceHistory",
+          "stream_categories": [
+            "catalogue::product"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "catalogue.projections.product_card.ProductCard": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "brand": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "category_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "currency": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "max_price": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "min_price": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "primary_image_url": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "product_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "sku": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "title": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "variant_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          }
+        },
+        "fqn": "catalogue.projections.product_card.ProductCard",
+        "identity_field": "product_id",
+        "module": "catalogue.projections.product_card",
+        "name": "ProductCard",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "product_card"
+        }
+      },
+      "projectors": {
+        "catalogue.projections.product_card.ProductCardProjector": {
+          "aggregates": [
+            "catalogue.product.product.Product"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "catalogue.projections.product_card.ProductCardProjector",
+          "handlers": {
+            "Catalogue.ProductActivated.v1": [
+              "on_product_activated"
+            ],
+            "Catalogue.ProductArchived.v1": [
+              "on_product_archived"
+            ],
+            "Catalogue.ProductCreated.v1": [
+              "on_product_created"
+            ],
+            "Catalogue.ProductDetailsUpdated.v1": [
+              "on_details_updated"
+            ],
+            "Catalogue.ProductDiscontinued.v1": [
+              "on_product_discontinued"
+            ],
+            "Catalogue.ProductImageAdded.v1": [
+              "on_image_added"
+            ],
+            "Catalogue.ProductImageRemoved.v1": [
+              "on_image_removed"
+            ],
+            "Catalogue.VariantAdded.v1": [
+              "on_variant_added"
+            ],
+            "Catalogue.VariantPriceChanged.v1": [
+              "on_variant_price_changed"
+            ]
+          },
+          "module": "catalogue.projections.product_card",
+          "name": "ProductCardProjector",
+          "projector_for": "catalogue.projections.product_card.ProductCard",
+          "stream_categories": [
+            "catalogue::product"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "catalogue.projections.product_card_queries.ListProductCards": {
+          "__type__": "Catalogue.ListProductCards",
+          "element_type": "QUERY",
+          "fields": {
+            "category_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            },
+            "page": {
+              "default": 1,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "page_size": {
+              "default": 20,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "status": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "catalogue.projections.product_card_queries.ListProductCards",
+          "module": "catalogue.projections.product_card_queries",
+          "name": "ListProductCards",
+          "part_of": "catalogue.projections.product_card.ProductCard"
+        }
+      },
+      "query_handlers": {
+        "catalogue.projections.product_card_queries.ProductCardQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "catalogue.projections.product_card_queries.ProductCardQueryHandler",
+          "handlers": {
+            "Catalogue.ListProductCards": [
+              "list_product_cards"
+            ]
+          },
+          "module": "catalogue.projections.product_card_queries",
+          "name": "ProductCardQueryHandler",
+          "part_of": "catalogue.projections.product_card.ProductCard"
+        }
+      }
+    },
+    "catalogue.projections.product_detail.ProductDetail": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "attributes": {
+            "default": "<callable>",
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "brand": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "category_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "description": {
+            "kind": "text",
+            "sanitize": true,
+            "type": "Text"
+          },
+          "images": {
+            "content_type": "dict",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "meta_description": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "meta_title": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "product_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "seller_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "sku": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "slug": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "title": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "variants": {
+            "content_type": "dict",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "visibility": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "catalogue.projections.product_detail.ProductDetail",
+        "identity_field": "product_id",
+        "module": "catalogue.projections.product_detail",
+        "name": "ProductDetail",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "product_detail"
+        }
+      },
+      "projectors": {
+        "catalogue.projections.product_detail.ProductDetailProjector": {
+          "aggregates": [
+            "catalogue.product.product.Product"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "catalogue.projections.product_detail.ProductDetailProjector",
+          "handlers": {
+            "Catalogue.ProductActivated.v1": [
+              "on_product_activated"
+            ],
+            "Catalogue.ProductArchived.v1": [
+              "on_product_archived"
+            ],
+            "Catalogue.ProductCreated.v1": [
+              "on_product_created"
+            ],
+            "Catalogue.ProductDetailsUpdated.v1": [
+              "on_details_updated"
+            ],
+            "Catalogue.ProductDiscontinued.v1": [
+              "on_product_discontinued"
+            ],
+            "Catalogue.ProductImageAdded.v1": [
+              "on_image_added"
+            ],
+            "Catalogue.ProductImageRemoved.v1": [
+              "on_image_removed"
+            ],
+            "Catalogue.TierPriceSet.v1": [
+              "on_tier_price_set"
+            ],
+            "Catalogue.VariantAdded.v1": [
+              "on_variant_added"
+            ],
+            "Catalogue.VariantPriceChanged.v1": [
+              "on_variant_price_changed"
+            ]
+          },
+          "module": "catalogue.projections.product_detail",
+          "name": "ProductDetailProjector",
+          "projector_for": "catalogue.projections.product_detail.ProductDetail",
+          "stream_categories": [
+            "catalogue::product"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "catalogue.projections.product_detail_queries.GetProductDetail": {
+          "__type__": "Catalogue.GetProductDetail",
+          "element_type": "QUERY",
+          "fields": {
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "catalogue.projections.product_detail_queries.GetProductDetail",
+          "module": "catalogue.projections.product_detail_queries",
+          "name": "GetProductDetail",
+          "part_of": "catalogue.projections.product_detail.ProductDetail"
+        }
+      },
+      "query_handlers": {
+        "catalogue.projections.product_detail_queries.ProductDetailQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "catalogue.projections.product_detail_queries.ProductDetailQueryHandler",
+          "handlers": {
+            "Catalogue.GetProductDetail": [
+              "get_product_detail"
+            ]
+          },
+          "module": "catalogue.projections.product_detail_queries",
+          "name": "ProductDetailQueryHandler",
+          "part_of": "catalogue.projections.product_detail.ProductDetail"
+        }
+      }
+    },
+    "catalogue.projections.seller_catalogue.SellerCatalogue": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "product_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "seller_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "sku": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "title": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "variant_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          }
+        },
+        "fqn": "catalogue.projections.seller_catalogue.SellerCatalogue",
+        "identity_field": "product_id",
+        "module": "catalogue.projections.seller_catalogue",
+        "name": "SellerCatalogue",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "seller_catalogue"
+        }
+      },
+      "projectors": {
+        "catalogue.projections.seller_catalogue.SellerCatalogueProjector": {
+          "aggregates": [
+            "catalogue.product.product.Product"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "catalogue.projections.seller_catalogue.SellerCatalogueProjector",
+          "handlers": {
+            "Catalogue.ProductActivated.v1": [
+              "on_product_activated"
+            ],
+            "Catalogue.ProductArchived.v1": [
+              "on_product_archived"
+            ],
+            "Catalogue.ProductCreated.v1": [
+              "on_product_created"
+            ],
+            "Catalogue.ProductDetailsUpdated.v1": [
+              "on_details_updated"
+            ],
+            "Catalogue.ProductDiscontinued.v1": [
+              "on_product_discontinued"
+            ],
+            "Catalogue.VariantAdded.v1": [
+              "on_variant_added"
+            ]
+          },
+          "module": "catalogue.projections.seller_catalogue",
+          "name": "SellerCatalogueProjector",
+          "projector_for": "catalogue.projections.seller_catalogue.SellerCatalogue",
+          "stream_categories": [
+            "catalogue::product"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    }
+  }
+}

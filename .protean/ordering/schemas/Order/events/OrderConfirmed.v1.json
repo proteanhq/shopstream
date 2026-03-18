@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The customer confirmed the order, committing to the purchase.",
+  "properties": {
+    "confirmed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "confirmed_at",
+    "order_id"
+  ],
+  "title": "OrderConfirmed",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.OrderConfirmed",
+  "x-protean-published": true,
+  "x-protean-type": "Ordering.OrderConfirmed.v1",
+  "x-protean-version": 1
+}

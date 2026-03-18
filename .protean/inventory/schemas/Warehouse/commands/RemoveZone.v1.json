@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Remove a zone from a warehouse.",
+  "properties": {
+    "warehouse_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "zone_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "warehouse_id",
+    "zone_id"
+  ],
+  "title": "RemoveZone",
+  "type": "object",
+  "x-protean-aggregate": "inventory.warehouse.warehouse.Warehouse",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "inventory.warehouse.management.RemoveZone",
+  "x-protean-type": "Inventory.RemoveZone.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Add a new address to a customer's address book.",
+  "properties": {
+    "city": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "country": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "geo_lat": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "geo_lng": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "label": {
+      "anyOf": [
+        {
+          "maxLength": 20,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "postal_code": {
+      "maxLength": 20,
+      "minLength": 1,
+      "type": "string"
+    },
+    "state": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "street": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "city",
+    "country",
+    "customer_id",
+    "postal_code",
+    "street"
+  ],
+  "title": "AddAddress",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "identity.customer.addresses.AddAddress",
+  "x-protean-type": "Identity.AddAddress.v1",
+  "x-protean-version": 1
+}

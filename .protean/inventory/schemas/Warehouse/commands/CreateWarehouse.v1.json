@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Create a new warehouse.",
+  "properties": {
+    "address": {
+      "type": "object"
+    },
+    "capacity": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "address",
+    "name"
+  ],
+  "title": "CreateWarehouse",
+  "type": "object",
+  "x-protean-aggregate": "inventory.warehouse.warehouse.Warehouse",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "inventory.warehouse.management.CreateWarehouse",
+  "x-protean-type": "Inventory.CreateWarehouse.v1",
+  "x-protean-version": 1
+}

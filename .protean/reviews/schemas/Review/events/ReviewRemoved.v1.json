@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A published review was removed.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "rating": {
+      "type": "integer"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "removed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "removed_by": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "review_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "product_id",
+    "rating",
+    "reason",
+    "removed_at",
+    "removed_by",
+    "review_id"
+  ],
+  "title": "ReviewRemoved",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "reviews.review.events.ReviewRemoved",
+  "x-protean-type": "Reviews.ReviewRemoved.v1",
+  "x-protean-version": 1
+}

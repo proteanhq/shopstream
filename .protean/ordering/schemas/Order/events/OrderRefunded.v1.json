@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A refund was issued for a cancelled or returned order.",
+  "properties": {
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "refund_amount": {
+      "type": "number"
+    },
+    "refunded_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "order_id",
+    "refund_amount",
+    "refunded_at"
+  ],
+  "title": "OrderRefunded",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.OrderRefunded",
+  "x-protean-type": "Ordering.OrderRefunded.v1",
+  "x-protean-version": 1
+}

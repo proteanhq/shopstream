@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "removed_by": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "review_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "reason",
+    "removed_by",
+    "review_id"
+  ],
+  "title": "RemoveReview",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "reviews.review.removal.RemoveReview",
+  "x-protean-type": "Reviews.RemoveReview.v1",
+  "x-protean-version": 1
+}

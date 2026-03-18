@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A line item in an order, representing a specific product variant and quantity.\n\nEach item tracks its own status through the fulfillment lifecycle\n(Pending -> Shipped -> Delivered -> optionally Returned), enabling partial\nshipments where some items ship before others.",
+  "properties": {
+    "discount": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    },
+    "id": {
+      "type": "string"
+    },
+    "item_status": {
+      "anyOf": [
+        {
+          "enum": [
+            "Delivered",
+            "Pending",
+            "Reserved",
+            "Returned",
+            "Shipped"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "Pending"
+    },
+    "order": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "sku": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+    },
+    "tax_amount": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    },
+    "title": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "unit_price": {
+      "minimum": 0.0,
+      "type": "number"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "product_id",
+    "quantity",
+    "sku",
+    "title",
+    "unit_price",
+    "variant_id"
+  ],
+  "title": "OrderItem",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "ordering.order.order.OrderItem",
+  "x-protean-identity-field": "id"
+}

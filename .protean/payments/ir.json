@@ -1,0 +1,2622 @@
+{
+  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
+  "checksum": "sha256:e489ea91faa5cd7e823d7e1bbe3225e85a6604851e5452a42a1bf3d7e65b8663",
+  "clusters": {
+    "abc.DefaultOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.DefaultOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "DefaultOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "outbox",
+          "stream_category": "payments::default_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.DefaultOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.DefaultOutboxRepository",
+          "module": "protean.utils",
+          "name": "DefaultOutboxRepository",
+          "part_of": "abc.DefaultOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "abc.MemoryOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.MemoryOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "MemoryOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "memory",
+          "schema_name": "outbox",
+          "stream_category": "payments::memory_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.MemoryOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.MemoryOutboxRepository",
+          "module": "protean.utils",
+          "name": "MemoryOutboxRepository",
+          "part_of": "abc.MemoryOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "payments.invoice.invoice.Invoice": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "invoice_number": {
+            "kind": "standard",
+            "max_length": 50,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "issued_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "line_items": {
+            "kind": "has_many",
+            "target": "payments.invoice.invoice.InvoiceLineItem"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "paid_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "status": {
+            "choices": [
+              "Draft",
+              "Issued",
+              "Paid",
+              "Voided"
+            ],
+            "default": "Draft",
+            "kind": "status",
+            "transitions": {
+              "Draft": [
+                "Issued",
+                "Voided"
+              ],
+              "Issued": [
+                "Paid",
+                "Voided"
+              ]
+            },
+            "type": "Status"
+          },
+          "subtotal": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "tax": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "total": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "payments.invoice.invoice.Invoice",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "payments.invoice.invoice",
+        "name": "Invoice",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "invoice",
+          "stream_category": "payments::invoice"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "payments.invoice.generation.GenerateInvoiceHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "payments.invoice.generation.GenerateInvoiceHandler",
+          "handlers": {
+            "Payments.GenerateInvoice.v1": [
+              "generate_invoice"
+            ]
+          },
+          "module": "payments.invoice.generation",
+          "name": "GenerateInvoiceHandler",
+          "part_of": "payments.invoice.invoice.Invoice",
+          "stream_category": "payments::invoice:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "payments.invoice.voiding.VoidInvoiceHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "payments.invoice.voiding.VoidInvoiceHandler",
+          "handlers": {
+            "Payments.VoidInvoice.v1": [
+              "void_invoice"
+            ]
+          },
+          "module": "payments.invoice.voiding",
+          "name": "VoidInvoiceHandler",
+          "part_of": "payments.invoice.invoice.Invoice",
+          "stream_category": "payments::invoice:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "payments.invoice.generation.GenerateInvoice": {
+          "__type__": "Payments.GenerateInvoice.v1",
+          "__version__": 1,
+          "description": "Generate a new invoice for an order.",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "line_items": {
+              "content_type": "dict",
+              "kind": "list",
+              "required": true,
+              "type": "List"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "tax": {
+              "default": 0.0,
+              "kind": "standard",
+              "type": "Float"
+            }
+          },
+          "fqn": "payments.invoice.generation.GenerateInvoice",
+          "module": "payments.invoice.generation",
+          "name": "GenerateInvoice",
+          "part_of": "payments.invoice.invoice.Invoice"
+        },
+        "payments.invoice.voiding.VoidInvoice": {
+          "__type__": "Payments.VoidInvoice.v1",
+          "__version__": 1,
+          "description": "Void an existing invoice.",
+          "element_type": "COMMAND",
+          "fields": {
+            "invoice_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "payments.invoice.voiding.VoidInvoice",
+          "module": "payments.invoice.voiding",
+          "name": "VoidInvoice",
+          "part_of": "payments.invoice.invoice.Invoice"
+        }
+      },
+      "database_models": {},
+      "entities": {
+        "payments.invoice.invoice.InvoiceLineItem": {
+          "description": "A line item on an invoice.",
+          "element_type": "ENTITY",
+          "fields": {
+            "description": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "invoice": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "payments.invoice.invoice.Invoice"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "total": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "unit_price": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            }
+          },
+          "fqn": "payments.invoice.invoice.InvoiceLineItem",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "payments.invoice.invoice",
+          "name": "InvoiceLineItem",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "invoice_line_item"
+          },
+          "part_of": "payments.invoice.invoice.Invoice"
+        }
+      },
+      "event_handlers": {},
+      "events": {
+        "payments.invoice.events.InvoiceGenerated": {
+          "__type__": "Payments.InvoiceGenerated.v1",
+          "__version__": 1,
+          "description": "A new invoice was generated for an order.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "generated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "invoice_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "invoice_number": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "total": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            }
+          },
+          "fqn": "payments.invoice.events.InvoiceGenerated",
+          "is_fact_event": false,
+          "module": "payments.invoice.events",
+          "name": "InvoiceGenerated",
+          "part_of": "payments.invoice.invoice.Invoice"
+        },
+        "payments.invoice.events.InvoiceIssued": {
+          "__type__": "Payments.InvoiceIssued.v1",
+          "__version__": 1,
+          "description": "An invoice was sent/issued to the customer.",
+          "element_type": "EVENT",
+          "fields": {
+            "invoice_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "invoice_number": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "issued_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "payments.invoice.events.InvoiceIssued",
+          "is_fact_event": false,
+          "module": "payments.invoice.events",
+          "name": "InvoiceIssued",
+          "part_of": "payments.invoice.invoice.Invoice"
+        },
+        "payments.invoice.events.InvoicePaid": {
+          "__type__": "Payments.InvoicePaid.v1",
+          "__version__": 1,
+          "description": "An invoice was marked as paid.",
+          "element_type": "EVENT",
+          "fields": {
+            "invoice_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "paid_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "payments.invoice.events.InvoicePaid",
+          "is_fact_event": false,
+          "module": "payments.invoice.events",
+          "name": "InvoicePaid",
+          "part_of": "payments.invoice.invoice.Invoice"
+        },
+        "payments.invoice.events.InvoiceVoided": {
+          "__type__": "Payments.InvoiceVoided.v1",
+          "__version__": 1,
+          "description": "An invoice was voided/cancelled.",
+          "element_type": "EVENT",
+          "fields": {
+            "invoice_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "voided_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "payments.invoice.events.InvoiceVoided",
+          "is_fact_event": false,
+          "module": "payments.invoice.events",
+          "name": "InvoiceVoided",
+          "part_of": "payments.invoice.invoice.Invoice"
+        }
+      },
+      "repositories": {},
+      "value_objects": {}
+    },
+    "payments.payment.payment.Payment": {
+      "aggregate": {
+        "apply_handlers": {
+          "payments.payment.events.PaymentFailed": "_on_payment_failed",
+          "payments.payment.events.PaymentInitiated": "_on_payment_initiated",
+          "payments.payment.events.PaymentProcessing": "_on_payment_processing",
+          "payments.payment.events.PaymentRetryInitiated": "_on_payment_retry_initiated",
+          "payments.payment.events.PaymentSucceeded": "_on_payment_succeeded",
+          "payments.payment.events.RefundCompleted": "_on_refund_completed",
+          "payments.payment.events.RefundRequested": "_on_refund_requested"
+        },
+        "element_type": "AGGREGATE",
+        "fields": {
+          "amount": {
+            "kind": "value_object",
+            "target": "payments.payment.payment.Money"
+          },
+          "attempt_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "attempts": {
+            "kind": "has_many",
+            "target": "payments.payment.payment.PaymentAttempt"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "gateway_info": {
+            "kind": "value_object",
+            "target": "payments.payment.payment.GatewayInfo"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "idempotency_key": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "payment_method": {
+            "kind": "value_object",
+            "target": "payments.payment.payment.PaymentMethod"
+          },
+          "refunds": {
+            "kind": "has_many",
+            "target": "payments.payment.payment.Refund"
+          },
+          "status": {
+            "choices": [
+              "Failed",
+              "Partially_Refunded",
+              "Pending",
+              "Processing",
+              "Refunded",
+              "Succeeded"
+            ],
+            "default": "Pending",
+            "kind": "status",
+            "transitions": {
+              "Failed": [
+                "Pending"
+              ],
+              "Partially_Refunded": [
+                "Refunded"
+              ],
+              "Pending": [
+                "Processing",
+                "Succeeded",
+                "Failed"
+              ],
+              "Processing": [
+                "Succeeded",
+                "Failed"
+              ],
+              "Succeeded": [
+                "Refunded",
+                "Partially_Refunded"
+              ]
+            },
+            "type": "Status"
+          },
+          "total_refunded": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "payments.payment.payment.Payment",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "payments.payment.payment",
+        "name": "Payment",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": true,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "payment",
+          "stream_category": "payments::payment"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "payments.payment.initiation.InitiatePaymentHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "payments.payment.initiation.InitiatePaymentHandler",
+          "handlers": {
+            "Payments.InitiatePayment.v1": [
+              "initiate_payment"
+            ]
+          },
+          "module": "payments.payment.initiation",
+          "name": "InitiatePaymentHandler",
+          "part_of": "payments.payment.payment.Payment",
+          "stream_category": "payments::payment:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "payments.payment.refund.RefundHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "payments.payment.refund.RefundHandler",
+          "handlers": {
+            "Payments.ProcessRefundWebhook.v1": [
+              "process_refund_webhook"
+            ],
+            "Payments.RequestRefund.v1": [
+              "request_refund"
+            ]
+          },
+          "module": "payments.payment.refund",
+          "name": "RefundHandler",
+          "part_of": "payments.payment.payment.Payment",
+          "stream_category": "payments::payment:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "payments.payment.retry.RetryPaymentHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "payments.payment.retry.RetryPaymentHandler",
+          "handlers": {
+            "Payments.RetryPayment.v1": [
+              "retry_payment"
+            ]
+          },
+          "module": "payments.payment.retry",
+          "name": "RetryPaymentHandler",
+          "part_of": "payments.payment.payment.Payment",
+          "stream_category": "payments::payment:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "payments.payment.webhook.ProcessWebhookHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "payments.payment.webhook.ProcessWebhookHandler",
+          "handlers": {
+            "Payments.ProcessPaymentWebhook.v1": [
+              "process_webhook"
+            ]
+          },
+          "module": "payments.payment.webhook",
+          "name": "ProcessWebhookHandler",
+          "part_of": "payments.payment.payment.Payment",
+          "stream_category": "payments::payment:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "payments.payment.initiation.InitiatePayment": {
+          "__type__": "Payments.InitiatePayment.v1",
+          "__version__": 1,
+          "description": "Initiate a new payment for an order.",
+          "element_type": "COMMAND",
+          "fields": {
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "currency": {
+              "default": "USD",
+              "kind": "standard",
+              "max_length": 3,
+              "sanitize": true,
+              "type": "String"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "idempotency_key": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "last4": {
+              "kind": "standard",
+              "max_length": 4,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_method_type": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "payments.payment.initiation.InitiatePayment",
+          "module": "payments.payment.initiation",
+          "name": "InitiatePayment",
+          "part_of": "payments.payment.payment.Payment"
+        },
+        "payments.payment.refund.ProcessRefundWebhook": {
+          "__type__": "Payments.ProcessRefundWebhook.v1",
+          "__version__": 1,
+          "description": "Process a refund confirmation from the gateway.",
+          "element_type": "COMMAND",
+          "fields": {
+            "gateway_refund_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "payment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "refund_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "payments.payment.refund.ProcessRefundWebhook",
+          "module": "payments.payment.refund",
+          "name": "ProcessRefundWebhook",
+          "part_of": "payments.payment.payment.Payment"
+        },
+        "payments.payment.refund.RequestRefund": {
+          "__type__": "Payments.RequestRefund.v1",
+          "__version__": 1,
+          "description": "Request a refund for a payment.",
+          "element_type": "COMMAND",
+          "fields": {
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "payment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "payments.payment.refund.RequestRefund",
+          "module": "payments.payment.refund",
+          "name": "RequestRefund",
+          "part_of": "payments.payment.payment.Payment"
+        },
+        "payments.payment.retry.RetryPayment": {
+          "__type__": "Payments.RetryPayment.v1",
+          "__version__": 1,
+          "description": "Retry a failed payment.",
+          "element_type": "COMMAND",
+          "fields": {
+            "payment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "payments.payment.retry.RetryPayment",
+          "module": "payments.payment.retry",
+          "name": "RetryPayment",
+          "part_of": "payments.payment.payment.Payment"
+        },
+        "payments.payment.webhook.ProcessPaymentWebhook": {
+          "__type__": "Payments.ProcessPaymentWebhook.v1",
+          "__version__": 1,
+          "description": "Process a payment gateway webhook callback.",
+          "element_type": "COMMAND",
+          "fields": {
+            "failure_reason": {
+              "kind": "standard",
+              "max_length": 500,
+              "sanitize": true,
+              "type": "String"
+            },
+            "gateway_status": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "gateway_transaction_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "payment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "payments.payment.webhook.ProcessPaymentWebhook",
+          "module": "payments.payment.webhook",
+          "name": "ProcessPaymentWebhook",
+          "part_of": "payments.payment.payment.Payment"
+        }
+      },
+      "database_models": {},
+      "entities": {
+        "payments.payment.payment.PaymentAttempt": {
+          "description": "A record of a single payment processing attempt.",
+          "element_type": "ENTITY",
+          "fields": {
+            "attempted_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "failure_reason": {
+              "kind": "standard",
+              "max_length": 500,
+              "sanitize": true,
+              "type": "String"
+            },
+            "gateway_transaction_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "payment": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "payments.payment.payment.Payment"
+            },
+            "status": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "payments.payment.payment.PaymentAttempt",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "payments.payment.payment",
+          "name": "PaymentAttempt",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "payment_attempt"
+          },
+          "part_of": "payments.payment.payment.Payment"
+        },
+        "payments.payment.payment.Refund": {
+          "description": "A refund against this payment.",
+          "element_type": "ENTITY",
+          "fields": {
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "gateway_refund_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "payment": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "payments.payment.payment.Payment"
+            },
+            "processed_at": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "requested_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "status": {
+              "choices": [
+                "Completed",
+                "Failed",
+                "Processing",
+                "Requested"
+              ],
+              "default": "Requested",
+              "kind": "standard",
+              "max_length": 50,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "payments.payment.payment.Refund",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "payments.payment.payment",
+          "name": "Refund",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "refund"
+          },
+          "part_of": "payments.payment.payment.Payment"
+        }
+      },
+      "event_handlers": {},
+      "events": {
+        "payments.payment.events.PaymentFailed": {
+          "__type__": "Payments.PaymentFailed.v1",
+          "__version__": 1,
+          "description": "Payment processing failed at the gateway.",
+          "element_type": "EVENT",
+          "fields": {
+            "attempt_number": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "can_retry": {
+              "kind": "standard",
+              "required": true,
+              "type": "Boolean"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "failed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "payments.payment.events.PaymentFailed",
+          "is_fact_event": false,
+          "module": "payments.payment.events",
+          "name": "PaymentFailed",
+          "part_of": "payments.payment.payment.Payment",
+          "published": true
+        },
+        "payments.payment.events.PaymentInitiated": {
+          "__type__": "Payments.PaymentInitiated.v1",
+          "__version__": 1,
+          "description": "A new payment was created for an order.",
+          "element_type": "EVENT",
+          "fields": {
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "currency": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "gateway_name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "idempotency_key": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "initiated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "last4": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_method_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "payments.payment.events.PaymentInitiated",
+          "is_fact_event": false,
+          "module": "payments.payment.events",
+          "name": "PaymentInitiated",
+          "part_of": "payments.payment.payment.Payment"
+        },
+        "payments.payment.events.PaymentProcessing": {
+          "__type__": "Payments.PaymentProcessing.v1",
+          "__version__": 1,
+          "description": "Payment was sent to the gateway for processing.",
+          "element_type": "EVENT",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "processing_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "payments.payment.events.PaymentProcessing",
+          "is_fact_event": false,
+          "module": "payments.payment.events",
+          "name": "PaymentProcessing",
+          "part_of": "payments.payment.payment.Payment"
+        },
+        "payments.payment.events.PaymentRetryInitiated": {
+          "__type__": "Payments.PaymentRetryInitiated.v1",
+          "__version__": 1,
+          "description": "A failed payment is being retried.",
+          "element_type": "EVENT",
+          "fields": {
+            "attempt_number": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "retried_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "payments.payment.events.PaymentRetryInitiated",
+          "is_fact_event": false,
+          "module": "payments.payment.events",
+          "name": "PaymentRetryInitiated",
+          "part_of": "payments.payment.payment.Payment"
+        },
+        "payments.payment.events.PaymentSucceeded": {
+          "__type__": "Payments.PaymentSucceeded.v1",
+          "__version__": 1,
+          "description": "Payment was successfully captured by the gateway.",
+          "element_type": "EVENT",
+          "fields": {
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "currency": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "gateway_transaction_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "succeeded_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "payments.payment.events.PaymentSucceeded",
+          "is_fact_event": false,
+          "module": "payments.payment.events",
+          "name": "PaymentSucceeded",
+          "part_of": "payments.payment.payment.Payment",
+          "published": true
+        },
+        "payments.payment.events.RefundCompleted": {
+          "__type__": "Payments.RefundCompleted.v1",
+          "__version__": 1,
+          "description": "A refund was completed by the gateway.",
+          "element_type": "EVENT",
+          "fields": {
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "completed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "gateway_refund_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "refund_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "payments.payment.events.RefundCompleted",
+          "is_fact_event": false,
+          "module": "payments.payment.events",
+          "name": "RefundCompleted",
+          "part_of": "payments.payment.payment.Payment",
+          "published": true
+        },
+        "payments.payment.events.RefundRequested": {
+          "__type__": "Payments.RefundRequested.v1",
+          "__version__": 1,
+          "description": "A refund was requested for a successful payment.",
+          "element_type": "EVENT",
+          "fields": {
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "refund_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "requested_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "payments.payment.events.RefundRequested",
+          "is_fact_event": false,
+          "module": "payments.payment.events",
+          "name": "RefundRequested",
+          "part_of": "payments.payment.payment.Payment"
+        }
+      },
+      "repositories": {},
+      "value_objects": {
+        "payments.payment.payment.GatewayInfo": {
+          "description": "Gateway-specific information about the payment.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "gateway_name": {
+              "kind": "standard",
+              "max_length": 50,
+              "sanitize": true,
+              "type": "String"
+            },
+            "gateway_response": {
+              "kind": "standard",
+              "max_length": 1000,
+              "sanitize": true,
+              "type": "String"
+            },
+            "gateway_status": {
+              "kind": "standard",
+              "max_length": 50,
+              "sanitize": true,
+              "type": "String"
+            },
+            "gateway_transaction_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "payments.payment.payment.GatewayInfo",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "payments.payment.payment",
+          "name": "GatewayInfo",
+          "part_of": "payments.payment.payment.Payment"
+        },
+        "payments.payment.payment.Money": {
+          "description": "Monetary amount with currency.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "currency": {
+              "default": "USD",
+              "kind": "standard",
+              "max_length": 3,
+              "sanitize": true,
+              "type": "String"
+            },
+            "value": {
+              "default": 0.0,
+              "kind": "standard",
+              "type": "Float"
+            }
+          },
+          "fqn": "payments.payment.payment.Money",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "payments.payment.payment",
+          "name": "Money",
+          "part_of": "payments.payment.payment.Payment"
+        },
+        "payments.payment.payment.PaymentMethod": {
+          "description": "Payment method details captured at initiation time.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "expiry_month": {
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "expiry_year": {
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "last4": {
+              "kind": "standard",
+              "max_length": 4,
+              "sanitize": true,
+              "type": "String"
+            },
+            "method_type": {
+              "kind": "standard",
+              "max_length": 50,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "payments.payment.payment.PaymentMethod",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "payments.payment.payment",
+          "name": "PaymentMethod",
+          "part_of": "payments.payment.payment.Payment"
+        }
+      }
+    }
+  },
+  "contracts": {
+    "events": [
+      {
+        "fields": {
+          "attempt_number": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "can_retry": {
+            "kind": "standard",
+            "required": true,
+            "type": "Boolean"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "failed_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "payment_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "payments.payment.events.PaymentFailed",
+        "type": "Payments.PaymentFailed.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "amount": {
+            "kind": "standard",
+            "required": true,
+            "type": "Float"
+          },
+          "currency": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "gateway_transaction_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "payment_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "succeeded_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          }
+        },
+        "fqn": "payments.payment.events.PaymentSucceeded",
+        "type": "Payments.PaymentSucceeded.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "amount": {
+            "kind": "standard",
+            "required": true,
+            "type": "Float"
+          },
+          "completed_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "gateway_refund_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "payment_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "refund_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "payments.payment.events.RefundCompleted",
+        "type": "Payments.RefundCompleted.v1",
+        "version": 1
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.DefaultOutbox",
+      "level": "warning",
+      "message": "Aggregate `DefaultOutbox` has no command handler \u2014 no write path exists"
+    },
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.MemoryOutbox",
+      "level": "warning",
+      "message": "Aggregate `MemoryOutbox` has no command handler \u2014 no write path exists"
+    }
+  ],
+  "domain": {
+    "camel_case_name": "Payments",
+    "command_processing": "sync",
+    "event_processing": "async",
+    "identity_strategy": "uuid",
+    "identity_type": "string",
+    "name": "payments",
+    "normalized_name": "payments"
+  },
+  "elements": {
+    "AGGREGATE": [
+      "abc.DefaultOutbox",
+      "abc.MemoryOutbox",
+      "payments.invoice.invoice.Invoice",
+      "payments.payment.payment.Payment"
+    ],
+    "APPLICATION_SERVICE": [],
+    "COMMAND": [
+      "payments.invoice.generation.GenerateInvoice",
+      "payments.invoice.voiding.VoidInvoice",
+      "payments.payment.initiation.InitiatePayment",
+      "payments.payment.refund.ProcessRefundWebhook",
+      "payments.payment.refund.RequestRefund",
+      "payments.payment.retry.RetryPayment",
+      "payments.payment.webhook.ProcessPaymentWebhook"
+    ],
+    "COMMAND_HANDLER": [
+      "payments.invoice.generation.GenerateInvoiceHandler",
+      "payments.invoice.voiding.VoidInvoiceHandler",
+      "payments.payment.initiation.InitiatePaymentHandler",
+      "payments.payment.refund.RefundHandler",
+      "payments.payment.retry.RetryPaymentHandler",
+      "payments.payment.webhook.ProcessWebhookHandler"
+    ],
+    "DATABASE_MODEL": [],
+    "DOMAIN_SERVICE": [],
+    "ENTITY": [
+      "payments.invoice.invoice.InvoiceLineItem",
+      "payments.payment.payment.PaymentAttempt",
+      "payments.payment.payment.Refund"
+    ],
+    "EVENT": [
+      "payments.invoice.events.InvoiceGenerated",
+      "payments.invoice.events.InvoiceIssued",
+      "payments.invoice.events.InvoicePaid",
+      "payments.invoice.events.InvoiceVoided",
+      "payments.payment.events.PaymentFailed",
+      "payments.payment.events.PaymentInitiated",
+      "payments.payment.events.PaymentProcessing",
+      "payments.payment.events.PaymentRetryInitiated",
+      "payments.payment.events.PaymentSucceeded",
+      "payments.payment.events.RefundCompleted",
+      "payments.payment.events.RefundRequested"
+    ],
+    "EVENT_HANDLER": [],
+    "PROCESS_MANAGER": [],
+    "PROJECTION": [
+      "payments.projections.customer_payments.CustomerPayment",
+      "payments.projections.daily_revenue.DailyRevenue",
+      "payments.projections.failed_payments.FailedPayment",
+      "payments.projections.invoice_status.InvoiceStatusView",
+      "payments.projections.payment_status.PaymentStatusView",
+      "payments.projections.refund_report.RefundReport"
+    ],
+    "PROJECTOR": [
+      "payments.projections.customer_payments.CustomerPaymentProjector",
+      "payments.projections.daily_revenue.DailyRevenueProjector",
+      "payments.projections.failed_payments.FailedPaymentProjector",
+      "payments.projections.invoice_status.InvoiceStatusProjector",
+      "payments.projections.payment_status.PaymentStatusProjector",
+      "payments.projections.refund_report.RefundReportProjector"
+    ],
+    "QUERY": [
+      "payments.projections.payment_status_queries.GetPaymentStatus"
+    ],
+    "QUERY_HANDLER": [
+      "payments.projections.payment_status_queries.PaymentStatusQueryHandler"
+    ],
+    "REPOSITORY": [
+      "protean.utils.DefaultOutboxRepository",
+      "protean.utils.MemoryOutboxRepository"
+    ],
+    "SUBSCRIBER": [
+      "payments.payment.ordering_subscriber.OrderReturnedSubscriber"
+    ],
+    "VALUE_OBJECT": [
+      "payments.payment.payment.GatewayInfo",
+      "payments.payment.payment.Money",
+      "payments.payment.payment.PaymentMethod"
+    ]
+  },
+  "flows": {
+    "domain_services": {},
+    "process_managers": {},
+    "subscribers": {
+      "payments.payment.ordering_subscriber.OrderReturnedSubscriber": {
+        "broker": "global",
+        "description": "Reacts to OrderReturned events to initiate refunds.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, looks up the succeeded payment for the order,\nand dispatches a RequestRefund command. Ignores all other event types.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "payments.payment.ordering_subscriber.OrderReturnedSubscriber",
+        "module": "payments.payment.ordering_subscriber",
+        "name": "OrderReturnedSubscriber",
+        "stream": "ordering::order"
+      }
+    }
+  },
+  "generated_at": "2026-03-18T13:30:26Z",
+  "ir_version": "0.1.0",
+  "projections": {
+    "payments.projections.customer_payments.CustomerPayment": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "amount": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "currency": {
+            "default": "USD",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "payment_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "payment_method_type": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "payments.projections.customer_payments.CustomerPayment",
+        "identity_field": "payment_id",
+        "module": "payments.projections.customer_payments",
+        "name": "CustomerPayment",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "customer_payment"
+        }
+      },
+      "projectors": {
+        "payments.projections.customer_payments.CustomerPaymentProjector": {
+          "aggregates": [
+            "payments.payment.payment.Payment"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "payments.projections.customer_payments.CustomerPaymentProjector",
+          "handlers": {
+            "Payments.PaymentFailed.v1": [
+              "on_payment_failed"
+            ],
+            "Payments.PaymentInitiated.v1": [
+              "on_payment_initiated"
+            ],
+            "Payments.PaymentSucceeded.v1": [
+              "on_payment_succeeded"
+            ],
+            "Payments.RefundCompleted.v1": [
+              "on_refund_completed"
+            ]
+          },
+          "module": "payments.projections.customer_payments",
+          "name": "CustomerPaymentProjector",
+          "projector_for": "payments.projections.customer_payments.CustomerPayment",
+          "stream_categories": [
+            "payments::payment"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "payments.projections.daily_revenue.DailyRevenue": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "currency": {
+            "default": "USD",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "date": {
+            "identifier": true,
+            "kind": "standard",
+            "max_length": 10,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "net_revenue": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "refund_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "total_refunded": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "total_revenue": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "transaction_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          }
+        },
+        "fqn": "payments.projections.daily_revenue.DailyRevenue",
+        "identity_field": "date",
+        "module": "payments.projections.daily_revenue",
+        "name": "DailyRevenue",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "daily_revenue"
+        }
+      },
+      "projectors": {
+        "payments.projections.daily_revenue.DailyRevenueProjector": {
+          "aggregates": [
+            "payments.payment.payment.Payment"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "payments.projections.daily_revenue.DailyRevenueProjector",
+          "handlers": {
+            "Payments.PaymentSucceeded.v1": [
+              "on_payment_succeeded"
+            ],
+            "Payments.RefundCompleted.v1": [
+              "on_refund_completed"
+            ]
+          },
+          "module": "payments.projections.daily_revenue",
+          "name": "DailyRevenueProjector",
+          "projector_for": "payments.projections.daily_revenue.DailyRevenue",
+          "stream_categories": [
+            "payments::payment"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "payments.projections.failed_payments.FailedPayment": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "amount": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "attempt_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "failed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "payment_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "payments.projections.failed_payments.FailedPayment",
+        "identity_field": "payment_id",
+        "module": "payments.projections.failed_payments",
+        "name": "FailedPayment",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "failed_payment"
+        }
+      },
+      "projectors": {
+        "payments.projections.failed_payments.FailedPaymentProjector": {
+          "aggregates": [
+            "payments.payment.payment.Payment"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "payments.projections.failed_payments.FailedPaymentProjector",
+          "handlers": {
+            "Payments.PaymentFailed.v1": [
+              "on_payment_failed"
+            ],
+            "Payments.PaymentRetryInitiated.v1": [
+              "on_payment_retry_initiated"
+            ],
+            "Payments.PaymentSucceeded.v1": [
+              "on_payment_succeeded"
+            ]
+          },
+          "module": "payments.projections.failed_payments",
+          "name": "FailedPaymentProjector",
+          "projector_for": "payments.projections.failed_payments.FailedPayment",
+          "stream_categories": [
+            "payments::payment"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "payments.projections.invoice_status.InvoiceStatusView": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "invoice_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "invoice_number": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "issued_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "paid_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "total": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "voided_reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "payments.projections.invoice_status.InvoiceStatusView",
+        "identity_field": "invoice_id",
+        "module": "payments.projections.invoice_status",
+        "name": "InvoiceStatusView",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "invoice_status_view"
+        }
+      },
+      "projectors": {
+        "payments.projections.invoice_status.InvoiceStatusProjector": {
+          "aggregates": [
+            "payments.invoice.invoice.Invoice"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "payments.projections.invoice_status.InvoiceStatusProjector",
+          "handlers": {
+            "Payments.InvoiceGenerated.v1": [
+              "on_invoice_generated"
+            ],
+            "Payments.InvoiceIssued.v1": [
+              "on_invoice_issued"
+            ],
+            "Payments.InvoicePaid.v1": [
+              "on_invoice_paid"
+            ],
+            "Payments.InvoiceVoided.v1": [
+              "on_invoice_voided"
+            ]
+          },
+          "module": "payments.projections.invoice_status",
+          "name": "InvoiceStatusProjector",
+          "projector_for": "payments.projections.invoice_status.InvoiceStatusView",
+          "stream_categories": [
+            "payments::invoice"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "payments.projections.payment_status.PaymentStatusView": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "amount": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "attempt_count": {
+            "default": 1,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "currency": {
+            "default": "USD",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "failure_reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "gateway_transaction_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "payment_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "total_refunded": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "payments.projections.payment_status.PaymentStatusView",
+        "identity_field": "payment_id",
+        "module": "payments.projections.payment_status",
+        "name": "PaymentStatusView",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "payment_status_view"
+        }
+      },
+      "projectors": {
+        "payments.projections.payment_status.PaymentStatusProjector": {
+          "aggregates": [
+            "payments.payment.payment.Payment"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "payments.projections.payment_status.PaymentStatusProjector",
+          "handlers": {
+            "Payments.PaymentFailed.v1": [
+              "on_payment_failed"
+            ],
+            "Payments.PaymentInitiated.v1": [
+              "on_payment_initiated"
+            ],
+            "Payments.PaymentProcessing.v1": [
+              "on_payment_processing"
+            ],
+            "Payments.PaymentRetryInitiated.v1": [
+              "on_payment_retry_initiated"
+            ],
+            "Payments.PaymentSucceeded.v1": [
+              "on_payment_succeeded"
+            ],
+            "Payments.RefundCompleted.v1": [
+              "on_refund_completed"
+            ],
+            "Payments.RefundRequested.v1": [
+              "on_refund_requested"
+            ]
+          },
+          "module": "payments.projections.payment_status",
+          "name": "PaymentStatusProjector",
+          "projector_for": "payments.projections.payment_status.PaymentStatusView",
+          "stream_categories": [
+            "payments::payment"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "payments.projections.payment_status_queries.GetPaymentStatus": {
+          "__type__": "Payments.GetPaymentStatus",
+          "element_type": "QUERY",
+          "fields": {
+            "payment_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "payments.projections.payment_status_queries.GetPaymentStatus",
+          "module": "payments.projections.payment_status_queries",
+          "name": "GetPaymentStatus",
+          "part_of": "payments.projections.payment_status.PaymentStatusView"
+        }
+      },
+      "query_handlers": {
+        "payments.projections.payment_status_queries.PaymentStatusQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "payments.projections.payment_status_queries.PaymentStatusQueryHandler",
+          "handlers": {
+            "Payments.GetPaymentStatus": [
+              "get_payment_status"
+            ]
+          },
+          "module": "payments.projections.payment_status_queries",
+          "name": "PaymentStatusQueryHandler",
+          "part_of": "payments.projections.payment_status.PaymentStatusView"
+        }
+      }
+    },
+    "payments.projections.refund_report.RefundReport": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "amount": {
+            "kind": "standard",
+            "required": true,
+            "type": "Float"
+          },
+          "completed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "gateway_refund_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "payment_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "refund_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "requested_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "payments.projections.refund_report.RefundReport",
+        "identity_field": "refund_id",
+        "module": "payments.projections.refund_report",
+        "name": "RefundReport",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "refund_report"
+        }
+      },
+      "projectors": {
+        "payments.projections.refund_report.RefundReportProjector": {
+          "aggregates": [
+            "payments.payment.payment.Payment"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "payments.projections.refund_report.RefundReportProjector",
+          "handlers": {
+            "Payments.RefundCompleted.v1": [
+              "on_refund_completed"
+            ],
+            "Payments.RefundRequested.v1": [
+              "on_refund_requested"
+            ]
+          },
+          "module": "payments.projections.refund_report",
+          "name": "RefundReportProjector",
+          "projector_for": "payments.projections.refund_report.RefundReport",
+          "stream_categories": [
+            "payments::payment"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    }
+  }
+}

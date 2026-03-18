@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A record of a single payment processing attempt.",
+  "properties": {
+    "attempted_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "failure_reason": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "gateway_transaction_id": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "payment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "attempted_at",
+    "id",
+    "status"
+  ],
+  "title": "PaymentAttempt",
+  "type": "object",
+  "x-protean-aggregate": "payments.payment.payment.Payment",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "payments.payment.payment.PaymentAttempt",
+  "x-protean-identity-field": "id"
+}

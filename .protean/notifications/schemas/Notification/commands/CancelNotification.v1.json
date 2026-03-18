@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Request to cancel a pending or scheduled notification.",
+  "properties": {
+    "notification_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "notification_id",
+    "reason"
+  ],
+  "title": "CancelNotification",
+  "type": "object",
+  "x-protean-aggregate": "notifications.notification.notification.Notification",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "notifications.notification.cancellation.CancelNotification",
+  "x-protean-type": "Notifications.CancelNotification.v1",
+  "x-protean-version": 1
+}

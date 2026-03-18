@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Create a new inventory record for a product variant at a warehouse.",
+  "properties": {
+    "initial_quantity": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reorder_point": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 10
+    },
+    "reorder_quantity": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 50
+    },
+    "sku": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "warehouse_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "product_id",
+    "sku",
+    "variant_id",
+    "warehouse_id"
+  ],
+  "title": "InitializeStock",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "inventory.stock.initialization.InitializeStock",
+  "x-protean-type": "Inventory.InitializeStock.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "channel": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "failed_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "failure_reason": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "max_retries": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 3
+    },
+    "notification_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "notification_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "recipient_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "retry_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    }
+  },
+  "required": [
+    "channel",
+    "notification_id",
+    "notification_type",
+    "recipient_id"
+  ],
+  "title": "FailedNotifications",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "notifications.projections.failed_notifications.FailedNotifications",
+  "x-protean-identity-field": "notification_id"
+}

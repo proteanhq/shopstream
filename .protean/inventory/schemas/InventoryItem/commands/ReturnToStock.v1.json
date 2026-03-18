@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Add returned items back to inventory.",
+  "properties": {
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "inventory_item_id",
+    "order_id",
+    "quantity"
+  ],
+  "title": "ReturnToStock",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "inventory.stock.returns.ReturnToStock",
+  "x-protean-type": "Inventory.ReturnToStock.v1",
+  "x-protean-version": 1
+}

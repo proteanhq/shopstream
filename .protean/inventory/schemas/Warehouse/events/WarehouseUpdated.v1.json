@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Warehouse details were updated.",
+  "properties": {
+    "capacity": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "warehouse_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "capacity",
+    "name",
+    "updated_at",
+    "warehouse_id"
+  ],
+  "title": "WarehouseUpdated",
+  "type": "object",
+  "x-protean-aggregate": "inventory.warehouse.warehouse.Warehouse",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.warehouse.events.WarehouseUpdated",
+  "x-protean-type": "Inventory.WarehouseUpdated.v1",
+  "x-protean-version": 1
+}

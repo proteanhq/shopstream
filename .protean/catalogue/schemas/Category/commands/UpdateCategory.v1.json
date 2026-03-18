@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Change a category's name or attributes.",
+  "properties": {
+    "attributes": {
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "category_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "name": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "category_id"
+  ],
+  "title": "UpdateCategory",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.category.category.Category",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "catalogue.category.management.UpdateCategory",
+  "x-protean-type": "Catalogue.UpdateCategory.v1",
+  "x-protean-version": 1
+}

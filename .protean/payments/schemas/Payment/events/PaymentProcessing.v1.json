@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Payment was sent to the gateway for processing.",
+  "properties": {
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "processing_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "order_id",
+    "payment_id",
+    "processing_at"
+  ],
+  "title": "PaymentProcessing",
+  "type": "object",
+  "x-protean-aggregate": "payments.payment.payment.Payment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "payments.payment.events.PaymentProcessing",
+  "x-protean-type": "Payments.PaymentProcessing.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "expires_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "reservation_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reserved_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "inventory_item_id",
+    "order_id",
+    "quantity",
+    "reservation_id",
+    "status"
+  ],
+  "title": "ReservationStatus",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "inventory.projections.reservation_status.ReservationStatus",
+  "x-protean-identity-field": "reservation_id"
+}

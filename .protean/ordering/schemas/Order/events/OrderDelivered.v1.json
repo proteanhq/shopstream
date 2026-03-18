@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The carrier confirmed delivery of the order to the customer.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "delivered_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "delivered_at",
+    "order_id"
+  ],
+  "title": "OrderDelivered",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.OrderDelivered",
+  "x-protean-published": true,
+  "x-protean-type": "Ordering.OrderDelivered.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A notification was created and queued for dispatch.",
+  "properties": {
+    "channel": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "notification_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "notification_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "recipient_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "recipient_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "scheduled_for": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "source_event_type": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "subject": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "template_name": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "channel",
+    "created_at",
+    "notification_id",
+    "notification_type",
+    "recipient_id",
+    "recipient_type"
+  ],
+  "title": "NotificationCreated",
+  "type": "object",
+  "x-protean-aggregate": "notifications.notification.notification.Notification",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "notifications.notification.events.NotificationCreated",
+  "x-protean-type": "Notifications.NotificationCreated.v1",
+  "x-protean-version": 1
+}

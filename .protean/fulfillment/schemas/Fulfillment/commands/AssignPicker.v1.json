@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Assign a warehouse picker to begin the picking process.",
+  "properties": {
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "picker_name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "fulfillment_id",
+    "picker_name"
+  ],
+  "title": "AssignPicker",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "fulfillment.fulfillment.picking.AssignPicker",
+  "x-protean-type": "Fulfillment.AssignPicker.v1",
+  "x-protean-version": 1
+}

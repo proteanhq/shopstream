@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A new inventory record was created for a product variant at a warehouse.",
+  "properties": {
+    "initial_quantity": {
+      "type": "integer"
+    },
+    "initialized_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reorder_point": {
+      "type": "integer"
+    },
+    "reorder_quantity": {
+      "type": "integer"
+    },
+    "sku": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "warehouse_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "initial_quantity",
+    "initialized_at",
+    "inventory_item_id",
+    "product_id",
+    "reorder_point",
+    "reorder_quantity",
+    "sku",
+    "variant_id",
+    "warehouse_id"
+  ],
+  "title": "StockInitialized",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.stock.events.StockInitialized",
+  "x-protean-type": "Inventory.StockInitialized.v1",
+  "x-protean-version": 1
+}

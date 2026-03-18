@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Latitude/longitude pair for address geolocation.\n\nBoth coordinates are required when provided; partial coordinates are rejected.\nLatitude ranges from -90 to 90, longitude from -180 to 180.",
+  "properties": {
+    "latitude": {
+      "anyOf": [
+        {
+          "maximum": 90.0,
+          "minimum": -90.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "longitude": {
+      "anyOf": [
+        {
+          "maximum": 180.0,
+          "minimum": -180.0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "title": "GeoCoordinates",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "value_object",
+  "x-protean-fqn": "identity.customer.customer.GeoCoordinates"
+}

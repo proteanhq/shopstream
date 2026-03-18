@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Update a customer's notification channel preferences.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "email_enabled": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "push_enabled": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sms_enabled": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "customer_id"
+  ],
+  "title": "UpdateNotificationPreferences",
+  "type": "object",
+  "x-protean-aggregate": "notifications.preference.preference.NotificationPreference",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "notifications.preference.management.UpdateNotificationPreferences",
+  "x-protean-type": "Notifications.UpdateNotificationPreferences.v1",
+  "x-protean-version": 1
+}

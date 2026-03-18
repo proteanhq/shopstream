@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Change a category's display position in the hierarchy.",
+  "properties": {
+    "category_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_display_order": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "category_id",
+    "new_display_order"
+  ],
+  "title": "ReorderCategory",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.category.category.Category",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "catalogue.category.management.ReorderCategory",
+  "x-protean-type": "Catalogue.ReorderCategory.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "available": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "damaged": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "entry_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "on_hand": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reserved": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "sku": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "warehouse_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "entry_id",
+    "product_id",
+    "sku",
+    "variant_id",
+    "warehouse_id"
+  ],
+  "title": "WarehouseStock",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "inventory.projections.warehouse_stock.WarehouseStock",
+  "x-protean-identity-field": "entry_id"
+}

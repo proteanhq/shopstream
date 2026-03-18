@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A customer's notification channel preferences were changed.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "email_enabled": {
+      "type": "boolean"
+    },
+    "preference_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "push_enabled": {
+      "type": "boolean"
+    },
+    "sms_enabled": {
+      "type": "boolean"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "email_enabled",
+    "preference_id",
+    "push_enabled",
+    "sms_enabled",
+    "updated_at"
+  ],
+  "title": "ChannelsUpdated",
+  "type": "object",
+  "x-protean-aggregate": "notifications.preference.preference.NotificationPreference",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "notifications.preference.events.ChannelsUpdated",
+  "x-protean-type": "Notifications.ChannelsUpdated.v1",
+  "x-protean-version": 1
+}

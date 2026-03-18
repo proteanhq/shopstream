@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A star rating from 1 to 5.",
+  "properties": {
+    "score": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "score"
+  ],
+  "title": "Rating",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "value_object",
+  "x-protean-fqn": "reviews.review.review.Rating"
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Returned items were received back from the customer.",
+  "properties": {
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "returned_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "returned_item_ids": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "order_id",
+    "returned_at"
+  ],
+  "title": "OrderReturned",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.OrderReturned",
+  "x-protean-published": true,
+  "x-protean-type": "Ordering.OrderReturned.v1",
+  "x-protean-version": 1
+}

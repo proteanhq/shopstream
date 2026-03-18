@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Upload a new image for a product.",
+  "properties": {
+    "alt_text": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_primary": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": false
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "url": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "product_id",
+    "url"
+  ],
+  "title": "AddProductImage",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "catalogue.product.images.AddProductImage",
+  "x-protean-type": "Catalogue.AddProductImage.v1",
+  "x-protean-version": 1
+}

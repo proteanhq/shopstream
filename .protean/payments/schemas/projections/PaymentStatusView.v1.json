@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "amount": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "attempt_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 1
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "currency": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "USD"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "failure_reason": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "gateway_transaction_id": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "status": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "total_refunded": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "customer_id",
+    "order_id",
+    "payment_id",
+    "status"
+  ],
+  "title": "PaymentStatusView",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "payments.projections.payment_status.PaymentStatusView",
+  "x-protean-identity-field": "payment_id"
+}

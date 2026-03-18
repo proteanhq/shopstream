@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Items have been packed into shipping packages.",
+  "properties": {
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "package_count": {
+      "type": "integer"
+    },
+    "packed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "packed_by": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "fulfillment_id",
+    "package_count",
+    "packed_at",
+    "packed_by"
+  ],
+  "title": "PackingCompleted",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "fulfillment.fulfillment.events.PackingCompleted",
+  "x-protean-type": "Fulfillment.PackingCompleted.v1",
+  "x-protean-version": 1
+}

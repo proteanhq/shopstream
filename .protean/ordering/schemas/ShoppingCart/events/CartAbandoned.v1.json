@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A shopping cart was marked as abandoned due to inactivity.",
+  "properties": {
+    "abandoned_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "cart_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "abandoned_at",
+    "cart_id"
+  ],
+  "title": "CartAbandoned",
+  "type": "object",
+  "x-protean-aggregate": "ordering.cart.cart.ShoppingCart",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.cart.events.CartAbandoned",
+  "x-protean-published": true,
+  "x-protean-type": "Ordering.CartAbandoned.v1",
+  "x-protean-version": 1
+}

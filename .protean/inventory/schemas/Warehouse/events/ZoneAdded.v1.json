@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A zone was added to a warehouse.",
+  "properties": {
+    "added_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "warehouse_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "zone_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "zone_name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "zone_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "added_at",
+    "warehouse_id",
+    "zone_id",
+    "zone_name",
+    "zone_type"
+  ],
+  "title": "ZoneAdded",
+  "type": "object",
+  "x-protean-aggregate": "inventory.warehouse.warehouse.Warehouse",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.warehouse.events.ZoneAdded",
+  "x-protean-type": "Inventory.ZoneAdded.v1",
+  "x-protean-version": 1
+}

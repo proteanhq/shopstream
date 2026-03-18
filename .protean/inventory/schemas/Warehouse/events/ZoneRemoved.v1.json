@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A zone was removed from a warehouse.",
+  "properties": {
+    "removed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "warehouse_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "zone_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "removed_at",
+    "warehouse_id",
+    "zone_id"
+  ],
+  "title": "ZoneRemoved",
+  "type": "object",
+  "x-protean-aggregate": "inventory.warehouse.warehouse.Warehouse",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.warehouse.events.ZoneRemoved",
+  "x-protean-type": "Inventory.ZoneRemoved.v1",
+  "x-protean-version": 1
+}

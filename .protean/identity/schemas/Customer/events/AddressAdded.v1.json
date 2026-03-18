@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A new address was added to a customer's address book.",
+  "properties": {
+    "address_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "city": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "country": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "is_default": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "label": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "postal_code": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "state": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "street": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "address_id",
+    "city",
+    "country",
+    "customer_id",
+    "is_default",
+    "label",
+    "postal_code",
+    "street"
+  ],
+  "title": "AddressAdded",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "identity.customer.events.AddressAdded",
+  "x-protean-type": "Identity.AddressAdded.v1",
+  "x-protean-version": 1
+}

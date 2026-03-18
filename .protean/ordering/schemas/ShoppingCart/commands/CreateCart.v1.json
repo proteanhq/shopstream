@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Create a new shopping cart for a registered customer or guest session.",
+  "properties": {
+    "customer_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "session_id": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "title": "CreateCart",
+  "type": "object",
+  "x-protean-aggregate": "ordering.cart.cart.ShoppingCart",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.cart.management.CreateCart",
+  "x-protean-type": "Ordering.CreateCart.v1",
+  "x-protean-version": 1
+}

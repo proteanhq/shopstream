@@ -1,0 +1,4742 @@
+{
+  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
+  "checksum": "sha256:30f90c92f44df3b1e35831fa774454b046179588f73e1aa1b721b3d583416f7c",
+  "clusters": {
+    "abc.DefaultOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.DefaultOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "DefaultOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "outbox",
+          "stream_category": "ordering::default_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.DefaultOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.DefaultOutboxRepository",
+          "module": "protean.utils",
+          "name": "DefaultOutboxRepository",
+          "part_of": "abc.DefaultOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "abc.MemoryOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.MemoryOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "MemoryOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "memory",
+          "schema_name": "outbox",
+          "stream_category": "ordering::memory_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.MemoryOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.MemoryOutboxRepository",
+          "module": "protean.utils",
+          "name": "MemoryOutboxRepository",
+          "part_of": "abc.MemoryOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "ordering.cart.cart.ShoppingCart": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "applied_coupons": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "items": {
+            "kind": "has_many",
+            "target": "ordering.cart.cart.CartItem"
+          },
+          "session_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "choices": [
+              "Abandoned",
+              "Active",
+              "Converted"
+            ],
+            "default": "Active",
+            "kind": "status",
+            "transitions": {
+              "Active": [
+                "Converted",
+                "Abandoned"
+              ]
+            },
+            "type": "Status"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "ordering.cart.cart.ShoppingCart",
+        "identity_field": "id",
+        "invariants": {
+          "post": [
+            "cart_must_have_items_to_convert"
+          ],
+          "pre": []
+        },
+        "module": "ordering.cart.cart",
+        "name": "ShoppingCart",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "shopping_cart",
+          "stream_category": "ordering::shopping_cart"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "ordering.cart.abandonment.DetectAbandonedCartsHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.cart.abandonment.DetectAbandonedCartsHandler",
+          "handlers": {
+            "Ordering.DetectAbandonedCarts.v1": [
+              "detect_abandoned_carts"
+            ]
+          },
+          "module": "ordering.cart.abandonment",
+          "name": "DetectAbandonedCartsHandler",
+          "part_of": "ordering.cart.cart.ShoppingCart",
+          "stream_category": "ordering::shopping_cart:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "ordering.cart.conversion.ConvertCartHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.cart.conversion.ConvertCartHandler",
+          "handlers": {
+            "Ordering.ConvertToOrder.v1": [
+              "convert_to_order"
+            ]
+          },
+          "module": "ordering.cart.conversion",
+          "name": "ConvertCartHandler",
+          "part_of": "ordering.cart.cart.ShoppingCart",
+          "stream_category": "ordering::shopping_cart:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "ordering.cart.coupons.ApplyCouponHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.cart.coupons.ApplyCouponHandler",
+          "handlers": {
+            "Ordering.ApplyCouponToCart.v1": [
+              "apply_coupon"
+            ]
+          },
+          "module": "ordering.cart.coupons",
+          "name": "ApplyCouponHandler",
+          "part_of": "ordering.cart.cart.ShoppingCart",
+          "stream_category": "ordering::shopping_cart:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "ordering.cart.items.ManageCartItemsHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.cart.items.ManageCartItemsHandler",
+          "handlers": {
+            "Ordering.AddToCart.v1": [
+              "add_to_cart"
+            ],
+            "Ordering.RemoveFromCart.v1": [
+              "remove_from_cart"
+            ],
+            "Ordering.UpdateCartQuantity.v1": [
+              "update_cart_quantity"
+            ]
+          },
+          "module": "ordering.cart.items",
+          "name": "ManageCartItemsHandler",
+          "part_of": "ordering.cart.cart.ShoppingCart",
+          "stream_category": "ordering::shopping_cart:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "ordering.cart.management.ManageCartHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.cart.management.ManageCartHandler",
+          "handlers": {
+            "Ordering.AbandonCart.v1": [
+              "abandon_cart"
+            ],
+            "Ordering.CreateCart.v1": [
+              "create_cart"
+            ],
+            "Ordering.MergeGuestCart.v1": [
+              "merge_guest_cart"
+            ]
+          },
+          "module": "ordering.cart.management",
+          "name": "ManageCartHandler",
+          "part_of": "ordering.cart.cart.ShoppingCart",
+          "stream_category": "ordering::shopping_cart:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "ordering.cart.abandonment.DetectAbandonedCarts": {
+          "__type__": "Ordering.DetectAbandonedCarts.v1",
+          "__version__": 1,
+          "description": "Flag active carts idle beyond the specified threshold.",
+          "element_type": "COMMAND",
+          "fields": {
+            "as_of": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "idle_threshold_hours": {
+              "default": 24,
+              "kind": "standard",
+              "type": "Integer"
+            }
+          },
+          "fqn": "ordering.cart.abandonment.DetectAbandonedCarts",
+          "module": "ordering.cart.abandonment",
+          "name": "DetectAbandonedCarts",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.conversion.ConvertToOrder": {
+          "__type__": "Ordering.ConvertToOrder.v1",
+          "__version__": 1,
+          "description": "Mark a cart as converted after checkout (cart becomes immutable).",
+          "element_type": "COMMAND",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.cart.conversion.ConvertToOrder",
+          "module": "ordering.cart.conversion",
+          "name": "ConvertToOrder",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.coupons.ApplyCouponToCart": {
+          "__type__": "Ordering.ApplyCouponToCart.v1",
+          "__version__": 1,
+          "description": "Apply a coupon code to a shopping cart.",
+          "element_type": "COMMAND",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "coupon_code": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.cart.coupons.ApplyCouponToCart",
+          "module": "ordering.cart.coupons",
+          "name": "ApplyCouponToCart",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.items.AddToCart": {
+          "__type__": "Ordering.AddToCart.v1",
+          "__version__": 1,
+          "description": "Add a product variant to the shopping cart (merges if already present).",
+          "element_type": "COMMAND",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "min_value": 1,
+              "required": true,
+              "type": "Integer"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.cart.items.AddToCart",
+          "module": "ordering.cart.items",
+          "name": "AddToCart",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.items.RemoveFromCart": {
+          "__type__": "Ordering.RemoveFromCart.v1",
+          "__version__": 1,
+          "description": "Remove an item from the shopping cart.",
+          "element_type": "COMMAND",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.cart.items.RemoveFromCart",
+          "module": "ordering.cart.items",
+          "name": "RemoveFromCart",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.items.UpdateCartQuantity": {
+          "__type__": "Ordering.UpdateCartQuantity.v1",
+          "__version__": 1,
+          "description": "Change the quantity of an item already in the cart.",
+          "element_type": "COMMAND",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_quantity": {
+              "kind": "standard",
+              "min_value": 1,
+              "required": true,
+              "type": "Integer"
+            }
+          },
+          "fqn": "ordering.cart.items.UpdateCartQuantity",
+          "module": "ordering.cart.items",
+          "name": "UpdateCartQuantity",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.management.AbandonCart": {
+          "__type__": "Ordering.AbandonCart.v1",
+          "__version__": 1,
+          "description": "Mark a cart as abandoned due to inactivity.",
+          "element_type": "COMMAND",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.cart.management.AbandonCart",
+          "module": "ordering.cart.management",
+          "name": "AbandonCart",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.management.CreateCart": {
+          "__type__": "Ordering.CreateCart.v1",
+          "__version__": 1,
+          "description": "Create a new shopping cart for a registered customer or guest session.",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            },
+            "session_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.cart.management.CreateCart",
+          "module": "ordering.cart.management",
+          "name": "CreateCart",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.management.MergeGuestCart": {
+          "__type__": "Ordering.MergeGuestCart.v1",
+          "__version__": 1,
+          "description": "Merge items from a guest session cart into a registered customer's cart.",
+          "element_type": "COMMAND",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "guest_cart_items": {
+              "content_type": "dict",
+              "kind": "list",
+              "required": true,
+              "type": "List"
+            }
+          },
+          "fqn": "ordering.cart.management.MergeGuestCart",
+          "module": "ordering.cart.management",
+          "name": "MergeGuestCart",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        }
+      },
+      "database_models": {},
+      "entities": {
+        "ordering.cart.cart.CartItem": {
+          "description": "An item in a shopping cart, tracking only product reference and quantity.\n\nCart items do not store prices \u2014 prices are resolved from the Catalogue\ncontext at checkout time and locked on the Order.",
+          "element_type": "ENTITY",
+          "fields": {
+            "added_at": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "min_value": 1,
+              "required": true,
+              "type": "Integer"
+            },
+            "shopping_cart": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "ordering.cart.cart.ShoppingCart"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.cart.cart.CartItem",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "ordering.cart.cart",
+          "name": "CartItem",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "cart_item"
+          },
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        }
+      },
+      "event_handlers": {},
+      "events": {
+        "ordering.cart.events.CartAbandoned": {
+          "__type__": "Ordering.CartAbandoned.v1",
+          "__version__": 1,
+          "description": "A shopping cart was marked as abandoned due to inactivity.",
+          "element_type": "EVENT",
+          "fields": {
+            "abandoned_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.cart.events.CartAbandoned",
+          "is_fact_event": false,
+          "module": "ordering.cart.events",
+          "name": "CartAbandoned",
+          "part_of": "ordering.cart.cart.ShoppingCart",
+          "published": true
+        },
+        "ordering.cart.events.CartConverted": {
+          "__type__": "Ordering.CartConverted.v1",
+          "__version__": 1,
+          "description": "A shopping cart was converted into an order at checkout.",
+          "element_type": "EVENT",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            },
+            "items": {
+              "content_type": "dict",
+              "kind": "list",
+              "required": true,
+              "type": "List"
+            }
+          },
+          "fqn": "ordering.cart.events.CartConverted",
+          "is_fact_event": false,
+          "module": "ordering.cart.events",
+          "name": "CartConverted",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.events.CartCouponApplied": {
+          "__type__": "Ordering.CartCouponApplied.v1",
+          "__version__": 1,
+          "description": "A coupon code was applied to the shopping cart.",
+          "element_type": "EVENT",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "coupon_code": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.cart.events.CartCouponApplied",
+          "is_fact_event": false,
+          "module": "ordering.cart.events",
+          "name": "CartCouponApplied",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.events.CartItemAdded": {
+          "__type__": "Ordering.CartItemAdded.v1",
+          "__version__": 1,
+          "description": "A product was added to the shopping cart.",
+          "element_type": "EVENT",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.cart.events.CartItemAdded",
+          "is_fact_event": false,
+          "module": "ordering.cart.events",
+          "name": "CartItemAdded",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.events.CartItemRemoved": {
+          "__type__": "Ordering.CartItemRemoved.v1",
+          "__version__": 1,
+          "description": "An item was removed from the shopping cart.",
+          "element_type": "EVENT",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.cart.events.CartItemRemoved",
+          "is_fact_event": false,
+          "module": "ordering.cart.events",
+          "name": "CartItemRemoved",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.events.CartQuantityUpdated": {
+          "__type__": "Ordering.CartQuantityUpdated.v1",
+          "__version__": 1,
+          "description": "The quantity of a cart item was changed.",
+          "element_type": "EVENT",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "previous_quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            }
+          },
+          "fqn": "ordering.cart.events.CartQuantityUpdated",
+          "is_fact_event": false,
+          "module": "ordering.cart.events",
+          "name": "CartQuantityUpdated",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        },
+        "ordering.cart.events.CartsMerged": {
+          "__type__": "Ordering.CartsMerged.v1",
+          "__version__": 1,
+          "description": "A guest cart's items were merged into a registered customer's cart.",
+          "element_type": "EVENT",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "items_merged_count": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "source_session_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.cart.events.CartsMerged",
+          "is_fact_event": false,
+          "module": "ordering.cart.events",
+          "name": "CartsMerged",
+          "part_of": "ordering.cart.cart.ShoppingCart"
+        }
+      },
+      "repositories": {},
+      "value_objects": {}
+    },
+    "ordering.order.order.Order": {
+      "aggregate": {
+        "apply_handlers": {
+          "ordering.order.events.CouponApplied": "_on_coupon_applied",
+          "ordering.order.events.ItemAdded": "_on_item_added",
+          "ordering.order.events.ItemQuantityUpdated": "_on_item_quantity_updated",
+          "ordering.order.events.ItemRemoved": "_on_item_removed",
+          "ordering.order.events.OrderCancelled": "_on_order_cancelled",
+          "ordering.order.events.OrderCompleted": "_on_order_completed",
+          "ordering.order.events.OrderConfirmed": "_on_order_confirmed",
+          "ordering.order.events.OrderCreated": "_on_order_created",
+          "ordering.order.events.OrderDelivered": "_on_order_delivered",
+          "ordering.order.events.OrderPartiallyShipped": "_on_order_partially_shipped",
+          "ordering.order.events.OrderProcessing": "_on_order_processing",
+          "ordering.order.events.OrderRefunded": "_on_order_refunded",
+          "ordering.order.events.OrderReturned": "_on_order_returned",
+          "ordering.order.events.OrderShipped": "_on_order_shipped",
+          "ordering.order.events.PaymentFailed": "_on_payment_failed",
+          "ordering.order.events.PaymentPending": "_on_payment_pending",
+          "ordering.order.events.PaymentSucceeded": "_on_payment_succeeded",
+          "ordering.order.events.ReturnApproved": "_on_return_approved",
+          "ordering.order.events.ReturnRequested": "_on_return_requested"
+        },
+        "element_type": "AGGREGATE",
+        "fields": {
+          "billing_address": {
+            "kind": "value_object",
+            "target": "ordering.order.order.ShippingAddress"
+          },
+          "cancellation_reason": {
+            "kind": "standard",
+            "max_length": 500,
+            "sanitize": true,
+            "type": "String"
+          },
+          "cancelled_by": {
+            "kind": "standard",
+            "max_length": 50,
+            "sanitize": true,
+            "type": "String"
+          },
+          "carrier": {
+            "kind": "standard",
+            "max_length": 100,
+            "sanitize": true,
+            "type": "String"
+          },
+          "coupon_code": {
+            "kind": "standard",
+            "max_length": 100,
+            "sanitize": true,
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "estimated_delivery": {
+            "kind": "standard",
+            "max_length": 10,
+            "sanitize": true,
+            "type": "String"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "items": {
+            "kind": "has_many",
+            "target": "ordering.order.order.OrderItem"
+          },
+          "payment_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "payment_method": {
+            "kind": "standard",
+            "max_length": 50,
+            "sanitize": true,
+            "type": "String"
+          },
+          "payment_status": {
+            "kind": "standard",
+            "max_length": 50,
+            "sanitize": true,
+            "type": "String"
+          },
+          "pricing": {
+            "kind": "value_object",
+            "target": "ordering.order.order.OrderPricing"
+          },
+          "shipment_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "shipping_address": {
+            "kind": "value_object",
+            "target": "ordering.order.order.ShippingAddress"
+          },
+          "status": {
+            "choices": [
+              "Cancelled",
+              "Completed",
+              "Confirmed",
+              "Created",
+              "Delivered",
+              "Paid",
+              "Partially_Shipped",
+              "Payment_Pending",
+              "Processing",
+              "Refunded",
+              "Return_Approved",
+              "Return_Requested",
+              "Returned",
+              "Shipped"
+            ],
+            "default": "Created",
+            "kind": "status",
+            "transitions": {
+              "Cancelled": [
+                "Refunded",
+                "Cancelled"
+              ],
+              "Confirmed": [
+                "Payment_Pending",
+                "Cancelled"
+              ],
+              "Created": [
+                "Confirmed",
+                "Cancelled"
+              ],
+              "Delivered": [
+                "Completed",
+                "Return_Requested"
+              ],
+              "Paid": [
+                "Processing",
+                "Paid",
+                "Shipped",
+                "Partially_Shipped",
+                "Cancelled"
+              ],
+              "Partially_Shipped": [
+                "Shipped"
+              ],
+              "Payment_Pending": [
+                "Paid",
+                "Payment_Pending",
+                "Confirmed",
+                "Cancelled"
+              ],
+              "Processing": [
+                "Shipped",
+                "Partially_Shipped"
+              ],
+              "Refunded": [
+                "Refunded"
+              ],
+              "Return_Approved": [
+                "Returned"
+              ],
+              "Return_Requested": [
+                "Return_Approved"
+              ],
+              "Returned": [
+                "Refunded",
+                "Returned"
+              ],
+              "Shipped": [
+                "Delivered"
+              ]
+            },
+            "type": "Status"
+          },
+          "tracking_number": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "ordering.order.order.Order",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "ordering.order.order",
+        "name": "Order",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": true,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "order",
+          "stream_category": "ordering::order"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "ordering.order.cancellation.CancelOrderHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.order.cancellation.CancelOrderHandler",
+          "handlers": {
+            "Ordering.CancelOrder.v1": [
+              "cancel_order"
+            ],
+            "Ordering.RefundOrder.v1": [
+              "refund_order"
+            ]
+          },
+          "module": "ordering.order.cancellation",
+          "name": "CancelOrderHandler",
+          "part_of": "ordering.order.order.Order",
+          "stream_category": "ordering::order:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "ordering.order.completion.CompleteOrderHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.order.completion.CompleteOrderHandler",
+          "handlers": {
+            "Ordering.CompleteOrder.v1": [
+              "complete_order"
+            ]
+          },
+          "module": "ordering.order.completion",
+          "name": "CompleteOrderHandler",
+          "part_of": "ordering.order.order.Order",
+          "stream_category": "ordering::order:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "ordering.order.confirmation.ConfirmOrderHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.order.confirmation.ConfirmOrderHandler",
+          "handlers": {
+            "Ordering.ConfirmOrder.v1": [
+              "confirm_order"
+            ]
+          },
+          "module": "ordering.order.confirmation",
+          "name": "ConfirmOrderHandler",
+          "part_of": "ordering.order.order.Order",
+          "stream_category": "ordering::order:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "ordering.order.creation.CreateOrderHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.order.creation.CreateOrderHandler",
+          "handlers": {
+            "Ordering.CreateOrder.v1": [
+              "create_order"
+            ]
+          },
+          "module": "ordering.order.creation",
+          "name": "CreateOrderHandler",
+          "part_of": "ordering.order.order.Order",
+          "stream_category": "ordering::order:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "ordering.order.fulfillment.RecordFulfillmentHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.order.fulfillment.RecordFulfillmentHandler",
+          "handlers": {
+            "Ordering.MarkProcessing.v1": [
+              "mark_processing"
+            ],
+            "Ordering.RecordDelivery.v1": [
+              "record_delivery"
+            ],
+            "Ordering.RecordPartialShipment.v1": [
+              "record_partial_shipment"
+            ],
+            "Ordering.RecordShipment.v1": [
+              "record_shipment"
+            ]
+          },
+          "module": "ordering.order.fulfillment",
+          "name": "RecordFulfillmentHandler",
+          "part_of": "ordering.order.order.Order",
+          "stream_category": "ordering::order:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "ordering.order.modification.ModifyOrderHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.order.modification.ModifyOrderHandler",
+          "handlers": {
+            "Ordering.AddItem.v1": [
+              "add_item"
+            ],
+            "Ordering.ApplyCoupon.v1": [
+              "apply_coupon"
+            ],
+            "Ordering.RemoveItem.v1": [
+              "remove_item"
+            ],
+            "Ordering.UpdateItemQuantity.v1": [
+              "update_item_quantity"
+            ]
+          },
+          "module": "ordering.order.modification",
+          "name": "ModifyOrderHandler",
+          "part_of": "ordering.order.order.Order",
+          "stream_category": "ordering::order:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "ordering.order.payment.RecordPaymentHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.order.payment.RecordPaymentHandler",
+          "handlers": {
+            "Ordering.RecordPaymentFailure.v1": [
+              "record_payment_failure"
+            ],
+            "Ordering.RecordPaymentPending.v1": [
+              "record_payment_pending"
+            ],
+            "Ordering.RecordPaymentSuccess.v1": [
+              "record_payment_success"
+            ]
+          },
+          "module": "ordering.order.payment",
+          "name": "RecordPaymentHandler",
+          "part_of": "ordering.order.order.Order",
+          "stream_category": "ordering::order:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "ordering.order.returns.ManageReturnsHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "ordering.order.returns.ManageReturnsHandler",
+          "handlers": {
+            "Ordering.ApproveReturn.v1": [
+              "approve_return"
+            ],
+            "Ordering.RecordReturn.v1": [
+              "record_return"
+            ],
+            "Ordering.RequestReturn.v1": [
+              "request_return"
+            ]
+          },
+          "module": "ordering.order.returns",
+          "name": "ManageReturnsHandler",
+          "part_of": "ordering.order.order.Order",
+          "stream_category": "ordering::order:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "ordering.order.cancellation.CancelOrder": {
+          "__type__": "Ordering.CancelOrder.v1",
+          "__version__": 1,
+          "description": "Cancel an order before fulfillment begins (allowed in Created through Paid states).",
+          "element_type": "COMMAND",
+          "fields": {
+            "cancelled_by": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.cancellation.CancelOrder",
+          "module": "ordering.order.cancellation",
+          "name": "CancelOrder",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.cancellation.RefundOrder": {
+          "__type__": "Ordering.RefundOrder.v1",
+          "__version__": 1,
+          "description": "Issue a refund for a cancelled or returned order.",
+          "element_type": "COMMAND",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "refund_amount": {
+              "kind": "standard",
+              "type": "Float"
+            }
+          },
+          "fqn": "ordering.order.cancellation.RefundOrder",
+          "module": "ordering.order.cancellation",
+          "name": "RefundOrder",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.completion.CompleteOrder": {
+          "__type__": "Ordering.CompleteOrder.v1",
+          "__version__": 1,
+          "description": "Finalize a delivered order after the return window has expired.",
+          "element_type": "COMMAND",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.completion.CompleteOrder",
+          "module": "ordering.order.completion",
+          "name": "CompleteOrder",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.confirmation.ConfirmOrder": {
+          "__type__": "Ordering.ConfirmOrder.v1",
+          "__version__": 1,
+          "description": "Confirm the order, signaling the customer's commitment to purchase.",
+          "element_type": "COMMAND",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.confirmation.ConfirmOrder",
+          "module": "ordering.order.confirmation",
+          "name": "ConfirmOrder",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.creation.CreateOrder": {
+          "__type__": "Ordering.CreateOrder.v1",
+          "__version__": 1,
+          "description": "Create a new order from a shopping cart's items, addresses, and pricing.",
+          "element_type": "COMMAND",
+          "fields": {
+            "billing_address": {
+              "kind": "dict",
+              "required": true,
+              "type": "Dict"
+            },
+            "currency": {
+              "default": "USD",
+              "kind": "standard",
+              "max_length": 3,
+              "sanitize": true,
+              "type": "String"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "discount_total": {
+              "default": 0.0,
+              "kind": "standard",
+              "type": "Float"
+            },
+            "grand_total": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "items": {
+              "content_type": "dict",
+              "kind": "list",
+              "required": true,
+              "type": "List"
+            },
+            "shipping_address": {
+              "kind": "dict",
+              "required": true,
+              "type": "Dict"
+            },
+            "shipping_cost": {
+              "default": 0.0,
+              "kind": "standard",
+              "type": "Float"
+            },
+            "subtotal": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "tax_total": {
+              "default": 0.0,
+              "kind": "standard",
+              "type": "Float"
+            }
+          },
+          "fqn": "ordering.order.creation.CreateOrder",
+          "module": "ordering.order.creation",
+          "name": "CreateOrder",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.fulfillment.MarkProcessing": {
+          "__type__": "Ordering.MarkProcessing.v1",
+          "__version__": 1,
+          "description": "Signal that the warehouse has started picking and packing.",
+          "element_type": "COMMAND",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.fulfillment.MarkProcessing",
+          "module": "ordering.order.fulfillment",
+          "name": "MarkProcessing",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.fulfillment.RecordDelivery": {
+          "__type__": "Ordering.RecordDelivery.v1",
+          "__version__": 1,
+          "description": "Record that the carrier has confirmed delivery to the customer.",
+          "element_type": "COMMAND",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.fulfillment.RecordDelivery",
+          "module": "ordering.order.fulfillment",
+          "name": "RecordDelivery",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.fulfillment.RecordPartialShipment": {
+          "__type__": "Ordering.RecordPartialShipment.v1",
+          "__version__": 1,
+          "description": "Record that some (but not all) items have been shipped.",
+          "element_type": "COMMAND",
+          "fields": {
+            "carrier": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "shipment_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "shipped_item_ids": {
+              "content_type": "String",
+              "kind": "list",
+              "required": true,
+              "type": "List"
+            },
+            "tracking_number": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.fulfillment.RecordPartialShipment",
+          "module": "ordering.order.fulfillment",
+          "name": "RecordPartialShipment",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.fulfillment.RecordShipment": {
+          "__type__": "Ordering.RecordShipment.v1",
+          "__version__": 1,
+          "description": "Record that all items have been shipped with a carrier.",
+          "element_type": "COMMAND",
+          "fields": {
+            "carrier": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "estimated_delivery": {
+              "kind": "standard",
+              "max_length": 10,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "shipment_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "shipped_item_ids": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            },
+            "tracking_number": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.fulfillment.RecordShipment",
+          "module": "ordering.order.fulfillment",
+          "name": "RecordShipment",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.modification.AddItem": {
+          "__type__": "Ordering.AddItem.v1",
+          "__version__": 1,
+          "description": "Add a new line item to an order (only allowed in Created state).",
+          "element_type": "COMMAND",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "min_value": 1,
+              "required": true,
+              "type": "Integer"
+            },
+            "sku": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "title": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "unit_price": {
+              "kind": "standard",
+              "min_value": 0.0,
+              "required": true,
+              "type": "Float"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.modification.AddItem",
+          "module": "ordering.order.modification",
+          "name": "AddItem",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.modification.ApplyCoupon": {
+          "__type__": "Ordering.ApplyCoupon.v1",
+          "__version__": 1,
+          "description": "Apply a coupon code to an order for a discount.",
+          "element_type": "COMMAND",
+          "fields": {
+            "coupon_code": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.modification.ApplyCoupon",
+          "module": "ordering.order.modification",
+          "name": "ApplyCoupon",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.modification.RemoveItem": {
+          "__type__": "Ordering.RemoveItem.v1",
+          "__version__": 1,
+          "description": "Remove a line item from an order (only allowed in Created state).",
+          "element_type": "COMMAND",
+          "fields": {
+            "item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.modification.RemoveItem",
+          "module": "ordering.order.modification",
+          "name": "RemoveItem",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.modification.UpdateItemQuantity": {
+          "__type__": "Ordering.UpdateItemQuantity.v1",
+          "__version__": 1,
+          "description": "Change the quantity of an existing order line item.",
+          "element_type": "COMMAND",
+          "fields": {
+            "item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_quantity": {
+              "kind": "standard",
+              "min_value": 1,
+              "required": true,
+              "type": "Integer"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.modification.UpdateItemQuantity",
+          "module": "ordering.order.modification",
+          "name": "UpdateItemQuantity",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.payment.RecordPaymentFailure": {
+          "__type__": "Ordering.RecordPaymentFailure.v1",
+          "__version__": 1,
+          "description": "Record that payment failed, returning the order to Confirmed for retry.",
+          "element_type": "COMMAND",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.payment.RecordPaymentFailure",
+          "module": "ordering.order.payment",
+          "name": "RecordPaymentFailure",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.payment.RecordPaymentPending": {
+          "__type__": "Ordering.RecordPaymentPending.v1",
+          "__version__": 1,
+          "description": "Record that payment processing has been initiated.",
+          "element_type": "COMMAND",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "payment_method": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.payment.RecordPaymentPending",
+          "module": "ordering.order.payment",
+          "name": "RecordPaymentPending",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.payment.RecordPaymentSuccess": {
+          "__type__": "Ordering.RecordPaymentSuccess.v1",
+          "__version__": 1,
+          "description": "Record that payment was successfully captured.",
+          "element_type": "COMMAND",
+          "fields": {
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "payment_method": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.payment.RecordPaymentSuccess",
+          "module": "ordering.order.payment",
+          "name": "RecordPaymentSuccess",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.returns.ApproveReturn": {
+          "__type__": "Ordering.ApproveReturn.v1",
+          "__version__": 1,
+          "description": "Approve a pending return request.",
+          "element_type": "COMMAND",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.returns.ApproveReturn",
+          "module": "ordering.order.returns",
+          "name": "ApproveReturn",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.returns.RecordReturn": {
+          "__type__": "Ordering.RecordReturn.v1",
+          "__version__": 1,
+          "description": "Record that returned items have been received back from the customer.",
+          "element_type": "COMMAND",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "returned_item_ids": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            }
+          },
+          "fqn": "ordering.order.returns.RecordReturn",
+          "module": "ordering.order.returns",
+          "name": "RecordReturn",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.returns.RequestReturn": {
+          "__type__": "Ordering.RequestReturn.v1",
+          "__version__": 1,
+          "description": "Request a return of a delivered order, providing a reason.",
+          "element_type": "COMMAND",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.returns.RequestReturn",
+          "module": "ordering.order.returns",
+          "name": "RequestReturn",
+          "part_of": "ordering.order.order.Order"
+        }
+      },
+      "database_models": {},
+      "entities": {
+        "ordering.order.order.OrderItem": {
+          "description": "A line item in an order, representing a specific product variant and quantity.\n\nEach item tracks its own status through the fulfillment lifecycle\n(Pending -> Shipped -> Delivered -> optionally Returned), enabling partial\nshipments where some items ship before others.",
+          "element_type": "ENTITY",
+          "fields": {
+            "discount": {
+              "default": 0.0,
+              "kind": "standard",
+              "type": "Float"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "item_status": {
+              "choices": [
+                "Delivered",
+                "Pending",
+                "Reserved",
+                "Returned",
+                "Shipped"
+              ],
+              "default": "Pending",
+              "kind": "status",
+              "transitions": {
+                "Delivered": [
+                  "Returned"
+                ],
+                "Pending": [
+                  "Reserved"
+                ],
+                "Reserved": [
+                  "Shipped"
+                ],
+                "Shipped": [
+                  "Delivered"
+                ]
+              },
+              "type": "Status"
+            },
+            "order": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "ordering.order.order.Order"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "min_value": 1,
+              "required": true,
+              "type": "Integer"
+            },
+            "sku": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "tax_amount": {
+              "default": 0.0,
+              "kind": "standard",
+              "type": "Float"
+            },
+            "title": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "unit_price": {
+              "kind": "standard",
+              "min_value": 0.0,
+              "required": true,
+              "type": "Float"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.order.OrderItem",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "ordering.order.order",
+          "name": "OrderItem",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "order_item"
+          },
+          "part_of": "ordering.order.order.Order"
+        }
+      },
+      "event_handlers": {},
+      "events": {
+        "ordering.order.events.CouponApplied": {
+          "__type__": "Ordering.CouponApplied.v1",
+          "__version__": 1,
+          "description": "A coupon code was applied to an order.",
+          "element_type": "EVENT",
+          "fields": {
+            "applied_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "coupon_code": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.events.CouponApplied",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "CouponApplied",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.ItemAdded": {
+          "__type__": "Ordering.ItemAdded.v1",
+          "__version__": 1,
+          "description": "A new line item was added to an order (only in Created state).",
+          "element_type": "EVENT",
+          "fields": {
+            "added_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_grand_total": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "new_subtotal": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "sku": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "title": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "unit_price": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.events.ItemAdded",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "ItemAdded",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.ItemQuantityUpdated": {
+          "__type__": "Ordering.ItemQuantityUpdated.v1",
+          "__version__": 1,
+          "description": "The quantity of an order line item was changed.",
+          "element_type": "EVENT",
+          "fields": {
+            "item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_grand_total": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "new_quantity": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "new_subtotal": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "previous_quantity": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "updated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "ordering.order.events.ItemQuantityUpdated",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "ItemQuantityUpdated",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.ItemRemoved": {
+          "__type__": "Ordering.ItemRemoved.v1",
+          "__version__": 1,
+          "description": "A line item was removed from an order (only in Created state).",
+          "element_type": "EVENT",
+          "fields": {
+            "item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_grand_total": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "new_subtotal": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "removed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "ordering.order.events.ItemRemoved",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "ItemRemoved",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.OrderCancelled": {
+          "__type__": "Ordering.OrderCancelled.v1",
+          "__version__": 1,
+          "description": "The order was cancelled before fulfillment began.",
+          "element_type": "EVENT",
+          "fields": {
+            "cancelled_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "cancelled_by": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.events.OrderCancelled",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "OrderCancelled",
+          "part_of": "ordering.order.order.Order",
+          "published": true
+        },
+        "ordering.order.events.OrderCompleted": {
+          "__type__": "Ordering.OrderCompleted.v1",
+          "__version__": 1,
+          "description": "The order was finalized after delivery and return window expiry.",
+          "element_type": "EVENT",
+          "fields": {
+            "completed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.events.OrderCompleted",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "OrderCompleted",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.OrderConfirmed": {
+          "__type__": "Ordering.OrderConfirmed.v1",
+          "__version__": 1,
+          "description": "The customer confirmed the order, committing to the purchase.",
+          "element_type": "EVENT",
+          "fields": {
+            "confirmed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.events.OrderConfirmed",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "OrderConfirmed",
+          "part_of": "ordering.order.order.Order",
+          "published": true
+        },
+        "ordering.order.events.OrderCreated": {
+          "__type__": "Ordering.OrderCreated.v1",
+          "__version__": 1,
+          "description": "A new order was created from a shopping cart at checkout.",
+          "element_type": "EVENT",
+          "fields": {
+            "billing_address": {
+              "kind": "dict",
+              "required": true,
+              "type": "Dict"
+            },
+            "created_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "currency": {
+              "default": "USD",
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "discount_total": {
+              "kind": "standard",
+              "type": "Float"
+            },
+            "grand_total": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "items": {
+              "content_type": "dict",
+              "kind": "list",
+              "required": true,
+              "type": "List"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "shipping_address": {
+              "kind": "dict",
+              "required": true,
+              "type": "Dict"
+            },
+            "shipping_cost": {
+              "kind": "standard",
+              "type": "Float"
+            },
+            "subtotal": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "tax_total": {
+              "kind": "standard",
+              "type": "Float"
+            }
+          },
+          "fqn": "ordering.order.events.OrderCreated",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "OrderCreated",
+          "part_of": "ordering.order.order.Order",
+          "published": true
+        },
+        "ordering.order.events.OrderDelivered": {
+          "__type__": "Ordering.OrderDelivered.v1",
+          "__version__": 1,
+          "description": "The carrier confirmed delivery of the order to the customer.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "delivered_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.events.OrderDelivered",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "OrderDelivered",
+          "part_of": "ordering.order.order.Order",
+          "published": true
+        },
+        "ordering.order.events.OrderPartiallyShipped": {
+          "__type__": "Ordering.OrderPartiallyShipped.v1",
+          "__version__": 1,
+          "description": "Some (but not all) order items were shipped.",
+          "element_type": "EVENT",
+          "fields": {
+            "carrier": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "shipment_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "shipped_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "shipped_item_ids": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            },
+            "tracking_number": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.events.OrderPartiallyShipped",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "OrderPartiallyShipped",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.OrderProcessing": {
+          "__type__": "Ordering.OrderProcessing.v1",
+          "__version__": 1,
+          "description": "The warehouse began picking and packing the order.",
+          "element_type": "EVENT",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "started_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "ordering.order.events.OrderProcessing",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "OrderProcessing",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.OrderRefunded": {
+          "__type__": "Ordering.OrderRefunded.v1",
+          "__version__": 1,
+          "description": "A refund was issued for a cancelled or returned order.",
+          "element_type": "EVENT",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "refund_amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "refunded_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "ordering.order.events.OrderRefunded",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "OrderRefunded",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.OrderReturned": {
+          "__type__": "Ordering.OrderReturned.v1",
+          "__version__": 1,
+          "description": "Returned items were received back from the customer.",
+          "element_type": "EVENT",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "returned_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "returned_item_ids": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            }
+          },
+          "fqn": "ordering.order.events.OrderReturned",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "OrderReturned",
+          "part_of": "ordering.order.order.Order",
+          "published": true
+        },
+        "ordering.order.events.OrderShipped": {
+          "__type__": "Ordering.OrderShipped.v1",
+          "__version__": 1,
+          "description": "All order items were shipped with a carrier.",
+          "element_type": "EVENT",
+          "fields": {
+            "carrier": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "estimated_delivery": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "shipment_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "shipped_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "shipped_item_ids": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            },
+            "tracking_number": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.events.OrderShipped",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "OrderShipped",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.PaymentFailed": {
+          "__type__": "Ordering.PaymentFailed.v1",
+          "__version__": 1,
+          "description": "Payment processing failed; the order returns to Confirmed for retry.",
+          "element_type": "EVENT",
+          "fields": {
+            "failed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.events.PaymentFailed",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "PaymentFailed",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.PaymentPending": {
+          "__type__": "Ordering.PaymentPending.v1",
+          "__version__": 1,
+          "description": "Payment processing was initiated for the order.",
+          "element_type": "EVENT",
+          "fields": {
+            "initiated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "payment_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "payment_method": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.events.PaymentPending",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "PaymentPending",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.PaymentSucceeded": {
+          "__type__": "Ordering.PaymentSucceeded.v1",
+          "__version__": 1,
+          "description": "Payment was successfully captured for the order.",
+          "element_type": "EVENT",
+          "fields": {
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Float"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "paid_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "payment_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "payment_method": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.events.PaymentSucceeded",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "PaymentSucceeded",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.ReturnApproved": {
+          "__type__": "Ordering.ReturnApproved.v1",
+          "__version__": 1,
+          "description": "A return request was approved by the system or an admin.",
+          "element_type": "EVENT",
+          "fields": {
+            "approved_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.order.events.ReturnApproved",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "ReturnApproved",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.events.ReturnRequested": {
+          "__type__": "Ordering.ReturnRequested.v1",
+          "__version__": 1,
+          "description": "The customer requested a return of a delivered order.",
+          "element_type": "EVENT",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "requested_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "ordering.order.events.ReturnRequested",
+          "is_fact_event": false,
+          "module": "ordering.order.events",
+          "name": "ReturnRequested",
+          "part_of": "ordering.order.order.Order"
+        }
+      },
+      "repositories": {},
+      "value_objects": {
+        "ordering.order.order.OrderPricing": {
+          "description": "Financial summary of an order: subtotal, shipping, tax, discounts, and grand total.\n\nPrices are locked at checkout and never change, even if the catalogue prices\nchange later. The currency is captured alongside the amounts.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "currency": {
+              "default": "USD",
+              "kind": "standard",
+              "max_length": 3,
+              "sanitize": true,
+              "type": "String"
+            },
+            "discount_total": {
+              "default": 0.0,
+              "kind": "standard",
+              "type": "Float"
+            },
+            "grand_total": {
+              "default": 0.0,
+              "kind": "standard",
+              "type": "Float"
+            },
+            "shipping_cost": {
+              "default": 0.0,
+              "kind": "standard",
+              "type": "Float"
+            },
+            "subtotal": {
+              "default": 0.0,
+              "kind": "standard",
+              "type": "Float"
+            },
+            "tax_total": {
+              "default": 0.0,
+              "kind": "standard",
+              "type": "Float"
+            }
+          },
+          "fqn": "ordering.order.order.OrderPricing",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "ordering.order.order",
+          "name": "OrderPricing",
+          "part_of": "ordering.order.order.Order"
+        },
+        "ordering.order.order.ShippingAddress": {
+          "description": "A delivery or billing address captured at checkout time.\n\nOnce recorded on an Order, the address is immutable \u2014 it represents where\nthe order was shipped, regardless of future address changes on the Customer.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "city": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "country": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "postal_code": {
+              "kind": "standard",
+              "max_length": 20,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "state": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "street": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.order.order.ShippingAddress",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "ordering.order.order",
+          "name": "ShippingAddress",
+          "part_of": "ordering.order.order.Order"
+        }
+      }
+    }
+  },
+  "contracts": {
+    "events": [
+      {
+        "fields": {
+          "abandoned_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "cart_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "ordering.cart.events.CartAbandoned",
+        "type": "Ordering.CartAbandoned.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "cancelled_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "cancelled_by": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "ordering.order.events.OrderCancelled",
+        "type": "Ordering.OrderCancelled.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "confirmed_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "ordering.order.events.OrderConfirmed",
+        "type": "Ordering.OrderConfirmed.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "billing_address": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "created_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "currency": {
+            "default": "USD",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "discount_total": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "grand_total": {
+            "kind": "standard",
+            "required": true,
+            "type": "Float"
+          },
+          "items": {
+            "content_type": "dict",
+            "kind": "list",
+            "required": true,
+            "type": "List"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "shipping_address": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "shipping_cost": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "subtotal": {
+            "kind": "standard",
+            "required": true,
+            "type": "Float"
+          },
+          "tax_total": {
+            "kind": "standard",
+            "type": "Float"
+          }
+        },
+        "fqn": "ordering.order.events.OrderCreated",
+        "type": "Ordering.OrderCreated.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "delivered_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "ordering.order.events.OrderDelivered",
+        "type": "Ordering.OrderDelivered.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "returned_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "returned_item_ids": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          }
+        },
+        "fqn": "ordering.order.events.OrderReturned",
+        "type": "Ordering.OrderReturned.v1",
+        "version": 1
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.DefaultOutbox",
+      "level": "warning",
+      "message": "Aggregate `DefaultOutbox` has no command handler \u2014 no write path exists"
+    },
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.MemoryOutbox",
+      "level": "warning",
+      "message": "Aggregate `MemoryOutbox` has no command handler \u2014 no write path exists"
+    },
+    {
+      "code": "PROJECTION_WITHOUT_PROJECTOR",
+      "element": "ordering.projections.suspended_accounts.SuspendedAccount",
+      "level": "warning",
+      "message": "Projection `SuspendedAccount` has no projector to populate it"
+    }
+  ],
+  "domain": {
+    "camel_case_name": "Ordering",
+    "command_processing": "sync",
+    "event_processing": "async",
+    "identity_strategy": "uuid",
+    "identity_type": "string",
+    "name": "ordering",
+    "normalized_name": "ordering"
+  },
+  "elements": {
+    "AGGREGATE": [
+      "abc.DefaultOutbox",
+      "abc.MemoryOutbox",
+      "ordering.cart.cart.ShoppingCart",
+      "ordering.order.order.Order"
+    ],
+    "APPLICATION_SERVICE": [],
+    "COMMAND": [
+      "ordering.cart.abandonment.DetectAbandonedCarts",
+      "ordering.cart.conversion.ConvertToOrder",
+      "ordering.cart.coupons.ApplyCouponToCart",
+      "ordering.cart.items.AddToCart",
+      "ordering.cart.items.RemoveFromCart",
+      "ordering.cart.items.UpdateCartQuantity",
+      "ordering.cart.management.AbandonCart",
+      "ordering.cart.management.CreateCart",
+      "ordering.cart.management.MergeGuestCart",
+      "ordering.order.cancellation.CancelOrder",
+      "ordering.order.cancellation.RefundOrder",
+      "ordering.order.completion.CompleteOrder",
+      "ordering.order.confirmation.ConfirmOrder",
+      "ordering.order.creation.CreateOrder",
+      "ordering.order.fulfillment.MarkProcessing",
+      "ordering.order.fulfillment.RecordDelivery",
+      "ordering.order.fulfillment.RecordPartialShipment",
+      "ordering.order.fulfillment.RecordShipment",
+      "ordering.order.modification.AddItem",
+      "ordering.order.modification.ApplyCoupon",
+      "ordering.order.modification.RemoveItem",
+      "ordering.order.modification.UpdateItemQuantity",
+      "ordering.order.payment.RecordPaymentFailure",
+      "ordering.order.payment.RecordPaymentPending",
+      "ordering.order.payment.RecordPaymentSuccess",
+      "ordering.order.returns.ApproveReturn",
+      "ordering.order.returns.RecordReturn",
+      "ordering.order.returns.RequestReturn"
+    ],
+    "COMMAND_HANDLER": [
+      "ordering.cart.abandonment.DetectAbandonedCartsHandler",
+      "ordering.cart.conversion.ConvertCartHandler",
+      "ordering.cart.coupons.ApplyCouponHandler",
+      "ordering.cart.items.ManageCartItemsHandler",
+      "ordering.cart.management.ManageCartHandler",
+      "ordering.order.cancellation.CancelOrderHandler",
+      "ordering.order.completion.CompleteOrderHandler",
+      "ordering.order.confirmation.ConfirmOrderHandler",
+      "ordering.order.creation.CreateOrderHandler",
+      "ordering.order.fulfillment.RecordFulfillmentHandler",
+      "ordering.order.modification.ModifyOrderHandler",
+      "ordering.order.payment.RecordPaymentHandler",
+      "ordering.order.returns.ManageReturnsHandler"
+    ],
+    "DATABASE_MODEL": [],
+    "DOMAIN_SERVICE": [],
+    "ENTITY": [
+      "ordering.cart.cart.CartItem",
+      "ordering.order.order.OrderItem"
+    ],
+    "EVENT": [
+      "abc._OrderCheckoutSagaTransition",
+      "ordering.cart.events.CartAbandoned",
+      "ordering.cart.events.CartConverted",
+      "ordering.cart.events.CartCouponApplied",
+      "ordering.cart.events.CartItemAdded",
+      "ordering.cart.events.CartItemRemoved",
+      "ordering.cart.events.CartQuantityUpdated",
+      "ordering.cart.events.CartsMerged",
+      "ordering.order.events.CouponApplied",
+      "ordering.order.events.ItemAdded",
+      "ordering.order.events.ItemQuantityUpdated",
+      "ordering.order.events.ItemRemoved",
+      "ordering.order.events.OrderCancelled",
+      "ordering.order.events.OrderCompleted",
+      "ordering.order.events.OrderConfirmed",
+      "ordering.order.events.OrderCreated",
+      "ordering.order.events.OrderDelivered",
+      "ordering.order.events.OrderPartiallyShipped",
+      "ordering.order.events.OrderProcessing",
+      "ordering.order.events.OrderRefunded",
+      "ordering.order.events.OrderReturned",
+      "ordering.order.events.OrderShipped",
+      "ordering.order.events.PaymentFailed",
+      "ordering.order.events.PaymentPending",
+      "ordering.order.events.PaymentSucceeded",
+      "ordering.order.events.ReturnApproved",
+      "ordering.order.events.ReturnRequested"
+    ],
+    "EVENT_HANDLER": [],
+    "PROCESS_MANAGER": [
+      "ordering.checkout.saga.OrderCheckoutSaga"
+    ],
+    "PROJECTION": [
+      "ordering.projections.abandoned_checkouts.AbandonedCheckout",
+      "ordering.projections.cart_view.CartView",
+      "ordering.projections.customer_orders.CustomerOrders",
+      "ordering.projections.daily_order_stats.DailyOrderStats",
+      "ordering.projections.order_detail.OrderDetail",
+      "ordering.projections.order_summary.OrderSummary",
+      "ordering.projections.order_timeline.OrderTimeline",
+      "ordering.projections.orders_by_status.OrdersByStatus",
+      "ordering.projections.suspended_accounts.SuspendedAccount"
+    ],
+    "PROJECTOR": [
+      "ordering.projections.abandoned_checkouts.AbandonedCheckoutProjector",
+      "ordering.projections.cart_view.CartViewProjector",
+      "ordering.projections.customer_orders.CustomerOrdersProjector",
+      "ordering.projections.daily_order_stats.DailyOrderStatsProjector",
+      "ordering.projections.order_detail.OrderDetailProjector",
+      "ordering.projections.order_summary.OrderSummaryProjector",
+      "ordering.projections.order_timeline.OrderTimelineProjector",
+      "ordering.projections.orders_by_status.OrdersByStatusProjector"
+    ],
+    "QUERY": [
+      "ordering.projections.cart_view_queries.GetCartView",
+      "ordering.projections.customer_orders_queries.ListCustomerOrders",
+      "ordering.projections.order_detail_queries.GetOrderDetail",
+      "ordering.projections.order_summary_queries.GetOrderSummary",
+      "ordering.projections.order_timeline_queries.GetOrderTimeline"
+    ],
+    "QUERY_HANDLER": [
+      "ordering.projections.cart_view_queries.CartViewQueryHandler",
+      "ordering.projections.customer_orders_queries.CustomerOrdersQueryHandler",
+      "ordering.projections.order_detail_queries.OrderDetailQueryHandler",
+      "ordering.projections.order_summary_queries.OrderSummaryQueryHandler",
+      "ordering.projections.order_timeline_queries.OrderTimelineQueryHandler"
+    ],
+    "REPOSITORY": [
+      "protean.utils.DefaultOutboxRepository",
+      "protean.utils.MemoryOutboxRepository"
+    ],
+    "SUBSCRIBER": [
+      "ordering.cart.catalogue_subscriber.CatalogueEventsSubscriber",
+      "ordering.checkout.inventory_subscriber.InventoryEventsSubscriber",
+      "ordering.checkout.payment_subscriber.PaymentEventsSubscriber",
+      "ordering.order.fulfillment_subscriber.FulfillmentEventsSubscriber",
+      "ordering.order.identity_subscriber.IdentityEventsSubscriber"
+    ],
+    "VALUE_OBJECT": [
+      "ordering.order.order.OrderPricing",
+      "ordering.order.order.ShippingAddress"
+    ]
+  },
+  "flows": {
+    "domain_services": {},
+    "process_managers": {
+      "ordering.checkout.saga.OrderCheckoutSaga": {
+        "description": "Coordinates the checkout process, reacting only to internal ordering events.",
+        "element_type": "PROCESS_MANAGER",
+        "fields": {
+          "amount": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "completed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "failure_reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "payment_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "started_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "status": {
+            "default": "new",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "ordering.checkout.saga.OrderCheckoutSaga",
+        "handlers": {
+          "Ordering.OrderCancelled.v1": {
+            "correlate": "order_id",
+            "end": true,
+            "methods": [
+              "on_order_cancelled"
+            ],
+            "start": false
+          },
+          "Ordering.OrderConfirmed.v1": {
+            "correlate": "order_id",
+            "end": false,
+            "methods": [
+              "on_order_confirmed"
+            ],
+            "start": true
+          },
+          "Ordering.PaymentFailed.v1": {
+            "correlate": "order_id",
+            "end": false,
+            "methods": [
+              "on_payment_failed"
+            ],
+            "start": false
+          },
+          "Ordering.PaymentPending.v1": {
+            "correlate": "order_id",
+            "end": false,
+            "methods": [
+              "on_payment_pending"
+            ],
+            "start": false
+          },
+          "Ordering.PaymentSucceeded.v1": {
+            "correlate": "order_id",
+            "end": false,
+            "methods": [
+              "on_payment_succeeded"
+            ],
+            "start": false
+          }
+        },
+        "identity_field": "id",
+        "module": "ordering.checkout.saga",
+        "name": "OrderCheckoutSaga",
+        "stream_categories": [
+          "ordering::order"
+        ],
+        "stream_category": "ordering::order_checkout_saga",
+        "subscription": {
+          "config": {},
+          "profile": null,
+          "type": null
+        },
+        "transition_event": {
+          "__type__": "Ordering._OrderCheckoutSagaTransition.v1",
+          "fqn": "abc._OrderCheckoutSagaTransition"
+        }
+      }
+    },
+    "subscribers": {
+      "ordering.cart.catalogue_subscriber.CatalogueEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Catalogue domain events affecting shopping carts.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and performs side-effects. Ignores all event types\nnot relevant to the Ordering domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "ordering.cart.catalogue_subscriber.CatalogueEventsSubscriber",
+        "module": "ordering.cart.catalogue_subscriber",
+        "name": "CatalogueEventsSubscriber",
+        "stream": "catalogue::product"
+      },
+      "ordering.checkout.inventory_subscriber.InventoryEventsSubscriber": {
+        "broker": "global",
+        "description": "Translates Inventory domain events into Ordering domain commands.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and dispatches domain commands. Ignores all\nevent types not relevant to the Ordering domain's checkout flow.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "ordering.checkout.inventory_subscriber.InventoryEventsSubscriber",
+        "module": "ordering.checkout.inventory_subscriber",
+        "name": "InventoryEventsSubscriber",
+        "stream": "inventory::inventory_item"
+      },
+      "ordering.checkout.payment_subscriber.PaymentEventsSubscriber": {
+        "broker": "global",
+        "description": "Translates Payment domain events into Ordering domain commands.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and dispatches domain commands. Ignores all\nevent types not relevant to the Ordering domain's checkout flow.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "ordering.checkout.payment_subscriber.PaymentEventsSubscriber",
+        "module": "ordering.checkout.payment_subscriber",
+        "name": "PaymentEventsSubscriber",
+        "stream": "payments::payment"
+      },
+      "ordering.order.fulfillment_subscriber.FulfillmentEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Fulfillment domain events to update Order status.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and dispatches domain commands. Ignores all\nevent types not relevant to the Ordering domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "ordering.order.fulfillment_subscriber.FulfillmentEventsSubscriber",
+        "module": "ordering.order.fulfillment_subscriber",
+        "name": "FulfillmentEventsSubscriber",
+        "stream": "fulfillment::fulfillment"
+      },
+      "ordering.order.identity_subscriber.IdentityEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Identity domain events to track suspended accounts.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and updates the SuspendedAccount projection.\nIgnores all event types not relevant to the Ordering domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "ordering.order.identity_subscriber.IdentityEventsSubscriber",
+        "module": "ordering.order.identity_subscriber",
+        "name": "IdentityEventsSubscriber",
+        "stream": "identity::customer"
+      }
+    }
+  },
+  "generated_at": "2026-03-18T13:30:24Z",
+  "ir_version": "0.1.0",
+  "projections": {
+    "ordering.projections.abandoned_checkouts.AbandonedCheckout": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "currency": {
+            "default": "USD",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "grand_total": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "item_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "order_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "ordering.projections.abandoned_checkouts.AbandonedCheckout",
+        "identity_field": "order_id",
+        "module": "ordering.projections.abandoned_checkouts",
+        "name": "AbandonedCheckout",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "abandoned_checkout"
+        }
+      },
+      "projectors": {
+        "ordering.projections.abandoned_checkouts.AbandonedCheckoutProjector": {
+          "aggregates": [
+            "ordering.order.order.Order"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "ordering.projections.abandoned_checkouts.AbandonedCheckoutProjector",
+          "handlers": {
+            "Ordering.OrderCancelled.v1": [
+              "on_order_cancelled"
+            ],
+            "Ordering.OrderConfirmed.v1": [
+              "on_order_confirmed"
+            ],
+            "Ordering.OrderCreated.v1": [
+              "on_order_created"
+            ]
+          },
+          "module": "ordering.projections.abandoned_checkouts",
+          "name": "AbandonedCheckoutProjector",
+          "projector_for": "ordering.projections.abandoned_checkouts.AbandonedCheckout",
+          "stream_categories": [
+            "ordering::order"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "ordering.projections.cart_view.CartView": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "applied_coupons": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "cart_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "item_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "items": {
+            "content_type": "dict",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "session_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "ordering.projections.cart_view.CartView",
+        "identity_field": "cart_id",
+        "module": "ordering.projections.cart_view",
+        "name": "CartView",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "cart_view"
+        }
+      },
+      "projectors": {
+        "ordering.projections.cart_view.CartViewProjector": {
+          "aggregates": [
+            "ordering.cart.cart.ShoppingCart"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "ordering.projections.cart_view.CartViewProjector",
+          "handlers": {
+            "Ordering.CartAbandoned.v1": [
+              "on_cart_abandoned"
+            ],
+            "Ordering.CartConverted.v1": [
+              "on_cart_converted"
+            ],
+            "Ordering.CartCouponApplied.v1": [
+              "on_coupon_applied"
+            ],
+            "Ordering.CartItemAdded.v1": [
+              "on_item_added"
+            ],
+            "Ordering.CartItemRemoved.v1": [
+              "on_item_removed"
+            ],
+            "Ordering.CartQuantityUpdated.v1": [
+              "on_quantity_updated"
+            ],
+            "Ordering.CartsMerged.v1": [
+              "on_carts_merged"
+            ]
+          },
+          "module": "ordering.projections.cart_view",
+          "name": "CartViewProjector",
+          "projector_for": "ordering.projections.cart_view.CartView",
+          "stream_categories": [
+            "ordering::shopping_cart"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "ordering.projections.cart_view_queries.GetCartView": {
+          "__type__": "Ordering.GetCartView",
+          "element_type": "QUERY",
+          "fields": {
+            "cart_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.projections.cart_view_queries.GetCartView",
+          "module": "ordering.projections.cart_view_queries",
+          "name": "GetCartView",
+          "part_of": "ordering.projections.cart_view.CartView"
+        }
+      },
+      "query_handlers": {
+        "ordering.projections.cart_view_queries.CartViewQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "ordering.projections.cart_view_queries.CartViewQueryHandler",
+          "handlers": {
+            "Ordering.GetCartView": [
+              "get_cart_view"
+            ]
+          },
+          "module": "ordering.projections.cart_view_queries",
+          "name": "CartViewQueryHandler",
+          "part_of": "ordering.projections.cart_view.CartView"
+        }
+      }
+    },
+    "ordering.projections.customer_orders.CustomerOrders": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "currency": {
+            "default": "USD",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "grand_total": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "item_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "order_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "ordering.projections.customer_orders.CustomerOrders",
+        "identity_field": "order_id",
+        "module": "ordering.projections.customer_orders",
+        "name": "CustomerOrders",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "customer_orders"
+        }
+      },
+      "projectors": {
+        "ordering.projections.customer_orders.CustomerOrdersProjector": {
+          "aggregates": [
+            "ordering.order.order.Order"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "ordering.projections.customer_orders.CustomerOrdersProjector",
+          "handlers": {
+            "Ordering.OrderCancelled.v1": [
+              "on_order_cancelled"
+            ],
+            "Ordering.OrderCompleted.v1": [
+              "on_order_completed"
+            ],
+            "Ordering.OrderConfirmed.v1": [
+              "on_order_confirmed"
+            ],
+            "Ordering.OrderCreated.v1": [
+              "on_order_created"
+            ],
+            "Ordering.OrderDelivered.v1": [
+              "on_order_delivered"
+            ],
+            "Ordering.OrderPartiallyShipped.v1": [
+              "on_order_partially_shipped"
+            ],
+            "Ordering.OrderProcessing.v1": [
+              "on_order_processing"
+            ],
+            "Ordering.OrderRefunded.v1": [
+              "on_order_refunded"
+            ],
+            "Ordering.OrderReturned.v1": [
+              "on_order_returned"
+            ],
+            "Ordering.OrderShipped.v1": [
+              "on_order_shipped"
+            ],
+            "Ordering.PaymentFailed.v1": [
+              "on_payment_failed"
+            ],
+            "Ordering.PaymentPending.v1": [
+              "on_payment_pending"
+            ],
+            "Ordering.PaymentSucceeded.v1": [
+              "on_payment_succeeded"
+            ],
+            "Ordering.ReturnApproved.v1": [
+              "on_return_approved"
+            ],
+            "Ordering.ReturnRequested.v1": [
+              "on_return_requested"
+            ]
+          },
+          "module": "ordering.projections.customer_orders",
+          "name": "CustomerOrdersProjector",
+          "projector_for": "ordering.projections.customer_orders.CustomerOrders",
+          "stream_categories": [
+            "ordering::order"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "ordering.projections.customer_orders_queries.ListCustomerOrders": {
+          "__type__": "Ordering.ListCustomerOrders",
+          "element_type": "QUERY",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "page": {
+              "default": 1,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "page_size": {
+              "default": 20,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "status": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "ordering.projections.customer_orders_queries.ListCustomerOrders",
+          "module": "ordering.projections.customer_orders_queries",
+          "name": "ListCustomerOrders",
+          "part_of": "ordering.projections.customer_orders.CustomerOrders"
+        }
+      },
+      "query_handlers": {
+        "ordering.projections.customer_orders_queries.CustomerOrdersQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "ordering.projections.customer_orders_queries.CustomerOrdersQueryHandler",
+          "handlers": {
+            "Ordering.ListCustomerOrders": [
+              "list_customer_orders"
+            ]
+          },
+          "module": "ordering.projections.customer_orders_queries",
+          "name": "CustomerOrdersQueryHandler",
+          "part_of": "ordering.projections.customer_orders.CustomerOrders"
+        }
+      }
+    },
+    "ordering.projections.daily_order_stats.DailyOrderStats": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "date": {
+            "identifier": true,
+            "kind": "standard",
+            "max_length": 10,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "orders_cancelled": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "orders_completed": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "orders_created": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "orders_refunded": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "total_refunds": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "total_revenue": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          }
+        },
+        "fqn": "ordering.projections.daily_order_stats.DailyOrderStats",
+        "identity_field": "date",
+        "module": "ordering.projections.daily_order_stats",
+        "name": "DailyOrderStats",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "daily_order_stats"
+        }
+      },
+      "projectors": {
+        "ordering.projections.daily_order_stats.DailyOrderStatsProjector": {
+          "aggregates": [
+            "ordering.order.order.Order"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "ordering.projections.daily_order_stats.DailyOrderStatsProjector",
+          "handlers": {
+            "Ordering.OrderCancelled.v1": [
+              "on_order_cancelled"
+            ],
+            "Ordering.OrderCompleted.v1": [
+              "on_order_completed"
+            ],
+            "Ordering.OrderCreated.v1": [
+              "on_order_created"
+            ],
+            "Ordering.OrderRefunded.v1": [
+              "on_order_refunded"
+            ]
+          },
+          "module": "ordering.projections.daily_order_stats",
+          "name": "DailyOrderStatsProjector",
+          "projector_for": "ordering.projections.daily_order_stats.DailyOrderStats",
+          "stream_categories": [
+            "ordering::order"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "ordering.projections.order_detail.OrderDetail": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "billing_address": {
+            "default": "<callable>",
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "cancellation_reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "cancelled_by": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "carrier": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "coupon_code": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "currency": {
+            "default": "USD",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "discount_total": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "estimated_delivery": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "grand_total": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "items": {
+            "content_type": "dict",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "order_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "payment_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "payment_method": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "payment_status": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "shipment_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "shipping_address": {
+            "default": "<callable>",
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "shipping_cost": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "subtotal": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "tax_total": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "tracking_number": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "ordering.projections.order_detail.OrderDetail",
+        "identity_field": "order_id",
+        "module": "ordering.projections.order_detail",
+        "name": "OrderDetail",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "order_detail"
+        }
+      },
+      "projectors": {
+        "ordering.projections.order_detail.OrderDetailProjector": {
+          "aggregates": [
+            "ordering.order.order.Order"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "ordering.projections.order_detail.OrderDetailProjector",
+          "handlers": {
+            "Ordering.CouponApplied.v1": [
+              "on_coupon_applied"
+            ],
+            "Ordering.ItemAdded.v1": [
+              "on_item_added"
+            ],
+            "Ordering.ItemQuantityUpdated.v1": [
+              "on_item_quantity_updated"
+            ],
+            "Ordering.ItemRemoved.v1": [
+              "on_item_removed"
+            ],
+            "Ordering.OrderCancelled.v1": [
+              "on_order_cancelled"
+            ],
+            "Ordering.OrderCompleted.v1": [
+              "on_order_completed"
+            ],
+            "Ordering.OrderConfirmed.v1": [
+              "on_order_confirmed"
+            ],
+            "Ordering.OrderCreated.v1": [
+              "on_order_created"
+            ],
+            "Ordering.OrderDelivered.v1": [
+              "on_order_delivered"
+            ],
+            "Ordering.OrderPartiallyShipped.v1": [
+              "on_order_partially_shipped"
+            ],
+            "Ordering.OrderProcessing.v1": [
+              "on_order_processing"
+            ],
+            "Ordering.OrderRefunded.v1": [
+              "on_order_refunded"
+            ],
+            "Ordering.OrderReturned.v1": [
+              "on_order_returned"
+            ],
+            "Ordering.OrderShipped.v1": [
+              "on_order_shipped"
+            ],
+            "Ordering.PaymentFailed.v1": [
+              "on_payment_failed"
+            ],
+            "Ordering.PaymentPending.v1": [
+              "on_payment_pending"
+            ],
+            "Ordering.PaymentSucceeded.v1": [
+              "on_payment_succeeded"
+            ],
+            "Ordering.ReturnApproved.v1": [
+              "on_return_approved"
+            ],
+            "Ordering.ReturnRequested.v1": [
+              "on_return_requested"
+            ]
+          },
+          "module": "ordering.projections.order_detail",
+          "name": "OrderDetailProjector",
+          "projector_for": "ordering.projections.order_detail.OrderDetail",
+          "stream_categories": [
+            "ordering::order"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "ordering.projections.order_detail_queries.GetOrderDetail": {
+          "__type__": "Ordering.GetOrderDetail",
+          "element_type": "QUERY",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.projections.order_detail_queries.GetOrderDetail",
+          "module": "ordering.projections.order_detail_queries",
+          "name": "GetOrderDetail",
+          "part_of": "ordering.projections.order_detail.OrderDetail"
+        }
+      },
+      "query_handlers": {
+        "ordering.projections.order_detail_queries.OrderDetailQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "ordering.projections.order_detail_queries.OrderDetailQueryHandler",
+          "handlers": {
+            "Ordering.GetOrderDetail": [
+              "get_order_detail"
+            ]
+          },
+          "module": "ordering.projections.order_detail_queries",
+          "name": "OrderDetailQueryHandler",
+          "part_of": "ordering.projections.order_detail.OrderDetail"
+        }
+      }
+    },
+    "ordering.projections.order_summary.OrderSummary": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "currency": {
+            "default": "USD",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "grand_total": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "item_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "order_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "ordering.projections.order_summary.OrderSummary",
+        "identity_field": "order_id",
+        "module": "ordering.projections.order_summary",
+        "name": "OrderSummary",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "order_summary"
+        }
+      },
+      "projectors": {
+        "ordering.projections.order_summary.OrderSummaryProjector": {
+          "aggregates": [
+            "ordering.order.order.Order"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "ordering.projections.order_summary.OrderSummaryProjector",
+          "handlers": {
+            "Ordering.ItemAdded.v1": [
+              "on_item_added"
+            ],
+            "Ordering.ItemQuantityUpdated.v1": [
+              "on_item_quantity_updated"
+            ],
+            "Ordering.ItemRemoved.v1": [
+              "on_item_removed"
+            ],
+            "Ordering.OrderCancelled.v1": [
+              "on_order_cancelled"
+            ],
+            "Ordering.OrderCompleted.v1": [
+              "on_order_completed"
+            ],
+            "Ordering.OrderConfirmed.v1": [
+              "on_order_confirmed"
+            ],
+            "Ordering.OrderCreated.v1": [
+              "on_order_created"
+            ],
+            "Ordering.OrderDelivered.v1": [
+              "on_order_delivered"
+            ],
+            "Ordering.OrderPartiallyShipped.v1": [
+              "on_order_partially_shipped"
+            ],
+            "Ordering.OrderProcessing.v1": [
+              "on_order_processing"
+            ],
+            "Ordering.OrderRefunded.v1": [
+              "on_order_refunded"
+            ],
+            "Ordering.OrderReturned.v1": [
+              "on_order_returned"
+            ],
+            "Ordering.OrderShipped.v1": [
+              "on_order_shipped"
+            ],
+            "Ordering.PaymentFailed.v1": [
+              "on_payment_failed"
+            ],
+            "Ordering.PaymentPending.v1": [
+              "on_payment_pending"
+            ],
+            "Ordering.PaymentSucceeded.v1": [
+              "on_payment_succeeded"
+            ],
+            "Ordering.ReturnApproved.v1": [
+              "on_return_approved"
+            ],
+            "Ordering.ReturnRequested.v1": [
+              "on_return_requested"
+            ]
+          },
+          "module": "ordering.projections.order_summary",
+          "name": "OrderSummaryProjector",
+          "projector_for": "ordering.projections.order_summary.OrderSummary",
+          "stream_categories": [
+            "ordering::order"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "ordering.projections.order_summary_queries.GetOrderSummary": {
+          "__type__": "Ordering.GetOrderSummary",
+          "element_type": "QUERY",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.projections.order_summary_queries.GetOrderSummary",
+          "module": "ordering.projections.order_summary_queries",
+          "name": "GetOrderSummary",
+          "part_of": "ordering.projections.order_summary.OrderSummary"
+        }
+      },
+      "query_handlers": {
+        "ordering.projections.order_summary_queries.OrderSummaryQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "ordering.projections.order_summary_queries.OrderSummaryQueryHandler",
+          "handlers": {
+            "Ordering.GetOrderSummary": [
+              "get_order_summary"
+            ]
+          },
+          "module": "ordering.projections.order_summary_queries",
+          "name": "OrderSummaryQueryHandler",
+          "part_of": "ordering.projections.order_summary.OrderSummary"
+        }
+      }
+    },
+    "ordering.projections.order_timeline.OrderTimeline": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "description": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "entry_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "event_metadata": {
+            "default": "<callable>",
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "event_type": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "occurred_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "ordering.projections.order_timeline.OrderTimeline",
+        "identity_field": "entry_id",
+        "module": "ordering.projections.order_timeline",
+        "name": "OrderTimeline",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "order_timeline"
+        }
+      },
+      "projectors": {
+        "ordering.projections.order_timeline.OrderTimelineProjector": {
+          "aggregates": [
+            "ordering.order.order.Order"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "ordering.projections.order_timeline.OrderTimelineProjector",
+          "handlers": {
+            "Ordering.CouponApplied.v1": [
+              "on_coupon_applied"
+            ],
+            "Ordering.ItemAdded.v1": [
+              "on_item_added"
+            ],
+            "Ordering.ItemQuantityUpdated.v1": [
+              "on_item_quantity_updated"
+            ],
+            "Ordering.ItemRemoved.v1": [
+              "on_item_removed"
+            ],
+            "Ordering.OrderCancelled.v1": [
+              "on_order_cancelled"
+            ],
+            "Ordering.OrderCompleted.v1": [
+              "on_order_completed"
+            ],
+            "Ordering.OrderConfirmed.v1": [
+              "on_order_confirmed"
+            ],
+            "Ordering.OrderCreated.v1": [
+              "on_order_created"
+            ],
+            "Ordering.OrderDelivered.v1": [
+              "on_order_delivered"
+            ],
+            "Ordering.OrderPartiallyShipped.v1": [
+              "on_order_partially_shipped"
+            ],
+            "Ordering.OrderProcessing.v1": [
+              "on_order_processing"
+            ],
+            "Ordering.OrderRefunded.v1": [
+              "on_order_refunded"
+            ],
+            "Ordering.OrderReturned.v1": [
+              "on_order_returned"
+            ],
+            "Ordering.OrderShipped.v1": [
+              "on_order_shipped"
+            ],
+            "Ordering.PaymentFailed.v1": [
+              "on_payment_failed"
+            ],
+            "Ordering.PaymentPending.v1": [
+              "on_payment_pending"
+            ],
+            "Ordering.PaymentSucceeded.v1": [
+              "on_payment_succeeded"
+            ],
+            "Ordering.ReturnApproved.v1": [
+              "on_return_approved"
+            ],
+            "Ordering.ReturnRequested.v1": [
+              "on_return_requested"
+            ]
+          },
+          "module": "ordering.projections.order_timeline",
+          "name": "OrderTimelineProjector",
+          "projector_for": "ordering.projections.order_timeline.OrderTimeline",
+          "stream_categories": [
+            "ordering::order"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "ordering.projections.order_timeline_queries.GetOrderTimeline": {
+          "__type__": "Ordering.GetOrderTimeline",
+          "element_type": "QUERY",
+          "fields": {
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "ordering.projections.order_timeline_queries.GetOrderTimeline",
+          "module": "ordering.projections.order_timeline_queries",
+          "name": "GetOrderTimeline",
+          "part_of": "ordering.projections.order_timeline.OrderTimeline"
+        }
+      },
+      "query_handlers": {
+        "ordering.projections.order_timeline_queries.OrderTimelineQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "ordering.projections.order_timeline_queries.OrderTimelineQueryHandler",
+          "handlers": {
+            "Ordering.GetOrderTimeline": [
+              "get_order_timeline"
+            ]
+          },
+          "module": "ordering.projections.order_timeline_queries",
+          "name": "OrderTimelineQueryHandler",
+          "part_of": "ordering.projections.order_timeline.OrderTimeline"
+        }
+      }
+    },
+    "ordering.projections.orders_by_status.OrdersByStatus": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "grand_total": {
+            "kind": "standard",
+            "type": "Float"
+          },
+          "order_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "ordering.projections.orders_by_status.OrdersByStatus",
+        "identity_field": "order_id",
+        "module": "ordering.projections.orders_by_status",
+        "name": "OrdersByStatus",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "orders_by_status"
+        }
+      },
+      "projectors": {
+        "ordering.projections.orders_by_status.OrdersByStatusProjector": {
+          "aggregates": [
+            "ordering.order.order.Order"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "ordering.projections.orders_by_status.OrdersByStatusProjector",
+          "handlers": {
+            "Ordering.OrderCancelled.v1": [
+              "on_order_cancelled"
+            ],
+            "Ordering.OrderCompleted.v1": [
+              "on_order_completed"
+            ],
+            "Ordering.OrderConfirmed.v1": [
+              "on_order_confirmed"
+            ],
+            "Ordering.OrderCreated.v1": [
+              "on_order_created"
+            ],
+            "Ordering.OrderDelivered.v1": [
+              "on_order_delivered"
+            ],
+            "Ordering.OrderPartiallyShipped.v1": [
+              "on_order_partially_shipped"
+            ],
+            "Ordering.OrderProcessing.v1": [
+              "on_order_processing"
+            ],
+            "Ordering.OrderRefunded.v1": [
+              "on_order_refunded"
+            ],
+            "Ordering.OrderReturned.v1": [
+              "on_order_returned"
+            ],
+            "Ordering.OrderShipped.v1": [
+              "on_order_shipped"
+            ],
+            "Ordering.PaymentFailed.v1": [
+              "on_payment_failed"
+            ],
+            "Ordering.PaymentPending.v1": [
+              "on_payment_pending"
+            ],
+            "Ordering.PaymentSucceeded.v1": [
+              "on_payment_succeeded"
+            ],
+            "Ordering.ReturnApproved.v1": [
+              "on_return_approved"
+            ],
+            "Ordering.ReturnRequested.v1": [
+              "on_return_requested"
+            ]
+          },
+          "module": "ordering.projections.orders_by_status",
+          "name": "OrdersByStatusProjector",
+          "projector_for": "ordering.projections.orders_by_status.OrdersByStatus",
+          "stream_categories": [
+            "ordering::order"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "ordering.projections.suspended_accounts.SuspendedAccount": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "customer_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "suspended_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "ordering.projections.suspended_accounts.SuspendedAccount",
+        "identity_field": "customer_id",
+        "module": "ordering.projections.suspended_accounts",
+        "name": "SuspendedAccount",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "suspended_account"
+        }
+      },
+      "projectors": {},
+      "queries": {},
+      "query_handlers": {}
+    }
+  }
+}

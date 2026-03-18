@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A new purchasable variant was added to a product.",
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "price_amount": {
+      "type": "number"
+    },
+    "price_currency": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_sku": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "created_at",
+    "price_amount",
+    "price_currency",
+    "product_id",
+    "variant_id",
+    "variant_sku"
+  ],
+  "title": "VariantAdded",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "catalogue.product.events.VariantAdded",
+  "x-protean-published": true,
+  "x-protean-type": "Catalogue.VariantAdded.v1",
+  "x-protean-version": 1
+}

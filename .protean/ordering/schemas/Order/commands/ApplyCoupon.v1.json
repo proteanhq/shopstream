@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Apply a coupon code to an order for a discount.",
+  "properties": {
+    "coupon_code": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "coupon_code",
+    "order_id"
+  ],
+  "title": "ApplyCoupon",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.order.modification.ApplyCoupon",
+  "x-protean-type": "Ordering.ApplyCoupon.v1",
+  "x-protean-version": 1
+}

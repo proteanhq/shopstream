@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "An invoice was marked as paid.",
+  "properties": {
+    "invoice_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "paid_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "invoice_id",
+    "order_id",
+    "paid_at"
+  ],
+  "title": "InvoicePaid",
+  "type": "object",
+  "x-protean-aggregate": "payments.invoice.invoice.Invoice",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "payments.invoice.events.InvoicePaid",
+  "x-protean-type": "Payments.InvoicePaid.v1",
+  "x-protean-version": 1
+}

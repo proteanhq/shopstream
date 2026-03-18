@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "date": {
+      "maxLength": 10,
+      "minLength": 1,
+      "type": "string"
+    },
+    "orders_cancelled": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "orders_completed": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "orders_created": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "orders_refunded": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "total_refunds": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    },
+    "total_revenue": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    }
+  },
+  "required": [
+    "date"
+  ],
+  "title": "DailyOrderStats",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "ordering.projections.daily_order_stats.DailyOrderStats",
+  "x-protean-identity-field": "date"
+}

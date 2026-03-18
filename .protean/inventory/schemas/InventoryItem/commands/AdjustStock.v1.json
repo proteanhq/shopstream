@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Manually adjust stock levels.",
+  "properties": {
+    "adjusted_by": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "adjustment_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity_change": {
+      "type": "integer"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "adjusted_by",
+    "adjustment_type",
+    "inventory_item_id",
+    "quantity_change",
+    "reason"
+  ],
+  "title": "AdjustStock",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "inventory.stock.adjustment.AdjustStock",
+  "x-protean-type": "Inventory.AdjustStock.v1",
+  "x-protean-version": 1
+}

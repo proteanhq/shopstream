@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "assigned_to": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "item_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "status": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "warehouse_id": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "fulfillment_id",
+    "order_id",
+    "status"
+  ],
+  "title": "WarehouseQueueView",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "fulfillment.projections.warehouse_queue.WarehouseQueueView",
+  "x-protean-identity-field": "fulfillment_id"
+}

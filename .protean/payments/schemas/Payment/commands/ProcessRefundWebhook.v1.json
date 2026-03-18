@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Process a refund confirmation from the gateway.",
+  "properties": {
+    "gateway_refund_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "refund_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "gateway_refund_id",
+    "payment_id",
+    "refund_id"
+  ],
+  "title": "ProcessRefundWebhook",
+  "type": "object",
+  "x-protean-aggregate": "payments.payment.payment.Payment",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "payments.payment.refund.ProcessRefundWebhook",
+  "x-protean-type": "Payments.ProcessRefundWebhook.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Record a tracking event from the carrier webhook.",
+  "properties": {
+    "description": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "location": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "fulfillment_id",
+    "status"
+  ],
+  "title": "UpdateTrackingEvent",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "fulfillment.fulfillment.tracking.UpdateTrackingEvent",
+  "x-protean-type": "Fulfillment.UpdateTrackingEvent.v1",
+  "x-protean-version": 1
+}

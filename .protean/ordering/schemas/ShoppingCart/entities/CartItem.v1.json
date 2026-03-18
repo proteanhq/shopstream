@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "An item in a shopping cart, tracking only product reference and quantity.\n\nCart items do not store prices \u2014 prices are resolved from the Catalogue\ncontext at checkout time and locked on the Order.",
+  "properties": {
+    "added_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "shopping_cart": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "product_id",
+    "quantity",
+    "variant_id"
+  ],
+  "title": "CartItem",
+  "type": "object",
+  "x-protean-aggregate": "ordering.cart.cart.ShoppingCart",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "ordering.cart.cart.CartItem",
+  "x-protean-identity-field": "id"
+}

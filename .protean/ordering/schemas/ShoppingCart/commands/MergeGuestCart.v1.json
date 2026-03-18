@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Merge items from a guest session cart into a registered customer's cart.",
+  "properties": {
+    "cart_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "guest_cart_items": {
+      "type": "array"
+    }
+  },
+  "required": [
+    "cart_id",
+    "guest_cart_items"
+  ],
+  "title": "MergeGuestCart",
+  "type": "object",
+  "x-protean-aggregate": "ordering.cart.cart.ShoppingCart",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.cart.management.MergeGuestCart",
+  "x-protean-type": "Ordering.MergeGuestCart.v1",
+  "x-protean-version": 1
+}

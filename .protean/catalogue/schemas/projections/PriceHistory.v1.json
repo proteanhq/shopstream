@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "changed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "currency": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "entry_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_price": {
+      "type": "number"
+    },
+    "previous_price": {
+      "type": "number"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "changed_at",
+    "currency",
+    "entry_id",
+    "new_price",
+    "previous_price",
+    "product_id",
+    "variant_id"
+  ],
+  "title": "PriceHistory",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "catalogue.projections.price_history.PriceHistory",
+  "x-protean-identity-field": "entry_id"
+}

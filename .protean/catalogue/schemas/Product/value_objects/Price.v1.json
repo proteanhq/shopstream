@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The monetary cost of a variant, with optional loyalty-tier discounts.\n\nBase price is the standard retail price. Tier prices (stored as JSON) allow\ndifferent pricing for Silver, Gold, and Platinum customers. Tier prices must\nalways be lower than the base price.",
+  "properties": {
+    "base_price": {
+      "minimum": 0.01,
+      "type": "number"
+    },
+    "currency": {
+      "anyOf": [
+        {
+          "maxLength": 3,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "USD"
+    },
+    "tier_prices": {
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "base_price"
+  ],
+  "title": "Price",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "value_object",
+  "x-protean-fqn": "catalogue.product.product.Price"
+}

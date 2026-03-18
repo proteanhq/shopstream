@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A customer's notification channel preferences.\n\nControls which channels (email, SMS, push) the customer receives\nnotifications on, quiet hours, and per-type unsubscribe.",
+  "properties": {
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "email_enabled": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": true
+    },
+    "id": {
+      "type": "string"
+    },
+    "push_enabled": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": false
+    },
+    "quiet_hours_end": {
+      "anyOf": [
+        {
+          "maxLength": 5,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "quiet_hours_start": {
+      "anyOf": [
+        {
+          "maxLength": 5,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sms_enabled": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": false
+    },
+    "unsubscribed_types": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "customer_id",
+    "id"
+  ],
+  "title": "NotificationPreference",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "notifications.preference.preference.NotificationPreference",
+  "x-protean-identity-field": "id"
+}

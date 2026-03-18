@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Stock was manually adjusted (count, shrinkage, correction).",
+  "properties": {
+    "adjusted_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "adjusted_by": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "adjustment_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_available": {
+      "type": "integer"
+    },
+    "new_on_hand": {
+      "type": "integer"
+    },
+    "previous_on_hand": {
+      "type": "integer"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity_change": {
+      "type": "integer"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "adjusted_at",
+    "adjusted_by",
+    "adjustment_type",
+    "inventory_item_id",
+    "new_available",
+    "new_on_hand",
+    "previous_on_hand",
+    "product_id",
+    "quantity_change",
+    "reason"
+  ],
+  "title": "StockAdjusted",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.stock.events.StockAdjusted",
+  "x-protean-type": "Inventory.StockAdjusted.v1",
+  "x-protean-version": 1
+}

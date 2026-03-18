@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "average_rating": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "rating_distribution": {
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "total_reviews": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "verified_review_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    }
+  },
+  "required": [
+    "product_id"
+  ],
+  "title": "ProductRating",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "reviews.projections.product_rating.ProductRating",
+  "x-protean-identity-field": "product_id"
+}

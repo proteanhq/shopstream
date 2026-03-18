@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A new warehouse was created.",
+  "properties": {
+    "address": {
+      "type": "object"
+    },
+    "capacity": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "warehouse_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "address",
+    "capacity",
+    "created_at",
+    "name",
+    "warehouse_id"
+  ],
+  "title": "WarehouseCreated",
+  "type": "object",
+  "x-protean-aggregate": "inventory.warehouse.warehouse.Warehouse",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.warehouse.events.WarehouseCreated",
+  "x-protean-type": "Inventory.WarehouseCreated.v1",
+  "x-protean-version": 1
+}

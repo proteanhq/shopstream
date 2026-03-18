@@ -1,0 +1,132 @@
+{
+  "$defs": {
+    "GeoCoordinates": {
+      "properties": {
+        "latitude": {
+          "anyOf": [
+            {
+              "maximum": 90.0,
+              "minimum": -90.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "longitude": {
+          "anyOf": [
+            {
+              "maximum": 180.0,
+              "minimum": -180.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A physical location associated with a Customer, such as a home or work address.\n\nEach address carries a label, geo-coordinates, and a default flag. A customer may\nhave up to 10 addresses, with exactly one marked as the default at all times.",
+  "properties": {
+    "city": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "country": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "customer": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "geo_coordinates": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GeoCoordinates"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "is_default": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": false
+    },
+    "label": {
+      "anyOf": [
+        {
+          "enum": [
+            "Home",
+            "Other",
+            "Work"
+          ],
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "Home"
+    },
+    "postal_code": {
+      "maxLength": 20,
+      "minLength": 1,
+      "type": "string"
+    },
+    "state": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "street": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "city",
+    "country",
+    "id",
+    "postal_code",
+    "street"
+  ],
+  "title": "Address",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "identity.customer.customer.Address",
+  "x-protean-identity-field": "id"
+}

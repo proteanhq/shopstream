@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "body": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "cons": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "has_seller_reply": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "False"
+    },
+    "helpful_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "images": {
+      "anyOf": [
+        {
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_edited": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "False"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "pros": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "published_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rating": {
+      "type": "integer"
+    },
+    "review_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "seller_reply_body": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "title": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "unhelpful_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "variant_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "verified_purchase": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "body",
+    "customer_id",
+    "product_id",
+    "rating",
+    "review_id",
+    "title"
+  ],
+  "title": "ProductReviews",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "reviews.projections.product_reviews.ProductReviews",
+  "x-protean-identity-field": "review_id"
+}

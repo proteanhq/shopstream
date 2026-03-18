@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "An invoice was sent/issued to the customer.",
+  "properties": {
+    "invoice_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "invoice_number": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "issued_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "invoice_id",
+    "invoice_number",
+    "issued_at",
+    "order_id"
+  ],
+  "title": "InvoiceIssued",
+  "type": "object",
+  "x-protean-aggregate": "payments.invoice.invoice.Invoice",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "payments.invoice.events.InvoiceIssued",
+  "x-protean-type": "Payments.InvoiceIssued.v1",
+  "x-protean-version": 1
+}

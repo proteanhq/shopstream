@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "is_in_stock": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": false
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_variant_key": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "total_available": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "total_on_hand": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "total_reserved": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "warehouse_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    }
+  },
+  "required": [
+    "product_id",
+    "product_variant_key",
+    "variant_id"
+  ],
+  "title": "ProductAvailability",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "inventory.projections.product_availability.ProductAvailability",
+  "x-protean-identity-field": "product_variant_key"
+}

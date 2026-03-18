@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A failed payment is being retried.",
+  "properties": {
+    "attempt_number": {
+      "type": "integer"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "retried_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "attempt_number",
+    "order_id",
+    "payment_id",
+    "retried_at"
+  ],
+  "title": "PaymentRetryInitiated",
+  "type": "object",
+  "x-protean-aggregate": "payments.payment.payment.Payment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "payments.payment.events.PaymentRetryInitiated",
+  "x-protean-type": "Payments.PaymentRetryInitiated.v1",
+  "x-protean-version": 1
+}

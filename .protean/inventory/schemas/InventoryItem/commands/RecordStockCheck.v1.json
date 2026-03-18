@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Record a physical stock count.",
+  "properties": {
+    "checked_by": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "counted_quantity": {
+      "type": "integer"
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "checked_by",
+    "counted_quantity",
+    "inventory_item_id"
+  ],
+  "title": "RecordStockCheck",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "inventory.stock.adjustment.RecordStockCheck",
+  "x-protean-type": "Inventory.RecordStockCheck.v1",
+  "x-protean-version": 1
+}

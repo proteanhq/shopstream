@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A warehouse was deactivated.",
+  "properties": {
+    "deactivated_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "warehouse_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "deactivated_at",
+    "warehouse_id"
+  ],
+  "title": "WarehouseDeactivated",
+  "type": "object",
+  "x-protean-aggregate": "inventory.warehouse.warehouse.Warehouse",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.warehouse.events.WarehouseDeactivated",
+  "x-protean-type": "Inventory.WarehouseDeactivated.v1",
+  "x-protean-version": 1
+}

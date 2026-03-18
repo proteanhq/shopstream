@@ -1,0 +1,408 @@
+{
+  "$defs": {
+    "GatewayInfo": {
+      "properties": {
+        "gateway_name": {
+          "anyOf": [
+            {
+              "maxLength": 50,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gateway_response": {
+          "anyOf": [
+            {
+              "maxLength": 1000,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gateway_status": {
+          "anyOf": [
+            {
+              "maxLength": 50,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gateway_transaction_id": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Money": {
+      "properties": {
+        "currency": {
+          "anyOf": [
+            {
+              "maxLength": 3,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "USD"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0.0
+        }
+      },
+      "type": "object"
+    },
+    "PaymentAttempt": {
+      "properties": {
+        "attempted_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "failure_reason": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gateway_transaction_id": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "payment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "maxLength": 50,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "attempted_at",
+        "id",
+        "status"
+      ],
+      "type": "object"
+    },
+    "PaymentMethod": {
+      "properties": {
+        "expiry_month": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expiry_year": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "last4": {
+          "anyOf": [
+            {
+              "maxLength": 4,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "method_type": {
+          "anyOf": [
+            {
+              "maxLength": 50,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Refund": {
+      "properties": {
+        "amount": {
+          "type": "number"
+        },
+        "gateway_refund_id": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "payment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "processed_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reason": {
+          "maxLength": 500,
+          "minLength": 1,
+          "type": "string"
+        },
+        "requested_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "enum": [
+                "Completed",
+                "Failed",
+                "Processing",
+                "Requested"
+              ],
+              "maxLength": 50,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "Requested"
+        }
+      },
+      "required": [
+        "amount",
+        "id",
+        "reason",
+        "requested_at"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "amount": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Money"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "attempt_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "attempts": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/PaymentAttempt"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "gateway_info": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GatewayInfo"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "idempotency_key": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_method": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PaymentMethod"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "refunds": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Refund"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "Failed",
+            "Partially_Refunded",
+            "Pending",
+            "Processing",
+            "Refunded",
+            "Succeeded"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "Pending"
+    },
+    "total_refunded": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "customer_id",
+    "id",
+    "idempotency_key",
+    "order_id"
+  ],
+  "title": "Payment",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "payments.payment.payment.Payment",
+  "x-protean-identity-field": "id",
+  "x-protean-is-event-sourced": true
+}

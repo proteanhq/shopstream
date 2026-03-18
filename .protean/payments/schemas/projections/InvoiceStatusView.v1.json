@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "invoice_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "invoice_number": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "issued_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "paid_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "total": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "voided_reason": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "customer_id",
+    "invoice_id",
+    "invoice_number",
+    "order_id",
+    "status"
+  ],
+  "title": "InvoiceStatusView",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "payments.projections.invoice_status.InvoiceStatusView",
+  "x-protean-identity-field": "invoice_id"
+}

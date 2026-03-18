@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Remove a line item from an order (only allowed in Created state).",
+  "properties": {
+    "item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "item_id",
+    "order_id"
+  ],
+  "title": "RemoveItem",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.order.modification.RemoveItem",
+  "x-protean-type": "Ordering.RemoveItem.v1",
+  "x-protean-version": 1
+}

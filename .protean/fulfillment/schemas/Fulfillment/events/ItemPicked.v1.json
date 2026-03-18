@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A single item was picked from its warehouse location.",
+  "properties": {
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "pick_location": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "picked_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "fulfillment_id",
+    "item_id",
+    "pick_location",
+    "picked_at"
+  ],
+  "title": "ItemPicked",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "fulfillment.fulfillment.events.ItemPicked",
+  "x-protean-type": "Fulfillment.ItemPicked.v1",
+  "x-protean-version": 1
+}

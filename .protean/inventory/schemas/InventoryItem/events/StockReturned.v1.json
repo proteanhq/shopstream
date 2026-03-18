@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Returned items were added back to on-hand inventory.",
+  "properties": {
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_available": {
+      "type": "integer"
+    },
+    "new_on_hand": {
+      "type": "integer"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "previous_on_hand": {
+      "type": "integer"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "returned_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "inventory_item_id",
+    "new_available",
+    "new_on_hand",
+    "order_id",
+    "previous_on_hand",
+    "quantity",
+    "returned_at"
+  ],
+  "title": "StockReturned",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.stock.events.StockReturned",
+  "x-protean-type": "Inventory.StockReturned.v1",
+  "x-protean-version": 1
+}

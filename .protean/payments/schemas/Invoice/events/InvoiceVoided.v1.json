@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "An invoice was voided/cancelled.",
+  "properties": {
+    "invoice_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "voided_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "invoice_id",
+    "order_id",
+    "reason",
+    "voided_at"
+  ],
+  "title": "InvoiceVoided",
+  "type": "object",
+  "x-protean-aggregate": "payments.invoice.invoice.Invoice",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "payments.invoice.events.InvoiceVoided",
+  "x-protean-type": "Payments.InvoiceVoided.v1",
+  "x-protean-version": 1
+}

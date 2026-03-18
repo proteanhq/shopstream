@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Generate a new invoice for an order.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "line_items": {
+      "type": "array"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "tax": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    }
+  },
+  "required": [
+    "customer_id",
+    "line_items",
+    "order_id"
+  ],
+  "title": "GenerateInvoice",
+  "type": "object",
+  "x-protean-aggregate": "payments.invoice.invoice.Invoice",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "payments.invoice.generation.GenerateInvoice",
+  "x-protean-type": "Payments.GenerateInvoice.v1",
+  "x-protean-version": 1
+}

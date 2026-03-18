@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A notification bounced (permanent delivery failure).",
+  "properties": {
+    "bounced_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "channel": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "notification_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "recipient_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "bounced_at",
+    "channel",
+    "notification_id",
+    "reason",
+    "recipient_id"
+  ],
+  "title": "NotificationBounced",
+  "type": "object",
+  "x-protean-aggregate": "notifications.notification.notification.Notification",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "notifications.notification.events.NotificationBounced",
+  "x-protean-type": "Notifications.NotificationBounced.v1",
+  "x-protean-version": 1
+}

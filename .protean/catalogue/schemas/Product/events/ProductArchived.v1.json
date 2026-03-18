@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A discontinued product was archived for permanent storage.",
+  "properties": {
+    "archived_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "archived_at",
+    "product_id"
+  ],
+  "title": "ProductArchived",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "catalogue.product.events.ProductArchived",
+  "x-protean-type": "Catalogue.ProductArchived.v1",
+  "x-protean-version": 1
+}

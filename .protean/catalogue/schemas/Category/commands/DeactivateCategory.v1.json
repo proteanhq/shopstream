@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Deactivate a category, hiding it from the storefront.",
+  "properties": {
+    "category_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "category_id"
+  ],
+  "title": "DeactivateCategory",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.category.category.Category",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "catalogue.category.management.DeactivateCategory",
+  "x-protean-type": "Catalogue.DeactivateCategory.v1",
+  "x-protean-version": 1
+}

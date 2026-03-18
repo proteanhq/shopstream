@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Cancel a fulfillment before it has been shipped.",
+  "properties": {
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "fulfillment_id",
+    "reason"
+  ],
+  "title": "CancelFulfillment",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "fulfillment.fulfillment.cancellation.CancelFulfillment",
+  "x-protean-type": "Fulfillment.CancelFulfillment.v1",
+  "x-protean-version": 1
+}

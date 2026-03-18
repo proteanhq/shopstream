@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A return request was approved by the system or an admin.",
+  "properties": {
+    "approved_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "approved_at",
+    "order_id"
+  ],
+  "title": "ReturnApproved",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.ReturnApproved",
+  "x-protean-type": "Ordering.ReturnApproved.v1",
+  "x-protean-version": 1
+}

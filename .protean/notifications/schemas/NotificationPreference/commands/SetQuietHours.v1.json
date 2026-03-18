@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Set a customer's do-not-disturb window.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "end": {
+      "maxLength": 5,
+      "minLength": 1,
+      "type": "string"
+    },
+    "start": {
+      "maxLength": 5,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "end",
+    "start"
+  ],
+  "title": "SetQuietHours",
+  "type": "object",
+  "x-protean-aggregate": "notifications.preference.preference.NotificationPreference",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "notifications.preference.management.SetQuietHours",
+  "x-protean-type": "Notifications.SetQuietHours.v1",
+  "x-protean-version": 1
+}

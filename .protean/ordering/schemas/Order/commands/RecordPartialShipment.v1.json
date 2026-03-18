@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Record that some (but not all) items have been shipped.",
+  "properties": {
+    "carrier": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "shipment_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "shipped_item_ids": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "tracking_number": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "carrier",
+    "order_id",
+    "shipment_id",
+    "shipped_item_ids",
+    "tracking_number"
+  ],
+  "title": "RecordPartialShipment",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.order.fulfillment.RecordPartialShipment",
+  "x-protean-type": "Ordering.RecordPartialShipment.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A loyalty-tier-specific price was set on a variant.",
+  "properties": {
+    "currency": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "price": {
+      "type": "number"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "tier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "currency",
+    "price",
+    "product_id",
+    "tier",
+    "variant_id"
+  ],
+  "title": "TierPriceSet",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "catalogue.product.events.TierPriceSet",
+  "x-protean-type": "Catalogue.TierPriceSet.v1",
+  "x-protean-version": 1
+}

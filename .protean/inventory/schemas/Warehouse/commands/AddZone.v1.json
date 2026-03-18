@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Add a zone to a warehouse.",
+  "properties": {
+    "warehouse_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "zone_name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "zone_type": {
+      "anyOf": [
+        {
+          "maxLength": 50,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "warehouse_id",
+    "zone_name"
+  ],
+  "title": "AddZone",
+  "type": "object",
+  "x-protean-aggregate": "inventory.warehouse.warehouse.Warehouse",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "inventory.warehouse.management.AddZone",
+  "x-protean-type": "Inventory.AddZone.v1",
+  "x-protean-version": 1
+}

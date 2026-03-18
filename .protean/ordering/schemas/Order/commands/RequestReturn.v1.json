@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Request a return of a delivered order, providing a reason.",
+  "properties": {
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "order_id",
+    "reason"
+  ],
+  "title": "RequestReturn",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.order.returns.RequestReturn",
+  "x-protean-type": "Ordering.RequestReturn.v1",
+  "x-protean-version": 1
+}

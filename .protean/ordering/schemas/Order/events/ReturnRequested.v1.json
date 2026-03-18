@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The customer requested a return of a delivered order.",
+  "properties": {
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "requested_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "order_id",
+    "reason",
+    "requested_at"
+  ],
+  "title": "ReturnRequested",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.ReturnRequested",
+  "x-protean-type": "Ordering.ReturnRequested.v1",
+  "x-protean-version": 1
+}

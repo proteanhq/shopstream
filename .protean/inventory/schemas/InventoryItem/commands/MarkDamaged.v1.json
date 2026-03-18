@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Flag stock as damaged.",
+  "properties": {
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "inventory_item_id",
+    "quantity",
+    "reason"
+  ],
+  "title": "MarkDamaged",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "inventory.stock.damage.MarkDamaged",
+  "x-protean-type": "Inventory.MarkDamaged.v1",
+  "x-protean-version": 1
+}

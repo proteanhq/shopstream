@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Create a new order from a shopping cart's items, addresses, and pricing.",
+  "properties": {
+    "billing_address": {
+      "type": "object"
+    },
+    "currency": {
+      "anyOf": [
+        {
+          "maxLength": 3,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "USD"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "discount_total": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    },
+    "grand_total": {
+      "type": "number"
+    },
+    "items": {
+      "type": "array"
+    },
+    "shipping_address": {
+      "type": "object"
+    },
+    "shipping_cost": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "tax_total": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    }
+  },
+  "required": [
+    "billing_address",
+    "customer_id",
+    "grand_total",
+    "items",
+    "shipping_address",
+    "subtotal"
+  ],
+  "title": "CreateOrder",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.order.creation.CreateOrder",
+  "x-protean-type": "Ordering.CreateOrder.v1",
+  "x-protean-version": 1
+}

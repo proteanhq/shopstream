@@ -1,0 +1,237 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A single notification dispatched to a recipient via a channel.\n\nNotifications are created reactively from cross-domain events. Each\nnotification tracks its delivery lifecycle for audit and retry.",
+  "properties": {
+    "body": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "channel": {
+      "enum": [
+        "Email",
+        "Push",
+        "SMS",
+        "Slack"
+      ],
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "context_data": {
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "delivered_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "failure_reason": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "max_retries": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 3
+    },
+    "notification_type": {
+      "enum": [
+        "CartRecovery",
+        "DeliveryConfirmation",
+        "DeliveryException",
+        "LowStockAlert",
+        "OrderCancellation",
+        "OrderConfirmation",
+        "PaymentReceipt",
+        "RefundNotification",
+        "ReviewPrompt",
+        "ReviewPublished",
+        "ReviewRejected",
+        "ShippingUpdate",
+        "Welcome"
+      ],
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "recipient_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "recipient_type": {
+      "anyOf": [
+        {
+          "enum": [
+            "Customer",
+            "Internal"
+          ],
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "Customer"
+    },
+    "retry_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "scheduled_for": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "sent_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "source_event_id": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "source_event_type": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "Bounced",
+            "Cancelled",
+            "Delivered",
+            "Failed",
+            "Pending",
+            "Sent"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "Pending"
+    },
+    "subject": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "template_name": {
+      "anyOf": [
+        {
+          "maxLength": 200,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "body",
+    "channel",
+    "id",
+    "notification_type",
+    "recipient_id"
+  ],
+  "title": "Notification",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "notifications.notification.notification.Notification",
+  "x-protean-identity-field": "id"
+}

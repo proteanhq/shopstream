@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Record confirmed delivery from the carrier.",
+  "properties": {
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "fulfillment_id"
+  ],
+  "title": "RecordDeliveryConfirmation",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "fulfillment.fulfillment.delivery.RecordDeliveryConfirmation",
+  "x-protean-type": "Fulfillment.RecordDeliveryConfirmation.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A new product category was added to the catalogue hierarchy.",
+  "properties": {
+    "category_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "level": {
+      "type": "integer"
+    },
+    "name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "parent_category_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "category_id",
+    "level",
+    "name"
+  ],
+  "title": "CategoryCreated",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.category.category.Category",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "catalogue.category.events.CategoryCreated",
+  "x-protean-type": "Catalogue.CategoryCreated.v1",
+  "x-protean-version": 1
+}

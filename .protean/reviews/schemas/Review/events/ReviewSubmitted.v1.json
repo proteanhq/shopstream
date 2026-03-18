@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A customer submitted a new product review.",
+  "properties": {
+    "body": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "cons": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "image_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "order_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "pros": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rating": {
+      "type": "integer"
+    },
+    "review_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "submitted_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "title": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "verified_purchase": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "body",
+    "customer_id",
+    "product_id",
+    "rating",
+    "review_id",
+    "submitted_at",
+    "title",
+    "verified_purchase"
+  ],
+  "title": "ReviewSubmitted",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "reviews.review.events.ReviewSubmitted",
+  "x-protean-type": "Reviews.ReviewSubmitted.v1",
+  "x-protean-version": 1
+}

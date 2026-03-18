@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Archive a discontinued product for permanent storage.",
+  "properties": {
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "product_id"
+  ],
+  "title": "ArchiveProduct",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "catalogue.product.lifecycle.ArchiveProduct",
+  "x-protean-type": "Catalogue.ArchiveProduct.v1",
+  "x-protean-version": 1
+}

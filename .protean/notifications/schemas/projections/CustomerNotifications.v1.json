@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "channel": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "notification_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "notification_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "status": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "subject": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "channel",
+    "customer_id",
+    "notification_id",
+    "notification_type",
+    "status"
+  ],
+  "title": "CustomerNotifications",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "notifications.projections.customer_notifications.CustomerNotifications",
+  "x-protean-identity-field": "notification_id"
+}

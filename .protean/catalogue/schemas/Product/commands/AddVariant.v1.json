@@ -1,0 +1,114 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Add a new purchasable variant (size, color, etc.) to a product.",
+  "properties": {
+    "attributes": {
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "base_price": {
+      "type": "number"
+    },
+    "currency": {
+      "anyOf": [
+        {
+          "maxLength": 3,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "USD"
+    },
+    "dimension_unit": {
+      "anyOf": [
+        {
+          "maxLength": 2,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "height": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "length": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_sku": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+    },
+    "weight_unit": {
+      "anyOf": [
+        {
+          "maxLength": 2,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "weight_value": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "width": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "base_price",
+    "product_id",
+    "variant_sku"
+  ],
+  "title": "AddVariant",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "catalogue.product.variants.AddVariant",
+  "x-protean-type": "Catalogue.AddVariant.v1",
+  "x-protean-version": 1
+}

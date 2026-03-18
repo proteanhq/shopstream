@@ -1,0 +1,391 @@
+{
+  "$defs": {
+    "HelpfulVote": {
+      "properties": {
+        "customer_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "review": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "vote_type": {
+          "enum": [
+            "Helpful",
+            "Unhelpful"
+          ],
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        },
+        "voted_at": {
+          "format": "date-time",
+          "type": "string"
+        }
+      },
+      "required": [
+        "customer_id",
+        "id",
+        "vote_type",
+        "voted_at"
+      ],
+      "type": "object"
+    },
+    "Rating": {
+      "properties": {
+        "score": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "score"
+      ],
+      "type": "object"
+    },
+    "ReviewImage": {
+      "properties": {
+        "alt_text": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "display_order": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0
+        },
+        "id": {
+          "type": "string"
+        },
+        "review": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "url": {
+          "maxLength": 500,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "url"
+      ],
+      "type": "object"
+    },
+    "SellerReply": {
+      "properties": {
+        "body": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "replied_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "review": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "seller_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "body",
+        "id",
+        "replied_at",
+        "seller_id"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A customer's review of a product they purchased.\n\nThe Review aggregate manages the full lifecycle: submission,\nmoderation, voting, reporting, seller replies, and removal.",
+  "properties": {
+    "body": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "cons": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "edited_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "helpful_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "id": {
+      "type": "string"
+    },
+    "images": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/ReviewImage"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "is_edited": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": false
+    },
+    "moderation_notes": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "order_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "pros": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "rating": {
+      "$ref": "#/$defs/Rating"
+    },
+    "reply": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/SellerReply"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "report_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "reported_reasons": {
+      "anyOf": [
+        {
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "Pending",
+            "Published",
+            "Rejected",
+            "Removed"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "Pending"
+    },
+    "title": {
+      "maxLength": 200,
+      "minLength": 1,
+      "type": "string"
+    },
+    "unhelpful_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "variant_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "verified_purchase": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": false
+    },
+    "votes": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/HelpfulVote"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "body",
+    "customer_id",
+    "id",
+    "product_id",
+    "rating",
+    "title"
+  ],
+  "title": "Review",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "reviews.review.review.Review",
+  "x-protean-identity-field": "id"
+}

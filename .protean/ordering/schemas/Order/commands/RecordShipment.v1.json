@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Record that all items have been shipped with a carrier.",
+  "properties": {
+    "carrier": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "estimated_delivery": {
+      "anyOf": [
+        {
+          "maxLength": 10,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "shipment_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "shipped_item_ids": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tracking_number": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "carrier",
+    "order_id",
+    "shipment_id",
+    "tracking_number"
+  ],
+  "title": "RecordShipment",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.order.fulfillment.RecordShipment",
+  "x-protean-type": "Ordering.RecordShipment.v1",
+  "x-protean-version": 1
+}

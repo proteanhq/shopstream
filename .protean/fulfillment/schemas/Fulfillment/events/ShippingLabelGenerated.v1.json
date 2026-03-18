@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A shipping label was generated for the fulfillment.",
+  "properties": {
+    "carrier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "label_url": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "service_level": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "carrier",
+    "fulfillment_id",
+    "generated_at",
+    "label_url",
+    "service_level"
+  ],
+  "title": "ShippingLabelGenerated",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "fulfillment.fulfillment.events.ShippingLabelGenerated",
+  "x-protean-type": "Fulfillment.ShippingLabelGenerated.v1",
+  "x-protean-version": 1
+}

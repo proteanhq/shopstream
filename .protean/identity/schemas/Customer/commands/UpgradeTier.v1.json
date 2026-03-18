@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Promote a customer to a higher loyalty tier (upgrades only, no downgrades).",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_tier": {
+      "maxLength": 20,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "new_tier"
+  ],
+  "title": "UpgradeTier",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "identity.customer.tier.UpgradeTier",
+  "x-protean-type": "Identity.UpgradeTier.v1",
+  "x-protean-version": 1
+}

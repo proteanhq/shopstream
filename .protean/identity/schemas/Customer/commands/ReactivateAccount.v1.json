@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Restore a suspended customer account to active status.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id"
+  ],
+  "title": "ReactivateAccount",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "identity.customer.account.ReactivateAccount",
+  "x-protean-type": "Identity.ReactivateAccount.v1",
+  "x-protean-version": 1
+}

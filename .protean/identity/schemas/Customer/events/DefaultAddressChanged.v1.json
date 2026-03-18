@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A different address was designated as the customer's default.",
+  "properties": {
+    "address_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "previous_default_address_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "address_id",
+    "customer_id"
+  ],
+  "title": "DefaultAddressChanged",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "identity.customer.events.DefaultAddressChanged",
+  "x-protean-type": "Identity.DefaultAddressChanged.v1",
+  "x-protean-version": 1
+}

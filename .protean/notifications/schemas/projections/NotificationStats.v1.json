@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "channel": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "date": {
+      "maxLength": 10,
+      "minLength": 1,
+      "type": "string"
+    },
+    "notification_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "stat_key": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "channel",
+    "date",
+    "notification_type",
+    "stat_key"
+  ],
+  "title": "NotificationStats",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "notifications.projections.notification_stats.NotificationStats",
+  "x-protean-identity-field": "stat_key"
+}
