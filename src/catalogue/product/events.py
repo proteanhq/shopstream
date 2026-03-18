@@ -1,6 +1,6 @@
 """Domain events for the Product aggregate."""
 
-from protean.fields import DateTime, Float, Identifier, String
+from protean.fields import Boolean, DateTime, Float, Identifier, String
 
 from catalogue.domain import catalogue
 
@@ -92,7 +92,7 @@ class ProductImageAdded:
     product_id: Identifier(required=True)
     image_id: Identifier(required=True)
     url: String(required=True)
-    is_primary: String(required=True)
+    is_primary: Boolean(required=True)
 
 
 @catalogue.event(part_of="Product")

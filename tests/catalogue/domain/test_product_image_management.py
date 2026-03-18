@@ -60,7 +60,7 @@ class TestAddImage:
         event = product._events[0]
         assert isinstance(event, ProductImageAdded)
         assert event.url == "https://cdn.example.com/img1.jpg"
-        assert event.is_primary == "True"
+        assert event.is_primary is True
 
     def test_add_image_display_order(self):
         product = _make_product()

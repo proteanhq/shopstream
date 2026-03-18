@@ -394,7 +394,7 @@ class Product:
                 product_id=self.id,
                 image_id=image.id,
                 url=url,
-                is_primary=str(is_primary),
+                is_primary=is_primary,
             )
         )
         return image

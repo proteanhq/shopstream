@@ -77,7 +77,7 @@ class Warehouse:
                 warehouse_id=str(warehouse.id),
                 name=name,
                 address=address if isinstance(address, dict) else address.to_dict(),
-                capacity=str(capacity),
+                capacity=capacity,
                 created_at=now,
             )
         )
@@ -94,7 +94,7 @@ class Warehouse:
             WarehouseUpdated(
                 warehouse_id=str(self.id),
                 name=self.name,
-                capacity=str(self.capacity),
+                capacity=self.capacity,
                 updated_at=self.updated_at,
             )
         )

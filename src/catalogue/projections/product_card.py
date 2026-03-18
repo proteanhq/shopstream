@@ -92,7 +92,7 @@ class ProductCardProjector:
     def on_image_added(self, event):
         repo = current_domain.repository_for(ProductCard)
         card = repo.get(event.product_id)
-        if event.is_primary == "True":
+        if event.is_primary:
             card.primary_image_url = event.url
         repo.add(card)
 

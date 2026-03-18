@@ -1,6 +1,6 @@
 """Domain events for the Warehouse aggregate."""
 
-from protean.fields import DateTime, Dict, Identifier, String
+from protean.fields import DateTime, Dict, Identifier, Integer, String
 
 from inventory.domain import inventory
 
@@ -12,7 +12,7 @@ class WarehouseCreated:
     warehouse_id = Identifier(required=True)
     name = String(required=True)
     address = Dict(required=True)
-    capacity = Identifier(required=True)  # Stored as string to avoid Integer(0) issue
+    capacity = Integer(required=True)
     created_at = DateTime(required=True)
 
 
@@ -22,7 +22,7 @@ class WarehouseUpdated:
 
     warehouse_id = Identifier(required=True)
     name = String(required=True)
-    capacity = Identifier(required=True)
+    capacity = Integer(required=True)
     updated_at = DateTime(required=True)
 
 

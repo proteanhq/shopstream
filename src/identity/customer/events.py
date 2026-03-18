@@ -1,6 +1,6 @@
 """Domain events for the Customer aggregate."""
 
-from protean.fields import DateTime, Identifier, String
+from protean.fields import Boolean, DateTime, Identifier, String
 
 from identity.domain import identity
 
@@ -25,7 +25,7 @@ class ProfileUpdated:
     first_name: String(required=True)
     last_name: String(required=True)
     phone: String()
-    date_of_birth: String()
+    date_of_birth: String(max_length=10)  # ISO date format YYYY-MM-DD
 
 
 @identity.event(part_of="Customer")
@@ -40,7 +40,7 @@ class AddressAdded:
     state: String()
     postal_code: String(required=True)
     country: String(required=True)
-    is_default: String(required=True)
+    is_default: Boolean(required=True)
 
 
 @identity.event(part_of="Customer")

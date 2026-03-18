@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:8b7be751e2369ddf1dd0c4b704e68cf5db47216440698d464d6c8108d1d40840",
+  "checksum": "sha256:f074826f2ea96ef43d9fdb77217828e7a5a7a08cc823612d0ee4376a0635aedc",
   "clusters": {
     "abc.DefaultOutbox": {
       "aggregate": {
@@ -1562,11 +1562,8 @@
             },
             "is_primary": {
               "kind": "standard",
-              "max_length": 255,
-              "min_length": 1,
               "required": true,
-              "sanitize": true,
-              "type": "String"
+              "type": "Boolean"
             },
             "product_id": {
               "kind": "identifier",
@@ -2170,7 +2167,7 @@
     "process_managers": {},
     "subscribers": {}
   },
-  "generated_at": "2026-03-18T13:30:23Z",
+  "generated_at": "2026-03-18T17:30:41Z",
   "ir_version": "0.1.0",
   "projections": {
     "catalogue.projections.category_products.CategoryProducts": {

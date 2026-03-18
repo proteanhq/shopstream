@@ -87,8 +87,8 @@ class StockLevels:
 class Reservation:
     """A hold on inventory for a specific order.
 
-    Reservations transition through: ACTIVE → CONFIRMED → (committed via
-    CommitStock), or ACTIVE → RELEASED (cancelled/expired).
+    Reservations transition through: Active → Confirmed → (committed via
+    CommitStock), or Active → Released (cancelled/expired).
     """
 
     order_id = Identifier(required=True)
