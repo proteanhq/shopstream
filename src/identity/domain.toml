@@ -69,6 +69,11 @@ database_uri = "${TEST_DATABASE_URL|postgresql://postgres:postgres@localhost:154
 event_processing = "async"
 debug = false
 
+# OpenTelemetry (enable by setting OTEL_EXPORTER_OTLP_ENDPOINT)
+[production.telemetry]
+enabled = true
+service_name = "shopstream"
+
 [production.databases.default]
 database_uri = "${DATABASE_URL|postgresql://postgres:postgres@localhost:15432/identity}"
 

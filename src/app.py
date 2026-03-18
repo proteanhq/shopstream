@@ -15,6 +15,7 @@ from fastapi.responses import JSONResponse
 from protean import g
 from protean.integrations.fastapi import (
     DomainContextMiddleware,
+    instrument_app,
     register_exception_handlers,
 )
 from scalar_fastapi import get_scalar_api_reference
@@ -120,6 +121,13 @@ class RequestContextMiddleware:
 
 
 app.add_middleware(RequestContextMiddleware)
+
+# ---------------------------------------------------------------------------
+# OpenTelemetry instrumentation (opt-in via [telemetry] in domain.toml)
+# Safe to call even without opentelemetry installed — returns False silently.
+# Uses the first domain's tracer/meter providers for HTTP span creation.
+# ---------------------------------------------------------------------------
+instrument_app(app, ordering, excluded_urls="/health,/docs")
 
 # ---------------------------------------------------------------------------
 # Exception handlers (from Protean)

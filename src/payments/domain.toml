@@ -12,6 +12,15 @@ message_processing = "sync"
 [server]
 default_subscription_type = "stream"
 
+# ExpectedVersionError auto-retry: when concurrent writes cause version
+# conflicts on event-sourced aggregates, the handler automatically retries
+# with exponential backoff (re-reads aggregate at latest version each attempt).
+[server.version_retry]
+enabled = true
+max_retries = 3
+base_delay_seconds = 0.05
+max_delay_seconds = 1.0
+
 # Priority Lanes: Route low-priority events (migrations, bulk imports) to a
 # separate Redis Stream so production events are always processed first.
 # See docs/priority-lanes.md for usage and load test instructions.
@@ -68,6 +77,11 @@ database_uri = "${TEST_PAYMENTS_DATABASE_URL|postgresql://postgres:postgres@loca
 [production]
 event_processing = "async"
 debug = false
+
+# OpenTelemetry (enable by setting OTEL_EXPORTER_OTLP_ENDPOINT)
+[production.telemetry]
+enabled = true
+service_name = "shopstream"
 
 [production.databases.default]
 database_uri = "${PAYMENTS_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/payments}"
