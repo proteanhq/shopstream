@@ -3,8 +3,7 @@
   "description": "Warehouse details were updated.",
   "properties": {
     "capacity": {
-      "minLength": 1,
-      "type": "string"
+      "type": "integer"
     },
     "name": {
       "maxLength": 255,

@@ -256,7 +256,7 @@ class Customer:
                 state=state,
                 postal_code=postal_code,
                 country=country,
-                is_default=str(is_default),
+                is_default=is_default,
             )
         )
         return address

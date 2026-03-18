@@ -39,7 +39,7 @@ class WarehouseDirectoryProjector:
                 name=event.name,
                 city=address.get("city", ""),
                 country=address.get("country", ""),
-                capacity=int(event.capacity) if event.capacity else 0,
+                capacity=event.capacity or 0,
                 zone_count=0,
                 is_active=True,
                 created_at=event.created_at,
@@ -52,7 +52,7 @@ class WarehouseDirectoryProjector:
         repo = current_domain.repository_for(WarehouseDirectory)
         view = repo.get(event.warehouse_id)
         view.name = event.name
-        view.capacity = int(event.capacity) if event.capacity else view.capacity
+        view.capacity = event.capacity if event.capacity is not None else view.capacity
         view.updated_at = event.updated_at
         repo.add(view)
 

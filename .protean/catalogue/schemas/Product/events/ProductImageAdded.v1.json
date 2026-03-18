@@ -7,9 +7,7 @@
       "type": "string"
     },
     "is_primary": {
-      "maxLength": 255,
-      "minLength": 1,
-      "type": "string"
+      "type": "boolean"
     },
     "product_id": {
       "minLength": 1,

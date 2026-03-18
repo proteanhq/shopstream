@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "A hold on inventory for a specific order.\n\nReservations transition through: ACTIVE \u2192 CONFIRMED \u2192 (committed via\nCommitStock), or ACTIVE \u2192 RELEASED (cancelled/expired).",
+  "description": "A hold on inventory for a specific order.\n\nReservations transition through: Active \u2192 Confirmed \u2192 (committed via\nCommitStock), or Active \u2192 Released (cancelled/expired).",
   "properties": {
     "expires_at": {
       "format": "date-time",

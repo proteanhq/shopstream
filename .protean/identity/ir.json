@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:078f3dd729a2c9a7e11d4e30668fb7c998eb8b67f95fa78c7717d3724cad021e",
+  "checksum": "sha256:b8f90ec77a49c8ea540d43b2f8bf998272ec7d077306f32690a2b246d226f574",
   "clusters": {
     "abc.DefaultOutbox": {
       "aggregate": {
@@ -1074,11 +1074,8 @@
             },
             "is_default": {
               "kind": "standard",
-              "max_length": 255,
-              "min_length": 1,
               "required": true,
-              "sanitize": true,
-              "type": "String"
+              "type": "Boolean"
             },
             "label": {
               "kind": "standard",
@@ -1303,7 +1300,7 @@
             },
             "date_of_birth": {
               "kind": "standard",
-              "max_length": 255,
+              "max_length": 10,
               "sanitize": true,
               "type": "String"
             },
@@ -1675,7 +1672,7 @@
     "process_managers": {},
     "subscribers": {}
   },
-  "generated_at": "2026-03-18T13:30:22Z",
+  "generated_at": "2026-03-18T17:30:40Z",
   "ir_version": "0.1.0",
   "projections": {
     "identity.projections.address_book.AddressBook": {

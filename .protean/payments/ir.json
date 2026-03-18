@@ -1949,7 +1949,7 @@
       }
     }
   },
-  "generated_at": "2026-03-18T13:30:26Z",
+  "generated_at": "2026-03-18T17:30:43Z",
   "ir_version": "0.1.0",
   "projections": {
     "payments.projections.customer_payments.CustomerPayment": {

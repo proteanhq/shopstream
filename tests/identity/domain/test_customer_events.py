@@ -82,7 +82,7 @@ class TestAddressAdded:
             state="IL",
             postal_code="62701",
             country="US",
-            is_default="True",
+            is_default=True,
         )
         assert event.customer_id == "cust-123"
         assert event.address_id == "addr-456"
@@ -92,7 +92,7 @@ class TestAddressAdded:
         assert event.state == "IL"
         assert event.postal_code == "62701"
         assert event.country == "US"
-        assert event.is_default == "True"
+        assert event.is_default is True
 
 
 class TestAddressUpdated:

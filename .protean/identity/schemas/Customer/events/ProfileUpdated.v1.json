@@ -9,7 +9,7 @@
     "date_of_birth": {
       "anyOf": [
         {
-          "maxLength": 255,
+          "maxLength": 10,
           "type": "string"
         },
         {

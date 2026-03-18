@@ -1909,7 +1909,7 @@
       }
     }
   },
-  "generated_at": "2026-03-18T13:30:26Z",
+  "generated_at": "2026-03-18T17:30:44Z",
   "ir_version": "0.1.0",
   "projections": {
     "fulfillment.projections.daily_shipments.DailyShipmentsView": {

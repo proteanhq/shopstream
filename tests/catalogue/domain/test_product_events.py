@@ -120,7 +120,7 @@ class TestProductImageAddedEvent:
 
     def test_fields(self):
         event = ProductImageAdded(
-            product_id="p-1", image_id="i-1", url="https://cdn.example.com/img.jpg", is_primary="True"
+            product_id="p-1", image_id="i-1", url="https://cdn.example.com/img.jpg", is_primary=True
         )
         assert event.url == "https://cdn.example.com/img.jpg"
 
