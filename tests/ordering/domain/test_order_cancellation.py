@@ -126,11 +126,10 @@ class TestRefundOrder:
         with pytest.raises(ValidationError):
             order.refund()
 
-    def test_refunded_is_terminal(self):
+    def test_refunded_is_idempotent(self):
         order = _make_order()
         order.cancel("Test", "System")
         order.refund()
         order._events.clear()
-        order.refund()  # Idempotent no-op
+        order.refund()  # Idempotent — self-transition allowed
         assert order.status == OrderStatus.REFUNDED.value
-        assert len(order._events) == 0

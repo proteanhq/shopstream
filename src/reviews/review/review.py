@@ -336,9 +336,6 @@ class Review:
     # -------------------------------------------------------------------
     def approve(self, moderator_id, notes=None):
         """Approve the review for publication."""
-        if self.status == ReviewStatus.PUBLISHED.value:
-            raise ValidationError({"status": ["Review is already published"]})
-
         now = datetime.now(UTC)
         self.status = ReviewStatus.PUBLISHED.value
         self.moderation_notes = notes
@@ -357,9 +354,6 @@ class Review:
 
     def reject(self, moderator_id, reason):
         """Reject the review."""
-        if self.status == ReviewStatus.REJECTED.value:
-            raise ValidationError({"status": ["Review is already rejected"]})
-
         now = datetime.now(UTC)
         self.status = ReviewStatus.REJECTED.value
         self.moderation_notes = reason
@@ -463,9 +457,6 @@ class Review:
     # -------------------------------------------------------------------
     def remove(self, removed_by, reason):
         """Remove a published review."""
-        if self.status == ReviewStatus.REMOVED.value:
-            raise ValidationError({"status": ["Review is already removed"]})
-
         now = datetime.now(UTC)
         self.status = ReviewStatus.REMOVED.value
         self.moderation_notes = reason

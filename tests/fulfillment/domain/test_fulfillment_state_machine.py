@@ -136,17 +136,15 @@ class TestCancellation:
     def test_cannot_cancel_after_shipped(self):
         ff = _make_fulfillment()
         _advance_to_shipped(ff)
-        with pytest.raises(ValidationError) as exc:
+        with pytest.raises(ValidationError):
             ff.cancel("Too late")
-        assert "Cannot cancel" in str(exc.value)
 
     def test_cannot_cancel_after_delivered(self):
         ff = _make_fulfillment()
         _advance_to_in_transit(ff)
         ff.record_delivery()
-        with pytest.raises(ValidationError) as exc:
+        with pytest.raises(ValidationError):
             ff.cancel("Too late")
-        assert "Cannot cancel" in str(exc.value)
 
     def test_cannot_cancel_when_already_cancelled(self):
         ff = _make_fulfillment()

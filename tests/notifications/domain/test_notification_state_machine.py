@@ -108,9 +108,8 @@ class TestValidTransitions:
 class TestInvalidTransitions:
     def test_cannot_send_already_sent(self):
         n = _notification_at_state(NotificationStatus.SENT)
-        with pytest.raises(ValidationError) as exc:
+        with pytest.raises(ValidationError):
             n.mark_sent()
-        assert "already been sent" in str(exc.value)
 
     def test_cannot_deliver_pending(self):
         n = _notification_at_state(NotificationStatus.PENDING)

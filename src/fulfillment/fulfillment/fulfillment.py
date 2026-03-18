@@ -466,12 +466,6 @@ class Fulfillment:
     # -------------------------------------------------------------------
     def cancel(self, reason: str) -> None:
         """Cancel the fulfillment (only before shipment)."""
-        current = FulfillmentStatus(self.status)
-        if current == FulfillmentStatus.CANCELLED or not self.can_transition_to(
-            "status", FulfillmentStatus.CANCELLED.value
-        ):
-            raise ValidationError({"status": [f"Cannot cancel fulfillment in {current.value} state"]})
-
         now = datetime.now(UTC)
         self.status = FulfillmentStatus.CANCELLED.value
         self.cancellation_reason = reason

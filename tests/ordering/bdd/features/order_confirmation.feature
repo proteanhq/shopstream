@@ -7,11 +7,11 @@ Feature: Order confirmation
     Then the order status is "Confirmed"
     And an OrderConfirmed order event is raised
 
-  Scenario: Cannot confirm an already confirmed order
+  Scenario: Confirming an already confirmed order is idempotent
     Given an order was created
     And the order was confirmed
     When the order is confirmed
-    Then the order action fails with a validation error
+    Then the order status is "Confirmed"
 
   Scenario: Cannot confirm a paid order
     Given an order was created

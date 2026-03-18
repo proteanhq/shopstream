@@ -40,11 +40,11 @@ class TestCompleteOrder:
         assert isinstance(event, OrderCompleted)
         assert event.completed_at is not None
 
-    def test_completed_is_terminal(self):
+    def test_completed_is_idempotent(self):
         order = _make_delivered_order()
         order.complete()
-        with pytest.raises(ValidationError):
-            order.complete()
+        order.complete()
+        assert order.status == OrderStatus.COMPLETED.value
 
     def test_cannot_complete_from_shipped(self):
         order = Order.create(

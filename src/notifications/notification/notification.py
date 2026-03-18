@@ -201,9 +201,6 @@ class Notification:
     # -------------------------------------------------------------------
     def mark_sent(self, sent_at=None):
         """Mark notification as successfully sent to the channel."""
-        if self.status == NotificationStatus.SENT.value:
-            raise ValidationError({"status": ["Notification has already been sent"]})
-
         now = sent_at or datetime.now(UTC)
         self.status = NotificationStatus.SENT.value
         self.sent_at = now

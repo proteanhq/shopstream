@@ -167,11 +167,13 @@ class Order:
             OrderStatus.CONFIRMED: [OrderStatus.PAYMENT_PENDING, OrderStatus.CANCELLED],
             OrderStatus.PAYMENT_PENDING: [
                 OrderStatus.PAID,
+                OrderStatus.PAYMENT_PENDING,  # Idempotent — duplicate payment initiation
                 OrderStatus.CONFIRMED,  # Payment failure → retry
                 OrderStatus.CANCELLED,
             ],
             OrderStatus.PAID: [
                 OrderStatus.PROCESSING,
+                OrderStatus.PAID,  # Idempotent — duplicate payment confirmation
                 OrderStatus.SHIPPED,
                 OrderStatus.PARTIALLY_SHIPPED,
                 OrderStatus.CANCELLED,
@@ -182,8 +184,9 @@ class Order:
             OrderStatus.DELIVERED: [OrderStatus.COMPLETED, OrderStatus.RETURN_REQUESTED],
             OrderStatus.RETURN_REQUESTED: [OrderStatus.RETURN_APPROVED],
             OrderStatus.RETURN_APPROVED: [OrderStatus.RETURNED],
-            OrderStatus.RETURNED: [OrderStatus.REFUNDED],
-            OrderStatus.CANCELLED: [OrderStatus.REFUNDED],
+            OrderStatus.RETURNED: [OrderStatus.REFUNDED, OrderStatus.RETURNED],  # Idempotent
+            OrderStatus.CANCELLED: [OrderStatus.REFUNDED, OrderStatus.CANCELLED],  # Idempotent
+            OrderStatus.REFUNDED: [OrderStatus.REFUNDED],  # Idempotent
         },
     )
     items = HasMany(OrderItem)
@@ -413,9 +416,6 @@ class Order:
     # -------------------------------------------------------------------
     def confirm(self):
         """Confirm the order (inventory reserved)."""
-        if self.status == OrderStatus.CONFIRMED.value:
-            raise ValidationError({"status": ["Order is already confirmed"]})
-
         self.raise_(
             OrderConfirmed(
                 order_id=str(self.id),
@@ -425,12 +425,6 @@ class Order:
 
     def record_payment_pending(self, payment_id, payment_method):
         """Record that payment has been initiated."""
-        current = OrderStatus(self.status)
-        if current == OrderStatus.PAYMENT_PENDING:
-            return  # Already pending — idempotent
-        if current in (OrderStatus.CANCELLED, OrderStatus.REFUNDED):
-            return  # Lost race — order already cancelled/refunded
-
         self.raise_(
             PaymentPending(
                 order_id=str(self.id),
@@ -442,12 +436,6 @@ class Order:
 
     def record_payment_success(self, payment_id, amount, payment_method):
         """Record successful payment capture."""
-        current = OrderStatus(self.status)
-        if current == OrderStatus.PAID:
-            return  # Already paid — idempotent
-        if current in (OrderStatus.CANCELLED, OrderStatus.REFUNDED):
-            return  # Lost race — order already cancelled/refunded
-
         self.raise_(
             PaymentSucceeded(
                 order_id=str(self.id),
@@ -460,10 +448,6 @@ class Order:
 
     def record_payment_failure(self, payment_id, reason):
         """Record payment failure. Returns order to CONFIRMED for retry."""
-        current = OrderStatus(self.status)
-        if current in (OrderStatus.CANCELLED, OrderStatus.REFUNDED):
-            return  # Lost race — order already cancelled/refunded
-
         self.raise_(
             PaymentFailed(
                 order_id=str(self.id),
@@ -544,9 +528,6 @@ class Order:
 
     def complete(self):
         """Complete the order (return window expired)."""
-        if self.status == OrderStatus.COMPLETED.value:
-            raise ValidationError({"status": ["Order is already completed"]})
-
         self.raise_(
             OrderCompleted(
                 order_id=str(self.id),
@@ -592,20 +573,6 @@ class Order:
     # -------------------------------------------------------------------
     def cancel(self, reason, cancelled_by):
         """Cancel the order."""
-        current = OrderStatus(self.status)
-        if current == OrderStatus.CANCELLED:
-            return  # Already cancelled — idempotent
-        if not self.can_transition_to("status", OrderStatus.CANCELLED.value):
-            raise ValidationError(
-                {
-                    "status": [
-                        f"Cannot cancel order in {current.value} state. "
-                        f"Cancellation is only allowed from: "
-                        f"Created, Confirmed, Payment_Pending, Paid"
-                    ]
-                }
-            )
-
         self.raise_(
             OrderCancelled(
                 order_id=str(self.id),
@@ -617,12 +584,6 @@ class Order:
 
     def refund(self, refund_amount=None):
         """Refund a cancelled or returned order."""
-        current = OrderStatus(self.status)
-        if current == OrderStatus.REFUNDED:
-            return  # Already refunded — idempotent
-        if current not in (OrderStatus.CANCELLED, OrderStatus.RETURNED):
-            raise ValidationError({"status": ["Only cancelled or returned orders can be refunded"]})
-
         amount = refund_amount if refund_amount is not None else self.pricing.grand_total
         self.raise_(
             OrderRefunded(

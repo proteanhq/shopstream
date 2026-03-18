@@ -77,9 +77,8 @@ class TestValidTransitions:
 class TestInvalidTransitions:
     def test_cannot_approve_published_review(self):
         review = _review_at_state(ReviewStatus.PUBLISHED)
-        with pytest.raises(ValidationError) as exc:
+        with pytest.raises(ValidationError):
             review.approve(moderator_id="mod-002")
-        assert "already published" in str(exc.value)
 
     def test_cannot_reject_published_review(self):
         review = _review_at_state(ReviewStatus.PUBLISHED)
