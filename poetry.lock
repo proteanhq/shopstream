@@ -1863,13 +1863,13 @@ files = [
 
 [[package]]
 name = "message-db-py"
-version = "0.3.3"
+version = "0.3.4"
 description = "The Python interface to the MessageDB Event Store and Message Store"
 optional = false
-python-versions = "<4.0,>=3.11"
+python-versions = ">=3.11"
 files = [
-    {file = "message_db_py-0.3.3-py3-none-any.whl", hash = "sha256:97bc29b31af1e7d8d1b3bcbbdf5822551bf2d8b253055b563e3f30bc1c25ef84"},
-    {file = "message_db_py-0.3.3.tar.gz", hash = "sha256:d6c62d1631507e2a716c35f6b3bb4154e7b1388e3759290afff5df19724a3e9e"},
+    {file = "message_db_py-0.3.4-py3-none-any.whl", hash = "sha256:14210e5b222cdf37b8140e0449f3ab716e966325517b9d23d5c6c5490e07db20"},
+    {file = "message_db_py-0.3.4.tar.gz", hash = "sha256:b1db0e241db5d1d292fe13b61eb76a347c56edc5c01a792e6f14703947834190"},
 ]
 
 [package.dependencies]
@@ -2358,7 +2358,7 @@ inflection = ">=0.5.1"
 ipython = ">=8.23,<10.0"
 jinja2 = ">=3.1.0"
 marshmallow = ">=3.15.0"
-message-db-py = {version = ">=0.3.3", optional = true, markers = "extra == \"message-db\""}
+message-db-py = {version = ">=0.3.4", optional = true, markers = "extra == \"message-db\""}
 psycopg2-binary = {version = ">=2.9.9", optional = true, markers = "extra == \"postgresql\""}
 pydantic = ">=2.10,<3.0"
 python-dateutil = ">=2.8.2"
@@ -2372,7 +2372,7 @@ werkzeug = ">=2.0.0"
 [package.extras]
 elasticsearch = ["elasticsearch (>=7.17.9,<9.4.0)", "elasticsearch-dsl (>=7.4.1,<8.19.0)"]
 flask = ["flask (>=1.1.1)"]
-message-db = ["message-db-py (>=0.3.3)"]
+message-db = ["message-db-py (>=0.3.4)"]
 mssql = ["pyodbc (>=5.0.0)", "sqlalchemy (>=2.0.30,<2.1.0)"]
 postgresql = ["psycopg2-binary (>=2.9.9)", "sqlalchemy (>=2.0.30,<2.1.0)"]
 redis = ["redis (>=5.0.7,<7.4.0)"]
@@ -2384,7 +2384,7 @@ telemetry = ["opentelemetry-api (>=1.20.0)", "opentelemetry-exporter-otlp-proto-
 type = "git"
 url = "https://github.com/proteanhq/protean.git"
 reference = "main"
-resolved_reference = "cad8dd4163a1371d539b7653f6adc61233301cbb"
+resolved_reference = "35922fc84c5415762b614f39346be504a2aafd89"
 
 [[package]]
 name = "psutil"

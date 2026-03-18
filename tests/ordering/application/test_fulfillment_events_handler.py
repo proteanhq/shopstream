@@ -1,8 +1,7 @@
-"""Application tests for FulfillmentOrderEventHandler — Ordering reacts to Fulfillment events.
+"""Application tests for FulfillmentEventsSubscriber — Ordering reacts to Fulfillment events.
 
-Covers:
-- on_shipment_handed_off: records shipment on order via RecordShipment command
-- on_delivery_confirmed: records delivery on order via RecordDelivery command
+Tests the subscriber ACL pattern: raw dict payloads are filtered by event type
+and translated into domain commands (RecordShipment, RecordDelivery).
 """
 
 from datetime import UTC, datetime
@@ -12,10 +11,17 @@ from protean import current_domain
 from ordering.order.confirmation import ConfirmOrder
 from ordering.order.creation import CreateOrder
 from ordering.order.fulfillment import MarkProcessing, RecordShipment
-from ordering.order.fulfillment_events import FulfillmentOrderEventHandler
+from ordering.order.fulfillment_subscriber import FulfillmentEventsSubscriber
 from ordering.order.order import Order, OrderStatus
 from ordering.order.payment import RecordPaymentPending, RecordPaymentSuccess
-from shared.events.fulfillment import DeliveryConfirmed, ShipmentHandedOff
+
+
+def _build_message(event_type: str, data: dict) -> dict:
+    """Build a broker message payload with metadata and data."""
+    return {
+        "data": data,
+        "metadata": {"headers": {"type": event_type}},
+    }
 
 
 def _create_paid_order():
@@ -71,20 +77,23 @@ def _create_processing_order():
     return order_id
 
 
-class TestShipmentHandedOffHandler:
+class TestShipmentHandedOffSubscriber:
     def test_records_shipment_on_order(self):
         """ShipmentHandedOff event should transition order to SHIPPED."""
         order_id = _create_processing_order()
 
-        handler = FulfillmentOrderEventHandler()
-        handler.on_shipment_handed_off(
-            ShipmentHandedOff(
-                fulfillment_id="ff-001",
-                order_id=order_id,
-                carrier="FedEx",
-                tracking_number="TRACK-SHIP-001",
-                shipped_item_ids=["item-1", "item-2"],
-                shipped_at=datetime.now(UTC),
+        subscriber = FulfillmentEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Fulfillment.ShipmentHandedOff.v1",
+                {
+                    "fulfillment_id": "ff-001",
+                    "order_id": order_id,
+                    "carrier": "FedEx",
+                    "tracking_number": "TRACK-SHIP-001",
+                    "shipped_item_ids": ["item-1", "item-2"],
+                    "shipped_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
 
@@ -94,7 +103,7 @@ class TestShipmentHandedOffHandler:
         assert order.tracking_number == "TRACK-SHIP-001"
 
 
-class TestDeliveryConfirmedHandler:
+class TestDeliveryConfirmedSubscriber:
     def test_records_delivery_on_order(self):
         """DeliveryConfirmed event should transition order to DELIVERED."""
         order_id = _create_processing_order()
@@ -113,16 +122,60 @@ class TestDeliveryConfirmedHandler:
         order = current_domain.repository_for(Order).get(order_id)
         assert order.status == OrderStatus.SHIPPED.value
 
-        # Now handle delivery confirmation
-        handler = FulfillmentOrderEventHandler()
-        handler.on_delivery_confirmed(
-            DeliveryConfirmed(
-                fulfillment_id="ff-001",
-                order_id=order_id,
-                actual_delivery=datetime.now(UTC),
-                delivered_at=datetime.now(UTC),
+        # Now handle delivery confirmation via subscriber
+        subscriber = FulfillmentEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Fulfillment.DeliveryConfirmed.v1",
+                {
+                    "fulfillment_id": "ff-001",
+                    "order_id": order_id,
+                    "actual_delivery": datetime.now(UTC).isoformat(),
+                    "delivered_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
 
         order = current_domain.repository_for(Order).get(order_id)
         assert order.status == OrderStatus.DELIVERED.value
+
+
+class TestDeliveryExceptionSubscriber:
+    def test_logs_delivery_exception(self):
+        """DeliveryException should be logged without changing order state."""
+        order_id = _create_processing_order()
+
+        # Ship the order first
+        current_domain.process(
+            RecordShipment(
+                order_id=order_id,
+                shipment_id="ship-001",
+                carrier="FedEx",
+                tracking_number="TRACK-001",
+            ),
+            asynchronous=False,
+        )
+
+        subscriber = FulfillmentEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Fulfillment.DeliveryException.v1",
+                {
+                    "fulfillment_id": "ff-001",
+                    "order_id": order_id,
+                    "reason": "Failed delivery attempt",
+                    "location": "Front door",
+                },
+            )
+        )
+
+        # Order should still be SHIPPED (exception doesn't change state)
+        order = current_domain.repository_for(Order).get(order_id)
+        assert order.status == OrderStatus.SHIPPED.value
+
+
+class TestIgnoresUnrelatedEvents:
+    def test_ignores_non_fulfillment_events(self):
+        """Non-fulfillment events on the stream should be ignored."""
+        subscriber = FulfillmentEventsSubscriber()
+        subscriber(_build_message("Fulfillment.PickerAssigned.v1", {"fulfillment_id": "ff-ignore"}))

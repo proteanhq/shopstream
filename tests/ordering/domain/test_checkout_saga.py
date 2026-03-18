@@ -1,17 +1,23 @@
 """Domain tests for OrderCheckoutSaga — unit tests for handler logic.
 
 These tests verify the saga's internal state transitions in isolation.
-Commands dispatched to the ordering domain are mocked since we're testing
-the saga's decision logic, not the downstream command handlers.
+The saga now reacts only to internal ordering events (OrderConfirmed,
+PaymentPending, PaymentSucceeded, PaymentFailed, OrderCancelled).
+External events from Inventory and Payments are translated by subscribers
+into ordering commands, which raise these internal events.
 """
 
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 from ordering.checkout.saga import OrderCheckoutSaga
-from ordering.order.events import OrderConfirmed
-from shared.events.inventory import ReservationReleased, StockReserved
-from shared.events.payments import PaymentFailed, PaymentSucceeded
+from ordering.order.events import (
+    OrderCancelled,
+    OrderConfirmed,
+    PaymentFailed,
+    PaymentPending,
+    PaymentSucceeded,
+)
 
 
 class TestOnOrderConfirmed:
@@ -33,106 +39,147 @@ class TestOnOrderConfirmed:
         assert saga.started_at == now
 
 
-class TestOnStockReserved:
-    @patch("ordering.checkout.saga.current_domain")
-    def test_sets_status_awaiting_payment(self, mock_domain):
-        mock_domain.process = MagicMock()
+class TestOnPaymentPending:
+    def test_sets_status_awaiting_payment(self):
         saga = OrderCheckoutSaga()
         saga.order_id = "ord-001"
         saga.status = "awaiting_reservation"
-        event = StockReserved(
-            inventory_item_id="inv-001",
-            reservation_id="res-001",
+        event = PaymentPending(
             order_id="ord-001",
-            quantity=2,
-            previous_available=10,
-            new_available=8,
-            reserved_at=datetime.now(UTC),
-            expires_at=datetime.now(UTC),
+            payment_id="pay-001",
+            payment_method="credit_card",
+            initiated_at=datetime.now(UTC),
         )
-        saga.on_stock_reserved(event)
+        saga.on_payment_pending(event)
         assert saga.status == "awaiting_payment"
-        assert saga.reservation_id == "res-001"
-        mock_domain.process.assert_called_once()
+        assert saga.payment_id == "pay-001"
 
 
 class TestOnPaymentSucceeded:
-    @patch("ordering.checkout.saga.current_domain")
-    def test_sets_status_completed(self, mock_domain):
-        mock_domain.process = MagicMock()
+    def test_sets_status_completed(self):
         saga = OrderCheckoutSaga()
         saga.order_id = "ord-001"
         saga.status = "awaiting_payment"
         event = PaymentSucceeded(
-            payment_id="pay-001",
             order_id="ord-001",
-            customer_id="cust-001",
+            payment_id="pay-001",
             amount=59.99,
-            currency="USD",
-            gateway_transaction_id="txn-001",
-            succeeded_at=datetime.now(UTC),
+            payment_method="credit_card",
+            paid_at=datetime.now(UTC),
         )
         saga.on_payment_succeeded(event)
         assert saga.status == "completed"
         assert saga.payment_id == "pay-001"
-        mock_domain.process.assert_called_once()
+        assert saga.amount == 59.99
+
+    def test_skips_when_already_completed(self):
+        saga = OrderCheckoutSaga()
+        saga.order_id = "ord-001"
+        saga.status = "completed"
+        event = PaymentSucceeded(
+            order_id="ord-001",
+            payment_id="pay-001",
+            amount=59.99,
+            payment_method="credit_card",
+            paid_at=datetime.now(UTC),
+        )
+        saga.on_payment_succeeded(event)
+        assert saga.status == "completed"
 
 
 class TestOnPaymentFailed:
-    def test_retrying_when_can_retry(self):
+    def test_retrying_when_under_max_retries(self):
         saga = OrderCheckoutSaga()
         saga.order_id = "ord-001"
         saga.status = "awaiting_payment"
+        saga.retry_count = 0
         event = PaymentFailed(
-            payment_id="pay-001",
             order_id="ord-001",
-            customer_id="cust-001",
+            payment_id="pay-001",
             reason="Declined",
-            attempt_number=1,
-            can_retry=True,
             failed_at=datetime.now(UTC),
         )
         saga.on_payment_failed(event)
         assert saga.status == "retrying"
+        assert saga.retry_count == 1
 
     @patch("ordering.checkout.saga.current_domain")
-    def test_failed_when_cannot_retry(self, mock_domain):
+    def test_failed_when_max_retries_exceeded(self, mock_domain):
         mock_domain.process = MagicMock()
         saga = OrderCheckoutSaga()
         saga.order_id = "ord-001"
         saga.status = "awaiting_payment"
+        saga.retry_count = 2  # Next failure = 3rd retry = max
         event = PaymentFailed(
-            payment_id="pay-001",
             order_id="ord-001",
-            customer_id="cust-001",
+            payment_id="pay-001",
             reason="Card expired",
-            attempt_number=3,
-            can_retry=False,
             failed_at=datetime.now(UTC),
         )
         saga.on_payment_failed(event)
         assert saga.status == "failed"
+        assert saga.retry_count == 3
         mock_domain.process.assert_called_once()
 
+    def test_catches_validation_error_on_cancel(self):
+        from unittest.mock import MagicMock, patch
 
-class TestOnReservationReleased:
-    @patch("ordering.checkout.saga.current_domain")
-    def test_sets_status_failed(self, mock_domain):
-        mock_domain.process = MagicMock()
+        from protean.exceptions import ValidationError
+
+        mock_domain = MagicMock()
+        mock_domain.process = MagicMock(side_effect=ValidationError({"order": "Already cancelled"}))
         saga = OrderCheckoutSaga()
         saga.order_id = "ord-001"
         saga.status = "awaiting_payment"
-        event = ReservationReleased(
-            inventory_item_id="inv-001",
-            reservation_id="res-001",
+        saga.retry_count = 2
+        event = PaymentFailed(
             order_id="ord-001",
-            quantity=2,
-            reason="timeout",
-            previous_available=8,
-            new_available=10,
-            released_at=datetime.now(UTC),
+            payment_id="pay-001",
+            reason="Card expired",
+            failed_at=datetime.now(UTC),
         )
-        saga.on_reservation_released(event)
+        with patch("ordering.checkout.saga.current_domain", mock_domain):
+            saga.on_payment_failed(event)
+        assert saga.status == "failed"
+
+    def test_skips_when_already_failed(self):
+        saga = OrderCheckoutSaga()
+        saga.order_id = "ord-001"
+        saga.status = "failed"
+        event = PaymentFailed(
+            order_id="ord-001",
+            payment_id="pay-001",
+            reason="Declined",
+            failed_at=datetime.now(UTC),
+        )
+        saga.on_payment_failed(event)
+        assert saga.status == "failed"
+
+
+class TestOnOrderCancelled:
+    def test_sets_status_failed(self):
+        saga = OrderCheckoutSaga()
+        saga.order_id = "ord-001"
+        saga.status = "awaiting_payment"
+        event = OrderCancelled(
+            order_id="ord-001",
+            reason="timeout",
+            cancelled_by="System",
+            cancelled_at=datetime.now(UTC),
+        )
+        saga.on_order_cancelled(event)
         assert saga.status == "failed"
         assert "timeout" in saga.failure_reason
-        mock_domain.process.assert_called_once()
+
+    def test_skips_when_already_completed(self):
+        saga = OrderCheckoutSaga()
+        saga.order_id = "ord-001"
+        saga.status = "completed"
+        event = OrderCancelled(
+            order_id="ord-001",
+            reason="late cancel",
+            cancelled_by="Customer",
+            cancelled_at=datetime.now(UTC),
+        )
+        saga.on_order_cancelled(event)
+        assert saga.status == "completed"

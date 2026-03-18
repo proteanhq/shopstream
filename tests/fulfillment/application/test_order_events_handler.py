@@ -1,9 +1,12 @@
-"""Application tests for OrderEventHandler — Fulfillment reacts to Ordering events.
+"""Application tests for OrderEventsSubscriber — Fulfillment reacts to Ordering events.
+
+Tests the subscriber ACL pattern: raw dict payloads are filtered by event type
+and translated into domain-local side effects.
 
 Covers:
-- on_order_cancelled: cancels in-progress fulfillment
-- on_order_cancelled: skips when no fulfillment found
-- on_order_cancelled: skips when fulfillment already shipped
+- OrderCancelled: cancels in-progress fulfillment
+- OrderCancelled: skips when no fulfillment found
+- OrderCancelled: skips when fulfillment already shipped
 """
 
 from datetime import UTC, datetime
@@ -12,11 +15,18 @@ from protean import current_domain
 
 from fulfillment.fulfillment.creation import CreateFulfillment
 from fulfillment.fulfillment.fulfillment import Fulfillment, FulfillmentStatus
-from fulfillment.fulfillment.order_events import OrderEventHandler
+from fulfillment.fulfillment.order_subscriber import OrderEventsSubscriber
 from fulfillment.fulfillment.packing import GenerateShippingLabel, RecordPacking
 from fulfillment.fulfillment.picking import AssignPicker, CompletePickList, RecordItemPicked
 from fulfillment.fulfillment.shipping import RecordHandoff
-from shared.events.ordering import OrderCancelled
+
+
+def _build_message(event_type: str, data: dict) -> dict:
+    """Build a broker message payload with metadata and data."""
+    return {
+        "data": data,
+        "metadata": {"headers": {"type": event_type}},
+    }
 
 
 def _single_item():
@@ -58,28 +68,28 @@ def _walk_to_shipped(ff_id):
     )
 
 
-class TestOrderCancelledHandler:
+class TestOrderCancelledSubscriber:
     def test_cancels_pending_fulfillment(self):
         """Fulfillment in PENDING state should be cancelled when order is cancelled."""
         order_id = "ord-cancel-pending"
         ff_id = _create_fulfillment(order_id=order_id)
 
-        # Verify it's in PENDING state
         ff = current_domain.repository_for(Fulfillment).get(ff_id)
         assert ff.status == FulfillmentStatus.PENDING.value
 
-        # Simulate the event handler receiving OrderCancelled
-        handler = OrderEventHandler()
-        handler.on_order_cancelled(
-            OrderCancelled(
-                order_id=order_id,
-                reason="Customer changed mind",
-                cancelled_by="Customer",
-                cancelled_at=datetime.now(UTC),
+        subscriber = OrderEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Ordering.OrderCancelled.v1",
+                {
+                    "order_id": order_id,
+                    "reason": "Customer changed mind",
+                    "cancelled_by": "Customer",
+                    "cancelled_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
 
-        # Verify fulfillment was cancelled
         ff = current_domain.repository_for(Fulfillment).get(ff_id)
         assert ff.status == FulfillmentStatus.CANCELLED.value
         assert "Customer changed mind" in ff.cancellation_reason
@@ -93,13 +103,16 @@ class TestOrderCancelledHandler:
         ff = current_domain.repository_for(Fulfillment).get(ff_id)
         assert ff.status == FulfillmentStatus.PICKING.value
 
-        handler = OrderEventHandler()
-        handler.on_order_cancelled(
-            OrderCancelled(
-                order_id=order_id,
-                reason="Out of stock",
-                cancelled_by="System",
-                cancelled_at=datetime.now(UTC),
+        subscriber = OrderEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Ordering.OrderCancelled.v1",
+                {
+                    "order_id": order_id,
+                    "reason": "Out of stock",
+                    "cancelled_by": "System",
+                    "cancelled_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
 
@@ -107,15 +120,17 @@ class TestOrderCancelledHandler:
         assert ff.status == FulfillmentStatus.CANCELLED.value
 
     def test_no_fulfillment_found_is_noop(self):
-        """If no fulfillment exists for the order, handler returns without error."""
-        handler = OrderEventHandler()
-        # Should not raise — just logs and returns
-        handler.on_order_cancelled(
-            OrderCancelled(
-                order_id="ord-nonexistent",
-                reason="Test cancellation",
-                cancelled_by="Customer",
-                cancelled_at=datetime.now(UTC),
+        """If no fulfillment exists for the order, subscriber returns without error."""
+        subscriber = OrderEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Ordering.OrderCancelled.v1",
+                {
+                    "order_id": "ord-nonexistent",
+                    "reason": "Test cancellation",
+                    "cancelled_by": "Customer",
+                    "cancelled_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
 
@@ -128,16 +143,31 @@ class TestOrderCancelledHandler:
         ff = current_domain.repository_for(Fulfillment).get(ff_id)
         assert ff.status == FulfillmentStatus.SHIPPED.value
 
-        handler = OrderEventHandler()
-        handler.on_order_cancelled(
-            OrderCancelled(
-                order_id=order_id,
-                reason="Too late to cancel",
-                cancelled_by="Customer",
-                cancelled_at=datetime.now(UTC),
+        subscriber = OrderEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Ordering.OrderCancelled.v1",
+                {
+                    "order_id": order_id,
+                    "reason": "Too late to cancel",
+                    "cancelled_by": "Customer",
+                    "cancelled_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
 
-        # Fulfillment should still be SHIPPED
         ff = current_domain.repository_for(Fulfillment).get(ff_id)
         assert ff.status == FulfillmentStatus.SHIPPED.value
+
+    def test_ignores_non_cancelled_events(self):
+        """Non-OrderCancelled events on the ordering stream are ignored."""
+        subscriber = OrderEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Ordering.OrderCreated.v1",
+                {
+                    "order_id": "ord-ignore",
+                    "customer_id": "cust-001",
+                },
+            )
+        )

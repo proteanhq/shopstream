@@ -20,7 +20,7 @@ from reviews.projections.verified_purchases import VerifiedPurchases
 logger = structlog.get_logger(__name__)
 
 
-@reviews.subscriber(stream="ordering::order")
+@reviews.subscriber(broker="global", stream="ordering::order")
 class OrderDeliveredSubscriber:
     """Reacts to OrderDelivered events to track verified purchases.
 

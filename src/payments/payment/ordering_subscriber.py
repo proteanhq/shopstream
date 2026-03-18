@@ -17,7 +17,7 @@ from payments.projections.payment_status import PaymentStatusView
 logger = structlog.get_logger(__name__)
 
 
-@payments.subscriber(stream="ordering::order")
+@payments.subscriber(broker="global", stream="ordering::order")
 class OrderReturnedSubscriber:
     """Reacts to OrderReturned events to initiate refunds.
 
