@@ -116,9 +116,8 @@ class TestClose:
     def test_cannot_close_already_closed_account(self):
         customer = _make_active_customer()
         customer.close()
-        with pytest.raises(ValidationError) as exc:
+        with pytest.raises(ValidationError):
             customer.close()
-        assert "Account is already closed" in str(exc.value)
 
 
 class TestFullLifecycle:

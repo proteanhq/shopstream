@@ -364,9 +364,6 @@ class Customer:
     def close(self):
         from identity.customer.events import AccountClosed
 
-        if self.status == CustomerStatus.CLOSED.value:
-            raise ValidationError({"status": ["Account is already closed"]})
-
         self.status = CustomerStatus.CLOSED.value
         now = datetime.now()
         self.raise_(

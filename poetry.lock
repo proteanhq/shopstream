@@ -2358,12 +2358,12 @@ inflection = ">=0.5.1"
 ipython = ">=8.23,<10.0"
 jinja2 = ">=3.1.0"
 marshmallow = ">=3.15.0"
-message-db-py = {version = ">=0.3.4", optional = true, markers = "extra == \"message-db\""}
-psycopg2-binary = {version = ">=2.9.9", optional = true, markers = "extra == \"postgresql\""}
+message-db-py = {version = ">=0.3.4", optional = true}
+psycopg2-binary = {version = ">=2.9.9", optional = true}
 pydantic = ">=2.10,<3.0"
 python-dateutil = ">=2.8.2"
-redis = {version = ">=5.0.7,<7.4.0", optional = true, markers = "extra == \"redis\""}
-sqlalchemy = {version = ">=2.0.30,<2.1.0", optional = true, markers = "extra == \"postgresql\""}
+redis = {version = ">=5.0.7,<7.4.0", optional = true}
+sqlalchemy = {version = ">=2.0.30,<2.1.0", optional = true}
 structlog = ">=24.1.0"
 typer = ">=0.12.3"
 uvicorn = ">=0.27.1"

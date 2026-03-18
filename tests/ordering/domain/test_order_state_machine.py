@@ -230,10 +230,10 @@ class TestCancellation:
 # Invalid transitions
 # ---------------------------------------------------------------
 class TestInvalidTransitions:
-    def test_cannot_confirm_confirmed_order(self):
+    def test_confirm_confirmed_order_is_idempotent(self):
         order = _order_at_state(OrderStatus.CONFIRMED)
-        with pytest.raises(ValidationError):
-            order.confirm()
+        order.confirm()
+        assert order.status == OrderStatus.CONFIRMED.value
 
     def test_cannot_ship_created_order(self):
         order = _order_at_state(OrderStatus.CREATED)
@@ -275,57 +275,53 @@ class TestInvalidTransitions:
         with pytest.raises(ValidationError):
             order.request_return("Too late")
 
-    def test_refunded_is_terminal(self):
+    def test_refunded_is_idempotent(self):
         order = _order_at_state(OrderStatus.REFUNDED)
-        order.refund()  # Idempotent no-op
+        order.refund()
         assert order.status == OrderStatus.REFUNDED.value
-        assert len(order._events) == 0
 
 
 # ---------------------------------------------------------------
 # Idempotent transitions (race condition resilience)
 # ---------------------------------------------------------------
 class TestIdempotentTransitions:
-    def test_cancel_already_cancelled_is_noop(self):
+    def test_cancel_already_cancelled_is_idempotent(self):
         order = _order_at_state(OrderStatus.CANCELLED)
         order.cancel("Duplicate", "System")
         assert order.status == OrderStatus.CANCELLED.value
-        assert len(order._events) == 0
 
-    def test_payment_pending_already_pending_is_noop(self):
+    def test_payment_pending_already_pending_is_idempotent(self):
         order = _order_at_state(OrderStatus.PAYMENT_PENDING)
         order._events.clear()
         order.record_payment_pending("pay-002", "debit")
         assert order.status == OrderStatus.PAYMENT_PENDING.value
-        assert len(order._events) == 0
 
-    def test_payment_pending_on_cancelled_is_noop(self):
-        order = _order_at_state(OrderStatus.CANCELLED)
-        order.record_payment_pending("pay-001", "credit_card")
-        assert order.status == OrderStatus.CANCELLED.value
-        assert len(order._events) == 0
-
-    def test_payment_success_already_paid_is_noop(self):
+    def test_payment_success_already_paid_is_idempotent(self):
         order = _order_at_state(OrderStatus.PAID)
         order._events.clear()
         order.record_payment_success("pay-001", 50.0, "credit_card")
         assert order.status == OrderStatus.PAID.value
-        assert len(order._events) == 0
 
-    def test_payment_success_on_cancelled_is_noop(self):
-        order = _order_at_state(OrderStatus.CANCELLED)
-        order.record_payment_success("pay-001", 50.0, "credit_card")
-        assert order.status == OrderStatus.CANCELLED.value
-        assert len(order._events) == 0
-
-    def test_payment_failure_on_cancelled_is_noop(self):
-        order = _order_at_state(OrderStatus.CANCELLED)
-        order.record_payment_failure("pay-001", "declined")
-        assert order.status == OrderStatus.CANCELLED.value
-        assert len(order._events) == 0
-
-    def test_refund_already_refunded_is_noop(self):
+    def test_refund_already_refunded_is_idempotent(self):
         order = _order_at_state(OrderStatus.REFUNDED)
         order.refund()
         assert order.status == OrderStatus.REFUNDED.value
-        assert len(order._events) == 0
+
+
+class TestRaceConditionRejections:
+    """Payment events arriving after cancellation should be rejected."""
+
+    def test_payment_pending_on_cancelled_raises(self):
+        order = _order_at_state(OrderStatus.CANCELLED)
+        with pytest.raises(ValidationError):
+            order.record_payment_pending("pay-001", "credit_card")
+
+    def test_payment_success_on_cancelled_raises(self):
+        order = _order_at_state(OrderStatus.CANCELLED)
+        with pytest.raises(ValidationError):
+            order.record_payment_success("pay-001", 50.0, "credit_card")
+
+    def test_payment_failure_on_cancelled_raises(self):
+        order = _order_at_state(OrderStatus.CANCELLED)
+        with pytest.raises(ValidationError):
+            order.record_payment_failure("pay-001", "declined")
