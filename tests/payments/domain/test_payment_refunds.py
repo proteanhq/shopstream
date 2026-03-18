@@ -1,108 +1,143 @@
 """Tests for payment refund flows."""
 
-import pytest
-from protean.exceptions import ValidationError
+from protean.testing import given
 
 from payments.payment.events import RefundCompleted, RefundRequested
+from payments.payment.initiation import InitiatePayment
 from payments.payment.payment import Payment, PaymentStatus, RefundStatus
+from payments.payment.refund import ProcessRefundWebhook, RequestRefund
+from payments.payment.webhook import ProcessPaymentWebhook
 
 
-def _make_succeeded_payment():
-    payment = Payment.create(
+def _initiate():
+    return InitiatePayment(
         order_id="ord-001",
         customer_id="cust-001",
         amount=100.00,
         currency="USD",
         payment_method_type="credit_card",
         last4="4242",
-        gateway_name="FakeGateway",
         idempotency_key="idem-001",
     )
-    payment.record_success(gateway_transaction_id="txn-123")
-    payment._events.clear()
-    return payment
+
+
+def _make_succeeded():
+    result = given(Payment).process(_initiate())
+    payment_id = str(result.aggregate.id)
+    result = result.process(
+        ProcessPaymentWebhook(
+            payment_id=payment_id,
+            gateway_transaction_id="txn-123",
+            gateway_status="succeeded",
+        )
+    )
+    return result, payment_id
 
 
 class TestRequestRefund:
     def test_request_refund_adds_refund_entity(self):
-        payment = _make_succeeded_payment()
-        payment.request_refund(amount=50.00, reason="Defective product")
-        assert len(payment.refunds) == 1
-        refund = payment.refunds[0]
+        result, payment_id = _make_succeeded()
+        result = result.process(RequestRefund(payment_id=payment_id, amount=50.00, reason="Defective product"))
+        assert result.accepted
+        assert len(result.aggregate.refunds) == 1
+        refund = result.aggregate.refunds[0]
         assert refund.amount == 50.00
         assert refund.reason == "Defective product"
         assert refund.status == RefundStatus.REQUESTED.value
 
     def test_request_refund_raises_event(self):
-        payment = _make_succeeded_payment()
-        payment.request_refund(amount=50.00, reason="Defective")
-        assert len(payment._events) == 1
-        event = payment._events[0]
-        assert isinstance(event, RefundRequested)
-        assert event.amount == 50.00
+        result, payment_id = _make_succeeded()
+        result = result.process(RequestRefund(payment_id=payment_id, amount=50.00, reason="Defective"))
+        assert len(result.events) == 1
+        assert RefundRequested in result.events
+        assert result.events[RefundRequested].amount == 50.00
 
     def test_request_refund_returns_refund_id(self):
-        payment = _make_succeeded_payment()
-        refund_id = payment.request_refund(amount=50.00, reason="Test")
-        assert refund_id is not None
+        result, payment_id = _make_succeeded()
+        result = result.process(RequestRefund(payment_id=payment_id, amount=50.00, reason="Test"))
+        assert result.accepted
+        assert len(result.aggregate.refunds) == 1
+        assert result.aggregate.refunds[0].id is not None
 
     def test_cannot_refund_pending_payment(self):
-        payment = Payment.create(
-            order_id="ord-001",
-            customer_id="cust-001",
-            amount=100.00,
-            currency="USD",
-            payment_method_type="credit_card",
-            last4="4242",
-            gateway_name="FakeGateway",
-            idempotency_key="idem-001",
-        )
-        with pytest.raises(ValidationError):
-            payment.request_refund(amount=50.00, reason="Test")
+        result = given(Payment).process(_initiate())
+        payment_id = str(result.aggregate.id)
+        result = result.process(RequestRefund(payment_id=payment_id, amount=50.00, reason="Test"))
+        assert result.rejected
 
     def test_cannot_refund_more_than_payment_amount(self):
-        payment = _make_succeeded_payment()
-        with pytest.raises(ValidationError):
-            payment.request_refund(amount=150.00, reason="Test")
+        result, payment_id = _make_succeeded()
+        result = result.process(RequestRefund(payment_id=payment_id, amount=150.00, reason="Test"))
+        assert result.rejected
 
 
 class TestCompleteRefund:
     def test_complete_refund_updates_refund_status(self):
-        payment = _make_succeeded_payment()
-        refund_id = payment.request_refund(amount=50.00, reason="Test")
-        payment._events.clear()
-        payment.complete_refund(refund_id=refund_id, gateway_refund_id="ref-123")
-        refund = next(r for r in payment.refunds if str(r.id) == refund_id)
+        result, payment_id = _make_succeeded()
+        result = result.process(RequestRefund(payment_id=payment_id, amount=50.00, reason="Test"))
+        refund_id = str(result.aggregate.refunds[0].id)
+        result = result.process(
+            ProcessRefundWebhook(
+                payment_id=payment_id,
+                refund_id=refund_id,
+                gateway_refund_id="ref-123",
+            )
+        )
+        assert result.accepted
+        refund = next(r for r in result.aggregate.refunds if str(r.id) == refund_id)
         assert refund.status == RefundStatus.COMPLETED.value
         assert refund.gateway_refund_id == "ref-123"
 
     def test_complete_refund_raises_event(self):
-        payment = _make_succeeded_payment()
-        refund_id = payment.request_refund(amount=50.00, reason="Test")
-        payment._events.clear()
-        payment.complete_refund(refund_id=refund_id, gateway_refund_id="ref-123")
-        assert len(payment._events) == 1
-        event = payment._events[0]
-        assert isinstance(event, RefundCompleted)
-        assert event.amount == 50.00
+        result, payment_id = _make_succeeded()
+        result = result.process(RequestRefund(payment_id=payment_id, amount=50.00, reason="Test"))
+        refund_id = str(result.aggregate.refunds[0].id)
+        result = result.process(
+            ProcessRefundWebhook(
+                payment_id=payment_id,
+                refund_id=refund_id,
+                gateway_refund_id="ref-123",
+            )
+        )
+        assert len(result.events) == 1
+        assert RefundCompleted in result.events
+        assert result.events[RefundCompleted].amount == 50.00
 
     def test_partial_refund_sets_partially_refunded(self):
-        payment = _make_succeeded_payment()
-        refund_id = payment.request_refund(amount=50.00, reason="Test")
-        payment._events.clear()
-        payment.complete_refund(refund_id=refund_id, gateway_refund_id="ref-123")
-        assert payment.status == PaymentStatus.PARTIALLY_REFUNDED.value
-        assert payment.total_refunded == 50.00
+        result, payment_id = _make_succeeded()
+        result = result.process(RequestRefund(payment_id=payment_id, amount=50.00, reason="Test"))
+        refund_id = str(result.aggregate.refunds[0].id)
+        result = result.process(
+            ProcessRefundWebhook(
+                payment_id=payment_id,
+                refund_id=refund_id,
+                gateway_refund_id="ref-123",
+            )
+        )
+        assert result.status == PaymentStatus.PARTIALLY_REFUNDED.value
+        assert result.total_refunded == 50.00
 
     def test_full_refund_sets_refunded(self):
-        payment = _make_succeeded_payment()
-        refund_id = payment.request_refund(amount=100.00, reason="Test")
-        payment._events.clear()
-        payment.complete_refund(refund_id=refund_id, gateway_refund_id="ref-123")
-        assert payment.status == PaymentStatus.REFUNDED.value
-        assert payment.total_refunded == 100.00
+        result, payment_id = _make_succeeded()
+        result = result.process(RequestRefund(payment_id=payment_id, amount=100.00, reason="Test"))
+        refund_id = str(result.aggregate.refunds[0].id)
+        result = result.process(
+            ProcessRefundWebhook(
+                payment_id=payment_id,
+                refund_id=refund_id,
+                gateway_refund_id="ref-123",
+            )
+        )
+        assert result.status == PaymentStatus.REFUNDED.value
+        assert result.total_refunded == 100.00
 
     def test_complete_refund_with_invalid_refund_id(self):
-        payment = _make_succeeded_payment()
-        with pytest.raises(ValidationError):
-            payment.complete_refund(refund_id="nonexistent", gateway_refund_id="ref-123")
+        result, payment_id = _make_succeeded()
+        result = result.process(
+            ProcessRefundWebhook(
+                payment_id=payment_id,
+                refund_id="nonexistent",
+                gateway_refund_id="ref-123",
+            )
+        )
+        assert result.rejected

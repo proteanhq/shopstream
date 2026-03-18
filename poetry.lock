@@ -2358,12 +2358,12 @@ inflection = ">=0.5.1"
 ipython = ">=8.23,<10.0"
 jinja2 = ">=3.1.0"
 marshmallow = ">=3.15.0"
-message-db-py = {version = ">=0.3.4", optional = true}
-psycopg2-binary = {version = ">=2.9.9", optional = true}
+message-db-py = {version = ">=0.3.4", optional = true, markers = "extra == \"message-db\""}
+psycopg2-binary = {version = ">=2.9.9", optional = true, markers = "extra == \"postgresql\""}
 pydantic = ">=2.10,<3.0"
 python-dateutil = ">=2.8.2"
-redis = {version = ">=5.0.7,<7.4.0", optional = true}
-sqlalchemy = {version = ">=2.0.30,<2.1.0", optional = true}
+redis = {version = ">=5.0.7,<7.4.0", optional = true, markers = "extra == \"redis\""}
+sqlalchemy = {version = ">=2.0.30,<2.1.0", optional = true, markers = "extra == \"postgresql\""}
 structlog = ">=24.1.0"
 typer = ">=0.12.3"
 uvicorn = ">=0.27.1"
@@ -2384,7 +2384,7 @@ telemetry = ["opentelemetry-api (>=1.20.0)", "opentelemetry-exporter-otlp-proto-
 type = "git"
 url = "https://github.com/proteanhq/protean.git"
 reference = "main"
-resolved_reference = "35922fc84c5415762b614f39346be504a2aafd89"
+resolved_reference = "7d0e2f0bd1210a793e1c35b043d610aa14322808"
 
 [[package]]
 name = "psutil"

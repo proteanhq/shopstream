@@ -1,7 +1,6 @@
 """Tests for Review seller reply — only on published, max 1, event raising."""
 
-import pytest
-from protean.exceptions import ValidationError
+from protean.testing import assert_invalid
 
 from reviews.review.review import Review
 
@@ -46,34 +45,38 @@ class TestSellerReplyGuards:
     def test_cannot_reply_to_pending_review(self):
         review = _make_review()
         review._events.clear()
-        with pytest.raises(ValidationError) as exc:
-            review.add_seller_reply(seller_id="seller-001", body="Reply")
-        assert "published reviews" in str(exc.value)
+        assert_invalid(
+            lambda: review.add_seller_reply(seller_id="seller-001", body="Reply"),
+            message="published reviews",
+        )
 
     def test_cannot_reply_to_rejected_review(self):
         review = _make_review()
         review._events.clear()
         review.reject(moderator_id="mod-001", reason="Bad content")
         review._events.clear()
-        with pytest.raises(ValidationError) as exc:
-            review.add_seller_reply(seller_id="seller-001", body="Reply")
-        assert "published reviews" in str(exc.value)
+        assert_invalid(
+            lambda: review.add_seller_reply(seller_id="seller-001", body="Reply"),
+            message="published reviews",
+        )
 
     def test_cannot_reply_to_removed_review(self):
         review = _published_review()
         review.remove(removed_by="Admin", reason="Policy")
         review._events.clear()
-        with pytest.raises(ValidationError) as exc:
-            review.add_seller_reply(seller_id="seller-001", body="Reply")
-        assert "published reviews" in str(exc.value)
+        assert_invalid(
+            lambda: review.add_seller_reply(seller_id="seller-001", body="Reply"),
+            message="published reviews",
+        )
 
     def test_cannot_add_second_reply(self):
         review = _published_review()
         review.add_seller_reply(seller_id="seller-001", body="Thank you!")
         review._events.clear()
-        with pytest.raises(ValidationError) as exc:
-            review.add_seller_reply(seller_id="seller-001", body="Another reply")
-        assert "at most one seller reply" in str(exc.value)
+        assert_invalid(
+            lambda: review.add_seller_reply(seller_id="seller-001", body="Another reply"),
+            message="at most one seller reply",
+        )
 
 
 class TestReplyRaisesEvent:
