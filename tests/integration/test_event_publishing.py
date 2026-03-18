@@ -11,10 +11,21 @@ Test strategy:
     a running Engine or Redis.
   - The outbox record structure is validated to ensure the Engine can
     publish it downstream without modification.
+
+Note on dual-write:
+  Events marked ``published=True`` produce TWO outbox rows — one for the
+  internal broker (``default``) and one for the external bus (``global``).
+  Tests that count outbox records for published events use
+  ``_internal_records()`` to filter to the internal broker's rows only.
 """
 
 from protean import current_domain
 from protean.utils.outbox import OutboxStatus
+
+
+def _internal_records(records):
+    """Filter outbox records to only those targeting the internal broker."""
+    return [r for r in records if r.target_broker == "default"]
 
 
 # ---------------------------------------------------------------------------
@@ -37,7 +48,7 @@ class TestIdentityEventOutbox:
         assert customer_id is not None
 
         outbox_repo = current_domain._get_outbox_repo("default")
-        records = outbox_repo.find_unprocessed()
+        records = _internal_records(outbox_repo.find_unprocessed())
 
         registered_events = [r for r in records if r.type == "Identity.CustomerRegistered.v1"]
         assert len(registered_events) == 1
@@ -71,7 +82,7 @@ class TestIdentityEventOutbox:
         )
 
         outbox_repo = current_domain._get_outbox_repo("default")
-        records = outbox_repo.find_unprocessed()
+        records = _internal_records(outbox_repo.find_unprocessed())
 
         suspended_events = [r for r in records if r.type == "Identity.AccountSuspended.v1"]
         assert len(suspended_events) == 1
@@ -190,7 +201,7 @@ class TestCatalogueEventOutbox:
         assert product_id is not None
 
         outbox_repo = current_domain._get_outbox_repo("default")
-        records = outbox_repo.find_unprocessed()
+        records = _internal_records(outbox_repo.find_unprocessed())
 
         created_events = [r for r in records if r.type == "Catalogue.ProductCreated.v1"]
         assert len(created_events) == 1
@@ -228,7 +239,7 @@ class TestCatalogueEventOutbox:
         )
 
         outbox_repo = current_domain._get_outbox_repo("default")
-        records = outbox_repo.find_unprocessed()
+        records = _internal_records(outbox_repo.find_unprocessed())
 
         variant_events = [r for r in records if r.type == "Catalogue.VariantAdded.v1"]
         assert len(variant_events) == 1

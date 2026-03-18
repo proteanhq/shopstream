@@ -19,7 +19,7 @@ logger = structlog.get_logger(__name__)
 _DEFAULT_WAREHOUSE_ID = "default-warehouse"
 
 
-@inventory.subscriber(stream="catalogue::product")
+@inventory.subscriber(broker="global", stream="catalogue::product")
 class CatalogueVariantSubscriber:
     """Reacts to VariantAdded events to initialize inventory records.
 

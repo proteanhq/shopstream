@@ -25,6 +25,7 @@ backfill_suffix = "backfill"
 # to the broker (Redis Streams) by the Engine's OutboxProcessor.
 [outbox]
 broker = "default"
+external_brokers = ["global"]
 messages_per_tick = 50
 tick_interval = 0.01
 
@@ -38,10 +39,15 @@ database_uri = "${PAYMENTS_DATABASE_URL|postgresql://postgres:postgres@localhost
 provider = "message_db"
 database_uri = "${MESSAGE_DB_URL|postgresql://message_store:message_store@localhost:15433/message_store}"
 
-# Default Broker Configuration
+# Default Broker Configuration (internal events — domain-specific Redis DB)
 [brokers.default]
 provider = "redis"
-URI = "${REDIS_URL|redis://127.0.0.1:16379/0}"
+URI = "${REDIS_URL|redis://127.0.0.1:16379/4}"
+
+# External Broker (shared bus for cross-domain published events)
+[brokers.global]
+provider = "redis"
+URI = "${REDIS_EXTERNAL_URL|redis://127.0.0.1:16379/15}"
 
 # ──────────────────────────────────────────────
 # Test overrides (PROTEAN_ENV=test)
@@ -82,4 +88,7 @@ provider = "memory"
 provider = "memory"
 
 [memory.brokers.default]
+provider = "inline"
+
+[memory.brokers.global]
 provider = "inline"

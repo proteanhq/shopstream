@@ -1,19 +1,20 @@
 """Order Checkout Saga — coordinates the Order → Inventory → Payment flow.
 
-This ProcessManager orchestrates the checkout process across three bounded
-contexts: Ordering, Inventory, and Payments. It lives in the Ordering domain
-because it primarily coordinates order lifecycle state changes.
+This ProcessManager tracks the checkout process state as it progresses
+through the ordering lifecycle. It lives in the Ordering domain and
+reacts ONLY to internal ordering events.
+
+External events (from Inventory and Payments) are translated into internal
+ordering commands by subscribers (inventory_subscriber.py, payment_subscriber.py),
+which in turn cause the Order aggregate to raise internal events that this
+saga reacts to.
 
 Flow:
     1. OrderConfirmed → set status awaiting_reservation
-    2. StockReserved → issue RecordPaymentPending command → awaiting_payment
-    3a. PaymentSucceeded → issue RecordPaymentSuccess command → completed (end)
-    3b. PaymentFailed (can_retry) → retrying (wait for external retry)
-    3b. PaymentFailed (no retry) → issue CancelOrder → failed (end)
-    4. ReservationReleased → issue CancelOrder → failed (end)
-
-Cross-domain events are imported from shared.events module and registered
-as external events via ordering.register_external_event().
+    2. PaymentPending → set status awaiting_payment (stock was reserved externally)
+    3a. PaymentSucceeded → completed (end)
+    3b. PaymentFailed → retrying (if under max retries) or CancelOrder → failed (end)
+    4. OrderCancelled → failed (end) (reservation released or other cancellation)
 """
 
 import logging
@@ -25,53 +26,15 @@ from protean.utils.mixins import handle
 from protean.utils.processing import Priority
 
 from ordering.domain import ordering
-from ordering.order.events import OrderConfirmed
-from shared.events.inventory import (
-    DamagedStockWrittenOff,
-    LowStockDetected,
-    ReservationConfirmed,
-    ReservationReleased,
-    StockAdjusted,
-    StockCheckRecorded,
-    StockCommitted,
-    StockInitialized,
-    StockMarkedDamaged,
-    StockReceived,
-    StockReserved,
-    StockReturned,
-)
-from shared.events.payments import (
+from ordering.order.events import (
+    OrderCancelled,
+    OrderConfirmed,
     PaymentFailed,
-    PaymentInitiated,
-    PaymentProcessing,
-    PaymentRetryInitiated,
+    PaymentPending,
     PaymentSucceeded,
-    RefundCompleted,
-    RefundRequested,
 )
 
 logger = logging.getLogger(__name__)
-
-# Register external events from other domains so Protean can deserialize them
-ordering.register_external_event(StockInitialized, "Inventory.StockInitialized.v1")
-ordering.register_external_event(StockReceived, "Inventory.StockReceived.v1")
-ordering.register_external_event(StockReserved, "Inventory.StockReserved.v1")
-ordering.register_external_event(ReservationReleased, "Inventory.ReservationReleased.v1")
-ordering.register_external_event(ReservationConfirmed, "Inventory.ReservationConfirmed.v1")
-ordering.register_external_event(StockCommitted, "Inventory.StockCommitted.v1")
-ordering.register_external_event(StockAdjusted, "Inventory.StockAdjusted.v1")
-ordering.register_external_event(StockMarkedDamaged, "Inventory.StockMarkedDamaged.v1")
-ordering.register_external_event(DamagedStockWrittenOff, "Inventory.DamagedStockWrittenOff.v1")
-ordering.register_external_event(StockReturned, "Inventory.StockReturned.v1")
-ordering.register_external_event(StockCheckRecorded, "Inventory.StockCheckRecorded.v1")
-ordering.register_external_event(LowStockDetected, "Inventory.LowStockDetected.v1")
-ordering.register_external_event(PaymentInitiated, "Payments.PaymentInitiated.v1")
-ordering.register_external_event(PaymentProcessing, "Payments.PaymentProcessing.v1")
-ordering.register_external_event(PaymentSucceeded, "Payments.PaymentSucceeded.v1")
-ordering.register_external_event(PaymentFailed, "Payments.PaymentFailed.v1")
-ordering.register_external_event(PaymentRetryInitiated, "Payments.PaymentRetryInitiated.v1")
-ordering.register_external_event(RefundRequested, "Payments.RefundRequested.v1")
-ordering.register_external_event(RefundCompleted, "Payments.RefundCompleted.v1")
 
 MAX_PAYMENT_RETRIES = 3
 
@@ -79,16 +42,13 @@ MAX_PAYMENT_RETRIES = 3
 @ordering.process_manager(
     stream_categories=[
         "ordering::order",
-        "inventory::inventory_item",
-        "payments::payment",
     ]
 )
 class OrderCheckoutSaga:
-    """Coordinates the checkout process across ordering, inventory, and payments."""
+    """Coordinates the checkout process, reacting only to internal ordering events."""
 
     order_id = Identifier()
     status = String(default="new")
-    reservation_id = Identifier()
     payment_id = Identifier()
     retry_count = Integer(default=0)
     failure_reason = String()
@@ -103,66 +63,46 @@ class OrderCheckoutSaga:
         self.status = "awaiting_reservation"
         self.started_at = event.confirmed_at
 
-    @handle(StockReserved, correlate="order_id")
-    def on_stock_reserved(self, event: StockReserved) -> None:
-        """Step 2: Stock reserved — initiate payment."""
-        self.reservation_id = event.reservation_id
+    @handle(PaymentPending, correlate="order_id")
+    def on_payment_pending(self, event: PaymentPending) -> None:
+        """Step 2: Payment pending — stock was reserved, payment initiated.
+
+        The InventoryEventsSubscriber received StockReserved from the external
+        bus and dispatched RecordPaymentPending, which caused this event.
+        """
+        self.payment_id = event.payment_id
         self.status = "awaiting_payment"
-
-        # Dispatch command to ordering domain to record payment pending
-        from ordering.order.payment import RecordPaymentPending
-
-        try:
-            current_domain.process(
-                RecordPaymentPending(
-                    order_id=self.order_id,
-                    payment_id=f"saga-pay-{self.order_id}",
-                    payment_method="credit_card",
-                ),
-                asynchronous=False,
-                priority=Priority.HIGH,
-            )
-        except ValidationError:
-            logger.info("Order %s already transitioned; skipping RecordPaymentPending", self.order_id)
 
     @handle(PaymentSucceeded, correlate="order_id")
     def on_payment_succeeded(self, event: PaymentSucceeded) -> None:
-        """Step 3a: Payment succeeded — record success and complete saga."""
+        """Step 3a: Payment succeeded — saga complete.
+
+        The PaymentEventsSubscriber received PaymentSucceeded from the external
+        bus and dispatched RecordPaymentSuccess, which caused this event.
+        """
         if self.status in ("completed", "failed"):
             return  # Already reached terminal state; skip duplicate
 
         self.payment_id = event.payment_id
         self.amount = event.amount
         self.status = "completed"
-
-        from ordering.order.payment import RecordPaymentSuccess
-
-        try:
-            current_domain.process(
-                RecordPaymentSuccess(
-                    order_id=self.order_id,
-                    payment_id=event.payment_id,
-                    amount=event.amount,
-                    payment_method="credit_card",
-                ),
-                asynchronous=False,
-                priority=Priority.HIGH,
-            )
-        except ValidationError:
-            logger.info("Order %s already transitioned; skipping RecordPaymentSuccess", self.order_id)
-
         self.mark_as_complete()
 
     @handle(PaymentFailed, correlate="order_id")
     def on_payment_failed(self, event: PaymentFailed) -> None:
-        """Step 3b: Payment failed — retry or cancel order."""
+        """Step 3b: Payment failed — retry or cancel order.
+
+        The PaymentEventsSubscriber received PaymentFailed from the external
+        bus and dispatched RecordPaymentFailure, which caused this event.
+        The saga owns the retry count and decides when to give up.
+        """
         if self.status in ("completed", "failed"):
             return  # Already reached terminal state; skip duplicate
 
-        self.retry_count = event.attempt_number
+        self.retry_count += 1
         self.failure_reason = event.reason
 
-        if event.can_retry and self.retry_count < MAX_PAYMENT_RETRIES:
+        if self.retry_count < MAX_PAYMENT_RETRIES:
             self.status = "retrying"
             # The payments domain handles retries; we just track state
         else:
@@ -184,26 +124,17 @@ class OrderCheckoutSaga:
 
             self.mark_as_complete()
 
-    @handle(ReservationReleased, correlate="order_id", end=True)
-    def on_reservation_released(self, event: ReservationReleased) -> None:
-        """Step 4: Reservation released (timeout or cancellation) — cancel order."""
+    @handle(OrderCancelled, correlate="order_id", end=True)
+    def on_order_cancelled(self, event: OrderCancelled) -> None:
+        """Step 4: Order cancelled — saga ends in failed state.
+
+        This can be triggered by:
+        - The InventoryEventsSubscriber dispatching CancelOrder after ReservationReleased
+        - The payment retry exhaustion above
+        - A manual cancellation
+        """
         if self.status in ("completed", "failed"):
             return  # Already reached terminal state; skip duplicate
 
         self.status = "failed"
-        self.failure_reason = f"Reservation released: {event.reason}"
-
-        from ordering.order.cancellation import CancelOrder
-
-        try:
-            current_domain.process(
-                CancelOrder(
-                    order_id=self.order_id,
-                    reason=f"Inventory reservation released: {event.reason}",
-                    cancelled_by="System",
-                ),
-                asynchronous=False,
-                priority=Priority.HIGH,
-            )
-        except ValidationError:
-            logger.info("Order %s already cancelled; skipping CancelOrder", self.order_id)
+        self.failure_reason = f"Order cancelled: {event.reason}"

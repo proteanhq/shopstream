@@ -1,4 +1,4 @@
-"""Application tests for CatalogueCartEventHandler — Ordering reacts to Catalogue events.
+"""Application tests for CatalogueEventsSubscriber — Ordering reacts to Catalogue events.
 
 Covers:
 - on_product_discontinued with no active carts: logs, no error
@@ -9,10 +9,13 @@ from datetime import UTC, datetime
 
 from protean import current_domain
 
-from ordering.cart.catalogue_events import CatalogueCartEventHandler
+from ordering.cart.catalogue_subscriber import CatalogueEventsSubscriber
 from ordering.cart.items import AddToCart
 from ordering.cart.management import CreateCart
-from shared.events.catalogue import ProductDiscontinued
+
+
+def _build_message(event_type: str, data: dict) -> dict:
+    return {"data": data, "metadata": {"headers": {"type": event_type}}}
 
 
 def _create_cart_with_product(product_id):
@@ -36,12 +39,15 @@ def _create_cart_with_product(product_id):
 class TestProductDiscontinuedHandler:
     def test_no_active_carts_is_noop(self):
         """When no active carts exist, handler logs and returns without error."""
-        handler = CatalogueCartEventHandler()
-        handler.on_product_discontinued(
-            ProductDiscontinued(
-                product_id="prod-disc-001",
-                sku="DISC-001",
-                discontinued_at=datetime.now(UTC),
+        subscriber = CatalogueEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Catalogue.ProductDiscontinued.v1",
+                {
+                    "product_id": "prod-disc-001",
+                    "sku": "DISC-001",
+                    "discontinued_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
 
@@ -50,13 +56,16 @@ class TestProductDiscontinuedHandler:
         product_id = "prod-disc-002"
         _create_cart_with_product(product_id)
 
-        handler = CatalogueCartEventHandler()
+        subscriber = CatalogueEventsSubscriber()
         # Should not raise -- just logs a warning about affected carts
-        handler.on_product_discontinued(
-            ProductDiscontinued(
-                product_id=product_id,
-                sku="DISC-002",
-                discontinued_at=datetime.now(UTC),
+        subscriber(
+            _build_message(
+                "Catalogue.ProductDiscontinued.v1",
+                {
+                    "product_id": product_id,
+                    "sku": "DISC-002",
+                    "discontinued_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
 
@@ -65,13 +74,28 @@ class TestProductDiscontinuedHandler:
         # Create a cart with a different product
         _create_cart_with_product("prod-other")
 
-        handler = CatalogueCartEventHandler()
+        subscriber = CatalogueEventsSubscriber()
         # Discontinuing a product not in any cart -- should not log warning
-        handler.on_product_discontinued(
-            ProductDiscontinued(
-                product_id="prod-disc-003",
-                sku="DISC-003",
-                discontinued_at=datetime.now(UTC),
+        subscriber(
+            _build_message(
+                "Catalogue.ProductDiscontinued.v1",
+                {
+                    "product_id": "prod-disc-003",
+                    "sku": "DISC-003",
+                    "discontinued_at": datetime.now(UTC).isoformat(),
+                },
+            )
+        )
+
+
+class TestIgnoresUnrelatedEvents:
+    def test_ignores_non_discontinued_events(self):
+        """Non-ProductDiscontinued events on the catalogue stream are ignored."""
+        subscriber = CatalogueEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Catalogue.ProductCreated.v1",
+                {"product_id": "prod-ignore", "sku": "IGNORE-SKU"},
             )
         )
 
@@ -81,12 +105,15 @@ class TestProductDiscontinuedHandler:
         _create_cart_with_product(product_id)
         _create_cart_with_product(product_id)
 
-        handler = CatalogueCartEventHandler()
+        subscriber = CatalogueEventsSubscriber()
         # Should not raise
-        handler.on_product_discontinued(
-            ProductDiscontinued(
-                product_id=product_id,
-                sku="DISC-MULTI",
-                discontinued_at=datetime.now(UTC),
+        subscriber(
+            _build_message(
+                "Catalogue.ProductDiscontinued.v1",
+                {
+                    "product_id": product_id,
+                    "sku": "DISC-MULTI",
+                    "discontinued_at": datetime.now(UTC).isoformat(),
+                },
             )
         )

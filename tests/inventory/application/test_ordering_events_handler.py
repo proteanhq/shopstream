@@ -1,4 +1,4 @@
-"""Application tests for OrderingInventoryEventHandler — Inventory reacts to Ordering events.
+"""Application tests for OrderingEventsSubscriber — Inventory reacts to Ordering events.
 
 Covers:
 - on_order_cancelled: releases active reservations for the cancelled order
@@ -13,10 +13,13 @@ from protean import current_domain
 
 from inventory.projections.reservation_status import ReservationStatus as ReservationStatusProjection
 from inventory.stock.initialization import InitializeStock
-from inventory.stock.ordering_events import OrderingInventoryEventHandler
+from inventory.stock.ordering_subscriber import OrderingEventsSubscriber
 from inventory.stock.reservation import ConfirmReservation, ReserveStock
 from inventory.stock.stock import InventoryItem
-from shared.events.ordering import OrderCancelled, OrderReturned
+
+
+def _build_message(event_type: str, data: dict) -> dict:
+    return {"data": data, "metadata": {"headers": {"type": event_type}}}
 
 
 def _initialize_stock(**overrides):
@@ -70,14 +73,17 @@ class TestOrderCancelledHandler:
         res_proj = current_domain.repository_for(ReservationStatusProjection).get(str(reservation.id))
         assert res_proj.status == "Active"
 
-        # Handle OrderCancelled event
-        handler = OrderingInventoryEventHandler()
-        handler.on_order_cancelled(
-            OrderCancelled(
-                order_id=order_id,
-                reason="Customer requested",
-                cancelled_by="Customer",
-                cancelled_at=datetime.now(UTC),
+        # Handle OrderCancelled event via subscriber
+        subscriber = OrderingEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Ordering.OrderCancelled.v1",
+                {
+                    "order_id": order_id,
+                    "reason": "Customer requested",
+                    "cancelled_by": "Customer",
+                    "cancelled_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
 
@@ -118,13 +124,16 @@ class TestOrderCancelledHandler:
         assert item.levels.available == 100
 
         # Now cancel the order -- should be a no-op since reservation is already released
-        handler = OrderingInventoryEventHandler()
-        handler.on_order_cancelled(
-            OrderCancelled(
-                order_id=order_id,
-                reason="System timeout",
-                cancelled_by="System",
-                cancelled_at=datetime.now(UTC),
+        subscriber = OrderingEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Ordering.OrderCancelled.v1",
+                {
+                    "order_id": order_id,
+                    "reason": "System timeout",
+                    "cancelled_by": "System",
+                    "cancelled_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
 
@@ -135,14 +144,17 @@ class TestOrderCancelledHandler:
 
     def test_no_reservations_is_noop(self):
         """If no reservations exist for the order, handler logs and returns without error."""
-        handler = OrderingInventoryEventHandler()
+        subscriber = OrderingEventsSubscriber()
         # Should not raise
-        handler.on_order_cancelled(
-            OrderCancelled(
-                order_id="ord-no-reservations",
-                reason="Customer requested",
-                cancelled_by="Customer",
-                cancelled_at=datetime.now(UTC),
+        subscriber(
+            _build_message(
+                "Ordering.OrderCancelled.v1",
+                {
+                    "order_id": "ord-no-reservations",
+                    "reason": "Customer requested",
+                    "cancelled_by": "Customer",
+                    "cancelled_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
 
@@ -155,35 +167,56 @@ class TestOrderReturnedHandler:
         not product/variant details. The handler logs for auditing; actual
         restocking requires enrichment from the order aggregate.
         """
-        handler = OrderingInventoryEventHandler()
+        subscriber = OrderingEventsSubscriber()
         # Should not raise — handler logs returned_item_ids
-        handler.on_order_returned(
-            OrderReturned(
-                order_id="ord-ret-001",
-                returned_item_ids=["item-001", "item-002"],
-                returned_at=datetime.now(UTC),
+        subscriber(
+            _build_message(
+                "Ordering.OrderReturned.v1",
+                {
+                    "order_id": "ord-ret-001",
+                    "returned_item_ids": ["item-001", "item-002"],
+                    "returned_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
 
     def test_empty_returned_item_ids_is_noop(self):
         """If the return event has no returned_item_ids, handler logs and returns."""
-        handler = OrderingInventoryEventHandler()
+        subscriber = OrderingEventsSubscriber()
         # Should not raise
-        handler.on_order_returned(
-            OrderReturned(
-                order_id="ord-ret-empty",
-                returned_item_ids=[],
-                returned_at=datetime.now(UTC),
+        subscriber(
+            _build_message(
+                "Ordering.OrderReturned.v1",
+                {
+                    "order_id": "ord-ret-empty",
+                    "returned_item_ids": [],
+                    "returned_at": datetime.now(UTC).isoformat(),
+                },
+            )
+        )
+
+
+class TestIgnoresUnrelatedEvents:
+    def test_ignores_non_matching_events(self):
+        """Events on the ordering stream that aren't handled should be ignored."""
+        subscriber = OrderingEventsSubscriber()
+        subscriber(
+            _build_message(
+                "Ordering.OrderCreated.v1",
+                {"order_id": "ord-ignore", "customer_id": "cust-001"},
             )
         )
 
     def test_no_returned_item_ids_is_noop(self):
         """If returned_item_ids is not provided, handler logs and returns."""
-        handler = OrderingInventoryEventHandler()
+        subscriber = OrderingEventsSubscriber()
         # Should not raise
-        handler.on_order_returned(
-            OrderReturned(
-                order_id="ord-ret-none",
-                returned_at=datetime.now(UTC),
+        subscriber(
+            _build_message(
+                "Ordering.OrderReturned.v1",
+                {
+                    "order_id": "ord-ret-none",
+                    "returned_at": datetime.now(UTC).isoformat(),
+                },
             )
         )
