@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Designate an existing address as the customer's default.",
+  "properties": {
+    "address_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "address_id",
+    "customer_id"
+  ],
+  "title": "SetDefaultAddress",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "identity.customer.addresses.SetDefaultAddress",
+  "x-protean-type": "Identity.SetDefaultAddress.v1",
+  "x-protean-version": 1
+}

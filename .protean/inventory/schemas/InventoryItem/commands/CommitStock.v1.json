@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Commit reserved stock when an order ships.",
+  "properties": {
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reservation_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "inventory_item_id",
+    "reservation_id"
+  ],
+  "title": "CommitStock",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "inventory.stock.shipping.CommitStock",
+  "x-protean-type": "Inventory.CommitStock.v1",
+  "x-protean-version": 1
+}

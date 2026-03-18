@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A new image was uploaded for a product.",
+  "properties": {
+    "image_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "is_primary": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "url": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "image_id",
+    "is_primary",
+    "product_id",
+    "url"
+  ],
+  "title": "ProductImageAdded",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "catalogue.product.events.ProductImageAdded",
+  "x-protean-type": "Catalogue.ProductImageAdded.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The order was cancelled before fulfillment began.",
+  "properties": {
+    "cancelled_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "cancelled_by": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "cancelled_at",
+    "cancelled_by",
+    "order_id",
+    "reason"
+  ],
+  "title": "OrderCancelled",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.OrderCancelled",
+  "x-protean-published": true,
+  "x-protean-type": "Ordering.OrderCancelled.v1",
+  "x-protean-version": 1
+}

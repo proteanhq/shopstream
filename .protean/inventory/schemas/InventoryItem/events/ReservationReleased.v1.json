@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A stock reservation was released, returning quantity to available.",
+  "properties": {
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_available": {
+      "type": "integer"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "previous_available": {
+      "type": "integer"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "released_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "reservation_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "inventory_item_id",
+    "new_available",
+    "order_id",
+    "previous_available",
+    "quantity",
+    "reason",
+    "released_at",
+    "reservation_id"
+  ],
+  "title": "ReservationReleased",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.stock.events.ReservationReleased",
+  "x-protean-published": true,
+  "x-protean-type": "Inventory.ReservationReleased.v1",
+  "x-protean-version": 1
+}

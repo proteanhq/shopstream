@@ -1,0 +1,2540 @@
+{
+  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
+  "checksum": "sha256:303c4070a9727257ae6eaf37d3060ddc5e888a1ce4fc93b39848cabc074ca604",
+  "clusters": {
+    "abc.DefaultOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.DefaultOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "DefaultOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "outbox",
+          "stream_category": "reviews::default_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.DefaultOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.DefaultOutboxRepository",
+          "module": "protean.utils",
+          "name": "DefaultOutboxRepository",
+          "part_of": "abc.DefaultOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "abc.MemoryOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.MemoryOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "MemoryOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "memory",
+          "schema_name": "outbox",
+          "stream_category": "reviews::memory_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.MemoryOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.MemoryOutboxRepository",
+          "module": "protean.utils",
+          "name": "MemoryOutboxRepository",
+          "part_of": "abc.MemoryOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "reviews.review.review.Review": {
+      "aggregate": {
+        "description": "A customer's review of a product they purchased.\n\nThe Review aggregate manages the full lifecycle: submission,\nmoderation, voting, reporting, seller replies, and removal.",
+        "element_type": "AGGREGATE",
+        "fields": {
+          "body": {
+            "kind": "text",
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "Text"
+          },
+          "cons": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "edited_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "helpful_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "images": {
+            "kind": "has_many",
+            "target": "reviews.review.review.ReviewImage"
+          },
+          "is_edited": {
+            "default": false,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "moderation_notes": {
+            "kind": "text",
+            "sanitize": true,
+            "type": "Text"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "pros": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "rating": {
+            "kind": "value_object",
+            "required": true,
+            "target": "reviews.review.review.Rating"
+          },
+          "reply": {
+            "kind": "has_many",
+            "target": "reviews.review.review.SellerReply"
+          },
+          "report_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "reported_reasons": {
+            "content_type": "dict",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "status": {
+            "choices": [
+              "Pending",
+              "Published",
+              "Rejected",
+              "Removed"
+            ],
+            "default": "Pending",
+            "kind": "status",
+            "transitions": {
+              "Pending": [
+                "Published",
+                "Rejected"
+              ],
+              "Published": [
+                "Removed"
+              ],
+              "Rejected": [
+                "Pending"
+              ]
+            },
+            "type": "Status"
+          },
+          "title": {
+            "kind": "standard",
+            "max_length": 200,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "unhelpful_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "variant_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "verified_purchase": {
+            "default": false,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "votes": {
+            "kind": "has_many",
+            "target": "reviews.review.review.HelpfulVote"
+          }
+        },
+        "fqn": "reviews.review.review.Review",
+        "identity_field": "id",
+        "invariants": {
+          "post": [
+            "at_most_one_seller_reply",
+            "body_minimum_length",
+            "images_cannot_exceed_maximum",
+            "title_must_not_be_empty"
+          ],
+          "pre": []
+        },
+        "module": "reviews.review.review",
+        "name": "Review",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "review",
+          "stream_category": "reviews::review"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "reviews.review.editing.EditReviewHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "reviews.review.editing.EditReviewHandler",
+          "handlers": {
+            "Reviews.EditReview.v1": [
+              "edit_review"
+            ]
+          },
+          "module": "reviews.review.editing",
+          "name": "EditReviewHandler",
+          "part_of": "reviews.review.review.Review",
+          "stream_category": "reviews::review:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "reviews.review.moderation.ModerateReviewHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "reviews.review.moderation.ModerateReviewHandler",
+          "handlers": {
+            "Reviews.ModerateReview.v1": [
+              "moderate_review"
+            ]
+          },
+          "module": "reviews.review.moderation",
+          "name": "ModerateReviewHandler",
+          "part_of": "reviews.review.review.Review",
+          "stream_category": "reviews::review:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "reviews.review.removal.RemoveReviewHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "reviews.review.removal.RemoveReviewHandler",
+          "handlers": {
+            "Reviews.RemoveReview.v1": [
+              "remove_review"
+            ]
+          },
+          "module": "reviews.review.removal",
+          "name": "RemoveReviewHandler",
+          "part_of": "reviews.review.review.Review",
+          "stream_category": "reviews::review:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "reviews.review.reply.AddSellerReplyHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "reviews.review.reply.AddSellerReplyHandler",
+          "handlers": {
+            "Reviews.AddSellerReply.v1": [
+              "add_seller_reply"
+            ]
+          },
+          "module": "reviews.review.reply",
+          "name": "AddSellerReplyHandler",
+          "part_of": "reviews.review.review.Review",
+          "stream_category": "reviews::review:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "reviews.review.reporting.ReportReviewHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "reviews.review.reporting.ReportReviewHandler",
+          "handlers": {
+            "Reviews.ReportReview.v1": [
+              "report_review"
+            ]
+          },
+          "module": "reviews.review.reporting",
+          "name": "ReportReviewHandler",
+          "part_of": "reviews.review.review.Review",
+          "stream_category": "reviews::review:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "reviews.review.submission.SubmitReviewHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "reviews.review.submission.SubmitReviewHandler",
+          "handlers": {
+            "Reviews.SubmitReview.v1": [
+              "submit_review"
+            ]
+          },
+          "module": "reviews.review.submission",
+          "name": "SubmitReviewHandler",
+          "part_of": "reviews.review.review.Review",
+          "stream_category": "reviews::review:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "reviews.review.voting.VoteOnReviewHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "reviews.review.voting.VoteOnReviewHandler",
+          "handlers": {
+            "Reviews.VoteOnReview.v1": [
+              "vote_on_review"
+            ]
+          },
+          "module": "reviews.review.voting",
+          "name": "VoteOnReviewHandler",
+          "part_of": "reviews.review.review.Review",
+          "stream_category": "reviews::review:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "reviews.review.editing.EditReview": {
+          "__type__": "Reviews.EditReview.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "body": {
+              "kind": "text",
+              "sanitize": true,
+              "type": "Text"
+            },
+            "cons": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "pros": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            },
+            "rating": {
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "title": {
+              "kind": "standard",
+              "max_length": 200,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "reviews.review.editing.EditReview",
+          "module": "reviews.review.editing",
+          "name": "EditReview",
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.moderation.ModerateReview": {
+          "__type__": "Reviews.ModerateReview.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "action": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "moderator_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.review.moderation.ModerateReview",
+          "module": "reviews.review.moderation",
+          "name": "ModerateReview",
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.removal.RemoveReview": {
+          "__type__": "Reviews.RemoveReview.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "removed_by": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.review.removal.RemoveReview",
+          "module": "reviews.review.removal",
+          "name": "RemoveReview",
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.reply.AddSellerReply": {
+          "__type__": "Reviews.AddSellerReply.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "body": {
+              "kind": "text",
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "Text"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "seller_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.review.reply.AddSellerReply",
+          "module": "reviews.review.reply",
+          "name": "AddSellerReply",
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.reporting.ReportReview": {
+          "__type__": "Reviews.ReportReview.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "detail": {
+              "kind": "standard",
+              "max_length": 500,
+              "sanitize": true,
+              "type": "String"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.review.reporting.ReportReview",
+          "module": "reviews.review.reporting",
+          "name": "ReportReview",
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.submission.SubmitReview": {
+          "__type__": "Reviews.SubmitReview.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "body": {
+              "kind": "text",
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "Text"
+            },
+            "cons": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "images": {
+              "content_type": "dict",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "pros": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            },
+            "rating": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "title": {
+              "kind": "standard",
+              "max_length": 200,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.review.submission.SubmitReview",
+          "module": "reviews.review.submission",
+          "name": "SubmitReview",
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.voting.VoteOnReview": {
+          "__type__": "Reviews.VoteOnReview.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "vote_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "reviews.review.voting.VoteOnReview",
+          "module": "reviews.review.voting",
+          "name": "VoteOnReview",
+          "part_of": "reviews.review.review.Review"
+        }
+      },
+      "database_models": {},
+      "entities": {
+        "reviews.review.review.HelpfulVote": {
+          "description": "A vote on whether a review was helpful or unhelpful.",
+          "element_type": "ENTITY",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "review": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "reviews.review.review.Review"
+            },
+            "vote_type": {
+              "choices": [
+                "Helpful",
+                "Unhelpful"
+              ],
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "voted_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "reviews.review.review.HelpfulVote",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "reviews.review.review",
+          "name": "HelpfulVote",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "helpful_vote"
+          },
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.review.ReviewImage": {
+          "description": "A photo attached to a review.",
+          "element_type": "ENTITY",
+          "fields": {
+            "alt_text": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "display_order": {
+              "default": 0,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "review": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "reviews.review.review.Review"
+            },
+            "url": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "reviews.review.review.ReviewImage",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "reviews.review.review",
+          "name": "ReviewImage",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "review_image"
+          },
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.review.SellerReply": {
+          "description": "A reply from the product seller to the review.",
+          "element_type": "ENTITY",
+          "fields": {
+            "body": {
+              "kind": "text",
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "Text"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "replied_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "review": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "reviews.review.review.Review"
+            },
+            "seller_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.review.review.SellerReply",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "reviews.review.review",
+          "name": "SellerReply",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "seller_reply"
+          },
+          "part_of": "reviews.review.review.Review"
+        }
+      },
+      "event_handlers": {},
+      "events": {
+        "reviews.review.events.HelpfulVoteRecorded": {
+          "__type__": "Reviews.HelpfulVoteRecorded.v1",
+          "__version__": 1,
+          "description": "A customer voted on whether a review was helpful.",
+          "element_type": "EVENT",
+          "fields": {
+            "helpful_count": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "unhelpful_count": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "vote_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "voted_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "voter_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.review.events.HelpfulVoteRecorded",
+          "is_fact_event": false,
+          "module": "reviews.review.events",
+          "name": "HelpfulVoteRecorded",
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.events.ReviewApproved": {
+          "__type__": "Reviews.ReviewApproved.v1",
+          "__version__": 1,
+          "description": "A moderator approved the review for publication.",
+          "element_type": "EVENT",
+          "fields": {
+            "approved_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "moderator_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "rating": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.review.events.ReviewApproved",
+          "is_fact_event": false,
+          "module": "reviews.review.events",
+          "name": "ReviewApproved",
+          "part_of": "reviews.review.review.Review",
+          "published": true
+        },
+        "reviews.review.events.ReviewEdited": {
+          "__type__": "Reviews.ReviewEdited.v1",
+          "__version__": 1,
+          "description": "A customer edited their review content.",
+          "element_type": "EVENT",
+          "fields": {
+            "body": {
+              "kind": "text",
+              "sanitize": true,
+              "type": "Text"
+            },
+            "edited_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "rating": {
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "title": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "reviews.review.events.ReviewEdited",
+          "is_fact_event": false,
+          "module": "reviews.review.events",
+          "name": "ReviewEdited",
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.events.ReviewRejected": {
+          "__type__": "Reviews.ReviewRejected.v1",
+          "__version__": 1,
+          "description": "A moderator rejected the review.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "moderator_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "rejected_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.review.events.ReviewRejected",
+          "is_fact_event": false,
+          "module": "reviews.review.events",
+          "name": "ReviewRejected",
+          "part_of": "reviews.review.review.Review",
+          "published": true
+        },
+        "reviews.review.events.ReviewRemoved": {
+          "__type__": "Reviews.ReviewRemoved.v1",
+          "__version__": 1,
+          "description": "A published review was removed.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "rating": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "removed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "removed_by": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.review.events.ReviewRemoved",
+          "is_fact_event": false,
+          "module": "reviews.review.events",
+          "name": "ReviewRemoved",
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.events.ReviewReported": {
+          "__type__": "Reviews.ReviewReported.v1",
+          "__version__": 1,
+          "description": "A customer reported a review for moderation.",
+          "element_type": "EVENT",
+          "fields": {
+            "detail": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "report_count": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reported_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "reporter_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.review.events.ReviewReported",
+          "is_fact_event": false,
+          "module": "reviews.review.events",
+          "name": "ReviewReported",
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.events.ReviewSubmitted": {
+          "__type__": "Reviews.ReviewSubmitted.v1",
+          "__version__": 1,
+          "description": "A customer submitted a new product review.",
+          "element_type": "EVENT",
+          "fields": {
+            "body": {
+              "kind": "text",
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "Text"
+            },
+            "cons": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "image_count": {
+              "default": 0,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "pros": {
+              "content_type": "String",
+              "default": "<callable>",
+              "kind": "list",
+              "type": "List"
+            },
+            "rating": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "submitted_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "title": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            },
+            "verified_purchase": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "reviews.review.events.ReviewSubmitted",
+          "is_fact_event": false,
+          "module": "reviews.review.events",
+          "name": "ReviewSubmitted",
+          "part_of": "reviews.review.review.Review"
+        },
+        "reviews.review.events.SellerReplyAdded": {
+          "__type__": "Reviews.SellerReplyAdded.v1",
+          "__version__": 1,
+          "description": "A seller added a reply to a review.",
+          "element_type": "EVENT",
+          "fields": {
+            "body": {
+              "kind": "text",
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "Text"
+            },
+            "replied_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "seller_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.review.events.SellerReplyAdded",
+          "is_fact_event": false,
+          "module": "reviews.review.events",
+          "name": "SellerReplyAdded",
+          "part_of": "reviews.review.review.Review"
+        }
+      },
+      "repositories": {},
+      "value_objects": {
+        "reviews.review.review.Rating": {
+          "description": "A star rating from 1 to 5.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "score": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            }
+          },
+          "fqn": "reviews.review.review.Rating",
+          "invariants": {
+            "post": [
+              "score_must_be_in_range"
+            ],
+            "pre": []
+          },
+          "module": "reviews.review.review",
+          "name": "Rating",
+          "part_of": "reviews.review.review.Review"
+        }
+      }
+    }
+  },
+  "contracts": {
+    "events": [
+      {
+        "fields": {
+          "approved_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "moderator_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "rating": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "review_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "reviews.review.events.ReviewApproved",
+        "type": "Reviews.ReviewApproved.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "moderator_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "rejected_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "review_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "reviews.review.events.ReviewRejected",
+        "type": "Reviews.ReviewRejected.v1",
+        "version": 1
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.DefaultOutbox",
+      "level": "warning",
+      "message": "Aggregate `DefaultOutbox` has no command handler \u2014 no write path exists"
+    },
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.MemoryOutbox",
+      "level": "warning",
+      "message": "Aggregate `MemoryOutbox` has no command handler \u2014 no write path exists"
+    },
+    {
+      "code": "PROJECTION_WITHOUT_PROJECTOR",
+      "element": "reviews.projections.verified_purchases.VerifiedPurchases",
+      "level": "warning",
+      "message": "Projection `VerifiedPurchases` has no projector to populate it"
+    }
+  ],
+  "domain": {
+    "camel_case_name": "Reviews",
+    "command_processing": "sync",
+    "event_processing": "async",
+    "identity_strategy": "uuid",
+    "identity_type": "string",
+    "name": "reviews",
+    "normalized_name": "reviews"
+  },
+  "elements": {
+    "AGGREGATE": [
+      "abc.DefaultOutbox",
+      "abc.MemoryOutbox",
+      "reviews.review.review.Review"
+    ],
+    "APPLICATION_SERVICE": [],
+    "COMMAND": [
+      "reviews.review.editing.EditReview",
+      "reviews.review.moderation.ModerateReview",
+      "reviews.review.removal.RemoveReview",
+      "reviews.review.reply.AddSellerReply",
+      "reviews.review.reporting.ReportReview",
+      "reviews.review.submission.SubmitReview",
+      "reviews.review.voting.VoteOnReview"
+    ],
+    "COMMAND_HANDLER": [
+      "reviews.review.editing.EditReviewHandler",
+      "reviews.review.moderation.ModerateReviewHandler",
+      "reviews.review.removal.RemoveReviewHandler",
+      "reviews.review.reply.AddSellerReplyHandler",
+      "reviews.review.reporting.ReportReviewHandler",
+      "reviews.review.submission.SubmitReviewHandler",
+      "reviews.review.voting.VoteOnReviewHandler"
+    ],
+    "DATABASE_MODEL": [],
+    "DOMAIN_SERVICE": [],
+    "ENTITY": [
+      "reviews.review.review.HelpfulVote",
+      "reviews.review.review.ReviewImage",
+      "reviews.review.review.SellerReply"
+    ],
+    "EVENT": [
+      "reviews.review.events.HelpfulVoteRecorded",
+      "reviews.review.events.ReviewApproved",
+      "reviews.review.events.ReviewEdited",
+      "reviews.review.events.ReviewRejected",
+      "reviews.review.events.ReviewRemoved",
+      "reviews.review.events.ReviewReported",
+      "reviews.review.events.ReviewSubmitted",
+      "reviews.review.events.SellerReplyAdded"
+    ],
+    "EVENT_HANDLER": [],
+    "PROCESS_MANAGER": [],
+    "PROJECTION": [
+      "reviews.projections.customer_reviews.CustomerReviews",
+      "reviews.projections.moderation_queue.ModerationQueue",
+      "reviews.projections.product_rating.ProductRating",
+      "reviews.projections.product_reviews.ProductReviews",
+      "reviews.projections.review_detail.ReviewDetail",
+      "reviews.projections.verified_purchases.VerifiedPurchases"
+    ],
+    "PROJECTOR": [
+      "reviews.projections.customer_reviews.CustomerReviewsProjector",
+      "reviews.projections.moderation_queue.ModerationQueueProjector",
+      "reviews.projections.product_rating.ProductRatingProjector",
+      "reviews.projections.product_reviews.ProductReviewsProjector",
+      "reviews.projections.review_detail.ReviewDetailProjector"
+    ],
+    "QUERY": [
+      "reviews.projections.customer_reviews_queries.ListCustomerReviews",
+      "reviews.projections.product_rating_queries.GetProductRating",
+      "reviews.projections.product_reviews_queries.ListProductReviews",
+      "reviews.projections.review_detail_queries.GetReviewDetail"
+    ],
+    "QUERY_HANDLER": [
+      "reviews.projections.customer_reviews_queries.CustomerReviewsQueryHandler",
+      "reviews.projections.product_rating_queries.ProductRatingQueryHandler",
+      "reviews.projections.product_reviews_queries.ProductReviewsQueryHandler",
+      "reviews.projections.review_detail_queries.ReviewDetailQueryHandler"
+    ],
+    "REPOSITORY": [
+      "protean.utils.DefaultOutboxRepository",
+      "protean.utils.MemoryOutboxRepository"
+    ],
+    "SUBSCRIBER": [
+      "reviews.review.ordering_subscriber.OrderDeliveredSubscriber"
+    ],
+    "VALUE_OBJECT": [
+      "reviews.review.review.Rating"
+    ]
+  },
+  "flows": {
+    "domain_services": {},
+    "process_managers": {},
+    "subscribers": {
+      "reviews.review.ordering_subscriber.OrderDeliveredSubscriber": {
+        "broker": "global",
+        "description": "Reacts to OrderDelivered events to track verified purchases.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and creates VerifiedPurchases records from the\nevent data. Ignores all other event types on the stream.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "reviews.review.ordering_subscriber.OrderDeliveredSubscriber",
+        "module": "reviews.review.ordering_subscriber",
+        "name": "OrderDeliveredSubscriber",
+        "stream": "ordering::order"
+      }
+    }
+  },
+  "generated_at": "2026-03-18T13:30:27Z",
+  "ir_version": "0.1.0",
+  "projections": {
+    "reviews.projections.customer_reviews.CustomerReviews": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "rating": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "review_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "title": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "reviews.projections.customer_reviews.CustomerReviews",
+        "identity_field": "review_id",
+        "module": "reviews.projections.customer_reviews",
+        "name": "CustomerReviews",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "customer_reviews"
+        }
+      },
+      "projectors": {
+        "reviews.projections.customer_reviews.CustomerReviewsProjector": {
+          "aggregates": [
+            "reviews.review.review.Review"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "reviews.projections.customer_reviews.CustomerReviewsProjector",
+          "handlers": {
+            "Reviews.ReviewApproved.v1": [
+              "on_review_approved"
+            ],
+            "Reviews.ReviewEdited.v1": [
+              "on_review_edited"
+            ],
+            "Reviews.ReviewRejected.v1": [
+              "on_review_rejected"
+            ],
+            "Reviews.ReviewRemoved.v1": [
+              "on_review_removed"
+            ],
+            "Reviews.ReviewSubmitted.v1": [
+              "on_review_submitted"
+            ]
+          },
+          "module": "reviews.projections.customer_reviews",
+          "name": "CustomerReviewsProjector",
+          "projector_for": "reviews.projections.customer_reviews.CustomerReviews",
+          "stream_categories": [
+            "reviews::review"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "reviews.projections.customer_reviews_queries.ListCustomerReviews": {
+          "__type__": "Reviews.ListCustomerReviews",
+          "element_type": "QUERY",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "page": {
+              "default": 1,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "page_size": {
+              "default": 20,
+              "kind": "standard",
+              "type": "Integer"
+            }
+          },
+          "fqn": "reviews.projections.customer_reviews_queries.ListCustomerReviews",
+          "module": "reviews.projections.customer_reviews_queries",
+          "name": "ListCustomerReviews",
+          "part_of": "reviews.projections.customer_reviews.CustomerReviews"
+        }
+      },
+      "query_handlers": {
+        "reviews.projections.customer_reviews_queries.CustomerReviewsQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "reviews.projections.customer_reviews_queries.CustomerReviewsQueryHandler",
+          "handlers": {
+            "Reviews.ListCustomerReviews": [
+              "list_customer_reviews"
+            ]
+          },
+          "module": "reviews.projections.customer_reviews_queries",
+          "name": "CustomerReviewsQueryHandler",
+          "part_of": "reviews.projections.customer_reviews.CustomerReviews"
+        }
+      }
+    },
+    "reviews.projections.moderation_queue.ModerationQueue": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "body": {
+            "kind": "text",
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "Text"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "last_reported_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "rating": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "report_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "review_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "submitted_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "title": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "verified_purchase": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "reviews.projections.moderation_queue.ModerationQueue",
+        "identity_field": "review_id",
+        "module": "reviews.projections.moderation_queue",
+        "name": "ModerationQueue",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "moderation_queue"
+        }
+      },
+      "projectors": {
+        "reviews.projections.moderation_queue.ModerationQueueProjector": {
+          "aggregates": [
+            "reviews.review.review.Review"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "reviews.projections.moderation_queue.ModerationQueueProjector",
+          "handlers": {
+            "Reviews.ReviewApproved.v1": [
+              "on_review_approved"
+            ],
+            "Reviews.ReviewRejected.v1": [
+              "on_review_rejected"
+            ],
+            "Reviews.ReviewRemoved.v1": [
+              "on_review_removed"
+            ],
+            "Reviews.ReviewReported.v1": [
+              "on_review_reported"
+            ],
+            "Reviews.ReviewSubmitted.v1": [
+              "on_review_submitted"
+            ]
+          },
+          "module": "reviews.projections.moderation_queue",
+          "name": "ModerationQueueProjector",
+          "projector_for": "reviews.projections.moderation_queue.ModerationQueue",
+          "stream_categories": [
+            "reviews::review"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "reviews.projections.product_rating.ProductRating": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "average_rating": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "product_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "rating_distribution": {
+            "default": "<callable>",
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "total_reviews": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "verified_review_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          }
+        },
+        "fqn": "reviews.projections.product_rating.ProductRating",
+        "identity_field": "product_id",
+        "module": "reviews.projections.product_rating",
+        "name": "ProductRating",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "product_rating"
+        }
+      },
+      "projectors": {
+        "reviews.projections.product_rating.ProductRatingProjector": {
+          "aggregates": [
+            "reviews.review.review.Review"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "reviews.projections.product_rating.ProductRatingProjector",
+          "handlers": {
+            "Reviews.ReviewApproved.v1": [
+              "on_review_approved"
+            ],
+            "Reviews.ReviewRemoved.v1": [
+              "on_review_removed"
+            ]
+          },
+          "module": "reviews.projections.product_rating",
+          "name": "ProductRatingProjector",
+          "projector_for": "reviews.projections.product_rating.ProductRating",
+          "stream_categories": [
+            "reviews::review"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "reviews.projections.product_rating_queries.GetProductRating": {
+          "__type__": "Reviews.GetProductRating",
+          "element_type": "QUERY",
+          "fields": {
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.projections.product_rating_queries.GetProductRating",
+          "module": "reviews.projections.product_rating_queries",
+          "name": "GetProductRating",
+          "part_of": "reviews.projections.product_rating.ProductRating"
+        }
+      },
+      "query_handlers": {
+        "reviews.projections.product_rating_queries.ProductRatingQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "reviews.projections.product_rating_queries.ProductRatingQueryHandler",
+          "handlers": {
+            "Reviews.GetProductRating": [
+              "get_product_rating"
+            ]
+          },
+          "module": "reviews.projections.product_rating_queries",
+          "name": "ProductRatingQueryHandler",
+          "part_of": "reviews.projections.product_rating.ProductRating"
+        }
+      }
+    },
+    "reviews.projections.product_reviews.ProductReviews": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "body": {
+            "kind": "text",
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "Text"
+          },
+          "cons": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "has_seller_reply": {
+            "default": "False",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "helpful_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "images": {
+            "content_type": "dict",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "is_edited": {
+            "default": "False",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "pros": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "rating": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "review_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "seller_reply_body": {
+            "kind": "text",
+            "sanitize": true,
+            "type": "Text"
+          },
+          "title": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "unhelpful_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "variant_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "verified_purchase": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "reviews.projections.product_reviews.ProductReviews",
+        "identity_field": "review_id",
+        "module": "reviews.projections.product_reviews",
+        "name": "ProductReviews",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "product_reviews"
+        }
+      },
+      "projectors": {
+        "reviews.projections.product_reviews.ProductReviewsProjector": {
+          "aggregates": [
+            "reviews.review.review.Review"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "reviews.projections.product_reviews.ProductReviewsProjector",
+          "handlers": {
+            "Reviews.HelpfulVoteRecorded.v1": [
+              "on_helpful_vote_recorded"
+            ],
+            "Reviews.ReviewApproved.v1": [
+              "on_review_approved"
+            ],
+            "Reviews.ReviewRemoved.v1": [
+              "on_review_removed"
+            ],
+            "Reviews.SellerReplyAdded.v1": [
+              "on_seller_reply_added"
+            ]
+          },
+          "module": "reviews.projections.product_reviews",
+          "name": "ProductReviewsProjector",
+          "projector_for": "reviews.projections.product_reviews.ProductReviews",
+          "stream_categories": [
+            "reviews::review"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "reviews.projections.product_reviews_queries.ListProductReviews": {
+          "__type__": "Reviews.ListProductReviews",
+          "element_type": "QUERY",
+          "fields": {
+            "page": {
+              "default": 1,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "page_size": {
+              "default": 20,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.projections.product_reviews_queries.ListProductReviews",
+          "module": "reviews.projections.product_reviews_queries",
+          "name": "ListProductReviews",
+          "part_of": "reviews.projections.product_reviews.ProductReviews"
+        }
+      },
+      "query_handlers": {
+        "reviews.projections.product_reviews_queries.ProductReviewsQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "reviews.projections.product_reviews_queries.ProductReviewsQueryHandler",
+          "handlers": {
+            "Reviews.ListProductReviews": [
+              "list_product_reviews"
+            ]
+          },
+          "module": "reviews.projections.product_reviews_queries",
+          "name": "ProductReviewsQueryHandler",
+          "part_of": "reviews.projections.product_reviews.ProductReviews"
+        }
+      }
+    },
+    "reviews.projections.review_detail.ReviewDetail": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "body": {
+            "kind": "text",
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "Text"
+          },
+          "cons": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "has_seller_reply": {
+            "default": "False",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "helpful_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "images": {
+            "kind": "text",
+            "sanitize": true,
+            "type": "Text"
+          },
+          "is_edited": {
+            "default": "False",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "moderation_notes": {
+            "kind": "text",
+            "sanitize": true,
+            "type": "Text"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "pros": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "rating": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "report_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "review_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "seller_reply_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "seller_reply_body": {
+            "kind": "text",
+            "sanitize": true,
+            "type": "Text"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "title": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "unhelpful_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "variant_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "verified_purchase": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "reviews.projections.review_detail.ReviewDetail",
+        "identity_field": "review_id",
+        "module": "reviews.projections.review_detail",
+        "name": "ReviewDetail",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "review_detail"
+        }
+      },
+      "projectors": {
+        "reviews.projections.review_detail.ReviewDetailProjector": {
+          "aggregates": [
+            "reviews.review.review.Review"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "reviews.projections.review_detail.ReviewDetailProjector",
+          "handlers": {
+            "Reviews.HelpfulVoteRecorded.v1": [
+              "on_helpful_vote_recorded"
+            ],
+            "Reviews.ReviewApproved.v1": [
+              "on_review_approved"
+            ],
+            "Reviews.ReviewEdited.v1": [
+              "on_review_edited"
+            ],
+            "Reviews.ReviewRejected.v1": [
+              "on_review_rejected"
+            ],
+            "Reviews.ReviewRemoved.v1": [
+              "on_review_removed"
+            ],
+            "Reviews.ReviewReported.v1": [
+              "on_review_reported"
+            ],
+            "Reviews.ReviewSubmitted.v1": [
+              "on_review_submitted"
+            ],
+            "Reviews.SellerReplyAdded.v1": [
+              "on_seller_reply_added"
+            ]
+          },
+          "module": "reviews.projections.review_detail",
+          "name": "ReviewDetailProjector",
+          "projector_for": "reviews.projections.review_detail.ReviewDetail",
+          "stream_categories": [
+            "reviews::review"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "reviews.projections.review_detail_queries.GetReviewDetail": {
+          "__type__": "Reviews.GetReviewDetail",
+          "element_type": "QUERY",
+          "fields": {
+            "review_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "reviews.projections.review_detail_queries.GetReviewDetail",
+          "module": "reviews.projections.review_detail_queries",
+          "name": "GetReviewDetail",
+          "part_of": "reviews.projections.review_detail.ReviewDetail"
+        }
+      },
+      "query_handlers": {
+        "reviews.projections.review_detail_queries.ReviewDetailQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "reviews.projections.review_detail_queries.ReviewDetailQueryHandler",
+          "handlers": {
+            "Reviews.GetReviewDetail": [
+              "get_review_detail"
+            ]
+          },
+          "module": "reviews.projections.review_detail_queries",
+          "name": "ReviewDetailQueryHandler",
+          "part_of": "reviews.projections.review_detail.ReviewDetail"
+        }
+      }
+    },
+    "reviews.projections.verified_purchases.VerifiedPurchases": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "customer_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "delivered_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "order_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "product_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "variant_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "vp_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "reviews.projections.verified_purchases.VerifiedPurchases",
+        "identity_field": "vp_id",
+        "module": "reviews.projections.verified_purchases",
+        "name": "VerifiedPurchases",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "verified_purchases"
+        }
+      },
+      "projectors": {},
+      "queries": {},
+      "query_handlers": {}
+    }
+  }
+}

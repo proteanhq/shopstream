@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A failed notification was retried.",
+  "properties": {
+    "channel": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "notification_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "recipient_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "retried_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "retry_count": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "channel",
+    "notification_id",
+    "recipient_id",
+    "retried_at",
+    "retry_count"
+  ],
+  "title": "NotificationRetried",
+  "type": "object",
+  "x-protean-aggregate": "notifications.notification.notification.Notification",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "notifications.notification.events.NotificationRetried",
+  "x-protean-type": "Notifications.NotificationRetried.v1",
+  "x-protean-version": 1
+}

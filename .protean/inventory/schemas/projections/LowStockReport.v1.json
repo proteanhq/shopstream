@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "current_available": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "detected_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "is_critical": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": false
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reorder_point": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 10
+    },
+    "sku": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "inventory_item_id",
+    "product_id",
+    "sku",
+    "variant_id"
+  ],
+  "title": "LowStockReport",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "inventory.projections.low_stock_report.LowStockReport",
+  "x-protean-identity-field": "inventory_item_id"
+}

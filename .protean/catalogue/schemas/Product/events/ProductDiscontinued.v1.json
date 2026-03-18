@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "An active product was discontinued and removed from sale.",
+  "properties": {
+    "discontinued_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "sku": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "discontinued_at",
+    "product_id",
+    "sku"
+  ],
+  "title": "ProductDiscontinued",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "catalogue.product.events.ProductDiscontinued",
+  "x-protean-published": true,
+  "x-protean-type": "Catalogue.ProductDiscontinued.v1",
+  "x-protean-version": 1
+}

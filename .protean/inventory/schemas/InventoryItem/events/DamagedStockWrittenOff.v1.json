@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Damaged stock was written off (removed from inventory).",
+  "properties": {
+    "approved_by": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_damaged": {
+      "type": "integer"
+    },
+    "previous_damaged": {
+      "type": "integer"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "written_off_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "approved_by",
+    "inventory_item_id",
+    "new_damaged",
+    "previous_damaged",
+    "product_id",
+    "quantity",
+    "written_off_at"
+  ],
+  "title": "DamagedStockWrittenOff",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.stock.events.DamagedStockWrittenOff",
+  "x-protean-type": "Inventory.DamagedStockWrittenOff.v1",
+  "x-protean-version": 1
+}

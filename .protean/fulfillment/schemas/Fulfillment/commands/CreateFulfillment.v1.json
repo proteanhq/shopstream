@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Create a new fulfillment for a paid order.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "items": {
+      "type": "array"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "warehouse_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "customer_id",
+    "items",
+    "order_id"
+  ],
+  "title": "CreateFulfillment",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "fulfillment.fulfillment.creation.CreateFulfillment",
+  "x-protean-type": "Fulfillment.CreateFulfillment.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,178 @@
+{
+  "$defs": {
+    "WarehouseAddress": {
+      "properties": {
+        "city": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+        },
+        "country": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+        },
+        "postal_code": {
+          "maxLength": 20,
+          "minLength": 1,
+          "type": "string"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "street": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "city",
+        "country",
+        "postal_code",
+        "street"
+      ],
+      "type": "object"
+    },
+    "Zone": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "warehouse": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "zone_name": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+        },
+        "zone_type": {
+          "anyOf": [
+            {
+              "enum": [
+                "Cold",
+                "Hazmat",
+                "Regular"
+              ],
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "Regular"
+        }
+      },
+      "required": [
+        "id",
+        "zone_name"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A physical location where inventory is stored.",
+  "properties": {
+    "address": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/WarehouseAddress"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "capacity": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "is_active": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": true
+    },
+    "name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "zones": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/Zone"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "name"
+  ],
+  "title": "Warehouse",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "inventory.warehouse.warehouse.Warehouse",
+  "x-protean-identity-field": "id"
+}

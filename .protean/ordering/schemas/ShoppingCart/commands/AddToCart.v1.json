@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Add a product variant to the shopping cart (merges if already present).",
+  "properties": {
+    "cart_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "cart_id",
+    "product_id",
+    "quantity",
+    "variant_id"
+  ],
+  "title": "AddToCart",
+  "type": "object",
+  "x-protean-aggregate": "ordering.cart.cart.ShoppingCart",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.cart.items.AddToCart",
+  "x-protean-type": "Ordering.AddToCart.v1",
+  "x-protean-version": 1
+}

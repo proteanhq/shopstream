@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Request a refund for a payment.",
+  "properties": {
+    "amount": {
+      "type": "number"
+    },
+    "payment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "amount",
+    "payment_id",
+    "reason"
+  ],
+  "title": "RequestRefund",
+  "type": "object",
+  "x-protean-aggregate": "payments.payment.payment.Payment",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "payments.payment.refund.RequestRefund",
+  "x-protean-type": "Payments.RequestRefund.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Initiate a new payment for an order.",
+  "properties": {
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "anyOf": [
+        {
+          "maxLength": 3,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "USD"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "idempotency_key": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "last4": {
+      "anyOf": [
+        {
+          "maxLength": 4,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_method_type": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "amount",
+    "customer_id",
+    "idempotency_key",
+    "order_id",
+    "payment_method_type"
+  ],
+  "title": "InitiatePayment",
+  "type": "object",
+  "x-protean-aggregate": "payments.payment.payment.Payment",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "payments.payment.initiation.InitiatePayment",
+  "x-protean-type": "Payments.InitiatePayment.v1",
+  "x-protean-version": 1
+}

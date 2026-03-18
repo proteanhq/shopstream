@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A delivery or billing address captured at checkout time.\n\nOnce recorded on an Order, the address is immutable \u2014 it represents where\nthe order was shipped, regardless of future address changes on the Customer.",
+  "properties": {
+    "city": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "country": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "postal_code": {
+      "maxLength": 20,
+      "minLength": 1,
+      "type": "string"
+    },
+    "state": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "street": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "city",
+    "country",
+    "postal_code",
+    "street"
+  ],
+  "title": "ShippingAddress",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "value_object",
+  "x-protean-fqn": "ordering.order.order.ShippingAddress"
+}

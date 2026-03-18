@@ -1,0 +1,180 @@
+{
+  "$defs": {
+    "InvoiceLineItem": {
+      "properties": {
+        "description": {
+          "maxLength": 500,
+          "minLength": 1,
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "invoice": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "quantity": {
+          "type": "number"
+        },
+        "total": {
+          "type": "number"
+        },
+        "unit_price": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "description",
+        "id",
+        "quantity",
+        "total",
+        "unit_price"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "invoice_number": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+    },
+    "issued_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "line_items": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/InvoiceLineItem"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "paid_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "Draft",
+            "Issued",
+            "Paid",
+            "Voided"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "Draft"
+    },
+    "subtotal": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    },
+    "tax": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    },
+    "total": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "customer_id",
+    "id",
+    "invoice_number",
+    "order_id"
+  ],
+  "title": "Invoice",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "payments.invoice.invoice.Invoice",
+  "x-protean-identity-field": "id"
+}

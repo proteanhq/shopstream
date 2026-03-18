@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Set a loyalty-tier-specific discount price on a variant.",
+  "properties": {
+    "price": {
+      "type": "number"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "tier": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "price",
+    "product_id",
+    "tier",
+    "variant_id"
+  ],
+  "title": "SetTierPrice",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "catalogue.product.variants.SetTierPrice",
+  "x-protean-type": "Catalogue.SetTierPrice.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Cancel an order before fulfillment begins (allowed in Created through Paid states).",
+  "properties": {
+    "cancelled_by": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "cancelled_by",
+    "order_id",
+    "reason"
+  ],
+  "title": "CancelOrder",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.order.cancellation.CancelOrder",
+  "x-protean-type": "Ordering.CancelOrder.v1",
+  "x-protean-version": 1
+}

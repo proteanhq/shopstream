@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Default notification preferences were created for a customer.",
+  "properties": {
+    "created_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "email_enabled": {
+      "type": "boolean"
+    },
+    "preference_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "push_enabled": {
+      "type": "boolean"
+    },
+    "sms_enabled": {
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "created_at",
+    "customer_id",
+    "email_enabled",
+    "preference_id",
+    "push_enabled",
+    "sms_enabled"
+  ],
+  "title": "PreferencesCreated",
+  "type": "object",
+  "x-protean-aggregate": "notifications.preference.preference.NotificationPreference",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "notifications.preference.events.PreferencesCreated",
+  "x-protean-type": "Notifications.PreferencesCreated.v1",
+  "x-protean-version": 1
+}

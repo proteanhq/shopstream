@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A category was deactivated and hidden from the storefront.",
+  "properties": {
+    "category_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "deactivated_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "category_id",
+    "deactivated_at"
+  ],
+  "title": "CategoryDeactivated",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.category.category.Category",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "catalogue.category.events.CategoryDeactivated",
+  "x-protean-type": "Catalogue.CategoryDeactivated.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Carrier delivery performance aggregated by carrier and date.",
+  "properties": {
+    "carrier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "date": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "delivered_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "exception_count": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "id": {
+      "type": "string"
+    },
+    "total_delivery_hours": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0.0
+    },
+    "total_shipments": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "carrier",
+    "date",
+    "id"
+  ],
+  "title": "DeliveryPerformanceView",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "fulfillment.projections.delivery_performance.DeliveryPerformanceView",
+  "x-protean-identity-field": "id"
+}

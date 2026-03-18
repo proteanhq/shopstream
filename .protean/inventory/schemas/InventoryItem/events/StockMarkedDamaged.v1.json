@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Stock was identified as damaged, moving from on-hand to damaged.",
+  "properties": {
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "marked_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "new_available": {
+      "type": "integer"
+    },
+    "new_damaged": {
+      "type": "integer"
+    },
+    "new_on_hand": {
+      "type": "integer"
+    },
+    "previous_damaged": {
+      "type": "integer"
+    },
+    "previous_on_hand": {
+      "type": "integer"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "inventory_item_id",
+    "marked_at",
+    "new_available",
+    "new_damaged",
+    "new_on_hand",
+    "previous_damaged",
+    "previous_on_hand",
+    "product_id",
+    "quantity",
+    "reason"
+  ],
+  "title": "StockMarkedDamaged",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.stock.events.StockMarkedDamaged",
+  "x-protean-type": "Inventory.StockMarkedDamaged.v1",
+  "x-protean-version": 1
+}

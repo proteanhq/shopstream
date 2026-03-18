@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Make a draft product available for sale (requires at least one variant).",
+  "properties": {
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "product_id"
+  ],
+  "title": "ActivateProduct",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "catalogue.product.lifecycle.ActivateProduct",
+  "x-protean-type": "Catalogue.ActivateProduct.v1",
+  "x-protean-version": 1
+}

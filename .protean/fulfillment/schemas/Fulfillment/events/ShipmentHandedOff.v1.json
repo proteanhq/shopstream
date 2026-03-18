@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The shipment was handed off to the carrier.",
+  "properties": {
+    "carrier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "estimated_delivery": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "shipped_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "shipped_item_ids": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tracking_number": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "carrier",
+    "fulfillment_id",
+    "order_id",
+    "shipped_at",
+    "tracking_number"
+  ],
+  "title": "ShipmentHandedOff",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "fulfillment.fulfillment.events.ShipmentHandedOff",
+  "x-protean-published": true,
+  "x-protean-type": "Fulfillment.ShipmentHandedOff.v1",
+  "x-protean-version": 1
+}

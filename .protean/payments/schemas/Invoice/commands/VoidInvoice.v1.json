@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Void an existing invoice.",
+  "properties": {
+    "invoice_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "invoice_id",
+    "reason"
+  ],
+  "title": "VoidInvoice",
+  "type": "object",
+  "x-protean-aggregate": "payments.invoice.invoice.Invoice",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "payments.invoice.voiding.VoidInvoice",
+  "x-protean-type": "Payments.VoidInvoice.v1",
+  "x-protean-version": 1
+}

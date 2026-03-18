@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "All order items were shipped with a carrier.",
+  "properties": {
+    "carrier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "estimated_delivery": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "shipment_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "shipped_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "shipped_item_ids": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tracking_number": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "carrier",
+    "order_id",
+    "shipment_id",
+    "shipped_at",
+    "tracking_number"
+  ],
+  "title": "OrderShipped",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.OrderShipped",
+  "x-protean-type": "Ordering.OrderShipped.v1",
+  "x-protean-version": 1
+}

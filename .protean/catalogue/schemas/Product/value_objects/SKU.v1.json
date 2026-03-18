@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Value object for stock keeping unit codes.\n\nFormat: alphanumeric + hyphens, 3-50 chars.\nE.g., \"ELEC-PHN-001\", \"SHOE-RUN-BLK-42\"",
+  "properties": {
+    "code": {
+      "maxLength": 50,
+      "minLength": 3,
+      "type": "string"
+    }
+  },
+  "required": [
+    "code"
+  ],
+  "title": "SKU",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "value_object",
+  "x-protean-fqn": "catalogue.shared.sku.SKU"
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Finalize a delivered order after the return window has expired.",
+  "properties": {
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "order_id"
+  ],
+  "title": "CompleteOrder",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.order.completion.CompleteOrder",
+  "x-protean-type": "Ordering.CompleteOrder.v1",
+  "x-protean-version": 1
+}

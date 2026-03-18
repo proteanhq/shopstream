@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A notification was sent to the channel adapter.",
+  "properties": {
+    "channel": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "notification_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "recipient_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "sent_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "channel",
+    "notification_id",
+    "recipient_id",
+    "sent_at"
+  ],
+  "title": "NotificationSent",
+  "type": "object",
+  "x-protean-aggregate": "notifications.notification.notification.Notification",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "notifications.notification.events.NotificationSent",
+  "x-protean-type": "Notifications.NotificationSent.v1",
+  "x-protean-version": 1
+}

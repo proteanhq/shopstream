@@ -1,0 +1,3576 @@
+{
+  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
+  "checksum": "sha256:f7146cf9afd8988cfb379b9e2ebe31a518fb305e3a95b6a85b838c01e534138c",
+  "clusters": {
+    "abc.DefaultOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.DefaultOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "DefaultOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "outbox",
+          "stream_category": "inventory::default_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.DefaultOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.DefaultOutboxRepository",
+          "module": "protean.utils",
+          "name": "DefaultOutboxRepository",
+          "part_of": "abc.DefaultOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "abc.MemoryOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.MemoryOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "MemoryOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "memory",
+          "schema_name": "outbox",
+          "stream_category": "inventory::memory_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.MemoryOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.MemoryOutboxRepository",
+          "module": "protean.utils",
+          "name": "MemoryOutboxRepository",
+          "part_of": "abc.MemoryOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "inventory.stock.stock.InventoryItem": {
+      "aggregate": {
+        "apply_handlers": {
+          "inventory.stock.events.DamagedStockWrittenOff": "_on_damaged_stock_written_off",
+          "inventory.stock.events.LowStockDetected": "_on_low_stock_detected",
+          "inventory.stock.events.ReservationConfirmed": "_on_reservation_confirmed",
+          "inventory.stock.events.ReservationReleased": "_on_reservation_released",
+          "inventory.stock.events.StockAdjusted": "_on_stock_adjusted",
+          "inventory.stock.events.StockCheckRecorded": "_on_stock_check_recorded",
+          "inventory.stock.events.StockCommitted": "_on_stock_committed",
+          "inventory.stock.events.StockInitialized": "_on_stock_initialized",
+          "inventory.stock.events.StockMarkedDamaged": "_on_stock_marked_damaged",
+          "inventory.stock.events.StockReceived": "_on_stock_received",
+          "inventory.stock.events.StockReserved": "_on_stock_reserved",
+          "inventory.stock.events.StockReturned": "_on_stock_returned"
+        },
+        "description": "Event-sourced aggregate tracking stock for one product variant at one warehouse.",
+        "element_type": "AGGREGATE",
+        "fields": {
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_stock_check": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "levels": {
+            "kind": "value_object",
+            "target": "inventory.stock.stock.StockLevels"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reorder_point": {
+            "default": 10,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "reorder_quantity": {
+            "default": 50,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "reservations": {
+            "kind": "has_many",
+            "target": "inventory.stock.stock.Reservation"
+          },
+          "sku": {
+            "kind": "standard",
+            "max_length": 50,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "variant_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "warehouse_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "inventory.stock.stock.InventoryItem",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "inventory.stock.stock",
+        "name": "InventoryItem",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": true,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "inventory_item",
+          "stream_category": "inventory::inventory_item"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "inventory.stock.adjustment.StockAdjustmentHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "inventory.stock.adjustment.StockAdjustmentHandler",
+          "handlers": {
+            "Inventory.AdjustStock.v1": [
+              "adjust_stock"
+            ],
+            "Inventory.RecordStockCheck.v1": [
+              "record_stock_check"
+            ]
+          },
+          "module": "inventory.stock.adjustment",
+          "name": "StockAdjustmentHandler",
+          "part_of": "inventory.stock.stock.InventoryItem",
+          "stream_category": "inventory::inventory_item:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "inventory.stock.damage.DamageHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "inventory.stock.damage.DamageHandler",
+          "handlers": {
+            "Inventory.MarkDamaged.v1": [
+              "mark_damaged"
+            ],
+            "Inventory.WriteOffDamaged.v1": [
+              "write_off_damaged"
+            ]
+          },
+          "module": "inventory.stock.damage",
+          "name": "DamageHandler",
+          "part_of": "inventory.stock.stock.InventoryItem",
+          "stream_category": "inventory::inventory_item:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "inventory.stock.expiry.ExpireStaleReservationsHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "inventory.stock.expiry.ExpireStaleReservationsHandler",
+          "handlers": {
+            "Inventory.ExpireStaleReservations.v1": [
+              "expire_stale_reservations"
+            ]
+          },
+          "module": "inventory.stock.expiry",
+          "name": "ExpireStaleReservationsHandler",
+          "part_of": "inventory.stock.stock.InventoryItem",
+          "stream_category": "inventory::inventory_item:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "inventory.stock.initialization.InitializeStockHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "inventory.stock.initialization.InitializeStockHandler",
+          "handlers": {
+            "Inventory.InitializeStock.v1": [
+              "initialize_stock"
+            ]
+          },
+          "module": "inventory.stock.initialization",
+          "name": "InitializeStockHandler",
+          "part_of": "inventory.stock.stock.InventoryItem",
+          "stream_category": "inventory::inventory_item:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "inventory.stock.receiving.ReceiveStockHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "inventory.stock.receiving.ReceiveStockHandler",
+          "handlers": {
+            "Inventory.ReceiveStock.v1": [
+              "receive_stock"
+            ]
+          },
+          "module": "inventory.stock.receiving",
+          "name": "ReceiveStockHandler",
+          "part_of": "inventory.stock.stock.InventoryItem",
+          "stream_category": "inventory::inventory_item:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "inventory.stock.reservation.ReservationHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "inventory.stock.reservation.ReservationHandler",
+          "handlers": {
+            "Inventory.ConfirmReservation.v1": [
+              "confirm_reservation"
+            ],
+            "Inventory.ReleaseReservation.v1": [
+              "release_reservation"
+            ],
+            "Inventory.ReserveStock.v1": [
+              "reserve_stock"
+            ]
+          },
+          "module": "inventory.stock.reservation",
+          "name": "ReservationHandler",
+          "part_of": "inventory.stock.stock.InventoryItem",
+          "stream_category": "inventory::inventory_item:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "inventory.stock.returns.ReturnToStockHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "inventory.stock.returns.ReturnToStockHandler",
+          "handlers": {
+            "Inventory.ReturnToStock.v1": [
+              "return_to_stock"
+            ]
+          },
+          "module": "inventory.stock.returns",
+          "name": "ReturnToStockHandler",
+          "part_of": "inventory.stock.stock.InventoryItem",
+          "stream_category": "inventory::inventory_item:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "inventory.stock.shipping.CommitStockHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "inventory.stock.shipping.CommitStockHandler",
+          "handlers": {
+            "Inventory.CommitStock.v1": [
+              "commit_stock"
+            ]
+          },
+          "module": "inventory.stock.shipping",
+          "name": "CommitStockHandler",
+          "part_of": "inventory.stock.stock.InventoryItem",
+          "stream_category": "inventory::inventory_item:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "inventory.stock.adjustment.AdjustStock": {
+          "__type__": "Inventory.AdjustStock.v1",
+          "__version__": 1,
+          "description": "Manually adjust stock levels.",
+          "element_type": "COMMAND",
+          "fields": {
+            "adjusted_by": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "adjustment_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity_change": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "inventory.stock.adjustment.AdjustStock",
+          "module": "inventory.stock.adjustment",
+          "name": "AdjustStock",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.adjustment.RecordStockCheck": {
+          "__type__": "Inventory.RecordStockCheck.v1",
+          "__version__": 1,
+          "description": "Record a physical stock count.",
+          "element_type": "COMMAND",
+          "fields": {
+            "checked_by": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "counted_quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.stock.adjustment.RecordStockCheck",
+          "module": "inventory.stock.adjustment",
+          "name": "RecordStockCheck",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.damage.MarkDamaged": {
+          "__type__": "Inventory.MarkDamaged.v1",
+          "__version__": 1,
+          "description": "Flag stock as damaged.",
+          "element_type": "COMMAND",
+          "fields": {
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "inventory.stock.damage.MarkDamaged",
+          "module": "inventory.stock.damage",
+          "name": "MarkDamaged",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.damage.WriteOffDamaged": {
+          "__type__": "Inventory.WriteOffDamaged.v1",
+          "__version__": 1,
+          "description": "Write off damaged stock.",
+          "element_type": "COMMAND",
+          "fields": {
+            "approved_by": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            }
+          },
+          "fqn": "inventory.stock.damage.WriteOffDamaged",
+          "module": "inventory.stock.damage",
+          "name": "WriteOffDamaged",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.expiry.ExpireStaleReservations": {
+          "__type__": "Inventory.ExpireStaleReservations.v1",
+          "__version__": 1,
+          "description": "Release reservations older than the specified threshold.",
+          "element_type": "COMMAND",
+          "fields": {
+            "as_of": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "older_than_minutes": {
+              "default": 15,
+              "kind": "standard",
+              "type": "Integer"
+            }
+          },
+          "fqn": "inventory.stock.expiry.ExpireStaleReservations",
+          "module": "inventory.stock.expiry",
+          "name": "ExpireStaleReservations",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.initialization.InitializeStock": {
+          "__type__": "Inventory.InitializeStock.v1",
+          "__version__": 1,
+          "description": "Create a new inventory record for a product variant at a warehouse.",
+          "element_type": "COMMAND",
+          "fields": {
+            "initial_quantity": {
+              "default": 0,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reorder_point": {
+              "default": 10,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "reorder_quantity": {
+              "default": 50,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "sku": {
+              "kind": "standard",
+              "max_length": 50,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "warehouse_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.stock.initialization.InitializeStock",
+          "module": "inventory.stock.initialization",
+          "name": "InitializeStock",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.receiving.ReceiveStock": {
+          "__type__": "Inventory.ReceiveStock.v1",
+          "__version__": 1,
+          "description": "Record incoming stock received at the warehouse.",
+          "element_type": "COMMAND",
+          "fields": {
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reference": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "inventory.stock.receiving.ReceiveStock",
+          "module": "inventory.stock.receiving",
+          "name": "ReceiveStock",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.reservation.ConfirmReservation": {
+          "__type__": "Inventory.ConfirmReservation.v1",
+          "__version__": 1,
+          "description": "Confirm a stock reservation after order payment.",
+          "element_type": "COMMAND",
+          "fields": {
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reservation_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.stock.reservation.ConfirmReservation",
+          "module": "inventory.stock.reservation",
+          "name": "ConfirmReservation",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.reservation.ReleaseReservation": {
+          "__type__": "Inventory.ReleaseReservation.v1",
+          "__version__": 1,
+          "description": "Release a stock reservation.",
+          "element_type": "COMMAND",
+          "fields": {
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "reservation_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.stock.reservation.ReleaseReservation",
+          "module": "inventory.stock.reservation",
+          "name": "ReleaseReservation",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.reservation.ReserveStock": {
+          "__type__": "Inventory.ReserveStock.v1",
+          "__version__": 1,
+          "description": "Reserve stock for an order.",
+          "element_type": "COMMAND",
+          "fields": {
+            "expires_at": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            }
+          },
+          "fqn": "inventory.stock.reservation.ReserveStock",
+          "module": "inventory.stock.reservation",
+          "name": "ReserveStock",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.returns.ReturnToStock": {
+          "__type__": "Inventory.ReturnToStock.v1",
+          "__version__": 1,
+          "description": "Add returned items back to inventory.",
+          "element_type": "COMMAND",
+          "fields": {
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            }
+          },
+          "fqn": "inventory.stock.returns.ReturnToStock",
+          "module": "inventory.stock.returns",
+          "name": "ReturnToStock",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.shipping.CommitStock": {
+          "__type__": "Inventory.CommitStock.v1",
+          "__version__": 1,
+          "description": "Commit reserved stock when an order ships.",
+          "element_type": "COMMAND",
+          "fields": {
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reservation_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.stock.shipping.CommitStock",
+          "module": "inventory.stock.shipping",
+          "name": "CommitStock",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        }
+      },
+      "database_models": {},
+      "entities": {
+        "inventory.stock.stock.Reservation": {
+          "description": "A hold on inventory for a specific order.\n\nReservations transition through: ACTIVE \u2192 CONFIRMED \u2192 (committed via\nCommitStock), or ACTIVE \u2192 RELEASED (cancelled/expired).",
+          "element_type": "ENTITY",
+          "fields": {
+            "expires_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "inventory_item": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "inventory.stock.stock.InventoryItem"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "min_value": 1,
+              "required": true,
+              "type": "Integer"
+            },
+            "reserved_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "status": {
+              "choices": [
+                "Active",
+                "Confirmed",
+                "Expired",
+                "Released"
+              ],
+              "default": "Active",
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "inventory.stock.stock.Reservation",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "inventory.stock.stock",
+          "name": "Reservation",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "reservation"
+          },
+          "part_of": "inventory.stock.stock.InventoryItem"
+        }
+      },
+      "event_handlers": {},
+      "events": {
+        "inventory.stock.events.DamagedStockWrittenOff": {
+          "__type__": "Inventory.DamagedStockWrittenOff.v1",
+          "__version__": 1,
+          "description": "Damaged stock was written off (removed from inventory).",
+          "element_type": "EVENT",
+          "fields": {
+            "approved_by": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_damaged": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "previous_damaged": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "written_off_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "inventory.stock.events.DamagedStockWrittenOff",
+          "is_fact_event": false,
+          "module": "inventory.stock.events",
+          "name": "DamagedStockWrittenOff",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.events.LowStockDetected": {
+          "__type__": "Inventory.LowStockDetected.v1",
+          "__version__": 1,
+          "description": "Available stock dropped below the reorder point.",
+          "element_type": "EVENT",
+          "fields": {
+            "current_available": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "detected_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reorder_point": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "sku": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.stock.events.LowStockDetected",
+          "is_fact_event": false,
+          "module": "inventory.stock.events",
+          "name": "LowStockDetected",
+          "part_of": "inventory.stock.stock.InventoryItem",
+          "published": true
+        },
+        "inventory.stock.events.ReservationConfirmed": {
+          "__type__": "Inventory.ReservationConfirmed.v1",
+          "__version__": 1,
+          "description": "A stock reservation was confirmed after order payment.",
+          "element_type": "EVENT",
+          "fields": {
+            "confirmed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reservation_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.stock.events.ReservationConfirmed",
+          "is_fact_event": false,
+          "module": "inventory.stock.events",
+          "name": "ReservationConfirmed",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.events.ReservationReleased": {
+          "__type__": "Inventory.ReservationReleased.v1",
+          "__version__": 1,
+          "description": "A stock reservation was released, returning quantity to available.",
+          "element_type": "EVENT",
+          "fields": {
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_available": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "previous_available": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "released_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "reservation_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.stock.events.ReservationReleased",
+          "is_fact_event": false,
+          "module": "inventory.stock.events",
+          "name": "ReservationReleased",
+          "part_of": "inventory.stock.stock.InventoryItem",
+          "published": true
+        },
+        "inventory.stock.events.StockAdjusted": {
+          "__type__": "Inventory.StockAdjusted.v1",
+          "__version__": 1,
+          "description": "Stock was manually adjusted (count, shrinkage, correction).",
+          "element_type": "EVENT",
+          "fields": {
+            "adjusted_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "adjusted_by": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "adjustment_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_available": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "new_on_hand": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "previous_on_hand": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity_change": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "inventory.stock.events.StockAdjusted",
+          "is_fact_event": false,
+          "module": "inventory.stock.events",
+          "name": "StockAdjusted",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.events.StockCheckRecorded": {
+          "__type__": "Inventory.StockCheckRecorded.v1",
+          "__version__": 1,
+          "description": "A physical stock count was recorded.",
+          "element_type": "EVENT",
+          "fields": {
+            "checked_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "checked_by": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "counted_quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "discrepancy": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "expected_quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.stock.events.StockCheckRecorded",
+          "is_fact_event": false,
+          "module": "inventory.stock.events",
+          "name": "StockCheckRecorded",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.events.StockCommitted": {
+          "__type__": "Inventory.StockCommitted.v1",
+          "__version__": 1,
+          "description": "Reserved stock was committed (shipped), reducing on-hand quantity.",
+          "element_type": "EVENT",
+          "fields": {
+            "committed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_on_hand": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "new_reserved": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "previous_on_hand": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "previous_reserved": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reservation_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.stock.events.StockCommitted",
+          "is_fact_event": false,
+          "module": "inventory.stock.events",
+          "name": "StockCommitted",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.events.StockInitialized": {
+          "__type__": "Inventory.StockInitialized.v1",
+          "__version__": 1,
+          "description": "A new inventory record was created for a product variant at a warehouse.",
+          "element_type": "EVENT",
+          "fields": {
+            "initial_quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "initialized_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reorder_point": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reorder_quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "sku": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "variant_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "warehouse_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.stock.events.StockInitialized",
+          "is_fact_event": false,
+          "module": "inventory.stock.events",
+          "name": "StockInitialized",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.events.StockMarkedDamaged": {
+          "__type__": "Inventory.StockMarkedDamaged.v1",
+          "__version__": 1,
+          "description": "Stock was identified as damaged, moving from on-hand to damaged.",
+          "element_type": "EVENT",
+          "fields": {
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "marked_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "new_available": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "new_damaged": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "new_on_hand": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "previous_damaged": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "previous_on_hand": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "product_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "inventory.stock.events.StockMarkedDamaged",
+          "is_fact_event": false,
+          "module": "inventory.stock.events",
+          "name": "StockMarkedDamaged",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.events.StockReceived": {
+          "__type__": "Inventory.StockReceived.v1",
+          "__version__": 1,
+          "description": "Stock was received into the warehouse, increasing on-hand quantity.",
+          "element_type": "EVENT",
+          "fields": {
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_available": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "new_on_hand": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "previous_on_hand": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "received_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "reference": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "inventory.stock.events.StockReceived",
+          "is_fact_event": false,
+          "module": "inventory.stock.events",
+          "name": "StockReceived",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        },
+        "inventory.stock.events.StockReserved": {
+          "__type__": "Inventory.StockReserved.v1",
+          "__version__": 1,
+          "description": "Stock was reserved for an order, decreasing available quantity.",
+          "element_type": "EVENT",
+          "fields": {
+            "expires_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_available": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "previous_available": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reservation_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reserved_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "inventory.stock.events.StockReserved",
+          "is_fact_event": false,
+          "module": "inventory.stock.events",
+          "name": "StockReserved",
+          "part_of": "inventory.stock.stock.InventoryItem",
+          "published": true
+        },
+        "inventory.stock.events.StockReturned": {
+          "__type__": "Inventory.StockReturned.v1",
+          "__version__": 1,
+          "description": "Returned items were added back to on-hand inventory.",
+          "element_type": "EVENT",
+          "fields": {
+            "inventory_item_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_available": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "new_on_hand": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "order_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "previous_on_hand": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "quantity": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "returned_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "inventory.stock.events.StockReturned",
+          "is_fact_event": false,
+          "module": "inventory.stock.events",
+          "name": "StockReturned",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        }
+      },
+      "repositories": {},
+      "value_objects": {
+        "inventory.stock.stock.StockLevels": {
+          "description": "Tracks all stock quantities.\n\nAvailable is always equal to on_hand - reserved. It is denormalized\nhere for query convenience.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "available": {
+              "default": 0,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "damaged": {
+              "default": 0,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "in_transit": {
+              "default": 0,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "on_hand": {
+              "default": 0,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "reserved": {
+              "default": 0,
+              "kind": "standard",
+              "type": "Integer"
+            }
+          },
+          "fqn": "inventory.stock.stock.StockLevels",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "inventory.stock.stock",
+          "name": "StockLevels",
+          "part_of": "inventory.stock.stock.InventoryItem"
+        }
+      }
+    },
+    "inventory.warehouse.warehouse.Warehouse": {
+      "aggregate": {
+        "description": "A physical location where inventory is stored.",
+        "element_type": "AGGREGATE",
+        "fields": {
+          "address": {
+            "kind": "value_object",
+            "target": "inventory.warehouse.warehouse.WarehouseAddress"
+          },
+          "capacity": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "is_active": {
+            "default": true,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "name": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "zones": {
+            "kind": "has_many",
+            "target": "inventory.warehouse.warehouse.Zone"
+          }
+        },
+        "fqn": "inventory.warehouse.warehouse.Warehouse",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "inventory.warehouse.warehouse",
+        "name": "Warehouse",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "warehouse",
+          "stream_category": "inventory::warehouse"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "inventory.warehouse.management.WarehouseManagementHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "inventory.warehouse.management.WarehouseManagementHandler",
+          "handlers": {
+            "Inventory.AddZone.v1": [
+              "add_zone"
+            ],
+            "Inventory.CreateWarehouse.v1": [
+              "create_warehouse"
+            ],
+            "Inventory.DeactivateWarehouse.v1": [
+              "deactivate_warehouse"
+            ],
+            "Inventory.RemoveZone.v1": [
+              "remove_zone"
+            ],
+            "Inventory.UpdateWarehouse.v1": [
+              "update_warehouse"
+            ]
+          },
+          "module": "inventory.warehouse.management",
+          "name": "WarehouseManagementHandler",
+          "part_of": "inventory.warehouse.warehouse.Warehouse",
+          "stream_category": "inventory::warehouse:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "inventory.warehouse.management.AddZone": {
+          "__type__": "Inventory.AddZone.v1",
+          "__version__": 1,
+          "description": "Add a zone to a warehouse.",
+          "element_type": "COMMAND",
+          "fields": {
+            "warehouse_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "zone_name": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "zone_type": {
+              "kind": "standard",
+              "max_length": 50,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "inventory.warehouse.management.AddZone",
+          "module": "inventory.warehouse.management",
+          "name": "AddZone",
+          "part_of": "inventory.warehouse.warehouse.Warehouse"
+        },
+        "inventory.warehouse.management.CreateWarehouse": {
+          "__type__": "Inventory.CreateWarehouse.v1",
+          "__version__": 1,
+          "description": "Create a new warehouse.",
+          "element_type": "COMMAND",
+          "fields": {
+            "address": {
+              "kind": "dict",
+              "required": true,
+              "type": "Dict"
+            },
+            "capacity": {
+              "default": 0,
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "inventory.warehouse.management.CreateWarehouse",
+          "module": "inventory.warehouse.management",
+          "name": "CreateWarehouse",
+          "part_of": "inventory.warehouse.warehouse.Warehouse"
+        },
+        "inventory.warehouse.management.DeactivateWarehouse": {
+          "__type__": "Inventory.DeactivateWarehouse.v1",
+          "__version__": 1,
+          "description": "Deactivate a warehouse.",
+          "element_type": "COMMAND",
+          "fields": {
+            "warehouse_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.warehouse.management.DeactivateWarehouse",
+          "module": "inventory.warehouse.management",
+          "name": "DeactivateWarehouse",
+          "part_of": "inventory.warehouse.warehouse.Warehouse"
+        },
+        "inventory.warehouse.management.RemoveZone": {
+          "__type__": "Inventory.RemoveZone.v1",
+          "__version__": 1,
+          "description": "Remove a zone from a warehouse.",
+          "element_type": "COMMAND",
+          "fields": {
+            "warehouse_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "zone_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.warehouse.management.RemoveZone",
+          "module": "inventory.warehouse.management",
+          "name": "RemoveZone",
+          "part_of": "inventory.warehouse.warehouse.Warehouse"
+        },
+        "inventory.warehouse.management.UpdateWarehouse": {
+          "__type__": "Inventory.UpdateWarehouse.v1",
+          "__version__": 1,
+          "description": "Update warehouse details.",
+          "element_type": "COMMAND",
+          "fields": {
+            "capacity": {
+              "kind": "standard",
+              "type": "Integer"
+            },
+            "name": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "warehouse_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.warehouse.management.UpdateWarehouse",
+          "module": "inventory.warehouse.management",
+          "name": "UpdateWarehouse",
+          "part_of": "inventory.warehouse.warehouse.Warehouse"
+        }
+      },
+      "database_models": {},
+      "entities": {
+        "inventory.warehouse.warehouse.Zone": {
+          "description": "A logical area within a warehouse (e.g., cold storage, hazmat).",
+          "element_type": "ENTITY",
+          "fields": {
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "warehouse": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "inventory.warehouse.warehouse.Warehouse"
+            },
+            "zone_name": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "zone_type": {
+              "choices": [
+                "Cold",
+                "Hazmat",
+                "Regular"
+              ],
+              "default": "Regular",
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "inventory.warehouse.warehouse.Zone",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "inventory.warehouse.warehouse",
+          "name": "Zone",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "zone"
+          },
+          "part_of": "inventory.warehouse.warehouse.Warehouse"
+        }
+      },
+      "event_handlers": {},
+      "events": {
+        "inventory.warehouse.events.WarehouseCreated": {
+          "__type__": "Inventory.WarehouseCreated.v1",
+          "__version__": 1,
+          "description": "A new warehouse was created.",
+          "element_type": "EVENT",
+          "fields": {
+            "address": {
+              "kind": "dict",
+              "required": true,
+              "type": "Dict"
+            },
+            "capacity": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "created_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "warehouse_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.warehouse.events.WarehouseCreated",
+          "is_fact_event": false,
+          "module": "inventory.warehouse.events",
+          "name": "WarehouseCreated",
+          "part_of": "inventory.warehouse.warehouse.Warehouse"
+        },
+        "inventory.warehouse.events.WarehouseDeactivated": {
+          "__type__": "Inventory.WarehouseDeactivated.v1",
+          "__version__": 1,
+          "description": "A warehouse was deactivated.",
+          "element_type": "EVENT",
+          "fields": {
+            "deactivated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "warehouse_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.warehouse.events.WarehouseDeactivated",
+          "is_fact_event": false,
+          "module": "inventory.warehouse.events",
+          "name": "WarehouseDeactivated",
+          "part_of": "inventory.warehouse.warehouse.Warehouse"
+        },
+        "inventory.warehouse.events.WarehouseUpdated": {
+          "__type__": "Inventory.WarehouseUpdated.v1",
+          "__version__": 1,
+          "description": "Warehouse details were updated.",
+          "element_type": "EVENT",
+          "fields": {
+            "capacity": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "updated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "warehouse_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.warehouse.events.WarehouseUpdated",
+          "is_fact_event": false,
+          "module": "inventory.warehouse.events",
+          "name": "WarehouseUpdated",
+          "part_of": "inventory.warehouse.warehouse.Warehouse"
+        },
+        "inventory.warehouse.events.ZoneAdded": {
+          "__type__": "Inventory.ZoneAdded.v1",
+          "__version__": 1,
+          "description": "A zone was added to a warehouse.",
+          "element_type": "EVENT",
+          "fields": {
+            "added_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "warehouse_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "zone_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "zone_name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "zone_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "inventory.warehouse.events.ZoneAdded",
+          "is_fact_event": false,
+          "module": "inventory.warehouse.events",
+          "name": "ZoneAdded",
+          "part_of": "inventory.warehouse.warehouse.Warehouse"
+        },
+        "inventory.warehouse.events.ZoneRemoved": {
+          "__type__": "Inventory.ZoneRemoved.v1",
+          "__version__": 1,
+          "description": "A zone was removed from a warehouse.",
+          "element_type": "EVENT",
+          "fields": {
+            "removed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "warehouse_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "zone_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "inventory.warehouse.events.ZoneRemoved",
+          "is_fact_event": false,
+          "module": "inventory.warehouse.events",
+          "name": "ZoneRemoved",
+          "part_of": "inventory.warehouse.warehouse.Warehouse"
+        }
+      },
+      "repositories": {},
+      "value_objects": {
+        "inventory.warehouse.warehouse.WarehouseAddress": {
+          "description": "Physical address of a warehouse.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "city": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "country": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "postal_code": {
+              "kind": "standard",
+              "max_length": 20,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "state": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "street": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "inventory.warehouse.warehouse.WarehouseAddress",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "inventory.warehouse.warehouse",
+          "name": "WarehouseAddress",
+          "part_of": "inventory.warehouse.warehouse.Warehouse"
+        }
+      }
+    }
+  },
+  "contracts": {
+    "events": [
+      {
+        "fields": {
+          "current_available": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "detected_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "inventory_item_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reorder_point": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "sku": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "variant_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "inventory.stock.events.LowStockDetected",
+        "type": "Inventory.LowStockDetected.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "inventory_item_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "new_available": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "previous_available": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "quantity": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "released_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "reservation_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "inventory.stock.events.ReservationReleased",
+        "type": "Inventory.ReservationReleased.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "expires_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "inventory_item_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "new_available": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "previous_available": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "quantity": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "reservation_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reserved_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          }
+        },
+        "fqn": "inventory.stock.events.StockReserved",
+        "type": "Inventory.StockReserved.v1",
+        "version": 1
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.DefaultOutbox",
+      "level": "warning",
+      "message": "Aggregate `DefaultOutbox` has no command handler \u2014 no write path exists"
+    },
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.MemoryOutbox",
+      "level": "warning",
+      "message": "Aggregate `MemoryOutbox` has no command handler \u2014 no write path exists"
+    }
+  ],
+  "domain": {
+    "camel_case_name": "Inventory",
+    "command_processing": "sync",
+    "event_processing": "async",
+    "identity_strategy": "uuid",
+    "identity_type": "string",
+    "name": "inventory",
+    "normalized_name": "inventory"
+  },
+  "elements": {
+    "AGGREGATE": [
+      "abc.DefaultOutbox",
+      "abc.MemoryOutbox",
+      "inventory.stock.stock.InventoryItem",
+      "inventory.warehouse.warehouse.Warehouse"
+    ],
+    "APPLICATION_SERVICE": [],
+    "COMMAND": [
+      "inventory.stock.adjustment.AdjustStock",
+      "inventory.stock.adjustment.RecordStockCheck",
+      "inventory.stock.damage.MarkDamaged",
+      "inventory.stock.damage.WriteOffDamaged",
+      "inventory.stock.expiry.ExpireStaleReservations",
+      "inventory.stock.initialization.InitializeStock",
+      "inventory.stock.receiving.ReceiveStock",
+      "inventory.stock.reservation.ConfirmReservation",
+      "inventory.stock.reservation.ReleaseReservation",
+      "inventory.stock.reservation.ReserveStock",
+      "inventory.stock.returns.ReturnToStock",
+      "inventory.stock.shipping.CommitStock",
+      "inventory.warehouse.management.AddZone",
+      "inventory.warehouse.management.CreateWarehouse",
+      "inventory.warehouse.management.DeactivateWarehouse",
+      "inventory.warehouse.management.RemoveZone",
+      "inventory.warehouse.management.UpdateWarehouse"
+    ],
+    "COMMAND_HANDLER": [
+      "inventory.stock.adjustment.StockAdjustmentHandler",
+      "inventory.stock.damage.DamageHandler",
+      "inventory.stock.expiry.ExpireStaleReservationsHandler",
+      "inventory.stock.initialization.InitializeStockHandler",
+      "inventory.stock.receiving.ReceiveStockHandler",
+      "inventory.stock.reservation.ReservationHandler",
+      "inventory.stock.returns.ReturnToStockHandler",
+      "inventory.stock.shipping.CommitStockHandler",
+      "inventory.warehouse.management.WarehouseManagementHandler"
+    ],
+    "DATABASE_MODEL": [],
+    "DOMAIN_SERVICE": [],
+    "ENTITY": [
+      "inventory.stock.stock.Reservation",
+      "inventory.warehouse.warehouse.Zone"
+    ],
+    "EVENT": [
+      "inventory.stock.events.DamagedStockWrittenOff",
+      "inventory.stock.events.LowStockDetected",
+      "inventory.stock.events.ReservationConfirmed",
+      "inventory.stock.events.ReservationReleased",
+      "inventory.stock.events.StockAdjusted",
+      "inventory.stock.events.StockCheckRecorded",
+      "inventory.stock.events.StockCommitted",
+      "inventory.stock.events.StockInitialized",
+      "inventory.stock.events.StockMarkedDamaged",
+      "inventory.stock.events.StockReceived",
+      "inventory.stock.events.StockReserved",
+      "inventory.stock.events.StockReturned",
+      "inventory.warehouse.events.WarehouseCreated",
+      "inventory.warehouse.events.WarehouseDeactivated",
+      "inventory.warehouse.events.WarehouseUpdated",
+      "inventory.warehouse.events.ZoneAdded",
+      "inventory.warehouse.events.ZoneRemoved"
+    ],
+    "EVENT_HANDLER": [],
+    "PROCESS_MANAGER": [],
+    "PROJECTION": [
+      "inventory.projections.inventory_level.InventoryLevel",
+      "inventory.projections.inventory_valuation.InventoryValuation",
+      "inventory.projections.low_stock_report.LowStockReport",
+      "inventory.projections.product_availability.ProductAvailability",
+      "inventory.projections.reservation_status.ReservationStatus",
+      "inventory.projections.shrinkage_report.ShrinkageReport",
+      "inventory.projections.stock_movement_log.StockMovementLog",
+      "inventory.projections.warehouse_directory.WarehouseDirectory",
+      "inventory.projections.warehouse_stock.WarehouseStock"
+    ],
+    "PROJECTOR": [
+      "inventory.projections.inventory_level.InventoryLevelProjector",
+      "inventory.projections.inventory_valuation.InventoryValuationProjector",
+      "inventory.projections.low_stock_report.LowStockReportProjector",
+      "inventory.projections.product_availability.ProductAvailabilityProjector",
+      "inventory.projections.reservation_status.ReservationStatusProjector",
+      "inventory.projections.shrinkage_report.ShrinkageReportProjector",
+      "inventory.projections.stock_movement_log.StockMovementLogProjector",
+      "inventory.projections.warehouse_directory.WarehouseDirectoryProjector",
+      "inventory.projections.warehouse_stock.WarehouseStockProjector"
+    ],
+    "QUERY": [],
+    "QUERY_HANDLER": [],
+    "REPOSITORY": [
+      "protean.utils.DefaultOutboxRepository",
+      "protean.utils.MemoryOutboxRepository"
+    ],
+    "SUBSCRIBER": [
+      "inventory.stock.catalogue_subscriber.CatalogueVariantSubscriber",
+      "inventory.stock.fulfillment_subscriber.FulfillmentEventsSubscriber",
+      "inventory.stock.ordering_subscriber.OrderingEventsSubscriber"
+    ],
+    "VALUE_OBJECT": [
+      "inventory.stock.stock.StockLevels",
+      "inventory.warehouse.warehouse.WarehouseAddress"
+    ]
+  },
+  "flows": {
+    "domain_services": {},
+    "process_managers": {},
+    "subscribers": {
+      "inventory.stock.catalogue_subscriber.CatalogueVariantSubscriber": {
+        "broker": "global",
+        "description": "Reacts to VariantAdded events to initialize inventory records.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and dispatches an InitializeStock command with\ndefault warehouse and quantity settings. Ignores all other event types.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "inventory.stock.catalogue_subscriber.CatalogueVariantSubscriber",
+        "module": "inventory.stock.catalogue_subscriber",
+        "name": "CatalogueVariantSubscriber",
+        "stream": "catalogue::product"
+      },
+      "inventory.stock.fulfillment_subscriber.FulfillmentEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Fulfillment domain events to commit reserved stock.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and dispatches CommitStock commands. Ignores all\nevent types not relevant to the Inventory domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "inventory.stock.fulfillment_subscriber.FulfillmentEventsSubscriber",
+        "module": "inventory.stock.fulfillment_subscriber",
+        "name": "FulfillmentEventsSubscriber",
+        "stream": "fulfillment::fulfillment"
+      },
+      "inventory.stock.ordering_subscriber.OrderingEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Ordering domain events to manage stock reservations and returns.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and dispatches appropriate commands. Ignores all\nevent types not relevant to the Inventory domain.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "inventory.stock.ordering_subscriber.OrderingEventsSubscriber",
+        "module": "inventory.stock.ordering_subscriber",
+        "name": "OrderingEventsSubscriber",
+        "stream": "ordering::order"
+      }
+    }
+  },
+  "generated_at": "2026-03-18T13:30:25Z",
+  "ir_version": "0.1.0",
+  "projections": {
+    "inventory.projections.inventory_level.InventoryLevel": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "available": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "damaged": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "in_transit": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "inventory_item_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "on_hand": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reorder_point": {
+            "default": 10,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "reserved": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sku": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "variant_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "warehouse_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "inventory.projections.inventory_level.InventoryLevel",
+        "identity_field": "inventory_item_id",
+        "module": "inventory.projections.inventory_level",
+        "name": "InventoryLevel",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "inventory_level"
+        }
+      },
+      "projectors": {
+        "inventory.projections.inventory_level.InventoryLevelProjector": {
+          "aggregates": [
+            "inventory.stock.stock.InventoryItem"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "inventory.projections.inventory_level.InventoryLevelProjector",
+          "handlers": {
+            "Inventory.DamagedStockWrittenOff.v1": [
+              "on_damaged_stock_written_off"
+            ],
+            "Inventory.ReservationReleased.v1": [
+              "on_reservation_released"
+            ],
+            "Inventory.StockAdjusted.v1": [
+              "on_stock_adjusted"
+            ],
+            "Inventory.StockCommitted.v1": [
+              "on_stock_committed"
+            ],
+            "Inventory.StockInitialized.v1": [
+              "on_stock_initialized"
+            ],
+            "Inventory.StockMarkedDamaged.v1": [
+              "on_stock_marked_damaged"
+            ],
+            "Inventory.StockReceived.v1": [
+              "on_stock_received"
+            ],
+            "Inventory.StockReserved.v1": [
+              "on_stock_reserved"
+            ],
+            "Inventory.StockReturned.v1": [
+              "on_stock_returned"
+            ]
+          },
+          "module": "inventory.projections.inventory_level",
+          "name": "InventoryLevelProjector",
+          "projector_for": "inventory.projections.inventory_level.InventoryLevel",
+          "stream_categories": [
+            "inventory::inventory_item"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "inventory.projections.inventory_valuation.InventoryValuation": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "inventory_item_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "on_hand": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "sku": {
+            "kind": "standard",
+            "max_length": 50,
+            "sanitize": true,
+            "type": "String"
+          },
+          "total_value": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "unit_cost": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "variant_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "warehouse_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          }
+        },
+        "fqn": "inventory.projections.inventory_valuation.InventoryValuation",
+        "identity_field": "inventory_item_id",
+        "module": "inventory.projections.inventory_valuation",
+        "name": "InventoryValuation",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "inventory_valuation"
+        }
+      },
+      "projectors": {
+        "inventory.projections.inventory_valuation.InventoryValuationProjector": {
+          "aggregates": [
+            "inventory.stock.stock.InventoryItem"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "inventory.projections.inventory_valuation.InventoryValuationProjector",
+          "handlers": {
+            "Inventory.DamagedStockWrittenOff.v1": [
+              "on_damaged_stock_written_off"
+            ],
+            "Inventory.StockAdjusted.v1": [
+              "on_stock_adjusted"
+            ],
+            "Inventory.StockCommitted.v1": [
+              "on_stock_committed"
+            ],
+            "Inventory.StockInitialized.v1": [
+              "on_stock_initialized"
+            ],
+            "Inventory.StockReceived.v1": [
+              "on_stock_received"
+            ],
+            "Inventory.StockReturned.v1": [
+              "on_stock_returned"
+            ]
+          },
+          "module": "inventory.projections.inventory_valuation",
+          "name": "InventoryValuationProjector",
+          "projector_for": "inventory.projections.inventory_valuation.InventoryValuation",
+          "stream_categories": [
+            "inventory::inventory_item"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "inventory.projections.low_stock_report.LowStockReport": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "current_available": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "detected_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "inventory_item_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "is_critical": {
+            "default": false,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reorder_point": {
+            "default": 10,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sku": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "variant_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "inventory.projections.low_stock_report.LowStockReport",
+        "identity_field": "inventory_item_id",
+        "module": "inventory.projections.low_stock_report",
+        "name": "LowStockReport",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "low_stock_report"
+        }
+      },
+      "projectors": {
+        "inventory.projections.low_stock_report.LowStockReportProjector": {
+          "aggregates": [
+            "inventory.stock.stock.InventoryItem"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "inventory.projections.low_stock_report.LowStockReportProjector",
+          "handlers": {
+            "Inventory.LowStockDetected.v1": [
+              "on_low_stock_detected"
+            ],
+            "Inventory.StockReceived.v1": [
+              "on_stock_received"
+            ],
+            "Inventory.StockReturned.v1": [
+              "on_stock_returned"
+            ]
+          },
+          "module": "inventory.projections.low_stock_report",
+          "name": "LowStockReportProjector",
+          "projector_for": "inventory.projections.low_stock_report.LowStockReport",
+          "stream_categories": [
+            "inventory::inventory_item"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "inventory.projections.product_availability.ProductAvailability": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "is_in_stock": {
+            "default": false,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "product_variant_key": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "total_available": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "total_on_hand": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "total_reserved": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "variant_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "warehouse_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          }
+        },
+        "fqn": "inventory.projections.product_availability.ProductAvailability",
+        "identity_field": "product_variant_key",
+        "module": "inventory.projections.product_availability",
+        "name": "ProductAvailability",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "product_availability"
+        }
+      },
+      "projectors": {
+        "inventory.projections.product_availability.ProductAvailabilityProjector": {
+          "aggregates": [
+            "inventory.stock.stock.InventoryItem"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "inventory.projections.product_availability.ProductAvailabilityProjector",
+          "handlers": {
+            "Inventory.ReservationReleased.v1": [
+              "on_reservation_released"
+            ],
+            "Inventory.StockAdjusted.v1": [
+              "on_stock_adjusted"
+            ],
+            "Inventory.StockCommitted.v1": [
+              "on_stock_committed"
+            ],
+            "Inventory.StockInitialized.v1": [
+              "on_stock_initialized"
+            ],
+            "Inventory.StockMarkedDamaged.v1": [
+              "on_stock_marked_damaged"
+            ],
+            "Inventory.StockReceived.v1": [
+              "on_stock_received"
+            ],
+            "Inventory.StockReserved.v1": [
+              "on_stock_reserved"
+            ],
+            "Inventory.StockReturned.v1": [
+              "on_stock_returned"
+            ]
+          },
+          "module": "inventory.projections.product_availability",
+          "name": "ProductAvailabilityProjector",
+          "projector_for": "inventory.projections.product_availability.ProductAvailability",
+          "stream_categories": [
+            "inventory::inventory_item"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "inventory.projections.reservation_status.ReservationStatus": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "expires_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "inventory_item_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "order_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "quantity": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "reservation_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "reserved_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "inventory.projections.reservation_status.ReservationStatus",
+        "identity_field": "reservation_id",
+        "module": "inventory.projections.reservation_status",
+        "name": "ReservationStatus",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "reservation_status"
+        }
+      },
+      "projectors": {
+        "inventory.projections.reservation_status.ReservationStatusProjector": {
+          "aggregates": [
+            "inventory.stock.stock.InventoryItem"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "inventory.projections.reservation_status.ReservationStatusProjector",
+          "handlers": {
+            "Inventory.ReservationConfirmed.v1": [
+              "on_reservation_confirmed"
+            ],
+            "Inventory.ReservationReleased.v1": [
+              "on_reservation_released"
+            ],
+            "Inventory.StockCommitted.v1": [
+              "on_stock_committed"
+            ],
+            "Inventory.StockReserved.v1": [
+              "on_stock_reserved"
+            ]
+          },
+          "module": "inventory.projections.reservation_status",
+          "name": "ReservationStatusProjector",
+          "projector_for": "inventory.projections.reservation_status.ReservationStatus",
+          "stream_categories": [
+            "inventory::inventory_item"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "inventory.projections.shrinkage_report.ShrinkageReport": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "adjustment_reasons": {
+            "content_type": "String",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "inventory_item_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "last_adjustment_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "sku": {
+            "kind": "standard",
+            "max_length": 50,
+            "sanitize": true,
+            "type": "String"
+          },
+          "total_adjustments": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "total_damaged": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "total_shrinkage_value": {
+            "default": 0.0,
+            "kind": "standard",
+            "type": "Float"
+          },
+          "total_written_off": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "warehouse_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          }
+        },
+        "fqn": "inventory.projections.shrinkage_report.ShrinkageReport",
+        "identity_field": "inventory_item_id",
+        "module": "inventory.projections.shrinkage_report",
+        "name": "ShrinkageReport",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "shrinkage_report"
+        }
+      },
+      "projectors": {
+        "inventory.projections.shrinkage_report.ShrinkageReportProjector": {
+          "aggregates": [
+            "inventory.stock.stock.InventoryItem"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "inventory.projections.shrinkage_report.ShrinkageReportProjector",
+          "handlers": {
+            "Inventory.DamagedStockWrittenOff.v1": [
+              "on_damaged_stock_written_off"
+            ],
+            "Inventory.StockAdjusted.v1": [
+              "on_stock_adjusted"
+            ],
+            "Inventory.StockMarkedDamaged.v1": [
+              "on_stock_marked_damaged"
+            ]
+          },
+          "module": "inventory.projections.shrinkage_report",
+          "name": "ShrinkageReportProjector",
+          "projector_for": "inventory.projections.shrinkage_report.ShrinkageReport",
+          "stream_categories": [
+            "inventory::inventory_item"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "inventory.projections.stock_movement_log.StockMovementLog": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "actor": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "description": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "entry_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "event_type": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "inventory_item_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "new_level": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "occurred_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "previous_level": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "quantity_change": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          }
+        },
+        "fqn": "inventory.projections.stock_movement_log.StockMovementLog",
+        "identity_field": "entry_id",
+        "module": "inventory.projections.stock_movement_log",
+        "name": "StockMovementLog",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "stock_movement_log"
+        }
+      },
+      "projectors": {
+        "inventory.projections.stock_movement_log.StockMovementLogProjector": {
+          "aggregates": [
+            "inventory.stock.stock.InventoryItem"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "inventory.projections.stock_movement_log.StockMovementLogProjector",
+          "handlers": {
+            "Inventory.DamagedStockWrittenOff.v1": [
+              "on_damaged_stock_written_off"
+            ],
+            "Inventory.ReservationConfirmed.v1": [
+              "on_reservation_confirmed"
+            ],
+            "Inventory.ReservationReleased.v1": [
+              "on_reservation_released"
+            ],
+            "Inventory.StockAdjusted.v1": [
+              "on_stock_adjusted"
+            ],
+            "Inventory.StockCheckRecorded.v1": [
+              "on_stock_check_recorded"
+            ],
+            "Inventory.StockCommitted.v1": [
+              "on_stock_committed"
+            ],
+            "Inventory.StockInitialized.v1": [
+              "on_stock_initialized"
+            ],
+            "Inventory.StockMarkedDamaged.v1": [
+              "on_stock_marked_damaged"
+            ],
+            "Inventory.StockReceived.v1": [
+              "on_stock_received"
+            ],
+            "Inventory.StockReserved.v1": [
+              "on_stock_reserved"
+            ],
+            "Inventory.StockReturned.v1": [
+              "on_stock_returned"
+            ]
+          },
+          "module": "inventory.projections.stock_movement_log",
+          "name": "StockMovementLogProjector",
+          "projector_for": "inventory.projections.stock_movement_log.StockMovementLog",
+          "stream_categories": [
+            "inventory::inventory_item"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "inventory.projections.warehouse_directory.WarehouseDirectory": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "capacity": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "city": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "country": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "is_active": {
+            "default": true,
+            "kind": "standard",
+            "type": "Boolean"
+          },
+          "name": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "warehouse_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "zone_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          }
+        },
+        "fqn": "inventory.projections.warehouse_directory.WarehouseDirectory",
+        "identity_field": "warehouse_id",
+        "module": "inventory.projections.warehouse_directory",
+        "name": "WarehouseDirectory",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "warehouse_directory"
+        }
+      },
+      "projectors": {
+        "inventory.projections.warehouse_directory.WarehouseDirectoryProjector": {
+          "aggregates": [
+            "inventory.warehouse.warehouse.Warehouse"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "inventory.projections.warehouse_directory.WarehouseDirectoryProjector",
+          "handlers": {
+            "Inventory.WarehouseCreated.v1": [
+              "on_warehouse_created"
+            ],
+            "Inventory.WarehouseDeactivated.v1": [
+              "on_warehouse_deactivated"
+            ],
+            "Inventory.WarehouseUpdated.v1": [
+              "on_warehouse_updated"
+            ],
+            "Inventory.ZoneAdded.v1": [
+              "on_zone_added"
+            ],
+            "Inventory.ZoneRemoved.v1": [
+              "on_zone_removed"
+            ]
+          },
+          "module": "inventory.projections.warehouse_directory",
+          "name": "WarehouseDirectoryProjector",
+          "projector_for": "inventory.projections.warehouse_directory.WarehouseDirectory",
+          "stream_categories": [
+            "inventory::warehouse"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "inventory.projections.warehouse_stock.WarehouseStock": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "available": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "damaged": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "entry_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "on_hand": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "product_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reserved": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sku": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "variant_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "warehouse_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "inventory.projections.warehouse_stock.WarehouseStock",
+        "identity_field": "entry_id",
+        "module": "inventory.projections.warehouse_stock",
+        "name": "WarehouseStock",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "warehouse_stock"
+        }
+      },
+      "projectors": {
+        "inventory.projections.warehouse_stock.WarehouseStockProjector": {
+          "aggregates": [
+            "inventory.stock.stock.InventoryItem"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "inventory.projections.warehouse_stock.WarehouseStockProjector",
+          "handlers": {
+            "Inventory.DamagedStockWrittenOff.v1": [
+              "on_damaged_stock_written_off"
+            ],
+            "Inventory.ReservationReleased.v1": [
+              "on_reservation_released"
+            ],
+            "Inventory.StockAdjusted.v1": [
+              "on_stock_adjusted"
+            ],
+            "Inventory.StockCommitted.v1": [
+              "on_stock_committed"
+            ],
+            "Inventory.StockInitialized.v1": [
+              "on_stock_initialized"
+            ],
+            "Inventory.StockMarkedDamaged.v1": [
+              "on_stock_marked_damaged"
+            ],
+            "Inventory.StockReceived.v1": [
+              "on_stock_received"
+            ],
+            "Inventory.StockReserved.v1": [
+              "on_stock_reserved"
+            ],
+            "Inventory.StockReturned.v1": [
+              "on_stock_returned"
+            ]
+          },
+          "module": "inventory.projections.warehouse_stock",
+          "name": "WarehouseStockProjector",
+          "projector_for": "inventory.projections.warehouse_stock.WarehouseStock",
+          "stream_categories": [
+            "inventory::inventory_item"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    }
+  }
+}

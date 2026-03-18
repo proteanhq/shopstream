@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A seller added a reply to a review.",
+  "properties": {
+    "body": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "replied_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "review_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "seller_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "body",
+    "replied_at",
+    "review_id",
+    "seller_id"
+  ],
+  "title": "SellerReplyAdded",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "reviews.review.events.SellerReplyAdded",
+  "x-protean-type": "Reviews.SellerReplyAdded.v1",
+  "x-protean-version": 1
+}

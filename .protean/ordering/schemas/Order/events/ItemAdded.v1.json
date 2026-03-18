@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A new line item was added to an order (only in Created state).",
+  "properties": {
+    "added_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_grand_total": {
+      "type": "number"
+    },
+    "new_subtotal": {
+      "type": "number"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "sku": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "title": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "unit_price": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "added_at",
+    "item_id",
+    "new_grand_total",
+    "new_subtotal",
+    "order_id",
+    "product_id",
+    "quantity",
+    "sku",
+    "title",
+    "unit_price",
+    "variant_id"
+  ],
+  "title": "ItemAdded",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.ItemAdded",
+  "x-protean-type": "Ordering.ItemAdded.v1",
+  "x-protean-version": 1
+}

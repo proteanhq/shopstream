@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A product was added to the shopping cart.",
+  "properties": {
+    "cart_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "cart_id",
+    "item_id",
+    "product_id",
+    "quantity",
+    "variant_id"
+  ],
+  "title": "CartItemAdded",
+  "type": "object",
+  "x-protean-aggregate": "ordering.cart.cart.ShoppingCart",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.cart.events.CartItemAdded",
+  "x-protean-type": "Ordering.CartItemAdded.v1",
+  "x-protean-version": 1
+}

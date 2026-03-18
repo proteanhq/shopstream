@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A category's name or attributes were changed.",
+  "properties": {
+    "attributes": {
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "category_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "category_id",
+    "name"
+  ],
+  "title": "CategoryDetailsUpdated",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.category.category.Category",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "catalogue.category.events.CategoryDetailsUpdated",
+  "x-protean-type": "Catalogue.CategoryDetailsUpdated.v1",
+  "x-protean-version": 1
+}

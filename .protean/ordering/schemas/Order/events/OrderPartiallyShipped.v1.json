@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Some (but not all) order items were shipped.",
+  "properties": {
+    "carrier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "shipment_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "shipped_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "shipped_item_ids": {
+      "anyOf": [
+        {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tracking_number": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "carrier",
+    "order_id",
+    "shipment_id",
+    "shipped_at",
+    "tracking_number"
+  ],
+  "title": "OrderPartiallyShipped",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.OrderPartiallyShipped",
+  "x-protean-type": "Ordering.OrderPartiallyShipped.v1",
+  "x-protean-version": 1
+}

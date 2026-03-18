@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A vote on whether a review was helpful or unhelpful.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "review": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "vote_type": {
+      "enum": [
+        "Helpful",
+        "Unhelpful"
+      ],
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "voted_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "id",
+    "vote_type",
+    "voted_at"
+  ],
+  "title": "HelpfulVote",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "reviews.review.review.HelpfulVote",
+  "x-protean-identity-field": "id"
+}

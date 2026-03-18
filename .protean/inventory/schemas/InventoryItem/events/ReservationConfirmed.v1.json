@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A stock reservation was confirmed after order payment.",
+  "properties": {
+    "confirmed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "reservation_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "confirmed_at",
+    "inventory_item_id",
+    "order_id",
+    "quantity",
+    "reservation_id"
+  ],
+  "title": "ReservationConfirmed",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.stock.events.ReservationConfirmed",
+  "x-protean-type": "Inventory.ReservationConfirmed.v1",
+  "x-protean-version": 1
+}

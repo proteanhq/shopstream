@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A reply from the product seller to the review.",
+  "properties": {
+    "body": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "replied_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "review": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "seller_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "body",
+    "id",
+    "replied_at",
+    "seller_id"
+  ],
+  "title": "SellerReply",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "reviews.review.review.SellerReply",
+  "x-protean-identity-field": "id"
+}

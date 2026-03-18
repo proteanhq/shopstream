@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A previously suspended customer account was restored to active status.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reactivated_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "reactivated_at"
+  ],
+  "title": "AccountReactivated",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "identity.customer.events.AccountReactivated",
+  "x-protean-published": true,
+  "x-protean-type": "Identity.AccountReactivated.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Stock was reserved for an order, decreasing available quantity.",
+  "properties": {
+    "expires_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_available": {
+      "type": "integer"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "previous_available": {
+      "type": "integer"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "reservation_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reserved_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "expires_at",
+    "inventory_item_id",
+    "new_available",
+    "order_id",
+    "previous_available",
+    "quantity",
+    "reservation_id",
+    "reserved_at"
+  ],
+  "title": "StockReserved",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.stock.events.StockReserved",
+  "x-protean-published": true,
+  "x-protean-type": "Inventory.StockReserved.v1",
+  "x-protean-version": 1
+}

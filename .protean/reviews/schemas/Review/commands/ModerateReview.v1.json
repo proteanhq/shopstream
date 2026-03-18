@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "action": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "moderator_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "review_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "action",
+    "moderator_id",
+    "review_id"
+  ],
+  "title": "ModerateReview",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "reviews.review.moderation.ModerateReview",
+  "x-protean-type": "Reviews.ModerateReview.v1",
+  "x-protean-version": 1
+}

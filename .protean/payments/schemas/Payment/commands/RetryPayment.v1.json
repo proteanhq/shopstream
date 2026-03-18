@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Retry a failed payment.",
+  "properties": {
+    "payment_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "payment_id"
+  ],
+  "title": "RetryPayment",
+  "type": "object",
+  "x-protean-aggregate": "payments.payment.payment.Payment",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "payments.payment.retry.RetryPayment",
+  "x-protean-type": "Payments.RetryPayment.v1",
+  "x-protean-version": 1
+}

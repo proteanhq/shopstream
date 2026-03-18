@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A refund was completed by the gateway.",
+  "properties": {
+    "amount": {
+      "type": "number"
+    },
+    "completed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "gateway_refund_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "refund_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "amount",
+    "completed_at",
+    "gateway_refund_id",
+    "order_id",
+    "payment_id",
+    "refund_id"
+  ],
+  "title": "RefundCompleted",
+  "type": "object",
+  "x-protean-aggregate": "payments.payment.payment.Payment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "payments.payment.events.RefundCompleted",
+  "x-protean-published": true,
+  "x-protean-type": "Payments.RefundCompleted.v1",
+  "x-protean-version": 1
+}

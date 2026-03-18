@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "email": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "first_name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "last_name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "tier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "email",
+    "first_name",
+    "last_name",
+    "tier"
+  ],
+  "title": "CustomerSegments",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "identity.projections.customer_segments.CustomerSegments",
+  "x-protean-identity-field": "customer_id"
+}

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A customer voted on whether a review was helpful.",
+  "properties": {
+    "helpful_count": {
+      "type": "integer"
+    },
+    "review_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "unhelpful_count": {
+      "type": "integer"
+    },
+    "vote_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "voted_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "voter_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "helpful_count",
+    "review_id",
+    "unhelpful_count",
+    "vote_type",
+    "voted_at",
+    "voter_id"
+  ],
+  "title": "HelpfulVoteRecorded",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "reviews.review.events.HelpfulVoteRecorded",
+  "x-protean-type": "Reviews.HelpfulVoteRecorded.v1",
+  "x-protean-version": 1
+}

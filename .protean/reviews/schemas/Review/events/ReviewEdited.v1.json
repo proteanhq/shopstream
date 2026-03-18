@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A customer edited their review content.",
+  "properties": {
+    "body": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "edited_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "rating": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "review_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "title": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "edited_at",
+    "review_id"
+  ],
+  "title": "ReviewEdited",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "reviews.review.events.ReviewEdited",
+  "x-protean-type": "Reviews.ReviewEdited.v1",
+  "x-protean-version": 1
+}

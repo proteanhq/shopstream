@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The quantity of an order line item was changed.",
+  "properties": {
+    "item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_grand_total": {
+      "type": "number"
+    },
+    "new_quantity": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_subtotal": {
+      "type": "number"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "previous_quantity": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "updated_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "item_id",
+    "new_grand_total",
+    "new_quantity",
+    "new_subtotal",
+    "order_id",
+    "previous_quantity",
+    "updated_at"
+  ],
+  "title": "ItemQuantityUpdated",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.ItemQuantityUpdated",
+  "x-protean-type": "Ordering.ItemQuantityUpdated.v1",
+  "x-protean-version": 1
+}

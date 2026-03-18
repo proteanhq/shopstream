@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A physical stock count was recorded.",
+  "properties": {
+    "checked_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "checked_by": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "counted_quantity": {
+      "type": "integer"
+    },
+    "discrepancy": {
+      "type": "integer"
+    },
+    "expected_quantity": {
+      "type": "integer"
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "checked_at",
+    "checked_by",
+    "counted_quantity",
+    "discrepancy",
+    "expected_quantity",
+    "inventory_item_id"
+  ],
+  "title": "StockCheckRecorded",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.stock.events.StockCheckRecorded",
+  "x-protean-type": "Inventory.StockCheckRecorded.v1",
+  "x-protean-version": 1
+}

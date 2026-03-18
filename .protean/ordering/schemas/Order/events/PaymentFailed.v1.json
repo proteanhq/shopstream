@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Payment processing failed; the order returns to Confirmed for retry.",
+  "properties": {
+    "failed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "failed_at",
+    "order_id",
+    "payment_id",
+    "reason"
+  ],
+  "title": "PaymentFailed",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.PaymentFailed",
+  "x-protean-type": "Ordering.PaymentFailed.v1",
+  "x-protean-version": 1
+}

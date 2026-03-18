@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "suspended_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "customer_id"
+  ],
+  "title": "SuspendedAccount",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "ordering.projections.suspended_accounts.SuspendedAccount",
+  "x-protean-identity-field": "customer_id"
+}

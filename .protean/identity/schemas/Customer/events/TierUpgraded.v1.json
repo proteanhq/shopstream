@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A customer was promoted to a higher loyalty tier.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_tier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "previous_tier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "upgraded_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "new_tier",
+    "previous_tier",
+    "upgraded_at"
+  ],
+  "title": "TierUpgraded",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "identity.customer.events.TierUpgraded",
+  "x-protean-type": "Identity.TierUpgraded.v1",
+  "x-protean-version": 1
+}

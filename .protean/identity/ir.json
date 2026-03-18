@@ -1,0 +1,2080 @@
+{
+  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
+  "checksum": "sha256:078f3dd729a2c9a7e11d4e30668fb7c998eb8b67f95fa78c7717d3724cad021e",
+  "clusters": {
+    "abc.DefaultOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.DefaultOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "DefaultOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "outbox",
+          "stream_category": "identity::default_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.DefaultOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.DefaultOutboxRepository",
+          "module": "protean.utils",
+          "name": "DefaultOutboxRepository",
+          "part_of": "abc.DefaultOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "abc.MemoryOutbox": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "causation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "created_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "data": {
+            "kind": "dict",
+            "required": true,
+            "type": "Dict"
+          },
+          "id": {
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_error": {
+            "kind": "dict",
+            "type": "Dict"
+          },
+          "last_processed_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "locked_by": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "locked_until": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "max_retries": {
+            "default": 3,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "message_id": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "metadata_": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "next_retry_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "priority": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "published_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "retry_count": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "sequence_number": {
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "default": "pending",
+            "kind": "standard",
+            "type": "String"
+          },
+          "stream_name": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          },
+          "target_broker": {
+            "kind": "standard",
+            "type": "String"
+          },
+          "type": {
+            "kind": "standard",
+            "required": true,
+            "type": "String"
+          }
+        },
+        "fqn": "abc.MemoryOutbox",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "abc",
+        "name": "MemoryOutbox",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "memory",
+          "schema_name": "outbox",
+          "stream_category": "identity::memory_outbox"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {
+        "protean.utils.MemoryOutboxRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "protean.utils.MemoryOutboxRepository",
+          "module": "protean.utils",
+          "name": "MemoryOutboxRepository",
+          "part_of": "abc.MemoryOutbox"
+        }
+      },
+      "value_objects": {}
+    },
+    "identity.customer.customer.Customer": {
+      "aggregate": {
+        "description": "A registered person on the platform, identified by a system ID and an external ID.\n\nThe Customer aggregate groups profile, addresses, account status, and loyalty tier\ninto a single transactional boundary. The \"exactly one default address\" invariant\nrequires these elements to change together consistently.",
+        "element_type": "AGGREGATE",
+        "fields": {
+          "addresses": {
+            "kind": "has_many",
+            "target": "identity.customer.customer.Address"
+          },
+          "email": {
+            "kind": "value_object",
+            "required": true,
+            "target": "identity.shared.email.EmailAddress"
+          },
+          "external_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String",
+            "unique": true
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "last_login_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "profile": {
+            "kind": "value_object",
+            "target": "identity.customer.customer.Profile"
+          },
+          "registered_at": {
+            "default": "<callable>",
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "status": {
+            "choices": [
+              "Active",
+              "Closed",
+              "Suspended"
+            ],
+            "default": "Active",
+            "kind": "status",
+            "transitions": {
+              "Active": [
+                "Suspended",
+                "Closed"
+              ],
+              "Suspended": [
+                "Active",
+                "Closed"
+              ]
+            },
+            "type": "Status"
+          },
+          "tier": {
+            "choices": [
+              "Gold",
+              "Platinum",
+              "Silver",
+              "Standard"
+            ],
+            "default": "Standard",
+            "kind": "status",
+            "transitions": {
+              "Gold": [
+                "Platinum"
+              ],
+              "Silver": [
+                "Gold",
+                "Platinum"
+              ],
+              "Standard": [
+                "Silver",
+                "Gold",
+                "Platinum"
+              ]
+            },
+            "type": "Status"
+          }
+        },
+        "fqn": "identity.customer.customer.Customer",
+        "identity_field": "id",
+        "invariants": {
+          "post": [
+            "addresses_cannot_exceed_maximum",
+            "exactly_one_default_address_when_addresses_exist"
+          ],
+          "pre": []
+        },
+        "module": "identity.customer.customer",
+        "name": "Customer",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "customer",
+          "stream_category": "identity::customer"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "identity.customer.account.ManageAccountHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "identity.customer.account.ManageAccountHandler",
+          "handlers": {
+            "Identity.CloseAccount.v1": [
+              "close_account"
+            ],
+            "Identity.ReactivateAccount.v1": [
+              "reactivate_account"
+            ],
+            "Identity.SuspendAccount.v1": [
+              "suspend_account"
+            ]
+          },
+          "module": "identity.customer.account",
+          "name": "ManageAccountHandler",
+          "part_of": "identity.customer.customer.Customer",
+          "stream_category": "identity::customer:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "identity.customer.addresses.ManageAddressesHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "identity.customer.addresses.ManageAddressesHandler",
+          "handlers": {
+            "Identity.AddAddress.v1": [
+              "add_address"
+            ],
+            "Identity.RemoveAddress.v1": [
+              "remove_address"
+            ],
+            "Identity.SetDefaultAddress.v1": [
+              "set_default_address"
+            ],
+            "Identity.UpdateAddress.v1": [
+              "update_address"
+            ]
+          },
+          "module": "identity.customer.addresses",
+          "name": "ManageAddressesHandler",
+          "part_of": "identity.customer.customer.Customer",
+          "stream_category": "identity::customer:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "identity.customer.profile.ManageProfileHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "identity.customer.profile.ManageProfileHandler",
+          "handlers": {
+            "Identity.UpdateProfile.v1": [
+              "update_profile"
+            ]
+          },
+          "module": "identity.customer.profile",
+          "name": "ManageProfileHandler",
+          "part_of": "identity.customer.customer.Customer",
+          "stream_category": "identity::customer:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "identity.customer.registration.RegisterCustomerHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "identity.customer.registration.RegisterCustomerHandler",
+          "handlers": {
+            "Identity.RegisterCustomer.v1": [
+              "register_customer"
+            ]
+          },
+          "module": "identity.customer.registration",
+          "name": "RegisterCustomerHandler",
+          "part_of": "identity.customer.customer.Customer",
+          "stream_category": "identity::customer:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "identity.customer.tier.ManageTierHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "identity.customer.tier.ManageTierHandler",
+          "handlers": {
+            "Identity.UpgradeTier.v1": [
+              "upgrade_tier"
+            ]
+          },
+          "module": "identity.customer.tier",
+          "name": "ManageTierHandler",
+          "part_of": "identity.customer.customer.Customer",
+          "stream_category": "identity::customer:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "identity.customer.account.CloseAccount": {
+          "__type__": "Identity.CloseAccount.v1",
+          "__version__": 1,
+          "description": "Permanently close a customer account.",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "identity.customer.account.CloseAccount",
+          "module": "identity.customer.account",
+          "name": "CloseAccount",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.account.ReactivateAccount": {
+          "__type__": "Identity.ReactivateAccount.v1",
+          "__version__": 1,
+          "description": "Restore a suspended customer account to active status.",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "identity.customer.account.ReactivateAccount",
+          "module": "identity.customer.account",
+          "name": "ReactivateAccount",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.account.SuspendAccount": {
+          "__type__": "Identity.SuspendAccount.v1",
+          "__version__": 1,
+          "description": "Temporarily suspend a customer account, blocking further activity.",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 500,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "identity.customer.account.SuspendAccount",
+          "module": "identity.customer.account",
+          "name": "SuspendAccount",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.addresses.AddAddress": {
+          "__type__": "Identity.AddAddress.v1",
+          "__version__": 1,
+          "description": "Add a new address to a customer's address book.",
+          "element_type": "COMMAND",
+          "fields": {
+            "city": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "country": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "geo_lat": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "geo_lng": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "label": {
+              "kind": "standard",
+              "max_length": 20,
+              "sanitize": true,
+              "type": "String"
+            },
+            "postal_code": {
+              "kind": "standard",
+              "max_length": 20,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "state": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "street": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "identity.customer.addresses.AddAddress",
+          "module": "identity.customer.addresses",
+          "name": "AddAddress",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.addresses.RemoveAddress": {
+          "__type__": "Identity.RemoveAddress.v1",
+          "__version__": 1,
+          "description": "Remove an address from a customer's address book.",
+          "element_type": "COMMAND",
+          "fields": {
+            "address_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "identity.customer.addresses.RemoveAddress",
+          "module": "identity.customer.addresses",
+          "name": "RemoveAddress",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.addresses.SetDefaultAddress": {
+          "__type__": "Identity.SetDefaultAddress.v1",
+          "__version__": 1,
+          "description": "Designate an existing address as the customer's default.",
+          "element_type": "COMMAND",
+          "fields": {
+            "address_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "identity.customer.addresses.SetDefaultAddress",
+          "module": "identity.customer.addresses",
+          "name": "SetDefaultAddress",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.addresses.UpdateAddress": {
+          "__type__": "Identity.UpdateAddress.v1",
+          "__version__": 1,
+          "description": "Modify fields of an existing address.",
+          "element_type": "COMMAND",
+          "fields": {
+            "address_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "city": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "country": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "label": {
+              "kind": "standard",
+              "max_length": 20,
+              "sanitize": true,
+              "type": "String"
+            },
+            "postal_code": {
+              "kind": "standard",
+              "max_length": 20,
+              "sanitize": true,
+              "type": "String"
+            },
+            "state": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "street": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "identity.customer.addresses.UpdateAddress",
+          "module": "identity.customer.addresses",
+          "name": "UpdateAddress",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.profile.UpdateProfile": {
+          "__type__": "Identity.UpdateProfile.v1",
+          "__version__": 1,
+          "description": "Change a customer's personal profile information (name, phone, date of birth).",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "date_of_birth": {
+              "kind": "standard",
+              "max_length": 10,
+              "sanitize": true,
+              "type": "String"
+            },
+            "first_name": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "last_name": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "phone": {
+              "kind": "standard",
+              "max_length": 20,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "identity.customer.profile.UpdateProfile",
+          "module": "identity.customer.profile",
+          "name": "UpdateProfile",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.registration.RegisterCustomer": {
+          "__type__": "Identity.RegisterCustomer.v1",
+          "__version__": 1,
+          "description": "Create a new customer account with profile information.",
+          "element_type": "COMMAND",
+          "fields": {
+            "date_of_birth": {
+              "kind": "standard",
+              "max_length": 10,
+              "sanitize": true,
+              "type": "String"
+            },
+            "email": {
+              "kind": "standard",
+              "max_length": 254,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "external_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "first_name": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "last_name": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "phone": {
+              "kind": "standard",
+              "max_length": 20,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "identity.customer.registration.RegisterCustomer",
+          "module": "identity.customer.registration",
+          "name": "RegisterCustomer",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.tier.UpgradeTier": {
+          "__type__": "Identity.UpgradeTier.v1",
+          "__version__": 1,
+          "description": "Promote a customer to a higher loyalty tier (upgrades only, no downgrades).",
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_tier": {
+              "kind": "standard",
+              "max_length": 20,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "identity.customer.tier.UpgradeTier",
+          "module": "identity.customer.tier",
+          "name": "UpgradeTier",
+          "part_of": "identity.customer.customer.Customer"
+        }
+      },
+      "database_models": {},
+      "entities": {
+        "identity.customer.customer.Address": {
+          "description": "A physical location associated with a Customer, such as a home or work address.\n\nEach address carries a label, geo-coordinates, and a default flag. A customer may\nhave up to 10 addresses, with exactly one marked as the default at all times.",
+          "element_type": "ENTITY",
+          "fields": {
+            "city": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "country": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "customer": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "identity.customer.customer.Customer"
+            },
+            "geo_coordinates": {
+              "kind": "value_object",
+              "target": "identity.customer.customer.GeoCoordinates"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "is_default": {
+              "default": false,
+              "kind": "standard",
+              "type": "Boolean"
+            },
+            "label": {
+              "choices": [
+                "Home",
+                "Other",
+                "Work"
+              ],
+              "default": "Home",
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "postal_code": {
+              "kind": "standard",
+              "max_length": 20,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "state": {
+              "kind": "standard",
+              "max_length": 100,
+              "sanitize": true,
+              "type": "String"
+            },
+            "street": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "identity.customer.customer.Address",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "identity.customer.customer",
+          "name": "Address",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "address"
+          },
+          "part_of": "identity.customer.customer.Customer"
+        }
+      },
+      "event_handlers": {},
+      "events": {
+        "identity.customer.events.AccountClosed": {
+          "__type__": "Identity.AccountClosed.v1",
+          "__version__": 1,
+          "description": "A customer account was permanently closed.",
+          "element_type": "EVENT",
+          "fields": {
+            "closed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "identity.customer.events.AccountClosed",
+          "is_fact_event": false,
+          "module": "identity.customer.events",
+          "name": "AccountClosed",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.events.AccountReactivated": {
+          "__type__": "Identity.AccountReactivated.v1",
+          "__version__": 1,
+          "description": "A previously suspended customer account was restored to active status.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reactivated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "identity.customer.events.AccountReactivated",
+          "is_fact_event": false,
+          "module": "identity.customer.events",
+          "name": "AccountReactivated",
+          "part_of": "identity.customer.customer.Customer",
+          "published": true
+        },
+        "identity.customer.events.AccountSuspended": {
+          "__type__": "Identity.AccountSuspended.v1",
+          "__version__": 1,
+          "description": "A customer account was suspended, blocking further activity.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "suspended_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "identity.customer.events.AccountSuspended",
+          "is_fact_event": false,
+          "module": "identity.customer.events",
+          "name": "AccountSuspended",
+          "part_of": "identity.customer.customer.Customer",
+          "published": true
+        },
+        "identity.customer.events.AddressAdded": {
+          "__type__": "Identity.AddressAdded.v1",
+          "__version__": 1,
+          "description": "A new address was added to a customer's address book.",
+          "element_type": "EVENT",
+          "fields": {
+            "address_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "city": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "country": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "is_default": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "label": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "postal_code": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "state": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "street": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "identity.customer.events.AddressAdded",
+          "is_fact_event": false,
+          "module": "identity.customer.events",
+          "name": "AddressAdded",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.events.AddressRemoved": {
+          "__type__": "Identity.AddressRemoved.v1",
+          "__version__": 1,
+          "description": "An address was removed from a customer's address book.",
+          "element_type": "EVENT",
+          "fields": {
+            "address_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "identity.customer.events.AddressRemoved",
+          "is_fact_event": false,
+          "module": "identity.customer.events",
+          "name": "AddressRemoved",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.events.AddressUpdated": {
+          "__type__": "Identity.AddressUpdated.v1",
+          "__version__": 1,
+          "description": "An existing address in a customer's address book was modified.",
+          "element_type": "EVENT",
+          "fields": {
+            "address_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "city": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "country": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "label": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "postal_code": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "state": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "street": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "identity.customer.events.AddressUpdated",
+          "is_fact_event": false,
+          "module": "identity.customer.events",
+          "name": "AddressUpdated",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.events.CustomerRegistered": {
+          "__type__": "Identity.CustomerRegistered.v1",
+          "__version__": 1,
+          "description": "A new customer account was created on the platform.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "email": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "external_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "first_name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "last_name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "registered_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "identity.customer.events.CustomerRegistered",
+          "is_fact_event": false,
+          "module": "identity.customer.events",
+          "name": "CustomerRegistered",
+          "part_of": "identity.customer.customer.Customer",
+          "published": true
+        },
+        "identity.customer.events.DefaultAddressChanged": {
+          "__type__": "Identity.DefaultAddressChanged.v1",
+          "__version__": 1,
+          "description": "A different address was designated as the customer's default.",
+          "element_type": "EVENT",
+          "fields": {
+            "address_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "previous_default_address_id": {
+              "kind": "identifier",
+              "type": "Identifier"
+            }
+          },
+          "fqn": "identity.customer.events.DefaultAddressChanged",
+          "is_fact_event": false,
+          "module": "identity.customer.events",
+          "name": "DefaultAddressChanged",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.events.ProfileUpdated": {
+          "__type__": "Identity.ProfileUpdated.v1",
+          "__version__": 1,
+          "description": "A customer's personal profile information was changed.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "date_of_birth": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "first_name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "last_name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "phone": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "identity.customer.events.ProfileUpdated",
+          "is_fact_event": false,
+          "module": "identity.customer.events",
+          "name": "ProfileUpdated",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.events.TierUpgraded": {
+          "__type__": "Identity.TierUpgraded.v1",
+          "__version__": 1,
+          "description": "A customer was promoted to a higher loyalty tier.",
+          "element_type": "EVENT",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "new_tier": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "previous_tier": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "upgraded_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "identity.customer.events.TierUpgraded",
+          "is_fact_event": false,
+          "module": "identity.customer.events",
+          "name": "TierUpgraded",
+          "part_of": "identity.customer.customer.Customer"
+        }
+      },
+      "repositories": {},
+      "value_objects": {
+        "identity.customer.customer.GeoCoordinates": {
+          "description": "Latitude/longitude pair for address geolocation.\n\nBoth coordinates are required when provided; partial coordinates are rejected.\nLatitude ranges from -90 to 90, longitude from -180 to 180.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "latitude": {
+              "kind": "standard",
+              "max_value": 90.0,
+              "min_value": -90.0,
+              "type": "Float"
+            },
+            "longitude": {
+              "kind": "standard",
+              "max_value": 180.0,
+              "min_value": -180.0,
+              "type": "Float"
+            }
+          },
+          "fqn": "identity.customer.customer.GeoCoordinates",
+          "invariants": {
+            "post": [
+              "both_coordinates_required"
+            ],
+            "pre": []
+          },
+          "module": "identity.customer.customer",
+          "name": "GeoCoordinates",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.customer.customer.Profile": {
+          "description": "Personal information associated with a Customer \u2014 name, phone, and date of birth.\n\nA Profile has no identity of its own; it exists only as part of a Customer.\nIt is replaced wholesale on update (value object semantics).",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "date_of_birth": {
+              "kind": "standard",
+              "type": "Date"
+            },
+            "first_name": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "last_name": {
+              "kind": "standard",
+              "max_length": 100,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "phone": {
+              "kind": "standard",
+              "type": "String"
+            }
+          },
+          "fqn": "identity.customer.customer.Profile",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "identity.customer.customer",
+          "name": "Profile",
+          "part_of": "identity.customer.customer.Customer"
+        },
+        "identity.shared.email.EmailAddress": {
+          "description": "A validated email address conforming to standard format rules.\n\nEnforces structural validity: exactly one @, valid local and domain parts,\nno consecutive dots, no forbidden characters. Used across contexts wherever\nan email is required.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "address": {
+              "kind": "standard",
+              "max_length": 254,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "identity.shared.email.EmailAddress",
+          "invariants": {
+            "post": [
+              "verify_email_address"
+            ],
+            "pre": []
+          },
+          "module": "identity.shared.email",
+          "name": "EmailAddress",
+          "part_of": "identity.customer.customer.Customer"
+        }
+      }
+    }
+  },
+  "contracts": {
+    "events": [
+      {
+        "fields": {
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reactivated_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          }
+        },
+        "fqn": "identity.customer.events.AccountReactivated",
+        "type": "Identity.AccountReactivated.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "suspended_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          }
+        },
+        "fqn": "identity.customer.events.AccountSuspended",
+        "type": "Identity.AccountSuspended.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "email": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "external_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "first_name": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "last_name": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "registered_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          }
+        },
+        "fqn": "identity.customer.events.CustomerRegistered",
+        "type": "Identity.CustomerRegistered.v1",
+        "version": 1
+      }
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.DefaultOutbox",
+      "level": "warning",
+      "message": "Aggregate `DefaultOutbox` has no command handler \u2014 no write path exists"
+    },
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "abc.MemoryOutbox",
+      "level": "warning",
+      "message": "Aggregate `MemoryOutbox` has no command handler \u2014 no write path exists"
+    }
+  ],
+  "domain": {
+    "camel_case_name": "Identity",
+    "command_processing": "sync",
+    "event_processing": "async",
+    "identity_strategy": "uuid",
+    "identity_type": "string",
+    "name": "identity",
+    "normalized_name": "identity"
+  },
+  "elements": {
+    "AGGREGATE": [
+      "abc.DefaultOutbox",
+      "abc.MemoryOutbox",
+      "identity.customer.customer.Customer"
+    ],
+    "APPLICATION_SERVICE": [],
+    "COMMAND": [
+      "identity.customer.account.CloseAccount",
+      "identity.customer.account.ReactivateAccount",
+      "identity.customer.account.SuspendAccount",
+      "identity.customer.addresses.AddAddress",
+      "identity.customer.addresses.RemoveAddress",
+      "identity.customer.addresses.SetDefaultAddress",
+      "identity.customer.addresses.UpdateAddress",
+      "identity.customer.profile.UpdateProfile",
+      "identity.customer.registration.RegisterCustomer",
+      "identity.customer.tier.UpgradeTier"
+    ],
+    "COMMAND_HANDLER": [
+      "identity.customer.account.ManageAccountHandler",
+      "identity.customer.addresses.ManageAddressesHandler",
+      "identity.customer.profile.ManageProfileHandler",
+      "identity.customer.registration.RegisterCustomerHandler",
+      "identity.customer.tier.ManageTierHandler"
+    ],
+    "DATABASE_MODEL": [],
+    "DOMAIN_SERVICE": [],
+    "ENTITY": [
+      "identity.customer.customer.Address"
+    ],
+    "EVENT": [
+      "identity.customer.events.AccountClosed",
+      "identity.customer.events.AccountReactivated",
+      "identity.customer.events.AccountSuspended",
+      "identity.customer.events.AddressAdded",
+      "identity.customer.events.AddressRemoved",
+      "identity.customer.events.AddressUpdated",
+      "identity.customer.events.CustomerRegistered",
+      "identity.customer.events.DefaultAddressChanged",
+      "identity.customer.events.ProfileUpdated",
+      "identity.customer.events.TierUpgraded"
+    ],
+    "EVENT_HANDLER": [],
+    "PROCESS_MANAGER": [],
+    "PROJECTION": [
+      "identity.projections.address_book.AddressBook",
+      "identity.projections.customer_card.CustomerCard",
+      "identity.projections.customer_lookup.CustomerLookup",
+      "identity.projections.customer_segments.CustomerSegments"
+    ],
+    "PROJECTOR": [
+      "identity.projections.address_book.AddressBookProjector",
+      "identity.projections.customer_card.CustomerCardProjector",
+      "identity.projections.customer_lookup.CustomerLookupProjector",
+      "identity.projections.customer_segments.CustomerSegmentsProjector"
+    ],
+    "QUERY": [
+      "identity.projections.address_book_queries.GetAddressBook",
+      "identity.projections.customer_card_queries.GetCustomerCard"
+    ],
+    "QUERY_HANDLER": [
+      "identity.projections.address_book_queries.AddressBookQueryHandler",
+      "identity.projections.customer_card_queries.CustomerCardQueryHandler"
+    ],
+    "REPOSITORY": [
+      "protean.utils.DefaultOutboxRepository",
+      "protean.utils.MemoryOutboxRepository"
+    ],
+    "SUBSCRIBER": [],
+    "VALUE_OBJECT": [
+      "identity.customer.customer.GeoCoordinates",
+      "identity.customer.customer.Profile",
+      "identity.shared.email.EmailAddress",
+      "identity.shared.phone.PhoneNumber"
+    ]
+  },
+  "flows": {
+    "domain_services": {},
+    "process_managers": {},
+    "subscribers": {}
+  },
+  "generated_at": "2026-03-18T13:30:22Z",
+  "ir_version": "0.1.0",
+  "projections": {
+    "identity.projections.address_book.AddressBook": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "addresses": {
+            "content_type": "dict",
+            "default": "<callable>",
+            "kind": "list",
+            "type": "List"
+          },
+          "customer_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "identity.projections.address_book.AddressBook",
+        "identity_field": "customer_id",
+        "module": "identity.projections.address_book",
+        "name": "AddressBook",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "address_book"
+        }
+      },
+      "projectors": {
+        "identity.projections.address_book.AddressBookProjector": {
+          "aggregates": [
+            "identity.customer.customer.Customer"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "identity.projections.address_book.AddressBookProjector",
+          "handlers": {
+            "Identity.AddressAdded.v1": [
+              "on_address_added"
+            ],
+            "Identity.AddressRemoved.v1": [
+              "on_address_removed"
+            ],
+            "Identity.AddressUpdated.v1": [
+              "on_address_updated"
+            ],
+            "Identity.DefaultAddressChanged.v1": [
+              "on_default_address_changed"
+            ]
+          },
+          "module": "identity.projections.address_book",
+          "name": "AddressBookProjector",
+          "projector_for": "identity.projections.address_book.AddressBook",
+          "stream_categories": [
+            "identity::customer"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "identity.projections.address_book_queries.GetAddressBook": {
+          "__type__": "Identity.GetAddressBook",
+          "element_type": "QUERY",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "identity.projections.address_book_queries.GetAddressBook",
+          "module": "identity.projections.address_book_queries",
+          "name": "GetAddressBook",
+          "part_of": "identity.projections.address_book.AddressBook"
+        }
+      },
+      "query_handlers": {
+        "identity.projections.address_book_queries.AddressBookQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "identity.projections.address_book_queries.AddressBookQueryHandler",
+          "handlers": {
+            "Identity.GetAddressBook": [
+              "get_address_book"
+            ]
+          },
+          "module": "identity.projections.address_book_queries",
+          "name": "AddressBookQueryHandler",
+          "part_of": "identity.projections.address_book.AddressBook"
+        }
+      }
+    },
+    "identity.projections.customer_card.CustomerCard": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "customer_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "email": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "external_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "first_name": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "last_name": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "phone": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "registered_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "tier": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "identity.projections.customer_card.CustomerCard",
+        "identity_field": "customer_id",
+        "module": "identity.projections.customer_card",
+        "name": "CustomerCard",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "customer_card"
+        }
+      },
+      "projectors": {
+        "identity.projections.customer_card.CustomerCardProjector": {
+          "aggregates": [
+            "identity.customer.customer.Customer"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "identity.projections.customer_card.CustomerCardProjector",
+          "handlers": {
+            "Identity.AccountClosed.v1": [
+              "on_account_closed"
+            ],
+            "Identity.AccountReactivated.v1": [
+              "on_account_reactivated"
+            ],
+            "Identity.AccountSuspended.v1": [
+              "on_account_suspended"
+            ],
+            "Identity.CustomerRegistered.v1": [
+              "on_customer_registered"
+            ],
+            "Identity.ProfileUpdated.v1": [
+              "on_profile_updated"
+            ],
+            "Identity.TierUpgraded.v1": [
+              "on_tier_upgraded"
+            ]
+          },
+          "module": "identity.projections.customer_card",
+          "name": "CustomerCardProjector",
+          "projector_for": "identity.projections.customer_card.CustomerCard",
+          "stream_categories": [
+            "identity::customer"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "identity.projections.customer_card_queries.GetCustomerCard": {
+          "__type__": "Identity.GetCustomerCard",
+          "element_type": "QUERY",
+          "fields": {
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "identity.projections.customer_card_queries.GetCustomerCard",
+          "module": "identity.projections.customer_card_queries",
+          "name": "GetCustomerCard",
+          "part_of": "identity.projections.customer_card.CustomerCard"
+        }
+      },
+      "query_handlers": {
+        "identity.projections.customer_card_queries.CustomerCardQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "identity.projections.customer_card_queries.CustomerCardQueryHandler",
+          "handlers": {
+            "Identity.GetCustomerCard": [
+              "get_customer_card"
+            ]
+          },
+          "module": "identity.projections.customer_card_queries",
+          "name": "CustomerCardQueryHandler",
+          "part_of": "identity.projections.customer_card.CustomerCard"
+        }
+      }
+    },
+    "identity.projections.customer_lookup.CustomerLookup": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "customer_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "email": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          }
+        },
+        "fqn": "identity.projections.customer_lookup.CustomerLookup",
+        "identity_field": "email",
+        "module": "identity.projections.customer_lookup",
+        "name": "CustomerLookup",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "customer_lookup"
+        }
+      },
+      "projectors": {
+        "identity.projections.customer_lookup.CustomerLookupProjector": {
+          "aggregates": [
+            "identity.customer.customer.Customer"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "identity.projections.customer_lookup.CustomerLookupProjector",
+          "handlers": {
+            "Identity.CustomerRegistered.v1": [
+              "on_customer_registered"
+            ]
+          },
+          "module": "identity.projections.customer_lookup",
+          "name": "CustomerLookupProjector",
+          "projector_for": "identity.projections.customer_lookup.CustomerLookup",
+          "stream_categories": [
+            "identity::customer"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "identity.projections.customer_segments.CustomerSegments": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "customer_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "email": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "first_name": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "last_name": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "tier": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "identity.projections.customer_segments.CustomerSegments",
+        "identity_field": "customer_id",
+        "module": "identity.projections.customer_segments",
+        "name": "CustomerSegments",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "customer_segments"
+        }
+      },
+      "projectors": {
+        "identity.projections.customer_segments.CustomerSegmentsProjector": {
+          "aggregates": [
+            "identity.customer.customer.Customer"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "identity.projections.customer_segments.CustomerSegmentsProjector",
+          "handlers": {
+            "Identity.CustomerRegistered.v1": [
+              "on_customer_registered"
+            ],
+            "Identity.ProfileUpdated.v1": [
+              "on_profile_updated"
+            ],
+            "Identity.TierUpgraded.v1": [
+              "on_tier_upgraded"
+            ]
+          },
+          "module": "identity.projections.customer_segments",
+          "name": "CustomerSegmentsProjector",
+          "projector_for": "identity.projections.customer_segments.CustomerSegments",
+          "stream_categories": [
+            "identity::customer"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    }
+  }
+}

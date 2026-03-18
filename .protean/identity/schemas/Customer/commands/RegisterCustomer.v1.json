@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Create a new customer account with profile information.",
+  "properties": {
+    "date_of_birth": {
+      "anyOf": [
+        {
+          "maxLength": 10,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "email": {
+      "maxLength": 254,
+      "minLength": 1,
+      "type": "string"
+    },
+    "external_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "first_name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "last_name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "phone": {
+      "anyOf": [
+        {
+          "maxLength": 20,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "email",
+    "external_id",
+    "first_name",
+    "last_name"
+  ],
+  "title": "RegisterCustomer",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "identity.customer.registration.RegisterCustomer",
+  "x-protean-type": "Identity.RegisterCustomer.v1",
+  "x-protean-version": 1
+}

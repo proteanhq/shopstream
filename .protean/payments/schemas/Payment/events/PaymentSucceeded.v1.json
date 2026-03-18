@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Payment was successfully captured by the gateway.",
+  "properties": {
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "gateway_transaction_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "succeeded_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "amount",
+    "currency",
+    "customer_id",
+    "gateway_transaction_id",
+    "order_id",
+    "payment_id",
+    "succeeded_at"
+  ],
+  "title": "PaymentSucceeded",
+  "type": "object",
+  "x-protean-aggregate": "payments.payment.payment.Payment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "payments.payment.events.PaymentSucceeded",
+  "x-protean-published": true,
+  "x-protean-type": "Payments.PaymentSucceeded.v1",
+  "x-protean-version": 1
+}

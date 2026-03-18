@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Daily aggregate of fulfillment operations.",
+  "properties": {
+    "date": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "total_created": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "total_delivered": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "total_exceptions": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "total_shipped": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "date",
+    "id"
+  ],
+  "title": "DailyShipmentsView",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "fulfillment.projections.daily_shipments.DailyShipmentsView",
+  "x-protean-identity-field": "id"
+}

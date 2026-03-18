@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Record that a shipping label has been generated.",
+  "properties": {
+    "carrier": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "label_url": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+    },
+    "service_level": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "carrier",
+    "fulfillment_id",
+    "label_url",
+    "service_level"
+  ],
+  "title": "GenerateShippingLabel",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "fulfillment.fulfillment.packing.GenerateShippingLabel",
+  "x-protean-type": "Fulfillment.GenerateShippingLabel.v1",
+  "x-protean-version": 1
+}

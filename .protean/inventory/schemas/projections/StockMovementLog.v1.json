@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "actor": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "description": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "entry_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "event_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_level": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "previous_level": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "quantity_change": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    }
+  },
+  "required": [
+    "description",
+    "entry_id",
+    "event_type",
+    "inventory_item_id",
+    "occurred_at"
+  ],
+  "title": "StockMovementLog",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "inventory.projections.stock_movement_log.StockMovementLog",
+  "x-protean-identity-field": "entry_id"
+}

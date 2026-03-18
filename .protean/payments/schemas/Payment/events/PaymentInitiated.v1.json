@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A new payment was created for an order.",
+  "properties": {
+    "amount": {
+      "type": "number"
+    },
+    "currency": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "gateway_name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "idempotency_key": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "initiated_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "last4": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_method_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "amount",
+    "currency",
+    "customer_id",
+    "gateway_name",
+    "idempotency_key",
+    "initiated_at",
+    "order_id",
+    "payment_id",
+    "payment_method_type"
+  ],
+  "title": "PaymentInitiated",
+  "type": "object",
+  "x-protean-aggregate": "payments.payment.payment.Payment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "payments.payment.events.PaymentInitiated",
+  "x-protean-type": "Payments.PaymentInitiated.v1",
+  "x-protean-version": 1
+}

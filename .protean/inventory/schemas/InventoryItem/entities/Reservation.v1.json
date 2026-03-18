@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A hold on inventory for a specific order.\n\nReservations transition through: ACTIVE \u2192 CONFIRMED \u2192 (committed via\nCommitStock), or ACTIVE \u2192 RELEASED (cancelled/expired).",
+  "properties": {
+    "expires_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "inventory_item": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "reserved_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "Active",
+            "Confirmed",
+            "Expired",
+            "Released"
+          ],
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "Active"
+    }
+  },
+  "required": [
+    "expires_at",
+    "id",
+    "order_id",
+    "quantity",
+    "reserved_at"
+  ],
+  "title": "Reservation",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "inventory.stock.stock.Reservation",
+  "x-protean-identity-field": "id"
+}

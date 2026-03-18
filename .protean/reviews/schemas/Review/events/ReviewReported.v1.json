@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A customer reported a review for moderation.",
+  "properties": {
+    "detail": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "report_count": {
+      "type": "integer"
+    },
+    "reported_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "reporter_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "review_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "reason",
+    "report_count",
+    "reported_at",
+    "reporter_id",
+    "review_id"
+  ],
+  "title": "ReviewReported",
+  "type": "object",
+  "x-protean-aggregate": "reviews.review.review.Review",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "reviews.review.events.ReviewReported",
+  "x-protean-type": "Reviews.ReviewReported.v1",
+  "x-protean-version": 1
+}

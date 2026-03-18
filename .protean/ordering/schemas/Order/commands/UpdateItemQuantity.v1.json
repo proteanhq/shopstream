@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Change the quantity of an existing order line item.",
+  "properties": {
+    "item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_quantity": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "item_id",
+    "new_quantity",
+    "order_id"
+  ],
+  "title": "UpdateItemQuantity",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.order.modification.UpdateItemQuantity",
+  "x-protean-type": "Ordering.UpdateItemQuantity.v1",
+  "x-protean-version": 1
+}

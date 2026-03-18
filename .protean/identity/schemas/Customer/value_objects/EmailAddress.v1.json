@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A validated email address conforming to standard format rules.\n\nEnforces structural validity: exactly one @, valid local and domain parts,\nno consecutive dots, no forbidden characters. Used across contexts wherever\nan email is required.",
+  "properties": {
+    "address": {
+      "maxLength": 254,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "address"
+  ],
+  "title": "EmailAddress",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "value_object",
+  "x-protean-fqn": "identity.shared.email.EmailAddress"
+}

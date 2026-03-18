@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The order was finalized after delivery and return window expiry.",
+  "properties": {
+    "completed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "completed_at",
+    "order_id"
+  ],
+  "title": "OrderCompleted",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.OrderCompleted",
+  "x-protean-type": "Ordering.OrderCompleted.v1",
+  "x-protean-version": 1
+}

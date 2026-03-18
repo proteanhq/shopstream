@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A draft product was activated and made available for sale.",
+  "properties": {
+    "activated_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "sku": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "activated_at",
+    "product_id",
+    "sku"
+  ],
+  "title": "ProductActivated",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "catalogue.product.events.ProductActivated",
+  "x-protean-type": "Catalogue.ProductActivated.v1",
+  "x-protean-version": 1
+}

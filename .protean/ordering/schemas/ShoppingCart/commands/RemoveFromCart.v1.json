@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Remove an item from the shopping cart.",
+  "properties": {
+    "cart_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "item_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "cart_id",
+    "item_id"
+  ],
+  "title": "RemoveFromCart",
+  "type": "object",
+  "x-protean-aggregate": "ordering.cart.cart.ShoppingCart",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.cart.items.RemoveFromCart",
+  "x-protean-type": "Ordering.RemoveFromCart.v1",
+  "x-protean-version": 1
+}

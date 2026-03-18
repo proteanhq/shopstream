@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A single line item being fulfilled.",
+  "properties": {
+    "fulfillment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "order_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "pick_location": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "sku": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "Packed",
+            "Pending",
+            "Picked"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "Pending"
+    }
+  },
+  "required": [
+    "id",
+    "order_item_id",
+    "product_id",
+    "quantity",
+    "sku"
+  ],
+  "title": "FulfillmentItem",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "fulfillment.fulfillment.fulfillment.FulfillmentItem",
+  "x-protean-identity-field": "id"
+}

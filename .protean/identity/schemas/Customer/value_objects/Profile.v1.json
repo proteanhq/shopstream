@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Personal information associated with a Customer \u2014 name, phone, and date of birth.\n\nA Profile has no identity of its own; it exists only as part of a Customer.\nIt is replaced wholesale on update (value object semantics).",
+  "properties": {
+    "date_of_birth": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "first_name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "last_name": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "phone": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "first_name",
+    "last_name"
+  ],
+  "title": "Profile",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "value_object",
+  "x-protean-fqn": "identity.customer.customer.Profile"
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Record that the carrier has confirmed delivery to the customer.",
+  "properties": {
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "order_id"
+  ],
+  "title": "RecordDelivery",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.order.fulfillment.RecordDelivery",
+  "x-protean-type": "Ordering.RecordDelivery.v1",
+  "x-protean-version": 1
+}

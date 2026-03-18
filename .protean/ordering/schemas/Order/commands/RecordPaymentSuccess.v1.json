@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Record that payment was successfully captured.",
+  "properties": {
+    "amount": {
+      "type": "number"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_method": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "amount",
+    "order_id",
+    "payment_id",
+    "payment_method"
+  ],
+  "title": "RecordPaymentSuccess",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.order.payment.RecordPaymentSuccess",
+  "x-protean-type": "Ordering.RecordPaymentSuccess.v1",
+  "x-protean-version": 1
+}

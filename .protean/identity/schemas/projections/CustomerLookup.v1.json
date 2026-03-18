@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "customer_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "email": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "email"
+  ],
+  "title": "CustomerLookup",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "identity.projections.customer_lookup.CustomerLookup",
+  "x-protean-identity-field": "email"
+}

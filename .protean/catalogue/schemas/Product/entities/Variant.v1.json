@@ -1,0 +1,204 @@
+{
+  "$defs": {
+    "Dimensions": {
+      "properties": {
+        "height": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "length": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unit": {
+          "anyOf": [
+            {
+              "maxLength": 2,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "cm"
+        },
+        "width": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
+    "Price": {
+      "properties": {
+        "base_price": {
+          "minimum": 0.01,
+          "type": "number"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "maxLength": 3,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "USD"
+        },
+        "tier_prices": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "base_price"
+      ],
+      "type": "object"
+    },
+    "SKU": {
+      "properties": {
+        "code": {
+          "maxLength": 50,
+          "minLength": 3,
+          "type": "string"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "type": "object"
+    },
+    "Weight": {
+      "properties": {
+        "unit": {
+          "anyOf": [
+            {
+              "maxLength": 2,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "kg"
+        },
+        "value": {
+          "anyOf": [
+            {
+              "minimum": 0.0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A purchasable configuration of a Product, such as a specific size or color.\n\nEach variant has its own SKU, pricing (with optional tier discounts), and\nphysical attributes (weight, dimensions). A product must have at least one\nvariant to be activated for sale.",
+  "properties": {
+    "attributes": {
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "dimensions": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Dimensions"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "is_active": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": true
+    },
+    "price": {
+      "$ref": "#/$defs/Price"
+    },
+    "product": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "variant_sku": {
+      "$ref": "#/$defs/SKU"
+    },
+    "weight": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Weight"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "price",
+    "variant_sku"
+  ],
+  "title": "Variant",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "catalogue.product.product.Variant",
+  "x-protean-identity-field": "id"
+}

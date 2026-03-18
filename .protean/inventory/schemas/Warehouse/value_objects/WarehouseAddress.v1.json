@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Physical address of a warehouse.",
+  "properties": {
+    "city": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "country": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    },
+    "postal_code": {
+      "maxLength": 20,
+      "minLength": 1,
+      "type": "string"
+    },
+    "state": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "street": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "city",
+    "country",
+    "postal_code",
+    "street"
+  ],
+  "title": "WarehouseAddress",
+  "type": "object",
+  "x-protean-aggregate": "inventory.warehouse.warehouse.Warehouse",
+  "x-protean-element-type": "value_object",
+  "x-protean-fqn": "inventory.warehouse.warehouse.WarehouseAddress"
+}

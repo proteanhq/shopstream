@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Change the base price of an existing variant.",
+  "properties": {
+    "base_price": {
+      "type": "number"
+    },
+    "currency": {
+      "anyOf": [
+        {
+          "maxLength": 3,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "USD"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "base_price",
+    "product_id",
+    "variant_id"
+  ],
+  "title": "UpdateVariantPrice",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "catalogue.product.variants.UpdateVariantPrice",
+  "x-protean-type": "Catalogue.UpdateVariantPrice.v1",
+  "x-protean-version": 1
+}

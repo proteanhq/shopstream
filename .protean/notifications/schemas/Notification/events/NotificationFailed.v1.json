@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A notification failed to send or deliver.",
+  "properties": {
+    "channel": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "failed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "max_retries": {
+      "type": "integer"
+    },
+    "notification_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "recipient_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "retry_count": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "channel",
+    "failed_at",
+    "max_retries",
+    "notification_id",
+    "reason",
+    "recipient_id",
+    "retry_count"
+  ],
+  "title": "NotificationFailed",
+  "type": "object",
+  "x-protean-aggregate": "notifications.notification.notification.Notification",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "notifications.notification.events.NotificationFailed",
+  "x-protean-type": "Notifications.NotificationFailed.v1",
+  "x-protean-version": 1
+}

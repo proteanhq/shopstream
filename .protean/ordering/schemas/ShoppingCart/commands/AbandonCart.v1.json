@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Mark a cart as abandoned due to inactivity.",
+  "properties": {
+    "cart_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "cart_id"
+  ],
+  "title": "AbandonCart",
+  "type": "object",
+  "x-protean-aggregate": "ordering.cart.cart.ShoppingCart",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.cart.management.AbandonCart",
+  "x-protean-type": "Ordering.AbandonCart.v1",
+  "x-protean-version": 1
+}

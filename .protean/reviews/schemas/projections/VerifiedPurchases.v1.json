@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "customer_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "delivered_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "order_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "vp_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "delivered_at",
+    "order_id",
+    "product_id",
+    "vp_id"
+  ],
+  "title": "VerifiedPurchases",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "reviews.projections.verified_purchases.VerifiedPurchases",
+  "x-protean-identity-field": "vp_id"
+}

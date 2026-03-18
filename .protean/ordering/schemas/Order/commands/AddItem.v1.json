@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Add a new line item to an order (only allowed in Created state).",
+  "properties": {
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "quantity": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "sku": {
+      "maxLength": 50,
+      "minLength": 1,
+      "type": "string"
+    },
+    "title": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "unit_price": {
+      "minimum": 0.0,
+      "type": "number"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "order_id",
+    "product_id",
+    "quantity",
+    "sku",
+    "title",
+    "unit_price",
+    "variant_id"
+  ],
+  "title": "AddItem",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.order.modification.AddItem",
+  "x-protean-type": "Ordering.AddItem.v1",
+  "x-protean-version": 1
+}

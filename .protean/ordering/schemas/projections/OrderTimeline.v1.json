@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "description": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "entry_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "event_metadata": {
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "event_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "description",
+    "entry_id",
+    "event_type",
+    "occurred_at",
+    "order_id"
+  ],
+  "title": "OrderTimeline",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "ordering.projections.order_timeline.OrderTimeline",
+  "x-protean-identity-field": "entry_id"
+}

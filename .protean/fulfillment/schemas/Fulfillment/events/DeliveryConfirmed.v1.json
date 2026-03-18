@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The carrier confirmed delivery to the customer.",
+  "properties": {
+    "actual_delivery": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "delivered_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "actual_delivery",
+    "delivered_at",
+    "fulfillment_id",
+    "order_id"
+  ],
+  "title": "DeliveryConfirmed",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "fulfillment.fulfillment.events.DeliveryConfirmed",
+  "x-protean-published": true,
+  "x-protean-type": "Fulfillment.DeliveryConfirmed.v1",
+  "x-protean-version": 1
+}

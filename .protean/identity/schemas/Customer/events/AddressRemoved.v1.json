@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "An address was removed from a customer's address book.",
+  "properties": {
+    "address_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "address_id",
+    "customer_id"
+  ],
+  "title": "AddressRemoved",
+  "type": "object",
+  "x-protean-aggregate": "identity.customer.customer.Customer",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "identity.customer.events.AddressRemoved",
+  "x-protean-type": "Identity.AddressRemoved.v1",
+  "x-protean-version": 1
+}

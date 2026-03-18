@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A line item on an invoice.",
+  "properties": {
+    "description": {
+      "maxLength": 500,
+      "minLength": 1,
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "invoice": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "total": {
+      "type": "number"
+    },
+    "unit_price": {
+      "type": "number"
+    }
+  },
+  "required": [
+    "description",
+    "id",
+    "quantity",
+    "total",
+    "unit_price"
+  ],
+  "title": "InvoiceLineItem",
+  "type": "object",
+  "x-protean-aggregate": "payments.invoice.invoice.Invoice",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "payments.invoice.invoice.InvoiceLineItem",
+  "x-protean-identity-field": "id"
+}

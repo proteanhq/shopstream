@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Payment was successfully captured for the order.",
+  "properties": {
+    "amount": {
+      "type": "number"
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "paid_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "payment_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "payment_method": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "amount",
+    "order_id",
+    "paid_at",
+    "payment_id",
+    "payment_method"
+  ],
+  "title": "PaymentSucceeded",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.PaymentSucceeded",
+  "x-protean-type": "Ordering.PaymentSucceeded.v1",
+  "x-protean-version": 1
+}

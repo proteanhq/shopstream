@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Stock was received into the warehouse, increasing on-hand quantity.",
+  "properties": {
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_available": {
+      "type": "integer"
+    },
+    "new_on_hand": {
+      "type": "integer"
+    },
+    "previous_on_hand": {
+      "type": "integer"
+    },
+    "quantity": {
+      "type": "integer"
+    },
+    "received_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "reference": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "inventory_item_id",
+    "new_available",
+    "new_on_hand",
+    "previous_on_hand",
+    "quantity",
+    "received_at"
+  ],
+  "title": "StockReceived",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.stock.events.StockReceived",
+  "x-protean-type": "Inventory.StockReceived.v1",
+  "x-protean-version": 1
+}

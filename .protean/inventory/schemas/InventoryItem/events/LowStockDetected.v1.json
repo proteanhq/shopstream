@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Available stock dropped below the reorder point.",
+  "properties": {
+    "current_available": {
+      "type": "integer"
+    },
+    "detected_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "inventory_item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "product_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "reorder_point": {
+      "type": "integer"
+    },
+    "sku": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "variant_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "current_available",
+    "detected_at",
+    "inventory_item_id",
+    "product_id",
+    "reorder_point",
+    "sku",
+    "variant_id"
+  ],
+  "title": "LowStockDetected",
+  "type": "object",
+  "x-protean-aggregate": "inventory.stock.stock.InventoryItem",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "inventory.stock.events.LowStockDetected",
+  "x-protean-published": true,
+  "x-protean-type": "Inventory.LowStockDetected.v1",
+  "x-protean-version": 1
+}

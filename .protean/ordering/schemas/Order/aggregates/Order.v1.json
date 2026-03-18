@@ -1,0 +1,433 @@
+{
+  "$defs": {
+    "OrderItem": {
+      "properties": {
+        "discount": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0.0
+        },
+        "id": {
+          "type": "string"
+        },
+        "item_status": {
+          "anyOf": [
+            {
+              "enum": [
+                "Delivered",
+                "Pending",
+                "Reserved",
+                "Returned",
+                "Shipped"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "Pending"
+        },
+        "order": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "product_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "quantity": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "sku": {
+          "maxLength": 50,
+          "minLength": 1,
+          "type": "string"
+        },
+        "tax_amount": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0.0
+        },
+        "title": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        },
+        "unit_price": {
+          "minimum": 0.0,
+          "type": "number"
+        },
+        "variant_id": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "product_id",
+        "quantity",
+        "sku",
+        "title",
+        "unit_price",
+        "variant_id"
+      ],
+      "type": "object"
+    },
+    "OrderPricing": {
+      "properties": {
+        "currency": {
+          "anyOf": [
+            {
+              "maxLength": 3,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "USD"
+        },
+        "discount_total": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0.0
+        },
+        "grand_total": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0.0
+        },
+        "shipping_cost": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0.0
+        },
+        "subtotal": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0.0
+        },
+        "tax_total": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": 0.0
+        }
+      },
+      "type": "object"
+    },
+    "ShippingAddress": {
+      "properties": {
+        "city": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+        },
+        "country": {
+          "maxLength": 100,
+          "minLength": 1,
+          "type": "string"
+        },
+        "postal_code": {
+          "maxLength": 20,
+          "minLength": 1,
+          "type": "string"
+        },
+        "state": {
+          "anyOf": [
+            {
+              "maxLength": 100,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "street": {
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "city",
+        "country",
+        "postal_code",
+        "street"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "billing_address": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ShippingAddress"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "cancellation_reason": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "cancelled_by": {
+      "anyOf": [
+        {
+          "maxLength": 50,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "carrier": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "coupon_code": {
+      "anyOf": [
+        {
+          "maxLength": 100,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "estimated_delivery": {
+      "anyOf": [
+        {
+          "maxLength": 10,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "items": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/OrderItem"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "payment_id": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "payment_method": {
+      "anyOf": [
+        {
+          "maxLength": 50,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "payment_status": {
+      "anyOf": [
+        {
+          "maxLength": 50,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "pricing": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/OrderPricing"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "shipment_id": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "shipping_address": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ShippingAddress"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "Cancelled",
+            "Completed",
+            "Confirmed",
+            "Created",
+            "Delivered",
+            "Paid",
+            "Partially_Shipped",
+            "Payment_Pending",
+            "Processing",
+            "Refunded",
+            "Return_Approved",
+            "Return_Requested",
+            "Returned",
+            "Shipped"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "Created"
+    },
+    "tracking_number": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "customer_id",
+    "id"
+  ],
+  "title": "Order",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "ordering.order.order.Order",
+  "x-protean-identity-field": "id",
+  "x-protean-is-event-sourced": true
+}

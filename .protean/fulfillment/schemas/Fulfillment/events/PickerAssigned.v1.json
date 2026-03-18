@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A warehouse picker was assigned to a fulfillment.",
+  "properties": {
+    "assigned_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "assigned_to": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "fulfillment_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "assigned_at",
+    "assigned_to",
+    "fulfillment_id"
+  ],
+  "title": "PickerAssigned",
+  "type": "object",
+  "x-protean-aggregate": "fulfillment.fulfillment.fulfillment.Fulfillment",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "fulfillment.fulfillment.events.PickerAssigned",
+  "x-protean-type": "Fulfillment.PickerAssigned.v1",
+  "x-protean-version": 1
+}

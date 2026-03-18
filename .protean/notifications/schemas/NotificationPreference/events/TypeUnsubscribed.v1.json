@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A customer unsubscribed from a specific notification type.",
+  "properties": {
+    "customer_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "notification_type": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "preference_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "unsubscribed_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "customer_id",
+    "notification_type",
+    "preference_id",
+    "unsubscribed_at"
+  ],
+  "title": "TypeUnsubscribed",
+  "type": "object",
+  "x-protean-aggregate": "notifications.preference.preference.NotificationPreference",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "notifications.preference.events.TypeUnsubscribed",
+  "x-protean-type": "Notifications.TypeUnsubscribed.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Apply a coupon code to a shopping cart.",
+  "properties": {
+    "cart_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "coupon_code": {
+      "maxLength": 100,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "cart_id",
+    "coupon_code"
+  ],
+  "title": "ApplyCouponToCart",
+  "type": "object",
+  "x-protean-aggregate": "ordering.cart.cart.ShoppingCart",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "ordering.cart.coupons.ApplyCouponToCart",
+  "x-protean-type": "Ordering.ApplyCouponToCart.v1",
+  "x-protean-version": 1
+}
