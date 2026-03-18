@@ -68,6 +68,11 @@ database_uri = "${TEST_FULFILLMENT_DATABASE_URL|postgresql://postgres:postgres@l
 event_processing = "async"
 debug = false
 
+# OpenTelemetry (enable by setting OTEL_EXPORTER_OTLP_ENDPOINT)
+[production.telemetry]
+enabled = true
+service_name = "shopstream"
+
 [production.databases.default]
 database_uri = "${FULFILLMENT_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/fulfillment}"
 

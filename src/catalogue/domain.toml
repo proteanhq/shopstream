@@ -69,6 +69,11 @@ database_uri = "${TEST_CATALOGUE_DATABASE_URL|postgresql://postgres:postgres@loc
 event_processing = "async"
 debug = false
 
+# OpenTelemetry (enable by setting OTEL_EXPORTER_OTLP_ENDPOINT)
+[production.telemetry]
+enabled = true
+service_name = "shopstream"
+
 [production.databases.default]
 database_uri = "${CATALOGUE_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/catalogue}"
 
