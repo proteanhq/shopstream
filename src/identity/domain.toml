@@ -72,7 +72,7 @@ debug = false
 # OpenTelemetry (enable by setting OTEL_EXPORTER_OTLP_ENDPOINT)
 [production.telemetry]
 enabled = true
-service_name = "shopstream"
+service_name = "shopstream-identity"
 
 [production.databases.default]
 database_uri = "${DATABASE_URL|postgresql://postgres:postgres@localhost:15432/identity}"
