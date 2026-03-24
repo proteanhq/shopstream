@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications ir ir-summary schemas ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications ir ir-summary schemas docs-generate ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment
 
 # Default target
 help: ## Show this help message
@@ -276,6 +276,15 @@ ir-summary: ## Show IR summary for all domains
 schemas: ## Generate JSON Schemas for all domains
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \
 		PYTHONPATH=src uv run protean schema generate --domain=$$d.domain --output=.protean/$$d; \
+	done
+
+docs-generate: ## Generate domain documentation (diagrams + event catalog)
+	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \
+		echo "Generating docs for $$d..."; \
+		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=clusters --output=docs/$$d/clusters.md; \
+		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=events --output=docs/$$d/event-flows.md; \
+		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=handlers --output=docs/$$d/handler-wiring.md; \
+		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=catalog --output=docs/$$d/catalog.md; \
 	done
 
 ir-diff: ## Diff live IR against saved baselines (.protean/<domain>/ir.json)
