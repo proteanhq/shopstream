@@ -1,0 +1,12 @@
+[compatibility]
+strictness = "warn"
+
+[domains]
+identity = "identity.domain"
+catalogue = "catalogue.domain"
+ordering = "ordering.domain"
+inventory = "inventory.domain"
+payments = "payments.domain"
+fulfillment = "fulfillment.domain"
+reviews = "reviews.domain"
+notifications = "notifications.domain"
