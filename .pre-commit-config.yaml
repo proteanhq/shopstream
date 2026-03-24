@@ -25,3 +25,7 @@ repos:
         args: [--fix]
       # Run the formatter
       - id: ruff-format
+
+  # Protean IR hooks require --domain per hook entry and PYTHONPATH=src,
+  # which is impractical for 8 domains. Use `make domain-check` and
+  # `make ir-diff` instead for multi-domain IR validation.
