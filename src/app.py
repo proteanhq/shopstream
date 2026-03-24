@@ -7,7 +7,7 @@ Usage:
     uvicorn app:app --host 0.0.0.0 --port 8000 --reload --app-dir src
 """
 
-import uuid
+import contextlib
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +18,8 @@ from protean.integrations.fastapi import (
     instrument_app,
     register_exception_handlers,
 )
+from protean.integrations.logging import protean_correlation_processor
+from protean.utils.logging import configure_logging
 from scalar_fastapi import get_scalar_api_reference
 
 from catalogue.api import category_router, product_router
@@ -36,6 +38,11 @@ from payments.api import invoice_router, payment_router
 from payments.domain import payments
 from reviews.api import review_router
 from reviews.domain import reviews
+
+# ---------------------------------------------------------------------------
+# Structured logging — environment-aware, with automatic correlation context
+# ---------------------------------------------------------------------------
+configure_logging(extra_processors=[protean_correlation_processor])
 
 # ---------------------------------------------------------------------------
 # Domain initialization
@@ -87,10 +94,11 @@ app.add_middleware(
 
 
 # ---------------------------------------------------------------------------
-# Request context middleware — populates Protean's `g` for message enrichment
+# User context middleware — populates Protean's `g` with user identity
+# Correlation IDs are handled automatically by DomainContextMiddleware.
 # ---------------------------------------------------------------------------
-class RequestContextMiddleware:
-    """Extract request_id and user_id from headers into Protean's thread-local g."""
+class UserContextMiddleware:
+    """Extract user_id from headers into Protean's thread-local g."""
 
     def __init__(self, app):
         self.app = app
@@ -98,29 +106,15 @@ class RequestContextMiddleware:
     async def __call__(self, scope, receive, send):
         if scope["type"] == "http":
             headers = dict(scope.get("headers", []))
-            # Headers arrive as bytes tuples
-            request_id = headers.get(b"x-request-id", b"").decode() or str(uuid.uuid4())
             user_id = headers.get(b"x-user-id", b"").decode() or None
 
-            try:
-                g.request_id = request_id
-                g.user_id = user_id
-            except AttributeError:
-                pass  # No domain context active (e.g. /docs, /health)
+            with contextlib.suppress(AttributeError):
+                g.user_id = user_id  # No-op when no domain context is active
 
-            async def send_with_request_id(message):
-                if message["type"] == "http.response.start":
-                    headers = list(message.get("headers", []))
-                    headers.append((b"x-request-id", request_id.encode()))
-                    message["headers"] = headers
-                await send(message)
-
-            await self.app(scope, receive, send_with_request_id)
-        else:
-            await self.app(scope, receive, send)
+        await self.app(scope, receive, send)
 
 
-app.add_middleware(RequestContextMiddleware)
+app.add_middleware(UserContextMiddleware)
 
 # ---------------------------------------------------------------------------
 # OpenTelemetry instrumentation (opt-in via [telemetry] in domain.toml)
