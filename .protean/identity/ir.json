@@ -1384,7 +1384,7 @@
     "process_managers": {},
     "subscribers": {}
   },
-  "generated_at": "2026-03-25T16:49:41Z",
+  "generated_at": "2026-03-25T18:08:09Z",
   "ir_version": "0.1.0",
   "projections": {
     "identity.projections.address_book.AddressBook": {

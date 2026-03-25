@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:9deac81602352a169ef3446d6046f2adda2915d4bb40df2aadc09e9060c32513",
+  "checksum": "sha256:ee797179cea65b51088f004c651cea5baed90b6821828e9839c5b34c8d285dab",
   "clusters": {
     "ordering.cart.cart.ShoppingCart": {
       "aggregate": {
@@ -759,6 +759,13 @@
             "kind": "has_many",
             "target": "ordering.order.order.OrderItem"
           },
+          "order_source": {
+            "default": "web",
+            "kind": "standard",
+            "max_length": 20,
+            "sanitize": true,
+            "type": "String"
+          },
           "payment_id": {
             "kind": "standard",
             "max_length": 255,
@@ -1207,6 +1214,13 @@
               "kind": "list",
               "required": true,
               "type": "List"
+            },
+            "order_source": {
+              "default": "web",
+              "kind": "standard",
+              "max_length": 20,
+              "sanitize": true,
+              "type": "String"
             },
             "shipping_address": {
               "kind": "dict",
@@ -2103,9 +2117,9 @@
           "published": true
         },
         "ordering.order.events.OrderCreated": {
-          "__type__": "Ordering.OrderCreated.v1",
-          "__version__": 1,
-          "description": "A new order was created from a shopping cart at checkout.",
+          "__type__": "Ordering.OrderCreated.v2",
+          "__version__": 2,
+          "description": "A new order was created from a shopping cart at checkout.\n\nv2: Added order_source to track originating channel (web, mobile, api).",
           "element_type": "EVENT",
           "fields": {
             "billing_address": {
@@ -2151,6 +2165,13 @@
               "min_length": 1,
               "required": true,
               "type": "Identifier"
+            },
+            "order_source": {
+              "default": "web",
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
             },
             "shipping_address": {
               "kind": "dict",
@@ -2810,6 +2831,13 @@
             "required": true,
             "type": "Identifier"
           },
+          "order_source": {
+            "default": "web",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
           "shipping_address": {
             "kind": "dict",
             "required": true,
@@ -2830,8 +2858,8 @@
           }
         },
         "fqn": "ordering.order.events.OrderCreated",
-        "type": "Ordering.OrderCreated.v1",
-        "version": 1
+        "type": "Ordering.OrderCreated.v2",
+        "version": 2
       },
       {
         "fields": {
@@ -3198,7 +3226,7 @@
       }
     }
   },
-  "generated_at": "2026-03-25T16:49:43Z",
+  "generated_at": "2026-03-25T18:08:10Z",
   "ir_version": "0.1.0",
   "projections": {
     "ordering.projections.abandoned_checkouts.AbandonedCheckout": {
@@ -3265,7 +3293,7 @@
             "Ordering.OrderConfirmed.v1": [
               "on_order_confirmed"
             ],
-            "Ordering.OrderCreated.v1": [
+            "Ordering.OrderCreated.v2": [
               "on_order_created"
             ]
           },
@@ -3505,7 +3533,7 @@
             "Ordering.OrderConfirmed.v1": [
               "on_order_confirmed"
             ],
-            "Ordering.OrderCreated.v1": [
+            "Ordering.OrderCreated.v2": [
               "on_order_created"
             ],
             "Ordering.OrderDelivered.v1": [
@@ -3674,7 +3702,7 @@
             "Ordering.OrderCompleted.v1": [
               "on_order_completed"
             ],
-            "Ordering.OrderCreated.v1": [
+            "Ordering.OrderCreated.v2": [
               "on_order_created"
             ],
             "Ordering.OrderRefunded.v1": [
@@ -3772,6 +3800,13 @@
             "kind": "identifier",
             "min_length": 1,
             "type": "Identifier"
+          },
+          "order_source": {
+            "default": "web",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
           },
           "payment_id": {
             "kind": "standard",
@@ -3874,7 +3909,7 @@
             "Ordering.OrderConfirmed.v1": [
               "on_order_confirmed"
             ],
-            "Ordering.OrderCreated.v1": [
+            "Ordering.OrderCreated.v2": [
               "on_order_created"
             ],
             "Ordering.OrderDelivered.v1": [
@@ -4044,7 +4079,7 @@
             "Ordering.OrderConfirmed.v1": [
               "on_order_confirmed"
             ],
-            "Ordering.OrderCreated.v1": [
+            "Ordering.OrderCreated.v2": [
               "on_order_created"
             ],
             "Ordering.OrderDelivered.v1": [
@@ -4211,7 +4246,7 @@
             "Ordering.OrderConfirmed.v1": [
               "on_order_confirmed"
             ],
-            "Ordering.OrderCreated.v1": [
+            "Ordering.OrderCreated.v2": [
               "on_order_created"
             ],
             "Ordering.OrderDelivered.v1": [
@@ -4360,7 +4395,7 @@
             "Ordering.OrderConfirmed.v1": [
               "on_order_confirmed"
             ],
-            "Ordering.OrderCreated.v1": [
+            "Ordering.OrderCreated.v2": [
               "on_order_created"
             ],
             "Ordering.OrderDelivered.v1": [

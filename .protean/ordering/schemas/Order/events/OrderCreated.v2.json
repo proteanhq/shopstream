@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "A new order was created from a shopping cart at checkout.",
+  "description": "A new order was created from a shopping cart at checkout.\n\nv2: Added order_source to track originating channel (web, mobile, api).",
   "properties": {
     "billing_address": {
       "type": "object"
@@ -45,6 +45,18 @@
       "minLength": 1,
       "type": "string"
     },
+    "order_source": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "web"
+    },
     "shipping_address": {
       "type": "object"
     },
@@ -88,6 +100,6 @@
   "x-protean-element-type": "event",
   "x-protean-fqn": "ordering.order.events.OrderCreated",
   "x-protean-published": true,
-  "x-protean-type": "Ordering.OrderCreated.v1",
-  "x-protean-version": 1
+  "x-protean-type": "Ordering.OrderCreated.v2",
+  "x-protean-version": 2
 }
