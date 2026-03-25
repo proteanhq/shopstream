@@ -1,7 +1,7 @@
 """Tests for Order event upcasters — schema evolution."""
 
+from ordering.order.creation import UpcastOrderCreatedV1ToV2
 from ordering.order.events import OrderCreated
-from ordering.order.upcasters import UpcastOrderCreatedV1ToV2
 
 
 class TestUpcastOrderCreatedV1ToV2:

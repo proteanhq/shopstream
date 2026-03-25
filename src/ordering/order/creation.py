@@ -1,11 +1,13 @@
-"""Order creation — command and handler."""
+"""Order creation — command, handler, and v1→v2 upcaster."""
 
 from protean import handle
+from protean.core.upcaster import BaseUpcaster
 from protean.fields import Dict, Float, Identifier, List, String
 from protean.utils.globals import current_domain
 from protean.utils.processing import Priority, processing_priority
 
 from ordering.domain import ordering
+from ordering.order.events import OrderCreated
 from ordering.order.order import Order
 
 
@@ -54,3 +56,15 @@ class CreateOrderHandler:
             )
             current_domain.repository_for(Order).add(order)
             return str(order.id)
+
+
+# ---------------------------------------------------------------------------
+# Upcaster: OrderCreated v1 → v2
+# ---------------------------------------------------------------------------
+@ordering.upcaster(event_type=OrderCreated, from_version=1, to_version=2)
+class UpcastOrderCreatedV1ToV2(BaseUpcaster):
+    """v1 had no order_source field — default to 'web'."""
+
+    def upcast(self, data: dict) -> dict:
+        data["order_source"] = "web"
+        return data
