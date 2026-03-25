@@ -239,6 +239,10 @@ make test-<domain>-cov    # Per-domain coverage report
 make lint                 # Ruff linting
 make format               # Ruff formatting
 make typecheck            # MyPy type checking
+make ir                   # Regenerate IR baselines for all domains
+make ir-check             # Check IR staleness for all domains
+make ir-diff              # Diff live IR against saved baselines
+make domain-check         # Run protean check on all domains
 ```
 
 ## Infrastructure
