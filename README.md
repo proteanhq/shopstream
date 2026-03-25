@@ -26,7 +26,7 @@ Commands are processed synchronously via a FastAPI web server. Events flow async
 ## Prerequisites
 
 - Python 3.11+
-- [Poetry](https://python-poetry.org/) for dependency management
+- [uv](https://docs.astral.sh/uv/) for dependency management
 - Docker and Docker Compose for infrastructure services
 - Make (optional, for convenience commands)
 

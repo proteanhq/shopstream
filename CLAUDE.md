@@ -246,7 +246,7 @@ make typecheck            # MyPy type checking
 
 ## Dependencies
 
-- Python 3.11+ with Poetry
+- Python 3.11+ with uv
 - Protean (git main) with postgresql, message-db, redis extras
 - FastAPI + Uvicorn
 - scalar-fastapi (API docs at /docs)
