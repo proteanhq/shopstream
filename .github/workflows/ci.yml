@@ -21,32 +21,20 @@ jobs:
         with:
           fetch-depth: 1
 
+      - uses: astral-sh/setup-uv@v5
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ matrix.python-version }}-
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: latest
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-
       - name: Install dependencies
-        run: poetry install --with dev,test,lint,types --all-extras
+        run: uv sync --all-extras
 
       - name: Run linting
-        run: poetry run ruff check src/ tests/
+        run: uv run ruff check src/ tests/
 
       - name: Run all tests (memory mode)
-        run: poetry run pytest --protean-env memory
+        run: uv run pytest --protean-env memory
 
   test:
     runs-on: ubuntu-latest
@@ -108,26 +96,14 @@ jobs:
         with:
           fetch-depth: 1
 
+      - uses: astral-sh/setup-uv@v5
+
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-${{ matrix.python-version }}-
-
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          version: latest
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-
       - name: Install dependencies
-        run: poetry install --with dev,test,lint,types --all-extras
+        run: uv sync --all-extras
 
       - name: Set up identity database
         run: bash src/identity/create_db.sh
@@ -154,10 +130,10 @@ jobs:
         run: bash src/notifications/create_db.sh
 
       - name: Run linting
-        run: poetry run ruff check src/ tests/
+        run: uv run ruff check src/ tests/
 
       - name: Run all tests with coverage
-        run: poetry run pytest --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov=src/inventory --cov=src/payments --cov=src/fulfillment --cov=src/reviews --cov=src/notifications --cov-report=xml --cov-report=term-missing
+        run: uv run pytest --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov=src/inventory --cov=src/payments --cov=src/fulfillment --cov=src/reviews --cov=src/notifications --cov-report=xml --cov-report=term-missing
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.11'
