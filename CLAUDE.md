@@ -2,6 +2,10 @@
 
 E-Commerce platform built on [Protean](https://github.com/proteanhq/protean), a Domain-Driven Design framework for Python.
 
+## Purpose
+
+ShopStream exists primarily to **test and verify Protean** in a realistic, multi-domain application. Treat issues discovered in Protean very seriously — surface them, fix them upstream (in the [Protean repo](https://github.com/proteanhq/protean)), re-test here, and iterate. ShopStream is the proving ground that keeps Protean honest.
+
 ## Architecture
 
 Multi-domain CQRS with seven bounded contexts sharing a single FastAPI server:
