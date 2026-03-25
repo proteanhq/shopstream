@@ -1,6 +1,9 @@
 [compatibility]
 strictness = "warn"
 
+[staleness]
+enabled = true
+
 [domains]
 identity = "identity.domain"
 catalogue = "catalogue.domain"
