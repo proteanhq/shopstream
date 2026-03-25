@@ -16,7 +16,6 @@ classifiers = [
 ]
 
 dependencies = [
-    # protean = { path = "../protean", extras = ["postgresql", "message-db", "redis", "telemetry"], develop = true }
     "protean[postgresql,message-db,redis,telemetry] @ git+https://github.com/proteanhq/protean.git@main",
     "python-dotenv>=1.0.0",
     "structlog>=24.1.0",
