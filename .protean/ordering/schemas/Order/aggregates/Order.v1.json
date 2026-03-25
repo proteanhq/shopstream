@@ -306,6 +306,18 @@
         }
       ]
     },
+    "order_source": {
+      "anyOf": [
+        {
+          "maxLength": 20,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "web"
+    },
     "payment_id": {
       "anyOf": [
         {

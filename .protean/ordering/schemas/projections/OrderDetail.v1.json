@@ -127,6 +127,18 @@
       "minLength": 1,
       "type": "string"
     },
+    "order_source": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "web"
+    },
     "payment_id": {
       "anyOf": [
         {

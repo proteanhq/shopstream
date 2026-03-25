@@ -38,6 +38,18 @@
     "items": {
       "type": "array"
     },
+    "order_source": {
+      "anyOf": [
+        {
+          "maxLength": 20,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "web"
+    },
     "shipping_address": {
       "type": "object"
     },
