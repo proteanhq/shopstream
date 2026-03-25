@@ -22,7 +22,7 @@ def _build_message(event_type: str, data: dict) -> dict:
 class TestOrderConfirmationHandler:
     def test_creates_order_confirmation_notification(self):
         payload = _build_message(
-            "Ordering.OrderCreated.v1",
+            "Ordering.OrderCreated.v2",
             {
                 "order_id": "ord-001",
                 "customer_id": "cust-ord-1",
@@ -63,7 +63,7 @@ class TestOrderConfirmationHandler:
 
     def test_order_confirmation_includes_order_id(self):
         payload = _build_message(
-            "Ordering.OrderCreated.v1",
+            "Ordering.OrderCreated.v2",
             {
                 "order_id": "ORD-123",
                 "customer_id": "cust-ord-2",

@@ -121,7 +121,7 @@ class TestOrderDeliveredSubscriber:
     def test_ignores_non_order_delivered_events(self):
         """Non-OrderDelivered events on the ordering stream are ignored."""
         payload = _build_message(
-            "Ordering.OrderCreated.v1",
+            "Ordering.OrderCreated.v2",
             {
                 "order_id": "order-005",
                 "customer_id": "cust-005",

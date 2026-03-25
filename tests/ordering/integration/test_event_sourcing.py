@@ -42,7 +42,7 @@ class TestEventStorePersistence:
         # Read events from the event store
         messages = current_domain.event_store.store.read(f"ordering::order-{order_id}")
         assert len(messages) >= 1
-        assert messages[0].metadata.headers.type == "Ordering.OrderCreated.v1"
+        assert messages[0].metadata.headers.type == "Ordering.OrderCreated.v2"
 
     def test_multiple_events_stored(self):
         """Verify multiple events accumulate in the event store."""
@@ -57,7 +57,7 @@ class TestEventStorePersistence:
         assert len(messages) >= 3
 
         event_types = [m.metadata.headers.type for m in messages]
-        assert "Ordering.OrderCreated.v1" in event_types
+        assert "Ordering.OrderCreated.v2" in event_types
         assert "Ordering.OrderConfirmed.v1" in event_types
         assert "Ordering.PaymentPending.v1" in event_types
 
@@ -145,10 +145,17 @@ class TestEventStoreStreamNaming:
         messages = current_domain.event_store.store.read(stream_name)
         assert len(messages) >= 1
 
-    def test_event_version_is_v1(self):
-        """Verify all events carry v1 version."""
+    def test_events_carry_version(self):
+        """Verify all events carry a version suffix."""
         order_id = _create_order()
         messages = current_domain.event_store.store.read(f"ordering::order-{order_id}")
 
         for msg in messages:
-            assert msg.metadata.headers.type.endswith(".v1")
+            event_type = msg.metadata.headers.type
+            # All events should have a version suffix (e.g., .v1 or .v2)
+            assert ".v" in event_type
+            # OrderCreated is v2 (schema evolution); others remain v1
+            if "OrderCreated" in event_type:
+                assert event_type.endswith(".v2")
+            else:
+                assert event_type.endswith(".v1")

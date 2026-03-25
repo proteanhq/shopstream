@@ -23,6 +23,7 @@ class CreateOrder:
     discount_total = Float(default=0.0)
     grand_total = Float(required=True)
     currency = String(max_length=3, default="USD")
+    order_source = String(max_length=20, default="web")
 
 
 @ordering.command_handler(part_of=Order)
@@ -49,6 +50,7 @@ class CreateOrderHandler:
                 shipping_address=shipping_address,
                 billing_address=billing_address,
                 pricing=pricing,
+                order_source=command.order_source or "web",
             )
             current_domain.repository_for(Order).add(order)
             return str(order.id)

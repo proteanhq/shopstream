@@ -106,6 +106,7 @@ class CreateOrderRequest(BaseModel):
     tax_total: float = 0.0
     discount_total: float = 0.0
     currency: str = "USD"
+    order_source: str = "web"
 
     model_config = {
         "json_schema_extra": {

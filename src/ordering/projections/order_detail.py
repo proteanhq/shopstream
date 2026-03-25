@@ -43,6 +43,7 @@ class OrderDetail:
     discount_total = Float()
     grand_total = Float()
     currency = String(default="USD")
+    order_source = String(default="web")
     payment_id = String()
     payment_method = String()
     payment_status = String()
@@ -75,6 +76,7 @@ class OrderDetailProjector:
                 discount_total=event.discount_total,
                 grand_total=event.grand_total,
                 currency=event.currency,
+                order_source=event.order_source or "web",
                 created_at=event.created_at,
                 updated_at=event.created_at,
             )
