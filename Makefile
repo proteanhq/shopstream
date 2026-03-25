@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications ir ir-summary schemas docs-generate ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications ir ir-summary schemas docs-generate ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment
 
 # Default target
 help: ## Show this help message
@@ -287,11 +287,17 @@ docs-generate: ## Generate domain documentation (diagrams + event catalog)
 		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=catalog --output=docs/$$d/catalog.md; \
 	done
 
+ir-check: ## Check staleness of materialized IR for all domains
+	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \
+		printf "$$d: "; \
+		PYTHONPATH=src uv run protean ir check --domain=$$d.domain --dir=.protean/$$d 2>&1 | head -1; \
+	done
+
 ir-diff: ## Diff live IR against saved baselines (.protean/<domain>/ir.json)
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \
 		if [ -f .protean/$$d/ir.json ]; then \
 			echo "=== $$d ==="; \
-			PYTHONPATH=src uv run protean ir diff --domain=$$d.domain --right=.protean/$$d/ir.json 2>&1 || true; \
+			PYTHONPATH=src uv run protean ir diff --domain=$$d.domain --dir=.protean/$$d 2>&1 || true; \
 			echo ""; \
 		else \
 			echo "=== $$d === (no baseline, run 'make ir' first)"; \
