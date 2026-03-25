@@ -136,6 +136,122 @@ class TestEventReplayRoundTrip:
         assert order.coupon_code == "VIP50"
 
 
+class TestOrderCreatedV1Upcasting:
+    """Verify that v1 OrderCreated events (without order_source) are upcast
+    to v2 during aggregate reconstruction from the event store."""
+
+    def _write_raw_v1_event(self, store, stream, data, position=0):
+        """Write a raw v1 OrderCreated event directly to the event store."""
+        type_string = "Ordering.OrderCreated.v1"
+        store._write(
+            stream,
+            type_string,
+            data,
+            {
+                "headers": {
+                    "id": f"evt-{position}",
+                    "type": type_string,
+                    "time": "2025-01-01T00:00:00+00:00",
+                    "stream": stream,
+                },
+                "envelope": {"specversion": "1.0"},
+                "domain": {
+                    "fqn": "ordering.order.events.OrderCreated",
+                    "kind": "EVENT",
+                    "origin_stream": None,
+                    "stream_category": stream.rsplit("-", 1)[0],
+                    "version": 1,
+                    "sequence_id": str(position),
+                    "asynchronous": True,
+                },
+            },
+            position - 1,
+        )
+
+    def test_v1_event_upcast_sets_order_source(self):
+        """A v1 OrderCreated (no order_source) should be upcast to v2
+        with order_source='web' when the aggregate is loaded."""
+        store = current_domain.event_store.store
+        order_id = "ord-upcast-001"
+        stream = f"ordering::order-{order_id}"
+
+        self._write_raw_v1_event(
+            store,
+            stream,
+            {
+                "order_id": order_id,
+                "customer_id": "cust-upcast-001",
+                "items": [
+                    {
+                        "id": "item-001",
+                        "product_id": "prod-001",
+                        "variant_id": "var-001",
+                        "sku": "SKU-001",
+                        "title": "Widget",
+                        "quantity": 1,
+                        "unit_price": 25.0,
+                    }
+                ],
+                "shipping_address": {
+                    "street": "1 St",
+                    "city": "C",
+                    "state": "S",
+                    "postal_code": "00000",
+                    "country": "US",
+                },
+                "billing_address": {
+                    "street": "1 St",
+                    "city": "C",
+                    "state": "S",
+                    "postal_code": "00000",
+                    "country": "US",
+                },
+                "subtotal": 25.0,
+                "shipping_cost": 5.0,
+                "tax_total": 0.0,
+                "discount_total": 0.0,
+                "grand_total": 30.0,
+                "currency": "USD",
+                "created_at": "2025-01-01T00:00:00+00:00",
+            },
+        )
+
+        # Load aggregate — upcaster should inject order_source="web"
+        order = current_domain.repository_for(Order).get(order_id)
+
+        assert order.id == order_id
+        assert order.customer_id == "cust-upcast-001"
+        assert order.order_source == "web"
+        assert order.status == OrderStatus.CREATED.value
+
+    def test_v2_event_preserves_order_source(self):
+        """A v2 OrderCreated with explicit order_source should preserve it."""
+        order_id = current_domain.process(
+            CreateOrder(
+                customer_id="cust-v2-001",
+                items=[
+                    {
+                        "product_id": "prod-001",
+                        "variant_id": "var-001",
+                        "sku": "SKU-001",
+                        "title": "Widget",
+                        "quantity": 1,
+                        "unit_price": 25.0,
+                    }
+                ],
+                shipping_address={"street": "1 St", "city": "C", "state": "S", "postal_code": "00000", "country": "US"},
+                billing_address={"street": "1 St", "city": "C", "state": "S", "postal_code": "00000", "country": "US"},
+                subtotal=25.0,
+                grand_total=30.0,
+                order_source="mobile",
+            ),
+            asynchronous=False,
+        )
+
+        order = current_domain.repository_for(Order).get(order_id)
+        assert order.order_source == "mobile"
+
+
 class TestEventStoreStreamNaming:
     def test_stream_name_follows_convention(self):
         """Verify event store streams follow the ordering::order-{id} convention."""
