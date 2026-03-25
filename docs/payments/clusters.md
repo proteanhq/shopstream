@@ -2,15 +2,15 @@
 
 ```mermaid
 classDiagram
-    class payments_invoice_invoice_Invoice {
+    class payments_invoice_invoice_Invoice["Invoice"] {
         <<Aggregate>>
         +created_at DateTime
-        +customer_id "Identifier (required)"
-        +id "Auto (identifier)"
-        +invoice_number "String (required)"
+        +customer_id Identifier~required~
+        +id Auto~identifier~
+        +invoice_number String~required~
         +issued_at DateTime
-        +line_items "InvoiceLineItem[]"
-        +order_id "Identifier (required)"
+        +line_items InvoiceLineItem[]
+        +order_id Identifier~required~
         +paid_at DateTime
         +status Status
         +subtotal Float
@@ -18,81 +18,81 @@ classDiagram
         +total Float
         +updated_at DateTime
     }
-    class payments_invoice_invoice_InvoiceLineItem {
+    class payments_invoice_invoice_InvoiceLineItem["InvoiceLineItem"] {
         <<Entity>>
-        +description "String (required)"
-        +id "Auto (identifier)"
+        +description String~required~
+        +id Auto~identifier~
         +invoice Invoice
-        +quantity "Float (required)"
-        +total "Float (required)"
-        +unit_price "Float (required)"
+        +quantity Float~required~
+        +total Float~required~
+        +unit_price Float~required~
     }
-    payments_invoice_invoice_Invoice "1" o-- "*" payments_invoice_invoice_InvoiceLineItem : InvoiceLineItem
+    payments_invoice_invoice_Invoice "1" o-- "*" payments_invoice_invoice_InvoiceLineItem : line_items
 ```
 
 ## Cluster: Payment
 
 ```mermaid
 classDiagram
-    class payments_payment_payment_Payment {
+    class payments_payment_payment_Payment["Payment"] {
         <<Aggregate, EventSourced>>
         +amount Money
         +attempt_count Integer
-        +attempts "PaymentAttempt[]"
+        +attempts PaymentAttempt[]
         +created_at DateTime
-        +customer_id "Identifier (required)"
+        +customer_id Identifier~required~
         +gateway_info GatewayInfo
-        +id "Auto (identifier)"
-        +idempotency_key "String (required)"
-        +order_id "Identifier (required)"
+        +id Auto~identifier~
+        +idempotency_key String~required~
+        +order_id Identifier~required~
         +payment_method PaymentMethod
-        +refunds "Refund[]"
+        +refunds Refund[]
         +status Status
         +total_refunded Float
         +updated_at DateTime
     }
-    class payments_payment_payment_PaymentAttempt {
+    class payments_payment_payment_PaymentAttempt["PaymentAttempt"] {
         <<Entity>>
-        +attempted_at "DateTime (required)"
+        +attempted_at DateTime~required~
         +failure_reason String
         +gateway_transaction_id String
-        +id "Auto (identifier)"
+        +id Auto~identifier~
         +payment Payment
-        +status "String (required)"
+        +status String~required~
     }
-    payments_payment_payment_Payment "1" o-- "*" payments_payment_payment_PaymentAttempt : PaymentAttempt
-    class payments_payment_payment_Refund {
+    payments_payment_payment_Payment "1" o-- "*" payments_payment_payment_PaymentAttempt : attempts
+    class payments_payment_payment_Refund["Refund"] {
         <<Entity>>
-        +amount "Float (required)"
+        +amount Float~required~
         +gateway_refund_id String
-        +id "Auto (identifier)"
+        +id Auto~identifier~
         +payment Payment
         +processed_at DateTime
-        +reason "String (required)"
-        +requested_at "DateTime (required)"
+        +reason String~required~
+        +requested_at DateTime~required~
         +status String
     }
-    payments_payment_payment_Payment "1" o-- "*" payments_payment_payment_Refund : Refund
-    class payments_payment_payment_GatewayInfo {
+    payments_payment_payment_Payment "1" o-- "*" payments_payment_payment_Refund : refunds
+    class payments_payment_payment_GatewayInfo["GatewayInfo"] {
         <<ValueObject>>
         +gateway_name String
         +gateway_response String
         +gateway_status String
         +gateway_transaction_id String
     }
-    payments_payment_payment_Payment *-- payments_payment_payment_GatewayInfo : GatewayInfo
-    class payments_payment_payment_Money {
+    payments_payment_payment_Payment *-- payments_payment_payment_GatewayInfo : gateway_info
+    class payments_payment_payment_Money["Money"] {
         <<ValueObject>>
         +currency String
         +value Float
     }
-    payments_payment_payment_Payment *-- payments_payment_payment_Money : Money
-    class payments_payment_payment_PaymentMethod {
+    payments_payment_payment_Payment *-- payments_payment_payment_Money : amount
+    class payments_payment_payment_PaymentMethod["PaymentMethod"] {
         <<ValueObject>>
         +expiry_month Integer
         +expiry_year Integer
         +last4 String
         +method_type String
     }
-    payments_payment_payment_Payment *-- payments_payment_payment_PaymentMethod : PaymentMethod
+    payments_payment_payment_Payment *-- payments_payment_payment_PaymentMethod : payment_method
 ```

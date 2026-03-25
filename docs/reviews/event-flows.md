@@ -1,7 +1,7 @@
-## Event Flows
+## Event Flow: Review
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph reviews_review_review_Review[Review]
         agg_reviews_review_review_Review[Review]
         cmd_reviews_review_editing_EditReview[/EditReview/]
@@ -49,27 +49,43 @@ flowchart LR
     agg_reviews_review_review_Review --> evt_reviews_review_events_ReviewReported
     agg_reviews_review_review_Review --> evt_reviews_review_events_ReviewSubmitted
     agg_reviews_review_review_Review --> evt_reviews_review_events_SellerReplyAdded
-    proj_reviews_projections_customer_reviews_CustomerReviewsProjector[CustomerReviewsProjector → CustomerReviews]
+```
+
+## Downstream Consumers
+
+```mermaid
+flowchart LR
+    evt_reviews_review_events_HelpfulVoteRecorded([HelpfulVoteRecorded])
+    evt_reviews_review_events_ReviewApproved([ReviewApproved])
+    evt_reviews_review_events_ReviewEdited([ReviewEdited])
+    evt_reviews_review_events_ReviewRejected([ReviewRejected])
+    evt_reviews_review_events_ReviewRemoved([ReviewRemoved])
+    evt_reviews_review_events_ReviewReported([ReviewReported])
+    evt_reviews_review_events_ReviewSubmitted([ReviewSubmitted])
+    evt_reviews_review_events_SellerReplyAdded([SellerReplyAdded])
+    subgraph projectors["Projectors"]
+        proj_reviews_projections_customer_reviews_CustomerReviewsProjector[CustomerReviewsProjector → CustomerReviews]
+        proj_reviews_projections_moderation_queue_ModerationQueueProjector[ModerationQueueProjector → ModerationQueue]
+        proj_reviews_projections_product_rating_ProductRatingProjector[ProductRatingProjector → ProductRating]
+        proj_reviews_projections_product_reviews_ProductReviewsProjector[ProductReviewsProjector → ProductReviews]
+        proj_reviews_projections_review_detail_ReviewDetailProjector[ReviewDetailProjector → ReviewDetail]
+    end
     evt_reviews_review_events_ReviewApproved --> proj_reviews_projections_customer_reviews_CustomerReviewsProjector
     evt_reviews_review_events_ReviewEdited --> proj_reviews_projections_customer_reviews_CustomerReviewsProjector
     evt_reviews_review_events_ReviewRejected --> proj_reviews_projections_customer_reviews_CustomerReviewsProjector
     evt_reviews_review_events_ReviewRemoved --> proj_reviews_projections_customer_reviews_CustomerReviewsProjector
     evt_reviews_review_events_ReviewSubmitted --> proj_reviews_projections_customer_reviews_CustomerReviewsProjector
-    proj_reviews_projections_moderation_queue_ModerationQueueProjector[ModerationQueueProjector → ModerationQueue]
     evt_reviews_review_events_ReviewApproved --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
     evt_reviews_review_events_ReviewRejected --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
     evt_reviews_review_events_ReviewRemoved --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
     evt_reviews_review_events_ReviewReported --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
     evt_reviews_review_events_ReviewSubmitted --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
-    proj_reviews_projections_product_rating_ProductRatingProjector[ProductRatingProjector → ProductRating]
     evt_reviews_review_events_ReviewApproved --> proj_reviews_projections_product_rating_ProductRatingProjector
     evt_reviews_review_events_ReviewRemoved --> proj_reviews_projections_product_rating_ProductRatingProjector
-    proj_reviews_projections_product_reviews_ProductReviewsProjector[ProductReviewsProjector → ProductReviews]
     evt_reviews_review_events_HelpfulVoteRecorded --> proj_reviews_projections_product_reviews_ProductReviewsProjector
     evt_reviews_review_events_ReviewApproved --> proj_reviews_projections_product_reviews_ProductReviewsProjector
     evt_reviews_review_events_ReviewRemoved --> proj_reviews_projections_product_reviews_ProductReviewsProjector
     evt_reviews_review_events_SellerReplyAdded --> proj_reviews_projections_product_reviews_ProductReviewsProjector
-    proj_reviews_projections_review_detail_ReviewDetailProjector[ReviewDetailProjector → ReviewDetail]
     evt_reviews_review_events_HelpfulVoteRecorded --> proj_reviews_projections_review_detail_ReviewDetailProjector
     evt_reviews_review_events_ReviewApproved --> proj_reviews_projections_review_detail_ReviewDetailProjector
     evt_reviews_review_events_ReviewEdited --> proj_reviews_projections_review_detail_ReviewDetailProjector

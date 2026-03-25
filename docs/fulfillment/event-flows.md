@@ -1,7 +1,7 @@
-## Event Flows
+## Event Flow: Fulfillment
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph fulfillment_fulfillment_fulfillment_Fulfillment[Fulfillment]
         agg_fulfillment_fulfillment_fulfillment_Fulfillment[Fulfillment]
         cmd_fulfillment_fulfillment_cancellation_CancelFulfillment[/CancelFulfillment/]
@@ -63,16 +63,37 @@ flowchart LR
     agg_fulfillment_fulfillment_fulfillment_Fulfillment --> evt_fulfillment_fulfillment_events_ShipmentHandedOff
     agg_fulfillment_fulfillment_fulfillment_Fulfillment --> evt_fulfillment_fulfillment_events_ShippingLabelGenerated
     agg_fulfillment_fulfillment_fulfillment_Fulfillment --> evt_fulfillment_fulfillment_events_TrackingEventReceived
-    proj_fulfillment_projections_daily_shipments_DailyShipmentsProjector[DailyShipmentsProjector → DailyShipmentsView]
+```
+
+## Downstream Consumers
+
+```mermaid
+flowchart LR
+    evt_fulfillment_fulfillment_events_DeliveryConfirmed([DeliveryConfirmed])
+    evt_fulfillment_fulfillment_events_DeliveryException([DeliveryException])
+    evt_fulfillment_fulfillment_events_FulfillmentCancelled([FulfillmentCancelled])
+    evt_fulfillment_fulfillment_events_FulfillmentCreated([FulfillmentCreated])
+    evt_fulfillment_fulfillment_events_ItemPicked([ItemPicked])
+    evt_fulfillment_fulfillment_events_PackingCompleted([PackingCompleted])
+    evt_fulfillment_fulfillment_events_PickerAssigned([PickerAssigned])
+    evt_fulfillment_fulfillment_events_PickingCompleted([PickingCompleted])
+    evt_fulfillment_fulfillment_events_ShipmentHandedOff([ShipmentHandedOff])
+    evt_fulfillment_fulfillment_events_ShippingLabelGenerated([ShippingLabelGenerated])
+    evt_fulfillment_fulfillment_events_TrackingEventReceived([TrackingEventReceived])
+    subgraph projectors["Projectors"]
+        proj_fulfillment_projections_daily_shipments_DailyShipmentsProjector[DailyShipmentsProjector → DailyShipmentsView]
+        proj_fulfillment_projections_delivery_performance_DeliveryPerformanceProjector[DeliveryPerformanceProjector → DeliveryPerformanceView]
+        proj_fulfillment_projections_fulfillment_status_FulfillmentStatusProjector[FulfillmentStatusProjector → FulfillmentStatusView]
+        proj_fulfillment_projections_shipment_tracking_ShipmentTrackingProjector[ShipmentTrackingProjector → ShipmentTrackingView]
+        proj_fulfillment_projections_warehouse_queue_WarehouseQueueProjector[WarehouseQueueProjector → WarehouseQueueView]
+    end
     evt_fulfillment_fulfillment_events_DeliveryConfirmed --> proj_fulfillment_projections_daily_shipments_DailyShipmentsProjector
     evt_fulfillment_fulfillment_events_DeliveryException --> proj_fulfillment_projections_daily_shipments_DailyShipmentsProjector
     evt_fulfillment_fulfillment_events_FulfillmentCreated --> proj_fulfillment_projections_daily_shipments_DailyShipmentsProjector
     evt_fulfillment_fulfillment_events_ShipmentHandedOff --> proj_fulfillment_projections_daily_shipments_DailyShipmentsProjector
-    proj_fulfillment_projections_delivery_performance_DeliveryPerformanceProjector[DeliveryPerformanceProjector → DeliveryPerformanceView]
     evt_fulfillment_fulfillment_events_DeliveryConfirmed --> proj_fulfillment_projections_delivery_performance_DeliveryPerformanceProjector
     evt_fulfillment_fulfillment_events_DeliveryException --> proj_fulfillment_projections_delivery_performance_DeliveryPerformanceProjector
     evt_fulfillment_fulfillment_events_ShipmentHandedOff --> proj_fulfillment_projections_delivery_performance_DeliveryPerformanceProjector
-    proj_fulfillment_projections_fulfillment_status_FulfillmentStatusProjector[FulfillmentStatusProjector → FulfillmentStatusView]
     evt_fulfillment_fulfillment_events_DeliveryConfirmed --> proj_fulfillment_projections_fulfillment_status_FulfillmentStatusProjector
     evt_fulfillment_fulfillment_events_DeliveryException --> proj_fulfillment_projections_fulfillment_status_FulfillmentStatusProjector
     evt_fulfillment_fulfillment_events_FulfillmentCancelled --> proj_fulfillment_projections_fulfillment_status_FulfillmentStatusProjector
@@ -84,12 +105,10 @@ flowchart LR
     evt_fulfillment_fulfillment_events_ShipmentHandedOff --> proj_fulfillment_projections_fulfillment_status_FulfillmentStatusProjector
     evt_fulfillment_fulfillment_events_ShippingLabelGenerated --> proj_fulfillment_projections_fulfillment_status_FulfillmentStatusProjector
     evt_fulfillment_fulfillment_events_TrackingEventReceived --> proj_fulfillment_projections_fulfillment_status_FulfillmentStatusProjector
-    proj_fulfillment_projections_shipment_tracking_ShipmentTrackingProjector[ShipmentTrackingProjector → ShipmentTrackingView]
     evt_fulfillment_fulfillment_events_DeliveryConfirmed --> proj_fulfillment_projections_shipment_tracking_ShipmentTrackingProjector
     evt_fulfillment_fulfillment_events_DeliveryException --> proj_fulfillment_projections_shipment_tracking_ShipmentTrackingProjector
     evt_fulfillment_fulfillment_events_ShipmentHandedOff --> proj_fulfillment_projections_shipment_tracking_ShipmentTrackingProjector
     evt_fulfillment_fulfillment_events_TrackingEventReceived --> proj_fulfillment_projections_shipment_tracking_ShipmentTrackingProjector
-    proj_fulfillment_projections_warehouse_queue_WarehouseQueueProjector[WarehouseQueueProjector → WarehouseQueueView]
     evt_fulfillment_fulfillment_events_FulfillmentCancelled --> proj_fulfillment_projections_warehouse_queue_WarehouseQueueProjector
     evt_fulfillment_fulfillment_events_FulfillmentCreated --> proj_fulfillment_projections_warehouse_queue_WarehouseQueueProjector
     evt_fulfillment_fulfillment_events_PackingCompleted --> proj_fulfillment_projections_warehouse_queue_WarehouseQueueProjector

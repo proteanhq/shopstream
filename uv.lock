@@ -1992,7 +1992,7 @@ wheels = [
 [[package]]
 name = "protean"
 version = "0.15.0rc1"
-source = { git = "https://github.com/proteanhq/protean.git?rev=main#2d00dfd64067698f57e97e0571c69b98c12b3586" }
+source = { git = "https://github.com/proteanhq/protean.git?rev=main#67c274f1a3f28caf857341ce16c6d625f3475b3f" }
 dependencies = [
     { name = "bleach" },
     { name = "cffi" },

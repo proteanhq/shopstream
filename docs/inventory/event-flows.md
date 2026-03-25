@@ -1,7 +1,7 @@
-## Event Flows
+## Event Flow: InventoryItem
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph inventory_stock_stock_InventoryItem[InventoryItem]
         agg_inventory_stock_stock_InventoryItem[InventoryItem]
         cmd_inventory_stock_adjustment_AdjustStock[/AdjustStock/]
@@ -37,20 +37,6 @@ flowchart LR
         hdlr_inventory_stock_returns_ReturnToStockHandler[ReturnToStockHandler]
         hdlr_inventory_stock_shipping_CommitStockHandler[CommitStockHandler]
     end
-    subgraph inventory_warehouse_warehouse_Warehouse[Warehouse]
-        agg_inventory_warehouse_warehouse_Warehouse[Warehouse]
-        cmd_inventory_warehouse_management_AddZone[/AddZone/]
-        cmd_inventory_warehouse_management_CreateWarehouse[/CreateWarehouse/]
-        cmd_inventory_warehouse_management_DeactivateWarehouse[/DeactivateWarehouse/]
-        cmd_inventory_warehouse_management_RemoveZone[/RemoveZone/]
-        cmd_inventory_warehouse_management_UpdateWarehouse[/UpdateWarehouse/]
-        evt_inventory_warehouse_events_WarehouseCreated([WarehouseCreated])
-        evt_inventory_warehouse_events_WarehouseDeactivated([WarehouseDeactivated])
-        evt_inventory_warehouse_events_WarehouseUpdated([WarehouseUpdated])
-        evt_inventory_warehouse_events_ZoneAdded([ZoneAdded])
-        evt_inventory_warehouse_events_ZoneRemoved([ZoneRemoved])
-        hdlr_inventory_warehouse_management_WarehouseManagementHandler[WarehouseManagementHandler]
-    end
     cmd_inventory_stock_adjustment_AdjustStock --> hdlr_inventory_stock_adjustment_StockAdjustmentHandler
     cmd_inventory_stock_adjustment_RecordStockCheck --> hdlr_inventory_stock_adjustment_StockAdjustmentHandler
     hdlr_inventory_stock_adjustment_StockAdjustmentHandler --> agg_inventory_stock_stock_InventoryItem
@@ -83,6 +69,26 @@ flowchart LR
     agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_StockReceived
     agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_StockReserved
     agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_StockReturned
+```
+
+## Event Flow: Warehouse
+
+```mermaid
+flowchart TD
+    subgraph inventory_warehouse_warehouse_Warehouse[Warehouse]
+        agg_inventory_warehouse_warehouse_Warehouse[Warehouse]
+        cmd_inventory_warehouse_management_AddZone[/AddZone/]
+        cmd_inventory_warehouse_management_CreateWarehouse[/CreateWarehouse/]
+        cmd_inventory_warehouse_management_DeactivateWarehouse[/DeactivateWarehouse/]
+        cmd_inventory_warehouse_management_RemoveZone[/RemoveZone/]
+        cmd_inventory_warehouse_management_UpdateWarehouse[/UpdateWarehouse/]
+        evt_inventory_warehouse_events_WarehouseCreated([WarehouseCreated])
+        evt_inventory_warehouse_events_WarehouseDeactivated([WarehouseDeactivated])
+        evt_inventory_warehouse_events_WarehouseUpdated([WarehouseUpdated])
+        evt_inventory_warehouse_events_ZoneAdded([ZoneAdded])
+        evt_inventory_warehouse_events_ZoneRemoved([ZoneRemoved])
+        hdlr_inventory_warehouse_management_WarehouseManagementHandler[WarehouseManagementHandler]
+    end
     cmd_inventory_warehouse_management_AddZone --> hdlr_inventory_warehouse_management_WarehouseManagementHandler
     cmd_inventory_warehouse_management_CreateWarehouse --> hdlr_inventory_warehouse_management_WarehouseManagementHandler
     cmd_inventory_warehouse_management_DeactivateWarehouse --> hdlr_inventory_warehouse_management_WarehouseManagementHandler
@@ -94,7 +100,40 @@ flowchart LR
     agg_inventory_warehouse_warehouse_Warehouse --> evt_inventory_warehouse_events_WarehouseUpdated
     agg_inventory_warehouse_warehouse_Warehouse --> evt_inventory_warehouse_events_ZoneAdded
     agg_inventory_warehouse_warehouse_Warehouse --> evt_inventory_warehouse_events_ZoneRemoved
-    proj_inventory_projections_inventory_level_InventoryLevelProjector[InventoryLevelProjector → InventoryLevel]
+```
+
+## Downstream Consumers
+
+```mermaid
+flowchart LR
+    evt_inventory_stock_events_DamagedStockWrittenOff([DamagedStockWrittenOff])
+    evt_inventory_stock_events_LowStockDetected([LowStockDetected])
+    evt_inventory_stock_events_ReservationConfirmed([ReservationConfirmed])
+    evt_inventory_stock_events_ReservationReleased([ReservationReleased])
+    evt_inventory_stock_events_StockAdjusted([StockAdjusted])
+    evt_inventory_stock_events_StockCheckRecorded([StockCheckRecorded])
+    evt_inventory_stock_events_StockCommitted([StockCommitted])
+    evt_inventory_stock_events_StockInitialized([StockInitialized])
+    evt_inventory_stock_events_StockMarkedDamaged([StockMarkedDamaged])
+    evt_inventory_stock_events_StockReceived([StockReceived])
+    evt_inventory_stock_events_StockReserved([StockReserved])
+    evt_inventory_stock_events_StockReturned([StockReturned])
+    evt_inventory_warehouse_events_WarehouseCreated([WarehouseCreated])
+    evt_inventory_warehouse_events_WarehouseDeactivated([WarehouseDeactivated])
+    evt_inventory_warehouse_events_WarehouseUpdated([WarehouseUpdated])
+    evt_inventory_warehouse_events_ZoneAdded([ZoneAdded])
+    evt_inventory_warehouse_events_ZoneRemoved([ZoneRemoved])
+    subgraph projectors["Projectors"]
+        proj_inventory_projections_inventory_level_InventoryLevelProjector[InventoryLevelProjector → InventoryLevel]
+        proj_inventory_projections_inventory_valuation_InventoryValuationProjector[InventoryValuationProjector → InventoryValuation]
+        proj_inventory_projections_low_stock_report_LowStockReportProjector[LowStockReportProjector → LowStockReport]
+        proj_inventory_projections_product_availability_ProductAvailabilityProjector[ProductAvailabilityProjector → ProductAvailability]
+        proj_inventory_projections_reservation_status_ReservationStatusProjector[ReservationStatusProjector → ReservationStatus]
+        proj_inventory_projections_shrinkage_report_ShrinkageReportProjector[ShrinkageReportProjector → ShrinkageReport]
+        proj_inventory_projections_stock_movement_log_StockMovementLogProjector[StockMovementLogProjector → StockMovementLog]
+        proj_inventory_projections_warehouse_directory_WarehouseDirectoryProjector[WarehouseDirectoryProjector → WarehouseDirectory]
+        proj_inventory_projections_warehouse_stock_WarehouseStockProjector[WarehouseStockProjector → WarehouseStock]
+    end
     evt_inventory_stock_events_DamagedStockWrittenOff --> proj_inventory_projections_inventory_level_InventoryLevelProjector
     evt_inventory_stock_events_ReservationReleased --> proj_inventory_projections_inventory_level_InventoryLevelProjector
     evt_inventory_stock_events_StockAdjusted --> proj_inventory_projections_inventory_level_InventoryLevelProjector
@@ -104,18 +143,15 @@ flowchart LR
     evt_inventory_stock_events_StockReceived --> proj_inventory_projections_inventory_level_InventoryLevelProjector
     evt_inventory_stock_events_StockReserved --> proj_inventory_projections_inventory_level_InventoryLevelProjector
     evt_inventory_stock_events_StockReturned --> proj_inventory_projections_inventory_level_InventoryLevelProjector
-    proj_inventory_projections_inventory_valuation_InventoryValuationProjector[InventoryValuationProjector → InventoryValuation]
     evt_inventory_stock_events_DamagedStockWrittenOff --> proj_inventory_projections_inventory_valuation_InventoryValuationProjector
     evt_inventory_stock_events_StockAdjusted --> proj_inventory_projections_inventory_valuation_InventoryValuationProjector
     evt_inventory_stock_events_StockCommitted --> proj_inventory_projections_inventory_valuation_InventoryValuationProjector
     evt_inventory_stock_events_StockInitialized --> proj_inventory_projections_inventory_valuation_InventoryValuationProjector
     evt_inventory_stock_events_StockReceived --> proj_inventory_projections_inventory_valuation_InventoryValuationProjector
     evt_inventory_stock_events_StockReturned --> proj_inventory_projections_inventory_valuation_InventoryValuationProjector
-    proj_inventory_projections_low_stock_report_LowStockReportProjector[LowStockReportProjector → LowStockReport]
     evt_inventory_stock_events_LowStockDetected --> proj_inventory_projections_low_stock_report_LowStockReportProjector
     evt_inventory_stock_events_StockReceived --> proj_inventory_projections_low_stock_report_LowStockReportProjector
     evt_inventory_stock_events_StockReturned --> proj_inventory_projections_low_stock_report_LowStockReportProjector
-    proj_inventory_projections_product_availability_ProductAvailabilityProjector[ProductAvailabilityProjector → ProductAvailability]
     evt_inventory_stock_events_ReservationReleased --> proj_inventory_projections_product_availability_ProductAvailabilityProjector
     evt_inventory_stock_events_StockAdjusted --> proj_inventory_projections_product_availability_ProductAvailabilityProjector
     evt_inventory_stock_events_StockCommitted --> proj_inventory_projections_product_availability_ProductAvailabilityProjector
@@ -124,16 +160,13 @@ flowchart LR
     evt_inventory_stock_events_StockReceived --> proj_inventory_projections_product_availability_ProductAvailabilityProjector
     evt_inventory_stock_events_StockReserved --> proj_inventory_projections_product_availability_ProductAvailabilityProjector
     evt_inventory_stock_events_StockReturned --> proj_inventory_projections_product_availability_ProductAvailabilityProjector
-    proj_inventory_projections_reservation_status_ReservationStatusProjector[ReservationStatusProjector → ReservationStatus]
     evt_inventory_stock_events_ReservationConfirmed --> proj_inventory_projections_reservation_status_ReservationStatusProjector
     evt_inventory_stock_events_ReservationReleased --> proj_inventory_projections_reservation_status_ReservationStatusProjector
     evt_inventory_stock_events_StockCommitted --> proj_inventory_projections_reservation_status_ReservationStatusProjector
     evt_inventory_stock_events_StockReserved --> proj_inventory_projections_reservation_status_ReservationStatusProjector
-    proj_inventory_projections_shrinkage_report_ShrinkageReportProjector[ShrinkageReportProjector → ShrinkageReport]
     evt_inventory_stock_events_DamagedStockWrittenOff --> proj_inventory_projections_shrinkage_report_ShrinkageReportProjector
     evt_inventory_stock_events_StockAdjusted --> proj_inventory_projections_shrinkage_report_ShrinkageReportProjector
     evt_inventory_stock_events_StockMarkedDamaged --> proj_inventory_projections_shrinkage_report_ShrinkageReportProjector
-    proj_inventory_projections_stock_movement_log_StockMovementLogProjector[StockMovementLogProjector → StockMovementLog]
     evt_inventory_stock_events_DamagedStockWrittenOff --> proj_inventory_projections_stock_movement_log_StockMovementLogProjector
     evt_inventory_stock_events_ReservationConfirmed --> proj_inventory_projections_stock_movement_log_StockMovementLogProjector
     evt_inventory_stock_events_ReservationReleased --> proj_inventory_projections_stock_movement_log_StockMovementLogProjector
@@ -145,13 +178,11 @@ flowchart LR
     evt_inventory_stock_events_StockReceived --> proj_inventory_projections_stock_movement_log_StockMovementLogProjector
     evt_inventory_stock_events_StockReserved --> proj_inventory_projections_stock_movement_log_StockMovementLogProjector
     evt_inventory_stock_events_StockReturned --> proj_inventory_projections_stock_movement_log_StockMovementLogProjector
-    proj_inventory_projections_warehouse_directory_WarehouseDirectoryProjector[WarehouseDirectoryProjector → WarehouseDirectory]
     evt_inventory_warehouse_events_WarehouseCreated --> proj_inventory_projections_warehouse_directory_WarehouseDirectoryProjector
     evt_inventory_warehouse_events_WarehouseDeactivated --> proj_inventory_projections_warehouse_directory_WarehouseDirectoryProjector
     evt_inventory_warehouse_events_WarehouseUpdated --> proj_inventory_projections_warehouse_directory_WarehouseDirectoryProjector
     evt_inventory_warehouse_events_ZoneAdded --> proj_inventory_projections_warehouse_directory_WarehouseDirectoryProjector
     evt_inventory_warehouse_events_ZoneRemoved --> proj_inventory_projections_warehouse_directory_WarehouseDirectoryProjector
-    proj_inventory_projections_warehouse_stock_WarehouseStockProjector[WarehouseStockProjector → WarehouseStock]
     evt_inventory_stock_events_DamagedStockWrittenOff --> proj_inventory_projections_warehouse_stock_WarehouseStockProjector
     evt_inventory_stock_events_ReservationReleased --> proj_inventory_projections_warehouse_stock_WarehouseStockProjector
     evt_inventory_stock_events_StockAdjusted --> proj_inventory_projections_warehouse_stock_WarehouseStockProjector
