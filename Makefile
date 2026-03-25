@@ -286,6 +286,8 @@ docs-generate: ## Generate domain documentation (diagrams + event catalog)
 		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=handlers --output=docs/$$d/handler-wiring.md; \
 		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=catalog --output=docs/$$d/catalog.md; \
 	done
+	@echo "Cleaning up internal framework elements from generated docs..."
+	@python scripts/clean_generated_docs.py
 
 ir-diff: ## Diff live IR against saved baselines (.protean/<domain>/ir.json)
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \

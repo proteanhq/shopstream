@@ -2,12 +2,6 @@
 
 ```mermaid
 flowchart LR
-    subgraph abc_DefaultOutbox[DefaultOutbox]
-        agg_abc_DefaultOutbox[DefaultOutbox]
-    end
-    subgraph abc_MemoryOutbox[MemoryOutbox]
-        agg_abc_MemoryOutbox[MemoryOutbox]
-    end
     subgraph reviews_review_review_Review[Review]
         agg_reviews_review_review_Review[Review]
         cmd_reviews_review_editing_EditReview[/EditReview/]

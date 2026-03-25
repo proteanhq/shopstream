@@ -2,12 +2,6 @@
 
 ```mermaid
 flowchart LR
-    subgraph abc_DefaultOutbox[DefaultOutbox]
-        agg_abc_DefaultOutbox[DefaultOutbox]
-    end
-    subgraph abc_MemoryOutbox[MemoryOutbox]
-        agg_abc_MemoryOutbox[MemoryOutbox]
-    end
     subgraph notifications_notification_notification_Notification[Notification]
         agg_notifications_notification_notification_Notification[Notification]
         cmd_notifications_notification_cancellation_CancelNotification[/CancelNotification/]

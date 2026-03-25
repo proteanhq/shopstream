@@ -2,12 +2,6 @@
 
 ```mermaid
 flowchart LR
-    subgraph abc_DefaultOutbox[DefaultOutbox]
-        agg_abc_DefaultOutbox[DefaultOutbox]
-    end
-    subgraph abc_MemoryOutbox[MemoryOutbox]
-        agg_abc_MemoryOutbox[MemoryOutbox]
-    end
     subgraph ordering_cart_cart_ShoppingCart[ShoppingCart]
         agg_ordering_cart_cart_ShoppingCart[ShoppingCart]
         cmd_ordering_cart_abandonment_DetectAbandonedCarts[/DetectAbandonedCarts/]

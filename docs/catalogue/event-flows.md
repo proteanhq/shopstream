@@ -2,12 +2,6 @@
 
 ```mermaid
 flowchart LR
-    subgraph abc_DefaultOutbox[DefaultOutbox]
-        agg_abc_DefaultOutbox[DefaultOutbox]
-    end
-    subgraph abc_MemoryOutbox[MemoryOutbox]
-        agg_abc_MemoryOutbox[MemoryOutbox]
-    end
     subgraph catalogue_category_category_Category[Category]
         agg_catalogue_category_category_Category[Category]
         cmd_catalogue_category_management_CreateCategory[/CreateCategory/]

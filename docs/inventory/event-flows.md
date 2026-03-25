@@ -2,12 +2,6 @@
 
 ```mermaid
 flowchart LR
-    subgraph abc_DefaultOutbox[DefaultOutbox]
-        agg_abc_DefaultOutbox[DefaultOutbox]
-    end
-    subgraph abc_MemoryOutbox[MemoryOutbox]
-        agg_abc_MemoryOutbox[MemoryOutbox]
-    end
     subgraph inventory_stock_stock_InventoryItem[InventoryItem]
         agg_inventory_stock_stock_InventoryItem[InventoryItem]
         cmd_inventory_stock_adjustment_AdjustStock[/AdjustStock/]

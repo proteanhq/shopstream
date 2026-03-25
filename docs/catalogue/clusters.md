@@ -1,63 +1,3 @@
-## Cluster: DefaultOutbox
-
-```mermaid
-classDiagram
-    class abc_DefaultOutbox {
-        <<Aggregate>>
-        +causation_id String
-        +correlation_id String
-        +created_at DateTime
-        +data "Dict (required)"
-        +id "Auto (identifier)"
-        +last_error Dict
-        +last_processed_at DateTime
-        +locked_by String
-        +locked_until DateTime
-        +max_retries Integer
-        +message_id "String (required)"
-        +metadata_ "String (required)"
-        +next_retry_at DateTime
-        +priority Integer
-        +published_at DateTime
-        +retry_count Integer
-        +sequence_number Integer
-        +status String
-        +stream_name "String (required)"
-        +target_broker String
-        +type "String (required)"
-    }
-```
-
-## Cluster: MemoryOutbox
-
-```mermaid
-classDiagram
-    class abc_MemoryOutbox {
-        <<Aggregate>>
-        +causation_id String
-        +correlation_id String
-        +created_at DateTime
-        +data "Dict (required)"
-        +id "Auto (identifier)"
-        +last_error Dict
-        +last_processed_at DateTime
-        +locked_by String
-        +locked_until DateTime
-        +max_retries Integer
-        +message_id "String (required)"
-        +metadata_ "String (required)"
-        +next_retry_at DateTime
-        +priority Integer
-        +published_at DateTime
-        +retry_count Integer
-        +sequence_number Integer
-        +status String
-        +stream_name "String (required)"
-        +target_broker String
-        +type "String (required)"
-    }
-```
-
 ## Cluster: Category
 
 ```mermaid
@@ -98,7 +38,7 @@ classDiagram
         +variants "Variant[]"
         +visibility String
     }
-    note for catalogue_product_product_Product exactly_one_primary_image_when_images_exist, images_cannot_exceed_maximum
+    note for catalogue_product_product_Product "exactly_one_primary_image_when_images_exist, images_cannot_exceed_maximum"
     class catalogue_product_product_Image {
         <<Entity>>
         +alt_text String
@@ -128,32 +68,32 @@ classDiagram
         +unit String
         +width Float
     }
-    note for catalogue_product_product_Dimensions unit_must_be_valid
+    note for catalogue_product_product_Dimensions "unit_must_be_valid"
     class catalogue_product_product_Price {
         <<ValueObject>>
         +base_price "Float (required)"
         +currency String
         +tier_prices Dict
     }
-    note for catalogue_product_product_Price tier_prices_must_be_valid
+    note for catalogue_product_product_Price "tier_prices_must_be_valid"
     class catalogue_product_product_SEO {
         <<ValueObject>>
         +meta_description String
         +meta_title String
         +slug String
     }
-    note for catalogue_product_product_SEO slug_must_be_url_safe
+    note for catalogue_product_product_SEO "slug_must_be_url_safe"
     catalogue_product_product_Product *-- catalogue_product_product_SEO : SEO
     class catalogue_product_product_Weight {
         <<ValueObject>>
         +unit String
         +value Float
     }
-    note for catalogue_product_product_Weight unit_must_be_valid
+    note for catalogue_product_product_Weight "unit_must_be_valid"
     class catalogue_shared_sku_SKU {
         <<ValueObject>>
         +code "String (required)"
     }
-    note for catalogue_shared_sku_SKU code_must_be_valid_format
+    note for catalogue_shared_sku_SKU "code_must_be_valid_format"
     catalogue_product_product_Product *-- catalogue_shared_sku_SKU : SKU
 ```

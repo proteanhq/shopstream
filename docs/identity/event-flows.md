@@ -2,12 +2,6 @@
 
 ```mermaid
 flowchart LR
-    subgraph abc_DefaultOutbox[DefaultOutbox]
-        agg_abc_DefaultOutbox[DefaultOutbox]
-    end
-    subgraph abc_MemoryOutbox[MemoryOutbox]
-        agg_abc_MemoryOutbox[MemoryOutbox]
-    end
     subgraph identity_customer_customer_Customer[Customer]
         agg_identity_customer_customer_Customer[Customer]
         cmd_identity_customer_account_CloseAccount[/CloseAccount/]

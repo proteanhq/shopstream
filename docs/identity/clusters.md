@@ -1,63 +1,3 @@
-## Cluster: DefaultOutbox
-
-```mermaid
-classDiagram
-    class abc_DefaultOutbox {
-        <<Aggregate>>
-        +causation_id String
-        +correlation_id String
-        +created_at DateTime
-        +data "Dict (required)"
-        +id "Auto (identifier)"
-        +last_error Dict
-        +last_processed_at DateTime
-        +locked_by String
-        +locked_until DateTime
-        +max_retries Integer
-        +message_id "String (required)"
-        +metadata_ "String (required)"
-        +next_retry_at DateTime
-        +priority Integer
-        +published_at DateTime
-        +retry_count Integer
-        +sequence_number Integer
-        +status String
-        +stream_name "String (required)"
-        +target_broker String
-        +type "String (required)"
-    }
-```
-
-## Cluster: MemoryOutbox
-
-```mermaid
-classDiagram
-    class abc_MemoryOutbox {
-        <<Aggregate>>
-        +causation_id String
-        +correlation_id String
-        +created_at DateTime
-        +data "Dict (required)"
-        +id "Auto (identifier)"
-        +last_error Dict
-        +last_processed_at DateTime
-        +locked_by String
-        +locked_until DateTime
-        +max_retries Integer
-        +message_id "String (required)"
-        +metadata_ "String (required)"
-        +next_retry_at DateTime
-        +priority Integer
-        +published_at DateTime
-        +retry_count Integer
-        +sequence_number Integer
-        +status String
-        +stream_name "String (required)"
-        +target_broker String
-        +type "String (required)"
-    }
-```
-
 ## Cluster: Customer
 
 ```mermaid
@@ -74,7 +14,7 @@ classDiagram
         +status Status
         +tier Status
     }
-    note for identity_customer_customer_Customer addresses_cannot_exceed_maximum, exactly_one_default_address_when_addresses_exist
+    note for identity_customer_customer_Customer "addresses_cannot_exceed_maximum, exactly_one_default_address_when_addresses_exist"
     class identity_customer_customer_Address {
         <<Entity>>
         +city "String (required)"
@@ -94,7 +34,7 @@ classDiagram
         +latitude Float
         +longitude Float
     }
-    note for identity_customer_customer_GeoCoordinates both_coordinates_required
+    note for identity_customer_customer_GeoCoordinates "both_coordinates_required"
     class identity_customer_customer_Profile {
         <<ValueObject>>
         +date_of_birth Date
@@ -107,6 +47,6 @@ classDiagram
         <<ValueObject>>
         +address "String (required)"
     }
-    note for identity_shared_email_EmailAddress verify_email_address
+    note for identity_shared_email_EmailAddress "verify_email_address"
     identity_customer_customer_Customer *-- identity_shared_email_EmailAddress : EmailAddress
 ```

@@ -2,12 +2,6 @@
 
 ```mermaid
 flowchart LR
-    subgraph abc_DefaultOutbox[DefaultOutbox]
-        agg_abc_DefaultOutbox[DefaultOutbox]
-    end
-    subgraph abc_MemoryOutbox[MemoryOutbox]
-        agg_abc_MemoryOutbox[MemoryOutbox]
-    end
     subgraph fulfillment_fulfillment_fulfillment_Fulfillment[Fulfillment]
         agg_fulfillment_fulfillment_fulfillment_Fulfillment[Fulfillment]
         cmd_fulfillment_fulfillment_cancellation_CancelFulfillment[/CancelFulfillment/]
