@@ -1,9 +1,5 @@
 # Event & Command Catalog
 
-## DefaultOutbox (`abc.DefaultOutbox`)
-
-## MemoryOutbox (`abc.MemoryOutbox`)
-
 ## Customer (`identity.customer.customer.Customer`)
 
 ### Events

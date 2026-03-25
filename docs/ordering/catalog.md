@@ -1,9 +1,5 @@
 # Event & Command Catalog
 
-## DefaultOutbox (`abc.DefaultOutbox`)
-
-## MemoryOutbox (`abc.MemoryOutbox`)
-
 ## ShoppingCart (`ordering.cart.cart.ShoppingCart`)
 
 ### Events

@@ -1,63 +1,3 @@
-## Cluster: DefaultOutbox
-
-```mermaid
-classDiagram
-    class abc_DefaultOutbox {
-        <<Aggregate>>
-        +causation_id String
-        +correlation_id String
-        +created_at DateTime
-        +data "Dict (required)"
-        +id "Auto (identifier)"
-        +last_error Dict
-        +last_processed_at DateTime
-        +locked_by String
-        +locked_until DateTime
-        +max_retries Integer
-        +message_id "String (required)"
-        +metadata_ "String (required)"
-        +next_retry_at DateTime
-        +priority Integer
-        +published_at DateTime
-        +retry_count Integer
-        +sequence_number Integer
-        +status String
-        +stream_name "String (required)"
-        +target_broker String
-        +type "String (required)"
-    }
-```
-
-## Cluster: MemoryOutbox
-
-```mermaid
-classDiagram
-    class abc_MemoryOutbox {
-        <<Aggregate>>
-        +causation_id String
-        +correlation_id String
-        +created_at DateTime
-        +data "Dict (required)"
-        +id "Auto (identifier)"
-        +last_error Dict
-        +last_processed_at DateTime
-        +locked_by String
-        +locked_until DateTime
-        +max_retries Integer
-        +message_id "String (required)"
-        +metadata_ "String (required)"
-        +next_retry_at DateTime
-        +priority Integer
-        +published_at DateTime
-        +retry_count Integer
-        +sequence_number Integer
-        +status String
-        +stream_name "String (required)"
-        +target_broker String
-        +type "String (required)"
-    }
-```
-
 ## Cluster: Review
 
 ```mermaid
@@ -89,7 +29,7 @@ classDiagram
         +verified_purchase Boolean
         +votes "HelpfulVote[]"
     }
-    note for reviews_review_review_Review at_most_one_seller_reply, body_minimum_length, images_cannot_exceed_maximum, title_must_not_be_empty
+    note for reviews_review_review_Review "at_most_one_seller_reply, body_minimum_length, images_cannot_exceed_maximum, title_must_not_be_empty"
     class reviews_review_review_HelpfulVote {
         <<Entity>>
         +customer_id "Identifier (required)"
@@ -121,6 +61,6 @@ classDiagram
         <<ValueObject>>
         +score "Integer (required)"
     }
-    note for reviews_review_review_Rating score_must_be_in_range
+    note for reviews_review_review_Rating "score_must_be_in_range"
     reviews_review_review_Review *-- reviews_review_review_Rating : Rating
 ```

@@ -1,63 +1,3 @@
-## Cluster: DefaultOutbox
-
-```mermaid
-classDiagram
-    class abc_DefaultOutbox {
-        <<Aggregate>>
-        +causation_id String
-        +correlation_id String
-        +created_at DateTime
-        +data "Dict (required)"
-        +id "Auto (identifier)"
-        +last_error Dict
-        +last_processed_at DateTime
-        +locked_by String
-        +locked_until DateTime
-        +max_retries Integer
-        +message_id "String (required)"
-        +metadata_ "String (required)"
-        +next_retry_at DateTime
-        +priority Integer
-        +published_at DateTime
-        +retry_count Integer
-        +sequence_number Integer
-        +status String
-        +stream_name "String (required)"
-        +target_broker String
-        +type "String (required)"
-    }
-```
-
-## Cluster: MemoryOutbox
-
-```mermaid
-classDiagram
-    class abc_MemoryOutbox {
-        <<Aggregate>>
-        +causation_id String
-        +correlation_id String
-        +created_at DateTime
-        +data "Dict (required)"
-        +id "Auto (identifier)"
-        +last_error Dict
-        +last_processed_at DateTime
-        +locked_by String
-        +locked_until DateTime
-        +max_retries Integer
-        +message_id "String (required)"
-        +metadata_ "String (required)"
-        +next_retry_at DateTime
-        +priority Integer
-        +published_at DateTime
-        +retry_count Integer
-        +sequence_number Integer
-        +status String
-        +stream_name "String (required)"
-        +target_broker String
-        +type "String (required)"
-    }
-```
-
 ## Cluster: ShoppingCart
 
 ```mermaid
@@ -73,7 +13,7 @@ classDiagram
         +status Status
         +updated_at DateTime
     }
-    note for ordering_cart_cart_ShoppingCart cart_must_have_items_to_convert
+    note for ordering_cart_cart_ShoppingCart "cart_must_have_items_to_convert"
     class ordering_cart_cart_CartItem {
         <<Entity>>
         +added_at DateTime

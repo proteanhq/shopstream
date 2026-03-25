@@ -1,9 +1,5 @@
 # Event & Command Catalog
 
-## DefaultOutbox (`abc.DefaultOutbox`)
-
-## MemoryOutbox (`abc.MemoryOutbox`)
-
 ## Fulfillment (`fulfillment.fulfillment.fulfillment.Fulfillment`)
 
 ### Events

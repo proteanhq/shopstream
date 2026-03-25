@@ -2,12 +2,6 @@
 
 ```mermaid
 flowchart LR
-    subgraph abc_DefaultOutbox[DefaultOutbox]
-        agg_abc_DefaultOutbox[DefaultOutbox]
-    end
-    subgraph abc_MemoryOutbox[MemoryOutbox]
-        agg_abc_MemoryOutbox[MemoryOutbox]
-    end
     subgraph payments_invoice_invoice_Invoice[Invoice]
         agg_payments_invoice_invoice_Invoice[Invoice]
         cmd_payments_invoice_generation_GenerateInvoice[/GenerateInvoice/]
