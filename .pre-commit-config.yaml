@@ -26,6 +26,12 @@ repos:
       # Run the formatter
       - id: ruff-format
 
-  # Protean IR hooks require --domain per hook entry and PYTHONPATH=src,
-  # which is impractical for 8 domains. Use `make domain-check` and
-  # `make ir-diff` instead for multi-domain IR validation.
+  - repo: local
+    hooks:
+      - id: protean-check-staleness
+        name: Check IR staleness
+        entry: uv run protean-check-staleness --fix
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
