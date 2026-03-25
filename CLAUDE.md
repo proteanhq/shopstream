@@ -255,3 +255,8 @@ make typecheck            # MyPy type checking
 - FastAPI + Uvicorn
 - scalar-fastapi (API docs at /docs)
 - Ruff (lint/format), MyPy (types), pytest (testing)
+
+## Git & PR Rules
+
+- Never merge PRs. Only create them. Leave reviewing, approving, and merging entirely to the user.
+- Never add "Co-Authored-By" lines at the end of commit messages.
