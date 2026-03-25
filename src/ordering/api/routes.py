@@ -275,6 +275,7 @@ async def create_order(body: CreateOrderRequest) -> OrderIdResponse:
         discount_total=body.discount_total,
         grand_total=grand_total,
         currency=body.currency,
+        order_source=body.order_source,
     )
     result = current_domain.process(command, asynchronous=False)
     return OrderIdResponse(order_id=result)

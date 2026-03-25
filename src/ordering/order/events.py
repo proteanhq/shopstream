@@ -14,7 +14,12 @@ from ordering.domain import ordering
 
 @ordering.event(part_of="Order", published=True)
 class OrderCreated:
-    """A new order was created from a shopping cart at checkout."""
+    """A new order was created from a shopping cart at checkout.
+
+    v2: Added order_source to track originating channel (web, mobile, api).
+    """
+
+    __version__ = 2
 
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
@@ -27,6 +32,7 @@ class OrderCreated:
     discount_total = Float()
     grand_total = Float(required=True)
     currency = String(default="USD")
+    order_source = String(default="web")
     created_at = DateTime(required=True)
 
 

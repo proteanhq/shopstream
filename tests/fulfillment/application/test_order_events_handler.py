@@ -164,7 +164,7 @@ class TestOrderCancelledSubscriber:
         subscriber = OrderEventsSubscriber()
         subscriber(
             _build_message(
-                "Ordering.OrderCreated.v1",
+                "Ordering.OrderCreated.v2",
                 {
                     "order_id": "ord-ignore",
                     "customer_id": "cust-001",

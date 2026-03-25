@@ -42,6 +42,38 @@ class TestOrderCreatedEvent:
         assert event.customer_id == "cust-001"
         assert event.subtotal == 100.0
 
+    def test_version_is_2(self):
+        assert OrderCreated.__version__ == 2
+
+    def test_order_source_defaults_to_web(self):
+        now = datetime.now(UTC)
+        event = OrderCreated(
+            order_id="ord-001",
+            customer_id="cust-001",
+            items=[{"sku": "S1"}],
+            shipping_address={"street": "1 St"},
+            billing_address={"street": "2 St"},
+            subtotal=100.0,
+            grand_total=110.0,
+            created_at=now,
+        )
+        assert event.order_source == "web"
+
+    def test_order_source_can_be_set(self):
+        now = datetime.now(UTC)
+        event = OrderCreated(
+            order_id="ord-001",
+            customer_id="cust-001",
+            items=[{"sku": "S1"}],
+            shipping_address={"street": "1 St"},
+            billing_address={"street": "2 St"},
+            subtotal=100.0,
+            grand_total=110.0,
+            order_source="mobile",
+            created_at=now,
+        )
+        assert event.order_source == "mobile"
+
 
 class TestItemAddedEvent:
     def test_construction(self):

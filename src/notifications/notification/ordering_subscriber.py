@@ -49,7 +49,7 @@ class OrderingEventsSubscriber:
                 "grand_total": str(data.get("grand_total", "")),
                 "currency": data.get("currency") or "USD",
             },
-            source_event_type="Ordering.OrderCreated.v1",
+            source_event_type="Ordering.OrderCreated.v2",
         )
 
     def _on_order_cancelled(self, data: dict) -> None:

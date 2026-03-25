@@ -200,6 +200,7 @@ class Order:
     carrier = String(max_length=100)
     tracking_number = String(max_length=255)
     estimated_delivery = String(max_length=10)  # ISO date string
+    order_source = String(max_length=20, default="web")
     cancellation_reason = String(max_length=500)
     cancelled_by = String(max_length=50)
     coupon_code = String(max_length=100)
@@ -217,6 +218,7 @@ class Order:
         shipping_address,
         billing_address,
         pricing,
+        order_source="web",
     ):
         """Create a new order from checkout data.
 
@@ -232,6 +234,7 @@ class Order:
             billing_address: Dict with street, city, state, postal_code, country.
             pricing: Dict with subtotal, shipping_cost, tax_total,
                      discount_total, grand_total, currency.
+            order_source: Channel where the order originated ("web", "mobile", "api").
         """
         now = datetime.now(UTC)
 
@@ -252,6 +255,7 @@ class Order:
                 discount_total=pricing.get("discount_total", 0.0),
                 grand_total=pricing.get("grand_total", 0.0),
                 currency=pricing.get("currency", "USD"),
+                order_source=order_source,
                 created_at=now,
             )
         )
@@ -601,6 +605,7 @@ class Order:
         self.id = event.order_id
         self.customer_id = event.customer_id
         self.status = OrderStatus.CREATED.value
+        self.order_source = event.order_source or "web"
         self.created_at = event.created_at
         self.updated_at = event.created_at
 
