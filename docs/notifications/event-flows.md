@@ -1,7 +1,7 @@
-## Event Flows
+## Event Flow: Notification
 
 ```mermaid
-flowchart LR
+flowchart TD
     subgraph notifications_notification_notification_Notification[Notification]
         agg_notifications_notification_notification_Notification[Notification]
         cmd_notifications_notification_cancellation_CancelNotification[/CancelNotification/]
@@ -18,6 +18,25 @@ flowchart LR
         hdlr_notifications_notification_retry_RetryNotificationHandler[RetryNotificationHandler]
         hdlr_notifications_notification_scheduler_ProcessScheduledNotificationsHandler[ProcessScheduledNotificationsHandler]
     end
+    cmd_notifications_notification_cancellation_CancelNotification --> hdlr_notifications_notification_cancellation_CancelNotificationHandler
+    hdlr_notifications_notification_cancellation_CancelNotificationHandler --> agg_notifications_notification_notification_Notification
+    cmd_notifications_notification_retry_RetryNotification --> hdlr_notifications_notification_retry_RetryNotificationHandler
+    hdlr_notifications_notification_retry_RetryNotificationHandler --> agg_notifications_notification_notification_Notification
+    cmd_notifications_notification_scheduler_ProcessScheduledNotifications --> hdlr_notifications_notification_scheduler_ProcessScheduledNotificationsHandler
+    hdlr_notifications_notification_scheduler_ProcessScheduledNotificationsHandler --> agg_notifications_notification_notification_Notification
+    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationBounced
+    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationCancelled
+    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationCreated
+    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationDelivered
+    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationFailed
+    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationRetried
+    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationSent
+```
+
+## Event Flow: NotificationPreference
+
+```mermaid
+flowchart TD
     subgraph notifications_preference_preference_NotificationPreference[NotificationPreference]
         agg_notifications_preference_preference_NotificationPreference[NotificationPreference]
         cmd_notifications_preference_management_ClearQuietHours[/ClearQuietHours/]
@@ -34,19 +53,6 @@ flowchart LR
         hdlr_notifications_preference_management_ManagePreferencesHandler[ManagePreferencesHandler]
         hdlr_notifications_preference_subscription_ManageSubscriptionsHandler[ManageSubscriptionsHandler]
     end
-    cmd_notifications_notification_cancellation_CancelNotification --> hdlr_notifications_notification_cancellation_CancelNotificationHandler
-    hdlr_notifications_notification_cancellation_CancelNotificationHandler --> agg_notifications_notification_notification_Notification
-    cmd_notifications_notification_retry_RetryNotification --> hdlr_notifications_notification_retry_RetryNotificationHandler
-    hdlr_notifications_notification_retry_RetryNotificationHandler --> agg_notifications_notification_notification_Notification
-    cmd_notifications_notification_scheduler_ProcessScheduledNotifications --> hdlr_notifications_notification_scheduler_ProcessScheduledNotificationsHandler
-    hdlr_notifications_notification_scheduler_ProcessScheduledNotificationsHandler --> agg_notifications_notification_notification_Notification
-    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationBounced
-    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationCancelled
-    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationCreated
-    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationDelivered
-    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationFailed
-    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationRetried
-    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationSent
     cmd_notifications_preference_management_ClearQuietHours --> hdlr_notifications_preference_management_ManagePreferencesHandler
     cmd_notifications_preference_management_SetQuietHours --> hdlr_notifications_preference_management_ManagePreferencesHandler
     cmd_notifications_preference_management_UpdateNotificationPreferences --> hdlr_notifications_preference_management_ManagePreferencesHandler
@@ -60,25 +66,49 @@ flowchart LR
     agg_notifications_preference_preference_NotificationPreference --> evt_notifications_preference_events_QuietHoursSet
     agg_notifications_preference_preference_NotificationPreference --> evt_notifications_preference_events_TypeResubscribed
     agg_notifications_preference_preference_NotificationPreference --> evt_notifications_preference_events_TypeUnsubscribed
-    eh_notifications_notification_dispatch_NotificationDispatcher[NotificationDispatcher]
+```
+
+## Downstream Consumers
+
+```mermaid
+flowchart LR
+    evt_notifications_notification_events_NotificationBounced([NotificationBounced])
+    evt_notifications_notification_events_NotificationCancelled([NotificationCancelled])
+    evt_notifications_notification_events_NotificationCreated([NotificationCreated])
+    evt_notifications_notification_events_NotificationDelivered([NotificationDelivered])
+    evt_notifications_notification_events_NotificationFailed([NotificationFailed])
+    evt_notifications_notification_events_NotificationRetried([NotificationRetried])
+    evt_notifications_notification_events_NotificationSent([NotificationSent])
+    evt_notifications_preference_events_ChannelsUpdated([ChannelsUpdated])
+    evt_notifications_preference_events_PreferencesCreated([PreferencesCreated])
+    evt_notifications_preference_events_QuietHoursCleared([QuietHoursCleared])
+    evt_notifications_preference_events_QuietHoursSet([QuietHoursSet])
+    evt_notifications_preference_events_TypeResubscribed([TypeResubscribed])
+    evt_notifications_preference_events_TypeUnsubscribed([TypeUnsubscribed])
+    subgraph event_handlers["Event Handlers"]
+        eh_notifications_notification_dispatch_NotificationDispatcher[NotificationDispatcher]
+    end
+    subgraph projectors["Projectors"]
+        proj_notifications_projections_customer_notifications_CustomerNotificationsProjector[CustomerNotificationsProjector → CustomerNotifications]
+        proj_notifications_projections_customer_preferences_CustomerPreferencesProjector[CustomerPreferencesProjector → CustomerPreferences]
+        proj_notifications_projections_failed_notifications_FailedNotificationsProjector[FailedNotificationsProjector → FailedNotifications]
+        proj_notifications_projections_notification_log_NotificationLogProjector[NotificationLogProjector → NotificationLog]
+        proj_notifications_projections_notification_stats_NotificationStatsProjector[NotificationStatsProjector → NotificationStats]
+    end
     evt_notifications_notification_events_NotificationCreated --> eh_notifications_notification_dispatch_NotificationDispatcher
-    proj_notifications_projections_customer_notifications_CustomerNotificationsProjector[CustomerNotificationsProjector → CustomerNotifications]
     evt_notifications_notification_events_NotificationCreated --> proj_notifications_projections_customer_notifications_CustomerNotificationsProjector
     evt_notifications_notification_events_NotificationDelivered --> proj_notifications_projections_customer_notifications_CustomerNotificationsProjector
     evt_notifications_notification_events_NotificationFailed --> proj_notifications_projections_customer_notifications_CustomerNotificationsProjector
     evt_notifications_notification_events_NotificationSent --> proj_notifications_projections_customer_notifications_CustomerNotificationsProjector
-    proj_notifications_projections_customer_preferences_CustomerPreferencesProjector[CustomerPreferencesProjector → CustomerPreferences]
     evt_notifications_preference_events_ChannelsUpdated --> proj_notifications_projections_customer_preferences_CustomerPreferencesProjector
     evt_notifications_preference_events_PreferencesCreated --> proj_notifications_projections_customer_preferences_CustomerPreferencesProjector
     evt_notifications_preference_events_QuietHoursCleared --> proj_notifications_projections_customer_preferences_CustomerPreferencesProjector
     evt_notifications_preference_events_QuietHoursSet --> proj_notifications_projections_customer_preferences_CustomerPreferencesProjector
     evt_notifications_preference_events_TypeResubscribed --> proj_notifications_projections_customer_preferences_CustomerPreferencesProjector
     evt_notifications_preference_events_TypeUnsubscribed --> proj_notifications_projections_customer_preferences_CustomerPreferencesProjector
-    proj_notifications_projections_failed_notifications_FailedNotificationsProjector[FailedNotificationsProjector → FailedNotifications]
     evt_notifications_notification_events_NotificationFailed --> proj_notifications_projections_failed_notifications_FailedNotificationsProjector
     evt_notifications_notification_events_NotificationRetried --> proj_notifications_projections_failed_notifications_FailedNotificationsProjector
     evt_notifications_notification_events_NotificationSent --> proj_notifications_projections_failed_notifications_FailedNotificationsProjector
-    proj_notifications_projections_notification_log_NotificationLogProjector[NotificationLogProjector → NotificationLog]
     evt_notifications_notification_events_NotificationBounced --> proj_notifications_projections_notification_log_NotificationLogProjector
     evt_notifications_notification_events_NotificationCancelled --> proj_notifications_projections_notification_log_NotificationLogProjector
     evt_notifications_notification_events_NotificationCreated --> proj_notifications_projections_notification_log_NotificationLogProjector
@@ -86,6 +116,5 @@ flowchart LR
     evt_notifications_notification_events_NotificationFailed --> proj_notifications_projections_notification_log_NotificationLogProjector
     evt_notifications_notification_events_NotificationRetried --> proj_notifications_projections_notification_log_NotificationLogProjector
     evt_notifications_notification_events_NotificationSent --> proj_notifications_projections_notification_log_NotificationLogProjector
-    proj_notifications_projections_notification_stats_NotificationStatsProjector[NotificationStatsProjector → NotificationStats]
     evt_notifications_notification_events_NotificationSent --> proj_notifications_projections_notification_stats_NotificationStatsProjector
 ```
