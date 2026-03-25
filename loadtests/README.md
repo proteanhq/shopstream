@@ -74,7 +74,7 @@ Each HTTP request creates an aggregate and raises domain events. The events are 
 make loadtest-install
 ```
 
-This installs Locust into an optional `[tool.poetry.group.loadtest]` dependency group.
+This installs Locust into an optional dependency group.
 
 ## Quick Start
 
