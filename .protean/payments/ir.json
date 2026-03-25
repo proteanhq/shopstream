@@ -1,277 +1,7 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:e489ea91faa5cd7e823d7e1bbe3225e85a6604851e5452a42a1bf3d7e65b8663",
+  "checksum": "sha256:c9c6a8941d28318af07faf470ae00418e759dadc7f53dec0c02a3e15ea05d72c",
   "clusters": {
-    "abc.DefaultOutbox": {
-      "aggregate": {
-        "element_type": "AGGREGATE",
-        "fields": {
-          "causation_id": {
-            "kind": "standard",
-            "type": "String"
-          },
-          "correlation_id": {
-            "kind": "standard",
-            "type": "String"
-          },
-          "created_at": {
-            "kind": "standard",
-            "type": "DateTime"
-          },
-          "data": {
-            "kind": "dict",
-            "required": true,
-            "type": "Dict"
-          },
-          "id": {
-            "identifier": true,
-            "kind": "auto",
-            "type": "Auto"
-          },
-          "last_error": {
-            "kind": "dict",
-            "type": "Dict"
-          },
-          "last_processed_at": {
-            "kind": "standard",
-            "type": "DateTime"
-          },
-          "locked_by": {
-            "kind": "standard",
-            "type": "String"
-          },
-          "locked_until": {
-            "kind": "standard",
-            "type": "DateTime"
-          },
-          "max_retries": {
-            "default": 3,
-            "kind": "standard",
-            "type": "Integer"
-          },
-          "message_id": {
-            "kind": "standard",
-            "required": true,
-            "type": "String"
-          },
-          "metadata_": {
-            "kind": "standard",
-            "required": true,
-            "type": "String"
-          },
-          "next_retry_at": {
-            "kind": "standard",
-            "type": "DateTime"
-          },
-          "priority": {
-            "default": 0,
-            "kind": "standard",
-            "type": "Integer"
-          },
-          "published_at": {
-            "kind": "standard",
-            "type": "DateTime"
-          },
-          "retry_count": {
-            "default": 0,
-            "kind": "standard",
-            "type": "Integer"
-          },
-          "sequence_number": {
-            "kind": "standard",
-            "type": "Integer"
-          },
-          "status": {
-            "default": "pending",
-            "kind": "standard",
-            "type": "String"
-          },
-          "stream_name": {
-            "kind": "standard",
-            "required": true,
-            "type": "String"
-          },
-          "target_broker": {
-            "kind": "standard",
-            "type": "String"
-          },
-          "type": {
-            "kind": "standard",
-            "required": true,
-            "type": "String"
-          }
-        },
-        "fqn": "abc.DefaultOutbox",
-        "identity_field": "id",
-        "invariants": {
-          "post": [],
-          "pre": []
-        },
-        "module": "abc",
-        "name": "DefaultOutbox",
-        "options": {
-          "auto_add_id_field": true,
-          "fact_events": false,
-          "is_event_sourced": false,
-          "limit": 100,
-          "provider": "default",
-          "schema_name": "outbox",
-          "stream_category": "payments::default_outbox"
-        }
-      },
-      "application_services": {},
-      "command_handlers": {},
-      "commands": {},
-      "database_models": {},
-      "entities": {},
-      "event_handlers": {},
-      "events": {},
-      "repositories": {
-        "protean.utils.DefaultOutboxRepository": {
-          "element_type": "REPOSITORY",
-          "fqn": "protean.utils.DefaultOutboxRepository",
-          "module": "protean.utils",
-          "name": "DefaultOutboxRepository",
-          "part_of": "abc.DefaultOutbox"
-        }
-      },
-      "value_objects": {}
-    },
-    "abc.MemoryOutbox": {
-      "aggregate": {
-        "element_type": "AGGREGATE",
-        "fields": {
-          "causation_id": {
-            "kind": "standard",
-            "type": "String"
-          },
-          "correlation_id": {
-            "kind": "standard",
-            "type": "String"
-          },
-          "created_at": {
-            "kind": "standard",
-            "type": "DateTime"
-          },
-          "data": {
-            "kind": "dict",
-            "required": true,
-            "type": "Dict"
-          },
-          "id": {
-            "identifier": true,
-            "kind": "auto",
-            "type": "Auto"
-          },
-          "last_error": {
-            "kind": "dict",
-            "type": "Dict"
-          },
-          "last_processed_at": {
-            "kind": "standard",
-            "type": "DateTime"
-          },
-          "locked_by": {
-            "kind": "standard",
-            "type": "String"
-          },
-          "locked_until": {
-            "kind": "standard",
-            "type": "DateTime"
-          },
-          "max_retries": {
-            "default": 3,
-            "kind": "standard",
-            "type": "Integer"
-          },
-          "message_id": {
-            "kind": "standard",
-            "required": true,
-            "type": "String"
-          },
-          "metadata_": {
-            "kind": "standard",
-            "required": true,
-            "type": "String"
-          },
-          "next_retry_at": {
-            "kind": "standard",
-            "type": "DateTime"
-          },
-          "priority": {
-            "default": 0,
-            "kind": "standard",
-            "type": "Integer"
-          },
-          "published_at": {
-            "kind": "standard",
-            "type": "DateTime"
-          },
-          "retry_count": {
-            "default": 0,
-            "kind": "standard",
-            "type": "Integer"
-          },
-          "sequence_number": {
-            "kind": "standard",
-            "type": "Integer"
-          },
-          "status": {
-            "default": "pending",
-            "kind": "standard",
-            "type": "String"
-          },
-          "stream_name": {
-            "kind": "standard",
-            "required": true,
-            "type": "String"
-          },
-          "target_broker": {
-            "kind": "standard",
-            "type": "String"
-          },
-          "type": {
-            "kind": "standard",
-            "required": true,
-            "type": "String"
-          }
-        },
-        "fqn": "abc.MemoryOutbox",
-        "identity_field": "id",
-        "invariants": {
-          "post": [],
-          "pre": []
-        },
-        "module": "abc",
-        "name": "MemoryOutbox",
-        "options": {
-          "auto_add_id_field": true,
-          "fact_events": false,
-          "is_event_sourced": false,
-          "limit": 100,
-          "provider": "memory",
-          "schema_name": "outbox",
-          "stream_category": "payments::memory_outbox"
-        }
-      },
-      "application_services": {},
-      "command_handlers": {},
-      "commands": {},
-      "database_models": {},
-      "entities": {},
-      "event_handlers": {},
-      "events": {},
-      "repositories": {
-        "protean.utils.MemoryOutboxRepository": {
-          "element_type": "REPOSITORY",
-          "fqn": "protean.utils.MemoryOutboxRepository",
-          "module": "protean.utils",
-          "name": "MemoryOutboxRepository",
-          "part_of": "abc.MemoryOutbox"
-        }
-      },
-      "value_objects": {}
-    },
     "payments.invoice.invoice.Invoice": {
       "aggregate": {
         "element_type": "AGGREGATE",
@@ -1829,20 +1559,7 @@
       }
     ]
   },
-  "diagnostics": [
-    {
-      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
-      "element": "abc.DefaultOutbox",
-      "level": "warning",
-      "message": "Aggregate `DefaultOutbox` has no command handler \u2014 no write path exists"
-    },
-    {
-      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
-      "element": "abc.MemoryOutbox",
-      "level": "warning",
-      "message": "Aggregate `MemoryOutbox` has no command handler \u2014 no write path exists"
-    }
-  ],
+  "diagnostics": [],
   "domain": {
     "camel_case_name": "Payments",
     "command_processing": "sync",
@@ -1854,8 +1571,6 @@
   },
   "elements": {
     "AGGREGATE": [
-      "abc.DefaultOutbox",
-      "abc.MemoryOutbox",
       "payments.invoice.invoice.Invoice",
       "payments.payment.payment.Payment"
     ],
@@ -1921,10 +1636,7 @@
     "QUERY_HANDLER": [
       "payments.projections.payment_status_queries.PaymentStatusQueryHandler"
     ],
-    "REPOSITORY": [
-      "protean.utils.DefaultOutboxRepository",
-      "protean.utils.MemoryOutboxRepository"
-    ],
+    "REPOSITORY": [],
     "SUBSCRIBER": [
       "payments.payment.ordering_subscriber.OrderReturnedSubscriber"
     ],
@@ -1949,7 +1661,7 @@
       }
     }
   },
-  "generated_at": "2026-03-18T17:30:43Z",
+  "generated_at": "2026-03-25T16:49:44Z",
   "ir_version": "0.1.0",
   "projections": {
     "payments.projections.customer_payments.CustomerPayment": {
