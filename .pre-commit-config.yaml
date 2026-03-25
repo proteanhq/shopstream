@@ -26,6 +26,11 @@ repos:
       # Run the formatter
       - id: ruff-format
 
+  # Protean IR hooks need to import domain modules to build the live IR,
+  # so they must run in the project's own venv (not pre-commit's isolated
+  # env). This is the same pattern pylint/mypy recommend for tools that
+  # introspect user code. Domains are read from [domains] in
+  # .protean/config.toml; --fix auto-regenerates stale IR and stages it.
   - repo: local
     hooks:
       - id: protean-check-staleness
