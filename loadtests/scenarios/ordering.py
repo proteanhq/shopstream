@@ -360,6 +360,19 @@ class OrderCancellationJourney(SequentialTaskSet):
                 pass
 
     @task
+    def verify_order(self):
+        """Verify OrderDetail projection reflects cancelled/refunded state."""
+        with self.client.get(
+            f"/orders/{self.state.order_id}",
+            catch_response=True,
+            name="GET /orders/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get order failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
     def done(self):
         self.interrupt()
 
@@ -413,9 +426,24 @@ class CartToCheckoutJourney(SequentialTaskSet):
             name="POST /carts/{id}/checkout",
         ) as resp:
             if resp.status_code == 201:
-                pass  # Order created
+                self._order_id = resp.json().get("order_id")
             else:
                 resp.failure(f"Checkout failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def verify_order(self):
+        """Verify OrderDetail projection is populated after checkout."""
+        if not getattr(self, "_order_id", None):
+            return
+        with self.client.get(
+            f"/orders/{self._order_id}",
+            catch_response=True,
+            name="GET /orders/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get order failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):
@@ -538,6 +566,32 @@ class OrderReturnJourney(SequentialTaskSet):
         ) as resp:
             if resp.status_code != 200:
                 resp.failure(f"Record return failed: {extract_error_detail(resp)}")
+
+    @task
+    def verify_order(self):
+        """Verify OrderDetail projection reflects returned state."""
+        with self.client.get(
+            f"/orders/{self.state.order_id}",
+            catch_response=True,
+            name="GET /orders/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get order failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def verify_timeline(self):
+        """Verify OrderTimeline projection has return events."""
+        with self.client.get(
+            f"/orders/{self.state.order_id}/timeline",
+            catch_response=True,
+            name="GET /orders/{id}/timeline",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get timeline failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):

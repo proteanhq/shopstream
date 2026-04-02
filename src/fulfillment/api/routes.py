@@ -13,7 +13,9 @@ from fulfillment.api.schemas import (
     CarrierConfigResponse,
     ConfigureCarrierRequest,
     CreateFulfillmentRequest,
+    FulfillmentDetailResponse,
     FulfillmentIdResponse,
+    FulfillmentItemDetailResponse,
     GenerateShippingLabelRequest,
     RecordExceptionRequest,
     RecordHandoffRequest,
@@ -47,6 +49,35 @@ async def get_shipment_tracking(order_id: str) -> ShipmentTrackingResponse:
     if result is None:
         raise HTTPException(status_code=404, detail="Shipment tracking not found")
     return ShipmentTrackingResponse(**result.to_dict())
+
+
+@fulfillment_router.get("/{fulfillment_id}", response_model=FulfillmentDetailResponse)
+async def get_fulfillment(fulfillment_id: str) -> FulfillmentDetailResponse:
+    """Get fulfillment details including item IDs."""
+    from fulfillment.fulfillment.fulfillment import Fulfillment
+
+    repo = current_domain.repository_for(Fulfillment)
+    try:
+        ff = repo.get(fulfillment_id)
+    except Exception:
+        raise HTTPException(status_code=404, detail="Fulfillment not found") from None
+    return FulfillmentDetailResponse(
+        fulfillment_id=str(ff.id),
+        order_id=str(ff.order_id),
+        customer_id=str(ff.customer_id),
+        status=ff.status.value,
+        items=[
+            FulfillmentItemDetailResponse(
+                item_id=str(item.id),
+                order_item_id=str(item.order_item_id),
+                product_id=str(item.product_id),
+                sku=item.sku,
+                quantity=item.quantity,
+                status=item.status.value,
+            )
+            for item in (ff.items or [])
+        ],
+    )
 
 
 @fulfillment_router.post("", status_code=201, response_model=FulfillmentIdResponse)

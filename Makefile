@@ -560,6 +560,9 @@ loadtest-baseline: ## Run priority lanes disabled baseline (headless, 30 users, 
 loadtest-fulfillment: ## Run fulfillment workflow load test (web UI)
 	uv run locust -f loadtests/locustfile.py --host http://localhost:8000 FulfillmentUser
 
+loadtest-seed: ## Seed baseline data (20 customers, 15 products, 5 categories, 3 warehouses)
+	uv run python -m loadtests.seed --host http://localhost:8000
+
 loadtest-clean: truncate-db ## Clean all data for a fresh load test run
 	docker exec shopstream-redis-1 redis-cli FLUSHDB
 

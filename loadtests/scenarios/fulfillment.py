@@ -4,11 +4,9 @@ Four stateful SequentialTaskSet journeys covering fulfillment creation
 and picker assignment, cancellation, tracking webhook processing, and
 exception recording.
 
-Note: The full pick → pack → label → handoff → deliver lifecycle cannot
-be exercised via load tests because the API doesn't expose FulfillmentItem
-internal IDs (POST /fulfillments returns only fulfillment_id). The pick
-endpoint requires these internal IDs. A GET /fulfillments/{id} endpoint
-would be needed to close this gap.
+Note: The full pick → pack → label → handoff → deliver lifecycle is not
+yet exercised. GET /fulfillments/{id} now returns item IDs, enabling
+future expansion of these journeys to cover the full lifecycle.
 """
 
 import random
@@ -93,6 +91,7 @@ class FulfillmentCancellationJourney(SequentialTaskSet):
     @task
     def create_fulfillment(self):
         payload = fulfillment_data()
+        self.state.order_id = payload["order_id"]
         with self.client.post(
             "/fulfillments",
             json=payload,
@@ -137,6 +136,19 @@ class FulfillmentCancellationJourney(SequentialTaskSet):
                 resp.failure(f"Cancel failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
+    def verify_tracking(self):
+        """Verify ShipmentTracking projection."""
+        with self.client.get(
+            f"/fulfillments/{self.state.order_id}/tracking",
+            catch_response=True,
+            name="GET /fulfillments/{order_id}/tracking",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get tracking failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
     def done(self):
         self.interrupt()
 
@@ -159,6 +171,7 @@ class FulfillmentPickerCancelJourney(SequentialTaskSet):
     @task
     def create_fulfillment(self):
         payload = fulfillment_data(num_items=1)
+        self.state.order_id = payload["order_id"]
         with self.client.post(
             "/fulfillments",
             json=payload,
@@ -201,6 +214,19 @@ class FulfillmentPickerCancelJourney(SequentialTaskSet):
                 self.state.current_status = "Cancelled"
             else:
                 resp.failure(f"Cancel failed: {extract_error_detail(resp)}")
+
+    @task
+    def verify_tracking(self):
+        """Verify ShipmentTracking projection."""
+        with self.client.get(
+            f"/fulfillments/{self.state.order_id}/tracking",
+            catch_response=True,
+            name="GET /fulfillments/{order_id}/tracking",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get tracking failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):

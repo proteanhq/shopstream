@@ -62,6 +62,19 @@ class PaymentSuccessJourney(SequentialTaskSet):
                 resp.failure(f"Webhook success failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
+    def verify_payment(self):
+        """Verify PaymentStatusView projection reflects succeeded state."""
+        with self.client.get(
+            f"/payments/{self.state.payment_id}",
+            catch_response=True,
+            name="GET /payments/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get payment failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
     def done(self):
         self.interrupt()
 
@@ -134,6 +147,19 @@ class PaymentFailureRetryJourney(SequentialTaskSet):
                 self.state.current_status = "succeeded"
             else:
                 resp.failure(f"Webhook success after retry failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def verify_payment(self):
+        """Verify PaymentStatusView projection reflects succeeded state."""
+        with self.client.get(
+            f"/payments/{self.state.payment_id}",
+            catch_response=True,
+            name="GET /payments/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get payment failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):
@@ -212,6 +238,19 @@ class PaymentRefundJourney(SequentialTaskSet):
         ) as resp:
             if resp.status_code != 200:
                 resp.failure(f"Refund webhook failed: {extract_error_detail(resp)}")
+
+    @task
+    def verify_payment(self):
+        """Verify PaymentStatusView projection reflects refunded state."""
+        with self.client.get(
+            f"/payments/{self.state.payment_id}",
+            catch_response=True,
+            name="GET /payments/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get payment failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):

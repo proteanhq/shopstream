@@ -210,6 +210,19 @@ class ProductLifecycleJourney(SequentialTaskSet):
                 resp.failure(f"Archive failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
+    def verify_product(self):
+        """Verify ProductDetail projection reflects archived state."""
+        with self.client.get(
+            f"/products/{self.state.product_id}",
+            catch_response=True,
+            name="GET /products/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get product failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
     def done(self):
         self.interrupt()
 

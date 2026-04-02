@@ -16,6 +16,7 @@ Scenarios:
 8. SubscriberVerifiedPurchaseJourney — Ordering → Reviews via subscriber
 """
 
+import logging
 import random
 import time
 import uuid
@@ -46,6 +47,8 @@ from loadtests.data_generators import (
 )
 from loadtests.helpers.response import extract_error_detail
 from loadtests.helpers.state import CrossDomainState, SagaState
+
+logger = logging.getLogger("loadtest")
 
 
 class EndToEndOrderJourney(SequentialTaskSet):
@@ -326,13 +329,22 @@ class FlashSaleStampede(SequentialTaskSet):
     _shared_warehouse_id = None
     _setup_done = False
     _setup_complete = False
+    _setup_failed = False
 
     def on_start(self):
         # First user sets up the shared inventory item with limited stock
         if not FlashSaleStampede._setup_done:
             FlashSaleStampede._setup_done = True
-            self._setup_shared_inventory()
-            FlashSaleStampede._setup_complete = True
+            try:
+                self._setup_shared_inventory()
+                if FlashSaleStampede._shared_inventory_item_id:
+                    FlashSaleStampede._setup_complete = True
+                else:
+                    logger.error("[FLASH] Setup failed: shared inventory item was not created")
+                    FlashSaleStampede._setup_failed = True
+            except Exception as e:
+                logger.error("[FLASH] Setup failed with exception: %s", e)
+                FlashSaleStampede._setup_failed = True
 
     def _setup_shared_inventory(self):
         """Create a warehouse and inventory item with limited stock (10 units)."""
@@ -361,11 +373,17 @@ class FlashSaleStampede(SequentialTaskSet):
         """Each user tries to grab 1-3 units — most will fail."""
         # Wait for setup to complete (first user is creating shared inventory)
         for _ in range(50):  # Wait up to 5 seconds
-            if FlashSaleStampede._setup_complete:
+            if FlashSaleStampede._setup_complete or FlashSaleStampede._setup_failed:
                 break
             time.sleep(0.1)
 
+        if FlashSaleStampede._setup_failed:
+            logger.error("[FLASH] Cannot reserve — shared inventory setup failed")
+            self.interrupt()
+            return
+
         if not FlashSaleStampede._shared_inventory_item_id:
+            logger.error("[FLASH] Setup timed out — shared inventory item ID is None")
             self.interrupt()
             return
 
@@ -1200,6 +1218,174 @@ class SagaDrivenCheckoutFailureJourney(SequentialTaskSet):
     def wait_for_saga_processing(self):
         """Give Engine time to process PaymentFailed event."""
         time.sleep(3)
+
+    @task
+    def done(self):
+        self.interrupt()
+
+
+# ---------------------------------------------------------------------------
+# Correlated session journey
+# ---------------------------------------------------------------------------
+
+
+class RealisticShopperJourney(SequentialTaskSet):
+    """Correlated user session: register -> browse -> cart -> checkout -> pay.
+
+    Models the most common e-commerce user flow in a single correlated
+    sequence. Unlike MixedWorkloadUser which runs independent journeys,
+    this ensures a single user's actions are sequenced realistically.
+
+    70% of sessions complete payment; 30% abandon after checkout.
+    """
+
+    def on_start(self):
+        self.customer_id = None
+        self.product_id = None
+        self.cart_id = None
+        self.order_id = None
+        self.payment_id = None
+        self.will_pay = random.random() < 0.7
+
+    @task
+    def register(self):
+        first, last = customer_name()
+        with self.client.post(
+            "/customers",
+            json={
+                "external_id": unique_external_id(),
+                "email": valid_email(),
+                "first_name": first,
+                "last_name": last,
+                "phone": valid_phone(),
+            },
+            catch_response=True,
+            name="[SHOPPER] POST /customers",
+        ) as resp:
+            if resp.status_code == 201:
+                self.customer_id = resp.json()["customer_id"]
+            else:
+                resp.failure(f"Register failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def browse_products(self):
+        """Browse product listing and categories."""
+        with self.client.get(
+            "/products",
+            catch_response=True,
+            name="[SHOPPER] GET /products",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Browse products failed: {resp.status_code}")
+
+        with self.client.get(
+            "/categories",
+            catch_response=True,
+            name="[SHOPPER] GET /categories",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Browse categories failed: {resp.status_code}")
+
+    @task
+    def create_cart(self):
+        with self.client.post(
+            "/carts",
+            json=cart_data(customer_id=self.customer_id),
+            catch_response=True,
+            name="[SHOPPER] POST /carts",
+        ) as resp:
+            if resp.status_code == 201:
+                self.cart_id = resp.json()["cart_id"]
+            else:
+                resp.failure(f"Create cart failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def add_items(self):
+        from loadtests.data_generators import cart_item_data
+
+        for _ in range(2):
+            with self.client.post(
+                f"/carts/{self.cart_id}/items",
+                json=cart_item_data(),
+                catch_response=True,
+                name="[SHOPPER] POST /carts/{id}/items",
+            ) as resp:
+                if resp.status_code not in (200, 201):
+                    resp.failure(f"Add item failed: {extract_error_detail(resp)}")
+
+    @task
+    def checkout(self):
+        with self.client.post(
+            f"/carts/{self.cart_id}/checkout",
+            json=checkout_data(),
+            catch_response=True,
+            name="[SHOPPER] POST /carts/{id}/checkout",
+        ) as resp:
+            if resp.status_code == 201:
+                self.order_id = resp.json().get("order_id")
+            else:
+                resp.failure(f"Checkout failed: {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def confirm_and_pay(self):
+        if not self.will_pay or not self.order_id:
+            return
+
+        # Confirm order
+        with self.client.put(
+            f"/orders/{self.order_id}/confirm",
+            catch_response=True,
+            name="[SHOPPER] PUT /orders/{id}/confirm",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Confirm failed: {extract_error_detail(resp)}")
+                return
+
+        # Initiate payment
+        pay = payment_data(order_id=self.order_id, customer_id=self.customer_id)
+        with self.client.post(
+            "/payments",
+            json=pay,
+            catch_response=True,
+            name="[SHOPPER] POST /payments",
+        ) as resp:
+            if resp.status_code == 201:
+                self.payment_id = resp.json()["payment_id"]
+            else:
+                resp.failure(f"Payment failed: {extract_error_detail(resp)}")
+                return
+
+        # Payment webhook success
+        with self.client.post(
+            "/payments/webhook",
+            json=webhook_data_success(self.payment_id),
+            headers={"X-Gateway-Signature": "test-signature"},
+            catch_response=True,
+            name="[SHOPPER] POST /payments/webhook",
+        ) as resp:
+            if resp.status_code != 200:
+                resp.failure(f"Webhook failed: {extract_error_detail(resp)}")
+
+    @task
+    def verify_order(self):
+        if not self.order_id:
+            return
+        with self.client.get(
+            f"/orders/{self.order_id}",
+            catch_response=True,
+            name="[SHOPPER] GET /orders/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get order failed: {resp.status_code}")
 
     @task
     def done(self):

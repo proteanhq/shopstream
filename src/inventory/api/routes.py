@@ -16,6 +16,7 @@ from inventory.api.schemas import (
     ReceiveStockRequest,
     RecordStockCheckRequest,
     ReleaseReservationRequest,
+    ReservationIdResponse,
     ReserveStockRequest,
     ReturnToStockRequest,
     StatusResponse,
@@ -70,8 +71,8 @@ async def receive_stock(inventory_item_id: str, body: ReceiveStockRequest) -> St
     return StatusResponse()
 
 
-@inventory_router.post("/{inventory_item_id}/reserve", status_code=201, response_model=StatusResponse)
-async def reserve_stock(inventory_item_id: str, body: ReserveStockRequest) -> StatusResponse:
+@inventory_router.post("/{inventory_item_id}/reserve", status_code=201, response_model=ReservationIdResponse)
+async def reserve_stock(inventory_item_id: str, body: ReserveStockRequest) -> ReservationIdResponse:
     expires_at = None
     if body.expires_in_minutes:
         expires_at = datetime.now(UTC) + timedelta(minutes=body.expires_in_minutes)
@@ -81,8 +82,8 @@ async def reserve_stock(inventory_item_id: str, body: ReserveStockRequest) -> St
         quantity=body.quantity,
         expires_at=expires_at,
     )
-    current_domain.process(command, asynchronous=False)
-    return StatusResponse()
+    result = current_domain.process(command, asynchronous=False)
+    return ReservationIdResponse(reservation_id=result)
 
 
 @inventory_router.put(

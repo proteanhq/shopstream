@@ -76,6 +76,23 @@ class FulfillmentIdResponse(BaseModel):
     fulfillment_id: str
 
 
+class FulfillmentItemDetailResponse(BaseModel):
+    item_id: str
+    order_item_id: str
+    product_id: str
+    sku: str
+    quantity: int
+    status: str
+
+
+class FulfillmentDetailResponse(BaseModel):
+    fulfillment_id: str
+    order_id: str
+    customer_id: str
+    status: str
+    items: list[FulfillmentItemDetailResponse]
+
+
 class StatusResponse(BaseModel):
     status: str
 
