@@ -243,7 +243,20 @@ make ir                   # Regenerate IR baselines for all domains
 make ir-check             # Check IR staleness for all domains
 make ir-diff              # Diff live IR against saved baselines
 make domain-check         # Run protean check on all domains
+make verify-timeline      # Verify Observatory Event Timeline (seeds data + 44 API checks)
 ```
+
+## Observatory Verification
+
+`scripts/verify-timeline.sh` — End-to-end verification of the Protean Observatory Event Timeline feature against a running ShopStream stack. Seeds test data across all domains (Identity, Catalogue, Inventory, Ordering, Payments, Fulfillment), then validates all 6 Timeline API endpoints (stats, event list, pagination, filtering, single detail, correlation chain, aggregate history), edge cases, and parameter validation. Run after any Protean upgrade that touches the Observatory.
+
+```bash
+make verify-timeline              # Full run: seed + 44 API checks (requires running stack)
+make verify-timeline-skip-seed    # Skip seeding, reuse existing data
+./scripts/verify-timeline.sh --seed-only  # Seed data only
+```
+
+Requires: `make docker-up && make setup-db && make truncate-db`, API server (`make api`), Observatory (`make observatory`), and at least the ordering + identity + inventory engines.
 
 ## Load Testing
 
