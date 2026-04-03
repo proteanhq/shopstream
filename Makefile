@@ -489,13 +489,13 @@ loadtest-spike: ## Run spike test (100 users, instant spawn, 2 min)
 		--html=results/spike-report.html
 
 loadtest-cross-domain: ## Run cross-domain workload scenario (web UI)
-	uv run locust -f loadtests/locustfile.py --host http://localhost:8000 CrossDomainUser
+	uv run locust -f loadtests/scenarios/cross_domain.py --host http://localhost:8000 CrossDomainUser
 
 loadtest-race: ## Run race condition scenarios (web UI)
-	uv run locust -f loadtests/locustfile.py --host http://localhost:8000 RaceConditionUser
+	uv run locust -f loadtests/scenarios/cross_domain.py --host http://localhost:8000 RaceConditionUser
 
 loadtest-flash-sale: ## Run flash sale simulation (web UI)
-	uv run locust -f loadtests/locustfile.py --host http://localhost:8000 FlashSaleUser
+	uv run locust -f loadtests/scenarios/cross_domain.py --host http://localhost:8000 FlashSaleUser
 
 loadtest-cross-flood: ## Run cross-domain flood stress test (web UI)
 	uv run locust -f loadtests/locustfile.py --host http://localhost:8000 CrossDomainFloodUser
