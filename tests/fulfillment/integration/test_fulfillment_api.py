@@ -67,6 +67,29 @@ def _walk_to_shipped(client, ff_id):
     )
 
 
+class TestGetFulfillmentAPI:
+    def test_get_fulfillment_returns_detail_with_item_ids(self, client):
+        ff_id = _create_fulfillment(client)
+        response = client.get(f"/fulfillments/{ff_id}")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["fulfillment_id"] == ff_id
+        assert data["order_id"] == "ord-api-001"
+        assert data["customer_id"] == "cust-api-001"
+        assert data["status"] == "Pending"
+        assert len(data["items"]) == 1
+        item = data["items"][0]
+        assert "item_id" in item
+        assert item["order_item_id"] == "oi-1"
+        assert item["product_id"] == "prod-1"
+        assert item["sku"] == "SKU-001"
+        assert item["quantity"] == 1
+
+    def test_get_fulfillment_not_found(self, client):
+        response = client.get("/fulfillments/nonexistent-id")
+        assert response.status_code == 404
+
+
 class TestCreateFulfillmentAPI:
     def test_create_returns_201(self, client):
         response = client.post(

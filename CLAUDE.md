@@ -245,6 +245,52 @@ make ir-diff              # Diff live IR against saved baselines
 make domain-check         # Run protean check on all domains
 ```
 
+## Load Testing
+
+Locust-based suite in `loadtests/` exercising all bounded contexts through the full CQRS pipeline (HTTP → outbox → Redis Streams → projectors). See `loadtests/README.md` for full documentation.
+
+### Quick Reference
+
+```bash
+make loadtest-install         # Install Locust (one-time)
+make loadtest                 # Web UI at :8089 (all default scenarios)
+make loadtest-mixed           # MixedWorkloadUser only
+make loadtest-headless        # CI mode: 50 users, 5/sec, 5 min → results/
+make loadtest-stack           # One-command: Docker + API + engines + Observatory + Locust
+make loadtest-seed            # Seed baseline data (customers, products, inventory)
+make loadtest-clean           # Truncate all data between runs
+```
+
+### Scenario Tiers
+
+**Default scenarios** (safe, no expected failures — included in `make loadtest`):
+- `IdentityUser`, `CatalogueUser`, `OrderingUser`, `InventoryUser`, `PaymentsUser` — per-domain journeys
+- `FulfillmentUser`, `ReviewsUser`, `NotificationsUser` — per-domain journeys
+- `SubscriberUser` — happy-path cross-domain subscriber ACL flows
+- `MixedWorkloadUser` — realistic mixed traffic across all domains
+- `EventFloodUser` — pipeline saturation stress test
+
+**Specialty scenarios** (generate expected failures — run explicitly):
+- `CrossDomainUser`, `FlashSaleUser`, `RaceConditionUser` — race conditions and saga timing
+- `OrderingSagaUser` — saga vs direct API race
+- `FulfillmentTrackingUser` — tracking before shipment (state machine violations)
+- `NotificationsCancelUser` — cancel vs process-scheduled race
+- `InventoryMaintenanceUser` — global expire-reservations (run with `-u 1`)
+- `SpikeUser` — burst traffic (20 req/sec/user)
+- Priority lane scenarios — run via `loadtests/scenarios/priority_lanes.py`
+
+### Monitoring
+
+| Dashboard | URL | Shows |
+|-----------|-----|-------|
+| Locust | :8089 | Request rate, p50/p95/p99 latency, failures |
+| Observatory | :9000 | Live message flow, outbox depth, stream health |
+| Prometheus | :9000/metrics | Raw metrics for scraping |
+
+### Known API Limitations (affect scenario coverage)
+
+- `POST /fulfillments` doesn't return internal `FulfillmentItem` IDs — the pick endpoint requires item IDs, but `GET /fulfillments/{id}` now exposes them
+
 ## Infrastructure
 
 - PostgreSQL (5432) — aggregate storage, outbox tables

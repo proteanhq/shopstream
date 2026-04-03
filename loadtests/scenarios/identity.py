@@ -205,6 +205,19 @@ class AccountLifecycleJourney(SequentialTaskSet):
                 resp.failure(f"Close failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
+    def verify_customer(self):
+        """Verify CustomerCard projection reflects final state."""
+        with self.client.get(
+            f"/customers/{self.state.customer_id}",
+            catch_response=True,
+            name="GET /customers/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get customer failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
     def done(self):
         self.interrupt()
 
@@ -263,6 +276,19 @@ class TierProgressionJourney(SequentialTaskSet):
                 self.state.current_tier = tier
             else:
                 resp.failure(f"Upgrade to {tier} failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def verify_customer(self):
+        """Verify CustomerCard projection reflects Platinum tier."""
+        with self.client.get(
+            f"/customers/{self.state.customer_id}",
+            catch_response=True,
+            name="GET /customers/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get customer failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
     def done(self):

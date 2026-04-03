@@ -16,6 +16,7 @@ from loadtests.scenarios.catalogue import (
     ProductCatalogBuilder,
     ProductLifecycleJourney,
 )
+from loadtests.scenarios.cross_domain import RealisticShopperJourney
 from loadtests.scenarios.fulfillment import (
     FulfillmentCancellationJourney,
     FulfillmentCreationJourney,
@@ -166,4 +167,6 @@ class MixedWorkloadUser(HttpUser):
         PreferenceManagementJourney: 3,
         UnsubscribeResubscribeJourney: 2,
         QuietHoursLifecycleJourney: 1,
+        # Correlated sessions (6%)
+        RealisticShopperJourney: 4,
     }

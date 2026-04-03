@@ -2,7 +2,8 @@
 
 EventFloodUser generates maximum events per second to stress the
 OutboxProcessor and Redis Streams consumers. SpikeUser simulates
-sudden traffic bursts. CrossDomainFloodUser hits all five domains.
+sudden traffic bursts. CrossDomainFloodUser hits the 5 core domains
+(Identity, Catalogue, Ordering, Inventory, Payments).
 """
 
 import uuid
@@ -155,10 +156,11 @@ class SpikeUser(HttpUser):
 
 
 class CrossDomainFloodUser(HttpUser):
-    """Stress test hitting all five domains with equal pressure.
+    """Stress test hitting the 5 core domains with equal pressure.
 
-    Unlike EventFloodUser which focuses on identity + catalogue,
-    this user distributes load evenly across all bounded contexts.
+    Distributes load evenly across Identity, Catalogue, Ordering,
+    Inventory, and Payments. Unlike EventFloodUser which weights
+    towards identity + catalogue, this user applies equal pressure.
     Useful for finding which domain's outbox drains slowest.
     """
 

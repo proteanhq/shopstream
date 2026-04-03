@@ -42,6 +42,7 @@ Specialty scenarios (run explicitly — these generate EXPECTED failures):
 """
 
 import logging
+import os
 import time
 
 import requests
@@ -114,10 +115,18 @@ def on_request(request_type, name, response, exception, **_kw):
 
 @events.test_start.add_listener
 def on_test_start(environment, **_kwargs):
-    """Log a marker when load test begins."""
+    """Log a marker when load test begins. Optionally seed baseline data."""
     print(f"\n[LOADTEST] Started at {time.strftime('%H:%M:%S')}")
     print(f"[LOADTEST] Target host: {environment.host}")
     print(f"[LOADTEST] Observatory metrics: {OBSERVATORY_URL}")
+
+    if os.environ.get("LOADTEST_SEED") == "1":
+        from loadtests.seed import seed_data
+
+        print("[LOADTEST] Seeding baseline data...")
+        created = seed_data(environment.host)
+        print(f"[LOADTEST] Seeded: {', '.join(f'{len(v)} {k}' for k, v in created.items())}")
+
     print()
 
 

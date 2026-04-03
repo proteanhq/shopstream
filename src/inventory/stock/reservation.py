@@ -55,6 +55,8 @@ class ReservationHandler:
         )
         repo.add(item)
 
+        return str(item.reservations[-1].id)
+
     @handle(ReleaseReservation)
     def release_reservation(self, command):
         repo = current_domain.repository_for(InventoryItem)

@@ -103,5 +103,9 @@ class WarehouseIdResponse(BaseModel):
     warehouse_id: str
 
 
+class ReservationIdResponse(BaseModel):
+    reservation_id: str
+
+
 class StatusResponse(BaseModel):
     status: str = "ok"

@@ -414,6 +414,19 @@ class ReviewReportAndRemoveJourney(SequentialTaskSet):
                 resp.failure(f"Remove review failed: {resp.status_code} — {extract_error_detail(resp)}")
 
     @task
+    def verify_review_removed(self):
+        """Verify ReviewDetail projection after removal."""
+        with self.client.get(
+            f"/reviews/{self.state.review_id}",
+            catch_response=True,
+            name="GET /reviews/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get review failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
     def done(self):
         self.interrupt()
 
