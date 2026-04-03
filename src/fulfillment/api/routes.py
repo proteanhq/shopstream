@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 
 from fastapi import APIRouter, Header, HTTPException
+from protean.exceptions import ObjectNotFoundError
 from protean.utils.globals import current_domain
 
 from fulfillment.api.schemas import (
@@ -59,13 +60,13 @@ async def get_fulfillment(fulfillment_id: str) -> FulfillmentDetailResponse:
     repo = current_domain.repository_for(Fulfillment)
     try:
         ff = repo.get(fulfillment_id)
-    except Exception:
+    except ObjectNotFoundError:
         raise HTTPException(status_code=404, detail="Fulfillment not found") from None
     return FulfillmentDetailResponse(
         fulfillment_id=str(ff.id),
         order_id=str(ff.order_id),
         customer_id=str(ff.customer_id),
-        status=ff.status.value,
+        status=str(ff.status),
         items=[
             FulfillmentItemDetailResponse(
                 item_id=str(item.id),
@@ -73,7 +74,7 @@ async def get_fulfillment(fulfillment_id: str) -> FulfillmentDetailResponse:
                 product_id=str(item.product_id),
                 sku=item.sku,
                 quantity=item.quantity,
-                status=item.status.value,
+                status=str(item.status),
             )
             for item in (ff.items or [])
         ],

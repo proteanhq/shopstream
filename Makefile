@@ -489,20 +489,20 @@ loadtest-spike: ## Run spike test (100 users, instant spawn, 2 min)
 		--html=results/spike-report.html
 
 loadtest-cross-domain: ## Run cross-domain workload scenario (web UI)
-	uv run locust -f loadtests/scenarios/cross_domain.py --host http://localhost:8000 CrossDomainUser
+	uv run locust -f loadtests/locustfile.py,loadtests/scenarios/cross_domain.py --host http://localhost:8000 CrossDomainUser
 
 loadtest-race: ## Run race condition scenarios (web UI)
-	uv run locust -f loadtests/scenarios/cross_domain.py --host http://localhost:8000 RaceConditionUser
+	uv run locust -f loadtests/locustfile.py,loadtests/scenarios/cross_domain.py --host http://localhost:8000 RaceConditionUser
 
 loadtest-flash-sale: ## Run flash sale simulation (web UI)
-	uv run locust -f loadtests/scenarios/cross_domain.py --host http://localhost:8000 FlashSaleUser
+	uv run locust -f loadtests/locustfile.py,loadtests/scenarios/cross_domain.py --host http://localhost:8000 FlashSaleUser
 
 loadtest-cross-flood: ## Run cross-domain flood stress test (web UI)
 	uv run locust -f loadtests/locustfile.py --host http://localhost:8000 CrossDomainFloodUser
 
 loadtest-headless-race: ## Run headless race condition test (30 users, 10/sec spawn, 3 min, reports)
 	@mkdir -p results
-	uv run locust -f loadtests/locustfile.py --host http://localhost:8000 \
+	uv run locust -f loadtests/locustfile.py,loadtests/scenarios/cross_domain.py --host http://localhost:8000 \
 		RaceConditionUser --headless \
 		-u 30 -r 10 -t 180s \
 		--csv=results/race-test --csv-full-history \
@@ -510,7 +510,7 @@ loadtest-headless-race: ## Run headless race condition test (30 users, 10/sec sp
 
 loadtest-headless-flash: ## Run headless flash sale test (50 users, instant spawn, 2 min, reports)
 	@mkdir -p results
-	uv run locust -f loadtests/locustfile.py --host http://localhost:8000 \
+	uv run locust -f loadtests/locustfile.py,loadtests/scenarios/cross_domain.py --host http://localhost:8000 \
 		FlashSaleUser --headless \
 		-u 50 -r 50 -t 120s \
 		--csv=results/flash-sale-test --csv-full-history \

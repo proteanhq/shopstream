@@ -40,9 +40,7 @@ def _reserve(client, item_id, order_id="ord-001", quantity=10):
         json={"order_id": order_id, "quantity": quantity},
     )
     assert response.status_code == 201
-    # Get reservation_id from aggregate
-    item = current_domain.repository_for(InventoryItem).get(item_id)
-    return str(item.reservations[-1].id)
+    return response.json()["reservation_id"]
 
 
 class TestInitializeStockEndpoint:
@@ -104,6 +102,21 @@ class TestReserveStockEndpoint:
         item = current_domain.repository_for(InventoryItem).get(item_id)
         assert item.levels.reserved == 10
         assert item.levels.available == 90
+
+    def test_reserve_stock_returns_reservation_id(self, client):
+        item_id = _initialize_stock(client, initial_quantity=100)
+        response = client.post(
+            f"/inventory/{item_id}/reserve",
+            json={"order_id": "ord-002", "quantity": 5},
+        )
+        assert response.status_code == 201
+        data = response.json()
+        assert "reservation_id" in data
+        assert data["reservation_id"] is not None
+
+        # Verify the returned ID matches the actual reservation
+        item = current_domain.repository_for(InventoryItem).get(item_id)
+        assert str(item.reservations[-1].id) == data["reservation_id"]
 
 
 class TestReleaseReservationEndpoint:

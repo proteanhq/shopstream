@@ -70,9 +70,15 @@ def seed_data(host: str, counts: dict | None = None) -> dict:
         resp = requests.post(f"{host}/products", json=product_data(), timeout=10)
         if resp.status_code == 201:
             pid = resp.json()["product_id"]
+            var_resp = requests.post(f"{host}/products/{pid}/variants", json=variant_data(), timeout=10)
+            if var_resp.status_code != 201:
+                print(f"[SEED] WARNING: variant creation failed for product {pid}: {var_resp.status_code}")
+                continue
+            act_resp = requests.put(f"{host}/products/{pid}/activate", timeout=10)
+            if act_resp.status_code != 200:
+                print(f"[SEED] WARNING: activation failed for product {pid}: {act_resp.status_code}")
+                continue
             created["product_ids"].append(pid)
-            requests.post(f"{host}/products/{pid}/variants", json=variant_data(), timeout=10)
-            requests.put(f"{host}/products/{pid}/activate", timeout=10)
 
     # Categories
     for _ in range(counts["categories"]):

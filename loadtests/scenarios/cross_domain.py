@@ -1270,13 +1270,17 @@ class RealisticShopperJourney(SequentialTaskSet):
 
     @task
     def browse_products(self):
-        """Browse product listing and categories."""
+        """Browse product listing and categories.
+
+        List endpoints return 200 with empty results (not 404), so only 200
+        is accepted here.
+        """
         with self.client.get(
             "/products",
             catch_response=True,
             name="[SHOPPER] GET /products",
         ) as resp:
-            if resp.status_code in (200, 404):
+            if resp.status_code == 200:
                 resp.success()
             else:
                 resp.failure(f"Browse products failed: {resp.status_code}")
@@ -1286,7 +1290,7 @@ class RealisticShopperJourney(SequentialTaskSet):
             catch_response=True,
             name="[SHOPPER] GET /categories",
         ) as resp:
-            if resp.status_code in (200, 404):
+            if resp.status_code == 200:
                 resp.success()
             else:
                 resp.failure(f"Browse categories failed: {resp.status_code}")
