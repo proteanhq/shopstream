@@ -1,5 +1,8 @@
 # ShopStream
 
+[![CI](https://github.com/proteanhq/shopstream/actions/workflows/ci.yml/badge.svg)](https://github.com/proteanhq/shopstream/actions/workflows/ci.yml)
+![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/subhashb/e80d8bfc7bc87c8165d51ad65f504832/raw/shopstream-coverage.json)
+
 **Version 0.1.0**
 
 E-Commerce Platform built on [Protean](https://github.com/proteanhq/protean) — a Domain-Driven Design framework for Python.
