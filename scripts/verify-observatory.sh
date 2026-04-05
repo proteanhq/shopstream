@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Observatory Timeline Verification Script
+# Observatory Timeline & Causation Graph Verification Script
 #
-# Verifies the Protean Observatory Event Timeline (Epic 6.2) end-to-end
-# against a running ShopStream stack. Seeds test data across multiple
-# domains, then validates all Timeline API endpoints.
+# Verifies the Protean Observatory Event Timeline (Epic 6.2) and
+# Causation Graph (Epic 6.3) end-to-end against a running ShopStream
+# stack. Seeds test data across multiple domains, then validates all
+# Timeline and Trace API endpoints.
 #
 # Prerequisites:
 #   make docker-up && make setup-db && make truncate-db
@@ -130,8 +131,23 @@ if [ "$SKIP_SEED" = false ]; then
         -H "Content-Type: application/json" \
         -d '{"variant_sku":"TL-WH-001-BLK","base_price":79.99}' > /dev/null
 
-    P1_DETAIL=$(curl -sf "$API_URL/products/$PROD1_ID")
-    VAR1_ID=$(echo "$P1_DETAIL" | python3 -c "import json,sys; print(json.load(sys.stdin)['variants'][0]['variant_id'])")
+    # Wait for catalogue engine to update product projection with variant (retry up to 20s)
+    VAR1_ID=""
+    for i in $(seq 1 20); do
+        P1_DETAIL=$(curl -sf "$API_URL/products/$PROD1_ID")
+        VAR1_ID=$(echo "$P1_DETAIL" | python3 -c "
+import json,sys
+d = json.load(sys.stdin)
+vs = d.get('variants', [])
+print(vs[0]['variant_id'] if vs else '')
+" 2>/dev/null)
+        [ -n "$VAR1_ID" ] && break
+        sleep 1
+    done
+    if [ -z "$VAR1_ID" ]; then
+        echo "  ERROR: Variant not available after 20s. Is the catalogue engine running?"
+        exit 1
+    fi
     echo "$PROD1_ID" > "$TMPDIR/prod1_id"
     echo "$VAR1_ID" > "$TMPDIR/var1_id"
 
@@ -491,15 +507,171 @@ curl -sf "$OBS_URL/api/timeline/events?limit=100" > "$TMPDIR/multi.json"
 python3 -c "
 import json
 d = json.load(open('$TMPDIR/multi.json'))
-domains = sorted(set(e.get('domain','') for e in d.get('events', [])))
+events = d.get('events', [])
+# Derive domain from stream prefix (more reliable than 'domain' field)
+stream_domains = sorted(set(e.get('stream','').split('::')[0] for e in events if '::' in e.get('stream','')))
 with open('$TMPDIR/domains.txt', 'w') as f:
-    f.write(f'{len(domains)}\n')
-    f.write(', '.join(domains))
+    f.write(f'{len(stream_domains)}\n')
+    f.write(', '.join(stream_domains))
 "
 DOMAIN_COUNT=$(sed -n '1p' "$TMPDIR/domains.txt")
 DOMAIN_LIST=$(sed -n '2p' "$TMPDIR/domains.txt")
 [ "$DOMAIN_COUNT" -gt 1 ] 2>/dev/null
 check $? "Multiple domains present ($DOMAIN_COUNT: $DOMAIN_LIST)"
+
+# ============================================================
+#  Phase 4: Causation Graph — Epic 6.3 Endpoints
+# ============================================================
+
+# --- 4.1 Recent traces ---
+section "4.1 Recent traces endpoint"
+curl -sf "$OBS_URL/api/timeline/traces/recent?limit=10" > "$TMPDIR/recent_traces.json"
+python3 -c "
+import json
+d = json.load(open('$TMPDIR/recent_traces.json'))
+traces = d.get('traces', [])
+count = d.get('count', 0)
+checks = []
+checks.append((count == len(traces), f'count ({count}) matches traces array ({len(traces)})'))
+checks.append((bool(traces), f'traces array has entries ({len(traces)})'))
+checks.append((count <= 10, f'limit respected ({count} <= 10)'))
+if traces:
+    t = traces[0]
+    required = ['correlation_id', 'root_type', 'event_count', 'started_at', 'streams']
+    missing = [f for f in required if f not in t]
+    checks.append((not missing, 'All required summary fields present' + (f' (missing: {\",\".join(missing)})' if missing else '')))
+    checks.append((isinstance(t.get('streams'), list), f'streams is a list'))
+    checks.append((t.get('event_count', 0) >= 1, f'event_count >= 1 ({t.get(\"event_count\")})'))
+for ok, msg in checks:
+    tag = 'PASS' if ok else 'FAIL'
+    print(f'  [{tag}] {msg}')
+with open('$TMPDIR/recent_traces_results', 'w') as f:
+    f.write(f'{sum(1 for ok,_ in checks if ok)}\n{sum(1 for ok,_ in checks if not ok)}')
+"
+read -r TP TF < "$TMPDIR/recent_traces_results"
+PASS=$((PASS + TP))
+FAIL=$((FAIL + TF))
+
+# --- 4.2 Trace search by aggregate_id ---
+section "4.2 Trace search by aggregate_id"
+if [ -n "$ORDER_ID" ]; then
+    curl -sf "$OBS_URL/api/timeline/traces/search?aggregate_id=$ORDER_ID" > "$TMPDIR/trace_search_agg.json"
+    python3 -c "
+import json
+d = json.load(open('$TMPDIR/trace_search_agg.json'))
+traces = d.get('traces', [])
+count = d.get('count', 0)
+checks = []
+checks.append((bool(traces), f'Search by aggregate_id returns results ({count})'))
+checks.append((count == len(traces), f'count matches array length'))
+for ok, msg in checks:
+    tag = 'PASS' if ok else 'FAIL'
+    print(f'  [{tag}] {msg}')
+with open('$TMPDIR/trace_search_agg_results', 'w') as f:
+    f.write(f'{sum(1 for ok,_ in checks if ok)}\n{sum(1 for ok,_ in checks if not ok)}')
+"
+    read -r TP TF < "$TMPDIR/trace_search_agg_results"
+    PASS=$((PASS + TP))
+    FAIL=$((FAIL + TF))
+else
+    fail "Trace search by aggregate_id (no order ID available)"
+fi
+
+# --- 4.3 Trace search by stream_category ---
+section "4.3 Trace search by stream_category"
+curl -sf "$OBS_URL/api/timeline/traces/search?stream_category=ordering%3A%3Aorder" > "$TMPDIR/trace_search_stream.json"
+python3 -c "
+import json
+d = json.load(open('$TMPDIR/trace_search_stream.json'))
+traces = d.get('traces', [])
+count = d.get('count', 0)
+checks = []
+checks.append((bool(traces), f'Search by stream_category returns results ({count})'))
+# Verify returned traces contain ordering::order streams
+if traces:
+    has_ordering = any('ordering::order' in s for t in traces for s in t.get('streams', []))
+    checks.append((has_ordering, 'Results include ordering::order streams'))
+for ok, msg in checks:
+    tag = 'PASS' if ok else 'FAIL'
+    print(f'  [{tag}] {msg}')
+with open('$TMPDIR/trace_search_stream_results', 'w') as f:
+    f.write(f'{sum(1 for ok,_ in checks if ok)}\n{sum(1 for ok,_ in checks if not ok)}')
+"
+read -r TP TF < "$TMPDIR/trace_search_stream_results"
+PASS=$((PASS + TP))
+FAIL=$((FAIL + TF))
+
+# --- 4.4 Trace search by event_type ---
+section "4.4 Trace search by event_type"
+if [ -n "$SAMPLE_TYPE" ]; then
+    ENCODED_TYPE=$(python3 -c "import urllib.parse; print(urllib.parse.quote('$SAMPLE_TYPE'))")
+    curl -sf "$OBS_URL/api/timeline/traces/search?event_type=$ENCODED_TYPE" > "$TMPDIR/trace_search_type.json"
+    TS_OK=$(python3 -c "import json; d=json.load(open('$TMPDIR/trace_search_type.json')); print(1 if d.get('traces') else 0)")
+    if [ "$TS_OK" = "1" ]; then pass "Search by event_type returns results ($SAMPLE_TYPE)"; else fail "Search by event_type returns results ($SAMPLE_TYPE)"; fi
+else
+    fail "Trace search by event_type (no sample type available)"
+fi
+
+# --- 4.5 Trace search empty results ---
+section "4.5 Trace search empty results"
+curl -sf "$OBS_URL/api/timeline/traces/search?aggregate_id=nonexistent-id-99999" > "$TMPDIR/trace_search_empty.json"
+python3 -c "
+import json
+d = json.load(open('$TMPDIR/trace_search_empty.json'))
+traces = d.get('traces', [])
+count = d.get('count', 0)
+ok = (traces == [] and count == 0)
+tag = 'PASS' if ok else 'FAIL'
+print(f'  [{tag}] Empty search returns {{traces: [], count: 0}} (got count={count}, len={len(traces)})')
+with open('$TMPDIR/trace_empty_ok', 'w') as f:
+    f.write('1' if ok else '0')
+"
+TRACE_EMPTY_OK=$(cat "$TMPDIR/trace_empty_ok")
+if [ "$TRACE_EMPTY_OK" = "1" ]; then PASS=$((PASS + 1)); else FAIL=$((FAIL + 1)); FAILURES+=("trace search empty results"); fi
+
+# --- 4.6 Trace search requires at least one parameter ---
+section "4.6 Trace search parameter validation"
+HTTP=$(curl -s -o /dev/null -w "%{http_code}" "$OBS_URL/api/timeline/traces/search")
+[ "$HTTP" = "400" ]; check $? "Trace search with no params returns 400 (got $HTTP)"
+
+# --- 4.7 Enriched correlation response (Epic 6.3.1) ---
+section "4.7 Enriched correlation response"
+if [ -n "$CORR_ID" ]; then
+    python3 -c "
+import json
+d = json.load(open('$TMPDIR/corr.json'))
+tree = d.get('tree', {})
+checks = []
+
+# total_duration_ms field exists in response (may be null if no trace data)
+checks.append(('total_duration_ms' in d, f'total_duration_ms field present (value={d.get(\"total_duration_ms\")})'))
+
+# tree nodes should have enrichment fields
+if tree:
+    # Check root node has the enrichment fields (may be None)
+    enrichment_fields = ['handler', 'duration_ms', 'delta_ms']
+    for field in enrichment_fields:
+        checks.append((field in tree, f'tree root has {field} field'))
+
+    # Check children propagate enrichment fields
+    children = tree.get('children', [])
+    if children:
+        child = children[0]
+        for field in enrichment_fields:
+            checks.append((field in child, f'tree child has {field} field'))
+
+for ok, msg in checks:
+    tag = 'PASS' if ok else 'FAIL'
+    print(f'  [{tag}] {msg}')
+with open('$TMPDIR/enriched_results', 'w') as f:
+    f.write(f'{sum(1 for ok,_ in checks if ok)}\n{sum(1 for ok,_ in checks if not ok)}')
+"
+    read -r EP EF < "$TMPDIR/enriched_results"
+    PASS=$((PASS + EP))
+    FAIL=$((FAIL + EF))
+else
+    fail "Enriched correlation (no correlation_id available)"
+fi
 
 # ============================================================
 #  Phase 5: Edge Cases & Parameter Validation
@@ -559,6 +731,13 @@ fi
 HTTP=$(curl -s -o /dev/null -w "%{http_code}" "$OBS_URL/timeline?correlation=invalid-uuid")
 [ "$HTTP" = "200" ]; check $? "Invalid deep link returns 200 (empty state, not error)"
 
+# Epic 6.3 UI checks
+HTTP=$(curl -s -o /dev/null -w "%{http_code}" "$OBS_URL/timeline?view=traces")
+[ "$HTTP" = "200" ]; check $? "Traces tab deep link loads (HTTP $HTTP)"
+
+HTTP=$(curl -s -o /dev/null -w "%{http_code}" "$OBS_URL/static/js/causation-graph.js")
+[ "$HTTP" = "200" ]; check $? "Causation graph JS file loads (HTTP $HTTP)"
+
 # ============================================================
 #  Summary
 # ============================================================
@@ -581,12 +760,20 @@ echo "==========================================="
 echo "  Visual verification URLs"
 echo "==========================================="
 echo ""
+echo "  --- Epic 6.2: Event Timeline ---"
 echo "  Timeline list view:       $OBS_URL/timeline"
 if [ -n "${CORR_ID:-}" ]; then
     echo "  Correlation deep link:    $OBS_URL/timeline?correlation=$CORR_ID"
 fi
 if [ -n "${ORDER_ID:-}" ]; then
     echo "  Aggregate deep link:      $OBS_URL/timeline?stream=ordering%3A%3Aorder&aggregate=$ORDER_ID"
+fi
+echo ""
+echo "  --- Epic 6.3: Causation Graph ---"
+echo "  Traces tab:               $OBS_URL/timeline?view=traces"
+if [ -n "${CORR_ID:-}" ]; then
+    echo "  Causation tree+graph:     $OBS_URL/timeline?correlation=$CORR_ID"
+    echo "    (toggle 'Tree View / Graph View' to see D3 interactive graph)"
 fi
 echo ""
 echo "  SSE test — run this while watching the timeline page:"

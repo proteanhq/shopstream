@@ -371,11 +371,11 @@ engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue
 observatory: ## Start Observatory dashboard (port 9000, live message flow + Prometheus metrics)
 	uv run protean observatory --domain identity.domain --domain catalogue.domain --domain ordering.domain --domain inventory.domain --domain payments.domain --domain fulfillment.domain --domain reviews.domain --domain notifications.domain --title "ShopStream Observatory"
 
-verify-timeline: ## Verify Observatory Event Timeline: seeds data + runs 44 API checks (requires running stack)
-	./scripts/verify-timeline.sh
+verify-observatory: ## Verify Observatory Timeline + Causation Graph: seeds data + runs ~66 API checks (requires running stack)
+	./scripts/verify-observatory.sh
 
-verify-timeline-skip-seed: ## Verify Observatory Event Timeline without re-seeding data
-	./scripts/verify-timeline.sh --skip-seed
+verify-observatory-skip-seed: ## Verify Observatory without re-seeding data
+	./scripts/verify-observatory.sh --skip-seed
 
 # ──────────────────────────────────────────────
 # Database
