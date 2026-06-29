@@ -37,3 +37,58 @@ class TestPromoCampaignEventSourcing:
         assert data["status"] == "active"
         assert data["discount_type"] == "percentage"
         assert data["discount_value"] == 10
+
+
+class TestCampaignLaunchedUpcastingOnReplay:
+    """A historical v1 CampaignLaunched event is upcast v1->v2->v3 during replay."""
+
+    def _write_raw_v1_event(self, store, stream, data, position=0):
+        type_string = "Loyalty.CampaignLaunched.v1"
+        store._write(
+            stream,
+            type_string,
+            data,
+            {
+                "headers": {
+                    "id": f"evt-{position}",
+                    "type": type_string,
+                    "time": "2025-01-01T00:00:00+00:00",
+                    "stream": stream,
+                },
+                "envelope": {"specversion": "1.0"},
+                "domain": {
+                    "fqn": "loyalty.campaign.events.CampaignLaunched",
+                    "kind": "EVENT",
+                    "origin_stream": None,
+                    "stream_category": stream.rsplit("-", 1)[0],
+                    "version": 1,
+                    "sequence_id": str(position),
+                    "asynchronous": True,
+                },
+            },
+            position - 1,
+        )
+
+    def test_v1_event_upcast_through_full_chain(self):
+        campaign_id = "promo-upcast-001"
+        stream = f"loyalty::promo_campaign-{campaign_id}"
+        store = current_domain.event_store.store
+
+        # v1 schema: a single discount_pct, no discount_type / scheduling fields.
+        self._write_raw_v1_event(
+            store,
+            stream,
+            {
+                "campaign_id": campaign_id,
+                "campaign_code": "LEGACY15",
+                "name": "Legacy Campaign",
+                "discount_pct": 15,
+                "launched_at": "2025-01-01T00:00:00+00:00",
+            },
+        )
+
+        campaign = current_domain.repository_for(PromoCampaign).get(campaign_id)
+        assert campaign.campaign_code == "LEGACY15"
+        assert campaign.discount_value == 15  # v1 discount_pct -> v2 discount_value
+        assert campaign.discount_type == "percentage"  # added by v1->v2
+        assert campaign.starts_on is None  # added by v2->v3

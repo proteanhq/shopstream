@@ -7,6 +7,9 @@ from loyalty.domain import loyalty
 
 @loyalty.event(part_of="PromoCampaign")
 class CampaignLaunched:
+    # Schema has evolved twice; see loyalty/campaign/upcasters.py for the v1->v2->v3 chain.
+    __version__ = 3
+
     campaign_id = String(required=True)
     campaign_code = String(required=True)
     name = String(required=True)
