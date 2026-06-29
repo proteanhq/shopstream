@@ -1,6 +1,7 @@
 """Tests for Review state machine — valid transitions and invalid transition guards."""
 
-from protean.testing import assert_invalid
+import pytest
+from protean.exceptions import ValidationError
 
 from reviews.review.review import Review, ReviewStatus
 
@@ -76,53 +77,43 @@ class TestValidTransitions:
 class TestInvalidTransitions:
     def test_cannot_approve_published_review(self):
         review = _review_at_state(ReviewStatus.PUBLISHED)
-        assert_invalid(lambda: review.approve(moderator_id="mod-002"))
+        with pytest.raises(ValidationError):
+            review.approve(moderator_id="mod-002")
 
     def test_cannot_reject_published_review(self):
         review = _review_at_state(ReviewStatus.PUBLISHED)
-        assert_invalid(
-            lambda: review.reject(moderator_id="mod-002", reason="Too late"),
-            message="Invalid status transition",
-        )
+        with pytest.raises(ValidationError, match="Invalid status transition"):
+            review.reject(moderator_id="mod-002", reason="Too late")
 
     def test_cannot_approve_removed_review(self):
         review = _review_at_state(ReviewStatus.REMOVED)
-        assert_invalid(
-            lambda: review.approve(moderator_id="mod-002"),
-            message="Invalid status transition",
-        )
+        with pytest.raises(ValidationError, match="Invalid status transition"):
+            review.approve(moderator_id="mod-002")
 
     def test_cannot_reject_removed_review(self):
         review = _review_at_state(ReviewStatus.REMOVED)
-        assert_invalid(
-            lambda: review.reject(moderator_id="mod-002", reason="Too late"),
-            message="Invalid status transition",
-        )
+        with pytest.raises(ValidationError, match="Invalid status transition"):
+            review.reject(moderator_id="mod-002", reason="Too late")
 
     def test_cannot_remove_pending_review(self):
         review = _review_at_state(ReviewStatus.PENDING)
-        assert_invalid(
-            lambda: review.remove(removed_by="Admin", reason="Policy"),
-            message="Invalid status transition",
-        )
+        with pytest.raises(ValidationError, match="Invalid status transition"):
+            review.remove(removed_by="Admin", reason="Policy")
 
     def test_cannot_remove_rejected_review(self):
         review = _review_at_state(ReviewStatus.REJECTED)
-        assert_invalid(
-            lambda: review.remove(removed_by="Admin", reason="Policy"),
-            message="Invalid status transition",
-        )
+        with pytest.raises(ValidationError, match="Invalid status transition"):
+            review.remove(removed_by="Admin", reason="Policy")
 
     def test_removed_is_terminal(self):
         review = _review_at_state(ReviewStatus.REMOVED)
-        assert_invalid(lambda: review.remove(removed_by="Admin", reason="Again"))
+        with pytest.raises(ValidationError):
+            review.remove(removed_by="Admin", reason="Again")
 
     def test_cannot_approve_rejected_review_directly(self):
         review = _review_at_state(ReviewStatus.REJECTED)
-        assert_invalid(
-            lambda: review.approve(moderator_id="mod-002"),
-            message="Invalid status transition",
-        )
+        with pytest.raises(ValidationError, match="Invalid status transition"):
+            review.approve(moderator_id="mod-002")
 
 
 # ---------------------------------------------------------------
@@ -141,14 +132,10 @@ class TestEditStateConstraints:
 
     def test_cannot_edit_published_review(self):
         review = _review_at_state(ReviewStatus.PUBLISHED)
-        assert_invalid(
-            lambda: review.edit(title="Try to edit published"),
-            message="Pending or Rejected",
-        )
+        with pytest.raises(ValidationError, match="Pending or Rejected"):
+            review.edit(title="Try to edit published")
 
     def test_cannot_edit_removed_review(self):
         review = _review_at_state(ReviewStatus.REMOVED)
-        assert_invalid(
-            lambda: review.edit(title="Try to edit removed"),
-            message="Pending or Rejected",
-        )
+        with pytest.raises(ValidationError, match="Pending or Rejected"):
+            review.edit(title="Try to edit removed")

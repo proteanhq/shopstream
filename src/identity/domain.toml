@@ -12,6 +12,11 @@ message_processing = "sync"
 [server]
 default_subscription_type = "stream"
 
+# Health-check HTTP server (Protean 0.16+). The engine binds 8080 by default;
+# assign a distinct port per domain so all eight engines run side by side locally.
+[server.health]
+port = 8081
+
 # Priority Lanes: Route low-priority events (migrations, bulk imports) to a
 # separate Redis Stream so production events are always processed first.
 # See docs/priority-lanes.md for usage and load test instructions.

@@ -1,6 +1,7 @@
 """Tests for Review aggregate invariants."""
 
-from protean.testing import assert_invalid
+import pytest
+from protean.exceptions import ValidationError
 
 from reviews.review.review import Review
 
@@ -23,10 +24,8 @@ class TestMaxImagesInvariant:
         assert len(review.images) == 5
 
     def test_6th_image_rejected(self):
-        assert_invalid(
-            lambda: _make_review(images=[{"url": f"https://cdn.example.com/img{i}.jpg"} for i in range(6)]),
-            message="Cannot attach more than 5 images",
-        )
+        with pytest.raises(ValidationError, match="Cannot attach more than 5 images"):
+            _make_review(images=[{"url": f"https://cdn.example.com/img{i}.jpg"} for i in range(6)])
 
 
 class TestAtMostOneSellerReply:
@@ -49,10 +48,8 @@ class TestAtMostOneSellerReply:
         review.add_seller_reply(seller_id="seller-001", body="Thank you for your feedback!")
         review._events.clear()
 
-        assert_invalid(
-            lambda: review.add_seller_reply(seller_id="seller-001", body="Another reply"),
-            message="at most one seller reply",
-        )
+        with pytest.raises(ValidationError, match="at most one seller reply"):
+            review.add_seller_reply(seller_id="seller-001", body="Another reply")
 
 
 class TestBodyMinimumLength:
@@ -61,16 +58,12 @@ class TestBodyMinimumLength:
         assert review.body is not None
 
     def test_short_body_rejected(self):
-        assert_invalid(
-            lambda: _make_review(body="Too short"),
-            message="at least 20 characters",
-        )
+        with pytest.raises(ValidationError, match="at least 20 characters"):
+            _make_review(body="Too short")
 
     def test_whitespace_only_body_rejected(self):
-        assert_invalid(
-            lambda: _make_review(body="   short   "),
-            message="at least 20 characters",
-        )
+        with pytest.raises(ValidationError, match="at least 20 characters"):
+            _make_review(body="   short   ")
 
 
 class TestTitleNotEmpty:
@@ -79,7 +72,5 @@ class TestTitleNotEmpty:
         assert review.title == "Great product review"
 
     def test_whitespace_only_title_rejected(self):
-        assert_invalid(
-            lambda: _make_review(title="   "),
-            message="title cannot be empty",
-        )
+        with pytest.raises(ValidationError, match="title cannot be empty"):
+            _make_review(title="   ")

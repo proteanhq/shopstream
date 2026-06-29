@@ -14,6 +14,7 @@ from datetime import UTC, datetime
 from enum import Enum
 from uuid import uuid4
 
+from protean import value_object_from_entity
 from protean.fields import DateTime, Float, HasMany, Identifier, Status, String
 
 from payments.domain import payments
@@ -40,6 +41,13 @@ class InvoiceLineItem:
     quantity = Float(required=True)
     unit_price = Float(required=True)
     total = Float(required=True)
+
+
+# Auto-generated input value object mirroring the caller-provided fields of
+# InvoiceLineItem (Protean 0.16 `value_object_from_entity`). `total` is excluded
+# because the aggregate derives it (quantity x unit_price). Carried by the
+# GenerateInvoice command in place of an untyped `List(Dict())`.
+InvoiceLineItemInput = value_object_from_entity(InvoiceLineItem, name="InvoiceLineItemInput", exclude={"total"})
 
 
 @payments.aggregate
@@ -69,22 +77,28 @@ class Invoice:
         cls,
         order_id: str,
         customer_id: str,
-        line_items_data: list[dict],
+        line_items_data: "list[InvoiceLineItemInput]",
         tax: float = 0.0,
     ):
-        """Create a new invoice for an order."""
+        """Create a new invoice for an order.
+
+        ``line_items_data`` is a list of ``InvoiceLineItemInput`` value objects
+        (the command coerces incoming dicts into them). The line total is
+        derived here, then each input is promoted to an ``InvoiceLineItem``
+        entity.
+        """
         now = datetime.now(UTC)
         invoice_number = f"INV-{uuid4().hex[:8].upper()}"
 
         items = []
         subtotal = 0.0
-        for item_data in line_items_data:
-            item_total = item_data["quantity"] * item_data["unit_price"]
+        for item_input in line_items_data:
+            item_total = item_input.quantity * item_input.unit_price
             items.append(
                 InvoiceLineItem(
-                    description=item_data["description"],
-                    quantity=item_data["quantity"],
-                    unit_price=item_data["unit_price"],
+                    description=item_input.description,
+                    quantity=item_input.quantity,
+                    unit_price=item_input.unit_price,
                     total=item_total,
                 )
             )

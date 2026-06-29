@@ -1,5 +1,6 @@
 """Customer orders — per-customer order listing projection."""
 
+from protean import Index
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -25,7 +26,8 @@ from ordering.order.events import (
 from ordering.order.order import Order
 
 
-@ordering.projection
+# Read path: list a customer's orders (filter by customer_id).
+@ordering.projection(indexes=[Index("customer_id")])
 class CustomerOrders:
     order_id = Identifier(identifier=True, required=True)
     customer_id = Identifier(required=True)

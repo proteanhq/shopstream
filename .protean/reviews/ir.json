@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:84a59c7058f8252964ac8db17809c02f2579b03bdbe2ca44fa1d731a8fc28f5a",
+  "checksum": "sha256:b829eca474666ea5620c44828e9bd77ba7264f8ba70733d45f89e814b2187d28",
   "clusters": {
     "reviews.review.review.Review": {
       "aggregate": {
@@ -1393,7 +1393,7 @@
       }
     }
   },
-  "generated_at": "2026-03-25T21:35:25Z",
+  "generated_at": "2026-06-29T22:03:33Z",
   "ir_version": "0.1.0",
   "projections": {
     "reviews.projections.customer_reviews.CustomerReviews": {
@@ -1450,6 +1450,14 @@
         },
         "fqn": "reviews.projections.customer_reviews.CustomerReviews",
         "identity_field": "review_id",
+        "indexes": [
+          {
+            "fields": [
+              "customer_id"
+            ],
+            "unique": false
+          }
+        ],
         "module": "reviews.projections.customer_reviews",
         "name": "CustomerReviews",
         "options": {
@@ -1876,6 +1884,14 @@
         },
         "fqn": "reviews.projections.product_reviews.ProductReviews",
         "identity_field": "review_id",
+        "indexes": [
+          {
+            "fields": [
+              "product_id"
+            ],
+            "unique": false
+          }
+        ],
         "module": "reviews.projections.product_reviews",
         "name": "ProductReviews",
         "options": {

@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:ee797179cea65b51088f004c651cea5baed90b6821828e9839c5b34c8d285dab",
+  "checksum": "sha256:588dc2f4cf24b35922e37329cb9578cc2210bcefcd70f47f2182966d98ad9396",
   "clusters": {
     "ordering.cart.cart.ShoppingCart": {
       "aggregate": {
@@ -818,21 +818,19 @@
             "default": "Created",
             "kind": "status",
             "transitions": {
-              "Cancelled": [
-                "Refunded",
+              "Created": [
+                "Confirmed",
                 "Cancelled"
               ],
               "Confirmed": [
                 "Payment_Pending",
                 "Cancelled"
               ],
-              "Created": [
+              "Payment_Pending": [
+                "Paid",
+                "Payment_Pending",
                 "Confirmed",
                 "Cancelled"
-              ],
-              "Delivered": [
-                "Completed",
-                "Return_Requested"
               ],
               "Paid": [
                 "Processing",
@@ -841,34 +839,36 @@
                 "Partially_Shipped",
                 "Cancelled"
               ],
-              "Partially_Shipped": [
-                "Shipped"
-              ],
-              "Payment_Pending": [
-                "Paid",
-                "Payment_Pending",
-                "Confirmed",
-                "Cancelled"
-              ],
               "Processing": [
                 "Shipped",
                 "Partially_Shipped"
               ],
-              "Refunded": [
-                "Refunded"
+              "Partially_Shipped": [
+                "Shipped"
               ],
-              "Return_Approved": [
-                "Returned"
+              "Shipped": [
+                "Delivered"
+              ],
+              "Delivered": [
+                "Completed",
+                "Return_Requested"
               ],
               "Return_Requested": [
                 "Return_Approved"
+              ],
+              "Return_Approved": [
+                "Returned"
               ],
               "Returned": [
                 "Refunded",
                 "Returned"
               ],
-              "Shipped": [
-                "Delivered"
+              "Cancelled": [
+                "Refunded",
+                "Cancelled"
+              ],
+              "Refunded": [
+                "Refunded"
               ]
             },
             "type": "Status"
@@ -1728,9 +1728,6 @@
               "default": "Pending",
               "kind": "status",
               "transitions": {
-                "Delivered": [
-                  "Returned"
-                ],
                 "Pending": [
                   "Reserved"
                 ],
@@ -1739,6 +1736,9 @@
                 ],
                 "Shipped": [
                   "Delivered"
+                ],
+                "Delivered": [
+                  "Returned"
                 ]
               },
               "type": "Status"
@@ -3226,7 +3226,7 @@
       }
     }
   },
-  "generated_at": "2026-03-25T21:35:23Z",
+  "generated_at": "2026-06-29T22:03:33Z",
   "ir_version": "0.1.0",
   "projections": {
     "ordering.projections.abandoned_checkouts.AbandonedCheckout": {
@@ -3506,6 +3506,14 @@
         },
         "fqn": "ordering.projections.customer_orders.CustomerOrders",
         "identity_field": "order_id",
+        "indexes": [
+          {
+            "fields": [
+              "customer_id"
+            ],
+            "unique": false
+          }
+        ],
         "module": "ordering.projections.customer_orders",
         "name": "CustomerOrders",
         "options": {
@@ -4207,6 +4215,15 @@
         },
         "fqn": "ordering.projections.order_timeline.OrderTimeline",
         "identity_field": "entry_id",
+        "indexes": [
+          {
+            "fields": [
+              "order_id",
+              "occurred_at"
+            ],
+            "unique": false
+          }
+        ],
         "module": "ordering.projections.order_timeline",
         "name": "OrderTimeline",
         "options": {

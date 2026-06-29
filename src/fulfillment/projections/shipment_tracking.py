@@ -1,5 +1,6 @@
 """Shipment tracking — customer-facing tracking page view."""
 
+from protean import Index
 from protean.core.projector import on
 from protean.fields import DateTime, Dict, Identifier, List, String
 from protean.utils.globals import current_domain
@@ -14,7 +15,8 @@ from fulfillment.fulfillment.events import (
 from fulfillment.fulfillment.fulfillment import Fulfillment
 
 
-@fulfillment.projection
+# Read path: tracking timeline for an order (filter by order_id).
+@fulfillment.projection(indexes=[Index("order_id")])
 class ShipmentTrackingView:
     fulfillment_id = Identifier(identifier=True, required=True)
     order_id = Identifier(required=True)

@@ -2,7 +2,8 @@
 
 from datetime import UTC, datetime
 
-from protean.testing import assert_invalid
+import pytest
+from protean.exceptions import ValidationError
 
 from reviews.review.review import Review, ReviewStatus
 
@@ -131,7 +132,5 @@ class TestEditValidation:
     def test_cannot_edit_to_short_body(self):
         review = _make_review()
         review._events.clear()
-        assert_invalid(
-            lambda: review.edit(body="Short"),
-            message="at least 20 characters",
-        )
+        with pytest.raises(ValidationError, match="at least 20 characters"):
+            review.edit(body="Short")

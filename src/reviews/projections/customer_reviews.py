@@ -1,5 +1,6 @@
 """CustomerReviews — a customer's review history across all products."""
 
+from protean import Index
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -15,7 +16,8 @@ from reviews.review.events import (
 from reviews.review.review import Review
 
 
-@reviews.projection
+# Read path: list a customer's own reviews (filter by customer_id).
+@reviews.projection(indexes=[Index("customer_id")])
 class CustomerReviews:
     review_id = Identifier(identifier=True, required=True)
     customer_id = Identifier(required=True)

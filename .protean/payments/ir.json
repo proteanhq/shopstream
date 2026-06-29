@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:c9c6a8941d28318af07faf470ae00418e759dadc7f53dec0c02a3e15ea05d72c",
+  "checksum": "sha256:194dc0b8def06215f42c6863a665922ffc2605889aaad47ef535de0a30692a6b",
   "clusters": {
     "payments.invoice.invoice.Invoice": {
       "aggregate": {
@@ -160,7 +160,7 @@
               "type": "Identifier"
             },
             "line_items": {
-              "content_type": "dict",
+              "content_type": "InvoiceLineItemInput",
               "kind": "list",
               "required": true,
               "type": "List"
@@ -509,12 +509,6 @@
             "default": "Pending",
             "kind": "status",
             "transitions": {
-              "Failed": [
-                "Pending"
-              ],
-              "Partially_Refunded": [
-                "Refunded"
-              ],
               "Pending": [
                 "Processing",
                 "Succeeded",
@@ -524,9 +518,15 @@
                 "Succeeded",
                 "Failed"
               ],
+              "Failed": [
+                "Pending"
+              ],
               "Succeeded": [
                 "Refunded",
                 "Partially_Refunded"
+              ],
+              "Partially_Refunded": [
+                "Refunded"
               ]
             },
             "type": "Status"
@@ -1661,7 +1661,7 @@
       }
     }
   },
-  "generated_at": "2026-03-25T21:35:24Z",
+  "generated_at": "2026-06-29T22:03:33Z",
   "ir_version": "0.1.0",
   "projections": {
     "payments.projections.customer_payments.CustomerPayment": {

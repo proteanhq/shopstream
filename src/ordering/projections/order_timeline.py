@@ -3,6 +3,7 @@
 import uuid
 from datetime import UTC, datetime
 
+from protean import Index
 from protean.core.projector import on
 from protean.fields import DateTime, Dict, Identifier, String
 from protean.utils.globals import current_domain
@@ -32,7 +33,9 @@ from ordering.order.events import (
 from ordering.order.order import Order
 
 
-@ordering.projection
+# Read path: a single order's timeline, filtered by order_id and ordered by
+# occurred_at — a composite index serves both the filter and the sort.
+@ordering.projection(indexes=[Index("order_id", "occurred_at")])
 class OrderTimeline:
     entry_id = Identifier(identifier=True, required=True)
     order_id = Identifier(required=True)

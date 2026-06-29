@@ -1,5 +1,6 @@
 """ProductReviews — published reviews for a product detail page."""
 
+from protean import Index
 from protean.core.projector import on
 from protean.fields import DateTime, Dict, Identifier, Integer, List, String, Text
 from protean.utils.globals import current_domain
@@ -14,7 +15,8 @@ from reviews.review.events import (
 from reviews.review.review import Review
 
 
-@reviews.projection
+# Read path: list published reviews for a product detail page (filter by product_id).
+@reviews.projection(indexes=[Index("product_id")])
 class ProductReviews:
     review_id = Identifier(identifier=True, required=True)
     product_id = Identifier(required=True)
