@@ -164,4 +164,54 @@ Items 1, 4, 5, 6 are design/UX changes better suited to 0.17.
   visualizable. Low priority.
 
 ---
+## 9. ✅ CONFIRMED (known/planned) — per-stream events delivered out of order under concurrent load
+- **Status:** Confirmed with a clean repro (engines restarted fresh, no Redis-flush
+  confound). **Not a new bug** — per-stream ordering is a tracked future item under
+  the event-driven hardening roadmap (epics #891 "Event-Driven Production
+  Readiness" / #964; specifically `sequential_by` partition-keyed publishing #830
+  under epic #826). Recording here as a concrete ShopStream reproduction.
+- **Decisive evidence:** under a 20-user concurrent `CatalogueUser` burst, the
+  catalogue `ProductDetailProjector` received one product's events badly out of
+  order — `ProductActivated` (pos 2) at 22:38:59, `VariantAdded` (pos 1) at
+  22:39:01, `ProductCreated` (pos 0) at 22:39:02 (~3s after Activated). The update
+  events arrive before the create event that seeds the projection.
+- **Impact:** transient `ObjectNotFoundError` projector failures that **mostly
+  self-heal via subscription retry** (final `status=ok`); end-state projection
+  coverage was complete (product_detail 111 == product 111). A small number (6 of
+  ~110) exhausted 3 retries before the create event landed → routed to
+  `catalogue::product:dlq`. Those DLQ'd update events stay unapplied until DLQ
+  replay, so a few projections may be missing variant/activation data until then.
+- **Takeaway for ShopStream:** until `sequential_by`/ordered delivery lands,
+  cross-event-dependent projectors (`on_variant_added` doing `repo.get(...)`) are
+  not resilient to out-of-order delivery. Options: make such projectors upsert /
+  tolerate-missing, raise subscription `max_retries`, or adopt `sequential_by` once
+  available. DLQ routing itself works correctly (a 0.16 feature).
+
+### Original candidate notes (pre-confirmation)
+- **Observed:** During a 30-user `MixedWorkloadUser` load test, three catalogue
+  projectors (`ProductDetailProjector`, `ProductCardProjector`,
+  `SellerCatalogueProjector`) failed `on_variant_added` with
+  `ObjectNotFoundError: <Projection> object ... does not exist`, exhausted 3
+  retries, and routed to the `catalogue::product:dlq`. Same shape for the
+  payments `PaymentEventsSubscriber` → `payments::payment:dlq`.
+- **Root cause (partial):** `VariantAdded` (stream position `1.1`) is projected
+  before `ProductCreated` (`0.1`) has created the projection row. The outbox shows
+  BOTH events `published=True` to the internal (`default`) broker, so they reached
+  the stream — the failure is ordering/timing, not a publish gap. (Dual-write to
+  default+global all succeeded — the composite-index fix holds under load.)
+- **Open question:** is this (a) a Protean per-stream ordering violation under the
+  0.16 batched/concurrent outbox claim+publish, or (b) a ShopStream projector
+  resilience gap (projectors assume the create-event projection exists), or (c) an
+  artifact of a confound I introduced (flushed Redis mid-run with engines live)?
+  A **sequential** seed of the same product+variant pattern was clean; only the
+  concurrent load triggered it.
+- **What's solid:** no outbox `UniqueViolation`, no OCC errors, no pool exhaustion
+  (36/100 connections), healthy latencies (p95 52ms, p99 80ms). DLQ routing itself
+  works correctly.
+- **Next step before filing:** clean controlled repro — stop engines, truncate +
+  flush with engines DOWN, restart, drive a concurrent product+variant burst, and
+  check whether a single projector subscription receives `1.1` before `0.1`. If
+  out-of-order delivery is confirmed on one subscription → Protean bug; if not →
+  ShopStream projector-resilience improvement.
+
 <!-- Append new findings below as they come up. -->
