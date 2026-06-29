@@ -37,6 +37,13 @@ class TestRewardAccountBehavior:
         assert account.lifetime_points == 150  # lifetime is not reduced
         assert {e.entry_type for e in account.entries} == {"earn", "redeem"}
 
+    def test_ledger_entry_carries_explicit_reference_to_account(self):
+        account = RewardAccount.enroll(customer_id="cust-1")
+        account.earn_points(50)
+        entry = account.entries[0]
+        # The explicit Reference("RewardAccount") exposes a reward_account_id shadow.
+        assert entry.reward_account_id == account.id
+
     def test_issue_card_attaches_hasone_membership_card(self):
         account = RewardAccount.enroll(customer_id="cust-1")
         account.issue_card(card_number="LOY-0001")

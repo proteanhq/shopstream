@@ -17,7 +17,7 @@ from enum import Enum
 
 from protean import invariant
 from protean.exceptions import ValidationError
-from protean.fields import Date, DateTime, HasMany, HasOne, Integer, String
+from protean.fields import Date, DateTime, HasMany, HasOne, Integer, Reference, String
 from protean.fields.validators import RegexValidator
 
 from loyalty.domain import loyalty
@@ -90,8 +90,13 @@ class MembershipCard:
 
 @loyalty.entity(part_of="RewardAccount")
 class PointsLedgerEntry:
-    """An append-only points movement — a 1:N (HasMany) child of the account."""
+    """An append-only points movement — a 1:N (HasMany) child of the account.
 
+    Declares the parent link explicitly via `Reference` (rather than relying on the
+    implicit reference HasMany would auto-create) to exercise the Reference field.
+    """
+
+    reward_account = Reference("RewardAccount")
     entry_type = String(
         choices=["earn", "redeem", "transfer_in", "transfer_out", "adjust"],
         required=True,
