@@ -4,6 +4,7 @@ Verifies state is reconstructed from the event stream and that fact_events=True 
 complete-state fact event on the ...-fact-<id> stream after each persist.
 """
 
+import pytest
 from protean import current_domain
 
 from loyalty.campaign.campaign import PromoCampaign
@@ -37,6 +38,35 @@ class TestPromoCampaignEventSourcing:
         assert data["status"] == "active"
         assert data["discount_type"] == "percentage"
         assert data["discount_value"] == 10
+
+
+class TestPromoCampaignSnapshots:
+    """Event-sourcing snapshots (snapshot_threshold=5 in loyalty domain.toml)."""
+
+    def test_create_snapshot_and_reload_preserves_state(self):
+        campaign = PromoCampaign.launch("SNAP1", "Snapshot Sale", "percentage", 10)
+        campaign.activate()
+        campaign.pause(reason="budget")
+        campaign.activate()
+        current_domain.repository_for(PromoCampaign).add(campaign)
+
+        assert current_domain.create_snapshot(PromoCampaign, campaign.id) is True
+
+        loaded = current_domain.repository_for(PromoCampaign).get(campaign.id)
+        assert loaded.status == "active"
+        assert loaded.campaign_code == "SNAP1"
+
+    @pytest.mark.xfail(
+        strict=True,
+        reason="proteanhq/protean#1028: create_snapshots() mistakes -fact- streams for instances when fact_events=True",
+    )
+    def test_create_snapshots_for_all_instances(self):
+        for i in range(2):
+            campaign = PromoCampaign.launch(f"BULK{i}", "Bulk", "fixed", 5)
+            current_domain.repository_for(PromoCampaign).add(campaign)
+
+        count = current_domain.create_snapshots(PromoCampaign)
+        assert count >= 2
 
 
 class TestCampaignLaunchedUpcastingOnReplay:

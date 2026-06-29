@@ -7,6 +7,10 @@ event_processing = "async"
 command_processing = "sync"
 message_processing = "sync"
 
+# Event-sourcing snapshots: after this many events on a stream, reconstruction can
+# fold from a snapshot instead of replaying the full history (PromoCampaign).
+snapshot_threshold = 5
+
 # Engine subscriptions use Redis Streams (outbox → broker → projectors).
 [server]
 default_subscription_type = "stream"
