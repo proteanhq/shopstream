@@ -28,10 +28,9 @@ _CODE_ALPHABET = string.ascii_uppercase + string.digits
 def generate_member_code(length=8):
     """Generate a valid member code (uppercase alphanumeric, no 3-in-a-row repeat).
 
-    Codes are generated rather than left optional because Protean 0.16 runs per-field
-    validators against ``None`` for optional fields (proteanhq/protean#1025), which would
-    spuriously reject an unset validated field. Generating a valid code keeps the field
-    ``required`` and always non-empty.
+    Every account is assigned its own member code, so ``member_code`` is required and
+    always generated when not supplied. (The optional, who-referred-me ``referral_code``
+    field exercises the optional-field + validators path.)
     """
     while True:
         code = "".join(secrets.choice(_CODE_ALPHABET) for _ in range(length))
@@ -128,6 +127,17 @@ class RewardAccount(Auditable):
             NoTripleRepeatValidator(),
         ],
     )
+    # Optional validated field — exercises validators on an optional field (validators are
+    # skipped when the value is None; proteanhq/protean#1025, fixed on main).
+    referral_code = String(
+        max_length=12,
+        validators=[
+            RegexValidator(
+                regex=r"^[A-Z0-9]{6,12}$",
+                message="Referral code must be 6-12 uppercase letters/digits",
+            )
+        ],
+    )
     card = HasOne("MembershipCard")
     entries = HasMany("PointsLedgerEntry")
 
@@ -145,12 +155,13 @@ class RewardAccount(Auditable):
             raise ValidationError({"_account": ["A closed reward account cannot be modified"]})
 
     @classmethod
-    def enroll(cls, customer_id, member_code=None):
+    def enroll(cls, customer_id, member_code=None, referral_code=None):
         from loyalty.reward.events import RewardAccountEnrolled
 
         account = cls(
             customer_id=customer_id,
             member_code=member_code or generate_member_code(),
+            referral_code=referral_code,
         )
         account.raise_(
             RewardAccountEnrolled(

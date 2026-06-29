@@ -97,3 +97,19 @@ class TestMemberCodeValidators:
         # Passes the regex (uppercase alnum) but trips the custom NoTripleRepeat rule.
         with pytest.raises(ValidationError, match="3 or more times"):
             RewardAccount.enroll(customer_id="cust-1", member_code="AAAB12")
+
+
+class TestOptionalReferralCode:
+    """The optional referral_code carries a validator that must be skipped when unset."""
+
+    def test_omitted_referral_code_is_accepted(self):
+        account = RewardAccount.enroll(customer_id="cust-1")
+        assert account.referral_code is None
+
+    def test_valid_referral_code_is_accepted(self):
+        account = RewardAccount.enroll(customer_id="cust-1", referral_code="FRIEND7")
+        assert account.referral_code == "FRIEND7"
+
+    def test_invalid_referral_code_is_rejected(self):
+        with pytest.raises(ValidationError):
+            RewardAccount.enroll(customer_id="cust-1", referral_code="friend7")

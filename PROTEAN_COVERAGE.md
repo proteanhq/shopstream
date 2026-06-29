@@ -22,7 +22,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `@event` fact events | ✅ | loyalty PromoCampaign |
 | `@event(published=True)` | ✅ | cross-domain bus events |
 | in-domain `@event_handler` | ✅ | inventory `EventAuditHandler` (+ notifications) |
-| `@handle("$any")` wildcard | ⛔ | inventory `EventAuditHandler` — works async/direct; sync skipped (**#1023**, xfail) |
+| `@handle("$any")` wildcard | ✅ | inventory `EventAuditHandler` (sync + direct dispatch; **#1023** fixed on main) |
 | `@projection` + `@projector` (DB) | ✅ | ~48; loyalty RewardAccountView |
 | `@projection(cache=...)` | ✅ | loyalty PointsLeaderboard (`cache="loyalty"`) — write via `cache_for().add()`, read via `view_for().get()` |
 | `@query` + `@query_handler` (`@read`) | ✅ | reviews/ordering/fulfillment/identity `*_queries.py` |
@@ -48,10 +48,10 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | non-Enum `choices` (list) | ✅ | loyalty tier, discount_type, entry_type |
 | `Auto(increment=True)` | 🚧 | works in memory, but the generated value is not reflected back onto the instance after `add` (stays `None`); contrived in loyalty — follow-up |
 | custom field validators (RegexValidator + custom class, composed) | ✅ | loyalty `member_code` |
+| optional field + `validators=` (skipped on `None`) | ✅ | loyalty `referral_code` (**#1025** fixed on main) |
 | `@invariant.post` | ✅ | widespread |
 | `@invariant.pre` | ✅ | loyalty RewardAccount (`closed_accounts_are_immutable`) |
 | `atomic_change` | ✅ | identity `add_address` |
-| optional field + `validators=` | ⛔ | blocked by **#1025** (validators run on `None`); worked around with required+generated |
 | portable `Index` on projections | ✅ | ordering/fulfillment/reviews (added in PR #8) |
 
 ## Event sourcing / messaging / persistence
@@ -60,7 +60,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 |---|---|---|
 | `@apply`, `from_events`, `_create_new`, `_version` | ✅ | Order/Payment/InventoryItem/PromoCampaign |
 | snapshots — `snapshot_threshold` + `create_snapshot` | ✅ | loyalty (`snapshot_threshold=5`) |
-| bulk `create_snapshots()` | ⛔ | broken for fact_events aggregates (**#1028**, xfail) |
+| bulk `create_snapshots()` | ⛔ | broken for fact_events aggregates (**#1028**, still OPEN, xfail) |
 | command `deadline` + `CommandExpiredError` | ✅ | payments (PR #8) |
 | handler `retries`/`backoff`/`retry_exceptions` + `transient_retry` | ✅ | payments (PR #8) |
 | `Q` / `F` / lookups (gte/in/…) | ✅ | loyalty `RewardAccountRepository` |
@@ -70,13 +70,15 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | multiple providers (sqlite/elasticsearch) | 🚧 | open question / follow-up |
 | DLQ deliberate exercise | 🚧 | open question / follow-up |
 
-## Protean bugs surfaced (filed; all milestone 0.16.1)
+## Protean bugs surfaced (filed; milestone 0.16.1)
 
-| Issue | Summary |
-|---|---|
-| [#1023](https://github.com/proteanhq/protean/issues/1023) | `@handle("$any")` event handlers silently skipped under `event_processing="sync"` (`handlers_for` ignores `$any`) |
-| [#1025](https://github.com/proteanhq/protean/issues/1025) | per-field `validators=` run against `None` on optional fields (AfterValidator omits empty-value short-circuit) |
-| [#1028](https://github.com/proteanhq/protean/issues/1028) | bulk `create_snapshots()` fails for `fact_events=True` aggregates (`-fact-` streams mistaken for instances) |
+This branch pins Protean to git `main`, which carries the #1023 and #1025 fixes.
+
+| Issue | Status | Summary |
+|---|---|---|
+| [#1023](https://github.com/proteanhq/protean/issues/1023) | ✅ fixed on main | `@handle("$any")` event handlers silently skipped under `event_processing="sync"` (`handlers_for` ignored `$any`) |
+| [#1025](https://github.com/proteanhq/protean/issues/1025) | ✅ fixed on main | per-field `validators=` ran against `None` on optional fields (AfterValidator omitted empty-value short-circuit) |
+| [#1028](https://github.com/proteanhq/protean/issues/1028) | ⛔ open | bulk `create_snapshots()` fails for `fact_events=True` aggregates (`-fact-` streams mistaken for instances); `test_create_snapshots_for_all_instances` is `xfail(strict)` until fixed |
 
 Minor DX note (not filed): `repository_for()` gives a confusing `provider=None` error for cache-backed
 projections — the working API is `cache_for().add()` / `view_for().get()`.

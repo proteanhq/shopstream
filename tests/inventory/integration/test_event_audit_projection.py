@@ -3,15 +3,12 @@
 Verifies that a single event handler with one wildcard handler method records an audit
 row for every kind of InventoryItem event, without a per-event-type method.
 
-Protean #1023: under event_processing="sync", the wildcard handler is silently skipped
-(EventStore.handlers_for ignores the "$any" key). So we verify the handler logic via
-direct dispatch (which works, like the async Engine path), and mark the
-sync-command-processing path xfail(strict) so it flips to a failure once #1023 is fixed.
+Covers both the direct-dispatch path and the sync-command-processing path (the latter was
+proteanhq/protean#1023, fixed on main: handlers_for now resolves "$any" handlers).
 """
 
 from datetime import UTC, datetime
 
-import pytest
 from protean import current_domain
 
 from inventory.projections.event_audit import EventAudit, EventAuditHandler
@@ -52,13 +49,9 @@ class TestEventAuditWildcardHandler:
         assert audits[0].qualified_type and "StockInitialized" in audits[0].qualified_type
         assert audits[0].recorded_at is not None
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="proteanhq/protean#1023: @handle('$any') skipped under sync dispatch",
-    )
     def test_audit_populated_through_sync_command_processing(self):
-        """Once #1023 is fixed, the wildcard handler fires during sync command processing
-        and every event from a command flow lands an audit row."""
+        """The wildcard handler fires during sync command processing and every event from
+        a command flow lands an audit row (proteanhq/protean#1023, fixed on main)."""
         item_id = current_domain.process(
             InitializeStock(
                 product_id="prod-001",
