@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:aa1adb93567c6f09ce594107615dbb5cd0df0b4395ed9e4d65b310fd7c03b2f4",
+  "checksum": "sha256:c61edfe44fe914d25ee02a0fce4c5e571dbadca6afb2e7e71f076ea370456270",
   "clusters": {
     "inventory.stock.stock.InventoryItem": {
       "aggregate": {
@@ -719,7 +719,28 @@
           "part_of": "inventory.stock.stock.InventoryItem"
         }
       },
-      "event_handlers": {},
+      "event_handlers": {
+        "inventory.projections.event_audit.EventAuditHandler": {
+          "description": "Records a uniform audit row for every InventoryItem event via the wildcard.",
+          "element_type": "EVENT_HANDLER",
+          "fqn": "inventory.projections.event_audit.EventAuditHandler",
+          "handlers": {
+            "$any": [
+              "on_any_event"
+            ]
+          },
+          "module": "inventory.projections.event_audit",
+          "name": "EventAuditHandler",
+          "part_of": "inventory.stock.stock.InventoryItem",
+          "source_stream": null,
+          "stream_category": "inventory::inventory_item",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
       "events": {
         "inventory.stock.events.DamagedStockWrittenOff": {
           "__type__": "Inventory.DamagedStockWrittenOff.v1",
@@ -2127,7 +2148,14 @@
       }
     ]
   },
-  "diagnostics": [],
+  "diagnostics": [
+    {
+      "code": "PROJECTION_WITHOUT_PROJECTOR",
+      "element": "inventory.projections.event_audit.EventAudit",
+      "level": "warning",
+      "message": "Projection `EventAudit` has no projector to populate it"
+    }
+  ],
   "domain": {
     "camel_case_name": "Inventory",
     "command_processing": "sync",
@@ -2198,9 +2226,12 @@
       "inventory.warehouse.events.ZoneAdded",
       "inventory.warehouse.events.ZoneRemoved"
     ],
-    "EVENT_HANDLER": [],
+    "EVENT_HANDLER": [
+      "inventory.projections.event_audit.EventAuditHandler"
+    ],
     "PROCESS_MANAGER": [],
     "PROJECTION": [
+      "inventory.projections.event_audit.EventAudit",
       "inventory.projections.inventory_level.InventoryLevel",
       "inventory.projections.inventory_valuation.InventoryValuation",
       "inventory.projections.low_stock_report.LowStockReport",
@@ -2268,9 +2299,77 @@
       }
     }
   },
-  "generated_at": "2026-06-29T22:03:33Z",
+  "generated_at": "2026-06-29T22:24:50Z",
   "ir_version": "0.1.0",
   "projections": {
+    "inventory.projections.event_audit.EventAudit": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "audit_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "causation_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "correlation_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "event_type": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "inventory_item_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "qualified_type": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "recorded_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "stream": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "inventory.projections.event_audit.EventAudit",
+        "identity_field": "audit_id",
+        "module": "inventory.projections.event_audit",
+        "name": "EventAudit",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "event_audit"
+        }
+      },
+      "projectors": {},
+      "queries": {},
+      "query_handlers": {}
+    },
     "inventory.projections.inventory_level.InventoryLevel": {
       "projection": {
         "element_type": "PROJECTION",
