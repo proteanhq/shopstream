@@ -1,6 +1,8 @@
 """Tests for payment state machine and amount guard invariants."""
 
-from protean.testing import assert_invalid, given
+import pytest
+from protean.exceptions import ValidationError
+from protean.testing import given
 
 from payments.payment.initiation import InitiatePayment
 from payments.payment.payment import MAX_PAYMENT_ATTEMPTS, Payment, PaymentStatus
@@ -133,10 +135,8 @@ class TestRecordProcessing:
         result = _succeed(result)
         # record_processing is an aggregate method, not a command.
         # We test via assert_invalid on the aggregate directly.
-        assert_invalid(
-            lambda: result.aggregate.record_processing(),
-            message="Invalid status transition",
-        )
+        with pytest.raises(ValidationError, match="Invalid status transition"):
+            result.aggregate.record_processing()
 
 
 class TestCompleteRefundGuards:

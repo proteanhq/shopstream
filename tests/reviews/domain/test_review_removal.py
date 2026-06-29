@@ -1,6 +1,7 @@
 """Tests for Review removal — only from published, event raising."""
 
-from protean.testing import assert_invalid
+import pytest
+from protean.exceptions import ValidationError
 
 from reviews.review.review import Review, ReviewStatus
 
@@ -45,16 +46,15 @@ class TestRemoveReview:
     def test_cannot_remove_pending_review(self):
         review = _make_review()
         review._events.clear()
-        assert_invalid(
-            lambda: review.remove(removed_by="Admin", reason="Policy"),
-            message="Invalid status transition",
-        )
+        with pytest.raises(ValidationError, match="Invalid status transition"):
+            review.remove(removed_by="Admin", reason="Policy")
 
     def test_cannot_remove_already_removed_review(self):
         review = _published_review()
         review.remove(removed_by="Admin", reason="First removal")
         review._events.clear()
-        assert_invalid(lambda: review.remove(removed_by="Admin", reason="Second removal"))
+        with pytest.raises(ValidationError):
+            review.remove(removed_by="Admin", reason="Second removal")
 
 
 class TestRemoveRaisesEvent:

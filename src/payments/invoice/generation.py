@@ -1,11 +1,11 @@
 """Invoice generation — command and handler."""
 
 from protean import handle
-from protean.fields import Dict, Float, Identifier, List
+from protean.fields import Float, Identifier, List, ValueObject
 from protean.utils.globals import current_domain
 
 from payments.domain import payments
-from payments.invoice.invoice import Invoice
+from payments.invoice.invoice import Invoice, InvoiceLineItemInput
 
 
 @payments.command(part_of="Invoice")
@@ -14,7 +14,9 @@ class GenerateInvoice:
 
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)
-    line_items = List(Dict(), required=True)
+    # Typed line items derived from the InvoiceLineItem entity via
+    # value_object_from_entity — no more untyped List(Dict()).
+    line_items = List(content_type=ValueObject(InvoiceLineItemInput), required=True)
     tax = Float(default=0.0)
 
 

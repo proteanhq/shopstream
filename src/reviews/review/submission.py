@@ -7,6 +7,7 @@ verified purchases.
 
 from protean.fields import Dict, Identifier, Integer, List, String, Text
 from protean.utils.globals import current_domain
+from protean.utils.logging import bind_event_context
 from protean.utils.mixins import handle
 
 from reviews.domain import reviews
@@ -63,6 +64,14 @@ class SubmitReviewHandler:
                 order_id = str(vps.items[0].order_id)
         except Exception:
             pass  # If projection not available, proceed unverified
+
+        # Enrich this handler's wide event (protean.access) with review
+        # dimensions for moderation/quality observability.
+        bind_event_context(
+            product_id=str(command.product_id),
+            rating=command.rating,
+            verified_purchase=verified,
+        )
 
         review = Review.submit(
             product_id=command.product_id,

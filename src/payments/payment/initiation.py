@@ -3,9 +3,12 @@
 Creates a new Payment aggregate and initiates a charge via the gateway.
 """
 
+from datetime import timedelta
+
 from protean import handle
 from protean.fields import Float, Identifier, String
 from protean.utils.globals import current_domain
+from protean.utils.logging import bind_event_context
 from protean.utils.processing import Priority, processing_priority
 
 from payments.domain import payments
@@ -26,10 +29,29 @@ class InitiatePayment:
     idempotency_key = String(required=True, max_length=255)
 
 
-@payments.command_handler(part_of=Payment)
+# A payment authorization has a validity window: a stale InitiatePayment that
+# sat queued past it (e.g. an abandoned checkout retried much later) must not
+# charge the customer. `timeout` declares that window — the command is rejected
+# with CommandExpiredError once `created_at + 15min` passes. `retries`/`backoff`
+# add transient-failure resilience when this handler runs on the async Engine.
+@payments.command_handler(
+    part_of=Payment,
+    timeout=timedelta(minutes=15),
+    retries=3,
+    backoff="exponential",
+)
 class InitiatePaymentHandler:
     @handle(InitiatePayment)
     def initiate_payment(self, command):
+        # Enrich this handler's wide event (protean.access) with business
+        # dimensions for revenue/fraud observability — these only the
+        # application knows, and they flow through to log aggregators.
+        bind_event_context(
+            order_id=str(command.order_id),
+            amount=command.amount,
+            currency=command.currency or "USD",
+            payment_method=command.payment_method_type,
+        )
         with processing_priority(Priority.CRITICAL):
             gateway = get_gateway()
 

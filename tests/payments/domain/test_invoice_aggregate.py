@@ -9,7 +9,7 @@ from payments.invoice.events import (
     InvoicePaid,
     InvoiceVoided,
 )
-from payments.invoice.invoice import Invoice, InvoiceStatus
+from payments.invoice.invoice import Invoice, InvoiceLineItemInput, InvoiceStatus
 
 
 def _make_invoice(**overrides):
@@ -17,8 +17,8 @@ def _make_invoice(**overrides):
         "order_id": "ord-001",
         "customer_id": "cust-001",
         "line_items_data": [
-            {"description": "Black T-Shirt (M)", "quantity": 2, "unit_price": 29.99},
-            {"description": "Blue Jeans (32)", "quantity": 1, "unit_price": 49.99},
+            InvoiceLineItemInput(description="Black T-Shirt (M)", quantity=2, unit_price=29.99),
+            InvoiceLineItemInput(description="Blue Jeans (32)", quantity=1, unit_price=49.99),
         ],
         "tax": 8.80,
     }

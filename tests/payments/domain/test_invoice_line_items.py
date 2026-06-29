@@ -18,13 +18,13 @@ class TestInvoiceLineItem:
 
     def test_total_calculated_in_aggregate(self):
         """Line item totals are calculated by the Invoice factory."""
-        from payments.invoice.invoice import Invoice
+        from payments.invoice.invoice import Invoice, InvoiceLineItemInput
 
         invoice = Invoice.create(
             order_id="ord-001",
             customer_id="cust-001",
             line_items_data=[
-                {"description": "Item A", "quantity": 3, "unit_price": 10.00},
+                InvoiceLineItemInput(description="Item A", quantity=3, unit_price=10.00),
             ],
         )
         assert len(invoice.line_items) == 1

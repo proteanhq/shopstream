@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:92a5d408b483bab5e105d7c23f49ffb4e2b90c0b824a32acbd3c67419025165d",
+  "checksum": "sha256:aa1adb93567c6f09ce594107615dbb5cd0df0b4395ed9e4d65b310fd7c03b2f4",
   "clusters": {
     "inventory.stock.stock.InventoryItem": {
       "aggregate": {
@@ -2268,7 +2268,7 @@
       }
     }
   },
-  "generated_at": "2026-03-25T21:35:23Z",
+  "generated_at": "2026-06-29T22:03:33Z",
   "ir_version": "0.1.0",
   "projections": {
     "inventory.projections.inventory_level.InventoryLevel": {

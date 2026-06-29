@@ -12,6 +12,11 @@ message_processing = "sync"
 [server]
 default_subscription_type = "stream"
 
+# Health-check HTTP server (Protean 0.16+). The engine binds 8080 by default;
+# assign a distinct port per domain so all eight engines run side by side locally.
+[server.health]
+port = 8085
+
 # ExpectedVersionError auto-retry: when concurrent writes cause version
 # conflicts on event-sourced aggregates, the handler automatically retries
 # with exponential backoff (re-reads aggregate at latest version each attempt).
@@ -20,6 +25,16 @@ enabled = true
 max_retries = 3
 base_delay_seconds = 0.05
 max_delay_seconds = 1.0
+
+# Transient-failure auto-retry (Protean 0.16+): when an async handler fails on a
+# transient infrastructure error (ConnectionError / TimeoutError / SendError) —
+# e.g. a momentary Redis or DB blip while a projector or cross-domain subscriber
+# runs on the Engine — it is retried before the error reaches the DLQ pipeline.
+# Each attempt runs in a fresh UnitOfWork. Distinct from version_retry (OCC).
+[server.transient_retry]
+enabled = true
+backoff = "exponential"
+max_retries = 3
 
 # Priority Lanes: Route low-priority events (migrations, bulk imports) to a
 # separate Redis Stream so production events are always processed first.

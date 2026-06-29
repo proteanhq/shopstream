@@ -1,6 +1,7 @@
 """Tests for Review voting — helpful/unhelpful votes, self-vote guard, duplicate guard."""
 
-from protean.testing import assert_invalid
+import pytest
+from protean.exceptions import ValidationError
 
 from reviews.review.review import Review, VoteType
 
@@ -79,10 +80,8 @@ class TestSelfVoteGuard:
     def test_cannot_vote_on_own_review(self):
         review = _make_review()
         review._events.clear()
-        assert_invalid(
-            lambda: review.vote(customer_id="cust-001", vote_type=VoteType.HELPFUL.value),
-            message="Cannot vote on your own review",
-        )
+        with pytest.raises(ValidationError, match="Cannot vote on your own review"):
+            review.vote(customer_id="cust-001", vote_type=VoteType.HELPFUL.value)
 
 
 class TestDuplicateVoteGuard:
@@ -92,10 +91,8 @@ class TestDuplicateVoteGuard:
         review.vote(customer_id="cust-002", vote_type=VoteType.HELPFUL.value)
         review._events.clear()
 
-        assert_invalid(
-            lambda: review.vote(customer_id="cust-002", vote_type=VoteType.UNHELPFUL.value),
-            message="already voted",
-        )
+        with pytest.raises(ValidationError, match="already voted"):
+            review.vote(customer_id="cust-002", vote_type=VoteType.UNHELPFUL.value)
 
     def test_cannot_vote_same_type_twice(self):
         review = _make_review()
@@ -103,7 +100,5 @@ class TestDuplicateVoteGuard:
         review.vote(customer_id="cust-002", vote_type=VoteType.HELPFUL.value)
         review._events.clear()
 
-        assert_invalid(
-            lambda: review.vote(customer_id="cust-002", vote_type=VoteType.HELPFUL.value),
-            message="already voted",
-        )
+        with pytest.raises(ValidationError, match="already voted"):
+            review.vote(customer_id="cust-002", vote_type=VoteType.HELPFUL.value)

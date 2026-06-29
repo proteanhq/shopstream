@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:413bab47dcc2e94a5ce3e504e60dde4e4b2176491e0b039519d82102ec53be46",
+  "checksum": "sha256:9b8d51c77bbb48ce8cb9f0a9705ac0ca11e790eda554fa120a85ba83a22021e9",
   "clusters": {
     "notifications.notification.notification.Notification": {
       "aggregate": {
@@ -135,9 +135,6 @@
             "default": "Pending",
             "kind": "status",
             "transitions": {
-              "Failed": [
-                "Pending"
-              ],
               "Pending": [
                 "Sent",
                 "Failed",
@@ -147,6 +144,9 @@
                 "Delivered",
                 "Failed",
                 "Bounced"
+              ],
+              "Failed": [
+                "Pending"
               ]
             },
             "type": "Status"
@@ -1355,7 +1355,7 @@
       }
     }
   },
-  "generated_at": "2026-03-25T21:35:26Z",
+  "generated_at": "2026-06-29T22:03:33Z",
   "ir_version": "0.1.0",
   "projections": {
     "notifications.projections.customer_notifications.CustomerNotifications": {

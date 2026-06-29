@@ -319,6 +319,31 @@ make loadtest-clean           # Truncate all data between runs
 - scalar-fastapi (API docs at /docs)
 - Ruff (lint/format), MyPy (types), pytest (testing)
 
+### Switching to Local Protean for Development
+
+When testing Protean changes locally, build the wheel manually and install it directly. Do NOT use `uv pip install -e` (hatchling copies files, creating stale snapshots) or `uv lock && uv sync` with `file://` (uv caches wheels by path, not content, so changes are ignored).
+
+**Initial setup (once):**
+```bash
+# No pyproject.toml changes needed
+cd /Users/subhashb/wspace/proteanhq/protean && uv build --wheel
+cd /Users/subhashb/wspace/proteanhq/shopstream && uv pip install --reinstall protean/dist/protean-*.whl
+```
+
+**After each Protean change:**
+```bash
+cd /Users/subhashb/wspace/proteanhq/protean && uv build --wheel
+cd /Users/subhashb/wspace/proteanhq/shopstream && uv pip install --reinstall /Users/subhashb/wspace/proteanhq/protean/dist/protean-0.15.0rc1-py3-none-any.whl
+```
+
+**Running servers:** Use `.venv/bin/protean` directly, NOT `uv run` (which triggers `uv sync` and overwrites the manual install with a stale cached version):
+```bash
+cd src && ../.venv/bin/protean observatory --domain ordering.domain ...
+```
+For the API server, `uv run uvicorn` is fine since it doesn't rebuild protean.
+
+**Reverting:** `uv lock && uv sync` restores the git-pinned version. Don't commit pyproject.toml or uv.lock changes.
+
 ## Git & PR Rules
 
 - Never merge PRs. Only create them. Leave reviewing, approving, and merging entirely to the user.

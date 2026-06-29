@@ -4,7 +4,7 @@ import pytest
 from protean.exceptions import ValidationError
 from pytest_bdd import given, parsers, then, when
 
-from payments.invoice.invoice import Invoice
+from payments.invoice.invoice import Invoice, InvoiceLineItemInput
 from payments.payment.events import (
     PaymentFailed,
     PaymentInitiated,
@@ -177,7 +177,7 @@ def _new_invoice():
         order_id="ord-001",
         customer_id="cust-001",
         line_items_data=[
-            {"description": "Widget", "quantity": 2, "unit_price": 25.00},
+            InvoiceLineItemInput(description="Widget", quantity=2, unit_price=25.00),
         ],
         tax=4.00,
     )

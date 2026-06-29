@@ -1,6 +1,7 @@
 """Tests for Review reporting — report reasons, self-report guard, count tracking."""
 
-from protean.testing import assert_invalid
+import pytest
+from protean.exceptions import ValidationError
 
 from reviews.review.review import ReportReason, Review
 
@@ -79,7 +80,5 @@ class TestSelfReportGuard:
     def test_cannot_report_own_review(self):
         review = _make_review()
         review._events.clear()
-        assert_invalid(
-            lambda: review.report(customer_id="cust-001", reason=ReportReason.SPAM.value),
-            message="Cannot report your own review",
-        )
+        with pytest.raises(ValidationError, match="Cannot report your own review"):
+            review.report(customer_id="cust-001", reason=ReportReason.SPAM.value)
