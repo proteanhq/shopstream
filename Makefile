@@ -40,16 +40,16 @@ test-memory: ## Run all tests with in-memory adapters (no Docker needed)
 	uv run pytest --protean-env memory
 
 test-memory-domain: ## Run domain tests with in-memory adapters
-	uv run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/ tests/reviews/domain/ tests/notifications/domain/ --protean-env memory
+	uv run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/ tests/reviews/domain/ tests/notifications/domain/ tests/loyalty/domain/ --protean-env memory
 
 test-memory-application: ## Run application tests with in-memory adapters
-	uv run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ tests/reviews/application/ tests/notifications/application/ --protean-env memory
+	uv run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ tests/reviews/application/ tests/notifications/application/ tests/loyalty/application/ --protean-env memory
 
 test-memory-integration: ## Run integration tests with in-memory adapters
 	uv run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/reviews/integration/ tests/notifications/integration/ tests/integration/ --protean-env memory
 
 test-memory-fast: ## Run fast memory tests (domain + application, excludes slow)
-	uv run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ tests/reviews/domain/ tests/reviews/application/ tests/notifications/domain/ tests/notifications/application/ -m "not slow" --protean-env memory
+	uv run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ tests/reviews/domain/ tests/reviews/application/ tests/notifications/domain/ tests/notifications/application/ tests/loyalty/domain/ tests/loyalty/application/ -m "not slow" --protean-env memory
 
 test-memory-cov: ## Run all memory tests with coverage report
 	uv run pytest --protean-env memory --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov=reviews --cov=notifications --cov-report=term-missing --cov-report=html --cov-report=xml
