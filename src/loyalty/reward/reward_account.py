@@ -146,16 +146,38 @@ class RewardAccount(Auditable):
 
     @classmethod
     def enroll(cls, customer_id, member_code=None):
-        return cls(
+        from loyalty.reward.events import RewardAccountEnrolled
+
+        account = cls(
             customer_id=customer_id,
             member_code=member_code or generate_member_code(),
         )
+        account.raise_(
+            RewardAccountEnrolled(
+                account_id=account.id,
+                customer_id=account.customer_id,
+                member_code=account.member_code,
+                tier=account.tier,
+                enrolled_at=datetime.now(UTC),
+            )
+        )
+        return account
 
     def issue_card(self, card_number):
+        from loyalty.reward.events import MembershipCardIssued
+
         if self.card is not None:
             raise ValidationError({"card": ["Account already has a membership card"]})
-        self.card = MembershipCard(card_number=card_number, issued_on=date.today())
+        issued_on = date.today()
+        self.card = MembershipCard(card_number=card_number, issued_on=issued_on)
         self.touch()
+        self.raise_(
+            MembershipCardIssued(
+                account_id=self.id,
+                card_number=card_number,
+                issued_on=issued_on.isoformat(),
+            )
+        )
 
     def _record_entry(self, entry_type, amount, reason=None):
         self.add_entries(
@@ -169,20 +191,45 @@ class RewardAccount(Auditable):
         )
 
     def earn_points(self, amount, reason="order"):
+        from loyalty.reward.events import PointsEarned
+
         if amount <= 0:
             raise ValidationError({"amount": ["Amount must be positive"]})
         self.points_balance += amount
         self.lifetime_points += amount
         self._record_entry("earn", amount, reason)
         self.touch()
+        self.raise_(
+            PointsEarned(
+                account_id=self.id,
+                amount=amount,
+                balance_after=self.points_balance,
+                reason=reason,
+                occurred_at=datetime.now(UTC),
+            )
+        )
 
     def redeem_points(self, amount, reason="redemption"):
+        from loyalty.reward.events import PointsRedeemed
+
         if amount <= 0:
             raise ValidationError({"amount": ["Amount must be positive"]})
         # Over-redemption is caught by the balance_never_negative post-invariant.
         self.points_balance -= amount
         self._record_entry("redeem", amount, reason)
         self.touch()
+        self.raise_(
+            PointsRedeemed(
+                account_id=self.id,
+                amount=amount,
+                balance_after=self.points_balance,
+                reason=reason,
+                occurred_at=datetime.now(UTC),
+            )
+        )
 
     def close(self):
+        from loyalty.reward.events import RewardAccountClosed
+
         self.status = AccountStatus.CLOSED.value
+        self.raise_(RewardAccountClosed(account_id=self.id, closed_at=datetime.now(UTC)))
