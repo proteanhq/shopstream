@@ -49,10 +49,30 @@ def async_dlq_config():
     stream_sub["retry_delay_seconds"] = 0  # no real sleeps — stay within the engine's test budget
     stream_sub["enable_dlq"] = True
 
+    # Point the external/global broker at the same Redis the default broker resolved to.
+    # The loyalty engine also opens the global broker (the cross-domain `broker="global"`
+    # subscribers use it). CI provides a single Redis and sets only REDIS_URL (the default
+    # broker); the global broker's REDIS_EXTERNAL_URL fallback points at a host CI doesn't run,
+    # and that connection failure cascades and breaks the engine. Redirecting global → default's
+    # working Redis keeps the engine healthy. (Harmless locally, where they already coincide.)
+    default_uri = loyalty.brokers["default"].conn_info["URI"]
+    global_broker = loyalty.brokers["global"]
+    saved_global_uri = global_broker.conn_info.get("URI")
+    saved_global_redis = global_broker.redis_instance
+    saved_cfg_global_uri = cfg.get("brokers", {}).get("global", {}).get("URI")
+    global_broker.conn_info["URI"] = default_uri
+    global_broker.redis_instance = redis.Redis.from_url(default_uri)
+    if cfg.get("brokers", {}).get("global"):
+        cfg["brokers"]["global"]["URI"] = default_uri
+
     yield
 
     cfg["event_processing"] = saved_event_processing
     server["stream_subscription"] = saved_stream_sub
+    global_broker.conn_info["URI"] = saved_global_uri
+    global_broker.redis_instance = saved_global_redis
+    if cfg.get("brokers", {}).get("global") and saved_cfg_global_uri is not None:
+        cfg["brokers"]["global"]["URI"] = saved_cfg_global_uri
 
 
 @pytest.mark.slow
