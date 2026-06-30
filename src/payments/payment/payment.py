@@ -308,6 +308,7 @@ class Payment:
                 payment_id=str(self.id),
                 refund_id=refund_id,
                 order_id=str(self.order_id),
+                customer_id=str(self.customer_id),
                 amount=refund.amount,
                 gateway_refund_id=gateway_refund_id,
                 completed_at=now,

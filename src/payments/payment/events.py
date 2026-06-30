@@ -92,6 +92,7 @@ class RefundCompleted:
     payment_id = Identifier(required=True)
     refund_id = Identifier(required=True)
     order_id = Identifier(required=True)
+    customer_id = Identifier(required=True)
     amount = Float(required=True)
     gateway_refund_id = String(required=True)
     completed_at = DateTime(required=True)

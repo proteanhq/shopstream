@@ -66,6 +66,7 @@ graph TB
     ordering -. "OrderDelivered" .-> loyalty_ctx
     identity -. "CustomerRegistered" .-> loyalty_ctx
     reviews_ctx -. "ReviewApproved" .-> loyalty_ctx
+    payments -. "RefundCompleted" .-> loyalty_ctx
     identity -. "CustomerRegistered" .-> notifications_ctx
     ordering -. "Order events" .-> notifications_ctx
     payments -. "Payment events" .-> notifications_ctx
@@ -204,9 +205,9 @@ into a `Notification` (rendered from a per-type template, filtered by customer p
 enabled channels). Notifications never queries any upstream context -- it only reacts to events
 and owns delivery state.
 
-### Identity, Ordering & Reviews &rarr; Loyalty (and Loyalty &rarr; Notifications)
+### Identity, Ordering, Reviews & Payments &rarr; Loyalty (and Loyalty &rarr; Notifications)
 
-The Loyalty context is a downstream consumer of three streams (demonstrating both subscriber
+The Loyalty context is a downstream consumer of four streams (demonstrating both subscriber
 styles) **and** an upstream producer for Notifications:
 
 - **`identity::customer` / `CustomerRegistered`** &rarr; auto-enrol a reward account by
@@ -215,6 +216,8 @@ styles) **and** an upstream producer for Notifications:
 - **`ordering::order` / `OrderDelivered`** &rarr; award a delivery bonus by loading the
   `RewardAccount` and calling a business method directly (subscriber **pattern B**).
 - **`reviews::review` / `ReviewApproved`** &rarr; award a review bonus (subscriber **pattern B**).
+- **`payments::payment` / `RefundCompleted`** &rarr; claw back points (clamped to the balance)
+  when an order is refunded (subscriber **pattern B**).
 - **Producer:** Loyalty marks `PointsEarned` / `PointsRedeemed` / `TierUpgraded` /
   `RewardAccountEnrolled` as `published=True`; Notifications' `LoyaltyEventsSubscriber` turns
   tier upgrades and redemptions into customer notifications.

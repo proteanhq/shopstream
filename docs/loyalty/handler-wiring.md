@@ -62,6 +62,7 @@ flowchart TD
     subgraph subscribers["Subscribers"]
         sub_loyalty_reward_identity_subscriber_CustomerRegisteredSubscriber[CustomerRegisteredSubscriber\nstream: identity::customer]
         sub_loyalty_reward_ordering_subscriber_OrderDeliveredSubscriber[OrderDeliveredSubscriber\nstream: ordering::order]
+        sub_loyalty_reward_payments_subscriber_PaymentRefundedSubscriber[PaymentRefundedSubscriber\nstream: payments::payment]
         sub_loyalty_reward_reviews_subscriber_ReviewApprovedSubscriber[ReviewApprovedSubscriber\nstream: reviews::review]
     end
 ```

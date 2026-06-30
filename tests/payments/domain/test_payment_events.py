@@ -94,9 +94,11 @@ class TestRefundCompleted:
             payment_id="pay-001",
             refund_id="ref-001",
             order_id="ord-001",
+            customer_id="cust-001",
             amount=30.00,
             gateway_refund_id="gw-ref-001",
             completed_at=datetime.now(UTC),
         )
         assert event.gateway_refund_id == "gw-ref-001"
         assert event.amount == 30.00
+        assert event.customer_id == "cust-001"

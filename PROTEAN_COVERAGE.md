@@ -28,7 +28,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `@query` + `@query_handler` (`@read`) | ✅ | reviews/ordering/fulfillment/identity + loyalty `*_queries.py` (incl. `campaign_catalog_queries.py` filtered/ordered list) |
 | cross-aggregate read in a write handler | ✅ | loyalty `PointsHandler.earn` reads `CampaignCatalog` (active points-multiplier) via `campaign/multiplier.py` |
 | `@subscriber` pattern A (→ command) | ✅ | inventory/ordering/payments/… ACL subscribers |
-| `@subscriber` pattern B (direct mutation) | ✅ | loyalty `OrderDeliveredSubscriber`, `ReviewApprovedSubscriber` (review bonus) |
+| `@subscriber` pattern B (direct mutation) | ✅ | loyalty `OrderDeliveredSubscriber`, `ReviewApprovedSubscriber` (review bonus), `PaymentRefundedSubscriber` (refund clawback) |
 | `@repository` (custom, Q/F/lookups) | ✅ | loyalty `RewardAccountRepository` |
 | `@domain_service` (cross-aggregate, pre/post) | ✅ | loyalty `TransferPoints` |
 | `@application_service` + `@use_case` | ✅ | loyalty `LoyaltyService.transfer_points` |

@@ -198,13 +198,18 @@ direct aggregate mutation). ACL: raw dict payload, type filtering, no shared eve
 stream="reviews::review")`. On `ReviewApproved`, awards a review bonus (`REVIEW_BONUS_POINTS`)
 by loading the customer's `RewardAccount` and calling `earn_points` (subscriber **pattern B**).
 
+### Inbound: Payments → Loyalty
+**File:** `reward/payments_subscriber.py` — `@loyalty.subscriber(broker="global",
+stream="payments::payment")`. On `RefundCompleted`, claws back points (1 per unit refunded) via
+`RewardAccount.claw_back_points`, which is **clamped to the balance** (a refund never drives the
+account negative) and records an `adjust` ledger entry (subscriber **pattern B**). Payments'
+`RefundCompleted` now carries `customer_id`, so the reward account resolves without an extra lookup.
+
 ### Outbound: Loyalty → Notifications (producer)
 Loyalty's `published=True` events (`TierUpgraded`, `PointsRedeemed`, …) flow to the external
 bus; Notifications' `LoyaltyEventsSubscriber` (`notifications/notification/loyalty_subscriber.py`)
 turns them into `TierUpgraded` / `PointsRedeemed` customer notifications. Loyalty is thus both a
-consumer (above) and a **producer** of cross-domain events. A Payments→Loyalty refund clawback is
-a follow-up: `RefundCompleted` carries `order_id` but no `customer_id`, so the reward account
-can't be resolved without an extra lookup.
+**consumer** (Identity / Ordering / Reviews / Payments) and a **producer** of cross-domain events.
 
 ## Projections
 
