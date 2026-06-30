@@ -259,11 +259,9 @@ reads through query handlers.
 | POST | `/loyalty/redemptions` | `RequestRedemption` (starts the `RedemptionSaga`) |
 | GET | `/loyalty/redemptions/{id}` | `GetRedemption` → RedemptionView (DB) |
 
-> **Known limitation:** `LaunchCampaign` accepts `starts_on`/`ends_on` (`Date`) but a `Date`
-> field on a command currently breaks Protean's message checksum
-> ([proteanhq/protean#1046](https://github.com/proteanhq/protean/issues/1046), milestone 0.16.1).
-> The campaign date-window path is covered by an `xfail` test that flips to passing once the fix
-> lands; status-based campaign activation (the multiplier driver) is unaffected.
+`LaunchCampaign` accepts `starts_on`/`ends_on` (`Date`) and the multiplier honours the active
+window — `Date` fields flow through a command end-to-end
+([proteanhq/protean#1046](https://github.com/proteanhq/protean/issues/1046), fixed on main).
 
 ## Tests
 

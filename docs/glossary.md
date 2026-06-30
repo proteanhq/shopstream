@@ -831,6 +831,38 @@ The reward account lifecycle: Active &harr; Frozen, and either &rarr; Closed (te
 
 &rarr; [`AccountStatus`](../src/loyalty/reward/reward_account.py) (Enum)
 
+### Tier Upgrade
+
+A promotion to a higher tier, triggered when **lifetime** points cross a threshold while
+earning (silver 1,000 / gold 5,000 / platinum 20,000). Tiers never downgrade. The resulting
+`TierUpgraded` event is published so Notifications can congratulate the customer.
+
+&rarr; [`TierUpgraded`](../src/loyalty/reward/events.py) (Event, published)
+
+### Redemption
+
+A request to spend points on a reward (a voucher). A small state machine -- requested
+&rarr; points_reserved &rarr; voucher_issued &rarr; completed, or a compensated branch when the
+voucher cannot be issued. Records what happened at each step; the saga owns the decisions.
+
+&rarr; [`Redemption`](../src/loyalty/redemption/redemption.py) (Aggregate)
+
+### Redemption Saga
+
+The process manager that orchestrates a redemption across two aggregates: it reserves points on
+the `RewardAccount`, asks the voucher port to issue a voucher, and either completes the
+redemption or **compensates** by refunding the reserved points. Exercises a dict `correlate`,
+a compensation path, and `end`.
+
+&rarr; [`RedemptionSaga`](../src/loyalty/redemption/saga.py) (Process Manager)
+
+### Voucher
+
+The reward issued for a completed redemption, produced by a voucher port that can fail (a
+failure drives the saga's compensation path).
+
+&rarr; [`issue_voucher_code`](../src/loyalty/redemption/voucher.py) (Port)
+
 ---
 
 ## Cross-Context Terms

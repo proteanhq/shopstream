@@ -47,7 +47,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | String/Text/Integer/Float/Boolean/DateTime/Identifier/List/Dict/ValueObject | ✅ | widespread |
 | `Status` field w/ transitions | ✅ | Customer, Order, … |
 | `Date` | ✅ | identity Profile, loyalty RewardAccount/PromoCampaign |
-| `Date` on a **command/event** payload | ⛔ | loyalty `LaunchCampaign.starts_on/ends_on` — breaks checksum (**#1046**); xfail until fixed |
+| `Date` on a **command/event** payload | ✅ | loyalty `LaunchCampaign.starts_on/ends_on` — campaign date windows flow through end-to-end (**#1046** fixed on main) |
 | non-Enum `choices` (list) | ✅ | loyalty tier, discount_type, entry_type |
 | `Auto(increment=True)` | 🚧 | works in memory, but the generated value is not reflected back onto the instance after `add` (stays `None`); contrived in loyalty — follow-up |
 | custom field validators (RegexValidator + custom class, composed) | ✅ | loyalty `member_code` |
@@ -75,8 +75,9 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 
 ## Protean bugs surfaced (filed; milestone 0.16.1)
 
-This branch pins Protean to git `main`. #1023/#1025/#1028/#1034 are fixed there; #1046 is
-filed and awaiting a fix (the one ⛔ row above is xfail'd until it lands).
+This branch pins Protean to git `main`. #1023/#1025/#1028/#1034/#1046 are fixed there; #1048
+(milestone 0.17.0) is awaiting a fix — the loyalty `RedemptionSaga` completion tests are `xfail`'d
+against it (the saga runs to completion under the engine; only synchronous cascade is affected).
 
 | Issue | Status | Summary |
 |---|---|---|
@@ -84,7 +85,7 @@ filed and awaiting a fix (the one ⛔ row above is xfail'd until it lands).
 | [#1025](https://github.com/proteanhq/protean/issues/1025) | ✅ fixed on main | per-field `validators=` ran against `None` on optional fields (AfterValidator omitted empty-value short-circuit) |
 | [#1028](https://github.com/proteanhq/protean/issues/1028) | ✅ fixed on main | bulk `create_snapshots()` failed for `fact_events=True` aggregates (`-fact-` streams mistaken for instances) |
 | [#1034](https://github.com/proteanhq/protean/issues/1034) | ✅ fixed on main | cache-backed projection broke SQLAlchemy DB setup (`_create_database_artifacts` didn't skip cache projections); loyalty now runs in the Postgres CI job too |
-| [#1046](https://github.com/proteanhq/protean/issues/1046) | 🐞 filed (0.16.1) | a `Date` field on a command/event breaks the message checksum (`ResolvedField.as_dict` has no `date` branch → `json.dumps` raises); blocks campaign date windows (`xfail`) |
+| [#1046](https://github.com/proteanhq/protean/issues/1046) | ✅ fixed on main | a `Date` field on a command/event broke the message checksum (`ResolvedField.as_dict` had no `date` branch → `json.dumps` raised); campaign date windows now work end-to-end |
 | [#1048](https://github.com/proteanhq/protean/issues/1048) | 🐞 filed (0.17.0) | multi-step process managers don't cascade under `event_processing="sync"` — re-entrant dispatch runs the next step before the start transition is persisted, so the PM can't load its own in-flight instance; loyalty `RedemptionSaga` completion tests (`xfail`) |
 
 Minor DX note (not filed): `repository_for()` gives a confusing `provider=None` error for cache-backed

@@ -5,6 +5,7 @@ Each generator produces payloads that pass the domain's validation rules
 names expected by the API's Pydantic request schemas.
 """
 
+import datetime
 import random
 import uuid
 
@@ -459,12 +460,15 @@ def campaign_code() -> str:
 def campaign_data() -> dict:
     """Generate a LaunchCampaignRequest payload (a points_multiplier campaign).
 
-    Omits starts_on/ends_on — a Date field on a command currently breaks Protean's
-    message checksum (proteanhq/protean#1046).
+    Includes a starts_on/ends_on date window — exercises Date fields flowing through a
+    command end-to-end (proteanhq/protean#1046, fixed on main).
     """
+    today = datetime.date.today()
     return {
         "campaign_code": campaign_code(),
         "name": f"{fake.word().title()} Bonus",
         "discount_type": "points_multiplier",
         "discount_value": random.choice([2, 3]),
+        "starts_on": today.isoformat(),
+        "ends_on": (today + datetime.timedelta(days=30)).isoformat(),
     }

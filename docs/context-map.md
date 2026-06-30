@@ -48,7 +48,7 @@ graph TB
         fulfillment_ctx["<b>Fulfillment</b><br/>Picking, packing, shipping,<br/>tracking, delivery<br/><i>1 aggregate &middot; 11 events</i>"]
         reviews_ctx["<b>Reviews</b><br/>Ratings, moderation, voting,<br/>seller replies<br/><i>1 aggregate &middot; 8 events</i>"]
         notifications_ctx["<b>Notifications</b><br/>Multi-channel delivery,<br/>preferences (event hub)<br/><i>2 aggregates &middot; 13 events</i>"]
-        loyalty_ctx["<b>Loyalty</b><br/>Reward accounts, points,<br/>promo campaigns<br/><i>2 aggregates &middot; 9 events</i>"]
+        loyalty_ctx["<b>Loyalty</b><br/>Reward accounts, points, tiers,<br/>promo campaigns, redemptions (saga)<br/><i>3 aggregates &middot; 16 events</i>"]
     end
 
     ordering -- "customer_id" --> identity
@@ -65,11 +65,13 @@ graph TB
     ordering -. "OrderDelivered" .-> reviews_ctx
     ordering -. "OrderDelivered" .-> loyalty_ctx
     identity -. "CustomerRegistered" .-> loyalty_ctx
+    reviews_ctx -. "ReviewApproved" .-> loyalty_ctx
     identity -. "CustomerRegistered" .-> notifications_ctx
     ordering -. "Order events" .-> notifications_ctx
     payments -. "Payment events" .-> notifications_ctx
     inventory -. "LowStockDetected" .-> notifications_ctx
     reviews_ctx -. "Review events" .-> notifications_ctx
+    loyalty_ctx -. "Loyalty events" .-> notifications_ctx
 
     style identity fill:#4a90d9,color:#fff,stroke:#2a6cb0
     style catalogue fill:#7bc96f,color:#fff,stroke:#4a9e3f
@@ -202,20 +204,24 @@ into a `Notification` (rendered from a per-type template, filtered by customer p
 enabled channels). Notifications never queries any upstream context -- it only reacts to events
 and owns delivery state.
 
-### Identity & Ordering &rarr; Loyalty
+### Identity, Ordering & Reviews &rarr; Loyalty (and Loyalty &rarr; Notifications)
 
-The Loyalty context is a downstream consumer of two streams, and demonstrates both subscriber
-styles:
+The Loyalty context is a downstream consumer of three streams (demonstrating both subscriber
+styles) **and** an upstream producer for Notifications:
 
 - **`identity::customer` / `CustomerRegistered`** &rarr; auto-enrol a reward account by
-  dispatching `EnrollRewardAccount` (subscriber **pattern A**, idempotent). This is how every
-  customer gets an account through the normal event flow -- Loyalty has no enrolment endpoint.
+  dispatching `EnrollRewardAccount` (subscriber **pattern A**, idempotent). Every customer gets
+  an account through the normal event flow, in addition to the `POST /loyalty/accounts` endpoint.
 - **`ordering::order` / `OrderDelivered`** &rarr; award a delivery bonus by loading the
   `RewardAccount` and calling a business method directly (subscriber **pattern B**).
+- **`reviews::review` / `ReviewApproved`** &rarr; award a review bonus (subscriber **pattern B**).
+- **Producer:** Loyalty marks `PointsEarned` / `PointsRedeemed` / `TierUpgraded` /
+  `RewardAccountEnrolled` as `published=True`; Notifications' `LoyaltyEventsSubscriber` turns
+  tier upgrades and redemptions into customer notifications.
 
-`customer_id` is an opaque reference; Loyalty never queries Identity or Ordering. Points earned
-through normal shopping, redemptions, and member-to-member transfers are internal to the
-Loyalty context.
+`customer_id` is an opaque reference; Loyalty never queries another context. Points earned
+through normal shopping, redemptions (orchestrated by the `RedemptionSaga`), and member-to-member
+transfers are internal to the Loyalty context.
 
 ## Communication Patterns
 

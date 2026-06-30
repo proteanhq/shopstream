@@ -115,12 +115,6 @@ class TestPointsMultiplier:
         self._earn(account_id, 100)
         assert self._balance(account_id) == 100
 
-    @pytest.mark.xfail(
-        raises=TypeError,
-        strict=True,
-        reason="proteanhq/protean#1046 — Date field on a command breaks checksum "
-        "(ResolvedField.as_dict has no `date` branch). Flip to passing once fixed.",
-    )
     def test_expired_window_does_not_boost(self):
         account_id = self._enroll()
         yesterday = date.today() - timedelta(days=1)
@@ -135,3 +129,18 @@ class TestPointsMultiplier:
 
         self._earn(account_id, 100)
         assert self._balance(account_id) == 100
+
+    def test_current_window_boosts(self):
+        account_id = self._enroll()
+        today = date.today()
+        cid = _launch(
+            code="NOW",
+            discount_type="points_multiplier",
+            discount_value=4,
+            starts_on=today - timedelta(days=1),
+            ends_on=today + timedelta(days=1),
+        )
+        current_domain.process(ActivateCampaign(campaign_id=cid), asynchronous=False)
+
+        self._earn(account_id, 100)
+        assert self._balance(account_id) == 400
