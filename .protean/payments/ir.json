@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:194dc0b8def06215f42c6863a665922ffc2605889aaad47ef535de0a30692a6b",
+  "checksum": "sha256:473a6ec492be4a4f40658e43290502420376a75f5d1298c40eeeed9afdd2e958",
   "clusters": {
     "payments.invoice.invoice.Invoice": {
       "aggregate": {
@@ -509,6 +509,12 @@
             "default": "Pending",
             "kind": "status",
             "transitions": {
+              "Failed": [
+                "Pending"
+              ],
+              "Partially_Refunded": [
+                "Refunded"
+              ],
               "Pending": [
                 "Processing",
                 "Succeeded",
@@ -518,15 +524,9 @@
                 "Succeeded",
                 "Failed"
               ],
-              "Failed": [
-                "Pending"
-              ],
               "Succeeded": [
                 "Refunded",
                 "Partially_Refunded"
-              ],
-              "Partially_Refunded": [
-                "Refunded"
               ]
             },
             "type": "Status"
@@ -1226,6 +1226,12 @@
               "required": true,
               "type": "DateTime"
             },
+            "customer_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
             "gateway_refund_id": {
               "kind": "standard",
               "max_length": 255,
@@ -1526,6 +1532,12 @@
             "required": true,
             "type": "DateTime"
           },
+          "customer_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
           "gateway_refund_id": {
             "kind": "standard",
             "max_length": 255,
@@ -1661,7 +1673,7 @@
       }
     }
   },
-  "generated_at": "2026-06-29T22:03:33Z",
+  "generated_at": "2026-06-30T21:05:49Z",
   "ir_version": "0.1.0",
   "projections": {
     "payments.projections.customer_payments.CustomerPayment": {

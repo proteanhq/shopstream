@@ -102,6 +102,8 @@ class TestCompleteRefund:
         assert len(result.events) == 1
         assert RefundCompleted in result.events
         assert result.events[RefundCompleted].amount == 50.00
+        # customer_id is carried so downstream contexts (Loyalty clawback, Notifications) can react.
+        assert result.events[RefundCompleted].customer_id == "cust-001"
 
     def test_partial_refund_sets_partially_refunded(self):
         result, payment_id = _make_succeeded()

@@ -71,7 +71,7 @@
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
 | customer_id | Identifier | Yes | min_length=1 |
-| line_items | List[dict] | Yes | — |
+| line_items | List[InvoiceLineItemInput] | Yes | — |
 | order_id | Identifier | Yes | min_length=1 |
 | tax | Float | No | — |
 
@@ -181,6 +181,7 @@
 |-------|------|----------|-------------|
 | amount | Float | Yes | — |
 | completed_at | DateTime | Yes | — |
+| customer_id | Identifier | Yes | min_length=1 |
 | gateway_refund_id | String | Yes | max_length=255, min_length=1 |
 | order_id | Identifier | Yes | min_length=1 |
 | payment_id | Identifier | Yes | min_length=1 |

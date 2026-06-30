@@ -280,6 +280,36 @@ class RewardAccount(Auditable):
             )
         )
 
+    def claw_back_points(self, amount, reason="refund_clawback"):
+        """Reverse points after a refund — deduct up to the available balance.
+
+        Unlike redemption, a clawback is **clamped** to the current balance (it never drives the
+        balance negative or raises): a refunded order should not push an account into debt. Records
+        an ``adjust`` ledger entry (the audit/adjustment movement type) and reuses ``PointsRedeemed``
+        so downstream consumers treat it like any other deduction. A no-op when there is nothing to
+        claw back, which makes at-least-once redelivery safe-ish.
+        """
+        from loyalty.reward.events import PointsRedeemed
+
+        if amount <= 0:
+            return
+        clawed = min(amount, self.points_balance)
+        if clawed == 0:
+            return
+        self.points_balance -= clawed
+        self._record_entry("adjust", clawed, reason)
+        self.touch()
+        self.raise_(
+            PointsRedeemed(
+                account_id=self.id,
+                customer_id=self.customer_id,
+                amount=clawed,
+                balance_after=self.points_balance,
+                reason=reason,
+                occurred_at=datetime.now(UTC),
+            )
+        )
+
     def close(self):
         from loyalty.reward.events import RewardAccountClosed
 

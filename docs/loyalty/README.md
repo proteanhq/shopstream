@@ -198,24 +198,24 @@ database provider.
 | `CustomerRegistered` | Loyalty | Identity raises `CustomerRegistered`; Loyalty's `CustomerRegisteredSubscriber` consumes the `identity::customer` stream and auto-enrols a reward account (idempotent) by dispatching `EnrollRewardAccount` — **pattern A** |
 | `OrderDelivered` | Loyalty | Ordering raises `OrderDelivered`; Loyalty's `OrderDeliveredSubscriber` consumes the `ordering::order` stream and awards a delivery bonus directly on the customer's RewardAccount — **pattern B** |
 | `ReviewApproved` | Loyalty | Reviews raises `ReviewApproved`; Loyalty's `ReviewApprovedSubscriber` consumes the `reviews::review` stream and awards a review bonus directly on the customer's RewardAccount — **pattern B** |
+| `RefundCompleted` | Loyalty | Payments raises `RefundCompleted` (now carrying `customer_id`); Loyalty's `PaymentRefundedSubscriber` consumes the `payments::payment` stream and **claws back** points (clamped to the balance) directly on the customer's RewardAccount — **pattern B** |
 | Loyalty events | Notifications | Loyalty **publishes** `TierUpgraded` / `PointsRedeemed` (and more) to the external bus; Notifications' `LoyaltyEventsSubscriber` turns them into customer notifications (Loyalty as **producer**) |
 
-Loyalty is a downstream consumer of Identity, Ordering, and Reviews — **and** an upstream
-**producer** for Notifications. All inbound subscribers use the **anti-corruption layer (ACL)**
-pattern — they receive a raw dict payload, filter by event type, and never import another
+Loyalty is a downstream consumer of Identity, Ordering, Reviews, and Payments — **and** an
+upstream **producer** for Notifications. All inbound subscribers use the **anti-corruption layer
+(ACL)** pattern — they receive a raw dict payload, filter by event type, and never import another
 context's event classes. They also demonstrate both subscriber styles:
 `CustomerRegisteredSubscriber` translates the event into a *command* (pattern A, idempotent so
-at-least-once delivery is safe), while `OrderDeliveredSubscriber` and `ReviewApprovedSubscriber`
-load the aggregate and mutate it directly (pattern B). On the producer side, Loyalty marks
-`PointsEarned` / `PointsRedeemed` / `TierUpgraded` / `RewardAccountEnrolled` as `published=True`
-so the outbox dual-writes them to the external bus for Notifications to consume. Loyalty stores
-`customer_id` as an opaque reference and never queries another context. Auto-enrolment on
-registration is what gives every customer a reward account through the normal event flow — no
-enrolment endpoint needed.
+at-least-once delivery is safe), while `OrderDeliveredSubscriber`, `ReviewApprovedSubscriber`, and
+`PaymentRefundedSubscriber` load the aggregate and mutate it directly (pattern B). On the producer
+side, Loyalty marks `PointsEarned` / `PointsRedeemed` / `TierUpgraded` / `RewardAccountEnrolled` as
+`published=True` so the outbox dual-writes them to the external bus for Notifications to consume.
+Loyalty stores `customer_id` as an opaque reference and never queries another context. Auto-enrolment
+on registration gives every customer a reward account through the normal event flow, alongside the
+`POST /loyalty/accounts` endpoint.
 
-A Payments→Loyalty refund clawback is a deliberate follow-up rather than an omission: the
-`RefundCompleted` event carries `order_id` but no `customer_id`, so the reward account can't be
-resolved without an additional lookup path.
+The refund clawback is **clamped** to the available balance (a refund never drives an account
+negative) and records an `adjust` ledger entry — the audit/adjustment movement type.
 
 ## Design Decisions
 
@@ -331,7 +331,7 @@ synchronous end-to-end completion tests are `xfail` against #1048 (they flip whe
 | TransferPoints domain service | [`src/loyalty/reward/transfer.py`](../../src/loyalty/reward/transfer.py) |
 | LoyaltyService application service (`@use_case`) | [`src/loyalty/reward/services.py`](../../src/loyalty/reward/services.py) |
 | Custom repository (Q/F/lookups) | [`src/loyalty/reward/repository.py`](../../src/loyalty/reward/repository.py) |
-| Inbound subscribers (pattern A: identity; pattern B: ordering, reviews) | [`identity_subscriber.py`](../../src/loyalty/reward/identity_subscriber.py), [`ordering_subscriber.py`](../../src/loyalty/reward/ordering_subscriber.py), [`reviews_subscriber.py`](../../src/loyalty/reward/reviews_subscriber.py) |
+| Inbound subscribers (pattern A: identity; pattern B: ordering, reviews, payments) | [`identity_subscriber.py`](../../src/loyalty/reward/identity_subscriber.py), [`ordering_subscriber.py`](../../src/loyalty/reward/ordering_subscriber.py), [`reviews_subscriber.py`](../../src/loyalty/reward/reviews_subscriber.py), [`payments_subscriber.py`](../../src/loyalty/reward/payments_subscriber.py) |
 | PromoCampaign event-sourced aggregate | [`src/loyalty/campaign/campaign.py`](../../src/loyalty/campaign/campaign.py) |
 | PromoCampaign events | [`src/loyalty/campaign/events.py`](../../src/loyalty/campaign/events.py) |
 | Campaign lifecycle commands + handler | [`src/loyalty/campaign/management.py`](../../src/loyalty/campaign/management.py) |
