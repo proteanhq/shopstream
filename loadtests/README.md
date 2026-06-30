@@ -217,6 +217,12 @@ Each journey registers a customer via the Identity API first, waits for the Engi
 
 **`NotificationCancelJourney`** ⚠️ — **Specialty scenario** (excluded from defaults). Races `process-scheduled` (which transitions to Sent) against cancel requests, generating expected `CancelNotificationHandler` failures. Run via `NotificationsCancelUser`.
 
+### Loyalty Domain
+
+Loyalty has **no HTTP API** — it is exercised entirely through cross-domain events. Run the Loyalty engine (`make engine-loyalty`), then drive the order lifecycle: `CustomerRegistered` auto-enrols a reward account (subscriber pattern A) and `OrderDelivered` awards a delivery bonus (subscriber pattern B), updating the `RewardAccountView` (DB) and `PointsLeaderboard` (cache) projections. Loyalty's effects are observed via the **Observatory** (loyalty Redis streams + cache + `protean_*` metrics), not asserted over HTTP.
+
+**`LoyaltyRewardsUser`** ⚠️ — **Specialty scenario** (`loadtests/scenarios/loyalty.py`, run explicitly via `make loadtest-loyalty`). Reuses the end-to-end order journey (register → … → ship → deliver) to generate loyalty's enrol + award load. Like `CrossDomainUser`, the E2E lifecycle can race the `OrderCheckoutSaga` and produce the same expected ordering payment-handler failures — those are about ordering's saga, not loyalty. Note: loyalty also gets exercised incidentally by any default scenario that registers customers (`IdentityUser`) and delivers orders (`SubscriberUser`, `MixedWorkloadUser`) whenever the Loyalty engine is running.
+
 ### Cross-Domain & Race Conditions
 
 These scenarios are the primary reason for the load testing suite. They weave threads across multiple bounded contexts and deliberately create the race conditions described in the domain specification.
@@ -358,6 +364,7 @@ These are safe, happy-path scenarios with no expected failures:
 | `InventoryMaintenanceUser` | 0.5–2.0s | Inventory | Expire reservations (run with `-u 1`) |
 | `SpikeUser` | 0.05s (constant) | Identity | Sudden traffic burst handling |
 | `CrossDomainFloodUser` | 0.1s (constant) | 5 core | Even pressure across all domains |
+| `LoyaltyRewardsUser` | 0.5–2.0s | Loyalty (event-driven) | Enrol-on-register + award-on-deliver; needs `engine-loyalty` |
 
 ### Priority Lanes (run explicitly — require `priority_lanes.enabled = true`)
 
