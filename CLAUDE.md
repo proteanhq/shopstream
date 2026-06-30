@@ -264,7 +264,7 @@ make verify-loyalty       # Verify Loyalty end-to-end (account/points/transfer/c
 
 ## Observatory Verification
 
-`scripts/verify-observatory.sh` — End-to-end verification of the Protean Observatory Event Timeline (Epic 6.2) and Causation Graph (Epic 6.3) features against a running ShopStream stack. Seeds test data across all domains (Identity, Catalogue, Inventory, Ordering, Payments, Fulfillment), then validates Timeline API endpoints (stats, event list, pagination, filtering, single detail, correlation chain, aggregate history), Trace API endpoints (recent traces, trace search, enriched causation tree fields), edge cases, parameter validation, and UI smoke checks (Traces tab, D3 causation graph JS). Run after any Protean upgrade that touches the Observatory.
+`scripts/verify-observatory.sh` — End-to-end verification of the Protean Observatory Event Timeline (Epic 6.2) and Causation Graph (Epic 6.3) features against a running ShopStream stack. Seeds test data across domains (Identity, Catalogue, Inventory, Ordering, Payments, Fulfillment, and Loyalty — a reward account, an event-sourced promo campaign, and a redemption that drives the RedemptionSaga), then validates Timeline API endpoints (stats, event list, pagination, filtering, single detail, correlation chain, aggregate history), Trace API endpoints (recent traces, trace search, enriched causation tree fields), loyalty stream coverage, edge cases, parameter validation, and UI smoke checks (Traces tab, D3 causation graph JS). Run after any Protean upgrade that touches the Observatory.
 
 ```bash
 make verify-observatory              # Full run: seed + ~66 API checks (requires running stack)
@@ -272,7 +272,7 @@ make verify-observatory-skip-seed    # Skip seeding, reuse existing data
 ./scripts/verify-observatory.sh --seed-only  # Seed data only
 ```
 
-Requires: `make docker-up && make setup-db && make truncate-db`, API server (`make api`), Observatory (`make observatory`), and at least the ordering + identity + inventory engines.
+Requires: `make docker-up && make setup-db && make truncate-db`, API server (`make api`), Observatory (`make observatory`), and at least the ordering + identity + inventory engines (add `make engine-loyalty` for the loyalty timeline + RedemptionSaga causation checks).
 
 ## Load Testing
 
