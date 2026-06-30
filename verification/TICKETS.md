@@ -1,0 +1,125 @@
+# Verification tickets
+
+Work items to build ShopStream into Protean's verification surface, in priority
+order. Each ticket lists what to do, how to know it is done, where the check's
+answer comes from (A strongest, see VERIFICATION_STRATEGY.md section 2), and
+whether it gates PRs / nightly / releases.
+
+`[A]/[B]/[C]` = answer source. `[gate]` = blocks releases. `[nightly]` = reports only.
+
+---
+
+## Phase 0 - foundation (do first)
+
+**T0.1 - `process_and_wait(command)` helper** `[A]` `[gate]`
+- Build a helper in `protean.testing` (upstream) and use it in ShopStream: send a
+  command, block until the outbox drains and projectors catch up, return the HTTP
+  response + the events that fired + any handler error.
+- Sync/instant in memory mode; real polling in Docker mode; same test code.
+- Done when: 3 existing async tests are rewritten to use it and the `time.sleep`
+  calls in `loadtests/` and integration tests are removed.
+
+**T0.2 - Turn the IR diff into a real gate** `[A/C]` `[gate]`
+- Remove the `|| true` from `make ir-diff` (Makefile:315); set strictness to
+  `strict`; add a CI step that fails on a breaking IR change.
+- Add one negative test: dropping a `published` event without deprecation must
+  make the check fail.
+- Done when: a deliberate breaking change fails CI; a safe additive change passes.
+
+**T0.3 - P20 same-event-twice check** `[A]` `[gate]` - DONE (prototype)
+- `verification/oracles/test_p20_projector_idempotency.py` exists and is xfail.
+- Follow-up: make `ProductRatingProjector` idempotent (upsert by
+  (product_id, review_id), or guard on already-seen review), then remove the
+  xfail. Extend the check to the other accumulating projectors.
+
+**T0.4 - Set up the `verification/` tree and the `src/` lint** `[-]`
+- Add a `[verification]` optional dependency group (Hypothesis, schemathesis,
+  Toxiproxy client, etc.) so the normal test run does not pull them in.
+- Add a CI lint (import-linter or a grep) that fails if anything under `src/`
+  imports a test/fault tool. Keeps the reference code clean.
+
+**T0.5 - Fix loyalty's false docstrings** `[-]`
+- `src/loyalty/domain.py` claims a second saga, `Auto`-increment IDs, and a custom
+  database model that do not exist. Remove the claims or implement them.
+- Reconcile `PROTEAN_COVERAGE.md` so "covered" means "has a real test."
+
+---
+
+## Phase 1 - the real bug-finders
+
+**T1.1 - Concurrency check: no lost updates (P2)** `[A]` `[gate]`
+- On REAL Postgres, multi-process: fire N concurrent commands at one aggregate;
+  assert final version == number of successes, failures == N - successes, and a
+  counter field == sum of applied deltas.
+- Use Inventory `Stock.reserve()` on one SKU.
+- Done when: the check passes on Postgres and FAILS if version_retry is disabled.
+- Note: must NOT run in memory mode (memory transactions are fake).
+
+**T1.2 - Exactly-one outbox row (P4)** `[A]` `[gate]`
+- Extend `tests/integration/test_event_publishing.py`: after a published-event
+  command, assert one row per expected (message_id, target_broker), and that a
+  forced duplicate insert raises IntegrityError.
+
+**T1.3 - Crash-window check (P21)** `[A]` `[nightly]`
+- Kill the process between the DB commit and the event-store append
+  (`unit_of_work.py:281`/`:286`); after restart, assert no event-sourced aggregate
+  is missing events. (This will likely fail - it is Protean gap G4.)
+
+**T1.4 - Concurrency model with Hypothesis (P2/P4)** `[A]` `[nightly]`
+- A Hypothesis state machine driving random valid command sequences against one
+  aggregate, checked against a hand-written plain-Python model (not Protean).
+- Only worth it with an independent model; do it for Stock and one event-sourced
+  aggregate, not all.
+
+**T1.5 - Regression set habit** `[A]` `[gate]`
+- Every Protean bug ShopStream finds becomes one permanent, named test under
+  `verification/oracles/`. Seed it with the issues already filed (G1-G5, the
+  outbox composite-index fix, the ordering finding).
+
+**T1.6 - Generate docs from the IR** `[A]`
+- Render `docs/<domain>/catalog.md` from the live domain elements so docs cannot
+  claim a feature the code lacks. Add doctest on the value objects (Money, SKU,
+  Rating).
+
+---
+
+## Phase 2 - breadth and depth
+
+**T2.1 - Metamorphic checks (P9/P10/P11)** `[B]` `[gate]`
+- projection == fold(events); from_events == live; snapshot == replay; sync == async.
+- Parameterize over the domain list so new domains are covered automatically.
+- Label clearly: these only catch bugs that differ between the two paths.
+
+**T2.2 - Cross-domain payload contracts (P15)** `[A]` `[gate]`
+- Snapshot every `published=True` event's external payload; feed each saved
+  payload through the real subscriber `__call__` and assert it translates with no
+  KeyError. Catches a producer dropping/renaming a field a subscriber reads.
+
+**T2.3 - Saga liveness + compensation (P16)** `[A]` `[nightly]`
+- Force a payment failure x3 in the checkout saga; assert the order ends CANCELLED
+  and the inventory reservation is released. Add a stuck-saga detector.
+
+**T2.4 - schemathesis API fuzzing** `[A]` `[nightly]`
+- `schemathesis run http://localhost:8000/openapi.json` with OpenAPI links for
+  write-then-read flows. Quick to add, finds shallow contract/500 bugs.
+
+**T2.5 - Adapter conformance (push upstream)** `[A]` `[nightly]`
+- A small set of declarative behavior cases run across memory/postgres/sqlite and
+  compared. Belongs in Protean (it is about Protean's adapters). Track skip-rate.
+
+**T2.6 - Toxiproxy fault injection on a FIXED workload** `[A]` `[nightly]`
+- Inject Redis/Postgres latency and partition during a small scripted workload
+  with a known end state; assert the outbox drains to zero and projections
+  converge. Do NOT use the random Locust load as the workload.
+
+---
+
+## Phase 3 - later / optional
+
+**T3.1 - Quarterly mutation audit** `[A]` `[manual]`
+- Run mutmut/cosmic-ray on Protean core; read the report; write targeted tests for
+  surviving mutants in invariant/state-machine/outbox code. No public badge, no gate.
+
+**T3.2 - Antithesis (optional)** `[A]`
+- Run the real Docker stack under Antithesis for deterministic, reproducible fault
+  testing - only if Phases 0-2 have proven their value.
