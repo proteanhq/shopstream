@@ -113,10 +113,15 @@ ShopStream's **second** process manager and the one that exercises the saga feat
 
 Flow: `RedemptionRequested` (start) → reserve points (`RedeemPoints` on the RewardAccount) +
 advance to `points_reserved` → issue voucher → `VoucherIssued` ⇒ complete (`mark_as_complete()`),
-or `VoucherIssuanceFailed` ⇒ **compensate** (refund, `end=True`). Like the ordering saga it is
-**engine-driven**; under `event_processing="sync"` it advances only to `points_reserved` (a later
-handler re-enters before the start transition persists), so its full logic is unit-tested with
-`given()` in `tests/loyalty/domain/test_redemption_saga.py`.
+or `VoucherIssuanceFailed` ⇒ **compensate** (refund, `end=True`). Its full forward + compensation
+logic is unit-tested with `given()` in `tests/loyalty/domain/test_redemption_saga.py`.
+
+**Sync limitation ([proteanhq/protean#1048](https://github.com/proteanhq/protean/issues/1048),
+0.17.0):** multi-step PMs don't cascade under `event_processing="sync"` — a later handler re-enters
+before the start transition persists, so the saga can't load its own in-flight instance and stops
+after the reserve step. The synchronous end-to-end completion tests are `xfail` against #1048, and
+the `RedemptionView` projector skips a transition whose view doesn't exist yet (out-of-order
+delivery under the same re-entrancy).
 
 ## Events
 

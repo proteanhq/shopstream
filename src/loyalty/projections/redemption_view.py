@@ -79,8 +79,17 @@ class RedemptionViewProjector:
         )
 
     def _set(self, redemption_id, **changes):
+        from protean.exceptions import ObjectNotFoundError
+
         repo = current_domain.repository_for(RedemptionView)
-        view = repo.get(redemption_id)
+        try:
+            view = repo.get(redemption_id)
+        except ObjectNotFoundError:
+            # The create projector (on `RedemptionRequested`) has not run yet. Under
+            # `event_processing="sync"` re-entrant dispatch can deliver a transition event's
+            # projector before the create event's (proteanhq/protean#1048); skip rather than
+            # crash — under the engine the create always lands first.
+            return
         for field, value in changes.items():
             setattr(view, field, value)
         repo.add(view)
