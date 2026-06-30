@@ -30,6 +30,7 @@ from identity.api import router as identity_router
 from identity.domain import identity
 from inventory.api import inventory_maintenance_router, inventory_router, warehouse_router
 from inventory.domain import inventory
+from loyalty.domain import loyalty
 from notifications.api import notification_router
 from notifications.domain import notifications
 from ordering.api import cart_router, order_router, ordering_maintenance_router
@@ -55,6 +56,9 @@ payments.init()
 fulfillment.init()
 reviews.init()
 notifications.init()
+# Loyalty: capability-coverage showcase domain (no HTTP API of its own yet);
+# initialized so its projectors/subscribers register in the stack.
+loyalty.init()
 
 # ---------------------------------------------------------------------------
 # FastAPI app

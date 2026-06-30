@@ -1,0 +1,108 @@
+debug = true
+testing = false
+secret_key = "${SECRET_KEY|a7b6c5d4e3f2a1b0c9d8e7f6a5b4c3d2e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6}"
+identity_strategy = "uuid"
+identity_type = "string"
+event_processing = "async"
+command_processing = "sync"
+message_processing = "sync"
+
+# Event-sourcing snapshots: after this many events on a stream, reconstruction can
+# fold from a snapshot instead of replaying the full history (PromoCampaign).
+snapshot_threshold = 5
+
+# Engine subscriptions use Redis Streams (outbox → broker → projectors).
+[server]
+default_subscription_type = "stream"
+
+# Health-check HTTP server. Per-domain port so all engines run side by side
+# (identity..notifications use 8081-8088; loyalty is the ninth engine).
+[server.health]
+port = 8089
+
+[server.priority_lanes]
+enabled = true
+threshold = 0
+backfill_suffix = "backfill"
+
+[outbox]
+broker = "default"
+external_brokers = ["global"]
+messages_per_tick = 50
+tick_interval = 0.01
+
+# Default Database (development / PROTEAN_ENV unset)
+[databases.default]
+provider = "postgresql"
+database_uri = "${LOYALTY_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/loyalty_local}"
+
+[event_store]
+provider = "message_db"
+database_uri = "${MESSAGE_DB_URL|postgresql://message_store:message_store@localhost:15433/message_store}"
+
+# Internal broker — loyalty owns Redis DB 8
+[brokers.default]
+provider = "redis"
+URI = "${REDIS_URL|redis://127.0.0.1:16379/8}"
+
+# External (shared) bus for cross-domain published events
+[brokers.global]
+provider = "redis"
+URI = "${REDIS_EXTERNAL_URL|redis://127.0.0.1:16379/15}"
+
+# Cache — backs the live points-leaderboard projection (cache="loyalty")
+[caches.loyalty]
+provider = "redis"
+URI = "${REDIS_CACHE_URL|redis://127.0.0.1:16379/9}"
+TTL = 3600
+
+# ──────────────────────────────────────────────
+# Test overrides (PROTEAN_ENV=test)
+# ──────────────────────────────────────────────
+[test]
+testing = true
+event_processing = "sync"
+
+[test.databases.default]
+database_uri = "${TEST_LOYALTY_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/loyalty_test}"
+
+# Use the in-memory cache in tests so the PointsLeaderboard cache projection works
+# without a dedicated Redis cache instance.
+[test.caches.loyalty]
+provider = "memory"
+
+# ──────────────────────────────────────────────
+# Production overrides (PROTEAN_ENV=production)
+# ──────────────────────────────────────────────
+[production]
+event_processing = "async"
+debug = false
+
+[production.telemetry]
+enabled = true
+service_name = "shopstream-loyalty"
+
+[production.databases.default]
+database_uri = "${LOYALTY_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/loyalty}"
+
+# ──────────────────────────────────────────────
+# Memory overrides (PROTEAN_ENV=memory)
+# ──────────────────────────────────────────────
+[memory]
+testing = true
+event_processing = "sync"
+
+[memory.databases.default]
+provider = "memory"
+
+[memory.event_store]
+provider = "memory"
+
+[memory.brokers.default]
+provider = "inline"
+
+[memory.brokers.global]
+provider = "inline"
+
+[memory.caches.loyalty]
+provider = "memory"

@@ -1,0 +1,1268 @@
+{
+  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
+  "checksum": "sha256:f4a3eba15f92ccd550542453555c5d8858ba7b0c37ed58c47f90e139346d8886",
+  "clusters": {
+    "loyalty.campaign.campaign.PromoCampaign": {
+      "aggregate": {
+        "apply_handlers": {
+          "loyalty.campaign.events.CampaignActivated": "_on_activated",
+          "loyalty.campaign.events.CampaignExpired": "_on_expired",
+          "loyalty.campaign.events.CampaignLaunched": "_on_launched",
+          "loyalty.campaign.events.CampaignPaused": "_on_paused"
+        },
+        "element_type": "AGGREGATE",
+        "fields": {
+          "campaign_code": {
+            "kind": "standard",
+            "max_length": 20,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "discount_type": {
+            "choices": [
+              "fixed",
+              "percentage",
+              "points_multiplier"
+            ],
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "discount_value": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "ends_on": {
+            "kind": "standard",
+            "type": "Date"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "launched_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "name": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "starts_on": {
+            "kind": "standard",
+            "type": "Date"
+          },
+          "status": {
+            "choices": [
+              "active",
+              "draft",
+              "expired",
+              "paused"
+            ],
+            "default": "draft",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "loyalty.campaign.campaign.PromoCampaign",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "loyalty.campaign.campaign",
+        "name": "PromoCampaign",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": true,
+          "is_event_sourced": true,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "promo_campaign",
+          "stream_category": "loyalty::promo_campaign"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {
+        "abc.PromoCampaignFactEvent": {
+          "__type__": "Loyalty.PromoCampaignFactEvent.v1",
+          "__version__": 1,
+          "auto_generated": true,
+          "element_type": "EVENT",
+          "fields": {
+            "campaign_code": {
+              "kind": "standard",
+              "required": true,
+              "type": "String"
+            },
+            "discount_type": {
+              "kind": "standard",
+              "required": true,
+              "type": "String"
+            },
+            "discount_value": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "ends_on": {
+              "kind": "standard",
+              "type": "Date"
+            },
+            "id": {
+              "kind": "standard",
+              "type": "String"
+            },
+            "launched_at": {
+              "kind": "standard",
+              "type": "DateTime"
+            },
+            "name": {
+              "kind": "standard",
+              "required": true,
+              "type": "String"
+            },
+            "starts_on": {
+              "kind": "standard",
+              "type": "Date"
+            },
+            "status": {
+              "default": "draft",
+              "kind": "standard",
+              "type": "String"
+            }
+          },
+          "fqn": "abc.PromoCampaignFactEvent",
+          "is_fact_event": true,
+          "module": "abc",
+          "name": "PromoCampaignFactEvent",
+          "part_of": "loyalty.campaign.campaign.PromoCampaign"
+        },
+        "loyalty.campaign.events.CampaignActivated": {
+          "__type__": "Loyalty.CampaignActivated.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "activated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "campaign_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.campaign.events.CampaignActivated",
+          "is_fact_event": false,
+          "module": "loyalty.campaign.events",
+          "name": "CampaignActivated",
+          "part_of": "loyalty.campaign.campaign.PromoCampaign"
+        },
+        "loyalty.campaign.events.CampaignExpired": {
+          "__type__": "Loyalty.CampaignExpired.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "campaign_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "expired_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "loyalty.campaign.events.CampaignExpired",
+          "is_fact_event": false,
+          "module": "loyalty.campaign.events",
+          "name": "CampaignExpired",
+          "part_of": "loyalty.campaign.campaign.PromoCampaign"
+        },
+        "loyalty.campaign.events.CampaignLaunched": {
+          "__type__": "Loyalty.CampaignLaunched.v3",
+          "__version__": 3,
+          "element_type": "EVENT",
+          "fields": {
+            "campaign_code": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "campaign_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "discount_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "discount_value": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "ends_on": {
+              "kind": "standard",
+              "type": "Date"
+            },
+            "launched_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "starts_on": {
+              "kind": "standard",
+              "type": "Date"
+            }
+          },
+          "fqn": "loyalty.campaign.events.CampaignLaunched",
+          "is_fact_event": false,
+          "module": "loyalty.campaign.events",
+          "name": "CampaignLaunched",
+          "part_of": "loyalty.campaign.campaign.PromoCampaign"
+        },
+        "loyalty.campaign.events.CampaignPaused": {
+          "__type__": "Loyalty.CampaignPaused.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "campaign_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "paused_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.campaign.events.CampaignPaused",
+          "is_fact_event": false,
+          "module": "loyalty.campaign.events",
+          "name": "CampaignPaused",
+          "part_of": "loyalty.campaign.campaign.PromoCampaign"
+        }
+      },
+      "repositories": {},
+      "value_objects": {}
+    },
+    "loyalty.reward.reward_account.Auditable": {
+      "aggregate": {
+        "description": "Abstract base contributing audit timestamps to concrete aggregates.",
+        "element_type": "AGGREGATE",
+        "fields": {
+          "created_at": {
+            "default": "<callable>",
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "updated_at": {
+            "default": "<callable>",
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "loyalty.reward.reward_account.Auditable",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "loyalty.reward.reward_account",
+        "name": "Auditable",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "auditable",
+          "stream_category": "loyalty::auditable"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {},
+      "commands": {},
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {},
+      "repositories": {},
+      "value_objects": {}
+    },
+    "loyalty.reward.reward_account.RewardAccount": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "card": {
+            "kind": "has_one",
+            "target": "loyalty.reward.reward_account.MembershipCard"
+          },
+          "created_at": {
+            "default": "<callable>",
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "customer_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "entries": {
+            "kind": "has_many",
+            "target": "loyalty.reward.reward_account.PointsLedgerEntry"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "lifetime_points": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "member_code": {
+            "kind": "standard",
+            "max_length": 12,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "membership_since": {
+            "default": "<callable>",
+            "kind": "standard",
+            "type": "Date"
+          },
+          "points_balance": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "referral_code": {
+            "kind": "standard",
+            "max_length": 12,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "choices": [
+              "Active",
+              "Closed",
+              "Frozen"
+            ],
+            "default": "Active",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "tier": {
+            "choices": [
+              "bronze",
+              "gold",
+              "platinum",
+              "silver"
+            ],
+            "default": "bronze",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "default": "<callable>",
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "loyalty.reward.reward_account.RewardAccount",
+        "identity_field": "id",
+        "invariants": {
+          "post": [
+            "balance_never_negative"
+          ],
+          "pre": [
+            "closed_accounts_are_immutable"
+          ]
+        },
+        "module": "loyalty.reward.reward_account",
+        "name": "RewardAccount",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "reward_account",
+          "stream_category": "loyalty::reward_account"
+        }
+      },
+      "application_services": {
+        "loyalty.reward.services.LoyaltyService": {
+          "element_type": "APPLICATION_SERVICE",
+          "fqn": "loyalty.reward.services.LoyaltyService",
+          "module": "loyalty.reward.services",
+          "name": "LoyaltyService",
+          "part_of": "loyalty.reward.reward_account.RewardAccount"
+        }
+      },
+      "command_handlers": {
+        "loyalty.reward.enrollment.EnrollRewardAccountHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "loyalty.reward.enrollment.EnrollRewardAccountHandler",
+          "handlers": {
+            "Loyalty.EnrollRewardAccount.v1": [
+              "enroll"
+            ]
+          },
+          "module": "loyalty.reward.enrollment",
+          "name": "EnrollRewardAccountHandler",
+          "part_of": "loyalty.reward.reward_account.RewardAccount",
+          "stream_category": "loyalty::reward_account:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "loyalty.reward.points.PointsHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "loyalty.reward.points.PointsHandler",
+          "handlers": {
+            "Loyalty.EarnPoints.v1": [
+              "earn"
+            ],
+            "Loyalty.RedeemPoints.v1": [
+              "redeem"
+            ]
+          },
+          "module": "loyalty.reward.points",
+          "name": "PointsHandler",
+          "part_of": "loyalty.reward.reward_account.RewardAccount",
+          "stream_category": "loyalty::reward_account:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "loyalty.reward.enrollment.EnrollRewardAccount": {
+          "__type__": "Loyalty.EnrollRewardAccount.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "customer_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "member_code": {
+              "kind": "standard",
+              "max_length": 12,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.reward.enrollment.EnrollRewardAccount",
+          "module": "loyalty.reward.enrollment",
+          "name": "EnrollRewardAccount",
+          "part_of": "loyalty.reward.reward_account.RewardAccount"
+        },
+        "loyalty.reward.points.EarnPoints": {
+          "__type__": "Loyalty.EarnPoints.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "account_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reason": {
+              "default": "order",
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.reward.points.EarnPoints",
+          "module": "loyalty.reward.points",
+          "name": "EarnPoints",
+          "part_of": "loyalty.reward.reward_account.RewardAccount"
+        },
+        "loyalty.reward.points.RedeemPoints": {
+          "__type__": "Loyalty.RedeemPoints.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "account_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reason": {
+              "default": "redemption",
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.reward.points.RedeemPoints",
+          "module": "loyalty.reward.points",
+          "name": "RedeemPoints",
+          "part_of": "loyalty.reward.reward_account.RewardAccount"
+        }
+      },
+      "database_models": {},
+      "entities": {
+        "loyalty.reward.reward_account.MembershipCard": {
+          "description": "The physical/virtual loyalty card \u2014 a 1:1 (HasOne) child of the account.",
+          "element_type": "ENTITY",
+          "fields": {
+            "card_number": {
+              "kind": "standard",
+              "max_length": 20,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "issued_on": {
+              "kind": "standard",
+              "required": true,
+              "type": "Date"
+            },
+            "reward_account": {
+              "auto_generated": true,
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "loyalty.reward.reward_account.RewardAccount"
+            },
+            "status": {
+              "choices": [
+                "active",
+                "expired",
+                "suspended"
+              ],
+              "default": "active",
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.reward.reward_account.MembershipCard",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "loyalty.reward.reward_account",
+          "name": "MembershipCard",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "membership_card"
+          },
+          "part_of": "loyalty.reward.reward_account.RewardAccount"
+        },
+        "loyalty.reward.reward_account.PointsLedgerEntry": {
+          "description": "An append-only points movement \u2014 a 1:N (HasMany) child of the account.\n\nDeclares the parent link explicitly via `Reference` (rather than relying on the\nimplicit reference HasMany would auto-create) to exercise the Reference field.",
+          "element_type": "ENTITY",
+          "fields": {
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "balance_after": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "entry_type": {
+              "choices": [
+                "adjust",
+                "earn",
+                "redeem",
+                "transfer_in",
+                "transfer_out"
+              ],
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "id": {
+              "auto_generated": true,
+              "identifier": true,
+              "kind": "auto",
+              "type": "Auto"
+            },
+            "occurred_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "reward_account": {
+              "kind": "reference",
+              "linked_attribute": "id",
+              "target": "loyalty.reward.reward_account.RewardAccount"
+            }
+          },
+          "fqn": "loyalty.reward.reward_account.PointsLedgerEntry",
+          "identity_field": "id",
+          "invariants": {
+            "post": [],
+            "pre": []
+          },
+          "module": "loyalty.reward.reward_account",
+          "name": "PointsLedgerEntry",
+          "options": {
+            "auto_add_id_field": true,
+            "limit": 100,
+            "provider": "default",
+            "schema_name": "points_ledger_entry"
+          },
+          "part_of": "loyalty.reward.reward_account.RewardAccount"
+        }
+      },
+      "event_handlers": {},
+      "events": {
+        "loyalty.reward.events.MembershipCardIssued": {
+          "__type__": "Loyalty.MembershipCardIssued.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "account_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "card_number": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "issued_on": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.reward.events.MembershipCardIssued",
+          "is_fact_event": false,
+          "module": "loyalty.reward.events",
+          "name": "MembershipCardIssued",
+          "part_of": "loyalty.reward.reward_account.RewardAccount"
+        },
+        "loyalty.reward.events.PointsEarned": {
+          "__type__": "Loyalty.PointsEarned.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "account_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "balance_after": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "occurred_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.reward.events.PointsEarned",
+          "is_fact_event": false,
+          "module": "loyalty.reward.events",
+          "name": "PointsEarned",
+          "part_of": "loyalty.reward.reward_account.RewardAccount"
+        },
+        "loyalty.reward.events.PointsRedeemed": {
+          "__type__": "Loyalty.PointsRedeemed.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "account_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "amount": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "balance_after": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "occurred_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.reward.events.PointsRedeemed",
+          "is_fact_event": false,
+          "module": "loyalty.reward.events",
+          "name": "PointsRedeemed",
+          "part_of": "loyalty.reward.reward_account.RewardAccount"
+        },
+        "loyalty.reward.events.RewardAccountClosed": {
+          "__type__": "Loyalty.RewardAccountClosed.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "account_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "closed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "loyalty.reward.events.RewardAccountClosed",
+          "is_fact_event": false,
+          "module": "loyalty.reward.events",
+          "name": "RewardAccountClosed",
+          "part_of": "loyalty.reward.reward_account.RewardAccount"
+        },
+        "loyalty.reward.events.RewardAccountEnrolled": {
+          "__type__": "Loyalty.RewardAccountEnrolled.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "account_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "customer_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "enrolled_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "member_code": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "tier": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.reward.events.RewardAccountEnrolled",
+          "is_fact_event": false,
+          "module": "loyalty.reward.events",
+          "name": "RewardAccountEnrolled",
+          "part_of": "loyalty.reward.reward_account.RewardAccount"
+        }
+      },
+      "repositories": {
+        "loyalty.reward.repository.RewardAccountRepository": {
+          "element_type": "REPOSITORY",
+          "fqn": "loyalty.reward.repository.RewardAccountRepository",
+          "module": "loyalty.reward.repository",
+          "name": "RewardAccountRepository",
+          "part_of": "loyalty.reward.reward_account.RewardAccount"
+        }
+      },
+      "value_objects": {}
+    }
+  },
+  "contracts": {
+    "events": []
+  },
+  "diagnostics": [
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "loyalty.campaign.campaign.PromoCampaign",
+      "level": "warning",
+      "message": "Aggregate `PromoCampaign` has no command handler \u2014 no write path exists"
+    },
+    {
+      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
+      "element": "loyalty.reward.reward_account.Auditable",
+      "level": "warning",
+      "message": "Aggregate `Auditable` has no command handler \u2014 no write path exists"
+    },
+    {
+      "code": "UNHANDLED_EVENT",
+      "element": "loyalty.campaign.events.CampaignActivated",
+      "level": "warning",
+      "message": "Event CampaignActivated has no registered handler"
+    },
+    {
+      "code": "UNHANDLED_EVENT",
+      "element": "loyalty.campaign.events.CampaignExpired",
+      "level": "warning",
+      "message": "Event CampaignExpired has no registered handler"
+    },
+    {
+      "code": "UNHANDLED_EVENT",
+      "element": "loyalty.campaign.events.CampaignLaunched",
+      "level": "warning",
+      "message": "Event CampaignLaunched has no registered handler"
+    },
+    {
+      "code": "UNHANDLED_EVENT",
+      "element": "loyalty.campaign.events.CampaignPaused",
+      "level": "warning",
+      "message": "Event CampaignPaused has no registered handler"
+    },
+    {
+      "code": "UNHANDLED_EVENT",
+      "element": "loyalty.reward.events.MembershipCardIssued",
+      "level": "warning",
+      "message": "Event MembershipCardIssued has no registered handler"
+    }
+  ],
+  "domain": {
+    "camel_case_name": "Loyalty",
+    "command_processing": "sync",
+    "event_processing": "async",
+    "identity_strategy": "uuid",
+    "identity_type": "string",
+    "name": "loyalty",
+    "normalized_name": "loyalty"
+  },
+  "elements": {
+    "AGGREGATE": [
+      "loyalty.campaign.campaign.PromoCampaign",
+      "loyalty.reward.reward_account.Auditable",
+      "loyalty.reward.reward_account.RewardAccount"
+    ],
+    "APPLICATION_SERVICE": [
+      "loyalty.reward.services.LoyaltyService"
+    ],
+    "COMMAND": [
+      "loyalty.reward.enrollment.EnrollRewardAccount",
+      "loyalty.reward.points.EarnPoints",
+      "loyalty.reward.points.RedeemPoints"
+    ],
+    "COMMAND_HANDLER": [
+      "loyalty.reward.enrollment.EnrollRewardAccountHandler",
+      "loyalty.reward.points.PointsHandler"
+    ],
+    "DATABASE_MODEL": [],
+    "DOMAIN_SERVICE": [
+      "loyalty.reward.transfer.TransferPoints"
+    ],
+    "ENTITY": [
+      "loyalty.reward.reward_account.MembershipCard",
+      "loyalty.reward.reward_account.PointsLedgerEntry"
+    ],
+    "EVENT": [
+      "abc.PromoCampaignFactEvent",
+      "loyalty.campaign.events.CampaignActivated",
+      "loyalty.campaign.events.CampaignExpired",
+      "loyalty.campaign.events.CampaignLaunched",
+      "loyalty.campaign.events.CampaignPaused",
+      "loyalty.reward.events.MembershipCardIssued",
+      "loyalty.reward.events.PointsEarned",
+      "loyalty.reward.events.PointsRedeemed",
+      "loyalty.reward.events.RewardAccountClosed",
+      "loyalty.reward.events.RewardAccountEnrolled"
+    ],
+    "EVENT_HANDLER": [],
+    "PROCESS_MANAGER": [],
+    "PROJECTION": [
+      "loyalty.projections.points_leaderboard.PointsLeaderboard",
+      "loyalty.projections.reward_account_view.RewardAccountView"
+    ],
+    "PROJECTOR": [
+      "loyalty.projections.points_leaderboard.PointsLeaderboardProjector",
+      "loyalty.projections.reward_account_view.RewardAccountViewProjector"
+    ],
+    "QUERY": [],
+    "QUERY_HANDLER": [],
+    "REPOSITORY": [
+      "loyalty.reward.repository.RewardAccountRepository"
+    ],
+    "SUBSCRIBER": [
+      "loyalty.reward.ordering_subscriber.OrderDeliveredSubscriber"
+    ],
+    "VALUE_OBJECT": []
+  },
+  "flows": {
+    "domain_services": {
+      "loyalty.reward.transfer.TransferPoints": {
+        "element_type": "DOMAIN_SERVICE",
+        "fqn": "loyalty.reward.transfer.TransferPoints",
+        "invariants": {
+          "post": [
+            "points_are_conserved"
+          ],
+          "pre": [
+            "both_accounts_must_be_active"
+          ]
+        },
+        "module": "loyalty.reward.transfer",
+        "name": "TransferPoints",
+        "part_of": [
+          "loyalty.reward.reward_account.RewardAccount",
+          "loyalty.reward.reward_account.RewardAccount"
+        ]
+      }
+    },
+    "process_managers": {},
+    "subscribers": {
+      "loyalty.reward.ordering_subscriber.OrderDeliveredSubscriber": {
+        "broker": "global",
+        "element_type": "SUBSCRIBER",
+        "fqn": "loyalty.reward.ordering_subscriber.OrderDeliveredSubscriber",
+        "module": "loyalty.reward.ordering_subscriber",
+        "name": "OrderDeliveredSubscriber",
+        "stream": "ordering::order"
+      }
+    }
+  },
+  "generated_at": "2026-06-30T02:40:33Z",
+  "ir_version": "0.1.0",
+  "projections": {
+    "loyalty.projections.points_leaderboard.PointsLeaderboard": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "account_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "customer_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "points_balance": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "tier": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "loyalty.projections.points_leaderboard.PointsLeaderboard",
+        "identity_field": "account_id",
+        "module": "loyalty.projections.points_leaderboard",
+        "name": "PointsLeaderboard",
+        "options": {
+          "cache": "loyalty",
+          "limit": 100,
+          "order_by": [],
+          "provider": null,
+          "schema_name": "points_leaderboard"
+        }
+      },
+      "projectors": {
+        "loyalty.projections.points_leaderboard.PointsLeaderboardProjector": {
+          "aggregates": [
+            "loyalty.reward.reward_account.RewardAccount"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "loyalty.projections.points_leaderboard.PointsLeaderboardProjector",
+          "handlers": {
+            "Loyalty.PointsEarned.v1": [
+              "on_earned"
+            ],
+            "Loyalty.PointsRedeemed.v1": [
+              "on_redeemed"
+            ],
+            "Loyalty.RewardAccountEnrolled.v1": [
+              "on_enrolled"
+            ]
+          },
+          "module": "loyalty.projections.points_leaderboard",
+          "name": "PointsLeaderboardProjector",
+          "projector_for": "loyalty.projections.points_leaderboard.PointsLeaderboard",
+          "stream_categories": [
+            "loyalty::reward_account"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    },
+    "loyalty.projections.reward_account_view.RewardAccountView": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "account_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "customer_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "lifetime_points": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "member_code": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "points_balance": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "tier": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "loyalty.projections.reward_account_view.RewardAccountView",
+        "identity_field": "account_id",
+        "module": "loyalty.projections.reward_account_view",
+        "name": "RewardAccountView",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "reward_account_view"
+        }
+      },
+      "projectors": {
+        "loyalty.projections.reward_account_view.RewardAccountViewProjector": {
+          "aggregates": [
+            "loyalty.reward.reward_account.RewardAccount"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "loyalty.projections.reward_account_view.RewardAccountViewProjector",
+          "handlers": {
+            "Loyalty.PointsEarned.v1": [
+              "on_earned"
+            ],
+            "Loyalty.PointsRedeemed.v1": [
+              "on_redeemed"
+            ],
+            "Loyalty.RewardAccountClosed.v1": [
+              "on_closed"
+            ],
+            "Loyalty.RewardAccountEnrolled.v1": [
+              "on_enrolled"
+            ]
+          },
+          "module": "loyalty.projections.reward_account_view",
+          "name": "RewardAccountViewProjector",
+          "projector_for": "loyalty.projections.reward_account_view.RewardAccountView",
+          "stream_categories": [
+            "loyalty::reward_account"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {},
+      "query_handlers": {}
+    }
+  }
+}
