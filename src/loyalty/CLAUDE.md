@@ -83,6 +83,9 @@ All state changes are applied via `@apply` handlers for event-sourcing replay. W
 snapshot-based reconstruction; `domain.create_snapshot(PromoCampaign, id)` /
 `create_snapshots(PromoCampaign)` create them.
 
+The lifecycle is driven through CQRS commands (`campaign/management.py`), projected into the
+`CampaignCatalog` read model (see Projections), and exposed via the campaign API (see API).
+
 ## Events
 
 **RewardAccount events** (`reward/events.py`): `RewardAccountEnrolled`, `PointsEarned`,
@@ -102,9 +105,18 @@ snapshot-based reconstruction; `domain.create_snapshot(PromoCampaign, id)` /
 |------|---------|---------|
 | `reward/enrollment.py` | `EnrollRewardAccount` | `EnrollRewardAccountHandler` |
 | `reward/points.py` | `EarnPoints`, `RedeemPoints` | `PointsHandler` |
+| `campaign/management.py` | `LaunchCampaign`, `ActivateCampaign`, `PauseCampaign`, `ExpireCampaign` | `PromoCampaignHandler` |
 
 Points transfer is **not** a CQRS command — see the domain/application services below.
-PromoCampaign lifecycle is driven directly on the event-sourced aggregate.
+
+### Active-campaign points multiplier (cross-aggregate read)
+
+`PointsHandler.earn` consults the **CampaignCatalog** read model (via
+`campaign/multiplier.py → active_points_multiplier()`) before crediting points: an active
+`points_multiplier` PromoCampaign boosts the amount earned (the most generous active one wins;
+no active campaign ⇒ multiplier 1). This is the one place the RewardAccount write path performs
+a cross-aggregate read, and it reads the **read model** rather than reaching into PromoCampaign's
+event stream.
 
 ## Domain Service & Application Service
 
@@ -146,6 +158,11 @@ direct aggregate mutation). ACL: raw dict payload, type filtering, no shared eve
 |------|-----------|---------|-----------|
 | `reward_account_view.py` | `RewardAccountView` | Database | `RewardAccountViewProjector` ([RewardAccount]) |
 | `points_leaderboard.py` | `PointsLeaderboard` | **Cache** (`cache="loyalty"`) | `PointsLeaderboardProjector` ([RewardAccount]) |
+| `campaign_catalog.py` | `CampaignCatalog` | Database | `CampaignCatalogProjector` ([PromoCampaign]) |
+
+`CampaignCatalog` projects the event-sourced PromoCampaign's delta events into a flat,
+queryable catalog — the read side the points-earning multiplier consults and the campaign API
+lists from.
 
 `PointsLeaderboard` is the only cache-backed projection in ShopStream. Write via
 `current_domain.cache_for(PointsLeaderboard).add(...)`; read via
@@ -154,11 +171,12 @@ cache projections.
 
 ## Queries (read side)
 
-**Files:** `projections/reward_account_view_queries.py`, `projections/points_leaderboard_queries.py`.
-`@loyalty.query` DTOs + `@loyalty.query_handler` with `@read` methods (no UnitOfWork) back the
-read endpoints: `GetRewardAccount` (DB `RewardAccountView` via `view_for`) and
-`GetLeaderboardStanding` (cache `PointsLeaderboard` via `view_for`). Invoked with
-`current_domain.dispatch(query)`.
+**Files:** `projections/reward_account_view_queries.py`, `projections/points_leaderboard_queries.py`,
+`projections/campaign_catalog_queries.py`. `@loyalty.query` DTOs + `@loyalty.query_handler` with
+`@read` methods (no UnitOfWork) back the read endpoints: `GetRewardAccount` (DB `RewardAccountView`
+via `view_for`), `GetLeaderboardStanding` (cache `PointsLeaderboard` via `view_for`), and
+`GetCampaign` / `ListCampaigns` (DB `CampaignCatalog`; `ListCampaigns` demonstrates a filtered,
+ordered projection query). Invoked with `current_domain.dispatch(query)`.
 
 ## API
 
@@ -174,11 +192,25 @@ reads through query handlers.
 | POST | `/loyalty/transfers` | `LoyaltyService.transfer_points` (application service, direct) |
 | GET | `/loyalty/accounts/{id}` | `GetRewardAccount` → RewardAccountView (DB) |
 | GET | `/loyalty/accounts/{id}/points` | `GetLeaderboardStanding` → PointsLeaderboard (cache) |
+| POST | `/loyalty/campaigns` | `LaunchCampaign` |
+| POST | `/loyalty/campaigns/{id}/activate` | `ActivateCampaign` |
+| POST | `/loyalty/campaigns/{id}/pause` | `PauseCampaign` |
+| POST | `/loyalty/campaigns/{id}/expire` | `ExpireCampaign` |
+| GET | `/loyalty/campaigns` | `ListCampaigns` → CampaignCatalog (DB; `?status=`) |
+| GET | `/loyalty/campaigns/{id}` | `GetCampaign` → CampaignCatalog (DB) |
+
+> **Known limitation:** `LaunchCampaign` accepts `starts_on`/`ends_on` (`Date`) but a `Date`
+> field on a command currently breaks Protean's message checksum
+> ([proteanhq/protean#1046](https://github.com/proteanhq/protean/issues/1046), milestone 0.16.1).
+> The campaign date-window path is covered by an `xfail` test that flips to passing once the fix
+> lands; status-based campaign activation (the multiplier driver) is unaffected.
 
 ## Tests
 
-`tests/loyalty/{domain,application}/` — domain-layer behaviour (RewardAccount, PromoCampaign,
-TransferPoints, upcasters) and application-layer flows (commands + projections, the application
-service, the custom repository, the pattern-B subscriber, ES persistence + fact events +
-snapshots). Run with `make test-loyalty` (or `make test-loyalty-domain` / `-application`), in
-memory mode via `make test-memory*`, or against Postgres via `make test`.
+`tests/loyalty/{domain,application,integration}/` — domain-layer behaviour (RewardAccount,
+PromoCampaign, TransferPoints, upcasters), application-layer flows (commands + projections, the
+campaign handlers + CampaignCatalog + points multiplier, the application service, the custom
+repository, the pattern-B subscriber, ES persistence + fact events + snapshots), and
+integration-layer API tests (TestClient over the account + campaign endpoints). Run with
+`make test-loyalty` (or `make test-loyalty-domain` / `-application`), in memory mode via
+`make test-memory*`, or against Postgres via `make test`.

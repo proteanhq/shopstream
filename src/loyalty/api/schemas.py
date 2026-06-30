@@ -6,6 +6,8 @@ external contract; commands and the application service are internal domain conc
 
 from __future__ import annotations
 
+from datetime import date
+
 from pydantic import BaseModel, Field
 
 
@@ -32,6 +34,19 @@ class TransferPointsRequest(BaseModel):
     source_account_id: str
     target_account_id: str
     amount: int = Field(gt=0)
+
+
+class LaunchCampaignRequest(BaseModel):
+    campaign_code: str = Field(max_length=20)
+    name: str = Field(max_length=255)
+    discount_type: str = Field(description="percentage | fixed | points_multiplier")
+    discount_value: int = Field(gt=0)
+    starts_on: date | None = None
+    ends_on: date | None = None
+
+
+class PauseCampaignRequest(BaseModel):
+    reason: str | None = Field(default=None, max_length=255)
 
 
 # ---------------------------------------------------------------------------
@@ -65,3 +80,18 @@ class LeaderboardEntryResponse(BaseModel):
     customer_id: str
     tier: str | None = None
     points_balance: int = 0
+
+
+class CampaignIdResponse(BaseModel):
+    campaign_id: str
+
+
+class CampaignResponse(BaseModel):
+    campaign_id: str
+    campaign_code: str | None = None
+    name: str | None = None
+    discount_type: str | None = None
+    discount_value: int = 0
+    status: str | None = None
+    starts_on: date | None = None
+    ends_on: date | None = None

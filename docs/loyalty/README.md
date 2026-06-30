@@ -159,16 +159,20 @@ stateDiagram-v2
 | Command | Who Initiates | What Happens | Events Raised |
 |---------|--------------|-------------|---------------|
 | `EnrollRewardAccount` | Customer / system | Creates an Active bronze account; generates a valid `member_code` if none supplied | `RewardAccountEnrolled` |
-| `EarnPoints` | System | Loads the account, adds points (balance + lifetime), appends a ledger entry | `PointsEarned` |
+| `EarnPoints` | System | Loads the account, adds points (balance + lifetime; **boosted by any active `points_multiplier` campaign**), appends a ledger entry | `PointsEarned` |
 | `RedeemPoints` | Customer | Loads the account, subtracts points (over-redemption rejected by the balance invariant), appends a ledger entry | `PointsRedeemed` |
+| `LaunchCampaign` | Marketing | Creates a draft event-sourced `PromoCampaign` | `CampaignLaunched` |
+| `ActivateCampaign` / `PauseCampaign` / `ExpireCampaign` | Marketing | Drives the campaign through its lifecycle | `CampaignActivated` / `CampaignPaused` / `CampaignExpired` |
 
-Two write paths are **not** CQRS commands, to exercise the alternative Protean patterns:
+The **points-earning** flow performs a cross-aggregate read: `PointsHandler.earn` consults the
+`CampaignCatalog` read model (via `campaign/multiplier.py`) so an active `points_multiplier`
+campaign multiplies the points credited (most generous active campaign wins; none ⇒ ×1).
+
+One write path is **not** a CQRS command, to exercise the alternative Protean pattern:
 
 - **Points transfer** runs through a **domain service** (`TransferPoints`) orchestrated by an
   **application service** (`LoyaltyService.transfer_points`, a `@use_case`) — invoked directly,
   not via `domain.process()`. See the [Points Transfer scenario](scenarios/points-transfer.md).
-- **PromoCampaign** lifecycle (`launch`/`activate`/`pause`/`expire`) is driven directly on the
-  event-sourced aggregate and persisted through its event-sourced repository.
 
 ## Read Models (Projections)
 
@@ -176,6 +180,7 @@ Two write paths are **not** CQRS commands, to exercise the alternative Protean p
 |-----------|---------|---------|-----------|
 | `RewardAccountView` | Database | Per-account view: customer, tier, status, balance, lifetime points | `RewardAccountEnrolled` (create), `PointsEarned`, `PointsRedeemed`, `RewardAccountClosed` |
 | `PointsLeaderboard` | **Cache** (`cache="loyalty"`) | Live points balance per account for leaderboard reads | `RewardAccountEnrolled` (create), `PointsEarned`, `PointsRedeemed` |
+| `CampaignCatalog` | Database | Flat, queryable catalog of campaigns + status; the read side the multiplier consults and the API lists | `CampaignLaunched` (create), `CampaignActivated`, `CampaignPaused`, `CampaignExpired` |
 
 `PointsLeaderboard` is the only **cache-backed** projection in ShopStream. Cache projections
 are written via `current_domain.cache_for(PointsLeaderboard).add(...)` and read via
@@ -290,12 +295,17 @@ command-dispatching subscriber; acceptable for a single, well-contained reaction
 | Cross-domain subscribers (pattern A: identity; pattern B: ordering) | [`identity_subscriber.py`](../../src/loyalty/reward/identity_subscriber.py), [`ordering_subscriber.py`](../../src/loyalty/reward/ordering_subscriber.py) |
 | PromoCampaign event-sourced aggregate | [`src/loyalty/campaign/campaign.py`](../../src/loyalty/campaign/campaign.py) |
 | PromoCampaign events | [`src/loyalty/campaign/events.py`](../../src/loyalty/campaign/events.py) |
+| Campaign lifecycle commands + handler | [`src/loyalty/campaign/management.py`](../../src/loyalty/campaign/management.py) |
+| Active points-multiplier lookup (cross-aggregate read) | [`src/loyalty/campaign/multiplier.py`](../../src/loyalty/campaign/multiplier.py) |
 | CampaignLaunched upcaster chain (v1&rarr;v2&rarr;v3) | [`src/loyalty/campaign/upcasters.py`](../../src/loyalty/campaign/upcasters.py) |
-| Projections + projectors (DB + cache) | [`src/loyalty/projections/`](../../src/loyalty/projections/) |
-| Query handlers (`@read`) for the read endpoints | [`reward_account_view_queries.py`](../../src/loyalty/projections/reward_account_view_queries.py), [`points_leaderboard_queries.py`](../../src/loyalty/projections/points_leaderboard_queries.py) |
+| Projections + projectors (DB account view + cache leaderboard + DB campaign catalog) | [`src/loyalty/projections/`](../../src/loyalty/projections/) |
+| Query handlers (`@read`) for the read endpoints | [`reward_account_view_queries.py`](../../src/loyalty/projections/reward_account_view_queries.py), [`points_leaderboard_queries.py`](../../src/loyalty/projections/points_leaderboard_queries.py), [`campaign_catalog_queries.py`](../../src/loyalty/projections/campaign_catalog_queries.py) |
 | API routes + schemas | [`src/loyalty/api/`](../../src/loyalty/api/) |
 | Generated reference: [clusters](clusters.md) · [event flows](event-flows.md) · [handler wiring](handler-wiring.md) · [catalog](catalog.md) | — |
 
-The HTTP API (`/loyalty`, see `src/loyalty/api/`) exposes enrol / earn / redeem / transfer plus
-read endpoints for the account view (DB) and points standing (cache). Writes go through commands
-and the application service; reads go through query handlers (`current_domain.dispatch`).
+The HTTP API (`/loyalty`, see `src/loyalty/api/`) exposes enrol / earn / redeem / transfer and
+the campaign lifecycle (launch / activate / pause / expire), plus read endpoints for the account
+view (DB), points standing (cache), and the campaign catalog (DB). Writes go through commands and
+the application service; reads go through query handlers (`current_domain.dispatch`). An active
+`points_multiplier` campaign boosts points earned — the earn handler reads the `CampaignCatalog`
+read model (a cross-aggregate read; see [`multiplier.py`](../../src/loyalty/campaign/multiplier.py)).

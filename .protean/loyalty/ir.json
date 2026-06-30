@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:b64de92dbe8ee020fd659c47617fee7f5963134946fd76dfd7554efd112c30b3",
+  "checksum": "sha256:81ce53fae6cf325590b1c3e71f644fe9ca632c1bee40ce2fc92e321170e1cc97",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -97,8 +97,142 @@
         }
       },
       "application_services": {},
-      "command_handlers": {},
-      "commands": {},
+      "command_handlers": {
+        "loyalty.campaign.management.PromoCampaignHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "loyalty.campaign.management.PromoCampaignHandler",
+          "handlers": {
+            "Loyalty.ActivateCampaign.v1": [
+              "activate"
+            ],
+            "Loyalty.ExpireCampaign.v1": [
+              "expire"
+            ],
+            "Loyalty.LaunchCampaign.v1": [
+              "launch"
+            ],
+            "Loyalty.PauseCampaign.v1": [
+              "pause"
+            ]
+          },
+          "module": "loyalty.campaign.management",
+          "name": "PromoCampaignHandler",
+          "part_of": "loyalty.campaign.campaign.PromoCampaign",
+          "stream_category": "loyalty::promo_campaign:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "loyalty.campaign.management.ActivateCampaign": {
+          "__type__": "Loyalty.ActivateCampaign.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "campaign_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "loyalty.campaign.management.ActivateCampaign",
+          "module": "loyalty.campaign.management",
+          "name": "ActivateCampaign",
+          "part_of": "loyalty.campaign.campaign.PromoCampaign"
+        },
+        "loyalty.campaign.management.ExpireCampaign": {
+          "__type__": "Loyalty.ExpireCampaign.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "campaign_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "loyalty.campaign.management.ExpireCampaign",
+          "module": "loyalty.campaign.management",
+          "name": "ExpireCampaign",
+          "part_of": "loyalty.campaign.campaign.PromoCampaign"
+        },
+        "loyalty.campaign.management.LaunchCampaign": {
+          "__type__": "Loyalty.LaunchCampaign.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "campaign_code": {
+              "kind": "standard",
+              "max_length": 20,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "discount_type": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "discount_value": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "ends_on": {
+              "kind": "standard",
+              "type": "Date"
+            },
+            "name": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "starts_on": {
+              "kind": "standard",
+              "type": "Date"
+            }
+          },
+          "fqn": "loyalty.campaign.management.LaunchCampaign",
+          "module": "loyalty.campaign.management",
+          "name": "LaunchCampaign",
+          "part_of": "loyalty.campaign.campaign.PromoCampaign"
+        },
+        "loyalty.campaign.management.PauseCampaign": {
+          "__type__": "Loyalty.PauseCampaign.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "campaign_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.campaign.management.PauseCampaign",
+          "module": "loyalty.campaign.management",
+          "name": "PauseCampaign",
+          "part_of": "loyalty.campaign.campaign.PromoCampaign"
+        }
+      },
       "database_models": {},
       "entities": {},
       "event_handlers": {},
@@ -944,39 +1078,9 @@
   "diagnostics": [
     {
       "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
-      "element": "loyalty.campaign.campaign.PromoCampaign",
-      "level": "warning",
-      "message": "Aggregate `PromoCampaign` has no command handler \u2014 no write path exists"
-    },
-    {
-      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
       "element": "loyalty.reward.reward_account.Auditable",
       "level": "warning",
       "message": "Aggregate `Auditable` has no command handler \u2014 no write path exists"
-    },
-    {
-      "code": "UNHANDLED_EVENT",
-      "element": "loyalty.campaign.events.CampaignActivated",
-      "level": "warning",
-      "message": "Event CampaignActivated has no registered handler"
-    },
-    {
-      "code": "UNHANDLED_EVENT",
-      "element": "loyalty.campaign.events.CampaignExpired",
-      "level": "warning",
-      "message": "Event CampaignExpired has no registered handler"
-    },
-    {
-      "code": "UNHANDLED_EVENT",
-      "element": "loyalty.campaign.events.CampaignLaunched",
-      "level": "warning",
-      "message": "Event CampaignLaunched has no registered handler"
-    },
-    {
-      "code": "UNHANDLED_EVENT",
-      "element": "loyalty.campaign.events.CampaignPaused",
-      "level": "warning",
-      "message": "Event CampaignPaused has no registered handler"
     },
     {
       "code": "UNHANDLED_EVENT",
@@ -1004,11 +1108,16 @@
       "loyalty.reward.services.LoyaltyService"
     ],
     "COMMAND": [
+      "loyalty.campaign.management.ActivateCampaign",
+      "loyalty.campaign.management.ExpireCampaign",
+      "loyalty.campaign.management.LaunchCampaign",
+      "loyalty.campaign.management.PauseCampaign",
       "loyalty.reward.enrollment.EnrollRewardAccount",
       "loyalty.reward.points.EarnPoints",
       "loyalty.reward.points.RedeemPoints"
     ],
     "COMMAND_HANDLER": [
+      "loyalty.campaign.management.PromoCampaignHandler",
       "loyalty.reward.enrollment.EnrollRewardAccountHandler",
       "loyalty.reward.points.PointsHandler"
     ],
@@ -1035,18 +1144,23 @@
     "EVENT_HANDLER": [],
     "PROCESS_MANAGER": [],
     "PROJECTION": [
+      "loyalty.projections.campaign_catalog.CampaignCatalog",
       "loyalty.projections.points_leaderboard.PointsLeaderboard",
       "loyalty.projections.reward_account_view.RewardAccountView"
     ],
     "PROJECTOR": [
+      "loyalty.projections.campaign_catalog.CampaignCatalogProjector",
       "loyalty.projections.points_leaderboard.PointsLeaderboardProjector",
       "loyalty.projections.reward_account_view.RewardAccountViewProjector"
     ],
     "QUERY": [
+      "loyalty.projections.campaign_catalog_queries.GetCampaign",
+      "loyalty.projections.campaign_catalog_queries.ListCampaigns",
       "loyalty.projections.points_leaderboard_queries.GetLeaderboardStanding",
       "loyalty.projections.reward_account_view_queries.GetRewardAccount"
     ],
     "QUERY_HANDLER": [
+      "loyalty.projections.campaign_catalog_queries.CampaignCatalogQueryHandler",
       "loyalty.projections.points_leaderboard_queries.PointsLeaderboardQueryHandler",
       "loyalty.projections.reward_account_view_queries.RewardAccountViewQueryHandler"
     ],
@@ -1100,9 +1214,159 @@
       }
     }
   },
-  "generated_at": "2026-06-30T17:50:16Z",
+  "generated_at": "2026-06-30T18:17:43Z",
   "ir_version": "0.1.0",
   "projections": {
+    "loyalty.projections.campaign_catalog.CampaignCatalog": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "campaign_code": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "campaign_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "discount_type": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "discount_value": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "ends_on": {
+            "kind": "standard",
+            "type": "Date"
+          },
+          "name": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "starts_on": {
+            "kind": "standard",
+            "type": "Date"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          }
+        },
+        "fqn": "loyalty.projections.campaign_catalog.CampaignCatalog",
+        "identity_field": "campaign_id",
+        "module": "loyalty.projections.campaign_catalog",
+        "name": "CampaignCatalog",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "campaign_catalog"
+        }
+      },
+      "projectors": {
+        "loyalty.projections.campaign_catalog.CampaignCatalogProjector": {
+          "aggregates": [
+            "loyalty.campaign.campaign.PromoCampaign"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "loyalty.projections.campaign_catalog.CampaignCatalogProjector",
+          "handlers": {
+            "Loyalty.CampaignActivated.v1": [
+              "on_activated"
+            ],
+            "Loyalty.CampaignExpired.v1": [
+              "on_expired"
+            ],
+            "Loyalty.CampaignLaunched.v3": [
+              "on_launched"
+            ],
+            "Loyalty.CampaignPaused.v1": [
+              "on_paused"
+            ]
+          },
+          "module": "loyalty.projections.campaign_catalog",
+          "name": "CampaignCatalogProjector",
+          "projector_for": "loyalty.projections.campaign_catalog.CampaignCatalog",
+          "stream_categories": [
+            "loyalty::promo_campaign"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "loyalty.projections.campaign_catalog_queries.GetCampaign": {
+          "__type__": "Loyalty.GetCampaign",
+          "element_type": "QUERY",
+          "fields": {
+            "campaign_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "loyalty.projections.campaign_catalog_queries.GetCampaign",
+          "module": "loyalty.projections.campaign_catalog_queries",
+          "name": "GetCampaign",
+          "part_of": "loyalty.projections.campaign_catalog.CampaignCatalog"
+        },
+        "loyalty.projections.campaign_catalog_queries.ListCampaigns": {
+          "__type__": "Loyalty.ListCampaigns",
+          "element_type": "QUERY",
+          "fields": {
+            "status": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.projections.campaign_catalog_queries.ListCampaigns",
+          "module": "loyalty.projections.campaign_catalog_queries",
+          "name": "ListCampaigns",
+          "part_of": "loyalty.projections.campaign_catalog.CampaignCatalog"
+        }
+      },
+      "query_handlers": {
+        "loyalty.projections.campaign_catalog_queries.CampaignCatalogQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "loyalty.projections.campaign_catalog_queries.CampaignCatalogQueryHandler",
+          "handlers": {
+            "Loyalty.GetCampaign": [
+              "get_campaign"
+            ],
+            "Loyalty.ListCampaigns": [
+              "list_campaigns"
+            ]
+          },
+          "module": "loyalty.projections.campaign_catalog_queries",
+          "name": "CampaignCatalogQueryHandler",
+          "part_of": "loyalty.projections.campaign_catalog.CampaignCatalog"
+        }
+      }
+    },
     "loyalty.projections.points_leaderboard.PointsLeaderboard": {
       "projection": {
         "element_type": "PROJECTION",

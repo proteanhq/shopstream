@@ -1,3 +1,17 @@
+## Command Handlers: PromoCampaign
+
+```mermaid
+flowchart LR
+    subgraph command_handlers["Command Handlers"]
+        ch_loyalty_campaign_management_PromoCampaignHandler[PromoCampaignHandler]
+    end
+    cmd_loyalty_campaign_management_ActivateCampaign[/ActivateCampaign/] --> ch_loyalty_campaign_management_PromoCampaignHandler
+    cmd_loyalty_campaign_management_ExpireCampaign[/ExpireCampaign/] --> ch_loyalty_campaign_management_PromoCampaignHandler
+    cmd_loyalty_campaign_management_LaunchCampaign[/LaunchCampaign/] --> ch_loyalty_campaign_management_PromoCampaignHandler
+    cmd_loyalty_campaign_management_PauseCampaign[/PauseCampaign/] --> ch_loyalty_campaign_management_PromoCampaignHandler
+    ch_loyalty_campaign_management_PromoCampaignHandler --> agg_loyalty_campaign_campaign_PromoCampaign[PromoCampaign]
+```
+
 ## Command Handlers: RewardAccount
 
 ```mermaid
@@ -18,8 +32,22 @@ flowchart LR
 ```mermaid
 flowchart TD
     subgraph subscribers["Subscribers"]
+        sub_loyalty_reward_identity_subscriber_CustomerRegisteredSubscriber[CustomerRegisteredSubscriber\nstream: identity::customer]
         sub_loyalty_reward_ordering_subscriber_OrderDeliveredSubscriber[OrderDeliveredSubscriber\nstream: ordering::order]
     end
+```
+
+## Projector: CampaignCatalog
+
+```mermaid
+flowchart LR
+    subgraph projectors["Projectors"]
+        proj_loyalty_projections_campaign_catalog_CampaignCatalogProjector[CampaignCatalogProjector → CampaignCatalog]
+    end
+    evt_loyalty_campaign_events_CampaignActivated([CampaignActivated]) --> proj_loyalty_projections_campaign_catalog_CampaignCatalogProjector
+    evt_loyalty_campaign_events_CampaignExpired([CampaignExpired]) --> proj_loyalty_projections_campaign_catalog_CampaignCatalogProjector
+    evt_loyalty_campaign_events_CampaignLaunched([CampaignLaunched]) --> proj_loyalty_projections_campaign_catalog_CampaignCatalogProjector
+    evt_loyalty_campaign_events_CampaignPaused([CampaignPaused]) --> proj_loyalty_projections_campaign_catalog_CampaignCatalogProjector
 ```
 
 ## Projector: PointsLeaderboard
