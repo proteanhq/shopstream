@@ -24,7 +24,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | in-domain `@event_handler` | ✅ | inventory `EventAuditHandler` (+ notifications) |
 | `@handle("$any")` wildcard | ✅ | inventory `EventAuditHandler` (sync + direct dispatch; **#1023** fixed on main) |
 | `@projection` + `@projector` (DB) | ✅ | ~48; loyalty RewardAccountView |
-| `@projection(cache=...)` | ✅ | loyalty PointsLeaderboard (`cache="loyalty"`) — write via `cache_for().add()`, read via `view_for().get()` |
+| `@projection(cache=...)` | ✅ (memory) | loyalty PointsLeaderboard (`cache="loyalty"`) — write via `cache_for().add()`, read via `view_for().get()`. Postgres DB setup blocked by **#1034** (see below); covered by the memory CI job |
 | `@query` + `@query_handler` (`@read`) | ✅ | reviews/ordering/fulfillment/identity `*_queries.py` |
 | `@subscriber` pattern A (→ command) | ✅ | inventory/ordering/payments/… ACL subscribers |
 | `@subscriber` pattern B (direct mutation) | ✅ | loyalty `OrderDeliveredSubscriber` |
@@ -79,6 +79,7 @@ This branch pins Protean to git `main`, which carries all three fixes.
 | [#1023](https://github.com/proteanhq/protean/issues/1023) | ✅ fixed on main | `@handle("$any")` event handlers silently skipped under `event_processing="sync"` (`handlers_for` ignored `$any`) |
 | [#1025](https://github.com/proteanhq/protean/issues/1025) | ✅ fixed on main | per-field `validators=` ran against `None` on optional fields (AfterValidator omitted empty-value short-circuit) |
 | [#1028](https://github.com/proteanhq/protean/issues/1028) | ✅ fixed on main | bulk `create_snapshots()` failed for `fact_events=True` aggregates (`-fact-` streams mistaken for instances) |
+| [#1034](https://github.com/proteanhq/protean/issues/1034) | ⛔ open | cache-backed projection breaks SQLAlchemy DB setup (`_create_database_artifacts` doesn't skip cache projections). loyalty is excluded from the Postgres CI job until fixed; it runs in the memory CI job |
 
 Minor DX note (not filed): `repository_for()` gives a confusing `provider=None` error for cache-backed
 projections — the working API is `cache_for().add()` / `view_for().get()`.
