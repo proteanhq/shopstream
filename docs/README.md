@@ -70,7 +70,7 @@ Each bounded context has a **narrative** (the business story) and **scenarios**
 6. Delivery Exception scenario (exception/recovery state transitions)
 7. Reviews narrative (cross-domain integration, moderation-before-publication design)
 8. Notifications narrative (pure consumer, template registry, port/adapter channels)
-9. Loyalty narrative (domain service + application service, cache projection, multi-step upcaster, fact events + snapshots)
+9. Loyalty narrative (domain + application services, cache projection, multi-step upcaster, fact events + snapshots, event producer, and a second process-manager saga with compensation)
 10. Points Transfer scenario (cross-aggregate domain service via an application service)
 11. Glossary (see how UL maps to code elements)
 
@@ -130,14 +130,15 @@ docs/
 
 | | Identity | Catalogue | Ordering | Inventory | Payments | Fulfillment | Reviews | Notifications | Loyalty |
 |---|---------|-----------|----------|-----------|----------|-------------|---------|---------------|---------|
-| **Aggregates** | Customer | Product, Category | Order (ES), ShoppingCart | InventoryItem (ES), Warehouse | Payment (ES), Invoice | Fulfillment | Review | Notification, NotificationPreference | RewardAccount, PromoCampaign (ES) |
+| **Aggregates** | Customer | Product, Category | Order (ES), ShoppingCart | InventoryItem (ES), Warehouse | Payment (ES), Invoice | Fulfillment | Review | Notification, NotificationPreference | RewardAccount, PromoCampaign (ES), Redemption |
 | **Entities** | Address | Variant, Image | OrderItem, CartItem | Reservation, Zone | PaymentAttempt, Refund, InvoiceLineItem | FulfillmentItem, Package, TrackingEvent | ReviewImage, HelpfulVote, SellerReply | -- | MembershipCard, PointsLedgerEntry |
 | **Value Objects** | Profile, EmailAddress, PhoneNumber, GeoCoordinates | SKU, Price, SEO, Dimensions, Weight, Money | ShippingAddress, OrderPricing | StockLevels, WarehouseAddress | Money, PaymentMethod, GatewayInfo | PickList, PackingInfo, ShipmentInfo, PackageDimensions | Rating | -- | -- |
-| **Events** | 10 | 13 | 25 | 18 | 10 | 11 | 8 | 13 | 9 |
-| **Commands** | 10 | 14 | 27 | 16 | 7 | 11 | 7 | 8 | 3 |
-| **Projections** | 4 | 5 | 6 | 6 | 5 | 5 | 6 | 4 | 2 (1 DB + 1 cache) |
-| **API Endpoints** | 10 | 14 | 25 | 16 | 9 | 12 | 7 | 9 | 6 |
-| **Persistence** | CQRS | CQRS | Event Sourced (Order) + CQRS (Cart) | Event Sourced (InventoryItem) + CQRS (Warehouse) | Event Sourced (Payment) + CQRS (Invoice) | CQRS | CQRS | CQRS | CQRS (RewardAccount) + Event Sourced (PromoCampaign) |
+| **Process Managers** | -- | -- | OrderCheckoutSaga | -- | -- | -- | -- | -- | RedemptionSaga |
+| **Events** | 10 | 13 | 25 | 18 | 10 | 11 | 8 | 13 | 16 |
+| **Commands** | 10 | 14 | 27 | 16 | 7 | 11 | 7 | 8 | 12 |
+| **Projections** | 4 | 5 | 6 | 6 | 5 | 5 | 6 | 4 | 4 (3 DB + 1 cache) |
+| **API Endpoints** | 10 | 14 | 25 | 16 | 9 | 12 | 7 | 9 | 14 |
+| **Persistence** | CQRS | CQRS | Event Sourced (Order) + CQRS (Cart) | Event Sourced (InventoryItem) + CQRS (Warehouse) | Event Sourced (Payment) + CQRS (Invoice) | CQRS | CQRS | CQRS | CQRS (RewardAccount, Redemption) + Event Sourced (PromoCampaign) + Saga (RedemptionSaga) |
 
 ## Conventions in This Documentation
 
