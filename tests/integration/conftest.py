@@ -41,3 +41,20 @@ def catalogue_ctx(catalogue_bed):
     """Push catalogue domain context for a test, with cleanup."""
     with catalogue_bed.domain_context() as domain:
         yield domain
+
+
+@pytest.fixture(scope="session")
+def loyalty_bed():
+    from loyalty.domain import loyalty
+
+    bed = DomainFixture(loyalty)
+    bed.setup()
+    yield bed
+    bed.teardown()
+
+
+@pytest.fixture
+def loyalty_ctx(loyalty_bed):
+    """Push loyalty domain context for a test, with cleanup."""
+    with loyalty_bed.domain_context() as domain:
+        yield domain

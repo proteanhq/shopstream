@@ -34,6 +34,7 @@ flowchart TD
     subgraph subscribers["Subscribers"]
         sub_loyalty_reward_identity_subscriber_CustomerRegisteredSubscriber[CustomerRegisteredSubscriber\nstream: identity::customer]
         sub_loyalty_reward_ordering_subscriber_OrderDeliveredSubscriber[OrderDeliveredSubscriber\nstream: ordering::order]
+        sub_loyalty_reward_reviews_subscriber_ReviewApprovedSubscriber[ReviewApprovedSubscriber\nstream: reviews::review]
     end
 ```
 
@@ -73,4 +74,5 @@ flowchart LR
     evt_loyalty_reward_events_PointsRedeemed([PointsRedeemed]) --> proj_loyalty_projections_reward_account_view_RewardAccountViewProjector
     evt_loyalty_reward_events_RewardAccountClosed([RewardAccountClosed]) --> proj_loyalty_projections_reward_account_view_RewardAccountViewProjector
     evt_loyalty_reward_events_RewardAccountEnrolled([RewardAccountEnrolled]) --> proj_loyalty_projections_reward_account_view_RewardAccountViewProjector
+    evt_loyalty_reward_events_TierUpgraded([TierUpgraded]) --> proj_loyalty_projections_reward_account_view_RewardAccountViewProjector
 ```

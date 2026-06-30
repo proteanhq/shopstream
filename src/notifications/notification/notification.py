@@ -47,6 +47,8 @@ class NotificationType(Enum):
     REVIEW_REJECTED = "ReviewRejected"
     REFUND_NOTIFICATION = "RefundNotification"
     ORDER_CANCELLATION = "OrderCancellation"
+    TIER_UPGRADED = "TierUpgraded"
+    POINTS_REDEEMED = "PointsRedeemed"
 
 
 class NotificationChannel(Enum):

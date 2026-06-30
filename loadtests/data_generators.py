@@ -441,3 +441,30 @@ def quiet_hours_data() -> dict:
 def notification_type() -> str:
     """Return a random NotificationType enum value."""
     return random.choice(_NOTIFICATION_TYPES)
+
+
+# ---------- Loyalty Domain ----------
+
+
+def loyalty_customer_id() -> str:
+    """Generate a unique customer id for loyalty enrolment (any string is accepted)."""
+    return f"LOY-CUST-{uuid.uuid4().hex[:10]}"
+
+
+def campaign_code() -> str:
+    """Generate a campaign_code matching the API's max_length=20 constraint."""
+    return f"PROMO{uuid.uuid4().hex[:8].upper()}"
+
+
+def campaign_data() -> dict:
+    """Generate a LaunchCampaignRequest payload (a points_multiplier campaign).
+
+    Omits starts_on/ends_on — a Date field on a command currently breaks Protean's
+    message checksum (proteanhq/protean#1046).
+    """
+    return {
+        "campaign_code": campaign_code(),
+        "name": f"{fake.word().title()} Bonus",
+        "discount_type": "points_multiplier",
+        "discount_value": random.choice([2, 3]),
+    }

@@ -23,8 +23,8 @@ from notifications.templates.welcome import WelcomeTemplate
 # Template registry
 # ---------------------------------------------------------------
 class TestTemplateRegistry:
-    def test_registry_has_13_templates(self):
-        assert len(TEMPLATE_REGISTRY) == 13
+    def test_registry_has_15_templates(self):
+        assert len(TEMPLATE_REGISTRY) == 15
 
     def test_every_notification_type_has_a_template(self):
         for nt in NotificationType:

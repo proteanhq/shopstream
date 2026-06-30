@@ -70,6 +70,12 @@ from loadtests.scenarios.cross_domain import SubscriberUser  # noqa: F401
 from loadtests.scenarios.fulfillment import FulfillmentUser  # noqa: F401
 from loadtests.scenarios.identity import IdentityUser  # noqa: F401
 from loadtests.scenarios.inventory import InventoryUser  # noqa: F401
+
+# LoyaltyUser is included — happy-path Loyalty HTTP API flows (enrol/earn/redeem/transfer +
+# promo-campaign lifecycle, no expected failures). LoyaltyRewardsUser (event-driven, drives
+# the order lifecycle and can race the OrderCheckoutSaga) is excluded — run explicitly:
+#   locust -f loadtests/scenarios/loyalty.py LoyaltyRewardsUser
+from loadtests.scenarios.loyalty import LoyaltyUser  # noqa: F401
 from loadtests.scenarios.mixed import MixedWorkloadUser  # noqa: F401
 from loadtests.scenarios.notifications import NotificationsUser  # noqa: F401
 

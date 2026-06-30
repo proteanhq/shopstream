@@ -487,3 +487,44 @@ class TestOutboxStreamIsolation:
         assert len(product_streams) >= 1
         assert len(category_streams) >= 1
         assert product_streams.isdisjoint(category_streams)
+
+
+# ---------------------------------------------------------------------------
+# Loyalty domain: producer (published events dual-written to the external bus)
+# ---------------------------------------------------------------------------
+class TestLoyaltyProducerOutbox:
+    """Verify Loyalty's published events are dual-written to internal + external brokers."""
+
+    def test_points_earned_dual_written_to_external_bus(self, loyalty_ctx):
+        """EarnPoints → PointsEarned lands on BOTH the internal and the global broker."""
+        from loyalty.reward.enrollment import EnrollRewardAccount
+        from loyalty.reward.points import EarnPoints
+
+        account_id = current_domain.process(EnrollRewardAccount(customer_id="cust-obx-earn"), asynchronous=False)
+        current_domain.process(EarnPoints(account_id=account_id, amount=120, reason="order"), asynchronous=False)
+
+        records = current_domain._get_outbox_repo("default").find_unprocessed()
+        earned = [r for r in records if r.type == "Loyalty.PointsEarned.v1"]
+        brokers = {r.target_broker for r in earned}
+
+        # published=True ⇒ one internal (default) row + one external (global) row.
+        assert brokers == {"default", "global"}
+        assert all(r.stream_name.startswith("loyalty::reward_account-") for r in earned)
+        assert earned[0].data["customer_id"] == "cust-obx-earn"
+
+    def test_tier_upgrade_event_published(self, loyalty_ctx):
+        """Earning past a tier threshold publishes a TierUpgraded event to the external bus."""
+        from loyalty.reward.enrollment import EnrollRewardAccount
+        from loyalty.reward.points import EarnPoints
+
+        account_id = current_domain.process(EnrollRewardAccount(customer_id="cust-obx-tier"), asynchronous=False)
+        current_domain.process(EarnPoints(account_id=account_id, amount=1_500, reason="order"), asynchronous=False)
+
+        records = current_domain._get_outbox_repo("default").find_unprocessed()
+        upgrades = [r for r in records if r.type == "Loyalty.TierUpgraded.v1"]
+        brokers = {r.target_broker for r in upgrades}
+
+        assert brokers == {"default", "global"}
+        external = next(r for r in upgrades if r.target_broker == "global")
+        assert external.data["new_tier"] == "silver"
+        assert external.data["customer_id"] == "cust-obx-tier"

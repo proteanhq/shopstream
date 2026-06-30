@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas docs-generate ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty verify-timeline verify-timeline-skip-seed
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas docs-generate ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-timeline verify-timeline-skip-seed
 
 # Default target
 help: ## Show this help message
@@ -591,7 +591,10 @@ loadtest-baseline: ## Run priority lanes disabled baseline (headless, 30 users, 
 loadtest-fulfillment: ## Run fulfillment workflow load test (web UI)
 	uv run locust -f loadtests/locustfile.py --host http://localhost:8000 FulfillmentUser
 
-loadtest-loyalty: ## Run loyalty (event-driven) load test — needs engine-loyalty running
+loadtest-loyalty: ## Run loyalty HTTP API load test (enrol/earn/redeem/transfer + campaigns)
+	uv run locust -f loadtests/scenarios/loyalty.py --host http://localhost:8000 LoyaltyUser
+
+loadtest-loyalty-events: ## Run loyalty event-driven load test (order lifecycle) — needs engine-loyalty
 	uv run locust -f loadtests/scenarios/loyalty.py --host http://localhost:8000 LoyaltyRewardsUser
 
 loadtest-seed: ## Seed baseline data (20 customers, 15 products, 5 categories, 3 warehouses)

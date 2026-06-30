@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:9b8d51c77bbb48ce8cb9f0a9705ac0ca11e790eda554fa120a85ba83a22021e9",
+  "checksum": "sha256:aa5a2db1514085c212810d69f833ee1cc3eaf31c92649628931aabe286ca9d6c",
   "clusters": {
     "notifications.notification.notification.Notification": {
       "aggregate": {
@@ -67,11 +67,13 @@
               "OrderCancellation",
               "OrderConfirmation",
               "PaymentReceipt",
+              "PointsRedeemed",
               "RefundNotification",
               "ReviewPrompt",
               "ReviewPublished",
               "ReviewRejected",
               "ShippingUpdate",
+              "TierUpgraded",
               "Welcome"
             ],
             "kind": "standard",
@@ -135,6 +137,9 @@
             "default": "Pending",
             "kind": "status",
             "transitions": {
+              "Failed": [
+                "Pending"
+              ],
               "Pending": [
                 "Sent",
                 "Failed",
@@ -144,9 +149,6 @@
                 "Delivered",
                 "Failed",
                 "Bounced"
-              ],
-              "Failed": [
-                "Pending"
               ]
             },
             "type": "Status"
@@ -1270,6 +1272,7 @@
       "notifications.notification.fulfillment_subscriber.FulfillmentEventsSubscriber",
       "notifications.notification.identity_subscriber.IdentityEventsSubscriber",
       "notifications.notification.inventory_subscriber.InventoryEventsSubscriber",
+      "notifications.notification.loyalty_subscriber.LoyaltyEventsSubscriber",
       "notifications.notification.ordering_subscriber.OrderingEventsSubscriber",
       "notifications.notification.payment_subscriber.PaymentEventsSubscriber",
       "notifications.notification.review_subscriber.ReviewEventsSubscriber",
@@ -1317,6 +1320,15 @@
         "name": "InventoryEventsSubscriber",
         "stream": "inventory::inventory_item"
       },
+      "notifications.notification.loyalty_subscriber.LoyaltyEventsSubscriber": {
+        "broker": "global",
+        "description": "Reacts to Loyalty domain events to send customer notifications.",
+        "element_type": "SUBSCRIBER",
+        "fqn": "notifications.notification.loyalty_subscriber.LoyaltyEventsSubscriber",
+        "module": "notifications.notification.loyalty_subscriber",
+        "name": "LoyaltyEventsSubscriber",
+        "stream": "loyalty::reward_account"
+      },
       "notifications.notification.ordering_subscriber.OrderingEventsSubscriber": {
         "broker": "global",
         "description": "Reacts to Ordering domain events to send customer notifications.\n\nACL pattern: receives raw broker message dict, extracts event type from\nmetadata.headers.type, and creates notifications. Ignores all event\ntypes not relevant to the Notifications domain.",
@@ -1355,7 +1367,7 @@
       }
     }
   },
-  "generated_at": "2026-06-29T22:03:33Z",
+  "generated_at": "2026-06-30T18:44:42Z",
   "ir_version": "0.1.0",
   "projections": {
     "notifications.projections.customer_notifications.CustomerNotifications": {
