@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:81ce53fae6cf325590b1c3e71f644fe9ca632c1bee40ce2fc92e321170e1cc97",
+  "checksum": "sha256:6eabe84b7f993fe5b519b48f9d706708578a5f534d4d944ef5efe6d262fa8f99",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -926,6 +926,12 @@
               "required": true,
               "type": "Integer"
             },
+            "customer_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
             "occurred_at": {
               "kind": "standard",
               "required": true,
@@ -942,7 +948,8 @@
           "is_fact_event": false,
           "module": "loyalty.reward.events",
           "name": "PointsEarned",
-          "part_of": "loyalty.reward.reward_account.RewardAccount"
+          "part_of": "loyalty.reward.reward_account.RewardAccount",
+          "published": true
         },
         "loyalty.reward.events.PointsRedeemed": {
           "__type__": "Loyalty.PointsRedeemed.v1",
@@ -967,6 +974,12 @@
               "required": true,
               "type": "Integer"
             },
+            "customer_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
             "occurred_at": {
               "kind": "standard",
               "required": true,
@@ -983,7 +996,8 @@
           "is_fact_event": false,
           "module": "loyalty.reward.events",
           "name": "PointsRedeemed",
-          "part_of": "loyalty.reward.reward_account.RewardAccount"
+          "part_of": "loyalty.reward.reward_account.RewardAccount",
+          "published": true
         },
         "loyalty.reward.events.RewardAccountClosed": {
           "__type__": "Loyalty.RewardAccountClosed.v1",
@@ -1057,7 +1071,63 @@
           "is_fact_event": false,
           "module": "loyalty.reward.events",
           "name": "RewardAccountEnrolled",
-          "part_of": "loyalty.reward.reward_account.RewardAccount"
+          "part_of": "loyalty.reward.reward_account.RewardAccount",
+          "published": true
+        },
+        "loyalty.reward.events.TierUpgraded": {
+          "__type__": "Loyalty.TierUpgraded.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "account_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "customer_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "lifetime_points": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "new_tier": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "occurred_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "old_tier": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.reward.events.TierUpgraded",
+          "is_fact_event": false,
+          "module": "loyalty.reward.events",
+          "name": "TierUpgraded",
+          "part_of": "loyalty.reward.reward_account.RewardAccount",
+          "published": true
         }
       },
       "repositories": {
@@ -1073,7 +1143,185 @@
     }
   },
   "contracts": {
-    "events": []
+    "events": [
+      {
+        "fields": {
+          "account_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "amount": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "balance_after": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "customer_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "occurred_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "loyalty.reward.events.PointsEarned",
+        "type": "Loyalty.PointsEarned.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "account_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "amount": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "balance_after": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "customer_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "occurred_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "loyalty.reward.events.PointsRedeemed",
+        "type": "Loyalty.PointsRedeemed.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "account_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "customer_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "enrolled_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "member_code": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "tier": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "loyalty.reward.events.RewardAccountEnrolled",
+        "type": "Loyalty.RewardAccountEnrolled.v1",
+        "version": 1
+      },
+      {
+        "fields": {
+          "account_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "customer_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "lifetime_points": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "new_tier": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "occurred_at": {
+            "kind": "standard",
+            "required": true,
+            "type": "DateTime"
+          },
+          "old_tier": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "loyalty.reward.events.TierUpgraded",
+        "type": "Loyalty.TierUpgraded.v1",
+        "version": 1
+      }
+    ]
   },
   "diagnostics": [
     {
@@ -1139,7 +1387,8 @@
       "loyalty.reward.events.PointsEarned",
       "loyalty.reward.events.PointsRedeemed",
       "loyalty.reward.events.RewardAccountClosed",
-      "loyalty.reward.events.RewardAccountEnrolled"
+      "loyalty.reward.events.RewardAccountEnrolled",
+      "loyalty.reward.events.TierUpgraded"
     ],
     "EVENT_HANDLER": [],
     "PROCESS_MANAGER": [],
@@ -1169,7 +1418,8 @@
     ],
     "SUBSCRIBER": [
       "loyalty.reward.identity_subscriber.CustomerRegisteredSubscriber",
-      "loyalty.reward.ordering_subscriber.OrderDeliveredSubscriber"
+      "loyalty.reward.ordering_subscriber.OrderDeliveredSubscriber",
+      "loyalty.reward.reviews_subscriber.ReviewApprovedSubscriber"
     ],
     "VALUE_OBJECT": []
   },
@@ -1211,10 +1461,18 @@
         "module": "loyalty.reward.ordering_subscriber",
         "name": "OrderDeliveredSubscriber",
         "stream": "ordering::order"
+      },
+      "loyalty.reward.reviews_subscriber.ReviewApprovedSubscriber": {
+        "broker": "global",
+        "element_type": "SUBSCRIBER",
+        "fqn": "loyalty.reward.reviews_subscriber.ReviewApprovedSubscriber",
+        "module": "loyalty.reward.reviews_subscriber",
+        "name": "ReviewApprovedSubscriber",
+        "stream": "reviews::review"
       }
     }
   },
-  "generated_at": "2026-06-30T18:17:43Z",
+  "generated_at": "2026-06-30T18:44:39Z",
   "ir_version": "0.1.0",
   "projections": {
     "loyalty.projections.campaign_catalog.CampaignCatalog": {
@@ -1555,6 +1813,9 @@
             ],
             "Loyalty.RewardAccountEnrolled.v1": [
               "on_enrolled"
+            ],
+            "Loyalty.TierUpgraded.v1": [
+              "on_tier_upgraded"
             ]
           },
           "module": "loyalty.projections.reward_account_view",

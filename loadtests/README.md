@@ -219,9 +219,11 @@ Each journey registers a customer via the Identity API first, waits for the Engi
 
 ### Loyalty Domain
 
-Loyalty has **no HTTP API** — it is exercised entirely through cross-domain events. Run the Loyalty engine (`make engine-loyalty`), then drive the order lifecycle: `CustomerRegistered` auto-enrols a reward account (subscriber pattern A) and `OrderDelivered` awards a delivery bonus (subscriber pattern B), updating the `RewardAccountView` (DB) and `PointsLeaderboard` (cache) projections. Loyalty's effects are observed via the **Observatory** (loyalty Redis streams + cache + `protean_*` metrics), not asserted over HTTP.
+Loyalty exposes a full HTTP API (`/loyalty`), so it can be load-tested directly **and** through cross-domain events.
 
-**`LoyaltyRewardsUser`** ⚠️ — **Specialty scenario** (`loadtests/scenarios/loyalty.py`, run explicitly via `make loadtest-loyalty`). Reuses the end-to-end order journey (register → … → ship → deliver) to generate loyalty's enrol + award load. Like `CrossDomainUser`, the E2E lifecycle can race the `OrderCheckoutSaga` and produce the same expected ordering payment-handler failures — those are about ordering's saga, not loyalty. Note: loyalty also gets exercised incidentally by any default scenario that registers customers (`IdentityUser`) and delivers orders (`SubscriberUser`, `MixedWorkloadUser`) whenever the Loyalty engine is running.
+**`LoyaltyUser`** ✅ — **Default scenario** (`loadtests/scenarios/loyalty.py`, `make loadtest-loyalty`). Drives the Loyalty HTTP API directly across three weighted journeys: a rewards account journey (enrol → earn → redeem, reading back the `RewardAccountView` DB projection and the `PointsLeaderboard` Redis-cache projection), a campaign multiplier journey (launch → activate a `points_multiplier` `PromoCampaign`, then enrol + earn so the cross-aggregate boost applies, plus a catalog list), and a points transfer journey (the application-service path). Pure happy-path — no expected failures. With `make engine-loyalty` running, this also drives the published producer events (`PointsEarned`/`PointsRedeemed`/`TierUpgraded`) onto the external bus.
+
+**`LoyaltyRewardsUser`** ⚠️ — **Specialty scenario** (run explicitly via `make loadtest-loyalty-events`). Reuses the end-to-end order journey (register → … → ship → deliver) to generate loyalty's enrol + award load via events: `CustomerRegistered` auto-enrols a reward account (subscriber pattern A) and `OrderDelivered` awards a delivery bonus (subscriber pattern B). Like `CrossDomainUser`, the E2E lifecycle can race the `OrderCheckoutSaga` and produce the same expected ordering payment-handler failures — those are about ordering's saga, not loyalty. Loyalty is also exercised incidentally by any default scenario that registers customers (`IdentityUser`) and delivers orders (`SubscriberUser`, `MixedWorkloadUser`) whenever the Loyalty engine is running.
 
 ### Cross-Domain & Race Conditions
 
@@ -347,6 +349,7 @@ These are safe, happy-path scenarios with no expected failures:
 | `FulfillmentUser` | 0.5–2.0s | Fulfillment | Per-domain journeys in isolation |
 | `ReviewsUser` | 0.5–2.0s | Reviews | Per-domain journeys in isolation |
 | `NotificationsUser` | 0.5–2.0s | Notifications + Identity | Per-domain journeys (registers customers first) |
+| `LoyaltyUser` | 0.5–2.0s | Loyalty | HTTP API: enrol/earn/redeem/transfer + promo-campaign lifecycle |
 | `SubscriberUser` | 1.0–3.0s | Cross-domain | Happy-path subscriber ACL flows |
 | `MixedWorkloadUser` | 0.5–3.0s | All 8 | Realistic cross-domain load baseline |
 | `EventFloodUser` | 0.1s (constant) | 5 core | Pipeline saturation / find breaking points |
@@ -364,7 +367,7 @@ These are safe, happy-path scenarios with no expected failures:
 | `InventoryMaintenanceUser` | 0.5–2.0s | Inventory | Expire reservations (run with `-u 1`) |
 | `SpikeUser` | 0.05s (constant) | Identity | Sudden traffic burst handling |
 | `CrossDomainFloodUser` | 0.1s (constant) | 5 core | Even pressure across all domains |
-| `LoyaltyRewardsUser` | 0.5–2.0s | Loyalty (event-driven) | Enrol-on-register + award-on-deliver; needs `engine-loyalty` |
+| `LoyaltyRewardsUser` | 0.5–2.0s | Loyalty (event-driven) | Enrol-on-register + award-on-deliver; `make loadtest-loyalty-events`; needs `engine-loyalty` |
 
 ### Priority Lanes (run explicitly — require `priority_lanes.enabled = true`)
 

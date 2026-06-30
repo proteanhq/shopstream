@@ -145,7 +145,7 @@
 
 - **Type**: `Loyalty.PointsEarned.v1`
 - **Version**: 1
-- **Published**: No
+- **Published**: Yes
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
@@ -153,6 +153,7 @@
 | account_id | String | Yes | max_length=255, min_length=1 |
 | amount | Integer | Yes | — |
 | balance_after | Integer | Yes | — |
+| customer_id | String | No | max_length=255 |
 | occurred_at | DateTime | Yes | — |
 | reason | String | No | max_length=255 |
 
@@ -160,7 +161,7 @@
 
 - **Type**: `Loyalty.PointsRedeemed.v1`
 - **Version**: 1
-- **Published**: No
+- **Published**: Yes
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
@@ -168,6 +169,7 @@
 | account_id | String | Yes | max_length=255, min_length=1 |
 | amount | Integer | Yes | — |
 | balance_after | Integer | Yes | — |
+| customer_id | String | No | max_length=255 |
 | occurred_at | DateTime | Yes | — |
 | reason | String | No | max_length=255 |
 
@@ -187,7 +189,7 @@
 
 - **Type**: `Loyalty.RewardAccountEnrolled.v1`
 - **Version**: 1
-- **Published**: No
+- **Published**: Yes
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
@@ -197,6 +199,22 @@
 | enrolled_at | DateTime | Yes | — |
 | member_code | String | Yes | max_length=255, min_length=1 |
 | tier | String | Yes | max_length=255, min_length=1 |
+
+#### TierUpgraded
+
+- **Type**: `Loyalty.TierUpgraded.v1`
+- **Version**: 1
+- **Published**: Yes
+- **Fact Event**: No
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| account_id | String | Yes | max_length=255, min_length=1 |
+| customer_id | String | Yes | max_length=255, min_length=1 |
+| lifetime_points | Integer | Yes | — |
+| new_tier | String | Yes | max_length=255, min_length=1 |
+| occurred_at | DateTime | Yes | — |
+| old_tier | String | Yes | max_length=255, min_length=1 |
 
 ### Commands
 
@@ -231,3 +249,14 @@
 | account_id | Identifier | Yes | min_length=1 |
 | amount | Integer | Yes | — |
 | reason | String | No | max_length=255 |
+
+---
+
+## Published Event Contracts
+
+| Event | Type | Version |
+|-------|------|---------|
+| PointsEarned | `Loyalty.PointsEarned.v1` | 1 |
+| PointsRedeemed | `Loyalty.PointsRedeemed.v1` | 1 |
+| RewardAccountEnrolled | `Loyalty.RewardAccountEnrolled.v1` | 1 |
+| TierUpgraded | `Loyalty.TierUpgraded.v1` | 1 |

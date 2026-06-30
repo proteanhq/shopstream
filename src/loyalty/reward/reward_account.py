@@ -59,6 +59,23 @@ class AccountStatus(Enum):
 # choices used elsewhere in ShopStream.
 TIERS = ["bronze", "silver", "gold", "platinum"]
 
+# Lifetime-points thresholds that unlock each tier. Earning points can promote an account
+# (highest threshold reached wins); tiers never downgrade on earn.
+TIER_THRESHOLDS = [
+    ("platinum", 20_000),
+    ("gold", 5_000),
+    ("silver", 1_000),
+    ("bronze", 0),
+]
+
+
+def tier_for_lifetime_points(lifetime_points):
+    """Return the highest tier whose threshold the lifetime points have reached."""
+    for tier, threshold in TIER_THRESHOLDS:
+        if lifetime_points >= threshold:
+            return tier
+    return "bronze"
+
 
 class NoTripleRepeatValidator:
     """Custom field validator: reject codes that repeat one character 3+ times in a row.
@@ -213,9 +230,32 @@ class RewardAccount(Auditable):
         self.raise_(
             PointsEarned(
                 account_id=self.id,
+                customer_id=self.customer_id,
                 amount=amount,
                 balance_after=self.points_balance,
                 reason=reason,
+                occurred_at=datetime.now(UTC),
+            )
+        )
+        self._maybe_upgrade_tier()
+
+    def _maybe_upgrade_tier(self):
+        """Promote the account if lifetime points have crossed a tier threshold."""
+        from loyalty.reward.events import TierUpgraded
+
+        earned_tier = tier_for_lifetime_points(self.lifetime_points)
+        if TIERS.index(earned_tier) <= TIERS.index(self.tier):
+            return  # already at or above the earned tier — never downgrade
+        old_tier = self.tier
+        self.tier = earned_tier
+        self.touch()
+        self.raise_(
+            TierUpgraded(
+                account_id=self.id,
+                customer_id=self.customer_id,
+                old_tier=old_tier,
+                new_tier=earned_tier,
+                lifetime_points=self.lifetime_points,
                 occurred_at=datetime.now(UTC),
             )
         )
@@ -232,6 +272,7 @@ class RewardAccount(Auditable):
         self.raise_(
             PointsRedeemed(
                 account_id=self.id,
+                customer_id=self.customer_id,
                 amount=amount,
                 balance_after=self.points_balance,
                 reason=reason,

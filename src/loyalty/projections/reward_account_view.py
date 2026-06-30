@@ -10,6 +10,7 @@ from loyalty.reward.events import (
     PointsRedeemed,
     RewardAccountClosed,
     RewardAccountEnrolled,
+    TierUpgraded,
 )
 from loyalty.reward.reward_account import RewardAccount
 
@@ -57,6 +58,14 @@ class RewardAccountViewProjector:
         repo = current_domain.repository_for(RewardAccountView)
         view = repo.get(event.account_id)
         view.points_balance = event.balance_after
+        view.updated_at = event.occurred_at
+        repo.add(view)
+
+    @on(TierUpgraded)
+    def on_tier_upgraded(self, event):
+        repo = current_domain.repository_for(RewardAccountView)
+        view = repo.get(event.account_id)
+        view.tier = event.new_tier
         view.updated_at = event.occurred_at
         repo.add(view)
 

@@ -29,9 +29,10 @@ Root fields: `recipient_id`, `recipient_type` (`RecipientType`), `notification_t
 `updated_at`.
 
 ### Enums
-- `NotificationType` (13): WELCOME, ORDER_CONFIRMATION, PAYMENT_RECEIPT, SHIPPING_UPDATE,
+- `NotificationType` (15): WELCOME, ORDER_CONFIRMATION, PAYMENT_RECEIPT, SHIPPING_UPDATE,
   DELIVERY_CONFIRMATION, DELIVERY_EXCEPTION, REVIEW_PROMPT, CART_RECOVERY, LOW_STOCK_ALERT,
-  REVIEW_PUBLISHED, REVIEW_REJECTED, REFUND_NOTIFICATION, ORDER_CANCELLATION
+  REVIEW_PUBLISHED, REVIEW_REJECTED, REFUND_NOTIFICATION, ORDER_CANCELLATION, TIER_UPGRADED,
+  POINTS_REDEEMED
 - `NotificationChannel`: EMAIL, SMS, PUSH, SLACK
 - `NotificationStatus`: PENDING, SENT, DELIVERED, FAILED, BOUNCED, CANCELLED
 - `RecipientType`: CUSTOMER, INTERNAL
@@ -112,8 +113,9 @@ All use the subscriber (ACL) pattern: `__call__(payload: dict)`, branch on
 | `notification/fulfillment_subscriber.py` | `fulfillment::fulfillment` | shipment/delivery events (logged; events lack customer_id) |
 | `notification/inventory_subscriber.py` | `inventory::inventory_item` | LowStockDetected → internal LOW_STOCK_ALERT (Slack) |
 | `notification/review_subscriber.py` | `reviews::review` | ReviewApproved → REVIEW_PUBLISHED; ReviewRejected → REVIEW_REJECTED |
+| `notification/loyalty_subscriber.py` | `loyalty::reward_account` | TierUpgraded → TIER_UPGRADED; PointsRedeemed → POINTS_REDEEMED |
 
-Eight subscribers across seven streams — `identity::customer` is consumed by two
+Nine subscribers across eight streams — `identity::customer` is consumed by two
 (welcome + preferences).
 
 ## Channels & Templates

@@ -9,8 +9,8 @@ from notifications.notification.notification import (
 
 
 class TestNotificationType:
-    def test_has_13_types(self):
-        assert len(NotificationType) == 13
+    def test_has_15_types(self):
+        assert len(NotificationType) == 15
 
     def test_welcome(self):
         assert NotificationType.WELCOME.value == "Welcome"
@@ -50,6 +50,12 @@ class TestNotificationType:
 
     def test_order_cancellation(self):
         assert NotificationType.ORDER_CANCELLATION.value == "OrderCancellation"
+
+    def test_tier_upgraded(self):
+        assert NotificationType.TIER_UPGRADED.value == "TierUpgraded"
+
+    def test_points_redeemed(self):
+        assert NotificationType.POINTS_REDEEMED.value == "PointsRedeemed"
 
 
 class TestNotificationChannel:

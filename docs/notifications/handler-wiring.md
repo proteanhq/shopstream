@@ -51,6 +51,7 @@ flowchart TD
         sub_notifications_notification_fulfillment_subscriber_FulfillmentEventsSubscriber[FulfillmentEventsSubscriber\nstream: fulfillment::fulfillment]
         sub_notifications_notification_identity_subscriber_IdentityEventsSubscriber[IdentityEventsSubscriber\nstream: identity::customer]
         sub_notifications_notification_inventory_subscriber_InventoryEventsSubscriber[InventoryEventsSubscriber\nstream: inventory::inventory_item]
+        sub_notifications_notification_loyalty_subscriber_LoyaltyEventsSubscriber[LoyaltyEventsSubscriber\nstream: loyalty::reward_account]
         sub_notifications_notification_ordering_subscriber_OrderingEventsSubscriber[OrderingEventsSubscriber\nstream: ordering::order]
         sub_notifications_notification_payment_subscriber_PaymentEventsSubscriber[PaymentEventsSubscriber\nstream: payments::payment]
         sub_notifications_notification_review_subscriber_ReviewEventsSubscriber[ReviewEventsSubscriber\nstream: reviews::review]

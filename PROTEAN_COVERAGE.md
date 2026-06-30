@@ -20,7 +20,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `@command` + `@command_handler` | ✅ | ~94 across domains; loyalty enrollment/points |
 | `@event` (delta) | ✅ | widespread |
 | `@event` fact events | ✅ | loyalty PromoCampaign |
-| `@event(published=True)` | ✅ | cross-domain bus events |
+| `@event(published=True)` | ✅ | cross-domain bus events; loyalty **produces** `PointsEarned`/`PointsRedeemed`/`TierUpgraded`/`RewardAccountEnrolled` (dual-write asserted in `tests/integration/test_event_publishing.py`) → Notifications reacts |
 | in-domain `@event_handler` | ✅ | inventory `EventAuditHandler` (+ notifications) |
 | `@handle("$any")` wildcard | ✅ | inventory `EventAuditHandler` (sync + direct dispatch; **#1023** fixed on main) |
 | `@projection` + `@projector` (DB) | ✅ | ~48; loyalty RewardAccountView, CampaignCatalog (projects the event-sourced PromoCampaign) |
@@ -28,7 +28,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `@query` + `@query_handler` (`@read`) | ✅ | reviews/ordering/fulfillment/identity + loyalty `*_queries.py` (incl. `campaign_catalog_queries.py` filtered/ordered list) |
 | cross-aggregate read in a write handler | ✅ | loyalty `PointsHandler.earn` reads `CampaignCatalog` (active points-multiplier) via `campaign/multiplier.py` |
 | `@subscriber` pattern A (→ command) | ✅ | inventory/ordering/payments/… ACL subscribers |
-| `@subscriber` pattern B (direct mutation) | ✅ | loyalty `OrderDeliveredSubscriber` |
+| `@subscriber` pattern B (direct mutation) | ✅ | loyalty `OrderDeliveredSubscriber`, `ReviewApprovedSubscriber` (review bonus) |
 | `@repository` (custom, Q/F/lookups) | ✅ | loyalty `RewardAccountRepository` |
 | `@domain_service` (cross-aggregate, pre/post) | ✅ | loyalty `TransferPoints` |
 | `@application_service` + `@use_case` | ✅ | loyalty `LoyaltyService.transfer_points` |

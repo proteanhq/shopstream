@@ -48,6 +48,7 @@ flowchart TD
         evt_loyalty_reward_events_PointsRedeemed([PointsRedeemed])
         evt_loyalty_reward_events_RewardAccountClosed([RewardAccountClosed])
         evt_loyalty_reward_events_RewardAccountEnrolled([RewardAccountEnrolled])
+        evt_loyalty_reward_events_TierUpgraded([TierUpgraded])
         hdlr_loyalty_reward_enrollment_EnrollRewardAccountHandler[EnrollRewardAccountHandler]
         hdlr_loyalty_reward_points_PointsHandler[PointsHandler]
     end
@@ -61,6 +62,7 @@ flowchart TD
     agg_loyalty_reward_reward_account_RewardAccount --> evt_loyalty_reward_events_PointsRedeemed
     agg_loyalty_reward_reward_account_RewardAccount --> evt_loyalty_reward_events_RewardAccountClosed
     agg_loyalty_reward_reward_account_RewardAccount --> evt_loyalty_reward_events_RewardAccountEnrolled
+    agg_loyalty_reward_reward_account_RewardAccount --> evt_loyalty_reward_events_TierUpgraded
 ```
 
 ## Downstream Consumers
@@ -75,6 +77,7 @@ flowchart LR
     evt_loyalty_reward_events_PointsRedeemed([PointsRedeemed])
     evt_loyalty_reward_events_RewardAccountClosed([RewardAccountClosed])
     evt_loyalty_reward_events_RewardAccountEnrolled([RewardAccountEnrolled])
+    evt_loyalty_reward_events_TierUpgraded([TierUpgraded])
     subgraph projectors["Projectors"]
         proj_loyalty_projections_campaign_catalog_CampaignCatalogProjector[CampaignCatalogProjector → CampaignCatalog]
         proj_loyalty_projections_points_leaderboard_PointsLeaderboardProjector[PointsLeaderboardProjector → PointsLeaderboard]
@@ -91,4 +94,5 @@ flowchart LR
     evt_loyalty_reward_events_PointsRedeemed --> proj_loyalty_projections_reward_account_view_RewardAccountViewProjector
     evt_loyalty_reward_events_RewardAccountClosed --> proj_loyalty_projections_reward_account_view_RewardAccountViewProjector
     evt_loyalty_reward_events_RewardAccountEnrolled --> proj_loyalty_projections_reward_account_view_RewardAccountViewProjector
+    evt_loyalty_reward_events_TierUpgraded --> proj_loyalty_projections_reward_account_view_RewardAccountViewProjector
 ```

@@ -53,9 +53,13 @@ bronze/silver/gold/platinum), `points_balance` (default 0), `lifetime_points` (d
 |--------|----------|
 | `RewardAccount.enroll(customer_id, member_code?, referral_code?)` | Factory; generates a valid `member_code` if absent; raises `RewardAccountEnrolled` |
 | `issue_card(card_number)` | Attaches the 1:1 `MembershipCard` (at most one); raises `MembershipCardIssued` |
-| `earn_points(amount, reason?)` | Increments balance + lifetime; appends ledger entry; raises `PointsEarned` |
+| `earn_points(amount, reason?)` | Increments balance + lifetime; appends ledger entry; raises `PointsEarned`; may promote tier (raises `TierUpgraded`) |
 | `redeem_points(amount, reason?)` | Decrements balance (not lifetime); appends ledger entry; raises `PointsRedeemed` |
 | `close()` | Sets status Closed (terminal); raises `RewardAccountClosed` |
+
+**Tier progression:** earning points can promote the account when **lifetime** points cross a
+threshold (`TIER_THRESHOLDS`: silver 1 000, gold 5 000, platinum 20 000; `tier_for_lifetime_points`).
+A promotion raises `TierUpgraded`; tiers never downgrade (redeeming spends balance, not lifetime).
 
 ### Helpers
 - `generate_member_code(length=8)` — module-level; produces a validator-passing code.
@@ -89,7 +93,13 @@ The lifecycle is driven through CQRS commands (`campaign/management.py`), projec
 ## Events
 
 **RewardAccount events** (`reward/events.py`): `RewardAccountEnrolled`, `PointsEarned`,
-`PointsRedeemed`, `MembershipCardIssued`, `RewardAccountClosed`.
+`PointsRedeemed`, `TierUpgraded`, `MembershipCardIssued`, `RewardAccountClosed`.
+
+`RewardAccountEnrolled`, `PointsEarned`, `PointsRedeemed`, and `TierUpgraded` are
+**`published=True`** — dual-written to the external bus so other contexts react (loyalty is an
+event **producer**, not just a consumer). They carry `customer_id` so consumers can address the
+customer without a loyalty lookup. Notifications' `LoyaltyEventsSubscriber` turns `TierUpgraded`
+and `PointsRedeemed` into customer notifications.
 
 **PromoCampaign events** (`campaign/events.py`): `CampaignLaunched` (`__version__ = 3`),
 `CampaignActivated`, `CampaignPaused`, `CampaignExpired` (+ auto `PromoCampaignFactEvent`).
@@ -149,6 +159,19 @@ endpoint required.
 stream="ordering::order")`. On `OrderDelivered`, awards a delivery bonus by loading the
 customer's `RewardAccount` and calling `earn_points` **directly** (subscriber **pattern B** —
 direct aggregate mutation). ACL: raw dict payload, type filtering, no shared event classes.
+
+### Inbound: Reviews → Loyalty
+**File:** `reward/reviews_subscriber.py` — `@loyalty.subscriber(broker="global",
+stream="reviews::review")`. On `ReviewApproved`, awards a review bonus (`REVIEW_BONUS_POINTS`)
+by loading the customer's `RewardAccount` and calling `earn_points` (subscriber **pattern B**).
+
+### Outbound: Loyalty → Notifications (producer)
+Loyalty's `published=True` events (`TierUpgraded`, `PointsRedeemed`, …) flow to the external
+bus; Notifications' `LoyaltyEventsSubscriber` (`notifications/notification/loyalty_subscriber.py`)
+turns them into `TierUpgraded` / `PointsRedeemed` customer notifications. Loyalty is thus both a
+consumer (above) and a **producer** of cross-domain events. A Payments→Loyalty refund clawback is
+a follow-up: `RefundCompleted` carries `order_id` but no `customer_id`, so the reward account
+can't be resolved without an extra lookup.
 
 ## Projections
 

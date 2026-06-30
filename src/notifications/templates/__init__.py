@@ -14,11 +14,13 @@ from notifications.templates.low_stock_alert import LowStockAlertTemplate
 from notifications.templates.order_cancellation import OrderCancellationTemplate
 from notifications.templates.order_confirmation import OrderConfirmationTemplate
 from notifications.templates.payment_receipt import PaymentReceiptTemplate
+from notifications.templates.points_redeemed import PointsRedeemedTemplate
 from notifications.templates.refund_notification import RefundNotificationTemplate
 from notifications.templates.review_prompt import ReviewPromptTemplate
 from notifications.templates.review_published import ReviewPublishedTemplate
 from notifications.templates.review_rejected import ReviewRejectedTemplate
 from notifications.templates.shipping_update import ShippingUpdateTemplate
+from notifications.templates.tier_upgraded import TierUpgradedTemplate
 from notifications.templates.welcome import WelcomeTemplate
 
 TEMPLATE_REGISTRY: dict[str, type] = {
@@ -35,6 +37,8 @@ TEMPLATE_REGISTRY: dict[str, type] = {
     NotificationType.REVIEW_REJECTED.value: ReviewRejectedTemplate,
     NotificationType.REFUND_NOTIFICATION.value: RefundNotificationTemplate,
     NotificationType.ORDER_CANCELLATION.value: OrderCancellationTemplate,
+    NotificationType.TIER_UPGRADED.value: TierUpgradedTemplate,
+    NotificationType.POINTS_REDEEMED.value: PointsRedeemedTemplate,
 }
 
 

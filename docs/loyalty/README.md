@@ -143,9 +143,10 @@ stateDiagram-v2
 
 | Event | Trigger | Consequence |
 |-------|---------|-------------|
-| `RewardAccountEnrolled` | Customer enrols into the program | RewardAccountView + PointsLeaderboard projections created |
-| `PointsEarned` | Account earns points (order, delivery bonus, transfer in) | Balance + lifetime updated on RewardAccountView; PointsLeaderboard balance updated; ledger entry appended |
-| `PointsRedeemed` | Account redeems points (or transfer out) | Balance updated on both projections; ledger entry appended |
+| `RewardAccountEnrolled` 📢 | Customer enrols into the program | RewardAccountView + PointsLeaderboard projections created |
+| `PointsEarned` 📢 | Account earns points (order, delivery bonus, review bonus, transfer in) | Balance + lifetime updated on RewardAccountView; PointsLeaderboard balance updated; ledger entry appended |
+| `PointsRedeemed` 📢 | Account redeems points (or transfer out) | Balance updated on both projections; ledger entry appended; Notifications sends a redemption notice |
+| `TierUpgraded` 📢 | Lifetime points cross a tier threshold while earning | RewardAccountView tier updated; Notifications sends a congratulatory notice |
 | `MembershipCardIssued` | A membership card is attached to the account | (read models unchanged; informational) |
 | `RewardAccountClosed` | Account is closed | RewardAccountView status set to Closed |
 | `CampaignLaunched` (v3) | A promo campaign is launched | Campaign created in `draft` (see upcasters for schema history) |
@@ -153,6 +154,9 @@ stateDiagram-v2
 | `CampaignPaused` | An active campaign is paused | Campaign status &rarr; paused |
 | `CampaignExpired` | A campaign is expired | Campaign status &rarr; expired (terminal) |
 | `PromoCampaignFactEvent` | Auto-emitted after every PromoCampaign persist | Full-state snapshot event on the `-fact-` stream (ECST) |
+
+📢 = `published=True` — dual-written to the external bus so other contexts can react. Loyalty is
+an event **producer** as well as a consumer; published RewardAccount events carry `customer_id`.
 
 ## Command Flows
 
@@ -178,7 +182,7 @@ One write path is **not** a CQRS command, to exercise the alternative Protean pa
 
 | Projection | Storage | Purpose | Built From |
 |-----------|---------|---------|-----------|
-| `RewardAccountView` | Database | Per-account view: customer, tier, status, balance, lifetime points | `RewardAccountEnrolled` (create), `PointsEarned`, `PointsRedeemed`, `RewardAccountClosed` |
+| `RewardAccountView` | Database | Per-account view: customer, tier, status, balance, lifetime points | `RewardAccountEnrolled` (create), `PointsEarned`, `PointsRedeemed`, `TierUpgraded`, `RewardAccountClosed` |
 | `PointsLeaderboard` | **Cache** (`cache="loyalty"`) | Live points balance per account for leaderboard reads | `RewardAccountEnrolled` (create), `PointsEarned`, `PointsRedeemed` |
 | `CampaignCatalog` | Database | Flat, queryable catalog of campaigns + status; the read side the multiplier consults and the API lists | `CampaignLaunched` (create), `CampaignActivated`, `CampaignPaused`, `CampaignExpired` |
 
@@ -193,15 +197,25 @@ database provider.
 |-----------------------|-----------------|-----|
 | `CustomerRegistered` | Loyalty | Identity raises `CustomerRegistered`; Loyalty's `CustomerRegisteredSubscriber` consumes the `identity::customer` stream and auto-enrols a reward account (idempotent) by dispatching `EnrollRewardAccount` — **pattern A** |
 | `OrderDelivered` | Loyalty | Ordering raises `OrderDelivered`; Loyalty's `OrderDeliveredSubscriber` consumes the `ordering::order` stream and awards a delivery bonus directly on the customer's RewardAccount — **pattern B** |
+| `ReviewApproved` | Loyalty | Reviews raises `ReviewApproved`; Loyalty's `ReviewApprovedSubscriber` consumes the `reviews::review` stream and awards a review bonus directly on the customer's RewardAccount — **pattern B** |
+| Loyalty events | Notifications | Loyalty **publishes** `TierUpgraded` / `PointsRedeemed` (and more) to the external bus; Notifications' `LoyaltyEventsSubscriber` turns them into customer notifications (Loyalty as **producer**) |
 
-Loyalty is a downstream consumer of Identity and Ordering. Both subscribers use the
-**anti-corruption layer (ACL)** pattern — they receive a raw dict payload, filter by event
-type, and never import another context's event classes. They also demonstrate both subscriber
-styles: `CustomerRegisteredSubscriber` translates the event into a *command* (pattern A,
-idempotent so at-least-once delivery is safe), while `OrderDeliveredSubscriber` loads the
-aggregate and mutates it directly (pattern B). Loyalty stores `customer_id` as an opaque
-reference and never queries Identity or Ordering. Auto-enrolment on registration is what gives
-every customer a reward account through the normal event flow — no enrolment endpoint needed.
+Loyalty is a downstream consumer of Identity, Ordering, and Reviews — **and** an upstream
+**producer** for Notifications. All inbound subscribers use the **anti-corruption layer (ACL)**
+pattern — they receive a raw dict payload, filter by event type, and never import another
+context's event classes. They also demonstrate both subscriber styles:
+`CustomerRegisteredSubscriber` translates the event into a *command* (pattern A, idempotent so
+at-least-once delivery is safe), while `OrderDeliveredSubscriber` and `ReviewApprovedSubscriber`
+load the aggregate and mutate it directly (pattern B). On the producer side, Loyalty marks
+`PointsEarned` / `PointsRedeemed` / `TierUpgraded` / `RewardAccountEnrolled` as `published=True`
+so the outbox dual-writes them to the external bus for Notifications to consume. Loyalty stores
+`customer_id` as an opaque reference and never queries another context. Auto-enrolment on
+registration is what gives every customer a reward account through the normal event flow — no
+enrolment endpoint needed.
+
+A Payments→Loyalty refund clawback is a deliberate follow-up rather than an omission: the
+`RefundCompleted` event carries `order_id` but no `customer_id`, so the reward account can't be
+resolved without an additional lookup path.
 
 ## Design Decisions
 
@@ -292,7 +306,7 @@ command-dispatching subscriber; acceptable for a single, well-contained reaction
 | TransferPoints domain service | [`src/loyalty/reward/transfer.py`](../../src/loyalty/reward/transfer.py) |
 | LoyaltyService application service (`@use_case`) | [`src/loyalty/reward/services.py`](../../src/loyalty/reward/services.py) |
 | Custom repository (Q/F/lookups) | [`src/loyalty/reward/repository.py`](../../src/loyalty/reward/repository.py) |
-| Cross-domain subscribers (pattern A: identity; pattern B: ordering) | [`identity_subscriber.py`](../../src/loyalty/reward/identity_subscriber.py), [`ordering_subscriber.py`](../../src/loyalty/reward/ordering_subscriber.py) |
+| Inbound subscribers (pattern A: identity; pattern B: ordering, reviews) | [`identity_subscriber.py`](../../src/loyalty/reward/identity_subscriber.py), [`ordering_subscriber.py`](../../src/loyalty/reward/ordering_subscriber.py), [`reviews_subscriber.py`](../../src/loyalty/reward/reviews_subscriber.py) |
 | PromoCampaign event-sourced aggregate | [`src/loyalty/campaign/campaign.py`](../../src/loyalty/campaign/campaign.py) |
 | PromoCampaign events | [`src/loyalty/campaign/events.py`](../../src/loyalty/campaign/events.py) |
 | Campaign lifecycle commands + handler | [`src/loyalty/campaign/management.py`](../../src/loyalty/campaign/management.py) |

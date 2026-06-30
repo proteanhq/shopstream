@@ -108,6 +108,16 @@ class NotificationState:
 
 
 @dataclass
+class LoyaltyState:
+    """Tracks state for a single loyalty rewards journey (HTTP API)."""
+
+    customer_id: str | None = None
+    account_id: str | None = None
+    campaign_id: str | None = None
+    points_earned: int = 0
+
+
+@dataclass
 class SagaState:
     """Tracks state for cross-domain saga exercise journeys.
 
