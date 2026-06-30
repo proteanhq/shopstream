@@ -137,11 +137,8 @@ jobs:
       - name: Run linting
         run: uv run ruff check src/ tests/
 
-      # loyalty is exercised by the Memory Tests job; it is excluded from the Postgres
-      # job until proteanhq/protean#1034 (cache-backed projection breaks SQLAlchemy DB
-      # setup) is fixed — its PointsLeaderboard cache projection makes setup() raise.
       - name: Run all tests with coverage
-        run: uv run pytest --ignore=tests/loyalty --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov=src/inventory --cov=src/payments --cov=src/fulfillment --cov=src/reviews --cov=src/notifications --cov-report=xml --cov-report=term-missing
+        run: uv run pytest --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov=src/inventory --cov=src/payments --cov=src/fulfillment --cov=src/reviews --cov=src/notifications --cov=src/loyalty --cov-report=xml --cov-report=term-missing
 
       - name: Extract coverage percentage
         if: matrix.python-version == '3.11'

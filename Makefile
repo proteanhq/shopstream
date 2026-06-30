@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications ir ir-summary schemas docs-generate ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment verify-timeline verify-timeline-skip-seed
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas docs-generate ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment verify-timeline verify-timeline-skip-seed
 
 # Default target
 help: ## Show this help message
@@ -21,10 +21,10 @@ test: ## Run all tests across all domains
 	uv run pytest
 
 test-domain: ## Run domain layer tests across all domains
-	uv run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/ tests/reviews/domain/ tests/notifications/domain/
+	uv run pytest tests/identity/domain/ tests/catalogue/domain/ tests/ordering/domain/ tests/inventory/domain/ tests/payments/domain/ tests/fulfillment/domain/ tests/reviews/domain/ tests/notifications/domain/ tests/loyalty/domain/
 
 test-application: ## Run application layer tests across all domains
-	uv run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ tests/reviews/application/ tests/notifications/application/
+	uv run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ tests/reviews/application/ tests/notifications/application/ tests/loyalty/application/
 
 test-integration: ## Run integration tests across all domains
 	uv run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/reviews/integration/ tests/notifications/integration/ tests/integration/
@@ -201,6 +201,18 @@ test-notifications-integration: ## Run notifications integration tests
 test-notifications-cov: ## Run all notifications tests with coverage report
 	uv run pytest tests/notifications/ --cov=notifications --cov-report=term-missing --cov-report=html:htmlcov/notifications
 
+test-loyalty: ## Run all loyalty tests
+	uv run pytest tests/loyalty/
+
+test-loyalty-domain: ## Run loyalty domain layer tests
+	uv run pytest tests/loyalty/domain/ --cov=loyalty --cov-report=term-missing
+
+test-loyalty-application: ## Run loyalty application layer tests
+	uv run pytest tests/loyalty/application/ --cov=loyalty --cov-report=term-missing
+
+test-loyalty-cov: ## Run all loyalty tests with coverage report
+	uv run pytest tests/loyalty/ --cov=loyalty --cov-report=term-missing --cov-report=html:htmlcov/loyalty
+
 # ──────────────────────────────────────────────
 # Test utilities
 # ──────────────────────────────────────────────
@@ -227,7 +239,7 @@ pre-commit: ## Run pre-commit hooks on all files
 # ──────────────────────────────────────────────
 domain-check: ## Run protean check on all domains
 	@failed=0; \
-	for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \
+	for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		PYTHONPATH=src uv run protean check --domain=$$d.domain || \
 			if [ $$? -eq 1 ]; then failed=1; fi; \
 	done; \
@@ -257,29 +269,32 @@ domain-check-reviews: ## Run protean check on reviews domain
 domain-check-notifications: ## Run protean check on notifications domain
 	PYTHONPATH=src uv run protean check --domain=notifications.domain
 
+domain-check-loyalty: ## Run protean check on loyalty domain
+	PYTHONPATH=src uv run protean check --domain=loyalty.domain
+
 # ──────────────────────────────────────────────
 # IR & Schema Generation
 # ──────────────────────────────────────────────
 ir: ## Generate IR (intermediate representation) for all domains
-	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \
+	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		mkdir -p .protean/$$d; \
 		PYTHONPATH=src uv run protean ir show --domain=$$d.domain > .protean/$$d/ir.json; \
 		echo "✓ $$d"; \
 	done
 
 ir-summary: ## Show IR summary for all domains
-	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \
+	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		PYTHONPATH=src uv run protean ir show --domain=$$d.domain --format=summary; \
 		echo ""; \
 	done
 
 schemas: ## Generate JSON Schemas for all domains
-	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \
+	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		PYTHONPATH=src uv run protean schema generate --domain=$$d.domain --output=.protean/$$d; \
 	done
 
 docs-generate: ## Generate domain documentation (diagrams + event catalog)
-	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \
+	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		echo "Generating docs for $$d..."; \
 		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=clusters --output=docs/$$d/clusters.md; \
 		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=events --output=docs/$$d/event-flows.md; \
@@ -288,13 +303,13 @@ docs-generate: ## Generate domain documentation (diagrams + event catalog)
 	done
 
 ir-check: ## Check staleness of materialized IR for all domains
-	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \
+	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		printf "$$d: "; \
 		PYTHONPATH=src uv run protean ir check --domain=$$d.domain --dir=.protean/$$d 2>&1 | head -1; \
 	done
 
 ir-diff: ## Diff live IR against saved baselines (.protean/<domain>/ir.json)
-	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications; do \
+	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		if [ -f .protean/$$d/ir.json ]; then \
 			echo "=== $$d ==="; \
 			PYTHONPATH=src uv run protean ir diff --domain=$$d.domain --dir=.protean/$$d 2>&1 || true; \
@@ -338,6 +353,9 @@ engine-reviews: ## Start Reviews domain engine
 engine-notifications: ## Start Notifications domain engine
 	uv run protean server --domain notifications.domain
 
+engine-loyalty: ## Start Loyalty domain engine
+	uv run protean server --domain loyalty.domain
+
 engine-identity-scaled: ## Start Identity engine with 4 workers
 	uv run protean server --domain identity.domain --workers 4
 
@@ -360,7 +378,7 @@ engine-fulfillment-scaled: ## Start Fulfillment engine with 4 workers
 # Docker-based Engine Workers
 # ──────────────────────────────────────────────
 engine-docker: ## Start all engines in Docker (1 worker each)
-	docker compose up engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-notifications
+	docker compose up engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-notifications engine-loyalty
 
 engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue, 2 ordering, 2 inventory, 2 payments, 2 fulfillment)
 	docker compose up --scale engine-identity=3 --scale engine-catalogue=2 --scale engine-ordering=2 --scale engine-inventory=2 --scale engine-payments=2 --scale engine-fulfillment=2

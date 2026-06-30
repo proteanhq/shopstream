@@ -24,7 +24,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | in-domain `@event_handler` | ✅ | inventory `EventAuditHandler` (+ notifications) |
 | `@handle("$any")` wildcard | ✅ | inventory `EventAuditHandler` (sync + direct dispatch; **#1023** fixed on main) |
 | `@projection` + `@projector` (DB) | ✅ | ~48; loyalty RewardAccountView |
-| `@projection(cache=...)` | ✅ (memory) | loyalty PointsLeaderboard (`cache="loyalty"`) — write via `cache_for().add()`, read via `view_for().get()`. Postgres DB setup blocked by **#1034** (see below); covered by the memory CI job |
+| `@projection(cache=...)` | ✅ | loyalty PointsLeaderboard (`cache="loyalty"`) — write via `cache_for().add()`, read via `view_for().get()` (runs on Postgres + memory; **#1034** fixed on main) |
 | `@query` + `@query_handler` (`@read`) | ✅ | reviews/ordering/fulfillment/identity `*_queries.py` |
 | `@subscriber` pattern A (→ command) | ✅ | inventory/ordering/payments/… ACL subscribers |
 | `@subscriber` pattern B (direct mutation) | ✅ | loyalty `OrderDeliveredSubscriber` |
@@ -72,14 +72,14 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 
 ## Protean bugs surfaced (filed; milestone 0.16.1)
 
-This branch pins Protean to git `main`, which carries all three fixes.
+This branch pins Protean to git `main`, which carries all four fixes.
 
 | Issue | Status | Summary |
 |---|---|---|
 | [#1023](https://github.com/proteanhq/protean/issues/1023) | ✅ fixed on main | `@handle("$any")` event handlers silently skipped under `event_processing="sync"` (`handlers_for` ignored `$any`) |
 | [#1025](https://github.com/proteanhq/protean/issues/1025) | ✅ fixed on main | per-field `validators=` ran against `None` on optional fields (AfterValidator omitted empty-value short-circuit) |
 | [#1028](https://github.com/proteanhq/protean/issues/1028) | ✅ fixed on main | bulk `create_snapshots()` failed for `fact_events=True` aggregates (`-fact-` streams mistaken for instances) |
-| [#1034](https://github.com/proteanhq/protean/issues/1034) | ⛔ open | cache-backed projection breaks SQLAlchemy DB setup (`_create_database_artifacts` doesn't skip cache projections). loyalty is excluded from the Postgres CI job until fixed; it runs in the memory CI job |
+| [#1034](https://github.com/proteanhq/protean/issues/1034) | ✅ fixed on main | cache-backed projection broke SQLAlchemy DB setup (`_create_database_artifacts` didn't skip cache projections); loyalty now runs in the Postgres CI job too |
 
 Minor DX note (not filed): `repository_for()` gives a confusing `provider=None` error for cache-backed
 projections — the working API is `cache_for().add()` / `view_for().get()`.
@@ -89,9 +89,8 @@ projections — the working API is `cache_for().add()` / `view_for().get()`.
 - **Process manager #2** — a loyalty `RedemptionSaga` exercising dict `correlate`, compensation, and `end`.
 - **`database_model`** — custom ORM model (Postgres; not exercised by memory tests).
 - **`Auto(increment)`** — a clean home + the id-reflection wart (see above).
-- **Infra wiring** — loyalty is wired into `app.py`, the `make test-memory*` targets, and CI
-  (`src/loyalty/create_db.sh` + a "Set up loyalty database" step + `--cov=src/loyalty`). Still
-  pending (needs a local `loyalty_local` DB, since registering before the DB exists makes the
-  `protean-check-staleness` pre-commit hook fail): register loyalty in `.protean/config.toml [domains]`,
-  generate `.protean/loyalty/ir.json` via `make ir`, add it to the Makefile IR/`domain-check`/per-domain
-  DB test loops, and add a `make engine-loyalty` target.
+- **Infra wiring — done.** loyalty is fully wired: `app.py`, `.protean/config.toml [domains]`,
+  `.protean/loyalty/ir.json` baseline, CI (Postgres + memory jobs, `create_db.sh`, `--cov=src/loyalty`),
+  the Makefile (`test`/`test-domain`/`test-application`/`test-memory*`/per-domain `test-loyalty*`,
+  IR/`domain-check`/`schemas`/`docs-generate` loops, `engine-loyalty`, `domain-check-loyalty`), and a
+  `engine-loyalty` docker-compose service.
