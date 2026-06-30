@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:116739c369ddc60889bca15020eb0844d19e887589d5fdc4cb8f1c92946b1c6a",
+  "checksum": "sha256:b64de92dbe8ee020fd659c47617fee7f5963134946fd76dfd7554efd112c30b3",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -1042,8 +1042,14 @@
       "loyalty.projections.points_leaderboard.PointsLeaderboardProjector",
       "loyalty.projections.reward_account_view.RewardAccountViewProjector"
     ],
-    "QUERY": [],
-    "QUERY_HANDLER": [],
+    "QUERY": [
+      "loyalty.projections.points_leaderboard_queries.GetLeaderboardStanding",
+      "loyalty.projections.reward_account_view_queries.GetRewardAccount"
+    ],
+    "QUERY_HANDLER": [
+      "loyalty.projections.points_leaderboard_queries.PointsLeaderboardQueryHandler",
+      "loyalty.projections.reward_account_view_queries.RewardAccountViewQueryHandler"
+    ],
     "REPOSITORY": [
       "loyalty.reward.repository.RewardAccountRepository"
     ],
@@ -1094,7 +1100,7 @@
       }
     }
   },
-  "generated_at": "2026-06-30T15:28:27Z",
+  "generated_at": "2026-06-30T17:50:16Z",
   "ir_version": "0.1.0",
   "projections": {
     "loyalty.projections.points_leaderboard.PointsLeaderboard": {
@@ -1170,8 +1176,38 @@
           }
         }
       },
-      "queries": {},
-      "query_handlers": {}
+      "queries": {
+        "loyalty.projections.points_leaderboard_queries.GetLeaderboardStanding": {
+          "__type__": "Loyalty.GetLeaderboardStanding",
+          "element_type": "QUERY",
+          "fields": {
+            "account_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "loyalty.projections.points_leaderboard_queries.GetLeaderboardStanding",
+          "module": "loyalty.projections.points_leaderboard_queries",
+          "name": "GetLeaderboardStanding",
+          "part_of": "loyalty.projections.points_leaderboard.PointsLeaderboard"
+        }
+      },
+      "query_handlers": {
+        "loyalty.projections.points_leaderboard_queries.PointsLeaderboardQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "loyalty.projections.points_leaderboard_queries.PointsLeaderboardQueryHandler",
+          "handlers": {
+            "Loyalty.GetLeaderboardStanding": [
+              "get_standing"
+            ]
+          },
+          "module": "loyalty.projections.points_leaderboard_queries",
+          "name": "PointsLeaderboardQueryHandler",
+          "part_of": "loyalty.projections.points_leaderboard.PointsLeaderboard"
+        }
+      }
     },
     "loyalty.projections.reward_account_view.RewardAccountView": {
       "projection": {
@@ -1270,8 +1306,38 @@
           }
         }
       },
-      "queries": {},
-      "query_handlers": {}
+      "queries": {
+        "loyalty.projections.reward_account_view_queries.GetRewardAccount": {
+          "__type__": "Loyalty.GetRewardAccount",
+          "element_type": "QUERY",
+          "fields": {
+            "account_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "loyalty.projections.reward_account_view_queries.GetRewardAccount",
+          "module": "loyalty.projections.reward_account_view_queries",
+          "name": "GetRewardAccount",
+          "part_of": "loyalty.projections.reward_account_view.RewardAccountView"
+        }
+      },
+      "query_handlers": {
+        "loyalty.projections.reward_account_view_queries.RewardAccountViewQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "loyalty.projections.reward_account_view_queries.RewardAccountViewQueryHandler",
+          "handlers": {
+            "Loyalty.GetRewardAccount": [
+              "get_reward_account"
+            ]
+          },
+          "module": "loyalty.projections.reward_account_view_queries",
+          "name": "RewardAccountViewQueryHandler",
+          "part_of": "loyalty.projections.reward_account_view.RewardAccountView"
+        }
+      }
     }
   }
 }

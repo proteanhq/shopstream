@@ -152,10 +152,28 @@ direct aggregate mutation). ACL: raw dict payload, type filtering, no shared eve
 `current_domain.view_for(PointsLeaderboard).get(...)`. `repository_for` does **not** serve
 cache projections.
 
+## Queries (read side)
+
+**Files:** `projections/reward_account_view_queries.py`, `projections/points_leaderboard_queries.py`.
+`@loyalty.query` DTOs + `@loyalty.query_handler` with `@read` methods (no UnitOfWork) back the
+read endpoints: `GetRewardAccount` (DB `RewardAccountView` via `view_for`) and
+`GetLeaderboardStanding` (cache `PointsLeaderboard` via `view_for`). Invoked with
+`current_domain.dispatch(query)`.
+
 ## API
 
-Loyalty does not expose an HTTP API of its own yet — it is exercised as a capability showcase
-and via cross-domain events. The domain is initialised in `src/app.py`.
+**Package:** `api/` — `APIRouter(prefix="/loyalty", tags=["loyalty"])`, wired into `src/app.py`
+(middleware maps `/loyalty` → loyalty). Writes go through commands / the application service;
+reads through query handlers.
+
+| Method | Path | Maps to |
+|--------|------|---------|
+| POST | `/loyalty/accounts` | `EnrollRewardAccount` |
+| POST | `/loyalty/accounts/{id}/earn` | `EarnPoints` |
+| POST | `/loyalty/accounts/{id}/redeem` | `RedeemPoints` |
+| POST | `/loyalty/transfers` | `LoyaltyService.transfer_points` (application service, direct) |
+| GET | `/loyalty/accounts/{id}` | `GetRewardAccount` → RewardAccountView (DB) |
+| GET | `/loyalty/accounts/{id}/points` | `GetLeaderboardStanding` → PointsLeaderboard (cache) |
 
 ## Tests
 
