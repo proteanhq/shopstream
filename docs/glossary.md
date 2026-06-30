@@ -400,6 +400,75 @@ systems. This is a notification-only event -- it does not change aggregate state
 
 ---
 
+## Payments Context
+
+### Payment
+
+A financial transaction for an order, tracking the charge attempts and any refunds against it.
+Event-sourced, so every charge attempt, success, failure, and refund is preserved as an
+immutable event for a complete financial audit trail.
+
+&rarr; [`Payment`](../src/payments/payment/payment.py) (Aggregate, Event-Sourced)
+
+### Payment Attempt
+
+A single try to charge the customer's payment method through the gateway. A Payment may
+accumulate several attempts (e.g. a retry after a transient gateway failure).
+
+&rarr; [`PaymentAttempt`](../src/payments/payment/payment.py) (Entity)
+
+### Refund
+
+A return of funds to the customer against a successful payment -- partial or full.
+
+&rarr; [`Refund`](../src/payments/payment/payment.py) (Entity)
+
+### Money
+
+An amount paired with a currency, used for charge and refund amounts. Equality and arithmetic
+are by value.
+
+&rarr; [`Money`](../src/payments/payment/payment.py) (Value Object)
+
+### Payment Method
+
+The instrument used to pay (e.g. card details abstracted to a token/brand/last-four), captured
+as a value object on the Payment.
+
+&rarr; [`PaymentMethod`](../src/payments/payment/payment.py) (Value Object)
+
+### Gateway
+
+The external payment processor (Stripe, etc.), abstracted behind a port so the domain depends
+on an interface rather than a vendor SDK. `GatewayInfo` records the gateway reference on the
+Payment.
+
+&rarr; [`GatewayInfo`](../src/payments/payment/payment.py) (Value Object) &middot; gateway port under `src/payments/gateway/`
+
+### Idempotency Key
+
+A unique key ensuring the same charge is not processed twice even if a request is retried or a
+webhook is delivered more than once.
+
+### Invoice
+
+A billing document generated after a successful payment. Uses standard CQRS (no event sourcing).
+
+&rarr; [`Invoice`](../src/payments/invoice/invoice.py) (Aggregate)
+
+### Invoice Line Item
+
+A single billed line on an invoice (description, quantity, amount).
+
+&rarr; [`InvoiceLineItem`](../src/payments/invoice/invoice.py) (Entity)
+
+### Webhook
+
+An asynchronous notification from the gateway about a payment's status, translated into a
+domain action at the payments boundary.
+
+---
+
 ## Fulfillment Context
 
 ### Fulfillment
@@ -624,6 +693,65 @@ An aggregated view of a product's review statistics: average rating, star distri
 are approved (incremented) or removed (decremented).
 
 &rarr; [`ProductRating`](../src/reviews/projections/product_rating.py) (Projection)
+
+---
+
+## Notifications Context
+
+### Notification
+
+A single message to deliver to a recipient over one channel, with its own delivery lifecycle
+(pending &rarr; sent &rarr; delivered, or failed/bounced/cancelled). Created from a template in
+reaction to an upstream domain event.
+
+&rarr; [`Notification`](../src/notifications/notification/notification.py) (Aggregate)
+
+### Notification Preference
+
+A customer's per-channel opt-in settings, quiet hours, and per-type unsubscribes. Consulted
+when fanning an event out to channels.
+
+&rarr; [`NotificationPreference`](../src/notifications/preference/preference.py) (Aggregate)
+
+### Notification Type
+
+What the notification is about (e.g. WELCOME, ORDER_CONFIRMATION, PAYMENT_RECEIPT,
+SHIPPING_UPDATE, REVIEW_PROMPT, CART_RECOVERY, LOW_STOCK_ALERT). Each type maps to a template
+with default channels.
+
+&rarr; [`NotificationType`](../src/notifications/notification/notification.py) (Enum)
+
+### Notification Channel
+
+The delivery medium: Email, SMS, Push, or Slack. Each channel is a port with a pluggable adapter.
+
+&rarr; [`NotificationChannel`](../src/notifications/notification/notification.py) (Enum)
+
+### Notification Status
+
+The delivery lifecycle state: Pending, Sent, Delivered, Failed, Bounced, or Cancelled.
+
+&rarr; [`NotificationStatus`](../src/notifications/notification/notification.py) (Enum)
+
+### Quiet Hours
+
+A daily time window (`HH:MM`–`HH:MM`) during which a customer prefers not to be notified.
+
+&rarr; [`set_quiet_hours`](../src/notifications/preference/preference.py) (on NotificationPreference)
+
+### Channel Adapter
+
+The pluggable implementation behind a channel port (email/SMS/push/Slack), resolved via a
+registry (`get_channel`). Fakes are used in development and tests.
+
+&rarr; channel ports + adapters under [`src/notifications/channel/`](../src/notifications/channel/)
+
+### Template
+
+A per-`NotificationType` class that renders a subject and body from context data and declares
+the channels it applies to by default. Resolved via `get_template`.
+
+&rarr; templates under [`src/notifications/templates/`](../src/notifications/templates/)
 
 ---
 
