@@ -267,10 +267,24 @@ reads through query handlers.
 
 ## Tests
 
-`tests/loyalty/{domain,application,integration}/` — domain-layer behaviour (RewardAccount,
-PromoCampaign, TransferPoints, upcasters), application-layer flows (commands + projections, the
-campaign handlers + CampaignCatalog + points multiplier, the application service, the custom
-repository, the pattern-B subscriber, ES persistence + fact events + snapshots), and
-integration-layer API tests (TestClient over the account + campaign endpoints). Run with
-`make test-loyalty` (or `make test-loyalty-domain` / `-application`), in memory mode via
-`make test-memory*`, or against Postgres via `make test`.
+`tests/loyalty/{domain,application,integration,bdd,property}/`:
+- **domain** — aggregate behaviour (RewardAccount, PromoCampaign, TransferPoints, Redemption,
+  upcasters) and the `RedemptionSaga` via `given()` (both the complete and compensation branches);
+- **application** — command/projection flows, campaign handlers + CampaignCatalog + points
+  multiplier, the application service, custom repository, pattern-B subscribers, ES persistence +
+  fact events + snapshots, and **optimistic-concurrency** tests (`test_concurrency.py`: a stale
+  writer is rejected with `ExpectedVersionError`, no lost updates);
+- **integration** — API tests (TestClient over account / campaign / redemption endpoints);
+- **bdd** — `pytest-bdd` scenarios (rewards lifecycle, points transfer, campaign lifecycle,
+  redemption) in `features/*.feature`;
+- **property** — Hypothesis tests (`test_points_conservation.py`): points conservation,
+  balance non-negativity, lifetime monotonicity, tier-as-a-function-of-lifetime, transfer
+  conservation.
+
+Run with `make test-loyalty` (all layers), `make test-loyalty-domain` / `-application`, in memory
+via `make test-memory*`, or against Postgres via `make test`.
+
+**End-to-end:** `make verify-loyalty` (`scripts/verify-loyalty.sh`) drives the full pipeline
+(commands → outbox → Redis Streams → projectors + cache, the transfer service, the active-campaign
+multiplier, and the RedemptionSaga to completion) over HTTP against a running stack — requires
+`make api` + `make engine-loyalty`.

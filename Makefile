@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas docs-generate ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-timeline verify-timeline-skip-seed
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas docs-generate ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-loyalty verify-timeline verify-timeline-skip-seed
 
 # Default target
 help: ## Show this help message
@@ -388,6 +388,9 @@ engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue
 # ──────────────────────────────────────────────
 observatory: ## Start Observatory dashboard (port 9000, live message flow + Prometheus metrics)
 	uv run protean observatory --domain ordering.domain --domain identity.domain --domain catalogue.domain --domain inventory.domain --domain payments.domain --domain fulfillment.domain --domain reviews.domain --domain notifications.domain --title "ShopStream Observatory"
+
+verify-loyalty: ## Verify Loyalty end-to-end: account/points/transfer/campaign/redemption API checks (requires running stack + engine-loyalty)
+	./scripts/verify-loyalty.sh
 
 verify-observatory: ## Verify Observatory Timeline + Causation Graph: seeds data + runs ~66 API checks (requires running stack)
 	./scripts/verify-observatory.sh
