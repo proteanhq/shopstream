@@ -69,9 +69,9 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `Q` / `F` / lookups (gte/in/…) | ✅ | loyalty `RewardAccountRepository` |
 | cache provider (`[caches.*]`) | ✅ | loyalty `[caches.loyalty]` |
 | `value_object_from_entity` | ✅ | payments invoice (PR #8) |
-| async command processing (`asynchronous=True`) | 🚧 | follow-up |
+| async command processing (`asynchronous=True`) | ✅ | loyalty `POST /loyalty/accounts/{id}/earn-async` (202; engine drains the command queue) |
 | multiple providers (sqlite/elasticsearch) | 🚧 | open question / follow-up |
-| DLQ deliberate exercise | 🚧 | open question / follow-up |
+| DLQ deliberate exercise + replay | ✅ | loyalty `PoisonPill` failing handler → `tests/loyalty/integration/test_dlq.py` drives `Engine(test_mode)` → message lands in `loyalty::poison_pill:dlq`, then `broker.dlq_replay` (Redis-only engine-driven test; **runs locally via `make test`, skipped under CI** — a full engine inside pytest is unreliable on CI's shared single-Redis) |
 
 ## Protean bugs surfaced (filed; milestone 0.16.1)
 

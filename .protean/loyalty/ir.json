@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:9bf941c4bafe2015b031f7c403881dea7c0de0aa9a6fef7455ab1dbd87c0bc02",
+  "checksum": "sha256:86031123292124dac90658a914ed33a0327a32f6b24ace9d6ea88b6c95fae51a",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -433,6 +433,141 @@
           "module": "loyalty.campaign.events",
           "name": "CampaignPaused",
           "part_of": "loyalty.campaign.campaign.PromoCampaign"
+        }
+      },
+      "repositories": {},
+      "value_objects": {}
+    },
+    "loyalty.dlq.poison.PoisonPill": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "note": {
+            "default": "intentional DLQ demo failure",
+            "kind": "standard",
+            "max_length": 120,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "loyalty.dlq.poison.PoisonPill",
+        "identity_field": "id",
+        "invariants": {
+          "post": [],
+          "pre": []
+        },
+        "module": "loyalty.dlq.poison",
+        "name": "PoisonPill",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "poison_pill",
+          "stream_category": "loyalty::poison_pill"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "loyalty.dlq.poison.EmitPoisonHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "loyalty.dlq.poison.EmitPoisonHandler",
+          "handlers": {
+            "Loyalty.EmitPoison.v1": [
+              "emit"
+            ]
+          },
+          "module": "loyalty.dlq.poison",
+          "name": "EmitPoisonHandler",
+          "part_of": "loyalty.dlq.poison.PoisonPill",
+          "stream_category": "loyalty::poison_pill:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "loyalty.dlq.poison.EmitPoison": {
+          "__type__": "Loyalty.EmitPoison.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "note": {
+              "default": "intentional DLQ demo failure",
+              "kind": "standard",
+              "max_length": 120,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.dlq.poison.EmitPoison",
+          "module": "loyalty.dlq.poison",
+          "name": "EmitPoison",
+          "part_of": "loyalty.dlq.poison.PoisonPill"
+        }
+      },
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {
+        "loyalty.dlq.poison.PoisonEventHandler": {
+          "description": "Always fails \u2014 every delivery raises, so the message exhausts its retries and is DLQ'd.",
+          "element_type": "EVENT_HANDLER",
+          "fqn": "loyalty.dlq.poison.PoisonEventHandler",
+          "handlers": {
+            "Loyalty.PoisonDetonated.v1": [
+              "always_fail"
+            ]
+          },
+          "module": "loyalty.dlq.poison",
+          "name": "PoisonEventHandler",
+          "part_of": "loyalty.dlq.poison.PoisonPill",
+          "source_stream": null,
+          "stream_category": "loyalty::poison_pill",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "events": {
+        "loyalty.dlq.poison.PoisonDetonated": {
+          "__type__": "Loyalty.PoisonDetonated.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "note": {
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "occurred_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "poison_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "loyalty.dlq.poison.PoisonDetonated",
+          "is_fact_event": false,
+          "module": "loyalty.dlq.poison",
+          "name": "PoisonDetonated",
+          "part_of": "loyalty.dlq.poison.PoisonPill"
         }
       },
       "repositories": {},
@@ -1808,6 +1943,7 @@
   "elements": {
     "AGGREGATE": [
       "loyalty.campaign.campaign.PromoCampaign",
+      "loyalty.dlq.poison.PoisonPill",
       "loyalty.redemption.redemption.Redemption",
       "loyalty.reward.reward_account.Auditable",
       "loyalty.reward.reward_account.RewardAccount"
@@ -1820,6 +1956,7 @@
       "loyalty.campaign.management.ExpireCampaign",
       "loyalty.campaign.management.LaunchCampaign",
       "loyalty.campaign.management.PauseCampaign",
+      "loyalty.dlq.poison.EmitPoison",
       "loyalty.redemption.commands.CompensateRedemption",
       "loyalty.redemption.commands.CompleteRedemption",
       "loyalty.redemption.commands.IssueRedemptionVoucher",
@@ -1831,6 +1968,7 @@
     ],
     "COMMAND_HANDLER": [
       "loyalty.campaign.management.PromoCampaignHandler",
+      "loyalty.dlq.poison.EmitPoisonHandler",
       "loyalty.redemption.commands.RedemptionHandler",
       "loyalty.reward.enrollment.EnrollRewardAccountHandler",
       "loyalty.reward.points.PointsHandler"
@@ -1849,6 +1987,7 @@
       "loyalty.campaign.events.CampaignExpired",
       "loyalty.campaign.events.CampaignLaunched",
       "loyalty.campaign.events.CampaignPaused",
+      "loyalty.dlq.poison.PoisonDetonated",
       "loyalty.redemption.events.PointsReserved",
       "loyalty.redemption.events.RedemptionCompensated",
       "loyalty.redemption.events.RedemptionCompleted",
@@ -1862,7 +2001,9 @@
       "loyalty.reward.events.RewardAccountEnrolled",
       "loyalty.reward.events.TierUpgraded"
     ],
-    "EVENT_HANDLER": [],
+    "EVENT_HANDLER": [
+      "loyalty.dlq.poison.PoisonEventHandler"
+    ],
     "PROCESS_MANAGER": [
       "loyalty.redemption.saga.RedemptionSaga"
     ],
@@ -2073,7 +2214,7 @@
       }
     }
   },
-  "generated_at": "2026-06-30T21:05:52Z",
+  "generated_at": "2026-06-30T22:00:56Z",
   "ir_version": "0.1.0",
   "projections": {
     "loyalty.projections.campaign_catalog.CampaignCatalog": {

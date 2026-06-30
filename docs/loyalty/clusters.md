@@ -16,6 +16,17 @@ classDiagram
     }
 ```
 
+## Cluster: PoisonPill
+
+```mermaid
+classDiagram
+    class loyalty_dlq_poison_PoisonPill["PoisonPill"] {
+        <<Aggregate>>
+        +id Auto~identifier~
+        +note String
+    }
+```
+
 ## Cluster: Redemption
 
 ```mermaid

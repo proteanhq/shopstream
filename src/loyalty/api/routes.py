@@ -71,6 +71,22 @@ async def earn_points(account_id: str, body: EarnPointsRequest) -> StatusRespons
     return StatusResponse()
 
 
+@loyalty_router.post("/accounts/{account_id}/earn-async", status_code=202, response_model=StatusResponse)
+async def earn_points_async(account_id: str, body: EarnPointsRequest) -> StatusResponse:
+    """Credit points **asynchronously**: the command is enqueued and processed by the loyalty
+    engine, so the request returns `202 Accepted` immediately without waiting for the handler.
+
+    This is the only `asynchronous=True` path in ShopStream — the rest of the platform processes
+    commands synchronously. Under a non-inline broker (dev/prod/Postgres-test) the effect lands
+    once the engine drains the command queue.
+    """
+    current_domain.process(
+        EarnPoints(account_id=account_id, amount=body.amount, reason=body.reason),
+        asynchronous=True,
+    )
+    return StatusResponse(status="accepted")
+
+
 @loyalty_router.post("/accounts/{account_id}/redeem", response_model=StatusResponse)
 async def redeem_points(account_id: str, body: RedeemPointsRequest) -> StatusResponse:
     """Redeem points from a reward account."""
