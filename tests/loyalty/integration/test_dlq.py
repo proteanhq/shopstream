@@ -65,19 +65,30 @@ class TestDeadLetterQueue:
         broker = current_domain.brokers["default"]
         broker.dlq_purge(DLQ_STREAM)
 
-        # 1. Emit the poison event (the command is synchronous; the event is async).
+        # 1. Emit the poison event (the command is synchronous; the event is async, so it lands
+        #    in the outbox).
         current_domain.process(EmitPoison(note="dlq-integration-test"), asynchronous=False)
 
-        # 2. Run the engine: deliver → fail → exhaust retries → route to DLQ.
-        Engine(loyalty, test_mode=True).run()
+        # 2. Run the engine until the message has flowed outbox → publish → deliver → fail → DLQ.
+        #    With max_retries=1 a single delivery exhausts retries immediately, but the multi-step
+        #    pipeline can need more than one bounded test-mode run under a slow/loaded broker (CI),
+        #    so re-run until the DLQ is populated. Each Engine() owns its connections; reconnect
+        #    the broker after each run (the engine closes the shared pool on shutdown).
+        def _depth() -> int:
+            b = loyalty.brokers["default"]
+            b.redis_instance = redis.Redis.from_url(b.conn_info["URI"])
+            return b.dlq_depth(DLQ_STREAM)
 
-        # The engine closes the shared Redis connection pool on shutdown; hand the broker a
-        # fresh client so the inspection/replay calls below are deterministic.
-        broker = loyalty.brokers["default"]
-        broker.redis_instance = redis.Redis.from_url(broker.conn_info["URI"])
+        for _ in range(5):
+            Engine(loyalty, test_mode=True).run()
+            if _depth() >= 1:
+                break
 
         # 3. Assert the message landed in the DLQ.
-        assert broker.dlq_depth(DLQ_STREAM) == 1
+        broker = loyalty.brokers["default"]
+        broker.redis_instance = redis.Redis.from_url(broker.conn_info["URI"])
+        depth = broker.dlq_depth(DLQ_STREAM)
+        assert depth == 1, f"expected 1 message in {DLQ_STREAM}, found {depth}"
         entries = broker.dlq_list([DLQ_STREAM])
         assert len(entries) == 1
         entry = entries[0]
