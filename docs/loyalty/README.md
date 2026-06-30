@@ -295,6 +295,30 @@ boundary (dict payload, type filtering, no shared event classes) keeps the conte
 **Trade-off:** Pattern B puts a little more logic in the subscriber than a thin
 command-dispatching subscriber; acceptable for a single, well-contained reaction.
 
+### Multi-Step Redemption via a Process Manager (Saga)
+
+**Problem:** Redeeming points for a voucher spans two aggregates (RewardAccount + Redemption)
+and an external voucher provider that can fail — so reserved points must be **refunded** if the
+voucher can't be issued.
+
+**Decision:** A second process manager, `RedemptionSaga`, orchestrates the flow:
+`RedemptionRequested` → reserve points (`RedeemPoints`) → `PointsReserved` → issue voucher →
+`VoucherIssued` ⇒ complete, or `VoucherIssuanceFailed` ⇒ **compensate** by refunding the points
+(`EarnPoints`) and marking the redemption compensated. The `Redemption` aggregate only records
+each transition (`requested → points_reserved → voucher_issued → completed | compensated`); the
+saga owns the decisions.
+
+**Rationale:** It is ShopStream's second saga and deliberately exercises the Protean features the
+ordering `OrderCheckoutSaga` does not — a **dict `correlate`** (`{"redemption_id": "redemption_id"}`),
+an explicit **compensation** path, and **`end=True`** (the success branch finalises via
+`mark_as_complete()` instead, so both styles are shown). The voucher port fails deterministically
+for reward codes containing `FAIL`, which drives the compensation branch in tests and demos.
+
+**Trade-off:** Like the ordering saga, it is **engine-driven**; under `event_processing="sync"` it
+only advances to `points_reserved` (a later handler re-enters before the start transition persists),
+so its full forward + compensation logic is covered by `given()` unit tests rather than a synchronous
+end-to-end test.
+
 ## Source Code Map
 
 | Concern | Location |
@@ -312,14 +336,18 @@ command-dispatching subscriber; acceptable for a single, well-contained reaction
 | Campaign lifecycle commands + handler | [`src/loyalty/campaign/management.py`](../../src/loyalty/campaign/management.py) |
 | Active points-multiplier lookup (cross-aggregate read) | [`src/loyalty/campaign/multiplier.py`](../../src/loyalty/campaign/multiplier.py) |
 | CampaignLaunched upcaster chain (v1&rarr;v2&rarr;v3) | [`src/loyalty/campaign/upcasters.py`](../../src/loyalty/campaign/upcasters.py) |
-| Projections + projectors (DB account view + cache leaderboard + DB campaign catalog) | [`src/loyalty/projections/`](../../src/loyalty/projections/) |
-| Query handlers (`@read`) for the read endpoints | [`reward_account_view_queries.py`](../../src/loyalty/projections/reward_account_view_queries.py), [`points_leaderboard_queries.py`](../../src/loyalty/projections/points_leaderboard_queries.py), [`campaign_catalog_queries.py`](../../src/loyalty/projections/campaign_catalog_queries.py) |
+| Redemption aggregate + events + commands | [`src/loyalty/redemption/`](../../src/loyalty/redemption/) |
+| **RedemptionSaga** process manager (dict correlate + compensation + `end`) | [`src/loyalty/redemption/saga.py`](../../src/loyalty/redemption/saga.py) |
+| Failable voucher port | [`src/loyalty/redemption/voucher.py`](../../src/loyalty/redemption/voucher.py) |
+| Projections + projectors (DB account view + cache leaderboard + DB campaign catalog + DB redemption view) | [`src/loyalty/projections/`](../../src/loyalty/projections/) |
+| Query handlers (`@read`) for the read endpoints | [`reward_account_view_queries.py`](../../src/loyalty/projections/reward_account_view_queries.py), [`points_leaderboard_queries.py`](../../src/loyalty/projections/points_leaderboard_queries.py), [`campaign_catalog_queries.py`](../../src/loyalty/projections/campaign_catalog_queries.py), [`redemption_view_queries.py`](../../src/loyalty/projections/redemption_view_queries.py) |
 | API routes + schemas | [`src/loyalty/api/`](../../src/loyalty/api/) |
 | Generated reference: [clusters](clusters.md) · [event flows](event-flows.md) · [handler wiring](handler-wiring.md) · [catalog](catalog.md) | — |
 
-The HTTP API (`/loyalty`, see `src/loyalty/api/`) exposes enrol / earn / redeem / transfer and
-the campaign lifecycle (launch / activate / pause / expire), plus read endpoints for the account
-view (DB), points standing (cache), and the campaign catalog (DB). Writes go through commands and
-the application service; reads go through query handlers (`current_domain.dispatch`). An active
-`points_multiplier` campaign boosts points earned — the earn handler reads the `CampaignCatalog`
-read model (a cross-aggregate read; see [`multiplier.py`](../../src/loyalty/campaign/multiplier.py)).
+The HTTP API (`/loyalty`, see `src/loyalty/api/`) exposes enrol / earn / redeem / transfer, the
+campaign lifecycle (launch / activate / pause / expire), and redemption requests (which start the
+`RedemptionSaga`), plus read endpoints for the account view (DB), points standing (cache), the
+campaign catalog (DB), and redemption progress (DB). Writes go through commands and the application
+service; reads go through query handlers (`current_domain.dispatch`). An active `points_multiplier`
+campaign boosts points earned — the earn handler reads the `CampaignCatalog` read model (a
+cross-aggregate read; see [`multiplier.py`](../../src/loyalty/campaign/multiplier.py)).

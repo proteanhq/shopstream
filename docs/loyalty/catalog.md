@@ -122,6 +122,143 @@
 | campaign_id | Identifier | Yes | min_length=1 |
 | reason | String | No | max_length=255 |
 
+## Redemption (`loyalty.redemption.redemption.Redemption`)
+
+### Events
+
+#### PointsReserved
+
+- **Type**: `Loyalty.PointsReserved.v1`
+- **Version**: 1
+- **Published**: No
+- **Fact Event**: No
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| account_id | String | Yes | max_length=255, min_length=1 |
+| points | Integer | Yes | — |
+| redemption_id | String | Yes | max_length=255, min_length=1 |
+| reserved_at | DateTime | Yes | — |
+
+#### RedemptionCompensated
+
+- **Type**: `Loyalty.RedemptionCompensated.v1`
+- **Version**: 1
+- **Published**: No
+- **Fact Event**: No
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| compensated_at | DateTime | Yes | — |
+| reason | String | Yes | max_length=255, min_length=1 |
+| redemption_id | String | Yes | max_length=255, min_length=1 |
+| refunded_points | Integer | Yes | — |
+
+#### RedemptionCompleted
+
+- **Type**: `Loyalty.RedemptionCompleted.v1`
+- **Version**: 1
+- **Published**: No
+- **Fact Event**: No
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| completed_at | DateTime | Yes | — |
+| redemption_id | String | Yes | max_length=255, min_length=1 |
+| voucher_code | String | Yes | max_length=255, min_length=1 |
+
+#### RedemptionRequested
+
+- **Type**: `Loyalty.RedemptionRequested.v1`
+- **Version**: 1
+- **Published**: No
+- **Fact Event**: No
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| account_id | String | Yes | max_length=255, min_length=1 |
+| points | Integer | Yes | — |
+| redemption_id | String | Yes | max_length=255, min_length=1 |
+| requested_at | DateTime | Yes | — |
+| reward_code | String | Yes | max_length=255, min_length=1 |
+
+#### VoucherIssuanceFailed
+
+- **Type**: `Loyalty.VoucherIssuanceFailed.v1`
+- **Version**: 1
+- **Published**: No
+- **Fact Event**: No
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| failed_at | DateTime | Yes | — |
+| reason | String | Yes | max_length=255, min_length=1 |
+| redemption_id | String | Yes | max_length=255, min_length=1 |
+
+#### VoucherIssued
+
+- **Type**: `Loyalty.VoucherIssued.v1`
+- **Version**: 1
+- **Published**: No
+- **Fact Event**: No
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| issued_at | DateTime | Yes | — |
+| redemption_id | String | Yes | max_length=255, min_length=1 |
+| voucher_code | String | Yes | max_length=255, min_length=1 |
+
+### Commands
+
+#### CompensateRedemption
+
+- **Type**: `Loyalty.CompensateRedemption.v1`
+- **Version**: 1
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| reason | String | No | max_length=255 |
+| redemption_id | Identifier | Yes | min_length=1 |
+| refunded_points | Integer | Yes | — |
+
+#### CompleteRedemption
+
+- **Type**: `Loyalty.CompleteRedemption.v1`
+- **Version**: 1
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| redemption_id | Identifier | Yes | min_length=1 |
+
+#### IssueRedemptionVoucher
+
+- **Type**: `Loyalty.IssueRedemptionVoucher.v1`
+- **Version**: 1
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| redemption_id | Identifier | Yes | min_length=1 |
+
+#### RequestRedemption
+
+- **Type**: `Loyalty.RequestRedemption.v1`
+- **Version**: 1
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| account_id | String | Yes | max_length=255, min_length=1 |
+| points | Integer | Yes | — |
+| reward_code | String | Yes | max_length=40, min_length=1 |
+
+#### ReserveRedemptionPoints
+
+- **Type**: `Loyalty.ReserveRedemptionPoints.v1`
+- **Version**: 1
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| redemption_id | Identifier | Yes | min_length=1 |
+
 ## Auditable (`loyalty.reward.reward_account.Auditable`)
 
 ## RewardAccount (`loyalty.reward.reward_account.RewardAccount`)

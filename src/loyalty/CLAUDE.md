@@ -90,6 +90,34 @@ snapshot-based reconstruction; `domain.create_snapshot(PromoCampaign, id)` /
 The lifecycle is driven through CQRS commands (`campaign/management.py`), projected into the
 `CampaignCatalog` read model (see Projections), and exposed via the campaign API (see API).
 
+## Aggregate: Redemption + RedemptionSaga (Process Manager)
+
+**Files:** `redemption/redemption.py` (aggregate), `redemption/events.py`, `redemption/commands.py`,
+`redemption/voucher.py` (failable voucher port), `redemption/saga.py` (process manager).
+
+`Redemption` is a small state aggregate for one points-for-voucher redemption
+(`requested → points_reserved → voucher_issued → completed`, with a `compensated` branch). Each
+transition raises an event carrying `redemption_id`. The aggregate only records *what happened*;
+the **`RedemptionSaga`** owns the decisions.
+
+`RedemptionSaga` (`@loyalty.process_manager(stream_categories=["loyalty::redemption"])`) is
+ShopStream's **second** process manager and the one that exercises the saga features the ordering
+`OrderCheckoutSaga` does not:
+
+- **dict `correlate`** — `correlate={"redemption_id": "redemption_id"}` (maps a PM field to the
+  event field), vs the ordering saga's bare-string form;
+- a **compensation** path — on `VoucherIssuanceFailed` it refunds the reserved points (a
+  compensating `EarnPoints` command) and marks the redemption compensated;
+- explicit **`end=True`** on the terminal compensation handler (the success branch ends via
+  **`mark_as_complete()`** instead, so both finalisation styles appear).
+
+Flow: `RedemptionRequested` (start) → reserve points (`RedeemPoints` on the RewardAccount) +
+advance to `points_reserved` → issue voucher → `VoucherIssued` ⇒ complete (`mark_as_complete()`),
+or `VoucherIssuanceFailed` ⇒ **compensate** (refund, `end=True`). Like the ordering saga it is
+**engine-driven**; under `event_processing="sync"` it advances only to `points_reserved` (a later
+handler re-enters before the start transition persists), so its full logic is unit-tested with
+`given()` in `tests/loyalty/domain/test_redemption_saga.py`.
+
 ## Events
 
 **RewardAccount events** (`reward/events.py`): `RewardAccountEnrolled`, `PointsEarned`,
@@ -182,10 +210,11 @@ can't be resolved without an extra lookup.
 | `reward_account_view.py` | `RewardAccountView` | Database | `RewardAccountViewProjector` ([RewardAccount]) |
 | `points_leaderboard.py` | `PointsLeaderboard` | **Cache** (`cache="loyalty"`) | `PointsLeaderboardProjector` ([RewardAccount]) |
 | `campaign_catalog.py` | `CampaignCatalog` | Database | `CampaignCatalogProjector` ([PromoCampaign]) |
+| `redemption_view.py` | `RedemptionView` | Database | `RedemptionViewProjector` ([Redemption]) |
 
 `CampaignCatalog` projects the event-sourced PromoCampaign's delta events into a flat,
 queryable catalog — the read side the points-earning multiplier consults and the campaign API
-lists from.
+lists from. `RedemptionView` tracks each redemption's saga progress for the redemption API.
 
 `PointsLeaderboard` is the only cache-backed projection in ShopStream. Write via
 `current_domain.cache_for(PointsLeaderboard).add(...)`; read via
@@ -195,11 +224,12 @@ cache projections.
 ## Queries (read side)
 
 **Files:** `projections/reward_account_view_queries.py`, `projections/points_leaderboard_queries.py`,
-`projections/campaign_catalog_queries.py`. `@loyalty.query` DTOs + `@loyalty.query_handler` with
-`@read` methods (no UnitOfWork) back the read endpoints: `GetRewardAccount` (DB `RewardAccountView`
-via `view_for`), `GetLeaderboardStanding` (cache `PointsLeaderboard` via `view_for`), and
-`GetCampaign` / `ListCampaigns` (DB `CampaignCatalog`; `ListCampaigns` demonstrates a filtered,
-ordered projection query). Invoked with `current_domain.dispatch(query)`.
+`projections/campaign_catalog_queries.py`, `projections/redemption_view_queries.py`.
+`@loyalty.query` DTOs + `@loyalty.query_handler` with `@read` methods (no UnitOfWork) back the read
+endpoints: `GetRewardAccount` (DB `RewardAccountView` via `view_for`), `GetLeaderboardStanding`
+(cache `PointsLeaderboard` via `view_for`), `GetCampaign` / `ListCampaigns` (DB `CampaignCatalog`;
+`ListCampaigns` demonstrates a filtered, ordered projection query), and `GetRedemption` (DB
+`RedemptionView`). Invoked with `current_domain.dispatch(query)`.
 
 ## API
 
@@ -221,6 +251,8 @@ reads through query handlers.
 | POST | `/loyalty/campaigns/{id}/expire` | `ExpireCampaign` |
 | GET | `/loyalty/campaigns` | `ListCampaigns` → CampaignCatalog (DB; `?status=`) |
 | GET | `/loyalty/campaigns/{id}` | `GetCampaign` → CampaignCatalog (DB) |
+| POST | `/loyalty/redemptions` | `RequestRedemption` (starts the `RedemptionSaga`) |
+| GET | `/loyalty/redemptions/{id}` | `GetRedemption` → RedemptionView (DB) |
 
 > **Known limitation:** `LaunchCampaign` accepts `starts_on`/`ends_on` (`Date`) but a `Date`
 > field on a command currently breaks Protean's message checksum

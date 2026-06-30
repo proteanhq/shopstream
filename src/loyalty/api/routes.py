@@ -19,6 +19,9 @@ from loyalty.api.schemas import (
     LeaderboardEntryResponse,
     PauseCampaignRequest,
     RedeemPointsRequest,
+    RedemptionIdResponse,
+    RedemptionResponse,
+    RequestRedemptionRequest,
     RewardAccountResponse,
     StatusResponse,
     TransferPointsRequest,
@@ -32,7 +35,9 @@ from loyalty.campaign.management import (
 )
 from loyalty.projections.campaign_catalog_queries import GetCampaign, ListCampaigns
 from loyalty.projections.points_leaderboard_queries import GetLeaderboardStanding
+from loyalty.projections.redemption_view_queries import GetRedemption
 from loyalty.projections.reward_account_view_queries import GetRewardAccount
+from loyalty.redemption.commands import RequestRedemption
 from loyalty.reward.enrollment import EnrollRewardAccount
 from loyalty.reward.points import EarnPoints, RedeemPoints
 from loyalty.reward.services import LoyaltyService
@@ -125,6 +130,27 @@ async def expire_campaign(campaign_id: str) -> StatusResponse:
 
 
 # ---------------------------------------------------------------------------
+# Redemption Endpoints (kicks off the RedemptionSaga)
+# ---------------------------------------------------------------------------
+@loyalty_router.post("/redemptions", status_code=201, response_model=RedemptionIdResponse)
+async def request_redemption(body: RequestRedemptionRequest) -> RedemptionIdResponse:
+    """Request a points-for-voucher redemption.
+
+    Raises `RedemptionRequested`; the `RedemptionSaga` (under the loyalty engine) then reserves
+    points, issues the voucher, and either completes or compensates (refunds the points).
+    """
+    redemption_id = current_domain.process(
+        RequestRedemption(
+            account_id=body.account_id,
+            points=body.points,
+            reward_code=body.reward_code,
+        ),
+        asynchronous=False,
+    )
+    return RedemptionIdResponse(redemption_id=str(redemption_id))
+
+
+# ---------------------------------------------------------------------------
 # Read Endpoints
 # ---------------------------------------------------------------------------
 @loyalty_router.get("/accounts/{account_id}", response_model=RewardAccountResponse)
@@ -159,3 +185,12 @@ async def get_campaign(campaign_id: str) -> CampaignResponse:
     if entry is None:
         raise HTTPException(status_code=404, detail="Campaign not found")
     return CampaignResponse(**entry.to_dict())
+
+
+@loyalty_router.get("/redemptions/{redemption_id}", response_model=RedemptionResponse)
+async def get_redemption(redemption_id: str) -> RedemptionResponse:
+    """Read a redemption's progress (database-backed projection)."""
+    view = current_domain.dispatch(GetRedemption(redemption_id=redemption_id))
+    if view is None:
+        raise HTTPException(status_code=404, detail="Redemption not found")
+    return RedemptionResponse(**view.to_dict())

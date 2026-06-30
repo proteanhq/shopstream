@@ -20,6 +20,8 @@ Two flavours:
         make loadtest-loyalty
 """
 
+from random import randint
+
 from locust import HttpUser, SequentialTaskSet, between, task
 
 from loadtests.data_generators import campaign_data, loyalty_customer_id
@@ -231,20 +233,87 @@ class TransferJourney(SequentialTaskSet):
         self.interrupt()
 
 
+class RedemptionSagaJourney(SequentialTaskSet):
+    """Enrol → earn → request a points-for-voucher redemption → read its progress.
+
+    Kicks off the RedemptionSaga (reserve → issue voucher → complete, or compensate). Mixes a
+    normal reward code (succeeds) with a ``FAIL`` code (drives the compensation/refund branch).
+    With the loyalty engine running, the saga advances the redemption asynchronously; the read
+    observes whatever state it has reached.
+    """
+
+    def on_start(self):
+        self.state = LoyaltyState()
+
+    @task
+    def enroll_and_fund(self):
+        with self.client.post(
+            "/loyalty/accounts",
+            json={"customer_id": loyalty_customer_id()},
+            catch_response=True,
+            name="POST /loyalty/accounts",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.account_id = resp.json()["account_id"]
+            else:
+                resp.failure(f"Enroll failed: {resp.status_code} — {extract_error_detail(resp)}")
+                self.interrupt()
+                return
+        self.client.post(
+            f"/loyalty/accounts/{self.state.account_id}/earn",
+            json={"amount": 500, "reason": "order"},
+            name="POST /loyalty/accounts/{id}/earn",
+        )
+
+    @task
+    def request_redemption(self):
+        # ~1 in 4 uses a FAIL code to exercise the saga's compensation path.
+        reward_code = "FAIL-STOCK" if randint(1, 4) == 1 else "GIFT25"
+        with self.client.post(
+            "/loyalty/redemptions",
+            json={"account_id": self.state.account_id, "points": 100, "reward_code": reward_code},
+            catch_response=True,
+            name="POST /loyalty/redemptions",
+        ) as resp:
+            if resp.status_code == 201:
+                self.state.redemption_id = resp.json()["redemption_id"]
+            else:
+                resp.failure(f"Request redemption failed: {resp.status_code} — {extract_error_detail(resp)}")
+                self.interrupt()
+
+    @task
+    def read_redemption(self):
+        with self.client.get(
+            f"/loyalty/redemptions/{self.state.redemption_id}",
+            catch_response=True,
+            name="GET /loyalty/redemptions/{id}",
+        ) as resp:
+            if resp.status_code in (200, 404):
+                resp.success()
+            else:
+                resp.failure(f"Get redemption failed: {resp.status_code} — {extract_error_detail(resp)}")
+
+    @task
+    def done(self):
+        self.interrupt()
+
+
 class LoyaltyUser(HttpUser):
     """Drives the Loyalty HTTP API directly (default scenario).
 
     Weighted task distribution:
-    - 50% Rewards account journey (enrol/earn/redeem + projection reads)
-    - 30% Campaign multiplier journey
-    - 20% Points transfer
+    - 40% Rewards account journey (enrol/earn/redeem + projection reads)
+    - 25% Campaign multiplier journey
+    - 20% Redemption saga journey (reserve → issue/compensate)
+    - 15% Points transfer
     """
 
     wait_time = between(0.5, 2.0)
     tasks = {
-        RewardsAccountJourney: 5,
-        CampaignMultiplierJourney: 3,
-        TransferJourney: 2,
+        RewardsAccountJourney: 8,
+        CampaignMultiplierJourney: 5,
+        RedemptionSagaJourney: 4,
+        TransferJourney: 3,
     }
 
 

@@ -34,7 +34,8 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `@application_service` + `@use_case` | ✅ | loyalty `LoyaltyService.transfer_points` |
 | `@upcaster` (single step) | ✅ | ordering OrderCreated v1→v2 |
 | `@upcaster` (multi-step chain) | ✅ | loyalty CampaignLaunched v1→v2→v3 |
-| `@process_manager` (saga) | ⚠️ 🚧 | ordering `OrderCheckoutSaga` (string correlate). A 2nd saga with dict-correlate + compensation + `end` is a follow-up |
+| `@process_manager` (saga, string correlate) | ✅ | ordering `OrderCheckoutSaga` |
+| `@process_manager` (dict correlate + compensation + `end`) | ✅ | loyalty `RedemptionSaga` — reserve → issue → complete, compensating (refund) on voucher failure; `correlate={"redemption_id": ...}`, `end=True` + `mark_as_complete()` |
 | event/command enrichers | ✅ | all domains (`register_command_enricher` / `register_event_enricher`) + `bind_event_context` (payments/reviews) |
 | `@database_model` (custom ORM) | 🚧 | follow-up — Postgres-specific, not exercised in memory tests |
 | `@email` / `send_email`, `ReadView` element | N/A | notifications uses bespoke channel ports; `view_for()` covers projection reads |
@@ -88,9 +89,15 @@ filed and awaiting a fix (the one ⛔ row above is xfail'd until it lands).
 Minor DX note (not filed): `repository_for()` gives a confusing `provider=None` error for cache-backed
 projections — the working API is `cache_for().add()` / `view_for().get()`.
 
+Process-manager note (not filed; PMs are engine-driven by design): under `event_processing="sync"`
+a multi-step PM does not cascade — a later handler re-enters (nested command dispatch) *before* the
+start handler's transition event is persisted, so it can't load the in-flight instance and is
+skipped. The `RedemptionSaga` therefore advances only to `points_reserved` synchronously; the
+remaining steps run under the engine. Its full forward + compensation logic is covered by `given()`
+unit tests (`tests/loyalty/domain/test_redemption_saga.py`).
+
 ## Follow-ups (need design or infrastructure)
 
-- **Process manager #2** — a loyalty `RedemptionSaga` exercising dict `correlate`, compensation, and `end`.
 - **`database_model`** — custom ORM model (Postgres; not exercised by memory tests).
 - **`Auto(increment)`** — a clean home + the id-reflection wart (see above).
 - **Infra wiring — done.** loyalty is fully wired: `app.py`, `.protean/config.toml [domains]`,

@@ -95,3 +95,23 @@ class CampaignResponse(BaseModel):
     status: str | None = None
     starts_on: date | None = None
     ends_on: date | None = None
+
+
+class RequestRedemptionRequest(BaseModel):
+    account_id: str
+    points: int = Field(gt=0)
+    reward_code: str = Field(max_length=40)
+
+
+class RedemptionIdResponse(BaseModel):
+    redemption_id: str
+
+
+class RedemptionResponse(BaseModel):
+    redemption_id: str
+    account_id: str
+    points: int = 0
+    reward_code: str | None = None
+    status: str | None = None
+    voucher_code: str | None = None
+    failure_reason: str | None = None

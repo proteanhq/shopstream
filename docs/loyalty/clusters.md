@@ -16,6 +16,24 @@ classDiagram
     }
 ```
 
+## Cluster: Redemption
+
+```mermaid
+classDiagram
+    class loyalty_redemption_redemption_Redemption["Redemption"] {
+        <<Aggregate>>
+        +account_id String~required~
+        +failure_reason String
+        +id Auto~identifier~
+        +points Integer~required~
+        +requested_at DateTime
+        +reward_code String~required~
+        +status String
+        +voucher_code String
+    }
+    note for loyalty_redemption_redemption_Redemption "points_must_be_positive"
+```
+
 ## Cluster: Auditable
 
 ```mermaid
