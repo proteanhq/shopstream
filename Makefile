@@ -600,7 +600,7 @@ loadtest-loyalty: ## Run loyalty HTTP API load test (enrol/earn/redeem/transfer 
 loadtest-loyalty-events: ## Run loyalty event-driven load test (order lifecycle) — needs engine-loyalty
 	uv run locust -f loadtests/scenarios/loyalty.py --host http://localhost:8000 LoyaltyRewardsUser
 
-loadtest-seed: ## Seed baseline data (20 customers, 15 products, 5 categories, 3 warehouses)
+loadtest-seed: ## Seed baseline data (20 customers, 15 products, 5 categories, 3 warehouses, 10 loyalty accounts)
 	uv run python -m loadtests.seed --host http://localhost:8000
 
 loadtest-clean: truncate-db ## Clean all data for a fresh load test run

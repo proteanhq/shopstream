@@ -21,6 +21,7 @@ from loadtests.data_generators import (
     category_name,
     customer_name,
     initialize_stock_data,
+    loyalty_customer_id,
     product_data,
     unique_external_id,
     valid_email,
@@ -34,6 +35,7 @@ DEFAULT_COUNTS = {
     "products": 15,
     "categories": 5,
     "warehouses": 3,
+    "loyalty_accounts": 10,
 }
 
 
@@ -46,6 +48,7 @@ def seed_data(host: str, counts: dict | None = None) -> dict:
         "category_ids": [],
         "warehouse_ids": [],
         "inventory_item_ids": [],
+        "loyalty_account_ids": [],
     }
 
     # Customers
@@ -104,6 +107,22 @@ def seed_data(host: str, counts: dict | None = None) -> dict:
             resp = requests.post(f"{host}/inventory", json=payload, timeout=10)
             if resp.status_code == 201:
                 created["inventory_item_ids"].append(resp.json()["inventory_item_id"])
+
+    # Loyalty reward accounts (enrolled + seeded with points to redeem/transfer)
+    for _ in range(counts.get("loyalty_accounts", 0)):
+        resp = requests.post(
+            f"{host}/loyalty/accounts",
+            json={"customer_id": loyalty_customer_id()},
+            timeout=10,
+        )
+        if resp.status_code == 201:
+            account_id = resp.json()["account_id"]
+            created["loyalty_account_ids"].append(account_id)
+            requests.post(
+                f"{host}/loyalty/accounts/{account_id}/earn",
+                json={"amount": 500, "reason": "seed"},
+                timeout=10,
+            )
 
     return created
 
