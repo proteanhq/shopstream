@@ -18,6 +18,7 @@ set -euo pipefail
 #   make engine-catalogue       # terminal 6 (optional, for projection processing)
 #   make engine-payments        # terminal 7 (optional)
 #   make engine-fulfillment     # terminal 8 (optional)
+#   make engine-loyalty         # terminal 9 (optional, for loyalty projections + the RedemptionSaga)
 #
 # Usage:
 #   ./scripts/verify-timeline.sh              # Full run: seed + verify
@@ -226,6 +227,30 @@ print(vs[0]['variant_id'] if vs else '')
     curl -sf -X PUT "$API_URL/orders/$ORDER_ID/ship" \
         -H "Content-Type: application/json" \
         -d "{\"shipment_id\":\"$FULFILL_ID\",\"tracking_number\":\"TL-TRACK-12345\",\"carrier\":\"FedEx\"}" > /dev/null
+
+    # --- 1.7 Loyalty (reward account, campaign, redemption saga) ---
+    echo "  Seeding loyalty (account, campaign, redemption)..."
+    LOY_ACC=$(curl -sf -X POST "$API_URL/loyalty/accounts" \
+        -H "Content-Type: application/json" \
+        -d "{\"customer_id\":\"$CUST1_ID\"}")
+    LOY_ACC_ID=$(echo "$LOY_ACC" | python3 -c "import json,sys; print(json.load(sys.stdin)['account_id'])")
+    curl -sf -X POST "$API_URL/loyalty/accounts/$LOY_ACC_ID/earn" \
+        -H "Content-Type: application/json" -d '{"amount":500,"reason":"order"}' > /dev/null
+    curl -sf -X POST "$API_URL/loyalty/accounts/$LOY_ACC_ID/redeem" \
+        -H "Content-Type: application/json" -d '{"amount":100,"reason":"voucher"}' > /dev/null
+
+    # Event-sourced PromoCampaign — its own stream + fact events
+    LOY_CAMP=$(curl -sf -X POST "$API_URL/loyalty/campaigns" \
+        -H "Content-Type: application/json" \
+        -d '{"campaign_code":"OBSVERIFY","name":"Observatory Verify","discount_type":"points_multiplier","discount_value":2}')
+    LOY_CAMP_ID=$(echo "$LOY_CAMP" | python3 -c "import json,sys; print(json.load(sys.stdin)['campaign_id'])")
+    curl -sf -X POST "$API_URL/loyalty/campaigns/$LOY_CAMP_ID/activate" > /dev/null
+
+    # Redemption — kicks off the RedemptionSaga (a causation chain on loyalty::redemption)
+    curl -sf -X POST "$API_URL/loyalty/redemptions" \
+        -H "Content-Type: application/json" \
+        -d "{\"account_id\":\"$LOY_ACC_ID\",\"points\":120,\"reward_code\":\"GIFT25\"}" > /dev/null
+    echo "  Loyalty account: $LOY_ACC_ID"
 
     # Let engines process events
     echo "  Waiting for engine processing..."
@@ -518,6 +543,24 @@ DOMAIN_COUNT=$(sed -n '1p' "$TMPDIR/domains.txt")
 DOMAIN_LIST=$(sed -n '2p' "$TMPDIR/domains.txt")
 [ "$DOMAIN_COUNT" -gt 1 ] 2>/dev/null
 check $? "Multiple domains present ($DOMAIN_COUNT: $DOMAIN_LIST)"
+
+# Loyalty events should be in the timeline (requires engine-loyalty running)
+echo "$DOMAIN_LIST" | grep -q "loyalty"
+check $? "Loyalty events present in the timeline (needs engine-loyalty)"
+
+section "2.12 Loyalty stream coverage"
+curl -sf "$OBS_URL/api/timeline/events?limit=200" > "$TMPDIR/loy.json"
+python3 -c "
+import json
+d = json.load(open('$TMPDIR/loy.json'))
+streams = set(e.get('stream','').split('-')[0] for e in d.get('events', []))
+loyalty_cats = sorted(s for s in streams if s.startswith('loyalty::'))
+open('$TMPDIR/loy_cats.txt','w').write(', '.join(loyalty_cats) or 'none')
+"
+LOY_CATS=$(cat "$TMPDIR/loy_cats.txt")
+echo "  Loyalty stream categories seen: $LOY_CATS"
+echo "$LOY_CATS" | grep -q "loyalty::reward_account"
+check $? "loyalty::reward_account stream present ($LOY_CATS)"
 
 # ============================================================
 #  Phase 4: Causation Graph — Epic 6.3 Endpoints
