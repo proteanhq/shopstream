@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:6eabe84b7f993fe5b519b48f9d706708578a5f534d4d944ef5efe6d262fa8f99",
+  "checksum": "sha256:60efd10022bb953a067dd863d3dfbad7be965a4e4965771c98bee0c24cd67259",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -433,6 +433,465 @@
           "module": "loyalty.campaign.events",
           "name": "CampaignPaused",
           "part_of": "loyalty.campaign.campaign.PromoCampaign"
+        }
+      },
+      "repositories": {},
+      "value_objects": {}
+    },
+    "loyalty.redemption.redemption.Redemption": {
+      "aggregate": {
+        "element_type": "AGGREGATE",
+        "fields": {
+          "account_id": {
+            "kind": "standard",
+            "max_length": 255,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "failure_reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "points": {
+            "kind": "standard",
+            "required": true,
+            "type": "Integer"
+          },
+          "requested_at": {
+            "default": "<callable>",
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "reward_code": {
+            "kind": "standard",
+            "max_length": 40,
+            "min_length": 1,
+            "required": true,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "choices": [
+              "compensated",
+              "completed",
+              "points_reserved",
+              "requested",
+              "voucher_issued"
+            ],
+            "default": "requested",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "voucher_code": {
+            "kind": "standard",
+            "max_length": 40,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "loyalty.redemption.redemption.Redemption",
+        "identity_field": "id",
+        "invariants": {
+          "post": [
+            "points_must_be_positive"
+          ],
+          "pre": []
+        },
+        "module": "loyalty.redemption.redemption",
+        "name": "Redemption",
+        "options": {
+          "auto_add_id_field": true,
+          "fact_events": false,
+          "is_event_sourced": false,
+          "limit": 100,
+          "provider": "default",
+          "schema_name": "redemption",
+          "stream_category": "loyalty::redemption"
+        }
+      },
+      "application_services": {},
+      "command_handlers": {
+        "loyalty.redemption.commands.RedemptionHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "loyalty.redemption.commands.RedemptionHandler",
+          "handlers": {
+            "Loyalty.CompensateRedemption.v1": [
+              "compensate"
+            ],
+            "Loyalty.CompleteRedemption.v1": [
+              "complete"
+            ],
+            "Loyalty.IssueRedemptionVoucher.v1": [
+              "issue"
+            ],
+            "Loyalty.RequestRedemption.v1": [
+              "request"
+            ],
+            "Loyalty.ReserveRedemptionPoints.v1": [
+              "reserve"
+            ]
+          },
+          "module": "loyalty.redemption.commands",
+          "name": "RedemptionHandler",
+          "part_of": "loyalty.redemption.redemption.Redemption",
+          "stream_category": "loyalty::redemption:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "commands": {
+        "loyalty.redemption.commands.CompensateRedemption": {
+          "__type__": "Loyalty.CompensateRedemption.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "reason": {
+              "default": "voucher unavailable",
+              "kind": "standard",
+              "max_length": 255,
+              "sanitize": true,
+              "type": "String"
+            },
+            "redemption_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "refunded_points": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            }
+          },
+          "fqn": "loyalty.redemption.commands.CompensateRedemption",
+          "module": "loyalty.redemption.commands",
+          "name": "CompensateRedemption",
+          "part_of": "loyalty.redemption.redemption.Redemption"
+        },
+        "loyalty.redemption.commands.CompleteRedemption": {
+          "__type__": "Loyalty.CompleteRedemption.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "redemption_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "loyalty.redemption.commands.CompleteRedemption",
+          "module": "loyalty.redemption.commands",
+          "name": "CompleteRedemption",
+          "part_of": "loyalty.redemption.redemption.Redemption"
+        },
+        "loyalty.redemption.commands.IssueRedemptionVoucher": {
+          "__type__": "Loyalty.IssueRedemptionVoucher.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "redemption_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "loyalty.redemption.commands.IssueRedemptionVoucher",
+          "module": "loyalty.redemption.commands",
+          "name": "IssueRedemptionVoucher",
+          "part_of": "loyalty.redemption.redemption.Redemption"
+        },
+        "loyalty.redemption.commands.RequestRedemption": {
+          "__type__": "Loyalty.RequestRedemption.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "account_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "points": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "reward_code": {
+              "kind": "standard",
+              "max_length": 40,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.redemption.commands.RequestRedemption",
+          "module": "loyalty.redemption.commands",
+          "name": "RequestRedemption",
+          "part_of": "loyalty.redemption.redemption.Redemption"
+        },
+        "loyalty.redemption.commands.ReserveRedemptionPoints": {
+          "__type__": "Loyalty.ReserveRedemptionPoints.v1",
+          "__version__": 1,
+          "element_type": "COMMAND",
+          "fields": {
+            "redemption_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "loyalty.redemption.commands.ReserveRedemptionPoints",
+          "module": "loyalty.redemption.commands",
+          "name": "ReserveRedemptionPoints",
+          "part_of": "loyalty.redemption.redemption.Redemption"
+        }
+      },
+      "database_models": {},
+      "entities": {},
+      "event_handlers": {},
+      "events": {
+        "loyalty.redemption.events.PointsReserved": {
+          "__type__": "Loyalty.PointsReserved.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "account_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "points": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "redemption_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "reserved_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "loyalty.redemption.events.PointsReserved",
+          "is_fact_event": false,
+          "module": "loyalty.redemption.events",
+          "name": "PointsReserved",
+          "part_of": "loyalty.redemption.redemption.Redemption"
+        },
+        "loyalty.redemption.events.RedemptionCompensated": {
+          "__type__": "Loyalty.RedemptionCompensated.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "compensated_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "redemption_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "refunded_points": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            }
+          },
+          "fqn": "loyalty.redemption.events.RedemptionCompensated",
+          "is_fact_event": false,
+          "module": "loyalty.redemption.events",
+          "name": "RedemptionCompensated",
+          "part_of": "loyalty.redemption.redemption.Redemption"
+        },
+        "loyalty.redemption.events.RedemptionCompleted": {
+          "__type__": "Loyalty.RedemptionCompleted.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "completed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "redemption_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "voucher_code": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.redemption.events.RedemptionCompleted",
+          "is_fact_event": false,
+          "module": "loyalty.redemption.events",
+          "name": "RedemptionCompleted",
+          "part_of": "loyalty.redemption.redemption.Redemption"
+        },
+        "loyalty.redemption.events.RedemptionRequested": {
+          "__type__": "Loyalty.RedemptionRequested.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "account_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "points": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "redemption_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "requested_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "reward_code": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.redemption.events.RedemptionRequested",
+          "is_fact_event": false,
+          "module": "loyalty.redemption.events",
+          "name": "RedemptionRequested",
+          "part_of": "loyalty.redemption.redemption.Redemption"
+        },
+        "loyalty.redemption.events.VoucherIssuanceFailed": {
+          "__type__": "Loyalty.VoucherIssuanceFailed.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "failed_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "reason": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "redemption_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.redemption.events.VoucherIssuanceFailed",
+          "is_fact_event": false,
+          "module": "loyalty.redemption.events",
+          "name": "VoucherIssuanceFailed",
+          "part_of": "loyalty.redemption.redemption.Redemption"
+        },
+        "loyalty.redemption.events.VoucherIssued": {
+          "__type__": "Loyalty.VoucherIssued.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "issued_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "redemption_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            },
+            "voucher_code": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "sanitize": true,
+              "type": "String"
+            }
+          },
+          "fqn": "loyalty.redemption.events.VoucherIssued",
+          "is_fact_event": false,
+          "module": "loyalty.redemption.events",
+          "name": "VoucherIssued",
+          "part_of": "loyalty.redemption.redemption.Redemption"
         }
       },
       "repositories": {},
@@ -1349,6 +1808,7 @@
   "elements": {
     "AGGREGATE": [
       "loyalty.campaign.campaign.PromoCampaign",
+      "loyalty.redemption.redemption.Redemption",
       "loyalty.reward.reward_account.Auditable",
       "loyalty.reward.reward_account.RewardAccount"
     ],
@@ -1360,12 +1820,18 @@
       "loyalty.campaign.management.ExpireCampaign",
       "loyalty.campaign.management.LaunchCampaign",
       "loyalty.campaign.management.PauseCampaign",
+      "loyalty.redemption.commands.CompensateRedemption",
+      "loyalty.redemption.commands.CompleteRedemption",
+      "loyalty.redemption.commands.IssueRedemptionVoucher",
+      "loyalty.redemption.commands.RequestRedemption",
+      "loyalty.redemption.commands.ReserveRedemptionPoints",
       "loyalty.reward.enrollment.EnrollRewardAccount",
       "loyalty.reward.points.EarnPoints",
       "loyalty.reward.points.RedeemPoints"
     ],
     "COMMAND_HANDLER": [
       "loyalty.campaign.management.PromoCampaignHandler",
+      "loyalty.redemption.commands.RedemptionHandler",
       "loyalty.reward.enrollment.EnrollRewardAccountHandler",
       "loyalty.reward.points.PointsHandler"
     ],
@@ -1383,6 +1849,12 @@
       "loyalty.campaign.events.CampaignExpired",
       "loyalty.campaign.events.CampaignLaunched",
       "loyalty.campaign.events.CampaignPaused",
+      "loyalty.redemption.events.PointsReserved",
+      "loyalty.redemption.events.RedemptionCompensated",
+      "loyalty.redemption.events.RedemptionCompleted",
+      "loyalty.redemption.events.RedemptionRequested",
+      "loyalty.redemption.events.VoucherIssuanceFailed",
+      "loyalty.redemption.events.VoucherIssued",
       "loyalty.reward.events.MembershipCardIssued",
       "loyalty.reward.events.PointsEarned",
       "loyalty.reward.events.PointsRedeemed",
@@ -1391,26 +1863,32 @@
       "loyalty.reward.events.TierUpgraded"
     ],
     "EVENT_HANDLER": [],
-    "PROCESS_MANAGER": [],
+    "PROCESS_MANAGER": [
+      "loyalty.redemption.saga.RedemptionSaga"
+    ],
     "PROJECTION": [
       "loyalty.projections.campaign_catalog.CampaignCatalog",
       "loyalty.projections.points_leaderboard.PointsLeaderboard",
+      "loyalty.projections.redemption_view.RedemptionView",
       "loyalty.projections.reward_account_view.RewardAccountView"
     ],
     "PROJECTOR": [
       "loyalty.projections.campaign_catalog.CampaignCatalogProjector",
       "loyalty.projections.points_leaderboard.PointsLeaderboardProjector",
+      "loyalty.projections.redemption_view.RedemptionViewProjector",
       "loyalty.projections.reward_account_view.RewardAccountViewProjector"
     ],
     "QUERY": [
       "loyalty.projections.campaign_catalog_queries.GetCampaign",
       "loyalty.projections.campaign_catalog_queries.ListCampaigns",
       "loyalty.projections.points_leaderboard_queries.GetLeaderboardStanding",
+      "loyalty.projections.redemption_view_queries.GetRedemption",
       "loyalty.projections.reward_account_view_queries.GetRewardAccount"
     ],
     "QUERY_HANDLER": [
       "loyalty.projections.campaign_catalog_queries.CampaignCatalogQueryHandler",
       "loyalty.projections.points_leaderboard_queries.PointsLeaderboardQueryHandler",
+      "loyalty.projections.redemption_view_queries.RedemptionViewQueryHandler",
       "loyalty.projections.reward_account_view_queries.RewardAccountViewQueryHandler"
     ],
     "REPOSITORY": [
@@ -1444,7 +1922,121 @@
         ]
       }
     },
-    "process_managers": {},
+    "process_managers": {
+      "loyalty.redemption.saga.RedemptionSaga": {
+        "description": "Coordinates reserve \u2192 issue \u2192 confirm, compensating on voucher failure.",
+        "element_type": "PROCESS_MANAGER",
+        "fields": {
+          "account_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "failure_reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "id": {
+            "auto_generated": true,
+            "identifier": true,
+            "kind": "auto",
+            "type": "Auto"
+          },
+          "points": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "redemption_id": {
+            "kind": "identifier",
+            "type": "Identifier"
+          },
+          "reward_code": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "started_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "status": {
+            "default": "new",
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "voucher_code": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "loyalty.redemption.saga.RedemptionSaga",
+        "handlers": {
+          "Loyalty.PointsReserved.v1": {
+            "correlate": {
+              "redemption_id": "redemption_id"
+            },
+            "end": false,
+            "methods": [
+              "on_points_reserved"
+            ],
+            "start": false
+          },
+          "Loyalty.RedemptionRequested.v1": {
+            "correlate": {
+              "redemption_id": "redemption_id"
+            },
+            "end": false,
+            "methods": [
+              "on_requested"
+            ],
+            "start": true
+          },
+          "Loyalty.VoucherIssuanceFailed.v1": {
+            "correlate": {
+              "redemption_id": "redemption_id"
+            },
+            "end": true,
+            "methods": [
+              "on_voucher_failed"
+            ],
+            "start": false
+          },
+          "Loyalty.VoucherIssued.v1": {
+            "correlate": {
+              "redemption_id": "redemption_id"
+            },
+            "end": false,
+            "methods": [
+              "on_voucher_issued"
+            ],
+            "start": false
+          }
+        },
+        "identity_field": "id",
+        "module": "loyalty.redemption.saga",
+        "name": "RedemptionSaga",
+        "stream_categories": [
+          "loyalty::redemption"
+        ],
+        "stream_category": "loyalty::redemption_saga",
+        "subscription": {
+          "config": {},
+          "profile": null,
+          "type": null
+        },
+        "transition_event": {
+          "__type__": "Loyalty._RedemptionSagaTransition.v1",
+          "fqn": "abc._RedemptionSagaTransition"
+        }
+      }
+    },
     "subscribers": {
       "loyalty.reward.identity_subscriber.CustomerRegisteredSubscriber": {
         "broker": "global",
@@ -1472,7 +2064,7 @@
       }
     }
   },
-  "generated_at": "2026-06-30T18:44:39Z",
+  "generated_at": "2026-06-30T19:08:38Z",
   "ir_version": "0.1.0",
   "projections": {
     "loyalty.projections.campaign_catalog.CampaignCatalog": {
@@ -1728,6 +2320,141 @@
           "module": "loyalty.projections.points_leaderboard_queries",
           "name": "PointsLeaderboardQueryHandler",
           "part_of": "loyalty.projections.points_leaderboard.PointsLeaderboard"
+        }
+      }
+    },
+    "loyalty.projections.redemption_view.RedemptionView": {
+      "projection": {
+        "element_type": "PROJECTION",
+        "fields": {
+          "account_id": {
+            "kind": "identifier",
+            "min_length": 1,
+            "required": true,
+            "type": "Identifier"
+          },
+          "failure_reason": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "points": {
+            "default": 0,
+            "kind": "standard",
+            "type": "Integer"
+          },
+          "redemption_id": {
+            "identifier": true,
+            "kind": "identifier",
+            "min_length": 1,
+            "type": "Identifier"
+          },
+          "reward_code": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "status": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          },
+          "updated_at": {
+            "kind": "standard",
+            "type": "DateTime"
+          },
+          "voucher_code": {
+            "kind": "standard",
+            "max_length": 255,
+            "sanitize": true,
+            "type": "String"
+          }
+        },
+        "fqn": "loyalty.projections.redemption_view.RedemptionView",
+        "identity_field": "redemption_id",
+        "module": "loyalty.projections.redemption_view",
+        "name": "RedemptionView",
+        "options": {
+          "cache": null,
+          "limit": 100,
+          "order_by": [],
+          "provider": "default",
+          "schema_name": "redemption_view"
+        }
+      },
+      "projectors": {
+        "loyalty.projections.redemption_view.RedemptionViewProjector": {
+          "aggregates": [
+            "loyalty.redemption.redemption.Redemption"
+          ],
+          "element_type": "PROJECTOR",
+          "fqn": "loyalty.projections.redemption_view.RedemptionViewProjector",
+          "handlers": {
+            "Loyalty.PointsReserved.v1": [
+              "on_points_reserved"
+            ],
+            "Loyalty.RedemptionCompensated.v1": [
+              "on_compensated"
+            ],
+            "Loyalty.RedemptionCompleted.v1": [
+              "on_completed"
+            ],
+            "Loyalty.RedemptionRequested.v1": [
+              "on_requested"
+            ],
+            "Loyalty.VoucherIssuanceFailed.v1": [
+              "on_voucher_failed"
+            ],
+            "Loyalty.VoucherIssued.v1": [
+              "on_voucher_issued"
+            ]
+          },
+          "module": "loyalty.projections.redemption_view",
+          "name": "RedemptionViewProjector",
+          "projector_for": "loyalty.projections.redemption_view.RedemptionView",
+          "stream_categories": [
+            "loyalty::redemption"
+          ],
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        }
+      },
+      "queries": {
+        "loyalty.projections.redemption_view_queries.GetRedemption": {
+          "__type__": "Loyalty.GetRedemption",
+          "element_type": "QUERY",
+          "fields": {
+            "redemption_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "loyalty.projections.redemption_view_queries.GetRedemption",
+          "module": "loyalty.projections.redemption_view_queries",
+          "name": "GetRedemption",
+          "part_of": "loyalty.projections.redemption_view.RedemptionView"
+        }
+      },
+      "query_handlers": {
+        "loyalty.projections.redemption_view_queries.RedemptionViewQueryHandler": {
+          "element_type": "QUERY_HANDLER",
+          "fqn": "loyalty.projections.redemption_view_queries.RedemptionViewQueryHandler",
+          "handlers": {
+            "Loyalty.GetRedemption": [
+              "get_redemption"
+            ]
+          },
+          "module": "loyalty.projections.redemption_view_queries",
+          "name": "RedemptionViewQueryHandler",
+          "part_of": "loyalty.projections.redemption_view.RedemptionView"
         }
       }
     },

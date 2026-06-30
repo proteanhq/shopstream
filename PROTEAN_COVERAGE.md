@@ -34,7 +34,8 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `@application_service` + `@use_case` | ✅ | loyalty `LoyaltyService.transfer_points` |
 | `@upcaster` (single step) | ✅ | ordering OrderCreated v1→v2 |
 | `@upcaster` (multi-step chain) | ✅ | loyalty CampaignLaunched v1→v2→v3 |
-| `@process_manager` (saga) | ⚠️ 🚧 | ordering `OrderCheckoutSaga` (string correlate). A 2nd saga with dict-correlate + compensation + `end` is a follow-up |
+| `@process_manager` (saga, string correlate) | ✅ | ordering `OrderCheckoutSaga` |
+| `@process_manager` (dict correlate + compensation + `end`) | ✅ | loyalty `RedemptionSaga` — reserve → issue → complete, compensating (refund) on voucher failure; `correlate={"redemption_id": ...}`, `end=True` + `mark_as_complete()` |
 | event/command enrichers | ✅ | all domains (`register_command_enricher` / `register_event_enricher`) + `bind_event_context` (payments/reviews) |
 | `@database_model` (custom ORM) | 🚧 | follow-up — Postgres-specific, not exercised in memory tests |
 | `@email` / `send_email`, `ReadView` element | N/A | notifications uses bespoke channel ports; `view_for()` covers projection reads |
@@ -84,13 +85,23 @@ filed and awaiting a fix (the one ⛔ row above is xfail'd until it lands).
 | [#1028](https://github.com/proteanhq/protean/issues/1028) | ✅ fixed on main | bulk `create_snapshots()` failed for `fact_events=True` aggregates (`-fact-` streams mistaken for instances) |
 | [#1034](https://github.com/proteanhq/protean/issues/1034) | ✅ fixed on main | cache-backed projection broke SQLAlchemy DB setup (`_create_database_artifacts` didn't skip cache projections); loyalty now runs in the Postgres CI job too |
 | [#1046](https://github.com/proteanhq/protean/issues/1046) | 🐞 filed (0.16.1) | a `Date` field on a command/event breaks the message checksum (`ResolvedField.as_dict` has no `date` branch → `json.dumps` raises); blocks campaign date windows (`xfail`) |
+| [#1048](https://github.com/proteanhq/protean/issues/1048) | 🐞 filed (0.17.0) | multi-step process managers don't cascade under `event_processing="sync"` — re-entrant dispatch runs the next step before the start transition is persisted, so the PM can't load its own in-flight instance; loyalty `RedemptionSaga` completion tests (`xfail`) |
 
 Minor DX note (not filed): `repository_for()` gives a confusing `provider=None` error for cache-backed
 projections — the working API is `cache_for().add()` / `view_for().get()`.
 
+Process-manager note ([#1048](https://github.com/proteanhq/protean/issues/1048), milestone 0.17.0):
+under `event_processing="sync"` a multi-step PM does not cascade — a later handler re-enters (nested
+command dispatch) *before* the start handler's transition event is persisted, so it can't load the
+in-flight instance and is skipped (and the same depth-first ordering can run a nested event's
+projector before the originating event's). The `RedemptionSaga` therefore advances only to
+`points_reserved` synchronously; its full forward + compensation logic is covered by `given()` unit
+tests, and its synchronous end-to-end completion tests are `xfail` against #1048 (they flip when it
+lands). The `RedemptionView` projector tolerates the out-of-order delivery (skips a transition whose
+view does not exist yet).
+
 ## Follow-ups (need design or infrastructure)
 
-- **Process manager #2** — a loyalty `RedemptionSaga` exercising dict `correlate`, compensation, and `end`.
 - **`database_model`** — custom ORM model (Postgres; not exercised by memory tests).
 - **`Auto(increment)`** — a clean home + the id-reflection wart (see above).
 - **Infra wiring — done.** loyalty is fully wired: `app.py`, `.protean/config.toml [domains]`,
