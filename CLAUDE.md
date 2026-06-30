@@ -8,7 +8,7 @@ ShopStream exists primarily to **test and verify Protean** in a realistic, multi
 
 ## Architecture
 
-Multi-domain CQRS with seven bounded contexts sharing a single FastAPI server:
+Multi-domain CQRS with nine bounded contexts sharing a single FastAPI server:
 
 - **Identity** (`src/identity/`) — Customer accounts, profiles, addresses, tiers
 - **Catalogue** (`src/catalogue/`) — Products, variants, categories, pricing
@@ -17,6 +17,8 @@ Multi-domain CQRS with seven bounded contexts sharing a single FastAPI server:
 - **Payments** (`src/payments/`) — Payment processing, refunds, transaction records
 - **Fulfillment** (`src/fulfillment/`) — Shipping, delivery tracking, logistics
 - **Reviews** (`src/reviews/`) — Product reviews, ratings, moderation, voting, seller replies
+- **Notifications** (`src/notifications/`) — Multi-channel notifications (email/SMS/push/Slack), preferences; cross-domain event consumer hub
+- **Loyalty** (`src/loyalty/`) — Reward accounts, points, tiers, membership cards (CQRS) + event-sourced promo campaigns; Protean capability showcase
 
 Commands are processed synchronously via FastAPI. Internal events flow asynchronously through the outbox pattern and domain-specific Redis Streams, with Engine workers maintaining read-model projections. Cross-domain events are published to a shared external Redis bus (DB 15) and consumed by `@domain.subscriber` classes that translate raw payloads into internal domain commands (ACL pattern).
 
@@ -32,6 +34,8 @@ Commands are processed synchronously via FastAPI. Internal events flow asynchron
 | Payments Engine | `make engine-payments` | — | Async event processing for Payments |
 | Fulfillment Engine | `make engine-fulfillment` | — | Async event processing for Fulfillment |
 | Reviews Engine | `make engine-reviews` | — | Async event processing for Reviews |
+| Notifications Engine | `make engine-notifications` | — | Async event processing for Notifications |
+| Loyalty Engine | `make engine-loyalty` | — | Async event processing for Loyalty |
 | Observatory | `make observatory` | 9000 | Live message flow dashboard + Prometheus metrics |
 
 ### Event Flow
@@ -61,6 +65,8 @@ Commands are processed synchronously via FastAPI. Internal events flow asynchron
 | 5 | Fulfillment |
 | 6 | Reviews |
 | 7 | Notifications |
+| 8 | Loyalty |
+| 9 | Loyalty cache (`[caches.loyalty]`, PointsLeaderboard projection) |
 | 15 | External bus (shared, cross-domain published events) |
 
 ## Project Structure
@@ -114,23 +120,32 @@ src/
 │   ├── fulfillment/          # Fulfillment aggregate module
 │   ├── projections/
 │   └── api/
-└── reviews/                  # Reviews & Ratings bounded context (CQRS)
+├── reviews/                  # Reviews & Ratings bounded context (CQRS)
+│   ├── domain.py
+│   ├── domain.toml
+│   ├── review/               # Review aggregate (Rating VO, HelpfulVote/SellerReply/ReviewImage entities)
+│   │   ├── review.py         # Aggregate + state machine (PENDING→PUBLISHED|REJECTED, etc.)
+│   │   ├── events.py         # 8 domain events
+│   │   └── ...               # submission/editing/moderation/voting/reporting/removal/reply + ordering_subscriber
+│   ├── projections/          # 6 read models
+│   └── api/                  # 7 REST endpoints (/reviews)
+├── notifications/            # Notifications bounded context (CQRS) — event-consumer hub
+│   ├── domain.py
+│   ├── domain.toml
+│   ├── notification/         # Notification aggregate + dispatch handler + 8 ACL subscribers + helpers
+│   ├── preference/           # NotificationPreference aggregate + commands
+│   ├── channel/              # Email/SMS/Push/Slack ports + fake adapters + get_channel registry
+│   ├── templates/            # Per-NotificationType template classes
+│   ├── projections/          # 5 read models
+│   └── api/                  # REST endpoints (/notifications)
+└── loyalty/                  # Loyalty & Rewards bounded context — Protean capability showcase
     ├── domain.py
-    ├── domain.toml
-    ├── review/               # Review aggregate (Rating VO, HelpfulVote/SellerReply/ReviewImage entities)
-    │   ├── review.py         # Aggregate + state machine (PENDING→PUBLISHED|REJECTED, etc.)
-    │   ├── events.py         # 8 domain events
-    │   ├── submission.py     # SubmitReview command + handler
-    │   ├── editing.py        # EditReview command + handler
-    │   ├── moderation.py     # ModerateReview command + handler
-    │   ├── voting.py         # VoteOnReview command + handler
-    │   ├── reporting.py      # ReportReview command + handler
-    │   ├── removal.py        # RemoveReview command + handler
-    │   ├── reply.py          # AddSellerReply command + handler
-    │   └── ordering_subscriber.py # Cross-domain: OrderDelivered → VerifiedPurchases
-    ├── projections/          # 6 read models (ProductReviews, ProductRating, CustomerReviews,
-    │                         #   ModerationQueue, VerifiedPurchases, ReviewDetail)
-    └── api/                  # 7 REST endpoints (/reviews)
+    ├── domain.toml           # Redis DB 8, cache DB 9, snapshot_threshold=5
+    ├── reward/               # RewardAccount (CQRS): aggregate + abstract base + entities + validators,
+    │                         #   events, enrollment/points commands, transfer (domain service),
+    │                         #   services (application service @use_case), repository (Q/F), ordering_subscriber (pattern B)
+    ├── campaign/             # PromoCampaign (event-sourced + fact_events): aggregate, events, upcasters (v1→v2→v3)
+    └── projections/          # RewardAccountView (DB) + PointsLeaderboard (cache)
 
 tests/
 ├── conftest.py               # Auto-marks tests by directory, --env option

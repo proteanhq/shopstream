@@ -7,12 +7,19 @@
 
 E-Commerce Platform built on [Protean](https://github.com/proteanhq/protean) — a Domain-Driven Design framework for Python.
 
-ShopStream implements a multi-domain CQRS architecture with two bounded contexts:
+ShopStream implements a multi-domain CQRS architecture with **nine bounded contexts**:
 
 - **Identity** — Customer accounts, profiles, addresses, tiers
 - **Catalogue** — Products, variants, categories, pricing
+- **Ordering** — Shopping carts and the order lifecycle (event-sourced), checkout
+- **Inventory** — Stock levels, reservations, warehouse management (event-sourced)
+- **Payments** — Payment processing, refunds, invoices (event-sourced), gateway integration
+- **Fulfillment** — Picking, packing, shipping, delivery tracking
+- **Reviews** — Product reviews, ratings, moderation, voting, seller replies
+- **Notifications** — Multi-channel notifications (email/SMS/push/Slack) + preferences; cross-domain event-consumer hub
+- **Loyalty** — Reward accounts, points, tiers, membership cards (CQRS) + event-sourced promo campaigns; also the Protean capability showcase
 
-Commands are processed synchronously via a FastAPI web server. Events flow asynchronously through the outbox pattern and Redis Streams, with Engine workers maintaining read-model projections.
+Commands are processed synchronously via a FastAPI web server. Events flow asynchronously through the outbox pattern and per-domain Redis Streams, with Engine workers maintaining read-model projections. Cross-domain events flow over a shared external Redis bus and are consumed by `@domain.subscriber` (ACL) classes. See [`docs/`](docs/) for the domain narratives, context map, and glossary.
 
 ## Table of Contents
 
@@ -57,40 +64,45 @@ curl -X POST http://localhost:8000/customers \
   -d '{"external_id":"EXT-1","email":"jane@example.com","first_name":"Jane","last_name":"Doe"}'
 ```
 
-To process events asynchronously (update projections, etc.), start the Engine workers in separate terminals:
+To process events asynchronously (update projections, etc.), start the Engine workers in separate terminals — one per domain (`make engine-identity`, `engine-catalogue`, `engine-ordering`, `engine-inventory`, `engine-payments`, `engine-fulfillment`, `engine-reviews`, `engine-notifications`, `engine-loyalty`):
 
 ```bash
 make engine-identity   # Terminal 2
-make engine-catalogue  # Terminal 3
+make engine-ordering   # Terminal 3
+# … and so on per domain
 ```
 
 ## Architecture
 
 ```
-  ┌──────────────────────┐          ┌─────────────────────┐
+  ┌──────────────────────┐          ┌──────────────────────┐
   │  FastAPI Web Server  │          │   PostgreSQL (5432)  │
-  │    (port 8000)       │          │  identity_local DB   │
-  │                      │          │  catalogue_local DB  │
-  │  /customers/*        │─────────▶│                      │
-  │  /products/*         │ commands │  Outbox Table        │
-  │  /categories/*       │          └──────────┬───────────┘
+  │    (port 8000)       │          │  one <domain>_local  │
+  │                      │          │  DB per domain       │
+  │  /customers /products│─────────▶│  + per-domain        │
+  │  /orders /inventory  │ commands │  Outbox Table        │
+  │  /payments /reviews… │          └──────────┬───────────┘
   └──────────────────────┘                     │
                                                │ OutboxProcessor
                                                ▼
   ┌──────────────────────┐          ┌──────────────────────┐
   │  Engine Workers      │◀─────────│   Redis Streams      │
-  │                      │ consume  │   (port 6379)        │
-  │  Identity Engine     │          └──────────────────────┘
-  │  Catalogue Engine    │
-  │                      │          ┌──────────────────────┐
-  │  - OutboxProcessor   │          │   Message DB (5433)  │
-  │  - Projector Subs    │          │   Event Store        │
-  └──────────────────────┘          └──────────────────────┘
+  │  (one per domain)    │ consume  │   (port 6379)        │
+  │                      │          │   DB 0..8 per domain │
+  │  Identity, Catalogue,│          │   DB 15 external bus │
+  │  Ordering, Inventory,│          └──────────────────────┘
+  │  Payments, Fulfillment,│
+  │  Reviews, Notifications,│        ┌──────────────────────┐
+  │  Loyalty             │          │   Message DB (5433)  │
+  │  - OutboxProcessor   │          │   Event Store        │
+  │  - Projector Subs    │          │  (event-sourced aggs)│
+  │  - ACL Subscribers   │          └──────────────────────┘
+  └──────────────────────┘
 
   ┌──────────────────────┐
-  │  Monitor (port 9000) │
+  │ Observatory (:9000)  │
   │  /outbox, /streams   │
-  │  /health             │
+  │  /metrics, /health   │
   └──────────────────────┘
 ```
 
@@ -108,9 +120,8 @@ make engine-catalogue  # Terminal 3
 
 | Process | Command | Port | Purpose |
 |---------|---------|------|---------|
-| Web Server | `make api` | 8000 | Synchronous command processing |
-| Identity Engine | `make engine-identity` | — | Async event processing for Identity domain |
-| Catalogue Engine | `make engine-catalogue` | — | Async event processing for Catalogue domain |
+| Web Server | `make api` | 8000 | Synchronous command processing (all domains) |
+| Domain Engines | `make engine-<domain>` | — | Async event processing, one per domain: identity, catalogue, ordering, inventory, payments, fulfillment, reviews, notifications, loyalty |
 | Observatory | `make observatory` | 9000 | Live message flow dashboard + Prometheus metrics |
 
 ## Running the Platform
@@ -121,7 +132,7 @@ make engine-catalogue  # Terminal 3
 # Start PostgreSQL, Message DB, and Redis
 make docker-up
 
-# Create database tables for both domains
+# Create database tables for all domains
 make setup-db
 ```
 
@@ -136,24 +147,31 @@ Starts a FastAPI server on port 8000 with hot-reload. Routes are mapped to domai
 | Route prefix | Domain |
 |-------------|--------|
 | `/customers/*` | Identity |
-| `/products/*` | Catalogue |
-| `/categories/*` | Catalogue |
+| `/products/*`, `/categories/*` | Catalogue |
+| `/carts/*`, `/orders/*` | Ordering |
+| `/inventory/*`, `/warehouses/*` | Inventory |
+| `/payments/*`, `/invoices/*` | Payments |
+| `/fulfillments/*` | Fulfillment |
+| `/reviews/*` | Reviews |
+| `/notifications/*` | Notifications |
 | `/health` | — |
 | `/docs` | Interactive API reference (Scalar) |
-| `/redoc` | ReDoc API documentation |
 | `/openapi.json` | OpenAPI 3.x spec |
+
+Loyalty has no HTTP API of its own yet — it is exercised via cross-domain events and as a capability showcase.
 
 ### 3. Engine Workers
 
 Engine workers process events asynchronously. Each engine runs an OutboxProcessor (polls the outbox table, publishes to Redis Streams) and StreamSubscriptions (consume from Redis, invoke projectors).
 
 ```bash
-# Run both engines in one process
-make engine
+# Run the engines together (via Docker Compose)
+make docker-dev
 
-# Or run individually (recommended for production)
+# Or run a domain's engine individually (recommended for production)
 make engine-identity
-make engine-catalogue
+make engine-ordering
+# … one per domain: engine-<domain>
 ```
 
 ### 4. Observatory
@@ -162,7 +180,7 @@ make engine-catalogue
 make observatory
 ```
 
-Available at `http://localhost:9000` — provides a live message flow dashboard and Prometheus metrics endpoint at `/metrics` for monitoring outbox depth, Redis stream health, and broker statistics across both domains.
+Available at `http://localhost:9000` — provides a live message flow dashboard and Prometheus metrics endpoint at `/metrics` for monitoring outbox depth, Redis stream health, and broker statistics across all domains.
 
 ### Development Workflow
 
@@ -172,16 +190,18 @@ make dev
 
 # Then in separate terminals:
 make api               # Terminal 1: web server
-make engine-identity   # Terminal 2: identity worker
-make engine-catalogue  # Terminal 3: catalogue worker
-make observatory       # Terminal 4: monitoring (optional)
+make engine-identity   # Terminal 2: a domain worker (one per domain as needed)
+make observatory       # Terminal 3: monitoring (optional)
 ```
 
 ## Testing
 
 ```bash
-# Run all tests (626 tests)
+# Run all tests (against Postgres/Redis/Message DB)
 make test
+
+# Run everything in-memory (no Docker needed)
+make test-memory
 
 # With coverage report
 make test-cov
@@ -191,9 +211,10 @@ make test-domain        # Pure business logic (no DB)
 make test-application   # Command handler tests (with DB)
 make test-integration   # Cross-domain outbox/event tests
 
-# By domain
+# By domain (test-<domain> for any of: identity, catalogue, ordering,
+# inventory, payments, fulfillment, reviews, notifications, loyalty)
 make test-identity
-make test-catalogue
+make test-loyalty
 
 # Fast tests only (skip slow/integration)
 make test-fast
@@ -203,7 +224,7 @@ Tests use `PROTEAN_ENV=test`, which keeps `event_processing = "sync"` so project
 
 ## Load Testing
 
-ShopStream includes a [Locust](https://locust.io)-based load testing suite that simulates realistic e-commerce traffic across both domains. It exercises the full event pipeline — API throughput, outbox processing, Redis Streams publishing, and projector consumption.
+ShopStream includes a [Locust](https://locust.io)-based load testing suite that simulates realistic e-commerce traffic across all domains. It exercises the full event pipeline — API throughput, outbox processing, Redis Streams publishing, and projector consumption. The table below lists a few representative user classes; see [`loadtests/README.md`](loadtests/README.md) for the full set (per-domain journeys, cross-domain, flash-sale, race-condition, and priority-lane scenarios).
 
 ```bash
 # Install load testing dependencies
@@ -283,11 +304,12 @@ database_uri = "${DATABASE_URL|postgresql://.../<domain>}"
 
 Protean applies config sections from `domain.toml` based on `PROTEAN_ENV`:
 
-| Environment | Identity DB | Catalogue DB | `event_processing` | Projectors fire... |
-|-------------|------------|-------------|-------------------|-------------------|
-| _(unset)_ — development | `identity_local` | `catalogue_local` | sync | During UoW commit |
-| `test` | `identity_test` | `catalogue_test` | sync | During UoW commit |
-| `production` | `identity` | `catalogue` | async | Via Engine workers |
+| Environment | DB naming (per domain) | `event_processing` | Projectors fire... |
+|-------------|------------------------|-------------------|-------------------|
+| _(unset)_ — development | `<domain>_local` | sync | During UoW commit |
+| `test` | `<domain>_test` | sync | During UoW commit |
+| `memory` | in-memory (no Docker) | sync | During UoW commit |
+| `production` | `<domain>` | async | Via Engine workers |
 
 Tests and dev use separate databases so running the test suite never destroys development data.
 
@@ -298,13 +320,16 @@ See [.env.example](.env.example) for all variables:
 ```bash
 PROTEAN_ENV=production
 
-# Development databases
+# Per-domain database URLs. Identity uses DATABASE_URL / TEST_DATABASE_URL;
+# every other domain uses <DOMAIN>_DATABASE_URL / TEST_<DOMAIN>_DATABASE_URL,
+# e.g. CATALOGUE_DATABASE_URL, ORDERING_DATABASE_URL, …, LOYALTY_DATABASE_URL.
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/identity_local
 CATALOGUE_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/catalogue_local
+# … ORDERING_DATABASE_URL, INVENTORY_DATABASE_URL, PAYMENTS_DATABASE_URL,
+# … FULFILLMENT_DATABASE_URL, REVIEWS_DATABASE_URL, NOTIFICATIONS_DATABASE_URL, LOYALTY_DATABASE_URL
 
-# Test databases (used when PROTEAN_ENV=test)
+# Test databases (used when PROTEAN_ENV=test): TEST_<DOMAIN>_DATABASE_URL
 TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/identity_test
-TEST_CATALOGUE_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/catalogue_test
 
 MESSAGE_DB_URL=postgresql://message_store:message_store@localhost:5433/message_store
 REDIS_URL=redis://127.0.0.1:6379/0
@@ -319,10 +344,9 @@ Run `make help` for the full list.
 
 ```bash
 make api                    # FastAPI web server (port 8000)
-make engine-identity        # Identity engine only
-make engine-catalogue       # Catalogue engine only
-make engine-identity-scaled # Identity engine with 4 workers
-make engine-catalogue-scaled# Catalogue engine with 4 workers
+make engine-<domain>        # Per-domain engine (identity, catalogue, ordering, inventory,
+                            #   payments, fulfillment, reviews, notifications, loyalty)
+make engine-identity-scaled # Example: identity engine with 4 workers
 make observatory            # Observatory dashboard (port 9000)
 ```
 
