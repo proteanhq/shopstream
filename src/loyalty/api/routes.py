@@ -11,15 +11,26 @@ from protean.utils.globals import current_domain
 
 from loyalty.api.schemas import (
     AccountIdResponse,
+    CampaignIdResponse,
+    CampaignResponse,
     EarnPointsRequest,
     EnrollRewardAccountRequest,
+    LaunchCampaignRequest,
     LeaderboardEntryResponse,
+    PauseCampaignRequest,
     RedeemPointsRequest,
     RewardAccountResponse,
     StatusResponse,
     TransferPointsRequest,
     TransferResponse,
 )
+from loyalty.campaign.management import (
+    ActivateCampaign,
+    ExpireCampaign,
+    LaunchCampaign,
+    PauseCampaign,
+)
+from loyalty.projections.campaign_catalog_queries import GetCampaign, ListCampaigns
 from loyalty.projections.points_leaderboard_queries import GetLeaderboardStanding
 from loyalty.projections.reward_account_view_queries import GetRewardAccount
 from loyalty.reward.enrollment import EnrollRewardAccount
@@ -73,6 +84,47 @@ async def transfer_points(body: TransferPointsRequest) -> TransferResponse:
 
 
 # ---------------------------------------------------------------------------
+# Campaign Endpoints (event-sourced PromoCampaign)
+# ---------------------------------------------------------------------------
+@loyalty_router.post("/campaigns", status_code=201, response_model=CampaignIdResponse)
+async def launch_campaign(body: LaunchCampaignRequest) -> CampaignIdResponse:
+    """Launch a promotional campaign (starts in 'draft')."""
+    campaign_id = current_domain.process(
+        LaunchCampaign(
+            campaign_code=body.campaign_code,
+            name=body.name,
+            discount_type=body.discount_type,
+            discount_value=body.discount_value,
+            starts_on=body.starts_on,
+            ends_on=body.ends_on,
+        ),
+        asynchronous=False,
+    )
+    return CampaignIdResponse(campaign_id=str(campaign_id))
+
+
+@loyalty_router.post("/campaigns/{campaign_id}/activate", response_model=StatusResponse)
+async def activate_campaign(campaign_id: str) -> StatusResponse:
+    """Activate a draft or paused campaign."""
+    current_domain.process(ActivateCampaign(campaign_id=campaign_id), asynchronous=False)
+    return StatusResponse()
+
+
+@loyalty_router.post("/campaigns/{campaign_id}/pause", response_model=StatusResponse)
+async def pause_campaign(campaign_id: str, body: PauseCampaignRequest) -> StatusResponse:
+    """Pause an active campaign."""
+    current_domain.process(PauseCampaign(campaign_id=campaign_id, reason=body.reason), asynchronous=False)
+    return StatusResponse()
+
+
+@loyalty_router.post("/campaigns/{campaign_id}/expire", response_model=StatusResponse)
+async def expire_campaign(campaign_id: str) -> StatusResponse:
+    """Expire a campaign (terminal)."""
+    current_domain.process(ExpireCampaign(campaign_id=campaign_id), asynchronous=False)
+    return StatusResponse()
+
+
+# ---------------------------------------------------------------------------
 # Read Endpoints
 # ---------------------------------------------------------------------------
 @loyalty_router.get("/accounts/{account_id}", response_model=RewardAccountResponse)
@@ -91,3 +143,19 @@ async def get_points_standing(account_id: str) -> LeaderboardEntryResponse:
     if entry is None:
         raise HTTPException(status_code=404, detail="No points standing for account")
     return LeaderboardEntryResponse(**entry.to_dict())
+
+
+@loyalty_router.get("/campaigns", response_model=list[CampaignResponse])
+async def list_campaigns(status: str | None = None) -> list[CampaignResponse]:
+    """List campaigns from the catalog, optionally filtered by status."""
+    entries = current_domain.dispatch(ListCampaigns(status=status))
+    return [CampaignResponse(**e.to_dict()) for e in entries]
+
+
+@loyalty_router.get("/campaigns/{campaign_id}", response_model=CampaignResponse)
+async def get_campaign(campaign_id: str) -> CampaignResponse:
+    """Read a single campaign from the catalog (database-backed projection)."""
+    entry = current_domain.dispatch(GetCampaign(campaign_id=campaign_id))
+    if entry is None:
+        raise HTTPException(status_code=404, detail="Campaign not found")
+    return CampaignResponse(**entry.to_dict())

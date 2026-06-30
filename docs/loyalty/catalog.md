@@ -78,6 +78,50 @@
 | paused_at | DateTime | Yes | — |
 | reason | String | No | max_length=255 |
 
+### Commands
+
+#### ActivateCampaign
+
+- **Type**: `Loyalty.ActivateCampaign.v1`
+- **Version**: 1
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| campaign_id | Identifier | Yes | min_length=1 |
+
+#### ExpireCampaign
+
+- **Type**: `Loyalty.ExpireCampaign.v1`
+- **Version**: 1
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| campaign_id | Identifier | Yes | min_length=1 |
+
+#### LaunchCampaign
+
+- **Type**: `Loyalty.LaunchCampaign.v1`
+- **Version**: 1
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| campaign_code | String | Yes | max_length=20, min_length=1 |
+| discount_type | String | Yes | max_length=255, min_length=1 |
+| discount_value | Integer | Yes | — |
+| ends_on | Date | No | — |
+| name | String | Yes | max_length=255, min_length=1 |
+| starts_on | Date | No | — |
+
+#### PauseCampaign
+
+- **Type**: `Loyalty.PauseCampaign.v1`
+- **Version**: 1
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| campaign_id | Identifier | Yes | min_length=1 |
+| reason | String | No | max_length=255 |
+
 ## Auditable (`loyalty.reward.reward_account.Auditable`)
 
 ## RewardAccount (`loyalty.reward.reward_account.RewardAccount`)

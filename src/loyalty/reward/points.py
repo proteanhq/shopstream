@@ -4,6 +4,7 @@ from protean.fields import Identifier, Integer, String
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
 
+from loyalty.campaign.multiplier import active_points_multiplier
 from loyalty.domain import loyalty
 from loyalty.reward.reward_account import RewardAccount
 
@@ -28,7 +29,12 @@ class PointsHandler:
     def earn(self, command: EarnPoints):
         repo = current_domain.repository_for(RewardAccount)
         account = repo.get(command.account_id)
-        account.earn_points(command.amount, reason=command.reason)
+        # Cross-aggregate read: an active points_multiplier PromoCampaign boosts the
+        # points earned. With no active campaign the multiplier is 1 (no change).
+        multiplier = active_points_multiplier()
+        effective = command.amount * multiplier
+        reason = command.reason if multiplier == 1 else f"{command.reason} (x{multiplier} promo)"
+        account.earn_points(effective, reason=reason)
         repo.add(account)
 
     @handle(RedeemPoints)
