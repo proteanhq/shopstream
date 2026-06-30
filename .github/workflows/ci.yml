@@ -88,6 +88,8 @@ jobs:
       TEST_REVIEWS_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/reviews_test
       NOTIFICATIONS_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/notifications_local
       TEST_NOTIFICATIONS_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/notifications_test
+      LOYALTY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/loyalty_local
+      TEST_LOYALTY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/loyalty_test
       MESSAGE_DB_URL: postgresql://message_store:message_store@localhost:5433/message_store
       REDIS_URL: redis://127.0.0.1:6379/0
 
@@ -129,11 +131,14 @@ jobs:
       - name: Set up notifications database
         run: bash src/notifications/create_db.sh
 
+      - name: Set up loyalty database
+        run: bash src/loyalty/create_db.sh
+
       - name: Run linting
         run: uv run ruff check src/ tests/
 
       - name: Run all tests with coverage
-        run: uv run pytest --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov=src/inventory --cov=src/payments --cov=src/fulfillment --cov=src/reviews --cov=src/notifications --cov-report=xml --cov-report=term-missing
+        run: uv run pytest --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov=src/inventory --cov=src/payments --cov=src/fulfillment --cov=src/reviews --cov=src/notifications --cov=src/loyalty --cov-report=xml --cov-report=term-missing
 
       - name: Extract coverage percentage
         if: matrix.python-version == '3.11'

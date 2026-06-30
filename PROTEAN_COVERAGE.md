@@ -60,7 +60,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 |---|---|---|
 | `@apply`, `from_events`, `_create_new`, `_version` | ✅ | Order/Payment/InventoryItem/PromoCampaign |
 | snapshots — `snapshot_threshold` + `create_snapshot` | ✅ | loyalty (`snapshot_threshold=5`) |
-| bulk `create_snapshots()` | ⛔ | broken for fact_events aggregates (**#1028**, still OPEN, xfail) |
+| bulk `create_snapshots()` | ✅ | loyalty PromoCampaign (**#1028** fixed on main) |
 | command `deadline` + `CommandExpiredError` | ✅ | payments (PR #8) |
 | handler `retries`/`backoff`/`retry_exceptions` + `transient_retry` | ✅ | payments (PR #8) |
 | `Q` / `F` / lookups (gte/in/…) | ✅ | loyalty `RewardAccountRepository` |
@@ -72,13 +72,13 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 
 ## Protean bugs surfaced (filed; milestone 0.16.1)
 
-This branch pins Protean to git `main`, which carries the #1023 and #1025 fixes.
+This branch pins Protean to git `main`, which carries all three fixes.
 
 | Issue | Status | Summary |
 |---|---|---|
 | [#1023](https://github.com/proteanhq/protean/issues/1023) | ✅ fixed on main | `@handle("$any")` event handlers silently skipped under `event_processing="sync"` (`handlers_for` ignored `$any`) |
 | [#1025](https://github.com/proteanhq/protean/issues/1025) | ✅ fixed on main | per-field `validators=` ran against `None` on optional fields (AfterValidator omitted empty-value short-circuit) |
-| [#1028](https://github.com/proteanhq/protean/issues/1028) | ⛔ open | bulk `create_snapshots()` fails for `fact_events=True` aggregates (`-fact-` streams mistaken for instances); `test_create_snapshots_for_all_instances` is `xfail(strict)` until fixed |
+| [#1028](https://github.com/proteanhq/protean/issues/1028) | ✅ fixed on main | bulk `create_snapshots()` failed for `fact_events=True` aggregates (`-fact-` streams mistaken for instances) |
 
 Minor DX note (not filed): `repository_for()` gives a confusing `provider=None` error for cache-backed
 projections — the working API is `cache_for().add()` / `view_for().get()`.
@@ -88,9 +88,9 @@ projections — the working API is `cache_for().add()` / `view_for().get()`.
 - **Process manager #2** — a loyalty `RedemptionSaga` exercising dict `correlate`, compensation, and `end`.
 - **`database_model`** — custom ORM model (Postgres; not exercised by memory tests).
 - **`Auto(increment)`** — a clean home + the id-reflection wart (see above).
-- **Infra wiring** — create `loyalty_local` / `loyalty_test` DBs, then: register loyalty in
-  `.protean/config.toml [domains]`, generate `.protean/loyalty/ir.json` via `make ir`, add loyalty to
-  the Makefile IR/`domain-check`/per-domain DB test loops, and add a `make engine-loyalty` target.
-  (Registering loyalty in `config.toml` before its DB exists makes the `protean-check-staleness`
-  pre-commit hook fail, so it is deferred to this step.) loyalty is already wired into `app.py` and
-  covered by the `make test-memory*` targets.
+- **Infra wiring** — loyalty is wired into `app.py`, the `make test-memory*` targets, and CI
+  (`src/loyalty/create_db.sh` + a "Set up loyalty database" step + `--cov=src/loyalty`). Still
+  pending (needs a local `loyalty_local` DB, since registering before the DB exists makes the
+  `protean-check-staleness` pre-commit hook fail): register loyalty in `.protean/config.toml [domains]`,
+  generate `.protean/loyalty/ir.json` via `make ir`, add it to the Makefile IR/`domain-check`/per-domain
+  DB test loops, and add a `make engine-loyalty` target.

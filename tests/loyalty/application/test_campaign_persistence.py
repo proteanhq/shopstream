@@ -4,7 +4,6 @@ Verifies state is reconstructed from the event stream and that fact_events=True 
 complete-state fact event on the ...-fact-<id> stream after each persist.
 """
 
-import pytest
 from protean import current_domain
 
 from loyalty.campaign.campaign import PromoCampaign
@@ -56,10 +55,6 @@ class TestPromoCampaignSnapshots:
         assert loaded.status == "active"
         assert loaded.campaign_code == "SNAP1"
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="proteanhq/protean#1028: create_snapshots() mistakes -fact- streams for instances when fact_events=True",
-    )
     def test_create_snapshots_for_all_instances(self):
         for i in range(2):
             campaign = PromoCampaign.launch(f"BULK{i}", "Bulk", "fixed", 5)
