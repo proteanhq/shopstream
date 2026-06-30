@@ -10,18 +10,15 @@ pipeline end to end:
 
 Requires asynchronous event processing (so the engine, not the inline path, handles the event)
 and the **Redis** streams broker (the subscription-routed DLQ and the `broker.dlq_*` inspection
-API only line up on Redis). It therefore skips under the in-memory broker — run it with
-`--protean-env test`.
+API only line up on Redis). It therefore skips under the in-memory broker.
 
-**Skipped under CI.** Running a full engine inside a pytest is reliable only against an isolated,
-per-domain Redis. CI runs all nine domains on a single shared Redis, where the loyalty engine
-(many subscriptions + the external/global broker + outbox processors on one server) churns and
-drops connections before the message reaches the DLQ. The capability is exercised locally via
-`make test` / `make test-loyalty`; CI relies on the rest of the loyalty suite (incl. the
-`given()` saga tests and the DLQ poison-handler unit test).
+**Marked `engine`.** Running a full engine inside a pytest needs an isolated, reachable broker:
+the loyalty engine opens many subscriptions, the external/global broker, and outbox processors,
+so it must not run amid the rest of the suite on a shared, partly-unreachable broker. The regular
+CI jobs deselect it with `-m "not engine"`; a dedicated **Engine Tests** job runs it (`-m engine`)
+with `REDIS_EXTERNAL_URL` set so the global broker is reachable. Locally it runs under
+`make test` / `make test-loyalty`.
 """
-
-import os
 
 import pytest
 import redis
@@ -64,13 +61,9 @@ def async_dlq_config():
 
 
 @pytest.mark.slow
+@pytest.mark.engine
 class TestDeadLetterQueue:
     def test_failing_handler_routes_to_dlq_then_replays(self, async_dlq_config):
-        if os.environ.get("CI"):
-            pytest.skip(
-                "Engine-driven DLQ test is unreliable under CI's shared single-Redis topology; "
-                "run it locally via `make test` / `make test-loyalty`."
-            )
         if not _broker_is_redis_streams():
             pytest.skip("DLQ exercise requires the Redis streams broker (run with --protean-env test)")
 
