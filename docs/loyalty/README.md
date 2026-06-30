@@ -186,14 +186,17 @@ database provider.
 
 | Other Context Provides | To This Context | How |
 |-----------------------|-----------------|-----|
-| `OrderDelivered` | Loyalty | Ordering raises `OrderDelivered`; Loyalty's `OrderDeliveredSubscriber` consumes the `ordering::order` stream and awards a delivery bonus directly on the customer's RewardAccount |
+| `CustomerRegistered` | Loyalty | Identity raises `CustomerRegistered`; Loyalty's `CustomerRegisteredSubscriber` consumes the `identity::customer` stream and auto-enrols a reward account (idempotent) by dispatching `EnrollRewardAccount` — **pattern A** |
+| `OrderDelivered` | Loyalty | Ordering raises `OrderDelivered`; Loyalty's `OrderDeliveredSubscriber` consumes the `ordering::order` stream and awards a delivery bonus directly on the customer's RewardAccount — **pattern B** |
 
-Loyalty is a downstream consumer of Ordering. Its subscriber uses the **anti-corruption
-layer (ACL)** pattern — it receives a raw dict payload, filters by event type, and never
-imports Ordering's event classes. Unlike most ShopStream subscribers (which translate a
-message into a *command*), this one uses **pattern B**: it loads the `RewardAccount`
-aggregate and calls a business method directly. Loyalty stores `customer_id` as an opaque
-reference and never queries Identity or Ordering.
+Loyalty is a downstream consumer of Identity and Ordering. Both subscribers use the
+**anti-corruption layer (ACL)** pattern — they receive a raw dict payload, filter by event
+type, and never import another context's event classes. They also demonstrate both subscriber
+styles: `CustomerRegisteredSubscriber` translates the event into a *command* (pattern A,
+idempotent so at-least-once delivery is safe), while `OrderDeliveredSubscriber` loads the
+aggregate and mutates it directly (pattern B). Loyalty stores `customer_id` as an opaque
+reference and never queries Identity or Ordering. Auto-enrolment on registration is what gives
+every customer a reward account through the normal event flow — no enrolment endpoint needed.
 
 ## Design Decisions
 

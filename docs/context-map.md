@@ -64,6 +64,7 @@ graph TB
     reviews_ctx -- "product_id, customer_id" --> catalogue
     ordering -. "OrderDelivered" .-> reviews_ctx
     ordering -. "OrderDelivered" .-> loyalty_ctx
+    identity -. "CustomerRegistered" .-> loyalty_ctx
     identity -. "CustomerRegistered" .-> notifications_ctx
     ordering -. "Order events" .-> notifications_ctx
     payments -. "Payment events" .-> notifications_ctx
@@ -201,14 +202,20 @@ into a `Notification` (rendered from a per-type template, filtered by customer p
 enabled channels). Notifications never queries any upstream context -- it only reacts to events
 and owns delivery state.
 
-### Ordering &rarr; Loyalty
+### Identity & Ordering &rarr; Loyalty
 
-The Loyalty context consumes `OrderDelivered` from the `ordering::order` stream to award a
-delivery bonus to the customer's reward account. This uses subscriber **pattern B** (the
-subscriber loads the `RewardAccount` aggregate and calls a business method directly, rather
-than dispatching a command). `customer_id` is an opaque reference; Loyalty never queries
-Ordering or Identity. Points earned through normal shopping, redemptions, and member-to-member
-transfers are internal to the Loyalty context.
+The Loyalty context is a downstream consumer of two streams, and demonstrates both subscriber
+styles:
+
+- **`identity::customer` / `CustomerRegistered`** &rarr; auto-enrol a reward account by
+  dispatching `EnrollRewardAccount` (subscriber **pattern A**, idempotent). This is how every
+  customer gets an account through the normal event flow -- Loyalty has no enrolment endpoint.
+- **`ordering::order` / `OrderDelivered`** &rarr; award a delivery bonus by loading the
+  `RewardAccount` and calling a business method directly (subscriber **pattern B**).
+
+`customer_id` is an opaque reference; Loyalty never queries Identity or Ordering. Points earned
+through normal shopping, redemptions, and member-to-member transfers are internal to the
+Loyalty context.
 
 ## Communication Patterns
 

@@ -124,12 +124,19 @@ domain queries via `self._dao`: `top_savers` (order_by + limit), `never_redeemed
 
 ## Cross-Domain Integration
 
+### Inbound: Identity → Loyalty
+**File:** `reward/identity_subscriber.py` — `@loyalty.subscriber(broker="global",
+stream="identity::customer")`. On `CustomerRegistered`, auto-enrols a reward account by
+dispatching `EnrollRewardAccount` (subscriber **pattern A** — translate event to command).
+Idempotent (skips if the customer already has an account), so at-least-once delivery is safe.
+This is how every customer gets a reward account through the normal event flow — no enrolment
+endpoint required.
+
 ### Inbound: Ordering → Loyalty
 **File:** `reward/ordering_subscriber.py` — `@loyalty.subscriber(broker="global",
 stream="ordering::order")`. On `OrderDelivered`, awards a delivery bonus by loading the
 customer's `RewardAccount` and calling `earn_points` **directly** (subscriber **pattern B** —
-direct aggregate mutation, vs the pattern-A command-dispatching subscribers elsewhere). ACL:
-raw dict payload, type filtering, no shared event classes.
+direct aggregate mutation). ACL: raw dict payload, type filtering, no shared event classes.
 
 ## Projections
 
