@@ -251,6 +251,7 @@ reads through query handlers.
 |--------|------|---------|
 | POST | `/loyalty/accounts` | `EnrollRewardAccount` |
 | POST | `/loyalty/accounts/{id}/earn` | `EarnPoints` |
+| POST | `/loyalty/accounts/{id}/earn-async` | `EarnPoints` (`asynchronous=True`, returns 202; the only async-command path) |
 | POST | `/loyalty/accounts/{id}/redeem` | `RedeemPoints` |
 | POST | `/loyalty/transfers` | `LoyaltyService.transfer_points` (application service, direct) |
 | GET | `/loyalty/accounts/{id}` | `GetRewardAccount` → RewardAccountView (DB) |
@@ -268,6 +269,20 @@ reads through query handlers.
 window — `Date` fields flow through a command end-to-end
 ([proteanhq/protean#1046](https://github.com/proteanhq/protean/issues/1046), fixed on main).
 
+## Dead Letter Queue (DLQ) demo
+
+**Files:** `dlq/poison.py` (the intentional-failure fixtures). `PoisonPill` is a tiny aggregate
+on its own `loyalty::poison_pill` stream whose event handler `PoisonEventHandler` **always
+raises**. Under asynchronous event processing the engine delivers `PoisonDetonated`, the handler
+fails, and after the retries are exhausted the engine routes the message to `loyalty::poison_pill:dlq`.
+
+`tests/loyalty/integration/test_dlq.py` is ShopStream's **first engine-driven integration test**:
+it flips loyalty to async + fast-fail retries, processes `EmitPoison`, runs `Engine(test_mode=True)`,
+then asserts the message is in the DLQ via `broker.dlq_depth` / `dlq_list` and **replays** it with
+`broker.dlq_replay`. DLQ routing and the `broker.dlq_*` API only line up on the **Redis** streams
+broker, so the test skips under the in-memory broker (run via `--protean-env test`). This handler is
+the *only* intentional failure in ShopStream and never runs in real flows.
+
 ## Tests
 
 `tests/loyalty/{domain,application,integration,bdd,property}/`:
@@ -277,7 +292,9 @@ window — `Date` fields flow through a command end-to-end
   multiplier, the application service, custom repository, pattern-B subscribers, ES persistence +
   fact events + snapshots, and **optimistic-concurrency** tests (`test_concurrency.py`: a stale
   writer is rejected with `ExpectedVersionError`, no lost updates);
-- **integration** — API tests (TestClient over account / campaign / redemption endpoints);
+- **integration** — API tests (TestClient over account / campaign / redemption endpoints), the
+  async-command path (`test_async_command.py`), and the engine-driven **DLQ** test
+  (`test_dlq.py`, Redis-only — skips on memory);
 - **bdd** — `pytest-bdd` scenarios (rewards lifecycle, points transfer, campaign lifecycle,
   redemption) in `features/*.feature`;
 - **property** — Hypothesis tests (`test_points_conservation.py`): points conservation,

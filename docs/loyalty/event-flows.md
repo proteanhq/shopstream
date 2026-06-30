@@ -25,6 +25,21 @@ flowchart TD
     agg_loyalty_campaign_campaign_PromoCampaign --> evt_loyalty_campaign_events_CampaignPaused
 ```
 
+## Event Flow: PoisonPill
+
+```mermaid
+flowchart TD
+    subgraph loyalty_dlq_poison_PoisonPill[PoisonPill]
+        agg_loyalty_dlq_poison_PoisonPill[PoisonPill]
+        cmd_loyalty_dlq_poison_EmitPoison[/EmitPoison/]
+        evt_loyalty_dlq_poison_PoisonDetonated([PoisonDetonated])
+        hdlr_loyalty_dlq_poison_EmitPoisonHandler[EmitPoisonHandler]
+    end
+    cmd_loyalty_dlq_poison_EmitPoison --> hdlr_loyalty_dlq_poison_EmitPoisonHandler
+    hdlr_loyalty_dlq_poison_EmitPoisonHandler --> agg_loyalty_dlq_poison_PoisonPill
+    agg_loyalty_dlq_poison_PoisonPill --> evt_loyalty_dlq_poison_PoisonDetonated
+```
+
 ## Event Flow: Redemption
 
 ```mermaid
@@ -106,6 +121,7 @@ flowchart LR
     evt_loyalty_campaign_events_CampaignExpired([CampaignExpired])
     evt_loyalty_campaign_events_CampaignLaunched([CampaignLaunched])
     evt_loyalty_campaign_events_CampaignPaused([CampaignPaused])
+    evt_loyalty_dlq_poison_PoisonDetonated([PoisonDetonated])
     evt_loyalty_redemption_events_PointsReserved([PointsReserved])
     evt_loyalty_redemption_events_RedemptionCompensated([RedemptionCompensated])
     evt_loyalty_redemption_events_RedemptionCompleted([RedemptionCompleted])
@@ -117,6 +133,9 @@ flowchart LR
     evt_loyalty_reward_events_RewardAccountClosed([RewardAccountClosed])
     evt_loyalty_reward_events_RewardAccountEnrolled([RewardAccountEnrolled])
     evt_loyalty_reward_events_TierUpgraded([TierUpgraded])
+    subgraph event_handlers["Event Handlers"]
+        eh_loyalty_dlq_poison_PoisonEventHandler[PoisonEventHandler]
+    end
     subgraph process_managers["Process Managers"]
         pm_loyalty_redemption_saga_RedemptionSaga["RedemptionSaga (start, end)"]
     end
@@ -126,6 +145,7 @@ flowchart LR
         proj_loyalty_projections_redemption_view_RedemptionViewProjector[RedemptionViewProjector → RedemptionView]
         proj_loyalty_projections_reward_account_view_RewardAccountViewProjector[RewardAccountViewProjector → RewardAccountView]
     end
+    evt_loyalty_dlq_poison_PoisonDetonated --> eh_loyalty_dlq_poison_PoisonEventHandler
     evt_loyalty_redemption_events_PointsReserved --> pm_loyalty_redemption_saga_RedemptionSaga
     evt_loyalty_redemption_events_RedemptionRequested -->|start| pm_loyalty_redemption_saga_RedemptionSaga
     evt_loyalty_redemption_events_VoucherIssuanceFailed -->|end| pm_loyalty_redemption_saga_RedemptionSaga

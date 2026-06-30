@@ -12,6 +12,17 @@ flowchart LR
     ch_loyalty_campaign_management_PromoCampaignHandler --> agg_loyalty_campaign_campaign_PromoCampaign[PromoCampaign]
 ```
 
+## Command Handlers: PoisonPill
+
+```mermaid
+flowchart LR
+    subgraph command_handlers["Command Handlers"]
+        ch_loyalty_dlq_poison_EmitPoisonHandler[EmitPoisonHandler]
+    end
+    cmd_loyalty_dlq_poison_EmitPoison[/EmitPoison/] --> ch_loyalty_dlq_poison_EmitPoisonHandler
+    ch_loyalty_dlq_poison_EmitPoisonHandler --> agg_loyalty_dlq_poison_PoisonPill[PoisonPill]
+```
+
 ## Command Handlers: Redemption
 
 ```mermaid
@@ -40,6 +51,16 @@ flowchart LR
     cmd_loyalty_reward_points_EarnPoints[/EarnPoints/] --> ch_loyalty_reward_points_PointsHandler
     cmd_loyalty_reward_points_RedeemPoints[/RedeemPoints/] --> ch_loyalty_reward_points_PointsHandler
     ch_loyalty_reward_points_PointsHandler --> agg_loyalty_reward_reward_account_RewardAccount[RewardAccount]
+```
+
+## Event Handlers
+
+```mermaid
+flowchart TD
+    subgraph event_handlers["Event Handlers"]
+        eh_loyalty_dlq_poison_PoisonEventHandler[PoisonEventHandler]
+    end
+    evt_loyalty_dlq_poison_PoisonDetonated([PoisonDetonated]) --> eh_loyalty_dlq_poison_PoisonEventHandler
 ```
 
 ## Process Managers

@@ -122,6 +122,34 @@
 | campaign_id | Identifier | Yes | min_length=1 |
 | reason | String | No | max_length=255 |
 
+## PoisonPill (`loyalty.dlq.poison.PoisonPill`)
+
+### Events
+
+#### PoisonDetonated
+
+- **Type**: `Loyalty.PoisonDetonated.v1`
+- **Version**: 1
+- **Published**: No
+- **Fact Event**: No
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| note | String | No | max_length=255 |
+| occurred_at | DateTime | Yes | — |
+| poison_id | Identifier | Yes | min_length=1 |
+
+### Commands
+
+#### EmitPoison
+
+- **Type**: `Loyalty.EmitPoison.v1`
+- **Version**: 1
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| note | String | No | max_length=120 |
+
 ## Redemption (`loyalty.redemption.redemption.Redemption`)
 
 ### Events
