@@ -276,12 +276,15 @@ on its own `loyalty::poison_pill` stream whose event handler `PoisonEventHandler
 raises**. Under asynchronous event processing the engine delivers `PoisonDetonated`, the handler
 fails, and after the retries are exhausted the engine routes the message to `loyalty::poison_pill:dlq`.
 
-`tests/loyalty/integration/test_dlq.py` is ShopStream's **first engine-driven integration test**:
-it flips loyalty to async + fast-fail retries, processes `EmitPoison`, runs `Engine(test_mode=True)`,
-then asserts the message is in the DLQ via `broker.dlq_depth` / `dlq_list` and **replays** it with
+`tests/loyalty/integration/test_dlq.py` is ShopStream's **only engine-driven test**: it flips
+loyalty to async + fast-fail retries, processes `EmitPoison`, runs `Engine(test_mode=True)`, then
+asserts the message is in the DLQ via `broker.dlq_depth` / `dlq_list` and **replays** it with
 `broker.dlq_replay`. DLQ routing and the `broker.dlq_*` API only line up on the **Redis** streams
-broker, so the test skips under the in-memory broker (run via `--protean-env test`). This handler is
-the *only* intentional failure in ShopStream and never runs in real flows.
+broker, so it skips under the in-memory broker. It also **skips under CI**: a full engine inside a
+pytest is reliable only against an isolated per-domain Redis, whereas CI runs all nine domains on
+one shared Redis (the engine's many subscriptions churn/drop connections there). Run it locally via
+`make test` / `make test-loyalty`. This handler is the *only* intentional failure in ShopStream and
+never runs in real flows.
 
 ## Tests
 
