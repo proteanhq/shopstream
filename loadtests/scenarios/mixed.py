@@ -34,6 +34,12 @@ from loadtests.scenarios.inventory import (
     StockInitAndReceiveJourney,
     WarehouseManagementJourney,
 )
+from loadtests.scenarios.loyalty import (
+    CampaignMultiplierJourney,
+    RedemptionSagaJourney,
+    RewardsAccountJourney,
+    TransferJourney,
+)
 from loadtests.scenarios.notifications import (
     PreferenceManagementJourney,
     QuietHoursLifecycleJourney,
@@ -64,7 +70,7 @@ from loadtests.scenarios.reviews import (
 class MixedWorkloadUser(HttpUser):
     """Realistic mixed workload simulating concurrent e-commerce activity.
 
-    Weight distribution models real-world patterns across all 8 domains:
+    Weight distribution models real-world patterns across all 9 domains:
 
     Identity (12%):
     - Customer registration: most common write + read verification
@@ -118,12 +124,18 @@ class MixedWorkloadUser(HttpUser):
     - Unsubscribe/resubscribe: opt-out flow
     (Notification cancel excluded — process-scheduled races with cancel, run via NotificationsCancelUser)
 
+    Loyalty (8%):
+    - Rewards account: enrol → earn → redeem + projection reads
+    - Campaign multiplier: launch/activate a points_multiplier campaign + earn
+    - Redemption saga: request a points-for-voucher redemption (engine advances it)
+    - Points transfer: member-to-member via the application service
+
     (Saga journeys excluded — trigger OrderCheckoutSaga which races with direct
     API calls under load. Run via CrossDomainUser for saga-specific testing.)
 
-    Creates cross-domain pressure on all seven PostgreSQL databases
-    simultaneously, testing the DomainContextMiddleware's ability
-    to route to the correct domain under load.
+    Creates cross-domain pressure on all PostgreSQL databases simultaneously,
+    testing the DomainContextMiddleware's ability to route to the correct domain
+    under load.
     """
 
     wait_time = between(0.5, 3.0)
@@ -167,6 +179,11 @@ class MixedWorkloadUser(HttpUser):
         PreferenceManagementJourney: 3,
         UnsubscribeResubscribeJourney: 2,
         QuietHoursLifecycleJourney: 1,
+        # Loyalty (8%)
+        RewardsAccountJourney: 3,
+        CampaignMultiplierJourney: 2,
+        RedemptionSagaJourney: 2,
+        TransferJourney: 1,
         # Correlated sessions (6%)
         RealisticShopperJourney: 4,
     }

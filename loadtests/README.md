@@ -1,6 +1,6 @@
 # Load Testing
 
-Locust-based load testing suite for ShopStream. Simulates realistic e-commerce traffic across all eight bounded contexts (Identity, Catalogue, Ordering, Inventory, Payments, Fulfillment, Reviews, Notifications), exercising the full CQRS event pipeline — from HTTP command processing through outbox persistence, Redis Streams publishing, and projector consumption.
+Locust-based load testing suite for ShopStream. Simulates realistic e-commerce traffic across all nine bounded contexts (Identity, Catalogue, Ordering, Inventory, Payments, Fulfillment, Reviews, Notifications, Loyalty), exercising the full CQRS event pipeline — from HTTP command processing through outbox persistence, Redis Streams publishing, and projector consumption.
 
 Includes targeted race condition scenarios based on the domain specification: concurrent checkout, flash sale stampede, cancel-during-payment, and concurrent order modification. Also includes subscriber ACL flow testing, saga-driven process manager journeys, and priority lane scenarios for migration vs production traffic.
 
@@ -351,7 +351,7 @@ These are safe, happy-path scenarios with no expected failures:
 | `NotificationsUser` | 0.5–2.0s | Notifications + Identity | Per-domain journeys (registers customers first) |
 | `LoyaltyUser` | 0.5–2.0s | Loyalty | HTTP API: enrol/earn/redeem/transfer + promo-campaign lifecycle |
 | `SubscriberUser` | 1.0–3.0s | Cross-domain | Happy-path subscriber ACL flows |
-| `MixedWorkloadUser` | 0.5–3.0s | All 8 | Realistic cross-domain load baseline |
+| `MixedWorkloadUser` | 0.5–3.0s | All 9 | Realistic cross-domain load baseline (incl. loyalty) |
 | `EventFloodUser` | 0.1s (constant) | 5 core | Pipeline saturation / find breaking points |
 
 ### Specialty (run explicitly — generate expected failures)
@@ -476,7 +476,7 @@ Three dashboards provide complementary views during a load test:
 | Dashboard | URL | What It Shows |
 |-----------|-----|---------------|
 | **Locust** | http://localhost:8089 | Request rate, response times (p50/p95/p99), failure rate, per-endpoint breakdown |
-| **Observatory** | http://localhost:9000 | Live message flow across all 8 domains, outbox queue depth, stream health |
+| **Observatory** | http://localhost:9000 | Live message flow across all 9 domains, outbox queue depth, stream health |
 | **Prometheus** | http://localhost:9000/metrics | Raw Prometheus-format metrics for scraping or ad-hoc queries |
 
 ### Key Metrics to Correlate
@@ -590,7 +590,7 @@ loadtests/
 │                              #   test_start/test_stop event hooks,
 │                              #   Observatory metrics fetch on stop
 ├── locust.conf                # Default config (host, web UI port)
-├── data_generators.py         # Faker-based payload generators (all 8 domains)
+├── data_generators.py         # Faker-based payload generators (all 9 domains)
 │
 ├── scenarios/
 │   ├── identity.py            # NewCustomerJourney, AccountLifecycleJourney,
@@ -624,7 +624,7 @@ loadtests/
 │   │                          #   SubscriberVariantStockJourney, SubscriberOrderRefundJourney,
 │   │                          #   SubscriberVerifiedPurchaseJourney,
 │   │                          #   CrossDomainUser, FlashSaleUser, RaceConditionUser, SubscriberUser
-│   ├── mixed.py               # MixedWorkloadUser (all 8 domains, weighted)
+│   ├── mixed.py               # MixedWorkloadUser (all 9 domains, weighted)
 │   ├── stress.py              # EventFloodUser, SpikeUser, CrossDomainFloodUser
 │   └── priority_lanes.py      # MigrationBulkImportPhase, ProductionTrafficPhase,
 │                              #   MigrationWithProductionTrafficUser, BackfillDrainRateUser,
