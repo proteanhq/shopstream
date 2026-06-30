@@ -627,6 +627,84 @@ are approved (incremented) or removed (decremented).
 
 ---
 
+## Loyalty Context
+
+### Reward Account
+
+A customer's loyalty account: a points balance, a lifetime-points total, a tier, an optional
+membership card, and an append-only points ledger. Long-lived and frequently mutated; uses
+standard CQRS. Closing an account is terminal and freezes it against further changes.
+
+&rarr; [`RewardAccount`](../src/loyalty/reward/reward_account.py) (Aggregate)
+
+### Points Balance
+
+The currently spendable points on a reward account. Decreases on redemption or transfer-out
+and can never go negative (enforced by a post-invariant).
+
+&rarr; [`points_balance`](../src/loyalty/reward/reward_account.py) (Field on RewardAccount)
+
+### Lifetime Points
+
+The cumulative points a customer has ever earned. Only ever increases -- redemptions and
+transfers-out do not lower it -- so it provides a stable basis for tiering and recognition.
+
+&rarr; [`lifetime_points`](../src/loyalty/reward/reward_account.py) (Field on RewardAccount)
+
+### Tier
+
+A loyalty level -- bronze, silver, gold, or platinum -- modeled as a non-Enum `choices` field.
+Reflects a customer's standing in the program.
+
+&rarr; [`tier`](../src/loyalty/reward/reward_account.py) (Field on RewardAccount)
+
+### Member Code
+
+The account's own unique code (6-12 uppercase alphanumerics). Required, and generated at
+enrolment if not supplied. Validated by a composed validator: the built-in `RegexValidator`
+plus a custom `NoTripleRepeatValidator`.
+
+&rarr; [`member_code`](../src/loyalty/reward/reward_account.py) (Field on RewardAccount)
+
+### Membership Card
+
+The physical/virtual loyalty card attached one-to-one (`HasOne`) to a reward account. An
+account may have at most one card.
+
+&rarr; [`MembershipCard`](../src/loyalty/reward/reward_account.py) (Entity)
+
+### Points Ledger Entry
+
+An append-only record of a single points movement -- earn, redeem, transfer-in, transfer-out,
+or adjust -- with the amount, resulting balance, and reason. Attached to its account as a
+`HasMany` child with an explicit `Reference` back to the account.
+
+&rarr; [`PointsLedgerEntry`](../src/loyalty/reward/reward_account.py) (Entity)
+
+### Points Transfer
+
+Moving points from one reward account to another. Spans two aggregates, so it lives in a
+domain service that conserves the total and requires both accounts to be active.
+
+&rarr; [`TransferPoints`](../src/loyalty/reward/transfer.py) (Domain Service)
+
+### Promo Campaign
+
+A promotional campaign (percentage, fixed, or points-multiplier discount) with its own
+lifecycle (draft &rarr; active &harr; paused &rarr; expired). Event-sourced: state is rebuilt
+from events, and a complete-state fact event is emitted after each change for audit and
+temporal queries.
+
+&rarr; [`PromoCampaign`](../src/loyalty/campaign/campaign.py) (Aggregate, Event-Sourced)
+
+### Account Status
+
+The reward account lifecycle: Active &harr; Frozen, and either &rarr; Closed (terminal).
+
+&rarr; [`AccountStatus`](../src/loyalty/reward/reward_account.py) (Enum)
+
+---
+
 ## Cross-Context Terms
 
 ### customer_id

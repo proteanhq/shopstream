@@ -4,7 +4,7 @@
 
 ## Overview
 
-ShopStream is decomposed into seven bounded contexts, each owning a distinct
+ShopStream is decomposed into nine bounded contexts, each owning a distinct
 area of business responsibility. The contexts share **no domain objects** --
 they communicate only through opaque identifiers and asynchronous domain events.
 
@@ -30,6 +30,12 @@ consistency requirements, change rates, and scalability needs:
 - **Reviews** is read-heavy and write-light (customers submit reviews occasionally,
   shoppers read them constantly). Reviews use CQRS with a pre-publication moderation
   workflow and consume `OrderDelivered` events to flag verified purchases.
+- **Notifications** is a pure event-consumer hub. It subscribes to events from across the
+  platform and fans them out to email/SMS/push/Slack via pluggable channel adapters,
+  honoring per-customer preferences. It owns no upstream truth -- only delivery state.
+- **Loyalty** runs the rewards program: long-lived reward accounts that earn/redeem/transfer
+  points (CQRS), plus event-sourced promo campaigns (audit + temporal history). It earns
+  bonuses by consuming `OrderDelivered`. It is also ShopStream's Protean capability showcase.
 
 ```mermaid
 graph TB
@@ -41,6 +47,8 @@ graph TB
         payments["<b>Payments</b><br/>Charges, refunds, invoices,<br/>gateway integration<br/><i>2 aggregates &middot; 10 events</i>"]
         fulfillment_ctx["<b>Fulfillment</b><br/>Picking, packing, shipping,<br/>tracking, delivery<br/><i>1 aggregate &middot; 11 events</i>"]
         reviews_ctx["<b>Reviews</b><br/>Ratings, moderation, voting,<br/>seller replies<br/><i>1 aggregate &middot; 8 events</i>"]
+        notifications_ctx["<b>Notifications</b><br/>Multi-channel delivery,<br/>preferences (event hub)<br/><i>2 aggregates &middot; 13 events</i>"]
+        loyalty_ctx["<b>Loyalty</b><br/>Reward accounts, points,<br/>promo campaigns<br/><i>2 aggregates &middot; 9 events</i>"]
     end
 
     ordering -- "customer_id" --> identity
@@ -55,6 +63,12 @@ graph TB
     ordering -. "OrderCancelled" .-> fulfillment_ctx
     reviews_ctx -- "product_id, customer_id" --> catalogue
     ordering -. "OrderDelivered" .-> reviews_ctx
+    ordering -. "OrderDelivered" .-> loyalty_ctx
+    identity -. "CustomerRegistered" .-> notifications_ctx
+    ordering -. "Order events" .-> notifications_ctx
+    payments -. "Payment events" .-> notifications_ctx
+    inventory -. "LowStockDetected" .-> notifications_ctx
+    reviews_ctx -. "Review events" .-> notifications_ctx
 
     style identity fill:#4a90d9,color:#fff,stroke:#2a6cb0
     style catalogue fill:#7bc96f,color:#fff,stroke:#4a9e3f
@@ -63,6 +77,8 @@ graph TB
     style payments fill:#9b59b6,color:#fff,stroke:#7d3c98
     style fulfillment_ctx fill:#1abc9c,color:#fff,stroke:#16a085
     style reviews_ctx fill:#e74c3c,color:#fff,stroke:#c0392b
+    style notifications_ctx fill:#34495e,color:#fff,stroke:#2c3e50
+    style loyalty_ctx fill:#f39c12,color:#fff,stroke:#c87f0a
 ```
 
 ## Context Relationships
@@ -173,6 +189,26 @@ independently reacts by creating per-product verified purchase records.
 
 The Reviews context also references `product_id` and `customer_id` as opaque
 identifiers. It never queries the Catalogue or Identity contexts.
+
+### Everything &rarr; Notifications
+
+The Notifications context is a pure **downstream consumer**. Eight `@subscriber(broker=
+"global")` classes consume seven streams -- `identity::customer` (×2: welcome + default
+preferences), `ordering::order`, `ordering::cart`, `payments::payment`,
+`fulfillment::fulfillment`, `inventory::inventory_item`, and `reviews::review`. Each
+subscriber is an ACL: it receives a raw dict payload, filters by event type, and translates
+into a `Notification` (rendered from a per-type template, filtered by customer preferences and
+enabled channels). Notifications never queries any upstream context -- it only reacts to events
+and owns delivery state.
+
+### Ordering &rarr; Loyalty
+
+The Loyalty context consumes `OrderDelivered` from the `ordering::order` stream to award a
+delivery bonus to the customer's reward account. This uses subscriber **pattern B** (the
+subscriber loads the `RewardAccount` aggregate and calls a business method directly, rather
+than dispatching a command). `customer_id` is an opaque reference; Loyalty never queries
+Ordering or Identity. Points earned through normal shopping, redemptions, and member-to-member
+transfers are internal to the Loyalty context.
 
 ## Communication Patterns
 
