@@ -30,6 +30,7 @@ from identity.api import router as identity_router
 from identity.domain import identity
 from inventory.api import inventory_maintenance_router, inventory_router, warehouse_router
 from inventory.domain import inventory
+from loyalty.api import loyalty_router
 from loyalty.domain import loyalty
 from notifications.api import notification_router
 from notifications.domain import notifications
@@ -56,8 +57,7 @@ payments.init()
 fulfillment.init()
 reviews.init()
 notifications.init()
-# Loyalty: capability-coverage showcase domain (no HTTP API of its own yet);
-# initialized so its projectors/subscribers register in the stack.
+# Loyalty: capability-coverage showcase domain.
 loyalty.init()
 
 # ---------------------------------------------------------------------------
@@ -93,6 +93,7 @@ app.add_middleware(
         "/fulfillments": fulfillment,
         "/reviews": reviews,
         "/notifications": notifications,
+        "/loyalty": loyalty,
     },
 )
 
@@ -147,6 +148,7 @@ app.include_router(invoice_router)
 app.include_router(fulfillment_router)
 app.include_router(review_router)
 app.include_router(notification_router)
+app.include_router(loyalty_router)
 
 # Maintenance routers (background job endpoints)
 app.include_router(inventory_maintenance_router)

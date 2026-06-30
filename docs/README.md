@@ -136,7 +136,7 @@ docs/
 | **Events** | 10 | 13 | 25 | 18 | 10 | 11 | 8 | 13 | 9 |
 | **Commands** | 10 | 14 | 27 | 16 | 7 | 11 | 7 | 8 | 3 |
 | **Projections** | 4 | 5 | 6 | 6 | 5 | 5 | 6 | 4 | 2 (1 DB + 1 cache) |
-| **API Endpoints** | 10 | 14 | 25 | 16 | 9 | 12 | 7 | 9 | -- |
+| **API Endpoints** | 10 | 14 | 25 | 16 | 9 | 12 | 7 | 9 | 6 |
 | **Persistence** | CQRS | CQRS | Event Sourced (Order) + CQRS (Cart) | Event Sourced (InventoryItem) + CQRS (Warehouse) | Event Sourced (Payment) + CQRS (Invoice) | CQRS | CQRS | CQRS | CQRS (RewardAccount) + Event Sourced (PromoCampaign) |
 
 ## Conventions in This Documentation

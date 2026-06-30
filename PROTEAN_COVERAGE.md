@@ -25,7 +25,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `@handle("$any")` wildcard | ✅ | inventory `EventAuditHandler` (sync + direct dispatch; **#1023** fixed on main) |
 | `@projection` + `@projector` (DB) | ✅ | ~48; loyalty RewardAccountView |
 | `@projection(cache=...)` | ✅ | loyalty PointsLeaderboard (`cache="loyalty"`) — write via `cache_for().add()`, read via `view_for().get()` (runs on Postgres + memory; **#1034** fixed on main) |
-| `@query` + `@query_handler` (`@read`) | ✅ | reviews/ordering/fulfillment/identity `*_queries.py` |
+| `@query` + `@query_handler` (`@read`) | ✅ | reviews/ordering/fulfillment/identity + loyalty `*_queries.py` |
 | `@subscriber` pattern A (→ command) | ✅ | inventory/ordering/payments/… ACL subscribers |
 | `@subscriber` pattern B (direct mutation) | ✅ | loyalty `OrderDeliveredSubscriber` |
 | `@repository` (custom, Q/F/lookups) | ✅ | loyalty `RewardAccountRepository` |

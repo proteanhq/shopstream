@@ -154,11 +154,10 @@ Starts a FastAPI server on port 8000 with hot-reload. Routes are mapped to domai
 | `/fulfillments/*` | Fulfillment |
 | `/reviews/*` | Reviews |
 | `/notifications/*` | Notifications |
+| `/loyalty/*` | Loyalty |
 | `/health` | — |
 | `/docs` | Interactive API reference (Scalar) |
 | `/openapi.json` | OpenAPI 3.x spec |
-
-Loyalty has no HTTP API of its own yet — it is exercised via cross-domain events and as a capability showcase.
 
 ### 3. Engine Workers
 

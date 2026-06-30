@@ -287,13 +287,15 @@ command-dispatching subscriber; acceptable for a single, well-contained reaction
 | TransferPoints domain service | [`src/loyalty/reward/transfer.py`](../../src/loyalty/reward/transfer.py) |
 | LoyaltyService application service (`@use_case`) | [`src/loyalty/reward/services.py`](../../src/loyalty/reward/services.py) |
 | Custom repository (Q/F/lookups) | [`src/loyalty/reward/repository.py`](../../src/loyalty/reward/repository.py) |
-| Cross-domain pattern-B subscriber | [`src/loyalty/reward/ordering_subscriber.py`](../../src/loyalty/reward/ordering_subscriber.py) |
+| Cross-domain subscribers (pattern A: identity; pattern B: ordering) | [`identity_subscriber.py`](../../src/loyalty/reward/identity_subscriber.py), [`ordering_subscriber.py`](../../src/loyalty/reward/ordering_subscriber.py) |
 | PromoCampaign event-sourced aggregate | [`src/loyalty/campaign/campaign.py`](../../src/loyalty/campaign/campaign.py) |
 | PromoCampaign events | [`src/loyalty/campaign/events.py`](../../src/loyalty/campaign/events.py) |
 | CampaignLaunched upcaster chain (v1&rarr;v2&rarr;v3) | [`src/loyalty/campaign/upcasters.py`](../../src/loyalty/campaign/upcasters.py) |
 | Projections + projectors (DB + cache) | [`src/loyalty/projections/`](../../src/loyalty/projections/) |
+| Query handlers (`@read`) for the read endpoints | [`reward_account_view_queries.py`](../../src/loyalty/projections/reward_account_view_queries.py), [`points_leaderboard_queries.py`](../../src/loyalty/projections/points_leaderboard_queries.py) |
+| API routes + schemas | [`src/loyalty/api/`](../../src/loyalty/api/) |
 | Generated reference: [clusters](clusters.md) · [event flows](event-flows.md) · [handler wiring](handler-wiring.md) · [catalog](catalog.md) | — |
 
-> Loyalty does not yet expose an HTTP API of its own (it is exercised as a capability
-> showcase and via cross-domain events); commands are processed through
-> `current_domain.process(...)` and the application service is invoked directly.
+The HTTP API (`/loyalty`, see `src/loyalty/api/`) exposes enrol / earn / redeem / transfer plus
+read endpoints for the account view (DB) and points standing (cache). Writes go through commands
+and the application service; reads go through query handlers (`current_domain.dispatch`).
