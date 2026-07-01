@@ -4,6 +4,12 @@ Projects the event-sourced PromoCampaign's delta events into a flat, queryable c
 It is the read side the points-earning flow consults to find an active points-multiplier
 campaign (a cross-aggregate read; see loyalty/campaign/multiplier.py), and what the
 campaign API lists from.
+
+This projection is bound to loyalty's **second persistence provider** (`provider="reporting"`,
+a SQLite store under Postgres; see `domain.toml`) — everything else in the domain uses the
+default Postgres provider. It exercises Protean running more than one database engine in a
+single domain; `repository_for(CampaignCatalog)` resolves to the reporting provider
+transparently, so the projector, queries, and the multiplier read need no special handling.
 """
 
 from protean.core.projector import on
@@ -20,7 +26,7 @@ from loyalty.campaign.events import (
 from loyalty.domain import loyalty
 
 
-@loyalty.projection
+@loyalty.projection(provider="reporting")
 class CampaignCatalog:
     campaign_id = Identifier(identifier=True, required=True)
     campaign_code = String()

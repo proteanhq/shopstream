@@ -15,11 +15,19 @@ via `register_command_enricher` / `register_event_enricher`. All elements regist
 
 ## Configuration
 
-`domain.toml` — PostgreSQL database, Redis broker (DB 8), Message DB event store, a Redis
-**cache** (`[caches.loyalty]`, DB 9) for the leaderboard projection, `snapshot_threshold = 5`,
-health port 8089. Environment overlays for test (`loyalty_test` DB; `[test.caches.loyalty]`
-uses the in-memory cache so tests need no Redis cache), production (async + telemetry), and
-memory (in-memory/inline adapters).
+`domain.toml` — PostgreSQL database (`[databases.default]`), a **second SQLite provider**
+(`[databases.reporting]`) backing the `CampaignCatalog` read model, Redis broker (DB 8), Message
+DB event store, a Redis **cache** (`[caches.loyalty]`, DB 9) for the leaderboard projection,
+`snapshot_threshold = 5`, health port 8089. Environment overlays for test (`loyalty_test` DB + a
+separate SQLite file; `[test.caches.loyalty]` uses the in-memory cache so tests need no Redis
+cache), production (async + telemetry), and memory (in-memory/inline adapters — the reporting
+provider also runs in-memory there).
+
+The **`reporting` provider is the second persistence provider** — SQLite is embedded (no server),
+so it runs in every environment without extra infrastructure. Under Postgres, loyalty therefore
+runs two real database engines at once (Postgres + SQLite); `repository_for(CampaignCatalog)`
+resolves to the reporting provider transparently. See root `PROTEAN_COVERAGE.md` and
+`tests/loyalty/integration/test_second_provider.py`.
 
 ## Aggregate: RewardAccount (CQRS)
 
@@ -219,7 +227,7 @@ turns them into `TierUpgraded` / `PointsRedeemed` customer notifications. Loyalt
 |------|-----------|---------|-----------|
 | `reward_account_view.py` | `RewardAccountView` | Database | `RewardAccountViewProjector` ([RewardAccount]) |
 | `points_leaderboard.py` | `PointsLeaderboard` | **Cache** (`cache="loyalty"`) | `PointsLeaderboardProjector` ([RewardAccount]) |
-| `campaign_catalog.py` | `CampaignCatalog` | Database | `CampaignCatalogProjector` ([PromoCampaign]) |
+| `campaign_catalog.py` | `CampaignCatalog` | Database (**`reporting` provider — SQLite**) | `CampaignCatalogProjector` ([PromoCampaign]) |
 | `redemption_view.py` | `RedemptionView` | Database | `RedemptionViewProjector` ([Redemption]) |
 
 `CampaignCatalog` projects the event-sourced PromoCampaign's delta events into a flat,

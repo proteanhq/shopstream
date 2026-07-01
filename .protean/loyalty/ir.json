@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:86031123292124dac90658a914ed33a0327a32f6b24ace9d6ea88b6c95fae51a",
+  "checksum": "sha256:475a7a048d497c83b2228e602b3f5ac48e7a77580964649a38d22bd382d45d63",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -2216,7 +2216,7 @@
       }
     }
   },
-  "generated_at": "2026-07-01T01:01:15Z",
+  "generated_at": "2026-07-01T05:43:42Z",
   "ir_version": "0.1.0",
   "projections": {
     "loyalty.projections.campaign_catalog.CampaignCatalog": {
@@ -2279,7 +2279,7 @@
           "cache": null,
           "limit": 100,
           "order_by": [],
-          "provider": "default",
+          "provider": "reporting",
           "schema_name": "campaign_catalog"
         }
       },
