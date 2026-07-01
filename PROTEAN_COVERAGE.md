@@ -37,7 +37,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `@process_manager` (saga, string correlate) | ✅ | ordering `OrderCheckoutSaga` |
 | `@process_manager` (dict correlate + compensation + `end`) | ✅ | loyalty `RedemptionSaga` — reserve → issue → complete, compensating (refund) on voucher failure; `correlate={"redemption_id": ...}`, `end=True` + `mark_as_complete()` |
 | event/command enrichers | ✅ | all domains (`register_command_enricher` / `register_event_enricher`) + `bind_event_context` (payments/reviews) |
-| `@database_model` (custom ORM) | 🚧 | follow-up — Postgres-specific, not exercised in memory tests |
+| `@database_model` (custom ORM) | ✅ | loyalty `RewardAccountViewPostgresModel` (`projections/reward_account_view_model.py`) — hand-written SQLAlchemy model overriding `RewardAccountView`'s columns (`Text` + indexed `customer_id`), registered `database="postgresql"` so Postgres uses it and the memory provider falls back to the auto-generated model; both paths asserted in `tests/loyalty/integration/test_custom_database_model.py` |
 | `@email` / `send_email`, `ReadView` element | N/A | notifications uses bespoke channel ports; `view_for()` covers projection reads |
 
 ## Fields & validation
@@ -105,7 +105,6 @@ view does not exist yet).
 
 ## Follow-ups (need design or infrastructure)
 
-- **`database_model`** — custom ORM model (Postgres; not exercised by memory tests).
 - **`Auto(increment)`** — a clean home + the id-reflection wart (see above).
 - **Infra wiring — done.** loyalty is fully wired: `app.py`, `.protean/config.toml [domains]`,
   `.protean/loyalty/ir.json` baseline, CI (Postgres + memory jobs, `create_db.sh`, `--cov=src/loyalty`),

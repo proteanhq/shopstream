@@ -3,9 +3,9 @@
 A showcase domain that exercises Protean capabilities not naturally exercised by the
 other seven ShopStream contexts: domain services (cross-aggregate), application services
 (@use_case), custom repositories, custom field validators, HasOne/Reference associations,
-cache-backed projections, Auto(increment) identity, non-Enum choices, event-sourced
-fact_events + snapshots, a second process-manager saga, and pattern-B (direct-to-aggregate)
-subscribers.
+cache-backed projections, a custom database model (hand-written SQLAlchemy for a projection),
+non-Enum choices, event-sourced fact_events + snapshots, a second process-manager saga, and
+pattern-B (direct-to-aggregate) subscribers.
 
 Customers earn points on completed orders, hold a membership card, redeem points, and can
 transfer points between accounts. Promotional campaigns are event-sourced.
