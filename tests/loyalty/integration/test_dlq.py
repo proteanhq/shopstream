@@ -12,12 +12,13 @@ Requires asynchronous event processing (so the engine, not the inline path, hand
 and the **Redis** streams broker (the subscription-routed DLQ and the `broker.dlq_*` inspection
 API only line up on Redis). It therefore skips under the in-memory broker.
 
-**Marked `engine`.** Running a full engine inside a pytest needs an isolated, reachable broker:
-the loyalty engine opens many subscriptions, the external/global broker, and outbox processors,
-so it must not run amid the rest of the suite on a shared, partly-unreachable broker. The regular
-CI jobs deselect it with `-m "not engine"`; a dedicated **Engine Tests** job runs it (`-m engine`)
-with `REDIS_EXTERNAL_URL` set so the global broker is reachable. Locally it runs under
-`make test` / `make test-loyalty`.
+**Marked `engine` → runs locally only.** Driving a full engine inside a pytest is unreliable in
+CI: even in an isolated job with every broker reachable, the engine's subscription poll loops drop
+their Redis connections mid-run ("Connection closed by server" → `redis_instance` becomes None), so
+the pipeline never completes and nothing reaches the DLQ. This reproduces only in CI, not locally —
+filed upstream as proteanhq/protean#1055. CI therefore deselects this test with `-m "not engine"`;
+it runs under `make test` / `make test-loyalty`. The command-handler half is covered synchronously
+by `tests/loyalty/application/test_poison_command.py`.
 """
 
 import pytest

@@ -280,11 +280,11 @@ fails, and after the retries are exhausted the engine routes the message to `loy
 it flips loyalty to async + fast-fail retries, processes `EmitPoison`, runs `Engine(test_mode=True)`,
 then asserts the message is in the DLQ via `broker.dlq_depth` / `dlq_list` and **replays** it with
 `broker.dlq_replay`. DLQ routing and the `broker.dlq_*` API only line up on the **Redis** streams
-broker, so it skips under the in-memory broker. Because a full engine inside pytest needs an
-**isolated, reachable broker**, it runs in a **dedicated CI job** (`-m engine`, with
-`REDIS_EXTERNAL_URL` set so the global broker is reachable) and is deselected from the regular jobs
-(`-m "not engine"`). Locally it runs under `make test` / `make test-loyalty`. The command-handler
-half (`EmitPoison` → fail) is also covered synchronously by
+broker, so it skips under the in-memory broker. It also **runs locally only**: driving a full
+engine inside pytest is unreliable in CI — even isolated with every broker reachable, the engine's
+poll loops drop their Redis connections mid-run (filed upstream as **proteanhq/protean#1055**), so
+CI deselects it with `-m "not engine"`. Locally it runs under `make test` / `make test-loyalty`.
+The command-handler half (`EmitPoison` → fail) is covered synchronously by
 `tests/loyalty/application/test_poison_command.py`. This handler is the *only* intentional failure
 in ShopStream and never runs in real flows.
 

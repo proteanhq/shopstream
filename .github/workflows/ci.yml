@@ -138,8 +138,8 @@ jobs:
         run: uv run ruff check src/ tests/
 
       - name: Run all tests with coverage
-        # Engine-driven tests (-m engine) need an isolated, reachable broker — they run in the
-        # dedicated "Engine Tests" job, not amid the full shared-broker suite.
+        # Engine-driven tests (-m engine) drive a full Protean Engine, which is unreliable against
+        # CI's Redis (see proteanhq/protean#1055) — they run locally only. Deselect them here.
         run: uv run pytest -m "not engine" --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov=src/inventory --cov=src/payments --cov=src/fulfillment --cov=src/reviews --cov=src/notifications --cov=src/loyalty --cov-report=xml --cov-report=term-missing
 
       - name: Extract coverage percentage
@@ -176,66 +176,3 @@ jobs:
           label: coverage
           message: ${{ steps.coverage.outputs.percentage }}%
           color: ${{ steps.coverage.outputs.color }}
-
-  # Engine-driven tests (-m engine) run the Protean Engine inside the test process. They are
-  # isolated here so the engine has its own broker — crucially with REDIS_EXTERNAL_URL set, so the
-  # loyalty global/external broker is reachable (the regular `test` job sets only REDIS_URL, leaving
-  # the external broker on an unreachable fallback). Single Python version: these are infra checks,
-  # not version-sensitive.
-  test-engine:
-    runs-on: ubuntu-latest
-    name: Engine Tests (isolated broker)
-
-    services:
-      postgres:
-        image: postgres:11
-        env:
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      message-db:
-        image: ethangarofolo/message-db:1.2.6
-        ports:
-          - 5433:5432
-
-    env:
-      LOYALTY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/loyalty_local
-      TEST_LOYALTY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/loyalty_test
-      MESSAGE_DB_URL: postgresql://message_store:message_store@localhost:5433/message_store
-      REDIS_URL: redis://127.0.0.1:6379/0
-      # Makes the loyalty external/global broker reachable on the same Redis (different DB).
-      REDIS_EXTERNAL_URL: redis://127.0.0.1:6379/15
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
-
-      - uses: astral-sh/setup-uv@v5
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: uv sync --all-extras --all-groups
-
-      - name: Set up loyalty database
-        run: bash src/loyalty/create_db.sh
-
-      - name: Run engine tests
-        run: uv run pytest -m engine --protean-env test tests/loyalty
