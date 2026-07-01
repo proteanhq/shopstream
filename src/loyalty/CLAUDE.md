@@ -231,6 +231,13 @@ lists from. `RedemptionView` tracks each redemption's saga progress for the rede
 `current_domain.view_for(PointsLeaderboard).get(...)`. `repository_for` does **not** serve
 cache projections.
 
+`reward_account_view_model.py` holds a **custom `@database_model`** (`RewardAccountViewPostgresModel`)
+for `RewardAccountView` — a hand-written SQLAlchemy model that overrides the auto-generated columns
+(`Text` + an indexed `customer_id`). It is registered `database="postgresql"`, so Protean uses it
+only under the Postgres provider and falls back to the auto-generated model under the in-memory
+provider (keeping both CI jobs green). This is ShopStream's only custom database model; see
+`tests/loyalty/integration/test_custom_database_model.py`.
+
 ## Queries (read side)
 
 **Files:** `projections/reward_account_view_queries.py`, `projections/points_leaderboard_queries.py`,

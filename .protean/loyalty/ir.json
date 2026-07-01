@@ -1973,7 +1973,9 @@
       "loyalty.reward.enrollment.EnrollRewardAccountHandler",
       "loyalty.reward.points.PointsHandler"
     ],
-    "DATABASE_MODEL": [],
+    "DATABASE_MODEL": [
+      "loyalty.projections.reward_account_view_model.RewardAccountViewPostgresModel"
+    ],
     "DOMAIN_SERVICE": [
       "loyalty.reward.transfer.TransferPoints"
     ],
@@ -2214,7 +2216,7 @@
       }
     }
   },
-  "generated_at": "2026-06-30T22:00:56Z",
+  "generated_at": "2026-07-01T01:01:15Z",
   "ir_version": "0.1.0",
   "projections": {
     "loyalty.projections.campaign_catalog.CampaignCatalog": {
