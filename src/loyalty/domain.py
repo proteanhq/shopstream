@@ -4,6 +4,7 @@ A showcase domain that exercises Protean capabilities not naturally exercised by
 other seven ShopStream contexts: domain services (cross-aggregate), application services
 (@use_case), custom repositories, custom field validators, HasOne/Reference associations,
 cache-backed projections, a custom database model (hand-written SQLAlchemy for a projection),
+a second persistence provider (a SQLite reporting store alongside the default Postgres),
 non-Enum choices, event-sourced fact_events + snapshots, a second process-manager saga, and
 pattern-B (direct-to-aggregate) subscribers.
 

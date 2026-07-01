@@ -70,7 +70,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | cache provider (`[caches.*]`) | ✅ | loyalty `[caches.loyalty]` |
 | `value_object_from_entity` | ✅ | payments invoice (PR #8) |
 | async command processing (`asynchronous=True`) | ✅ | loyalty `POST /loyalty/accounts/{id}/earn-async` (202; engine drains the command queue) |
-| multiple providers (sqlite/elasticsearch) | 🚧 | open question / follow-up |
+| multiple database providers in one domain | ✅ | loyalty runs **two** providers: default PostgreSQL + a `[databases.reporting]` **SQLite** store backing `CampaignCatalog` (`@loyalty.projection(provider="reporting")`). SQLite is embedded so both CI jobs exercise it (Postgres job = real Postgres + real SQLite; memory job = both in-memory). Routing + round-trip asserted in `tests/loyalty/integration/test_second_provider.py` |
 | DLQ deliberate exercise + replay | ✅ | loyalty `PoisonPill` failing handler → `tests/loyalty/integration/test_dlq.py` drives `Engine(test_mode)` → message lands in `loyalty::poison_pill:dlq`, then `broker.dlq_replay` (Redis-only, `@pytest.mark.engine`; **runs locally only** — the engine is unreliable in CI, filed as [proteanhq/protean#1055](https://github.com/proteanhq/protean/issues/1055); CI deselects via `-m "not engine"`) |
 
 ## Protean bugs surfaced (filed; milestone 0.16.1)

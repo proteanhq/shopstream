@@ -175,3 +175,6 @@ todo/
 *.todo
 *.temp
 .DS_Store
+
+# Loyalty second-provider (SQLite reporting store) — created at runtime
+loyalty_reporting*.db

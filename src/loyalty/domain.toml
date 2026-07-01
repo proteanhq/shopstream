@@ -36,6 +36,14 @@ tick_interval = 0.01
 provider = "postgresql"
 database_uri = "${LOYALTY_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/loyalty_local}"
 
+# Second persistence provider — a SQLite "reporting" store backing the CampaignCatalog read
+# model. Exercises Protean running more than one database provider in a single domain (default
+# PostgreSQL for everything else + this SQLite). SQLite is embedded (no server), so the second
+# provider runs in every environment without extra infrastructure.
+[databases.reporting]
+provider = "sqlite"
+database_uri = "${LOYALTY_REPORTING_URL|sqlite:////tmp/loyalty_reporting.db}"
+
 [event_store]
 provider = "message_db"
 database_uri = "${MESSAGE_DB_URL|postgresql://message_store:message_store@localhost:15433/message_store}"
@@ -66,6 +74,10 @@ event_processing = "sync"
 [test.databases.default]
 database_uri = "${TEST_LOYALTY_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/loyalty_test}"
 
+# Separate SQLite file for tests so runs never touch the dev reporting store.
+[test.databases.reporting]
+database_uri = "${TEST_LOYALTY_REPORTING_URL|sqlite:////tmp/loyalty_reporting_test.db}"
+
 # Use the in-memory cache in tests so the PointsLeaderboard cache projection works
 # without a dedicated Redis cache instance.
 [test.caches.loyalty]
@@ -93,6 +105,10 @@ testing = true
 event_processing = "sync"
 
 [memory.databases.default]
+provider = "memory"
+
+# The reporting store also runs in-memory under the memory env (no SQLite file needed).
+[memory.databases.reporting]
 provider = "memory"
 
 [memory.event_store]
