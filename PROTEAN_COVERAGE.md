@@ -49,7 +49,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `Date` | ✅ | identity Profile, loyalty RewardAccount/PromoCampaign |
 | `Date` on a **command/event** payload | ✅ | loyalty `LaunchCampaign.starts_on/ends_on` — campaign date windows flow through end-to-end (**#1046** fixed on main) |
 | non-Enum `choices` (list) | ✅ | loyalty tier, discount_type, entry_type |
-| `Auto(increment=True)` | 🚧 | works in memory, but the generated value is not reflected back onto the instance after `add` (stays `None`); contrived in loyalty — follow-up |
+| `Auto(increment=True)` | ⛔ | the generated value is **not reflected back onto the aggregate after `repository.add()`** (stays `None`), so the feature is unusable via the repository — filed as [proteanhq/protean#1056](https://github.com/proteanhq/protean/issues/1056). Root cause: `BaseDAO.save()` (the `add()` path) omits the auto-field reverse-update that `dao.create()` performs. Add a loyalty exerciser + regression test when it lands |
 | custom field validators (RegexValidator + custom class, composed) | ✅ | loyalty `member_code` |
 | optional field + `validators=` (skipped on `None`) | ✅ | loyalty `referral_code` (**#1025** fixed on main) |
 | `@invariant.post` | ✅ | widespread |
@@ -88,6 +88,7 @@ against it (the saga runs to completion under the engine; only synchronous casca
 | [#1046](https://github.com/proteanhq/protean/issues/1046) | ✅ fixed on main | a `Date` field on a command/event broke the message checksum (`ResolvedField.as_dict` had no `date` branch → `json.dumps` raised); campaign date windows now work end-to-end |
 | [#1048](https://github.com/proteanhq/protean/issues/1048) | 🐞 filed (0.17.0) | multi-step process managers don't cascade under `event_processing="sync"` — re-entrant dispatch runs the next step before the start transition is persisted, so the PM can't load its own in-flight instance; loyalty `RedemptionSaga` completion tests (`xfail`) |
 | [#1055](https://github.com/proteanhq/protean/issues/1055) | 🐞 filed (0.17.0) | `Engine(test_mode=True).run()` against a Redis broker is unreliable in CI — the engine's async poll loops drop their (sync) Redis connections mid-read (`Connection closed by server` → `redis_instance` becomes `None`), so the async pipeline never completes. Reproduces only in CI, not locally. The loyalty DLQ test (`@pytest.mark.engine`) runs **locally only**; **revisit when #1055 is fixed** — then re-add an engine CI job (deselected today via `-m "not engine"`) |
+| [#1056](https://github.com/proteanhq/protean/issues/1056) | 🐞 filed (0.17.0) | `repository.add()` doesn't reflect an `Auto(increment=True)` generated value back onto the aggregate (stays `None`) though it is generated + persisted; only `dao.create()` does. `BaseDAO.save()` drops `_create()`'s return and omits the reverse-update that `create()` has. Makes auto-increment identities unusable via the repository. **Add a loyalty exerciser + regression test when fixed** |
 
 Minor DX note (not filed): `repository_for()` gives a confusing `provider=None` error for cache-backed
 projections — the working API is `cache_for().add()` / `view_for().get()`.
