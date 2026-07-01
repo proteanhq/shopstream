@@ -34,7 +34,7 @@ jobs:
         run: uv run ruff check src/ tests/
 
       - name: Run all tests (memory mode)
-        run: uv run pytest --protean-env memory
+        run: uv run pytest --protean-env memory -m "not engine"
 
   test:
     runs-on: ubuntu-latest
@@ -138,7 +138,9 @@ jobs:
         run: uv run ruff check src/ tests/
 
       - name: Run all tests with coverage
-        run: uv run pytest --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov=src/inventory --cov=src/payments --cov=src/fulfillment --cov=src/reviews --cov=src/notifications --cov=src/loyalty --cov-report=xml --cov-report=term-missing
+        # Engine-driven tests (-m engine) drive a full Protean Engine, which is unreliable against
+        # CI's Redis (see proteanhq/protean#1055) — they run locally only. Deselect them here.
+        run: uv run pytest -m "not engine" --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov=src/inventory --cov=src/payments --cov=src/fulfillment --cov=src/reviews --cov=src/notifications --cov=src/loyalty --cov-report=xml --cov-report=term-missing
 
       - name: Extract coverage percentage
         if: matrix.python-version == '3.11'

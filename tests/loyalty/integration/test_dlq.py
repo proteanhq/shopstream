@@ -10,18 +10,16 @@ pipeline end to end:
 
 Requires asynchronous event processing (so the engine, not the inline path, handles the event)
 and the **Redis** streams broker (the subscription-routed DLQ and the `broker.dlq_*` inspection
-API only line up on Redis). It therefore skips under the in-memory broker — run it with
-`--protean-env test`.
+API only line up on Redis). It therefore skips under the in-memory broker.
 
-**Skipped under CI.** Running a full engine inside a pytest is reliable only against an isolated,
-per-domain Redis. CI runs all nine domains on a single shared Redis, where the loyalty engine
-(many subscriptions + the external/global broker + outbox processors on one server) churns and
-drops connections before the message reaches the DLQ. The capability is exercised locally via
-`make test` / `make test-loyalty`; CI relies on the rest of the loyalty suite (incl. the
-`given()` saga tests and the DLQ poison-handler unit test).
+**Marked `engine` → runs locally only.** Driving a full engine inside a pytest is unreliable in
+CI: even in an isolated job with every broker reachable, the engine's subscription poll loops drop
+their Redis connections mid-run ("Connection closed by server" → `redis_instance` becomes None), so
+the pipeline never completes and nothing reaches the DLQ. This reproduces only in CI, not locally —
+filed upstream as proteanhq/protean#1055. CI therefore deselects this test with `-m "not engine"`;
+it runs under `make test` / `make test-loyalty`. The command-handler half is covered synchronously
+by `tests/loyalty/application/test_poison_command.py`.
 """
-
-import os
 
 import pytest
 import redis
@@ -64,13 +62,9 @@ def async_dlq_config():
 
 
 @pytest.mark.slow
+@pytest.mark.engine
 class TestDeadLetterQueue:
     def test_failing_handler_routes_to_dlq_then_replays(self, async_dlq_config):
-        if os.environ.get("CI"):
-            pytest.skip(
-                "Engine-driven DLQ test is unreliable under CI's shared single-Redis topology; "
-                "run it locally via `make test` / `make test-loyalty`."
-            )
         if not _broker_is_redis_streams():
             pytest.skip("DLQ exercise requires the Redis streams broker (run with --protean-env test)")
 

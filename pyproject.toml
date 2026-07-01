@@ -157,6 +157,7 @@ markers = [
     # domain, application, integration, slow, bdd are registered by Protean's pytest plugin
     "fast: Fast tests (excludes slow integration tests)",
     "bdd: behavior-driven tests",
+    "engine: drives a full Protean Engine; runs locally only — unreliable against CI's Redis (proteanhq/protean#1055), so CI deselects it with -m 'not engine'",
 ]
 filterwarnings = [
     "ignore::DeprecationWarning",
