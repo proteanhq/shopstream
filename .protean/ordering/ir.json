@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:588dc2f4cf24b35922e37329cb9578cc2210bcefcd70f47f2182966d98ad9396",
+  "checksum": "sha256:bb3ac8b7dfeae28e69be6bb176ee98537eb049be3a7750fb2a42f165d2b21943",
   "clusters": {
     "ordering.cart.cart.ShoppingCart": {
       "aggregate": {
@@ -3226,7 +3226,7 @@
       }
     }
   },
-  "generated_at": "2026-06-29T22:03:33Z",
+  "generated_at": "2026-07-02T21:23:57Z",
   "ir_version": "0.1.0",
   "projections": {
     "ordering.projections.abandoned_checkouts.AbandonedCheckout": {
@@ -3273,6 +3273,7 @@
         "name": "AbandonedCheckout",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -3373,6 +3374,7 @@
         "name": "CartView",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -3518,6 +3520,7 @@
         "name": "CustomerOrders",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -3690,6 +3693,7 @@
         "name": "DailyOrderStats",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -3882,6 +3886,7 @@
         "name": "OrderDetail",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -4055,6 +4060,7 @@
         "name": "OrderSummary",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -4228,6 +4234,7 @@
         "name": "OrderTimeline",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -4389,6 +4396,7 @@
         "name": "OrdersByStatus",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -4492,6 +4500,7 @@
         "name": "SuspendedAccount",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",

@@ -90,7 +90,7 @@ capabilities:
 
   - name: ir_backward_compat
     taught_by: .protean/   # committed IR baselines per domain
-    guarded_by: verification/contracts/test_ir_compat_gate.py   # to build (P14)
-    property: "IR diff flags breaking changes correctly"
+    guarded_by: verification/contracts/test_ir_gate.py   # + `make ir-gate` in CI
+    property: "IR diff flags breaking changes correctly (P14)"
     source: A
-    status: gap   # today `make ir-diff` ends in `|| true` and never fails CI
+    status: covered   # T0.2: strict config + make ir-gate + CI + negative test

@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:bec470c627a13ed278216d2e7a7405485a2fd1b959012299b35e852e66034554",
+  "checksum": "sha256:52c2c400f398aed1fab43b96f7786cb9883366f3ca64242f0377113a0628abdc",
   "clusters": {
     "catalogue.category.category.Category": {
       "aggregate": {
@@ -1879,7 +1879,7 @@
     "process_managers": {},
     "subscribers": {}
   },
-  "generated_at": "2026-06-29T22:03:33Z",
+  "generated_at": "2026-07-02T21:23:56Z",
   "ir_version": "0.1.0",
   "projections": {
     "catalogue.projections.category_products.CategoryProducts": {
@@ -1922,6 +1922,7 @@
         "name": "CategoryProducts",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -2058,6 +2059,7 @@
         "name": "CategoryTree",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -2181,6 +2183,7 @@
         "name": "PriceHistory",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -2295,6 +2298,7 @@
         "name": "ProductCard",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -2506,6 +2510,7 @@
         "name": "ProductDetail",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -2655,6 +2660,7 @@
         "name": "SellerCatalogue",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
