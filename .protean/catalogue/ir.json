@@ -399,15 +399,15 @@
             "default": "Draft",
             "kind": "status",
             "transitions": {
+              "Draft": [
+                "Active",
+                "Archived"
+              ],
               "Active": [
                 "Discontinued",
                 "Archived"
               ],
               "Discontinued": [
-                "Active",
-                "Archived"
-              ],
-              "Draft": [
                 "Active",
                 "Archived"
               ]
@@ -1879,7 +1879,7 @@
     "process_managers": {},
     "subscribers": {}
   },
-  "generated_at": "2026-07-02T19:30:55Z",
+  "generated_at": "2026-07-02T21:23:56Z",
   "ir_version": "0.1.0",
   "projections": {
     "catalogue.projections.category_products.CategoryProducts": {

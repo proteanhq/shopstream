@@ -278,13 +278,13 @@ domain-check-loyalty: ## Run protean check on loyalty domain
 ir: ## Generate IR (intermediate representation) for all domains
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		mkdir -p .protean/$$d; \
-		PYTHONPATH=src uv run protean ir show --domain=$$d.domain > .protean/$$d/ir.json; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean ir show --domain=$$d.domain > .protean/$$d/ir.json; \
 		echo "✓ $$d"; \
 	done
 
 ir-summary: ## Show IR summary for all domains
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
-		PYTHONPATH=src uv run protean ir show --domain=$$d.domain --format=summary; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean ir show --domain=$$d.domain --format=summary; \
 		echo ""; \
 	done
 
@@ -305,14 +305,14 @@ docs-generate: ## Generate domain documentation (diagrams + event catalog)
 ir-check: ## Check staleness of materialized IR for all domains
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		printf "$$d: "; \
-		PYTHONPATH=src uv run protean ir check --domain=$$d.domain --dir=.protean/$$d 2>&1 | head -1; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean ir check --domain=$$d.domain --dir=.protean/$$d 2>&1 | head -1; \
 	done
 
 ir-diff: ## Diff live IR against saved baselines (.protean/<domain>/ir.json)
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		if [ -f .protean/$$d/ir.json ]; then \
 			echo "=== $$d ==="; \
-			PYTHONPATH=src uv run protean ir diff --domain=$$d.domain --dir=.protean/$$d 2>&1 || true; \
+			PYTHONPATH=src PROTEAN_ENV=memory uv run protean ir diff --domain=$$d.domain --dir=.protean/$$d 2>&1 || true; \
 			echo ""; \
 		else \
 			echo "=== $$d === (no baseline, run 'make ir' first)"; \
@@ -324,7 +324,7 @@ ir-gate: ## CI gate — fail on a BREAKING IR change vs the committed baseline (
 	PYTHONPATH=src uv run python -c 'import importlib.metadata as m; d=m.distribution("protean"); print(d.version, (d.read_text("direct_url.json") or "").strip())'
 	@fail=0; \
 	for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
-		out=$$(PYTHONPATH=src uv run protean --log-level ERROR ir diff --domain=$$d.domain --dir=.protean/$$d 2>&1); \
+		out=$$(PYTHONPATH=src PROTEAN_ENV=memory uv run protean --log-level ERROR ir diff --domain=$$d.domain --dir=.protean/$$d 2>&1); \
 		code=$$?; \
 		if [ $$code -eq 0 ]; then echo "ok: $$d"; \
 		elif [ $$code -eq 2 ]; then echo "note: non-breaking IR change in $$d (baseline behind; run 'make ir')"; \

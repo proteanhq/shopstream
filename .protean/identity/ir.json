@@ -74,16 +74,16 @@
             "default": "Standard",
             "kind": "status",
             "transitions": {
-              "Gold": [
+              "Standard": [
+                "Silver",
+                "Gold",
                 "Platinum"
               ],
               "Silver": [
                 "Gold",
                 "Platinum"
               ],
-              "Standard": [
-                "Silver",
-                "Gold",
+              "Gold": [
                 "Platinum"
               ]
             },
@@ -1384,7 +1384,7 @@
     "process_managers": {},
     "subscribers": {}
   },
-  "generated_at": "2026-07-02T19:30:54Z",
+  "generated_at": "2026-07-02T21:23:56Z",
   "ir_version": "0.1.0",
   "projections": {
     "identity.projections.address_book.AddressBook": {
