@@ -45,10 +45,16 @@ whether it gates PRs / nightly / releases.
 - Deferred: the `[verification]` optional dependency group — the suite uses no
   heavy tools yet; add it when Phase 2 introduces schemathesis/Toxiproxy.
 
-**T0.5 - Fix loyalty's false docstrings** `[-]`
-- `src/loyalty/domain.py` claims a second saga, `Auto`-increment IDs, and a custom
-  database model that do not exist. Remove the claims or implement them.
-- Reconcile `PROTEAN_COVERAGE.md` so "covered" means "has a real test."
+**T0.5 - Fix loyalty's false docstrings** `[-]` - DONE (resolved by the loyalty buildout)
+- The previously-false claims are now implemented and tested: the second saga
+  (`redemption/saga.py`, PRs #16 — 3 tests) and the custom database model
+  (`projections/reward_account_view_model.py`, PR #25 — `test_custom_database_model.py`).
+  `Auto(increment)` is no longer claimed in the docstring (it's honestly listed as
+  a follow-up in `PROTEAN_COVERAGE.md`, tied to proteanhq/protean#1056).
+- Verified every `src/loyalty/domain.py` docstring claim maps to real code + a test.
+- `PROTEAN_COVERAGE.md` is honest: deferred items and their Protean issues (#1048,
+  #1056) are documented transparently, no overclaims.
+- The durable guard against doc drift is T1.6 (generate docs from the IR).
 
 ---
 
