@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:30015cd6a25388d2b2725e6ef3ba6c577a34c1247c4f8e8fa9ba8569b33970bd",
+  "checksum": "sha256:02a1e3a53f12f11c9a418bc19698b727a50f962290a4bcc1784cff98447a1d0a",
   "clusters": {
     "reviews.review.review.Review": {
       "aggregate": {
@@ -1393,7 +1393,7 @@
       }
     }
   },
-  "generated_at": "2026-07-02T21:23:57Z",
+  "generated_at": "2026-07-02T22:27:04Z",
   "ir_version": "0.1.0",
   "projections": {
     "reviews.projections.customer_reviews.CustomerReviews": {
@@ -1680,6 +1680,11 @@
             "default": 0.0,
             "kind": "standard",
             "type": "Float"
+          },
+          "counted_reviews": {
+            "default": "<callable>",
+            "kind": "dict",
+            "type": "Dict"
           },
           "product_id": {
             "identifier": true,

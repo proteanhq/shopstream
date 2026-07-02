@@ -37,7 +37,7 @@ capabilities:
     guarded_by: verification/oracles/test_p20_projector_idempotency.py
     property: "delivering one event N times == delivering it once (P20)"
     source: A
-    status: partial   # check exists and is xfail (real bug); fix projector to close
+    status: covered   # T0.3: projector made idempotent; P20 check passes
 
   - name: outbox_dual_write
     taught_by: src/payments/domain.toml   # external_brokers = ["global"]

@@ -20,10 +20,10 @@ WHY THIS CHECK IS DIFFERENT FROM "projection == fold(events)"
     point - it can catch a bug the convergence check is blind to.
 
 STATUS
-    Expected to FAIL today: ProductRatingProjector does total_reviews += 1 on
-    every delivery (reviews/projections/product_rating.py:56). Marked xfail so
-    the suite stays green; when the projector is made idempotent this test will
-    pass, xfail(strict=True) will flag it, and the marker should be removed.
+    Passing: ProductRatingProjector records which reviews it has counted
+    (counted_reviews) and treats a redelivered ReviewApproved as a no-op
+    (ticket T0.3). The framework-level fix (consume-side dedup) is separate:
+    proteanhq/protean#1042.
 
 RUN (no Docker):
     .venv/bin/python -m pytest \
@@ -61,16 +61,6 @@ def _submit_and_approve(product_id: str, rating: int = 5) -> str:
 
 
 @pytest.mark.usefixtures("reviews_ctx")
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "P20 gap: ProductRatingProjector.on_review_approved is not idempotent "
-        "(total_reviews += 1 per delivery). Protean has no consume-side event "
-        "dedup and delivery is at-least-once, so a redelivered ReviewApproved "
-        "double-counts. Fix: upsert by (product_id, review_id) or add framework "
-        "idempotency. See VERIFICATION_STRATEGY.md (P20) and the Protean gap issue."
-    ),
-)
 def test_product_rating_projector_is_idempotent_under_redelivery():
     product_id = "prod-p20"
     review_id = _submit_and_approve(product_id)

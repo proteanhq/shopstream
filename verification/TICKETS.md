@@ -29,11 +29,13 @@ whether it gates PRs / nightly / releases.
   reverting to `warn`).
 - Baselines refreshed to current Protean main in the same change.
 
-**T0.3 - P20 same-event-twice check** `[A]` `[gate]` - DONE (prototype)
-- `verification/oracles/test_p20_projector_idempotency.py` exists and is xfail.
-- Follow-up: make `ProductRatingProjector` idempotent (upsert by
-  (product_id, review_id), or guard on already-seen review), then remove the
-  xfail. Extend the check to the other accumulating projectors.
+**T0.3 - P20 same-event-twice check** `[A]` `[gate]` - DONE
+- `verification/oracles/test_p20_projector_idempotency.py` — the check.
+- `ProductRatingProjector` made idempotent: it records counted reviews
+  (`counted_reviews`) and treats a redelivered event as a no-op; stats are
+  derived from that set. The xfail is removed — the check now passes.
+- The framework-level fix (consume-side dedup) is separate: proteanhq/protean#1042.
+- Follow-up: extend the same check to the other accumulating projectors.
 
 **T0.4 - Set up the `verification/` tree and the `src/` lint** `[-]`
 - Add a `[verification]` optional dependency group (Hypothesis, schemathesis,
