@@ -33,6 +33,9 @@ jobs:
       - name: Run linting
         run: uv run ruff check src/ tests/ verification/
 
+      - name: Reference code is test-tool free
+        run: make check-src-clean
+
       - name: IR backward-compatibility gate
         run: make ir-gate
 
