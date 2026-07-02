@@ -223,6 +223,15 @@ test-watch: ## Run tests in watch mode
 lint: ## Run linting with ruff
 	uv run ruff check src/ tests/
 
+check-src-clean: ## Fail if reference code (src/) imports test/verification-only tools
+	@bad=$$(grep -rnE '^[[:space:]]*(import|from)[[:space:]]+(pytest|hypothesis|schemathesis|toxiproxy)([[:space:].]|$$)' src/ || true); \
+	if [ -n "$$bad" ]; then \
+		echo "$$bad"; echo ""; \
+		echo "src/ (reference code) must not import test/verification tools — move it to tests/ or verification/."; \
+		exit 1; \
+	fi; \
+	echo "src/ is clean (no test-tool imports)"
+
 format: ## Format code with ruff
 	uv run ruff format src/ tests/
 

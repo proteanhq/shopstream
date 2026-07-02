@@ -35,11 +35,13 @@ whether it gates PRs / nightly / releases.
   (product_id, review_id), or guard on already-seen review), then remove the
   xfail. Extend the check to the other accumulating projectors.
 
-**T0.4 - Set up the `verification/` tree and the `src/` lint** `[-]`
-- Add a `[verification]` optional dependency group (Hypothesis, schemathesis,
-  Toxiproxy client, etc.) so the normal test run does not pull them in.
-- Add a CI lint (import-linter or a grep) that fails if anything under `src/`
-  imports a test/fault tool. Keeps the reference code clean.
+**T0.4 - Set up the `verification/` tree and the `src/` lint** `[-]` - DONE
+- The `verification/` tree exists (oracles/, contracts/, conftest).
+- `make check-src-clean` fails if reference code (`src/`) imports a
+  test/verification tool (pytest/hypothesis/schemathesis/toxiproxy); wired into
+  CI ("Reference code is test-tool free"). Verified it catches a violation.
+- Deferred: the `[verification]` optional dependency group — the suite uses no
+  heavy tools yet; add it when Phase 2 introduces schemathesis/Toxiproxy.
 
 **T0.5 - Fix loyalty's false docstrings** `[-]`
 - `src/loyalty/domain.py` claims a second saga, `Auto`-increment IDs, and a custom
