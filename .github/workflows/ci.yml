@@ -31,10 +31,16 @@ jobs:
         run: uv sync --all-extras --all-groups
 
       - name: Run linting
-        run: uv run ruff check src/ tests/
+        run: uv run ruff check src/ tests/ verification/
+
+      - name: IR backward-compatibility gate
+        run: make ir-gate
 
       - name: Run all tests (memory mode)
         run: uv run pytest --protean-env memory -m "not engine"
+
+      - name: Run verification checks
+        run: uv run pytest verification/ --protean-env memory -m "not engine"
 
   test:
     runs-on: ubuntu-latest

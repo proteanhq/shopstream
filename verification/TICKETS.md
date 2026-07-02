@@ -19,12 +19,15 @@ whether it gates PRs / nightly / releases.
 - Done when: 3 existing async tests are rewritten to use it and the `time.sleep`
   calls in `loadtests/` and integration tests are removed.
 
-**T0.2 - Turn the IR diff into a real gate** `[A/C]` `[gate]`
-- Remove the `|| true` from `make ir-diff` (Makefile:315); set strictness to
-  `strict`; add a CI step that fails on a breaking IR change.
-- Add one negative test: dropping a `published` event without deprecation must
-  make the check fail.
-- Done when: a deliberate breaking change fails CI; a safe additive change passes.
+**T0.2 - Turn the IR diff into a real gate** `[A/C]` `[gate]` - DONE
+- `.protean/config.toml` strictness set to `strict` (breaking changes now exit 1).
+- New `make ir-gate` target fails on a breaking IR change vs the committed
+  baseline (non-breaking drift is a note, not a failure).
+- CI (`.github/workflows/ci.yml`) runs `make ir-gate` on every push.
+- Negative test `verification/contracts/test_ir_gate.py` proves a breaking
+  removal exits 1 and no-change exits 0 (guards against strictness silently
+  reverting to `warn`).
+- Baselines refreshed to current Protean main in the same change.
 
 **T0.3 - P20 same-event-twice check** `[A]` `[gate]` - DONE (prototype)
 - `verification/oracles/test_p20_projector_idempotency.py` exists and is xfail.

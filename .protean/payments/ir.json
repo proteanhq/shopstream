@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:473a6ec492be4a4f40658e43290502420376a75f5d1298c40eeeed9afdd2e958",
+  "checksum": "sha256:d647c7c1a63ccebd6d89e9b1526c00135a5560f8c4f577a92d25dcd06c820521",
   "clusters": {
     "payments.invoice.invoice.Invoice": {
       "aggregate": {
@@ -1673,7 +1673,7 @@
       }
     }
   },
-  "generated_at": "2026-06-30T21:05:49Z",
+  "generated_at": "2026-07-02T19:30:58Z",
   "ir_version": "0.1.0",
   "projections": {
     "payments.projections.customer_payments.CustomerPayment": {
@@ -1738,6 +1738,7 @@
         "name": "CustomerPayment",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -1833,6 +1834,7 @@
         "name": "DailyRevenue",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -1929,6 +1931,7 @@
         "name": "FailedPayment",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -2040,6 +2043,7 @@
         "name": "InvoiceStatusView",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -2161,6 +2165,7 @@
         "name": "PaymentStatusView",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -2305,6 +2310,7 @@
         "name": "RefundReport",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",

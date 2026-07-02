@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:aa5a2db1514085c212810d69f833ee1cc3eaf31c92649628931aabe286ca9d6c",
+  "checksum": "sha256:bd29e9221040d6e3fccfab71393c2b46d4e2c73c410482fa49ad557111fe46ee",
   "clusters": {
     "notifications.notification.notification.Notification": {
       "aggregate": {
@@ -1367,7 +1367,7 @@
       }
     }
   },
-  "generated_at": "2026-06-30T18:44:42Z",
+  "generated_at": "2026-07-02T19:31:00Z",
   "ir_version": "0.1.0",
   "projections": {
     "notifications.projections.customer_notifications.CustomerNotifications": {
@@ -1431,6 +1431,7 @@
         "name": "CustomerNotifications",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -1538,6 +1539,7 @@
         "name": "CustomerPreferences",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -1646,6 +1648,7 @@
         "name": "FailedNotifications",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -1790,6 +1793,7 @@
         "name": "NotificationLog",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",
@@ -1895,6 +1899,7 @@
         "name": "NotificationStats",
         "options": {
           "cache": null,
+          "externally_populated": false,
           "limit": 100,
           "order_by": [],
           "provider": "default",

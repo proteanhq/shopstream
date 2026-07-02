@@ -1,5 +1,5 @@
 [compatibility]
-strictness = "warn"
+strictness = "strict"
 
 [staleness]
 enabled = true
