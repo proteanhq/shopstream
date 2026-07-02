@@ -11,13 +11,20 @@ whether it gates PRs / nightly / releases.
 
 ## Phase 0 - foundation (do first)
 
-**T0.1 - `process_and_wait(command)` helper** `[A]` `[gate]`
-- Build a helper in `protean.testing` (upstream) and use it in ShopStream: send a
-  command, block until the outbox drains and projectors catch up, return the HTTP
-  response + the events that fired + any handler error.
-- Sync/instant in memory mode; real polling in Docker mode; same test code.
-- Done when: 3 existing async tests are rewritten to use it and the `time.sleep`
-  calls in `loadtests/` and integration tests are removed.
+**T0.1 - `process_and_wait(command)` helper** `[A]` `[gate]` - DONE (local seed; upstream filed)
+- `verification/support/processing.py` ships `process_and_wait(command, domain)`
+  and the `drain(domain, until=...)` primitive under it. Same test body works
+  whether events fire inline (sync: memory/test env) or via a background engine
+  (async): sync returns as soon as the handler does; async drains the engine.
+- Sync contract is covered end to end in CI (`verification/support/test_processing.py`,
+  memory mode); the async control flow (cycle count, early stop, max-cycle bound,
+  sync-vs-async branching) is covered there too with a stubbed engine. The real
+  engine path is exercised by the DLQ test, now refactored onto `drain`
+  (`tests/loyalty/integration/test_dlq.py`) — validated locally against Redis.
+- The richer version — one that also returns the events that fired and any
+  handler error without reaching into framework internals — belongs in
+  `protean.testing`. Filed upstream as proteanhq/protean#1065. When it lands,
+  swap this seed for it and migrate the remaining `loadtests/` `time.sleep`s.
 
 **T0.2 - Turn the IR diff into a real gate** `[A/C]` `[gate]` - DONE
 - `.protean/config.toml` strictness set to `strict` (breaking changes now exit 1).
