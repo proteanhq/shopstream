@@ -28,8 +28,13 @@ for _p in (_REPO, os.path.join(_REPO, "src")):
 _INITED = False
 
 
-def _domain(env: str, disable_version_retry: bool):
-    """Init the inventory domain once per worker process."""
+def _domain(env: str, retry_config: dict | None):
+    """Init the inventory domain once per worker process.
+
+    `retry_config` overrides `server.version_retry` for this process — the oracle
+    uses it to run with generous retries (liveness) or with retry disabled
+    (falsification). `None` leaves the shipped defaults untouched.
+    """
     global _INITED
     os.environ["PROTEAN_ENV"] = env
     from inventory.domain import inventory
@@ -37,9 +42,9 @@ def _domain(env: str, disable_version_retry: bool):
     if not _INITED:
         inventory.init()
         _INITED = True
-    if disable_version_retry:
+    if retry_config is not None:
         server = inventory.config.setdefault("server", {})
-        server.setdefault("version_retry", {})["enabled"] = False
+        server.setdefault("version_retry", {}).update(retry_config)
     return inventory
 
 
@@ -52,8 +57,8 @@ def reserve_once(args):
       "insufficient"         - stock genuinely exhausted (ValidationError)
       "<ExceptionName>"      - anything unexpected (surfaces as a test failure)
     """
-    env, item_id, order_id, barrier, disable_version_retry = args
-    inventory = _domain(env, disable_version_retry)
+    env, item_id, order_id, barrier, retry_config = args
+    inventory = _domain(env, retry_config)
 
     from protean.exceptions import ExpectedVersionError, ValidationError
 
