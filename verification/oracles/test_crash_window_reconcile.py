@@ -131,17 +131,14 @@ def test_crash_leaves_event_durable_but_unpublished():
     assert _internal_received_rows(current_domain, item_id) == []
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "proteanhq/protean#1073: reconcile_outbox is a no-op against Message-DB "
-        "because read_last_message('$all') returns None, so the outbox row lost in "
-        "the crash window is never restored. Remove xfail when the fix lands."
-    ),
-)
 @pytest.mark.usefixtures("inventory_ctx")
 def test_reconcile_restores_the_lost_outbox_row():
-    """P21: reconciliation must recreate the outbox row so the event still publishes."""
+    """P21 (guard): reconciliation recreates the outbox row so the event still publishes.
+
+    Was xfail while reconcile_outbox no-op'd against Message-DB (proteanhq/protean#1073,
+    read_last_message("$all") returned None); the pin bump to Protean main landed the
+    fix, so this is now a permanent guard.
+    """
     from protean import current_domain
     from protean.utils.outbox import reconcile_outbox
 

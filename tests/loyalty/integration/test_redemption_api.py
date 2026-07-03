@@ -1,8 +1,8 @@
 """Integration tests for the Loyalty redemption API endpoints via TestClient.
 
 Processing ``RequestRedemption`` synchronously starts the RedemptionSaga, which reserves
-points and records the redemption. Full saga completion needs sync PM cascade
-(proteanhq/protean#1048), so the end-to-end completion check is ``xfail`` until that lands.
+points, records the redemption, and — since multi-step process managers cascade under
+``event_processing="sync"`` (proteanhq/protean#1048 fixed) — runs it through to completion.
 """
 
 import pytest
@@ -39,17 +39,12 @@ class TestRedemptionEndpoints:
 
         view = client.get(f"/loyalty/redemptions/{redemption_id}").json()
         assert view["points"] == 150
-        assert view["status"] in ("requested", "points_reserved")
+        assert view["status"] == "completed"  # saga cascades synchronously
 
-        # The saga's reserve step spent the points on the account.
+        # The saga spent the points on the account.
         account = client.get(f"/loyalty/accounts/{account_id}").json()
         assert account["points_balance"] == 350
 
-    @pytest.mark.xfail(
-        reason="proteanhq/protean#1048 — multi-step process managers don't cascade under "
-        "event_processing=sync; the redemption stops before 'completed'. Flip when fixed.",
-        strict=True,
-    )
     def test_request_drives_saga_to_completion(self, client):
         account_id = _funded_account(client, customer_id="cust-redeem-api-done", points=500)
         resp = client.post(

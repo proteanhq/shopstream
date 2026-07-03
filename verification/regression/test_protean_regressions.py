@@ -69,18 +69,13 @@ def test_1039_event_datetime_serialized_as_iso_utc():
     ENV == "test",
     reason="#1071 is about the in-memory adapter; the relational path is covered by test_outbox_exactly_once",
 )
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "proteanhq/protean#1071 is fixed upstream but not yet in ShopStream's Protean "
-        "pin: the in-memory adapter still accepts a duplicate that violates a "
-        "unique index. This is an UPGRADE TRIPWIRE — it flips (xpass) once the pin "
-        "is bumped, at which point drop the marker and the outbox oracle's memory skip."
-    ),
-)
 @pytest.mark.usefixtures("loyalty_ctx")
 def test_1071_memory_adapter_enforces_unique_index():
-    """proteanhq/protean#1071: the in-memory adapter must enforce Index(unique=True)."""
+    """proteanhq/protean#1071 (guard): the in-memory adapter enforces Index(unique=True).
+
+    Was a tripwire (xfail) while the fix was upstream-only; the pin bump to Protean
+    main (#1074) landed it, so this is now a permanent guard against regression.
+    """
     from protean import current_domain
     from protean.utils.outbox import Outbox
 

@@ -23,10 +23,12 @@ WHY THIS IS A TYPE-A ORACLE (see VERIFICATION_STRATEGY.md section 2)
     a duplicate row could not hide it.
 
 WHY THE DUPLICATE CHECK IS POSTGRES-ONLY
-    The in-memory adapter does not enforce `Index(unique=True)` — a duplicate
-    insert is silently accepted there. So the schema-teeth half runs only
-    against a real relational store (`--protean-env test`). The dual-write shape
-    check is adapter-independent and runs everywhere.
+    This half asserts the specific relational failure — `sqlalchemy.exc.
+    IntegrityError`. The in-memory adapter now enforces the unique index too (since
+    proteanhq/protean#1074), but rejects with a Protean `ValidationError`, not the
+    SQLAlchemy type; that memory-enforcement path is guarded by
+    `regression/test_1071_memory_adapter_enforces_unique_index`. The dual-write
+    shape check is adapter-independent and runs everywhere.
 
 RUN:
     make docker-up && make setup-db      # once
@@ -82,7 +84,7 @@ def test_published_event_dual_written_exactly_once():
 
 @pytest.mark.skipif(
     ENV != "test",
-    reason="unique-index enforcement needs a real relational store (memory adapter ignores it)",
+    reason="asserts the relational sqlalchemy IntegrityError; memory enforces too but raises a Protean error (see test_1071)",
 )
 @pytest.mark.usefixtures("loyalty_ctx")
 def test_duplicate_outbox_row_is_rejected_by_the_database():

@@ -75,9 +75,10 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 
 ## Protean bugs surfaced (filed; milestone 0.16.1)
 
-This branch pins Protean to git `main`. #1023/#1025/#1028/#1034/#1046 are fixed there; #1048
-(milestone 0.17.0) is awaiting a fix — the loyalty `RedemptionSaga` completion tests are `xfail`'d
-against it (the saga runs to completion under the engine; only synchronous cascade is affected).
+This branch pins Protean to git `main`. #1023/#1025/#1028/#1034/#1046 are fixed there, and the
+pin was bumped to Protean main `c79c497`, which also lands #1048 (sync PM cascade) and #1056
+(Auto-increment) — the loyalty `RedemptionSaga` now cascades to completion synchronously and its
+completion tests are permanent guards (no longer `xfail`).
 
 | Issue | Status | Summary |
 |---|---|---|
@@ -86,22 +87,20 @@ against it (the saga runs to completion under the engine; only synchronous casca
 | [#1028](https://github.com/proteanhq/protean/issues/1028) | ✅ fixed on main | bulk `create_snapshots()` failed for `fact_events=True` aggregates (`-fact-` streams mistaken for instances) |
 | [#1034](https://github.com/proteanhq/protean/issues/1034) | ✅ fixed on main | cache-backed projection broke SQLAlchemy DB setup (`_create_database_artifacts` didn't skip cache projections); loyalty now runs in the Postgres CI job too |
 | [#1046](https://github.com/proteanhq/protean/issues/1046) | ✅ fixed on main | a `Date` field on a command/event broke the message checksum (`ResolvedField.as_dict` had no `date` branch → `json.dumps` raised); campaign date windows now work end-to-end |
-| [#1048](https://github.com/proteanhq/protean/issues/1048) | 🐞 filed (0.17.0) | multi-step process managers don't cascade under `event_processing="sync"` — re-entrant dispatch runs the next step before the start transition is persisted, so the PM can't load its own in-flight instance; loyalty `RedemptionSaga` completion tests (`xfail`) |
+| [#1048](https://github.com/proteanhq/protean/issues/1048) | ✅ fixed on main | multi-step process managers now cascade under `event_processing="sync"`; loyalty `RedemptionSaga` runs to a terminal state synchronously (completion/compensation tests are guards) |
 | [#1055](https://github.com/proteanhq/protean/issues/1055) | 🐞 filed (0.17.0) | `Engine(test_mode=True).run()` against a Redis broker is unreliable in CI — the engine's async poll loops drop their (sync) Redis connections mid-read (`Connection closed by server` → `redis_instance` becomes `None`), so the async pipeline never completes. Reproduces only in CI, not locally. The loyalty DLQ test (`@pytest.mark.engine`) runs **locally only**; **revisit when #1055 is fixed** — then re-add an engine CI job (deselected today via `-m "not engine"`) |
-| [#1056](https://github.com/proteanhq/protean/issues/1056) | 🐞 filed (0.17.0) | `repository.add()` doesn't reflect an `Auto(increment=True)` generated value back onto the aggregate (stays `None`) though it is generated + persisted; only `dao.create()` does. `BaseDAO.save()` drops `_create()`'s return and omits the reverse-update that `create()` has. Makes auto-increment identities unusable via the repository. **Add a loyalty exerciser + regression test when fixed** |
+| [#1056](https://github.com/proteanhq/protean/issues/1056) | ✅ fixed on main | `repository.add()` now reflects an `Auto(increment=True)` generated value back onto the aggregate (the in-memory provider reflects it; relational adapters assign it). ShopStream has no `increment=True` usage to exercise it |
 
 Minor DX note (not filed): `repository_for()` gives a confusing `provider=None` error for cache-backed
 projections — the working API is `cache_for().add()` / `view_for().get()`.
 
-Process-manager note ([#1048](https://github.com/proteanhq/protean/issues/1048), milestone 0.17.0):
-under `event_processing="sync"` a multi-step PM does not cascade — a later handler re-enters (nested
-command dispatch) *before* the start handler's transition event is persisted, so it can't load the
-in-flight instance and is skipped (and the same depth-first ordering can run a nested event's
-projector before the originating event's). The `RedemptionSaga` therefore advances only to
-`points_reserved` synchronously; its full forward + compensation logic is covered by `given()` unit
-tests, and its synchronous end-to-end completion tests are `xfail` against #1048 (they flip when it
-lands). The `RedemptionView` projector tolerates the out-of-order delivery (skips a transition whose
-view does not exist yet).
+Process-manager note ([#1048](https://github.com/proteanhq/protean/issues/1048), fixed on main):
+multi-step PMs now cascade under `event_processing="sync"` — the start transition is persisted
+before the next step re-enters, so the PM loads its own in-flight instance, and a nested event's
+projector runs after the originating event's. The `RedemptionSaga` runs reserve → issue → complete
+(or compensates on voucher failure) in a single synchronous pass; its forward + compensation logic
+is covered by `given()` unit tests and by end-to-end completion tests (now permanent guards, not
+`xfail`). The `RedemptionView` projector still tolerates redelivery idempotently.
 
 ## Follow-ups (need design or infrastructure)
 

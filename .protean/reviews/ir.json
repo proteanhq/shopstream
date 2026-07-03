@@ -1393,7 +1393,6 @@
       }
     }
   },
-  "generated_at": "2026-07-02T22:27:04Z",
   "ir_version": "0.1.0",
   "projections": {
     "reviews.projections.customer_reviews.CustomerReviews": {
