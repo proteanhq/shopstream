@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:cb1e8d41fa0cb9d25c2fded8dac0c72ea78aba37036259aa4bb59c12ddf1ffdb",
+  "checksum": "sha256:4b08d917afc98bcfc1de6aee42cd46595429a86daf472cc426fdafb5321412c5",
   "clusters": {
     "fulfillment.fulfillment.fulfillment.Fulfillment": {
       "aggregate": {
@@ -1510,7 +1510,7 @@
   "domain": {
     "camel_case_name": "Fulfillment",
     "command_processing": "sync",
-    "event_processing": "async",
+    "event_processing": "sync",
     "identity_strategy": "uuid",
     "identity_type": "string",
     "name": "fulfillment",

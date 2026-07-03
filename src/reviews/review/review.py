@@ -81,7 +81,22 @@ class ModerationAction(Enum):
 # ---------------------------------------------------------------------------
 @reviews.value_object(part_of="Review")
 class Rating:
-    """A star rating from 1 to 5."""
+    """A star rating from 1 to 5.
+
+    Examples:
+        >>> Rating(score=5).score
+        5
+        >>> try:
+        ...     Rating(score=0)
+        ... except ValidationError:
+        ...     print("below range rejected")
+        below range rejected
+        >>> try:
+        ...     Rating(score=6)
+        ... except ValidationError:
+        ...     print("above range rejected")
+        above range rejected
+    """
 
     score = Integer(required=True)
 

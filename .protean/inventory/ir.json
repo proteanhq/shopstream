@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:b45cdd31c7b633f07bdcbe2d2f511e2a0a6fd5d2784832f5857b1caa619d6c1b",
+  "checksum": "sha256:c614fcca31dddab90730224469be398e74bbf2884ffe5e8619ccfe2bcba67b5b",
   "clusters": {
     "inventory.stock.stock.InventoryItem": {
       "aggregate": {
@@ -2159,7 +2159,7 @@
   "domain": {
     "camel_case_name": "Inventory",
     "command_processing": "sync",
-    "event_processing": "async",
+    "event_processing": "sync",
     "identity_strategy": "uuid",
     "identity_type": "string",
     "name": "inventory",
