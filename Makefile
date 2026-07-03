@@ -539,6 +539,21 @@ clean: ## Clean up generated files
 	find . -type d -name "build" -exec rm -rf {} + 2>/dev/null || true
 
 # ──────────────────────────────────────────────
+# API Fuzzing (schemathesis) — T2.4, shallow contract/500 bugs
+# Runs against the RUNNING stack (make api + engines). Not part of CI.
+# See verification/fuzz/README.md.
+# ──────────────────────────────────────────────
+fuzz-install: ## Install schemathesis into the venv (opt-in; no lock change, to avoid drifting the git-pinned protean)
+	uv pip install 'schemathesis>=4,<5'
+
+fuzz: ## Fuzz the live API for server errors (500s). Requires: freshly provisioned stack + make api (+ engines) up.
+	.venv/bin/schemathesis run http://localhost:8000/openapi.json \
+		--checks not_a_server_error --max-examples 20 --workers 4
+
+fuzz-full: ## Full fuzz: all checks (server errors + schema conformance + undocumented status codes)
+	.venv/bin/schemathesis run http://localhost:8000/openapi.json --max-examples 20 --workers 4
+
+# ──────────────────────────────────────────────
 # Load Testing
 # ──────────────────────────────────────────────
 loadtest-install: ## Install load testing dependencies

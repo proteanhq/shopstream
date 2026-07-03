@@ -4,7 +4,7 @@ Each route translates between Pydantic schemas (external contract) and
 Protean commands (internal domain concepts).
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from protean.utils.globals import current_domain
 
 from reviews.api.schemas import (
@@ -49,8 +49,8 @@ async def get_product_rating(product_id: str) -> ProductRatingResponse:
 @review_router.get("/customer/{customer_id}", response_model=PaginatedResponse)
 async def list_customer_reviews(
     customer_id: str,
-    page: int = 1,
-    page_size: int = 20,
+    page: int = Query(1, ge=1, le=1_000_000),
+    page_size: int = Query(20, ge=1, le=100),
 ) -> PaginatedResponse:
     """List all reviews by a customer."""
     from reviews.projections.customer_reviews_queries import ListCustomerReviews
@@ -85,8 +85,8 @@ async def get_review_detail(review_id: str) -> ReviewDetailResponse:
 @review_router.get("", response_model=PaginatedResponse)
 async def list_product_reviews(
     product_id: str,
-    page: int = 1,
-    page_size: int = 20,
+    page: int = Query(1, ge=1, le=1_000_000),
+    page_size: int = Query(20, ge=1, le=100),
 ) -> PaginatedResponse:
     """List published reviews for a product."""
     from reviews.projections.product_reviews_queries import ListProductReviews

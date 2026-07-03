@@ -277,9 +277,30 @@ whether it gates PRs / nightly / releases.
   `[development]` overlay → base config, `_local` DBs) with the stack up. Validated
   locally: 3/3 stable runs.
 
-**T2.4 - schemathesis API fuzzing** `[A]` `[nightly]`
-- `schemathesis run http://localhost:8000/openapi.json` with OpenAPI links for
-  write-then-read flows. Quick to add, finds shallow contract/500 bugs.
+**T2.4 - schemathesis API fuzzing** `[A]` `[nightly]` - DONE (harness + 1 bug fixed, 1 filed)
+- Harness: `make fuzz` (server errors only) / `make fuzz-full`, `make fuzz-install`,
+  documented in `verification/fuzz/README.md`. schemathesis runs against the live
+  stack (140 operations, ~3.3k cases). Nightly/local — needs the running stack and
+  a freshly provisioned DB (a stale schema yields provisioning-artifact 500s).
+- schemathesis is installed via `uv pip install` (venv only), NOT added to
+  `[dependency-groups]`, because a `uv lock` would re-resolve protean's `rev=main`
+  pin and silently bump it off the committed commit. The deferred `[verification]`
+  group (T0.4) lands with a separate lock refresh.
+- **Bug found + FIXED here — pagination overflow → 500.** List endpoints
+  (`GET /orders`, `/products`, `/reviews`, `/reviews/customer/{id}`) took unbounded
+  `page`/`page_size`; a huge `page × page_size` overflowed Postgres `bigint`
+  (`offset = (page-1)*page_size`) → `NumericValueOutOfRange` → 500. Fixed with
+  FastAPI `Query` bounds (`page` 1..1_000_000, `page_size` 1..100) → 422. Verified
+  against the live API (previously-500 cases now 422; normal pagination still 200).
+- **Finding filed (not fixed) — `Dict()` projection field gets no DB column.**
+  `reviews.ProductRating.counted_reviews = Dict()` is materialized WITHOUT a column
+  by `protean db setup`, so `GET /reviews/ratings/{id}` 500s with `UndefinedColumn`.
+  Reproduces on a freshly provisioned DB → a real Protean schema-generation gap for
+  `Dict` projection fields, not a stale-env artifact. Candidate upstream issue.
+- Lower priority (deferred): 148 "undocumented status code" + 70 "schema-compliant
+  rejected" findings = the OpenAPI spec under-documents 4xx responses (doc gap, not
+  crashes). The "write-then-read via OpenAPI links" idea needs the schema to define
+  `links` first; deferred with the doc work.
 
 **T2.5 - Adapter conformance (push upstream)** `[A]` `[nightly]`
 - A small set of declarative behavior cases run across memory/postgres/sqlite and
