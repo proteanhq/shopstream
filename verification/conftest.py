@@ -27,3 +27,19 @@ def reviews_bed():
 def reviews_ctx(reviews_bed):
     with reviews_bed.domain_context():
         yield
+
+
+@pytest.fixture(scope="session")
+def loyalty_bed():
+    from loyalty.domain import loyalty
+
+    bed = DomainFixture(loyalty)
+    bed.setup()
+    yield bed
+    bed.teardown()
+
+
+@pytest.fixture()
+def loyalty_ctx(loyalty_bed):
+    with loyalty_bed.domain_context():
+        yield

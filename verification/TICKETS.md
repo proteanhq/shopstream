@@ -85,10 +85,19 @@ whether it gates PRs / nightly / releases.
   job via `pytest verification/ --protean-env test`. Empirically stable (9/9
   runs `successes == N` with retry on; 1-2 without).
 
-**T1.2 - Exactly-one outbox row (P4)** `[A]` `[gate]`
-- Extend `tests/integration/test_event_publishing.py`: after a published-event
-  command, assert one row per expected (message_id, target_broker), and that a
-  forced duplicate insert raises IntegrityError.
+**T1.2 - Exactly-one outbox row (P4)** `[A]` `[gate]` - DONE
+- `verification/oracles/test_outbox_exactly_once.py` (placed with the other
+  property oracles rather than in `tests/integration/`, for consistency with
+  P2/P20; the tests/ file already covers the happy-path dual-write):
+- Shape: a `published=True` event (loyalty `EarnPoints`) yields exactly one row
+  per (message_id, target_broker) — one `default` + one `global`, same
+  message_id, no duplicates. Runs on any adapter.
+- Teeth: forcing a second row with the same (message_id, target_broker) raises
+  `IntegrityError` — the DB, not just app code, prevents double-publishing.
+  Type-A (probes the unique index directly).
+- Finding: the in-memory adapter does NOT enforce `Index(unique=True)` — the
+  duplicate is silently accepted there, so the teeth test is Postgres-only
+  (skips under `--protean-env memory`). Candidate Protean fidelity note.
 
 **T1.3 - Crash-window check (P21)** `[A]` `[nightly]`
 - Kill the process between the DB commit and the event-store append
