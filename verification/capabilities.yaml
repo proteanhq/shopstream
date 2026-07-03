@@ -83,10 +83,10 @@ capabilities:
 
   - name: cross_domain_acl_subscriber
     taught_by: src/reviews/review/ordering_subscriber.py
-    guarded_by: verification/contracts/test_acl_payloads.py   # to build (P15)
-    property: "published event payload matches what every subscriber reads"
+    guarded_by: verification/contracts/test_acl_payloads.py
+    property: "every published event's external payload feeds every subscriber on its stream with no KeyError (P15)"
     source: A
-    status: gap
+    status: covered   # T2.2: 84 producer×consumer pairs + 4 falsifications; real producer payload through real subscriber __call__
 
   - name: domain_service
     taught_by: src/loyalty/reward/transfer.py
