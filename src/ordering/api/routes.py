@@ -1,6 +1,6 @@
 """FastAPI routes for the Ordering domain — carts and orders."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from protean.utils.globals import current_domain
 from pydantic import BaseModel as PydanticBaseModel
 
@@ -210,8 +210,8 @@ order_router = APIRouter(prefix="/orders", tags=["orders"])
 async def list_customer_orders(
     customer_id: str,
     status: str | None = None,
-    page: int = 1,
-    page_size: int = 20,
+    page: int = Query(1, ge=1, le=1_000_000),
+    page_size: int = Query(20, ge=1, le=100),
 ) -> PaginatedResponse:
     from ordering.projections.customer_orders_queries import ListCustomerOrders
 

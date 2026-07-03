@@ -129,3 +129,10 @@ capabilities:
     property: "committed catalog.md == freshly generated from the domain (docs can't claim a missing feature)"
     source: A
     status: covered   # T1.6: docs-check gate + value-object doctests (make doctest)
+
+  - name: api_contract_fuzzing
+    taught_by: src/app.py   # FastAPI routes + protean.integrations.fastapi exception handlers
+    guarded_by: verification/fuzz/README.md   # make fuzz (schemathesis, nightly/local)
+    property: "no schema-allowed request makes the API return 500 (shallow contract bug)"
+    source: A
+    status: partial   # T2.4: schemathesis harness; found+fixed pagination-overflow 500; ProductRating Dict-field-no-column 500 filed

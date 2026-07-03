@@ -1,6 +1,6 @@
 """FastAPI endpoints for the Catalogue domain."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from protean.utils.globals import current_domain
 
 from catalogue.api.schemas import (
@@ -45,8 +45,8 @@ category_router = APIRouter(prefix="/categories", tags=["categories"])
 async def list_products(
     category_id: str | None = None,
     status: str | None = None,
-    page: int = 1,
-    page_size: int = 20,
+    page: int = Query(1, ge=1, le=1_000_000),
+    page_size: int = Query(20, ge=1, le=100),
 ) -> PaginatedResponse:
     from catalogue.projections.product_card_queries import ListProductCards
 
