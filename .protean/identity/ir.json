@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:77b62ea8b054d994ade2fb8f7b592cf2377f0c0d3083c53314d4ceb6776dc5e0",
+  "checksum": "sha256:189927d44cda609da793f7b3f326199353c533b7df775faab6f585c66e15909f",
   "clusters": {
     "identity.customer.customer.Customer": {
       "aggregate": {
@@ -1301,7 +1301,7 @@
   "domain": {
     "camel_case_name": "Identity",
     "command_processing": "sync",
-    "event_processing": "async",
+    "event_processing": "sync",
     "identity_strategy": "uuid",
     "identity_type": "string",
     "name": "identity",

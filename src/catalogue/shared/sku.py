@@ -15,6 +15,25 @@ class SKU:
 
     Format: alphanumeric + hyphens, 3-50 chars.
     E.g., "ELEC-PHN-001", "SHOE-RUN-BLK-42"
+
+    Examples:
+        >>> SKU(code="ELEC-PHN-001").code
+        'ELEC-PHN-001'
+        >>> try:
+        ...     SKU(code="bad--code")  # consecutive hyphens
+        ... except ValidationError:
+        ...     print("rejected")
+        rejected
+        >>> try:
+        ...     SKU(code="-leads-with-hyphen")
+        ... except ValidationError:
+        ...     print("rejected")
+        rejected
+        >>> try:
+        ...     SKU(code="ab")  # shorter than 3 chars
+        ... except ValidationError:
+        ...     print("rejected")
+        rejected
     """
 
     code: String(required=True, max_length=50, min_length=3)

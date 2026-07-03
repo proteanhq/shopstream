@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:02a1e3a53f12f11c9a418bc19698b727a50f962290a4bcc1784cff98447a1d0a",
+  "checksum": "sha256:83d56a91470b9c31b4347ab9c193a1c7a8a1f8edeb677e4d7bf81d6ef998914d",
   "clusters": {
     "reviews.review.review.Review": {
       "aggregate": {
@@ -1172,7 +1172,7 @@
       "repositories": {},
       "value_objects": {
         "reviews.review.review.Rating": {
-          "description": "A star rating from 1 to 5.",
+          "description": "A star rating from 1 to 5.\n\nExamples:\n    >>> Rating(score=5).score\n    5\n    >>> try:\n    ...     Rating(score=0)\n    ... except ValidationError:\n    ...     print(\"below range rejected\")\n    below range rejected\n    >>> try:\n    ...     Rating(score=6)\n    ... except ValidationError:\n    ...     print(\"above range rejected\")\n    above range rejected",
           "element_type": "VALUE_OBJECT",
           "fields": {
             "score": {
@@ -1295,7 +1295,7 @@
   "domain": {
     "camel_case_name": "Reviews",
     "command_processing": "sync",
-    "event_processing": "async",
+    "event_processing": "sync",
     "identity_strategy": "uuid",
     "identity_type": "string",
     "name": "reviews",

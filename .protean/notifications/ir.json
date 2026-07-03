@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:bd29e9221040d6e3fccfab71393c2b46d4e2c73c410482fa49ad557111fe46ee",
+  "checksum": "sha256:0379f7207953a6d21d3070cd13866b4e9bdb29b9775d36424ec9089b8582ea50",
   "clusters": {
     "notifications.notification.notification.Notification": {
       "aggregate": {
@@ -1199,7 +1199,7 @@
   "domain": {
     "camel_case_name": "Notifications",
     "command_processing": "sync",
-    "event_processing": "async",
+    "event_processing": "sync",
     "identity_strategy": "uuid",
     "identity_type": "string",
     "name": "notifications",

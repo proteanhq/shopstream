@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:bb3ac8b7dfeae28e69be6bb176ee98537eb049be3a7750fb2a42f165d2b21943",
+  "checksum": "sha256:666a263cd830552441c1dc839bc9365fdc18ee78e8880bf05fe7640a8eea2cc8",
   "clusters": {
     "ordering.cart.cart.ShoppingCart": {
       "aggregate": {
@@ -2922,7 +2922,7 @@
   "domain": {
     "camel_case_name": "Ordering",
     "command_processing": "sync",
-    "event_processing": "async",
+    "event_processing": "sync",
     "identity_strategy": "uuid",
     "identity_type": "string",
     "name": "ordering",

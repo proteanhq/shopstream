@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:52c2c400f398aed1fab43b96f7786cb9883366f3ca64242f0377113a0628abdc",
+  "checksum": "sha256:2701bb7eb79e6a5ede996f60cc4058ff5791c7abe9dc1964194eafae6dcf1365",
   "clusters": {
     "catalogue.category.category.Category": {
       "aggregate": {
@@ -1620,7 +1620,7 @@
           "part_of": "catalogue.product.product.Product"
         },
         "catalogue.shared.sku.SKU": {
-          "description": "Value object for stock keeping unit codes.\n\nFormat: alphanumeric + hyphens, 3-50 chars.\nE.g., \"ELEC-PHN-001\", \"SHOE-RUN-BLK-42\"",
+          "description": "Value object for stock keeping unit codes.\n\nFormat: alphanumeric + hyphens, 3-50 chars.\nE.g., \"ELEC-PHN-001\", \"SHOE-RUN-BLK-42\"\n\nExamples:\n    >>> SKU(code=\"ELEC-PHN-001\").code\n    'ELEC-PHN-001'\n    >>> try:\n    ...     SKU(code=\"bad--code\")  # consecutive hyphens\n    ... except ValidationError:\n    ...     print(\"rejected\")\n    rejected\n    >>> try:\n    ...     SKU(code=\"-leads-with-hyphen\")\n    ... except ValidationError:\n    ...     print(\"rejected\")\n    rejected\n    >>> try:\n    ...     SKU(code=\"ab\")  # shorter than 3 chars\n    ... except ValidationError:\n    ...     print(\"rejected\")\n    rejected",
           "element_type": "VALUE_OBJECT",
           "fields": {
             "code": {
@@ -1775,7 +1775,7 @@
   "domain": {
     "camel_case_name": "Catalogue",
     "command_processing": "sync",
-    "event_processing": "async",
+    "event_processing": "sync",
     "identity_strategy": "uuid",
     "identity_type": "string",
     "name": "catalogue",

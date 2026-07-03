@@ -38,6 +38,23 @@ class Money:
 
     Supports 20 major currencies. Amount must be non-negative. Used for
     representing prices, totals, and other financial values.
+
+    Examples:
+        >>> price = Money(amount=19.99, currency="USD")
+        >>> (price.amount, price.currency)
+        (19.99, 'USD')
+        >>> Money(amount=5).currency  # currency defaults to USD
+        'USD'
+        >>> try:
+        ...     Money(amount=-1, currency="USD")
+        ... except ValidationError:
+        ...     print("negative amount rejected")
+        negative amount rejected
+        >>> try:
+        ...     Money(amount=5, currency="XYZ")
+        ... except ValidationError:
+        ...     print("unsupported currency rejected")
+        unsupported currency rejected
     """
 
     amount: Float(required=True, min_value=0.0)
