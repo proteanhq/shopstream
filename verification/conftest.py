@@ -59,3 +59,35 @@ def inventory_bed():
 def inventory_ctx(inventory_bed):
     with inventory_bed.domain_context():
         yield
+
+
+@pytest.fixture(scope="session")
+def ordering_bed():
+    from ordering.domain import ordering
+
+    bed = DomainFixture(ordering)
+    bed.setup()
+    yield bed
+    bed.teardown()
+
+
+@pytest.fixture()
+def ordering_ctx(ordering_bed):
+    with ordering_bed.domain_context():
+        yield
+
+
+@pytest.fixture(scope="session")
+def payments_bed():
+    from payments.domain import payments
+
+    bed = DomainFixture(payments)
+    bed.setup()
+    yield bed
+    bed.teardown()
+
+
+@pytest.fixture()
+def payments_ctx(payments_bed):
+    with payments_bed.domain_context():
+        yield

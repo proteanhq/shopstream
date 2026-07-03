@@ -25,6 +25,9 @@ class PaymentInitiated:
     last4 = String()
     gateway_name = String(required=True)
     idempotency_key = String(required=True)
+    # Pre-generated identity for the first PaymentAttempt, carried on the event so
+    # replay reconstructs the same child-entity id (deterministic event sourcing).
+    attempt_id = Identifier(required=True)
     initiated_at = DateTime(required=True)
 
 
@@ -70,6 +73,8 @@ class PaymentRetryInitiated:
     payment_id = Identifier(required=True)
     order_id = Identifier(required=True)
     attempt_number = Integer(required=True)
+    # Pre-generated identity for the retry's PaymentAttempt (see PaymentInitiated).
+    attempt_id = Identifier(required=True)
     retried_at = DateTime(required=True)
 
 
