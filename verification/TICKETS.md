@@ -246,9 +246,36 @@ whether it gates PRs / nightly / releases.
   OrderDelivered→items one, which is worth a follow-up (add `items` to
   `OrderDelivered`, or have reviews read them another way).
 
-**T2.3 - Saga liveness + compensation (P16)** `[A]` `[nightly]`
-- Force a payment failure x3 in the checkout saga; assert the order ends CANCELLED
-  and the inventory reservation is released. Add a stuck-saga detector.
+**T2.3 - Saga liveness + compensation (P16)** `[A]` `[nightly]` - DONE
+- `verification/resilience/test_saga_compensation.py`. Drives a REAL checkout over
+  HTTP against the running async stack (api + ordering/inventory/payments engines),
+  forces the payment to fail `MAX_PAYMENT_RETRIES` (3) times, and asserts the two
+  P16 outcomes end to end:
+  - **liveness + order compensation**: the saga reaches terminal `Cancelled`
+    (`cancelled_by="System"`, reason "Payment failed: …") within a bounded poll;
+  - **cross-domain compensation**: the inventory reservation the checkout was
+    holding is `Released` (OrderCancelled → external bus → inventory
+    `ReleaseReservation`), read in-process from the same `_local` DB the engine
+    writes to;
+  - **stuck-saga detector**: reads the saga's own event-sourced PM stream
+    (`ordering::order_checkout_saga-<order_id>`) and asserts its last transition is
+    `is_complete` with state `failed`. The bounded polls are the liveness
+    enforcement — a saga that never reaches terminal fails with the last-seen state.
+- The forced-failure loop the exploration nailed down (there is NO auto-wiring):
+  confirm → `POST /inventory/{id}/reserve` (→ StockReserved → RecordPaymentPending →
+  Payment_Pending) → for each of 3 attempts `POST /payments` + `POST /payments/webhook`
+  with `gateway_status="failed"` (+ header `X-Gateway-Signature: test-signature`);
+  between retries re-drive `PUT /orders/{id}/payment/pending`. Failure is forced via
+  the WEBHOOK, not the gateway `should_succeed` flag (nothing calls `create_charge`
+  at runtime).
+- Must run against the async engine: the saga is a multi-step PM that hits
+  proteanhq/protean#1048 under `event_processing="sync"` (no cascade), and the
+  cross-domain hops need the engines + external Redis bus. So it is
+  `@pytest.mark.engine` (deselected in CI via `-m "not engine"`, like `test_dlq`,
+  and skips cleanly when the stack/base-env is absent — never breaks the memory/
+  test suite). Run it in base (async) env: `--protean-env development` (no
+  `[development]` overlay → base config, `_local` DBs) with the stack up. Validated
+  locally: 3/3 stable runs.
 
 **T2.4 - schemathesis API fuzzing** `[A]` `[nightly]`
 - `schemathesis run http://localhost:8000/openapi.json` with OpenAPI links for

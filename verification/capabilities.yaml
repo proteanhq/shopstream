@@ -104,10 +104,10 @@ capabilities:
 
   - name: saga_process_manager
     taught_by: src/ordering/checkout/saga.py
-    guarded_by: verification/resilience/test_saga_compensation.py   # to build (P16)
-    property: "every saga reaches a terminal state; failure triggers compensation"
+    guarded_by: verification/resilience/test_saga_compensation.py
+    property: "every saga reaches a terminal state; failure triggers compensation (P16)"
     source: A
-    status: partial
+    status: covered   # T2.3: forced 3x payment failure -> order CANCELLED + reservation RELEASED + PM terminal, on the real async engine (engine-marked, local)
 
   - name: command_deadline
     taught_by: src/payments/payment/initiation.py
