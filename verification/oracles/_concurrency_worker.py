@@ -83,3 +83,46 @@ def reserve_once(args):
             return f"ValidationError:{exc}"
         except Exception as exc:  # noqa: BLE001
             return f"{type(exc).__name__}:{str(exc)[:80]}"
+
+
+def project_low_stock_once(args):
+    """Drive ONE LowStockDetected through the projector, barrier-aligned.
+
+    Deterministically reproduces the projector's concurrent-create window: every
+    worker fires the projector for the SAME fresh item at the same instant, so
+    they all take the create path before any commits. A version-retry loop mimics
+    the framework's `_handle` wrapper so that update-update races (the projection
+    has its own `_version`) are retried the way production would — leaving the
+    create-create collision as the only thing under test.
+
+    Returns "ok", "version_exhausted", or "<ExceptionName>:<msg>".
+    """
+    env, item_id, product_id, variant_id, sku, available, detected_at_iso, barrier = args
+    inventory = _domain(env, None)
+
+    from datetime import datetime
+
+    from inventory.projections.low_stock_report import LowStockReportProjector
+    from inventory.stock.events import LowStockDetected
+
+    event = LowStockDetected(
+        inventory_item_id=item_id,
+        product_id=product_id,
+        variant_id=variant_id,
+        sku=sku,
+        current_available=available,
+        reorder_point=10,
+        detected_at=datetime.fromisoformat(detected_at_iso),
+    )
+
+    with inventory.domain_context():
+        with contextlib.suppress(Exception):
+            barrier.wait()
+        # `@on` wraps the handler with the framework's own UnitOfWork + retry
+        # machinery (version + transient), so call it directly — do NOT nest it in
+        # another UnitOfWork, which would defeat the retry.
+        try:
+            LowStockReportProjector().on_low_stock_detected(event)
+            return "ok"
+        except Exception as exc:  # noqa: BLE001
+            return f"{type(exc).__name__}:{str(exc)[:70]}"
