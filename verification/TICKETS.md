@@ -123,10 +123,24 @@ whether it gates PRs / nightly / releases.
 - Only worth it with an independent model; do it for Stock and one event-sourced
   aggregate, not all.
 
-**T1.5 - Regression set habit** `[A]` `[gate]`
-- Every Protean bug ShopStream finds becomes one permanent, named test under
-  `verification/oracles/`. Seed it with the issues already filed (G1-G5, the
-  outbox composite-index fix, the ordering finding).
+**T1.5 - Regression set habit** `[A]` `[gate]` - DONE
+- `verification/regression/` — the habit + a manifest (`README.md`) mapping every
+  Protean issue ShopStream has filed to its guard and state (guard / open /
+  tripwire). Each bug flips through `xfail(strict)` → passing guard as its fix
+  lands, so a fixed bug can never quietly regress.
+- Seeded from the filed issues. Most are FIXED (G1-G5 #1038-#1042, #1046, #1048,
+  #1056, #1065): several are already guarded by existing oracles — #1040 →
+  `test_crash_window_reconcile` (append-first durability), #1041 →
+  `test_outbox_exactly_once`, #1042 → `test_p20_projector_idempotency`.
+- New named regressions in `test_protean_regressions.py`:
+  - `test_1039_...` — datetime payloads are ISO-8601/UTC (guard, passes).
+  - `test_1071_...` — in-memory adapter enforces `Index(unique=True)`; an UPGRADE
+    TRIPWIRE (`xfail(strict)`): fixed upstream but not yet in ShopStream's Protean
+    pin, so it flips when the pin is bumped.
+- Still-open bugs carry live xfails: #1073 (`test_crash_window_reconcile`), #1055
+  (engine CI, `test_dlq` local-only).
+- Bugs with no natural ShopStream reproduction (#1038 Decimal, #1046 Date, #1056
+  Auto-increment) are recorded in the manifest rather than force-fit.
 
 **T1.6 - Generate docs from the IR** `[A]`
 - Render `docs/<domain>/catalog.md` from the live domain elements so docs cannot
