@@ -39,6 +39,13 @@ capabilities:
     source: A
     status: covered   # T0.3: projector made idempotent; P20 check passes
 
+  - name: projector_concurrent_upsert
+    taught_by: src/inventory/projections/low_stock_report.py
+    guarded_by: verification/oracles/test_lowstock_projector_concurrency.py
+    property: "concurrent level-triggered events for one key yield exactly one row; no command fails on the create-create race"
+    source: A
+    status: covered   # projector made concurrency-safe (nested-UoW upsert); relates to proteanhq/protean#1076
+
   - name: outbox_dual_write
     taught_by: src/payments/domain.toml   # external_brokers = ["global"]
     guarded_by: verification/oracles/test_outbox_exactly_once.py
