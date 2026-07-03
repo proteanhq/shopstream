@@ -155,3 +155,18 @@ def notifications_bed():
 def notifications_ctx(notifications_bed):
     with notifications_bed.domain_context():
         yield
+
+
+def pytest_ignore_collect(collection_path, config):
+    """Skip the adapter-conformance harness unless it's being run on purpose.
+
+    verification/conformance/ needs Protean's adapter-conformance plugin (the
+    `--db` option + `test_domain`/`db`/`store_config` fixtures). A normal
+    `pytest verification/ --protean-env memory` run (as CI does) doesn't load that
+    plugin, so those tests would error. Collect them only when `--db` is on the
+    command line — i.e. via `make conformance` (or an explicit `--db` run).
+    """
+    normalized = str(collection_path).replace("\\", "/")
+    if "verification/conformance" in normalized and "--db" not in config.invocation_params.args:
+        return True
+    return None

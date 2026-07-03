@@ -135,4 +135,11 @@ capabilities:
     guarded_by: verification/fuzz/README.md   # make fuzz (schemathesis, nightly/local)
     property: "no schema-allowed request makes the API return 500 (shallow contract bug)"
     source: A
-    status: partial   # T2.4: schemathesis harness; found+fixed pagination-overflow 500; ProductRating Dict-field-no-column 500 filed
+    status: partial   # T2.4: schemathesis harness; found+fixed pagination-overflow 500 (the counted_reviews 500 was a stale-table artifact, see T2.5)
+
+  - name: adapter_conformance
+    taught_by: src/loyalty/domain.toml   # two live providers: postgres default + sqlite reporting
+    guarded_by: verification/conformance/test_dao_conformance.py   # make conformance (memory/sqlite/postgres)
+    property: "the same DAO behavior (add/get/filter/order/paginate/unique/Dict) holds on every provider (skip-rate 0%)"
+    source: A
+    status: covered   # T2.5: 13 behaviors x 3 adapters green; built on Protean's own conformance plugin; corrected the T2.4 Dict finding
