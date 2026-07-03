@@ -84,7 +84,14 @@ def inventory_domain():
 
 
 def _seed_item(inventory, on_hand: int) -> str:
-    """Create a fresh InventoryItem with `on_hand` units; return its id."""
+    """Create a fresh InventoryItem with `on_hand` units; return its id.
+
+    `reorder_point=-1` suppresses `LowStockDetected` entirely. This isolates the
+    check to the reservation's optimistic concurrency: otherwise every reserve
+    (available <= reorder_point) also fires the `LowStockReport` projector, whose
+    create-not-upsert write fails ("already exists") when two workers race it —
+    an unrelated projector-concurrency issue that would mask the P2 signal.
+    """
     from inventory.stock.stock import InventoryItem
 
     with inventory.domain_context():
@@ -94,6 +101,7 @@ def _seed_item(inventory, on_hand: int) -> str:
             warehouse_id=str(uuid.uuid4()),
             sku=f"SKU-{uuid.uuid4().hex[:8]}",
             initial_quantity=on_hand,
+            reorder_point=-1,
         )
         inventory.repository_for(InventoryItem).add(item)
         return str(item.id)
