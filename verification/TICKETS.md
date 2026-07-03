@@ -152,10 +152,18 @@ whether it gates PRs / nightly / releases.
 - Bugs with no natural ShopStream reproduction (#1038 Decimal, #1046 Date, #1056
   Auto-increment) are recorded in the manifest rather than force-fit.
 
-**T1.6 - Generate docs from the IR** `[A]`
-- Render `docs/<domain>/catalog.md` from the live domain elements so docs cannot
-  claim a feature the code lacks. Add doctest on the value objects (Money, SKU,
-  Rating).
+**T1.6 - Generate docs from the IR** `[A]` - DONE
+- `docs/<domain>/catalog.md` is generated from the live domain elements
+  (`make docs-catalog` → `protean docs generate --type=catalog`), so it cannot
+  claim a feature the code lacks.
+- `make docs-check` is the enforcement: it regenerates every catalog and fails if
+  a committed one drifts (verified it has teeth). Wired into CI. It immediately
+  caught a stale `ordering` catalog, now regenerated.
+- Doctests on the value objects (Money, SKU, Rating) — executable examples in the
+  docstrings, run by `make doctest` (`pytest --doctest-modules`), wired into CI.
+- Folded in: `make ir` now uses `--canonical` (sorted keys + no volatile
+  `generated_at`), so IR baselines diff only on real changes — no key-reorder or
+  timestamp churn between runs/versions. All 9 baselines regenerated canonically.
 
 ---
 

@@ -122,3 +122,10 @@ capabilities:
     property: "IR diff flags breaking changes correctly (P14)"
     source: A
     status: covered   # T0.2: strict config + make ir-gate + CI + negative test
+
+  - name: docs_generated_from_code
+    taught_by: docs/reviews/catalog.md   # protean docs generate --type=catalog
+    guarded_by: make docs-check   # regenerates every catalog, fails on drift (in CI)
+    property: "committed catalog.md == freshly generated from the domain (docs can't claim a missing feature)"
+    source: A
+    status: covered   # T1.6: docs-check gate + value-object doctests (make doctest)

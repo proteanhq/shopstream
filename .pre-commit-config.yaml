@@ -30,12 +30,22 @@ repos:
   # so they must run in the project's own venv (not pre-commit's isolated
   # env). This is the same pattern pylint/mypy recommend for tools that
   # introspect user code. Domains are read from [domains] in
-  # .protean/config.toml; --fix auto-regenerates stale IR and stages it.
+  # .protean/config.toml.
+  #
+  # Check-only (NOT --fix): the auto-fixer regenerates baselines WITHOUT the
+  # canonical form (`protean-check-staleness` has no --canonical flag), which
+  # would fight `make ir --canonical` and reintroduce timestamp/key-order churn.
+  # So the hook only FAILS on staleness; `make ir` is the sole writer, keeping
+  # baselines canonical. (Re-enable --fix once protean-check-staleness gains
+  # --canonical: proteanhq/protean#1080.)
   - repo: local
     hooks:
       - id: protean-check-staleness
         name: Check IR staleness
-        entry: uv run protean-check-staleness --fix
+        # PROTEAN_ENV=memory to match how `make ir` generates the baselines. The
+        # IR captures env-dependent config (e.g. event_processing sync vs async),
+        # so an env mismatch here reports a false "stale" (loyalty differs by env).
+        entry: env PROTEAN_ENV=memory uv run protean-check-staleness
         language: system
         pass_filenames: false
         always_run: true

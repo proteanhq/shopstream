@@ -298,8 +298,8 @@
 
 #### OrderCreated
 
-- **Type**: `Ordering.OrderCreated.v1`
-- **Version**: 1
+- **Type**: `Ordering.OrderCreated.v2`
+- **Version**: 2
 - **Published**: Yes
 - **Fact Event**: No
 
@@ -313,6 +313,7 @@
 | grand_total | Float | Yes | — |
 | items | List[dict] | Yes | — |
 | order_id | Identifier | Yes | min_length=1 |
+| order_source | String | No | max_length=255 |
 | shipping_address | Dict | Yes | — |
 | shipping_cost | Float | No | — |
 | subtotal | Float | Yes | — |
@@ -524,6 +525,7 @@
 | discount_total | Float | No | — |
 | grand_total | Float | Yes | — |
 | items | List[dict] | Yes | — |
+| order_source | String | No | max_length=20 |
 | shipping_address | Dict | Yes | — |
 | shipping_cost | Float | No | — |
 | subtotal | Float | Yes | — |
@@ -692,6 +694,6 @@
 | CartAbandoned | `Ordering.CartAbandoned.v1` | 1 |
 | OrderCancelled | `Ordering.OrderCancelled.v1` | 1 |
 | OrderConfirmed | `Ordering.OrderConfirmed.v1` | 1 |
-| OrderCreated | `Ordering.OrderCreated.v1` | 1 |
+| OrderCreated | `Ordering.OrderCreated.v2` | 2 |
 | OrderDelivered | `Ordering.OrderDelivered.v1` | 1 |
 | OrderReturned | `Ordering.OrderReturned.v1` | 1 |

@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas docs-generate ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-loyalty verify-timeline verify-timeline-skip-seed
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas docs-generate docs-catalog docs-check doctest ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-loyalty verify-timeline verify-timeline-skip-seed
 
 # Default target
 help: ## Show this help message
@@ -285,9 +285,11 @@ domain-check-loyalty: ## Run protean check on loyalty domain
 # IR & Schema Generation
 # ──────────────────────────────────────────────
 ir: ## Generate IR (intermediate representation) for all domains
+	@# --canonical: sorted keys + no volatile `generated_at`, so committed baselines
+	@# diff only on real changes (no key-reorder or timestamp churn between runs/versions).
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		mkdir -p .protean/$$d; \
-		PYTHONPATH=src PROTEAN_ENV=memory uv run protean ir show --domain=$$d.domain > .protean/$$d/ir.json; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean ir show --domain=$$d.domain --canonical > .protean/$$d/ir.json; \
 		echo "✓ $$d"; \
 	done
 
@@ -310,6 +312,27 @@ docs-generate: ## Generate domain documentation (diagrams + event catalog)
 		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=handlers --output=docs/$$d/handler-wiring.md; \
 		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=catalog --output=docs/$$d/catalog.md; \
 	done
+
+docs-catalog: ## Regenerate the event/command catalog docs from the live domains
+	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=catalog --output=docs/$$d/catalog.md; \
+		echo "✓ docs/$$d/catalog.md"; \
+	done
+
+docs-check: ## CI gate — fail if any committed catalog.md is stale vs the code
+	@# Docs are generated FROM the domain, so they cannot claim a feature the code
+	@# lacks. This fails the build if a committed catalog drifts — run 'make docs-catalog'.
+	@fail=0; for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=catalog --output=/tmp/catalog_check_$$d.md >/dev/null 2>&1; \
+		if ! diff -q docs/$$d/catalog.md /tmp/catalog_check_$$d.md >/dev/null 2>&1; then \
+			echo "STALE: docs/$$d/catalog.md — run 'make docs-catalog' and commit"; fail=1; \
+		fi; \
+	done; \
+	if [ $$fail -eq 0 ]; then echo "✓ all catalog docs current"; else exit 1; fi
+
+doctest: ## Run doctests on the value objects (executable examples in docstrings)
+	PYTHONPATH=src PROTEAN_ENV=memory uv run pytest --doctest-modules \
+		src/catalogue/shared/money.py src/catalogue/shared/sku.py src/reviews/review/review.py -q
 
 ir-check: ## Check staleness of materialized IR for all domains
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \

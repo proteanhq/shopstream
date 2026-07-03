@@ -39,6 +39,12 @@ jobs:
       - name: IR backward-compatibility gate
         run: make ir-gate
 
+      - name: Docs generated from code are current
+        run: make docs-check
+
+      - name: Value-object doctests
+        run: make doctest
+
       - name: Run all tests (memory mode)
         run: uv run pytest --protean-env memory -m "not engine"
 

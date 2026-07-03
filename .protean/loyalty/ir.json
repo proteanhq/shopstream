@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:eb66bfaab2b1197377f06045953c181a234caf9689bf363ae89da2039d1591f8",
+  "checksum": "sha256:9b3918fa93b6123e340daece254bcbee57e04cc675435ea6fae987d18da08825",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -1934,7 +1934,7 @@
   "domain": {
     "camel_case_name": "Loyalty",
     "command_processing": "sync",
-    "event_processing": "async",
+    "event_processing": "sync",
     "identity_strategy": "uuid",
     "identity_type": "string",
     "name": "loyalty",

@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:a83fc6da9ab173a643f146b566f9fa2359d803589fd57fd34dafac4a1968802c",
+  "checksum": "sha256:eaac06e70ea3587c54419e0355cf84b854bf0fb43d813c4b15f9465c9f1ec56f",
   "clusters": {
     "payments.invoice.invoice.Invoice": {
       "aggregate": {
@@ -1592,7 +1592,7 @@
   "domain": {
     "camel_case_name": "Payments",
     "command_processing": "sync",
-    "event_processing": "async",
+    "event_processing": "sync",
     "identity_strategy": "uuid",
     "identity_type": "string",
     "name": "payments",
