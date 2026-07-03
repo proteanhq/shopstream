@@ -99,10 +99,23 @@ whether it gates PRs / nightly / releases.
   duplicate is silently accepted there, so the teeth test is Postgres-only
   (skips under `--protean-env memory`). Candidate Protean fidelity note.
 
-**T1.3 - Crash-window check (P21)** `[A]` `[nightly]`
-- Kill the process between the DB commit and the event-store append
-  (`unit_of_work.py:281`/`:286`); after restart, assert no event-sourced aggregate
-  is missing events. (This will likely fail - it is Protean gap G4.)
+**T1.3 - Crash-window check (P21)** `[A]` `[nightly]` - DONE (gap confirmed + filed)
+- `verification/oracles/test_crash_window_reconcile.py`. Note: per ADR-0015 the
+  order is now event-store append FIRST, then relational commit — so an
+  event-sourced aggregate is NOT missing events after a crash (the ticket's
+  original framing). The real window is: the event is durable but its OUTBOX row
+  (relational) rolled back → a durable event that is never published.
+- Crash is simulated deterministically in-process: patch SQLAlchemy
+  `Session.commit` to raise (Message-DB uses its own psycopg2 pool, so the append
+  still lands), reproducing the ADR-0015 window with no process kill.
+- `test_crash_leaves_event_durable_but_unpublished` PASSES: characterizes the
+  window (StockReceived durable in the event store, its internal outbox row absent).
+- `test_reconcile_restores_the_lost_outbox_row` XFAIL (strict): ADR-0015 promises
+  `reconcile_outbox` repairs this on startup, but it is a **no-op against
+  Message-DB** — `read_last_message("$all")` returns None, so the sweep returns 0
+  and the lost row is never restored. Filed proteanhq/protean#1073; xfail flips
+  when fixed.
+- Postgres + Message-DB only (skips under `--protean-env memory`).
 
 **T1.4 - Concurrency model with Hypothesis (P2/P4)** `[A]` `[nightly]`
 - A Hypothesis state machine driving random valid command sequences against one

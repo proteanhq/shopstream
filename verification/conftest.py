@@ -43,3 +43,19 @@ def loyalty_bed():
 def loyalty_ctx(loyalty_bed):
     with loyalty_bed.domain_context():
         yield
+
+
+@pytest.fixture(scope="session")
+def inventory_bed():
+    from inventory.domain import inventory
+
+    bed = DomainFixture(inventory)
+    bed.setup()
+    yield bed
+    bed.teardown()
+
+
+@pytest.fixture()
+def inventory_ctx(inventory_bed):
+    with inventory_bed.domain_context():
+        yield
