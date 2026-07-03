@@ -53,6 +53,13 @@ capabilities:
     source: A
     status: covered   # T1.1: multi-process on real Postgres + Message-DB; falsified with version_retry off
 
+  - name: crash_window_reconciliation
+    taught_by: src/inventory/stock/stock.py   # event-sourced; recovery is framework-level (ADR-0015)
+    guarded_by: verification/oracles/test_crash_window_reconcile.py
+    property: "a durable event whose relational commit crashed is still published after reconcile (P21)"
+    source: A
+    status: partial   # T1.3: window characterized (passes); recovery broken on message-db (proteanhq/protean#1073), xfail
+
   - name: cross_domain_acl_subscriber
     taught_by: src/reviews/review/ordering_subscriber.py
     guarded_by: verification/contracts/test_acl_payloads.py   # to build (P15)
