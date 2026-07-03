@@ -20,10 +20,10 @@ capabilities:
 
   - name: event_sourced_aggregate
     taught_by: src/ordering/order/order.py
-    guarded_by: verification/metamorphic/test_replay_equals_live.py   # to build (P10)
-    property: "from_events(events) == live aggregate state"
+    guarded_by: verification/metamorphic/test_replay_equals_live.py
+    property: "from_events(events) == live aggregate state (P10)"
     source: B
-    status: partial
+    status: covered   # T2.1: replay==live over all 4 ES aggregates; found + FIXED the Payment attempt-id replay bug (now a passing guard)
 
   - name: aggregate_state_machine
     taught_by: src/inventory/stock/stock.py
@@ -34,10 +34,10 @@ capabilities:
 
   - name: snapshots
     taught_by: src/loyalty/campaign/campaign.py
-    guarded_by: verification/metamorphic/test_snapshot_equals_replay.py   # to build (P11)
-    property: "load via snapshot == full replay"
+    guarded_by: verification/metamorphic/test_snapshot_equals_replay.py
+    property: "load via snapshot == full replay (P11)"
     source: B
-    status: gap
+    status: covered   # T2.1: snapshot load == full replay, and snapshot+tail == live (PromoCampaign)
 
   - name: projector_read_model
     taught_by: src/reviews/projections/product_rating.py
@@ -45,6 +45,13 @@ capabilities:
     property: "delivering one event N times == delivering it once (P20)"
     source: A
     status: covered   # T0.3: projector made idempotent; P20 check passes
+
+  - name: projection_convergence
+    taught_by: src/inventory/projections/inventory_level.py
+    guarded_by: verification/metamorphic/test_projection_equals_fold.py
+    property: "projection == fold(events): a read model equals its aggregate's replayed state (P9)"
+    source: B
+    status: covered   # T2.1: InventoryLevel == InventoryItem.levels; weaker than the P20 oracle (shares stream bugs)
 
   - name: projector_concurrent_upsert
     taught_by: src/inventory/projections/low_stock_report.py

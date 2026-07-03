@@ -185,6 +185,7 @@ class Payment:
                 last4=last4 or "",
                 gateway_name=gateway_name,
                 idempotency_key=idempotency_key,
+                attempt_id=str(uuid4()),  # deterministic child id for replay
                 initiated_at=now,
             )
         )
@@ -251,6 +252,7 @@ class Payment:
                 payment_id=str(self.id),
                 order_id=str(self.order_id),
                 attempt_number=self.attempt_count + 1,
+                attempt_id=str(uuid4()),  # deterministic child id for replay
                 retried_at=now,
             )
         )
@@ -339,6 +341,7 @@ class Payment:
         # Record first attempt
         self.add_attempts(
             PaymentAttempt(
+                id=event.attempt_id,
                 attempted_at=event.initiated_at,
                 status="processing",
             )
@@ -385,6 +388,7 @@ class Payment:
         # Add new attempt
         self.add_attempts(
             PaymentAttempt(
+                id=event.attempt_id,
                 attempted_at=event.retried_at,
                 status="processing",
             )

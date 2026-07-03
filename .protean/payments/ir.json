@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:e3ccf0c5b28548704e49feda0ffca242dd557aecb9e9ab590fddf93e1c0afa45",
+  "checksum": "sha256:eaac06e70ea3587c54419e0355cf84b854bf0fb43d813c4b15f9465c9f1ec56f",
   "clusters": {
     "payments.invoice.invoice.Invoice": {
       "aggregate": {
@@ -1024,6 +1024,12 @@
               "required": true,
               "type": "Float"
             },
+            "attempt_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
             "currency": {
               "kind": "standard",
               "max_length": 255,
@@ -1128,6 +1134,12 @@
           "description": "A failed payment is being retried.",
           "element_type": "EVENT",
           "fields": {
+            "attempt_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
             "attempt_number": {
               "kind": "standard",
               "required": true,

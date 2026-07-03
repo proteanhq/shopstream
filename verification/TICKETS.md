@@ -169,10 +169,47 @@ whether it gates PRs / nightly / releases.
 
 ## Phase 2 - breadth and depth
 
-**T2.1 - Metamorphic checks (P9/P10/P11)** `[B]` `[gate]`
-- projection == fold(events); from_events == live; snapshot == replay; sync == async.
-- Parameterize over the domain list so new domains are covered automatically.
-- Label clearly: these only catch bugs that differ between the two paths.
+**T2.1 - Metamorphic checks (P9/P10/P11)** `[B]` `[gate]` - MOSTLY DONE (3 of 4; sync==async deferred)
+- New `verification/metamorphic/` tree. Every module docstring states the source-B
+  caveat up front: these compare two folds of the SAME stream, so they only catch
+  bugs that DIVERGE between the paths — not bugs both paths share (that is what the
+  type-A oracles are for). Auto-collected by CI's existing `pytest verification/`
+  jobs (memory + Postgres); no workflow change needed.
+- **P10 — `test_replay_equals_live.py`**: `repository.get(id)` (replay via
+  from_events) must equal the live in-memory aggregate, full `to_dict()` incl.
+  version / VOs / child entities. Parameterized over ALL FOUR event-sourced
+  aggregates (Order, InventoryItem, Payment, PromoCampaign) — adding an ES
+  aggregate is a one-row change plus its `*_bed` fixture.
+  - **Finding (this check caught it) — FIXED in the same change:** the **Payment**
+    aggregate's `PaymentAttempt` child entity carried no identity on its events
+    (`PaymentInitiated` / `PaymentRetryInitiated`); `_on_payment_initiated` did
+    `add_attempts(PaymentAttempt(...))` with no id, so Protean minted a **fresh
+    uuid4 on every replay** → replayed != live, and the "complete audit trail of
+    every charge" promise broke. `Order` does it right (pre-generates `OrderItem`
+    ids, carries them on `OrderCreated`); Payment already did it right for refunds
+    (`refund_id` on `RefundRequested`). Fixed by pre-generating `attempt_id` in
+    `create()`/`retry()`, carrying it on both events, and using
+    `PaymentAttempt(id=event.attempt_id, ...)` in the @apply handlers; payments IR
+    baseline regenerated; two event-construction unit tests updated. The `payment`
+    case is now a **passing regression guard** (fails if the id is ever dropped
+    again). ShopStream reference-code bug, no Protean issue (user code calling
+    uuid4() in an @apply handler — the framework cannot detect this).
+- **P11 — `test_snapshot_equals_replay.py`**: for PromoCampaign
+  (`snapshot_threshold=5`, the only snapshot-configured aggregate), full replay
+  (captured before any snapshot) == snapshot load (after `create_snapshot`), and a
+  second test proves snapshot + post-snapshot tail == live.
+- **P9 — `test_projection_equals_fold.py`**: a read model == its aggregate's
+  replayed state (two independent folds of one stream). Seeded with
+  `InventoryLevel` (mirrors the `StockLevels` VO one-for-one). Registry-shaped for
+  more projections. Docstring is explicit that this is the WEAK check and points at
+  `test_p20_projector_idempotency` for the duplicate-in-stream blind spot.
+- **sync == async — DEFERRED to `[nightly]`/local.** Both CI envs (memory, test)
+  are `event_processing="sync"`; a genuine sync-vs-async comparison needs the live
+  engine + Redis, which is unreliable in CI (proteanhq/protean#1055, the same
+  reason `test_dlq` is `@pytest.mark.engine` local-only). The `sync`/`async` test-
+  body equivalence is already covered structurally by `process_and_wait`/`drain`
+  (T0.1). A dedicated metamorphic sync==async harness belongs in the nightly engine
+  lane; tracked, not built here.
 
 **T2.2 - Cross-domain payload contracts (P15)** `[A]` `[gate]`
 - Snapshot every `published=True` event's external payload; feed each saved

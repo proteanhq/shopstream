@@ -24,6 +24,7 @@ class TestPaymentInitiated:
             last4="4242",
             gateway_name="FakeGateway",
             idempotency_key="idem-001",
+            attempt_id="att-001",
             initiated_at=datetime.now(UTC),
         )
         assert event.payment_id == "pay-001"
@@ -69,6 +70,7 @@ class TestPaymentRetryInitiated:
             payment_id="pay-001",
             order_id="ord-001",
             attempt_number=2,
+            attempt_id="att-002",
             retried_at=datetime.now(UTC),
         )
         assert event.attempt_number == 2

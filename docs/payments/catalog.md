@@ -116,6 +116,7 @@
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
 | amount | Float | Yes | — |
+| attempt_id | Identifier | Yes | min_length=1 |
 | currency | String | Yes | max_length=255, min_length=1 |
 | customer_id | Identifier | Yes | min_length=1 |
 | gateway_name | String | Yes | max_length=255, min_length=1 |
@@ -148,6 +149,7 @@
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
+| attempt_id | Identifier | Yes | min_length=1 |
 | attempt_number | Integer | Yes | — |
 | order_id | Identifier | Yes | min_length=1 |
 | payment_id | Identifier | Yes | min_length=1 |
