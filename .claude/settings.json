@@ -1,0 +1,76 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(for db in identity_local catalogue_local ordering_local inventory_local payments_local fulfillment_local notifications_local reviews_local)",
+      "Bash(do echo \"Truncating $db...\")",
+      "Bash(PROTEAN_ENV=memory PYTHONPATH=src poetry run pytest:*)",
+      "Bash(source .venv/bin/activate)",
+      "Bash(docker restart shopstream-api-1)",
+      "Bash(lsof -ti:9000)",
+      "Read(//tmp/**)",
+      "Read(//Users/subhashb/wspace/proteanhq/shopstream/**)",
+      "Read(//private/tmp/**)",
+      "Bash(git add:*)",
+      "Bash(git rm:*)",
+      "Bash(PYTHONPATH=src poetry run protean docs generate --domain=catalogue.domain --type=clusters --output=docs/catalogue/clusters.md)",
+      "Bash(PYTHONPATH=src python -m protean docs generate --domain=catalogue.domain --type=clusters --output=docs/catalogue/clusters.md)",
+      "Bash(PYTHONPATH=src protean docs generate --domain=catalogue.domain --type=clusters --output=docs/catalogue/clusters.md)",
+      "Bash(for d:*)",
+      "Bash(do PYTHONPATH=src protean docs generate --domain=$d.domain --type=clusters --output=docs/$d/clusters.md)",
+      "Bash(for type:*)",
+      "Bash(do for:*)",
+      "Bash(do PYTHONPATH=src protean docs generate --domain=$d.domain --type=$type --output=docs/$d/$type.md)",
+      "Bash(do PYTHONPATH=src protean docs generate --domain=$d.domain --type=events --output=docs/$d/event-flows.md)",
+      "Bash(PYTHONPATH=src protean docs generate --domain=$d.domain --type=handlers --output=docs/$d/handler-wiring.md)",
+      "Bash(PYTHONPATH=src PROTEAN_ENV=memory uv run pytest tests/ -x -q --tb=short)",
+      "Bash(uv sync:*)",
+      "Bash(gh issue:*)",
+      "Bash(gh pr:*)",
+      "Bash(uv run:*)",
+      "Bash(PROTEAN_ENV=memory uv run pytest tests/inventory/ -x -q)",
+      "Bash(PROTEAN_ENV=memory uv run pytest tests/fulfillment/ -x -q)",
+      "Bash(PROTEAN_ENV=memory uv run pytest tests/ -x -q)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/shopstream-pulse.py",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/block-dangerous-git.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/stop-lint-format.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
