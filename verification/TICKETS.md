@@ -117,11 +117,21 @@ whether it gates PRs / nightly / releases.
   when fixed.
 - Postgres + Message-DB only (skips under `--protean-env memory`).
 
-**T1.4 - Concurrency model with Hypothesis (P2/P4)** `[A]` `[nightly]`
-- A Hypothesis state machine driving random valid command sequences against one
-  aggregate, checked against a hand-written plain-Python model (not Protean).
-- Only worth it with an independent model; do it for Stock and one event-sourced
-  aggregate, not all.
+**T1.4 - Concurrency model with Hypothesis (P2/P4)** `[A]` `[nightly]` - DONE
+- `verification/model/test_inventory_model.py` — a Hypothesis `RuleBasedStateMachine`
+  drives random valid sequences (receive / reserve / release / confirm / adjust)
+  at one event-sourced `InventoryItem` (Stock, which is both "Stock" and the
+  event-sourced aggregate) and asserts its stock position matches an INDEPENDENT
+  plain-Python model after every step.
+- Drives the aggregate directly (methods apply events in-memory) rather than the
+  full command→persist→project→replay path: the projector fan-out per command made
+  that path minutes-slow (150×25 ≈ 47 min); the aggregate-level version runs the
+  same coverage in ~1.7s. State-machine correctness is what this targets.
+- Finding: an all-default `StockLevels` VO round-trips to None (surfaced while
+  building this); filed proteanhq/protean#1078. The model mirrors the aggregate's
+  own None-as-zeros handling.
+- Note: not literal concurrency (that is T1.1, multi-process) — this explores
+  sequential interleavings an example-based test would miss.
 
 **T1.5 - Regression set habit** `[A]` `[gate]` - DONE
 - `verification/regression/` — the habit + a manifest (`README.md`) mapping every

@@ -25,6 +25,13 @@ capabilities:
     source: B
     status: partial
 
+  - name: aggregate_state_machine
+    taught_by: src/inventory/stock/stock.py
+    guarded_by: verification/model/test_inventory_model.py
+    property: "random valid command sequences keep the aggregate == an independent plain-Python model (P2)"
+    source: A
+    status: covered   # T1.4: Hypothesis state machine vs hand-written model
+
   - name: snapshots
     taught_by: src/loyalty/campaign/campaign.py
     guarded_by: verification/metamorphic/test_snapshot_equals_replay.py   # to build (P11)
