@@ -48,10 +48,10 @@ capabilities:
 
   - name: optimistic_concurrency
     taught_by: src/inventory/stock/stock.py   # reserve() under contention
-    guarded_by: verification/oracles/test_no_lost_updates.py   # to build (P2)
-    property: "N concurrent writes: final_version == #successes, no lost update"
+    guarded_by: verification/oracles/test_no_lost_updates.py
+    property: "N concurrent writes at one aggregate: successes <= on_hand (never over-reserve), reserved == successes"
     source: A
-    status: gap   # KEY: must run on real Postgres, multi-process
+    status: covered   # T1.1: multi-process on real Postgres + Message-DB; falsified with version_retry off
 
   - name: cross_domain_acl_subscriber
     taught_by: src/reviews/review/ordering_subscriber.py

@@ -67,13 +67,23 @@ whether it gates PRs / nightly / releases.
 
 ## Phase 1 - the real bug-finders
 
-**T1.1 - Concurrency check: no lost updates (P2)** `[A]` `[gate]`
-- On REAL Postgres, multi-process: fire N concurrent commands at one aggregate;
-  assert final version == number of successes, failures == N - successes, and a
-  counter field == sum of applied deltas.
-- Use Inventory `Stock.reserve()` on one SKU.
-- Done when: the check passes on Postgres and FAILS if version_retry is disabled.
-- Note: must NOT run in memory mode (memory transactions are fake).
+**T1.1 - Concurrency check: no lost updates (P2)** `[A]` `[gate]` - DONE
+- `verification/oracles/test_no_lost_updates.py` (+ `_concurrency_worker.py`):
+  spawns WORKERS separate processes that each fire one `ReserveStock(qty=1)` at
+  ONE `InventoryItem` seeded with N units, on real Postgres + Message-DB, aligned
+  on a barrier for maximal contention.
+- Safety gate (always holds): `successes <= N` (never over-reserve — the
+  lost-update bug), `reserved == successes`, `available == N - successes >= 0`,
+  reservation count == successes. Type-A: expected values are hand-computed, not
+  folded from the event stream.
+- Liveness (retry on): all N units sell; the extra writers fail with "insufficient
+  stock", not a dropped write.
+- Falsification (`test_version_retry_is_load_bearing`): with `version_retry`
+  disabled, real `ExpectedVersionError`s surface and `successes < N`, while safety
+  still holds — proving the oracle has teeth and OCC never corrupts.
+- Skips under `--protean-env memory` (fake transactions); runs in CI's Postgres
+  job via `pytest verification/ --protean-env test`. Empirically stable (9/9
+  runs `successes == N` with retry on; 1-2 without).
 
 **T1.2 - Exactly-one outbox row (P4)** `[A]` `[gate]`
 - Extend `tests/integration/test_event_publishing.py`: after a published-event

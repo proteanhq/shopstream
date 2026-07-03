@@ -151,6 +151,12 @@ jobs:
         # CI's Redis (see proteanhq/protean#1055) — they run locally only. Deselect them here.
         run: uv run pytest -m "not engine" --cov=src/identity --cov=src/catalogue --cov=src/ordering --cov=src/inventory --cov=src/payments --cov=src/fulfillment --cov=src/reviews --cov=src/notifications --cov=src/loyalty --cov-report=xml --cov-report=term-missing
 
+      - name: Run verification oracles (real Postgres + Message-DB)
+        # The verification/ suite is only collected here (not in testpaths). The P2
+        # no-lost-updates oracle needs a real store + Message-DB and is multi-process,
+        # so it skips under memory mode and only runs against the test database.
+        run: uv run pytest verification/ --protean-env test -m "not engine"
+
       - name: Extract coverage percentage
         if: matrix.python-version == '3.11'
         id: coverage
