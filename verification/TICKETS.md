@@ -211,10 +211,40 @@ whether it gates PRs / nightly / releases.
   (T0.1). A dedicated metamorphic sync==async harness belongs in the nightly engine
   lane; tracked, not built here.
 
-**T2.2 - Cross-domain payload contracts (P15)** `[A]` `[gate]`
-- Snapshot every `published=True` event's external payload; feed each saved
-  payload through the real subscriber `__call__` and assert it translates with no
-  KeyError. Catches a producer dropping/renaming a field a subscriber reads.
+**T2.2 - Cross-domain payload contracts (P15)** `[A]` `[gate]` - DONE
+- `verification/contracts/test_acl_payloads.py`. For every stream, a real instance
+  of each `published=True` event is built from its own declared fields and
+  serialized exactly as the outbox does (`to_dict()` minus `_metadata` -> the
+  `data` block, wrapped in `{"metadata":{"headers":{"type": "<Camel>.<Event>.v<n>"}},
+  "data": ...}`), then fed through EVERY real subscriber on that stream via the
+  subscriber's `__call__`. Asserts no KeyError. Type-A: the payload shape comes
+  from the producer, independent of what the consumer expects — a rename on either
+  side drops a key a subscriber hard-reads and the check fails.
+- Coverage: full producer×consumer cross-product per stream (84 pairs across the 9
+  streams) — a subscriber must also cleanly IGNORE the event types it does not
+  handle. New event/subscriber = one line in the `STREAMS` registry. Added the 4
+  missing `*_bed`/`*_ctx` fixtures (identity, catalogue, fulfillment, notifications)
+  to `verification/conftest.py`.
+- Teeth: 4 falsifications (`test_dropped_hard_read_field_is_caught`) — dropping a
+  field a subscriber HARD-reads (`data[field]`) across 4 consumer domains
+  (inventory CatalogueVariantSubscriber/product_id, notifications review/review_id,
+  notifications payment/customer_id, notifications ordering/order_id) MUST raise
+  KeyError. Proves the oracle is not passing vacuously.
+- Honest limitation (in the module docstring): asserts on KeyError only. ShopStream
+  subscribers are defensive — most reads are `data.get(key)`, which returns None
+  instead of raising, so this check cannot see a field read via `.get()` that
+  silently degrades. It catches the hard `data[key]` reads (the ones that crash a
+  consumer). Downstream business failures (a dispatched command with no target
+  aggregate) are tolerated — only the payload translation is under test.
+- Finding (soft gaps the map surfaced, not KeyErrors — candidate ShopStream bugs,
+  NOT fixed here): `OrderDelivered` carries only `order_id/customer_id/delivered_at`
+  but reviews' `OrderDeliveredSubscriber` wants `data.get("items")` to record
+  VerifiedPurchases — so VerifiedPurchases is never populated from the real event.
+  Similarly `CartAbandoned` has no `customer_id` (notifications cart subscriber
+  no-ops) and `OrderCancelled`/fulfillment events lack `customer_id` (notifications
+  handlers are log-only by design). These are graceful-by-design except the
+  OrderDelivered→items one, which is worth a follow-up (add `items` to
+  `OrderDelivered`, or have reviews read them another way).
 
 **T2.3 - Saga liveness + compensation (P16)** `[A]` `[nightly]`
 - Force a payment failure x3 in the checkout saga; assert the order ends CANCELLED
