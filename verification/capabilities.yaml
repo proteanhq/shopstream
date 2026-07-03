@@ -41,10 +41,10 @@ capabilities:
 
   - name: outbox_dual_write
     taught_by: src/payments/domain.toml   # external_brokers = ["global"]
-    guarded_by: tests/integration/test_event_publishing.py
+    guarded_by: verification/oracles/test_outbox_exactly_once.py
     property: "exactly one outbox row per (message_id, target_broker) (P4)"
     source: A
-    status: partial   # extend with a forced-duplicate-insert-must-fail case
+    status: covered   # T1.2: dual-write shape + DB rejects a forced duplicate (IntegrityError)
 
   - name: optimistic_concurrency
     taught_by: src/inventory/stock/stock.py   # reserve() under contention
