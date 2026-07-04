@@ -42,13 +42,17 @@ dependency group from T0.4 lands with a lock refresh, separately.)
   `NumericValueOutOfRange` → 500. Fixed by bounding both with FastAPI `Query`
   (`page` 1..1_000_000, `page_size` 1..100) → out-of-range now returns 422.
 
-**Filed / candidate (NOT a fix here):**
-- **`ProductRating.counted_reviews` (a `Dict()` projection field) gets no DB
-  column.** `protean db setup` materializes `product_rating` without a
-  `counted_reviews` column, so any query touching it (`GET /reviews/ratings/{id}`)
-  500s with `UndefinedColumn`. Reproduces on a freshly provisioned base-env DB, so
-  it is a real schema-generation gap for `Dict` projection fields, not a stale-env
-  artifact — candidate Protean issue. Tracked, not fixed in T2.4.
+**Investigated further — CORRECTED by T2.5 (see verification/conformance/):**
+- `GET /reviews/ratings/{id}` 500s with `UndefinedColumn: product_rating.
+  counted_reviews`. T2.4 originally speculated this was a "Dict projection field
+  gets no column" schema-generation gap. **That was wrong.** The T2.5 conformance
+  harness proves a `Dict()` field DOES get a column on a freshly created table, on
+  both postgresql and sqlite, for aggregates AND projections. The real cause is a
+  **stale table**: `protean db setup` / `create_all` creates only MISSING tables
+  and does not ALTER an existing one to add a newly-declared column, so the
+  `product_rating` table (created before `counted_reviews` was added) never gained
+  the column. That's a no-auto-migration property of `create_all` (drop + recreate,
+  or a real migration, is needed), not a Dict-type bug.
 
 **Lower-priority (documentation, not crashes):**
 - Many "undocumented HTTP status code" and "API rejected schema-compliant request"

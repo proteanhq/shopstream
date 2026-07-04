@@ -554,6 +554,18 @@ fuzz-full: ## Full fuzz: all checks (server errors + schema conformance + undocu
 	.venv/bin/schemathesis run http://localhost:8000/openapi.json --max-examples 20 --workers 4
 
 # ──────────────────────────────────────────────
+# Adapter conformance (T2.5) — same DAO behavior across memory/postgres/sqlite
+# Uses Protean's own adapter-conformance plugin. Requires Docker Postgres (:15432).
+# See verification/conformance/README.md.
+# ──────────────────────────────────────────────
+conformance: ## Run adapter conformance across memory/sqlite/postgresql and print the skip-rate
+	@set -e; for db in MEMORY SQLITE POSTGRESQL; do \
+		echo "── adapter: $$db ──"; \
+		PYTHONPATH=src .venv/bin/python -m pytest verification/conformance/ \
+			-p protean.integrations.pytest.adapter_conformance --db $$db -q -rs; \
+	done
+
+# ──────────────────────────────────────────────
 # Load Testing
 # ──────────────────────────────────────────────
 loadtest-install: ## Install load testing dependencies

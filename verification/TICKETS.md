@@ -292,19 +292,49 @@ whether it gates PRs / nightly / releases.
   (`offset = (page-1)*page_size`) → `NumericValueOutOfRange` → 500. Fixed with
   FastAPI `Query` bounds (`page` 1..1_000_000, `page_size` 1..100) → 422. Verified
   against the live API (previously-500 cases now 422; normal pagination still 200).
-- **Finding filed (not fixed) — `Dict()` projection field gets no DB column.**
-  `reviews.ProductRating.counted_reviews = Dict()` is materialized WITHOUT a column
-  by `protean db setup`, so `GET /reviews/ratings/{id}` 500s with `UndefinedColumn`.
-  Reproduces on a freshly provisioned DB → a real Protean schema-generation gap for
-  `Dict` projection fields, not a stale-env artifact. Candidate upstream issue.
+- **Finding investigated — CORRECTED by T2.5.** `GET /reviews/ratings/{id}` 500s
+  with `UndefinedColumn: product_rating.counted_reviews`. T2.4 first speculated a
+  "Dict projection field gets no column" schema-generation gap; the T2.5
+  conformance harness disproved that (a `Dict()` field DOES get a column on a fresh
+  table, on postgresql+sqlite, aggregate + projection). Real cause: a **stale
+  table** — `protean db setup`/`create_all` creates only MISSING tables and never
+  ALTERs an existing one to add a newly-declared column, so `product_rating`
+  (created before `counted_reviews` existed) never gained it. A no-auto-migration
+  property of `create_all`, not a Dict-type bug. No upstream issue.
 - Lower priority (deferred): 148 "undocumented status code" + 70 "schema-compliant
   rejected" findings = the OpenAPI spec under-documents 4xx responses (doc gap, not
   crashes). The "write-then-read via OpenAPI links" idea needs the schema to define
   `links` first; deferred with the doc work.
 
-**T2.5 - Adapter conformance (push upstream)** `[A]` `[nightly]`
-- A small set of declarative behavior cases run across memory/postgres/sqlite and
-  compared. Belongs in Protean (it is about Protean's adapters). Track skip-rate.
+**T2.5 - Adapter conformance (push upstream)** `[A]` `[nightly]` - DONE
+- `verification/conformance/` — 13 declarative persistence behaviors (add/get,
+  get-missing→ObjectNotFoundError, filter + gte/in/contains lookups, exclude,
+  order_by, limit+offset, count, update, delete, unique-index enforcement, Dict()
+  round-trip on an aggregate AND a projection) run across memory / sqlite /
+  postgresql and compared. `make conformance` runs all three and prints the
+  skip-rate.
+- Built ON Protean's OWN adapter-conformance plugin
+  (`protean.integrations.pytest.adapter_conformance`: the `--db` option +
+  `test_domain`/`db`/`store_config` fixtures + capability markers). Our conftest
+  overrides `db_config` (Postgres :15432, temp SQLite file) and `test_domain`
+  (registers the tiny `elements.py` aggregates). So the cases are directly
+  contributable upstream — which is the "push upstream" intent. Note: Protean's
+  generic conformance suite (`protean.testing.get_generic_test_dir()`) ships only
+  with source installs, not the wheel we pin.
+- **Result: 13/13 on all three adapters, skip-rate 0%** — every behavior here is
+  provider-agnostic by contract. Excluded from the normal `pytest verification/`
+  CI run via a `pytest_ignore_collect` guard (collected only when `--db` is on the
+  CLI), so it never breaks the memory/postgres jobs.
+- **Corrected the T2.4 finding.** The Dict()-round-trip cases pass on postgresql +
+  sqlite for both an aggregate and a projection, proving a `Dict` field DOES get a
+  column on a freshly created table. T2.4's `counted_reviews` 500 was therefore a
+  stale-table artifact (`create_all` doesn't ALTER existing tables), not a
+  Dict-schema-generation bug. T2.4's docs (fuzz README, TICKETS, capabilities)
+  updated in this change.
+- Divergence hunters kept for teeth: unique-index enforcement (asserts rejection,
+  not the exception type — memory vs SQL differ, relates to #1071) and the Dict
+  round-trip. Add more provider-incapable cases with capability markers
+  (`native_json`, `native_array`, …) — those auto-skip and show up in the skip-rate.
 
 **T2.6 - Toxiproxy fault injection on a FIXED workload** `[A]` `[nightly]`
 - Inject Redis/Postgres latency and partition during a small scripted workload
