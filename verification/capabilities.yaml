@@ -157,3 +157,4 @@ capabilities:
     property: "the same workload yields the same read model whether events process inline (sync) or via the engine (async)"
     source: B
     status: covered   # T2.1 (deferred sub-item, now done): InventoryLevel identical sync vs async on real Postgres; engine-marked/local
+

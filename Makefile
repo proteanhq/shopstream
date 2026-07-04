@@ -587,6 +587,7 @@ sync-async-verify: ## Run the sync==async read-model equivalence check (needs Do
 	PROTEAN_ENV=development PYTHONPATH=src .venv/bin/python -m pytest \
 		verification/metamorphic/test_sync_equals_async.py -q
 
+
 # ──────────────────────────────────────────────
 # Load Testing
 # ──────────────────────────────────────────────
