@@ -566,6 +566,24 @@ conformance: ## Run adapter conformance across memory/sqlite/postgresql and prin
 	done
 
 # ──────────────────────────────────────────────
+# Toxiproxy fault injection (T2.6) — convergence under broker faults
+# See verification/resilience/test_toxiproxy_convergence.py.
+# ──────────────────────────────────────────────
+toxiproxy-up: ## Start Toxiproxy (API :8474) and create the Redis proxy on :26379
+	@docker rm -f shopstream-toxiproxy >/dev/null 2>&1 || true
+	docker run -d --name shopstream-toxiproxy -p 8474:8474 -p 26379:26379 ghcr.io/shopify/toxiproxy:2.9.0
+	@sleep 2; curl -sf -X POST http://localhost:8474/proxies \
+		-d '{"name":"redis","listen":"0.0.0.0:26379","upstream":"host.docker.internal:16379"}' >/dev/null \
+		&& echo "redis proxy :26379 -> host:16379 ready" || echo "proxy may already exist"
+
+toxiproxy-down: ## Stop and remove the Toxiproxy container
+	@docker rm -f shopstream-toxiproxy >/dev/null 2>&1 && echo "toxiproxy removed" || true
+
+toxiproxy-verify: ## Run the T2.6 convergence check (needs Docker + toxiproxy-up)
+	PROTEAN_ENV=development PYTHONPATH=src .venv/bin/python -m pytest \
+		verification/resilience/test_toxiproxy_convergence.py -q
+
+# ──────────────────────────────────────────────
 # Load Testing
 # ──────────────────────────────────────────────
 loadtest-install: ## Install load testing dependencies

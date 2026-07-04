@@ -143,3 +143,10 @@ capabilities:
     property: "the same DAO behavior (add/get/filter/order/paginate/unique/Dict) holds on every provider (skip-rate 0%)"
     source: A
     status: covered   # T2.5: 13 behaviors x 3 adapters green; built on Protean's own conformance plugin; corrected the T2.4 Dict finding
+
+  - name: fault_tolerant_convergence
+    taught_by: src/inventory/domain.toml   # outbox + async broker pipeline
+    guarded_by: verification/resilience/test_toxiproxy_convergence.py   # make toxiproxy-verify
+    property: "under a transient broker fault, a fixed workload still drains the outbox to zero and the projection converges (guarded: latency; partition findings documented)"
+    source: A
+    status: covered   # T2.6: Toxiproxy in front of Redis; latency convergence guarded; partition surfaced 3 engine-resilience findings (#1055-class), engine-marked/local
