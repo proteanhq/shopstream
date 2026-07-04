@@ -203,13 +203,17 @@ whether it gates PRs / nightly / releases.
   `InventoryLevel` (mirrors the `StockLevels` VO one-for-one). Registry-shaped for
   more projections. Docstring is explicit that this is the WEAK check and points at
   `test_p20_projector_idempotency` for the duplicate-in-stream blind spot.
-- **sync == async — DEFERRED to `[nightly]`/local.** Both CI envs (memory, test)
-  are `event_processing="sync"`; a genuine sync-vs-async comparison needs the live
-  engine + Redis, which is unreliable in CI (proteanhq/protean#1055, the same
-  reason `test_dlq` is `@pytest.mark.engine` local-only). The `sync`/`async` test-
-  body equivalence is already covered structurally by `process_and_wait`/`drain`
-  (T0.1). A dedicated metamorphic sync==async harness belongs in the nightly engine
-  lane; tracked, not built here.
+- **sync == async — DONE (was deferred).** `verification/metamorphic/
+  test_sync_equals_async.py` runs one FIXED inventory workload (init 20, reserve 3)
+  twice against the same real Postgres — once with `event_processing="sync"` (events
+  fire inline) and once with `"async"` (outbox + `Engine.run()` drain) — and asserts
+  the two InventoryLevel projections are identical (bar the row id/timestamp). Same
+  events, same fold, so the read model must match whichever path ran. `make
+  sync-async-verify`. `@pytest.mark.engine` + base(async) env (needs the live engine
+  + Redis, #1055) — deselected in CI and skips cleanly under memory/test, so it
+  never breaks the normal suite. (The helper-level `sync`/`async` equivalence stays
+  covered by `process_and_wait`/`drain`, T0.1; this adds the end-to-end read-model
+  equivalence.)
 
 **T2.2 - Cross-domain payload contracts (P15)** `[A]` `[gate]` - DONE
 - `verification/contracts/test_acl_payloads.py`. For every stream, a real instance
