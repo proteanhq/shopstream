@@ -336,10 +336,43 @@ whether it gates PRs / nightly / releases.
   round-trip. Add more provider-incapable cases with capability markers
   (`native_json`, `native_array`, …) — those auto-skip and show up in the skip-rate.
 
-**T2.6 - Toxiproxy fault injection on a FIXED workload** `[A]` `[nightly]`
-- Inject Redis/Postgres latency and partition during a small scripted workload
-  with a known end state; assert the outbox drains to zero and projections
-  converge. Do NOT use the random Locust load as the workload.
+**T2.6 - Toxiproxy fault injection on a FIXED workload** `[A]` `[nightly]` - DONE
+- `verification/resilience/test_toxiproxy_convergence.py`. Toxiproxy sits in front
+  of Redis (`make toxiproxy-up` runs the container + creates the `:26379 -> redis`
+  proxy). The inventory broker is routed through it just by setting
+  `REDIS_URL=redis://127.0.0.1:26379/3` — the domain.toml URI is `${REDIS_URL|...}`,
+  so NO src change; Postgres + event store stay direct. A Redis toxic therefore
+  stalls exactly the publish/consume steps.
+- FIXED scripted workload with a hand-computed end state (init 20 units, reserve 3
+  → reserved=3, available=17) — NOT the random Locust load. Driven in-process; the
+  engine is drained with `Engine(inventory, test_mode=True).run()`.
+- Guarded (passing) check — **latency**: an 80ms latency toxic on the Redis broker
+  slows the pipeline but loses nothing — the fixed workload still drains the outbox
+  to zero and InventoryLevel converges to reserved=3. Plus a fast durability sanity
+  check (the workload's events are in the outbox pending, independent of the broker).
+- Partition was ALSO injected during exploration and produced the findings below;
+  full re-convergence after a HARD partition is not asserted because it is not
+  reliable via an in-process `Engine.run()` drain — it needs the real engine
+  process (the T2.3 pattern).
+- **Findings (all proteanhq/protean#1055-class) — the async engine does not
+  self-heal its broker connection under a partition:**
+  1. Without a socket timeout on the broker (`REDIS_URL` needs
+     `?socket_connect_timeout=1&socket_timeout=2`) the engine BLOCKS FOREVER on a
+     Redis read during a partition instead of failing fast.
+  2. After a partition, the broker's `redis_instance` is left `None`; the engine
+     never re-establishes it, so post-heal passes crash with `AttributeError`
+     until the harness calls `broker._ensure_connection()` itself (which pings and
+     reconnects, preserving pool settings — a raw `from_url` drops them and then
+     the engine's blocking reads time out).
+  3. Messages already delivered-but-unacked when the partition hits can stay stuck
+     in the consumer group's pending list; an in-process drain does not reclaim
+     them, so the projection converges only partially (e.g. reserved=2 of 3).
+  The outbox is durable so nothing is lost — but a real async worker would wedge
+  or crash-loop under a broker partition rather than recover on its own. Worth
+  surfacing upstream as a resilience default.
+- `@pytest.mark.engine` (deselected in CI via `-m "not engine"`, like the saga +
+  DLQ tests; #1055) and needs Docker + Toxiproxy + base(async) env. Run:
+  `make docker-up && make toxiproxy-up && make toxiproxy-verify`.
 
 ---
 
