@@ -150,3 +150,11 @@ capabilities:
     property: "under a transient broker fault, a fixed workload still drains the outbox to zero and the projection converges (guarded: latency; partition findings documented)"
     source: A
     status: covered   # T2.6: Toxiproxy in front of Redis; latency convergence guarded; partition surfaced 3 engine-resilience findings (#1055-class), engine-marked/local
+
+  - name: sync_async_equivalence
+    taught_by: src/inventory/domain.toml   # event_processing = sync | async
+    guarded_by: verification/metamorphic/test_sync_equals_async.py   # make sync-async-verify
+    property: "the same workload yields the same read model whether events process inline (sync) or via the engine (async)"
+    source: B
+    status: covered   # T2.1 (deferred sub-item, now done): InventoryLevel identical sync vs async on real Postgres; engine-marked/local
+
