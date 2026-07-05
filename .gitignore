@@ -189,3 +189,6 @@ todo/
 
 # Loyalty second-provider (SQLite reporting store) — created at runtime
 loyalty_reporting*.db
+
+# schemathesis fuzzing cache (T2.4)
+.schemathesis/

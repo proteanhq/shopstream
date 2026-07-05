@@ -382,9 +382,25 @@ whether it gates PRs / nightly / releases.
 
 ## Phase 3 - later / optional
 
-**T3.1 - Quarterly mutation audit** `[A]` `[manual]`
-- Run mutmut/cosmic-ray on Protean core; read the report; write targeted tests for
-  surviving mutants in invariant/state-machine/outbox code. No public badge, no gate.
+**T3.1 - Quarterly mutation audit** `[A]` `[manual]` - DONE (first run: outbox)
+- `verification/mutation/README.md` — the audit report + reproduce steps. First run
+  targets `protean.utils.outbox.py` (the outbox pattern ShopStream leans on hardest)
+  at the pinned commit `c79c497`, in an isolated `git worktree` (dev's protean branch
+  untouched), with mutmut 2.5.1 driven against Protean's fast outbox unit tests via
+  ShopStream's own venv (no `uv sync` needed).
+- **78% mutation score** (228/293 killed). Of the 65 survivors, ~50 are low-value
+  (enum/result string constants, default tuning args, index defs) and ~12 are real
+  boundary gaps in Protean's unit tests: retry-TIMING boundary (`current_time <
+  next_retry_at`, both call sites — VERIFIED by hand), lock-expiry boundary in
+  `_is_locked`, query `limit` boundaries (0 / >0 / <=0 across the fetch+claim paths),
+  the reconcile-sweep window off-by-one (`max(0, tail - limit + 1)` — recovery, which
+  T1.3/#1073 already flagged), and a dropped `target_broker` query filter. The report
+  gives a proposed test for each.
+- Per the T3.1 decision, findings/tests target the Protean repo but are documented
+  here, not committed upstream in this change. No public badge, no gate; quarterly.
+- Follow-ups: extend the audit to the state-machine (`Status` field transitions) and
+  invariant machinery next quarter. `mutmut results` crashes on the current pony-orm
+  (survivors read from `.mutmut-cache` directly) — note for anyone automating it.
 
 **T3.2 - Antithesis (optional)** `[A]`
 - Run the real Docker stack under Antithesis for deterministic, reproducible fault

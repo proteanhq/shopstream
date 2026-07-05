@@ -158,3 +158,9 @@ capabilities:
     source: B
     status: covered   # T2.1 (deferred sub-item, now done): InventoryLevel identical sync vs async on real Postgres; engine-marked/local
 
+  - name: mutation_audit
+    taught_by: verification/mutation/README.md   # quarterly mutation audit of Protean core
+    guarded_by: verification/mutation/README.md   # [manual] report, no gate
+    property: "Protean's own unit tests kill mutations of its core logic (outbox/state-machine/invariant)"
+    source: A
+    status: partial   # T3.1: outbox.py audited (78% score, 228/293 killed); ~12 real boundary gaps + 6 proposed tests; quarterly, no gate
