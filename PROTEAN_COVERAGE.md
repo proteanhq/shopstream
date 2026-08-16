@@ -49,7 +49,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `Date` | ✅ | identity Profile, loyalty RewardAccount/PromoCampaign |
 | `Date` on a **command/event** payload | ✅ | loyalty `LaunchCampaign.starts_on/ends_on` — campaign date windows flow through end-to-end (**#1046** fixed on main) |
 | non-Enum `choices` (list) | ✅ | loyalty tier, discount_type, entry_type |
-| `Auto(increment=True)` | ⛔ | the generated value is **not reflected back onto the aggregate after `repository.add()`** (stays `None`), so the feature is unusable via the repository — filed as [proteanhq/protean#1056](https://github.com/proteanhq/protean/issues/1056). Root cause: `BaseDAO.save()` (the `add()` path) omits the auto-field reverse-update that `dao.create()` performs. Add a loyalty exerciser + regression test when it lands |
+| `Auto(increment=True)` | 🚧 | [proteanhq/protean#1056](https://github.com/proteanhq/protean/issues/1056) is fixed on main: `repository.add()` now reflects the generated value back onto the aggregate. ShopStream has no `increment=True` usage yet; the follow-up is a loyalty exerciser + regression test |
 | custom field validators (RegexValidator + custom class, composed) | ✅ | loyalty `member_code` |
 | optional field + `validators=` (skipped on `None`) | ✅ | loyalty `referral_code` (**#1025** fixed on main) |
 | `@invariant.post` | ✅ | widespread |
@@ -72,6 +72,40 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | async command processing (`asynchronous=True`) | ✅ | loyalty `POST /loyalty/accounts/{id}/earn-async` (202; engine drains the command queue) |
 | multiple database providers in one domain | ✅ | loyalty runs **two** providers: default PostgreSQL + a `[databases.reporting]` **SQLite** store backing `CampaignCatalog` (`@loyalty.projection(provider="reporting")`). SQLite is embedded so both CI jobs exercise it (Postgres job = real Postgres + real SQLite; memory job = both in-memory). Routing + round-trip asserted in `tests/loyalty/integration/test_second_provider.py` |
 | DLQ deliberate exercise + replay | ✅ | loyalty `PoisonPill` failing handler → `tests/loyalty/integration/test_dlq.py` drives `Engine(test_mode)` → message lands in `loyalty::poison_pill:dlq`, then `broker.dlq_replay` (Redis-only, `@pytest.mark.engine`; **runs locally only** — the engine is unreliable in CI, filed as [proteanhq/protean#1055](https://github.com/proteanhq/protean/issues/1055); CI deselects via `-m "not engine"`) |
+| temporal / point-in-time (as-of) event-store queries | 🚧 | claimed in `ordering`/`inventory` aggregate docstrings; no as-of replay query API is actually exercised (the `as_of` uses in cart/stock/notifications are datetime business logic). The follow-up is a real point-in-time read |
+
+## Server & async runtime
+
+| Capability | Status | Where |
+|---|---|---|
+| the Engine (per-domain workers) | ✅ | `make engine-<domain>` (OutboxProcessor + StreamSubscriptions); scaled variants `engine-<domain>-scaled` |
+| stream subscriptions (outbox-backed) | ✅ | `[server] default_subscription_type = "stream"` in every domain.toml |
+| the outbox (atomic write + dual-write) | ✅ | `[outbox]` in every domain.toml; exactly-once guarded by `verification/oracles/test_outbox_exactly_once.py` |
+| stream categories | ✅ | `stream_categories=[...]` on `OrderCheckoutSaga` and `RedemptionSaga` |
+| priority lanes (primary vs backfill) | ✅ | `[server.priority_lanes]` in identity/catalogue/ordering/inventory/payments; `docs/priority-lanes.md`; `loadtests/scenarios/priority_lanes.py`; `scripts/migration_demo.py` |
+| version-retry (OCC auto-retry) | ✅ | `[server.version_retry]` in ordering/payments; guarded by `verification/oracles/test_no_lost_updates.py` (multi-process Postgres) |
+| external Redis bus (shared, DB 15) | ✅ | `[brokers.global]` per domain.toml; `[outbox] external_brokers = ["global"]` |
+| `sequential_by` partitioned/ordered consumer | 🚧 | absent. ShopStream reproduces per-stream out-of-order delivery under concurrent load (`PROTEAN_v0.16_NOTES.md` item 9) and does not yet adopt `sequential_by` (Protean #830, epic #826). Highest-value gap |
+| circuit breaker | 🚧 | absent. `transient_retry` (payments) and `version_retry` (ordering/payments) are the only resilience knobs wired. The follow-up is a breaker exerciser |
+| stream retention / trimming (MAXLEN) | 🚧 | absent. No stream-trim configuration on any broker; streams grow unbounded in the demo. The follow-up is a retention exerciser |
+| custom subscription profiles | 🚧 | absent. Only `default_subscription_type` and priority-lane routing are configured; no per-subscription profile. The follow-up is a profile exerciser |
+| CloudEvents envelope format | 🚧 | absent. Cross-domain events use Protean's native metadata-headers dict payload; the CloudEvents serialization is not exercised. The follow-up is a CloudEvents exerciser |
+
+## Observability & diagnostics
+
+| Capability | Status | Where |
+|---|---|---|
+| OpenTelemetry (OTLP HTTP spans) | ⚠️ | wired via `instrument_app(...)` in `src/app.py`; `[production.telemetry]` production overlay; no dedicated assertion found |
+| structured logging + correlation processor | ⚠️ | wired via `configure_logging(extra_processors=[protean_correlation_processor])`; `logging.toml`; no dedicated assertion found |
+| correlation & causation identity | ✅ | `src/shared/enrichment.py`; verified E2E by `scripts/verify-observatory.sh` (correlation chain + causation tree) |
+| Observatory (timeline, causation graph, domain visualizer) | ✅ | `make observatory`; `scripts/verify-observatory.sh` (~66 checks); `scripts/verify-domain-visualizer.sh` |
+| message tracing | ✅ | Observatory Trace API (recent, search, causation tree) checked in `scripts/verify-observatory.sh` |
+| Prometheus metrics | ⚠️ | Observatory `/metrics` (`protean_outbox_messages`, `protean_stream_messages`, `protean_stream_processed_total`); scraped in load tests; no unit assertion |
+| `protean check` (typed diagnostics) | ✅ | `make domain-check` / `domain-check-<domain>` |
+| the IR + baselines + backward-compat gate | ✅ | `.protean/<domain>/ir.json`; `make ir`/`ir-check`/`ir-diff`; `verification/contracts/test_ir_gate.py` + `make ir-gate` |
+| docs generated from the IR | ✅ | `make docs-generate`; committed `docs/<domain>/catalog.md`; `make docs-check` CI gate |
+| fitness functions | 🚧 | absent. Architectural discipline is enforced through `make check-src-clean` and the IR gate; no Protean fitness-function element is used. The follow-up is a fitness-function exerciser |
+| `protean verify` subcommand | 🚧 | absent. The `make verify-*` targets are ShopStream shell scripts; the follow-up is to wire the real `protean verify` (init + check + tests) in |
 
 ## Protean bugs surfaced (filed; milestone 0.16.1)
 
@@ -104,7 +138,9 @@ is covered by `given()` unit tests and by end-to-end completion tests (now perma
 
 ## Follow-ups (need design or infrastructure)
 
-- **`Auto(increment)`** — a clean home + the id-reflection wart (see above).
+**Coverage-gap backlog** (the 🚧 rows in the tables above, features that still need a ShopStream example, mapped 2026-08-16): temporal queries, `sequential_by` partitioned consumer, circuit breaker, stream retention/trimming, custom subscription profiles, CloudEvents envelope, fitness functions, `protean verify`, plus `Auto(increment=True)`.
+
+- **`Auto(increment)`**: a loyalty exerciser + regression test (see the table above; the id-reflection wart is fixed on main via #1056).
 - **Infra wiring — done.** loyalty is fully wired: `app.py`, `.protean/config.toml [domains]`,
   `.protean/loyalty/ir.json` baseline, CI (Postgres + memory jobs, `create_db.sh`, `--cov=src/loyalty`),
   the Makefile (`test`/`test-domain`/`test-application`/`test-memory*`/per-domain `test-loyalty*`,
