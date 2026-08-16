@@ -168,17 +168,9 @@ cython_debug/
 .vscode/
 .ruff_cache/
 
-# Claude Code: ignore local/personal config by default, but track the shared
-# rigor surface (hooks, agents, the /check skill, and the wiring in settings.json)
-# so new files under those dirs are versioned automatically. settings.local.json,
-# worktrees/, plans/, scratch/, and the plugin-provided element skills stay local.
-.claude/*
-!.claude/hooks/
-!.claude/agents/
-!.claude/settings.json
-!.claude/skills/
-.claude/skills/*
-!.claude/skills/check/
+# Claude Code config now lives in dotagents (dotagents/shopstream/dotclaude),
+# with .claude a symlink to it, matching the Protean setup. Ignore the symlink.
+/.claude
 
 # Load test results
 results/
