@@ -150,7 +150,7 @@ async def checkout_cart(cart_id: str, body: CheckoutRequest) -> OrderIdResponse:
 
     # Calculate pricing
     subtotal = sum(item["unit_price"] * item["quantity"] for item in items_data)
-    grand_total = subtotal + (body.shipping.dict() if hasattr(body, "shipping") else {}).get("shipping_cost", 0)
+    grand_total = subtotal + (body.shipping.model_dump() if hasattr(body, "shipping") else {}).get("shipping_cost", 0)
 
     shipping_dict = body.shipping.model_dump()
     billing_dict = body.billing.model_dump()

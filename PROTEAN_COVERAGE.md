@@ -71,7 +71,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `value_object_from_entity` | ✅ | payments invoice (PR #8) |
 | async command processing (`asynchronous=True`) | ✅ | loyalty `POST /loyalty/accounts/{id}/earn-async` (202; engine drains the command queue) |
 | multiple database providers in one domain | ✅ | loyalty runs **two** providers: default PostgreSQL + a `[databases.reporting]` **SQLite** store backing `CampaignCatalog` (`@loyalty.projection(provider="reporting")`). SQLite is embedded so both CI jobs exercise it (Postgres job = real Postgres + real SQLite; memory job = both in-memory). Routing + round-trip asserted in `tests/loyalty/integration/test_second_provider.py` |
-| DLQ deliberate exercise + replay | ✅ | loyalty `PoisonPill` failing handler → `tests/loyalty/integration/test_dlq.py` drives `Engine(test_mode)` → message lands in `loyalty::poison_pill:dlq`, then `broker.dlq_replay` (Redis-only, `@pytest.mark.engine`; **runs locally only** — the engine is unreliable in CI, filed as [proteanhq/protean#1055](https://github.com/proteanhq/protean/issues/1055); CI deselects via `-m "not engine"`) |
+| DLQ deliberate exercise + replay | ✅ | loyalty `PoisonPill` failing handler → `tests/loyalty/integration/test_dlq.py` drives `Engine(test_mode)` → message lands in `loyalty::poison_pill:dlq`, then `broker.dlq_replay` (Redis-only, `@pytest.mark.engine`; **runs locally only**: CI deselects via `-m "not engine"`, a workaround for [proteanhq/protean#1055](https://github.com/proteanhq/protean/issues/1055), which is now fixed in the pin; the engine CI job is not yet re-added) |
 | temporal / point-in-time (as-of) event-store queries | 🚧 | claimed in `ordering`/`inventory` aggregate docstrings; no as-of replay query API is actually exercised (the `as_of` uses in cart/stock/notifications are datetime business logic). The follow-up is a real point-in-time read |
 
 ## Server & async runtime
@@ -109,8 +109,8 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 
 ## Protean bugs surfaced (filed; milestone 0.16.1)
 
-This branch pins Protean to git `main`. #1023/#1025/#1028/#1034/#1046 are fixed there, and the
-pin was bumped to Protean main `c79c497`, which also lands #1048 (sync PM cascade) and #1056
+This branch pins Protean to git `main`, currently `6b4cd312` (after 0.17.0). #1023/#1025/#1028/
+#1034/#1046 are fixed there, and so are #1048 (sync PM cascade), #1055 (engine in CI) and #1056
 (Auto-increment) — the loyalty `RedemptionSaga` now cascades to completion synchronously and its
 completion tests are permanent guards (no longer `xfail`).
 
@@ -122,7 +122,7 @@ completion tests are permanent guards (no longer `xfail`).
 | [#1034](https://github.com/proteanhq/protean/issues/1034) | ✅ fixed on main | cache-backed projection broke SQLAlchemy DB setup (`_create_database_artifacts` didn't skip cache projections); loyalty now runs in the Postgres CI job too |
 | [#1046](https://github.com/proteanhq/protean/issues/1046) | ✅ fixed on main | a `Date` field on a command/event broke the message checksum (`ResolvedField.as_dict` had no `date` branch → `json.dumps` raised); campaign date windows now work end-to-end |
 | [#1048](https://github.com/proteanhq/protean/issues/1048) | ✅ fixed on main | multi-step process managers now cascade under `event_processing="sync"`; loyalty `RedemptionSaga` runs to a terminal state synchronously (completion/compensation tests are guards) |
-| [#1055](https://github.com/proteanhq/protean/issues/1055) | 🐞 filed (0.17.0) | `Engine(test_mode=True).run()` against a Redis broker is unreliable in CI — the engine's async poll loops drop their (sync) Redis connections mid-read (`Connection closed by server` → `redis_instance` becomes `None`), so the async pipeline never completes. Reproduces only in CI, not locally. The loyalty DLQ test (`@pytest.mark.engine`) runs **locally only**; **revisit when #1055 is fixed** — then re-add an engine CI job (deselected today via `-m "not engine"`) |
+| [#1055](https://github.com/proteanhq/protean/issues/1055) | ✅ fixed on main | `Engine(test_mode=True).run()` against a Redis broker was unreliable in CI. The engine's async poll loops dropped their (sync) Redis connections mid-read (`Connection closed by server` → `redis_instance` became `None`), so the async pipeline never completed. The fix is in the pin (main 6b4cd312, after 0.17.0), but CI still deselects the engine tests (`-m "not engine"`), so the loyalty DLQ test (`@pytest.mark.engine`) still runs **locally only** until an engine CI job is re-added |
 | [#1056](https://github.com/proteanhq/protean/issues/1056) | ✅ fixed on main | `repository.add()` now reflects an `Auto(increment=True)` generated value back onto the aggregate (the in-memory provider reflects it; relational adapters assign it). ShopStream has no `increment=True` usage to exercise it |
 
 Minor DX note (not filed): `repository_for()` gives a confusing `provider=None` error for cache-backed

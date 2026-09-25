@@ -20,6 +20,7 @@ See README.md for the full manifest (every filed issue → its guard → status)
 from __future__ import annotations
 
 import os
+import warnings
 from datetime import datetime
 
 import pytest
@@ -95,3 +96,257 @@ def test_1071_memory_adapter_enforces_unique_index():
     except Exception:
         rejected = True
     assert rejected, "in-memory adapter accepted a row that violates the (message_id, target_broker) unique index"
+
+
+@pytest.mark.usefixtures("inventory_ctx")
+def test_1078_all_default_value_object_round_trips():
+    """proteanhq/protean#1078 (guard): an all-default ValueObject survives event replay.
+
+    An event-sourced aggregate whose ValueObject had only falsy fields (every
+    `StockLevels` count at 0) came back as `None` after a persist and reload. The
+    fix touched both the attribute setter (`ValueObject.__set__`) and
+    serialization (`to_dict`), so the test checks the reloaded attribute and its
+    serialized form. The fix arrived with the pin bump to Protean main 6b4cd312
+    (after 0.17.0), so this is now a permanent guard.
+    """
+    import uuid
+
+    from protean import current_domain
+
+    from inventory.stock.stock import InventoryItem, StockLevels
+
+    item = InventoryItem.create(
+        product_id=str(uuid.uuid4()),
+        variant_id=str(uuid.uuid4()),
+        warehouse_id=str(uuid.uuid4()),
+        sku=f"SKU-{uuid.uuid4().hex[:8]}",
+        initial_quantity=0,
+        reorder_point=0,
+    )
+    repo = current_domain.repository_for(InventoryItem)
+    repo.add(item)
+
+    reloaded = repo.get(item.id)
+    assert reloaded.levels == StockLevels(on_hand=0, reserved=0, available=0, in_transit=0, damaged=0)
+    assert reloaded.to_dict()["levels"] == {
+        "on_hand": 0,
+        "reserved": 0,
+        "available": 0,
+        "in_transit": 0,
+        "damaged": 0,
+    }
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="current_domain warns 'Working outside of domain context' on attribute and type probes",
+)
+def test_current_domain_probe_outside_context_is_silent():
+    """Protean finding (not filed, feature request): `current_domain` has no warning-free probe.
+
+    Test modules import `current_domain` at module level. During collection pytest
+    runs `getattr(obj, "__test__", None)` (`_pytest/compat.py`) and `isinstance`
+    checks over every module attribute. With no domain context active, both go
+    through the proxy's `_find_domain()` and emit the "Working outside of domain
+    context" `UserWarning`, so collection prints it for 9 modules in `tests/`.
+
+    The proxy's docstring promises None-like results outside a context, not
+    silence, and Protean's own tests assert that `bool`/`repr` warn. So this is a
+    request for a probe that stays quiet (as `_domain_now()` already reads the
+    stack without warning), not a regression. The warning predates this pin: it
+    showed on Protean 0.16.0 too, and `pyproject.toml` filters it for the suite.
+    """
+    from protean import current_domain
+    from protean.utils.globals import _domain_context_stack
+
+    if _domain_context_stack.top is not None:
+        pytest.fail("precondition: no domain context may be active")
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        test_attr = getattr(current_domain, "__test__", None)
+        is_type = isinstance(current_domain, type)
+
+    assert test_attr is None
+    assert is_type is False
+    messages = [str(w.message) for w in caught]
+    assert not any("outside of domain context" in m for m in messages), messages
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Config2 keeps only keys from _default_config(), so a top-level [lint] table in domain.toml is dropped",
+)
+def test_lint_table_in_domain_toml_is_loaded(tmp_path, monkeypatch):
+    """Protean finding (not filed): a top-level `[lint]` table in `domain.toml` is dropped.
+
+    Protean's configuration docs describe a `[lint]` table (`level`, `suppressions`,
+    and more) that `protean check` and `protean verify` read through
+    `domain.config.get("lint", {})`. `Config2._normalize_config` keeps only the
+    top-level keys that `_default_config()` defines, and `lint` is not one of
+    them, so a top-level `[lint]` is discarded. An environment overlay such as
+    `[test.lint]` is deep-merged without that key filter, so it does load. The
+    bug is that the filter is applied to one and not the other.
+
+    On this pin any warning makes `protean check` exit 1. Because the `[lint]`
+    table is dropped, ShopStream cannot set `level = "error"` to keep
+    `make domain-check` failing on errors only.
+    """
+    from protean.domain.config import Config2
+
+    (tmp_path / "domain.toml").write_text('debug = true\n\n[lint]\nlevel = "error"\n\n[test.lint]\nlevel = "error"\n')
+
+    monkeypatch.setenv("PROTEAN_ENV", "test")
+    overlay = Config2.load_from_path(str(tmp_path))
+    if overlay.get("lint", {}).get("level") != "error":
+        pytest.fail("precondition: the [test.lint] overlay should load")
+
+    monkeypatch.delenv("PROTEAN_ENV")
+    config = Config2.load_from_path(str(tmp_path))
+
+    if config["debug"] is not True:
+        pytest.fail("precondition: the domain.toml was read")
+    assert config.get("lint", {}).get("level") == "error"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the is_event_sourced deprecation warning is attributed to protean/domain/__init__.py, not the caller",
+)
+def test_is_event_sourced_warning_points_at_the_decorator():
+    """Protean finding (not filed): the `is_event_sourced` warning names the wrong line.
+
+    Registering an element with the deprecated `is_event_sourced=True` warns, but
+    the warning's file and line are Protean's own `_domain_element.wrap` in
+    `protean/domain/__init__.py`, not the `@domain.aggregate(...)` line that used
+    the option. The `stacklevel` stops one frame short, so a user cannot see which
+    of their elements to change.
+    """
+    from protean import Domain
+    from protean.fields import String
+
+    domain = Domain(name="StacklevelProbe")
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+
+        @domain.aggregate(is_event_sourced=True)
+        class Probe:
+            name = String()
+
+    deprecations = [w for w in caught if "is_event_sourced" in str(w.message)]
+    if not deprecations:
+        pytest.fail("precondition: the deprecation warning was raised")
+    assert deprecations[0].filename == __file__, deprecations[0].filename
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the outermost UnitOfWork rolls back a doomed transaction and returns without raising",
+)
+def test_outer_commit_of_a_doomed_transaction_raises():
+    """Protean finding (not filed): a doomed transaction ends without an error.
+
+    A nested UnitOfWork joins the outermost one, so a nested rollback marks the
+    whole transaction rollback-only. When the outermost UnitOfWork then commits,
+    `UnitOfWork.commit` sees `_rollback_only`, logs a warning, rolls back and
+    returns. Nothing tells the caller the work was lost. A command handler that
+    catches the error from a nested `domain.process(...)` and carries on returns
+    as if it succeeded, and none of its writes persist. ShopStream's batch
+    handlers `ExpireStaleReservations` and `DetectAbandonedCarts` do exactly this.
+    """
+    from protean import Domain
+    from protean.core.unit_of_work import UnitOfWork
+    from protean.fields import String
+
+    domain = Domain(name="DoomedTransactionProbe")
+
+    @domain.aggregate
+    class Probe:
+        name = String()
+
+    domain.init(traverse=False)
+
+    with domain.domain_context():
+        outer_error = None
+        try:
+            with UnitOfWork():
+                domain.repository_for(Probe).add(Probe(name="lost"))
+                try:
+                    with UnitOfWork():
+                        raise RuntimeError("inner failure")
+                except RuntimeError:
+                    pass
+        except Exception as exc:  # noqa: BLE001
+            outer_error = exc
+
+        if domain.repository_for(Probe).query.all().total != 0:
+            pytest.fail("precondition: the nested rollback discarded the outer write")
+        assert outer_error is not None, "the outer UnitOfWork returned normally"
+
+
+@pytest.mark.skipif(
+    ENV != "test",
+    reason="needs the Postgres outbox and a Message-DB event store; the in-memory adapters do not autoflush",
+)
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="a stale write on an event-sourced aggregate with a published event fails on the outbox unique index",
+)
+@pytest.mark.usefixtures("inventory_ctx")
+def test_stale_event_sourced_write_raises_expected_version_error():
+    """Protean finding (not filed): a stale write surfaces as an IntegrityError.
+
+    For an event-sourced aggregate, the Message-DB append decides the version
+    conflict. `UnitOfWork._do_commit` writes the outbox rows before that append.
+    A published event gets a second row for the external broker, and saving it
+    runs `_validate_unique`, whose query autoflushes the first row. The outbox
+    message id is `<stream>-<version>`, so the stale writer's row has the same
+    `(message_id, target_broker)` as the winner's and Postgres rejects it. The
+    caller gets `sqlalchemy.exc.IntegrityError` instead of `ExpectedVersionError`,
+    so version retry never runs and a concurrent `ReserveStock` fails outright.
+    Guarded under real contention by `oracles/test_no_lost_updates.py`.
+    """
+    import uuid
+    from datetime import UTC, timedelta
+
+    from protean import current_domain
+    from protean.core.unit_of_work import UnitOfWork
+    from protean.exceptions import ExpectedVersionError
+
+    from inventory.stock.stock import InventoryItem
+
+    repo = current_domain.repository_for(InventoryItem)
+    item = InventoryItem.create(
+        product_id=str(uuid.uuid4()),
+        variant_id=str(uuid.uuid4()),
+        warehouse_id=str(uuid.uuid4()),
+        sku=f"SKU-{uuid.uuid4().hex[:8]}",
+        initial_quantity=5,
+        reorder_point=-1,
+    )
+    repo.add(item)
+    expires_at = datetime.now(UTC) + timedelta(minutes=15)
+
+    stale = repo.get(item.id)
+    with UnitOfWork():
+        winner = repo.get(item.id)
+        winner.reserve(order_id=str(uuid.uuid4()), quantity=1, expires_at=expires_at)
+        repo.add(winner)
+
+    outcome = None
+    try:
+        with UnitOfWork():
+            stale.reserve(order_id=str(uuid.uuid4()), quantity=1, expires_at=expires_at)
+            repo.add(stale)
+    except Exception as exc:  # noqa: BLE001
+        outcome = exc
+
+    if repo.get(item.id).levels.reserved != 1:
+        pytest.fail("precondition: only the winner's reservation persisted")
+    assert isinstance(outcome, ExpectedVersionError), repr(outcome)

@@ -8,7 +8,6 @@ compensation (refund) branches, plus the commands the saga dispatches.
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
-from protean.exceptions import ValidationError
 from protean.testing import given
 
 from loyalty.redemption.commands import (
@@ -51,6 +50,12 @@ def _voucher_failed(reason="No vouchers available"):
     return VoucherIssuanceFailed(redemption_id=RID, reason=reason, failed_at=datetime.now(UTC))
 
 
+def _funded(mock_domain):
+    """Mock dispatch, and an account that can cover any redemption."""
+    mock_domain.process = MagicMock()
+    mock_domain.repository_for.return_value.get.return_value.redemption_blocker.return_value = None
+
+
 def _commands_of(mock_domain, command_cls):
     return [c.args[0] for c in mock_domain.process.call_args_list if isinstance(c.args[0], command_cls)]
 
@@ -58,7 +63,7 @@ def _commands_of(mock_domain, command_cls):
 class TestForwardFlow:
     @patch("loyalty.redemption.saga.current_domain")
     def test_request_reserves_points_and_advances(self, mock_domain):
-        mock_domain.process = MagicMock()
+        _funded(mock_domain)
         result = given(_saga(), _requested(points=150))
         assert result.status == "reserving"
         assert result.points == 150
@@ -69,14 +74,14 @@ class TestForwardFlow:
 
     @patch("loyalty.redemption.saga.current_domain")
     def test_points_reserved_issues_voucher(self, mock_domain):
-        mock_domain.process = MagicMock()
+        _funded(mock_domain)
         result = given(_saga(), _requested(), _reserved())
         assert result.status == "issuing_voucher"
         assert len(_commands_of(mock_domain, IssueRedemptionVoucher)) == 1
 
     @patch("loyalty.redemption.saga.current_domain")
     def test_voucher_issued_completes_saga(self, mock_domain):
-        mock_domain.process = MagicMock()
+        _funded(mock_domain)
         result = given(_saga(), _requested(), _reserved(), _voucher_issued(code="VCHR-XYZ"))
         assert result.status == "completed"
         assert result.voucher_code == "VCHR-XYZ"
@@ -87,7 +92,7 @@ class TestForwardFlow:
 class TestCompensationFlow:
     @patch("loyalty.redemption.saga.current_domain")
     def test_voucher_failure_refunds_points_and_compensates(self, mock_domain):
-        mock_domain.process = MagicMock()
+        _funded(mock_domain)
         result = given(_saga(), _requested(points=200), _reserved(points=200), _voucher_failed("sold out"))
         assert result.status == "compensated"
         assert result.failure_reason == "sold out"
@@ -103,12 +108,15 @@ class TestCompensationFlow:
 class TestReserveRejected:
     @patch("loyalty.redemption.saga.current_domain")
     def test_insufficient_balance_rejects_without_compensation(self, mock_domain):
-        # RedeemPoints (the first dispatch) fails — nothing was deducted, nothing to refund.
-        mock_domain.process = MagicMock(side_effect=ValidationError({"points_balance": ["negative"]}))
+        # The account cannot cover the redemption, so nothing is dispatched and nothing refunded.
+        mock_domain.process = MagicMock()
+        account = mock_domain.repository_for.return_value.get.return_value
+        account.redemption_blocker.return_value = "Points balance cannot be negative"
         result = given(_saga(), _requested())
         assert result.status == "rejected"
+        assert result.failure_reason == "Points balance cannot be negative"
         assert result.is_complete
-        assert _commands_of(mock_domain, EarnPoints) == []
+        assert mock_domain.process.call_args_list == []
 
 
 def _saga():

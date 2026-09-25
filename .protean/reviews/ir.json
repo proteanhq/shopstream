@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:83d56a91470b9c31b4347ab9c193a1c7a8a1f8edeb677e4d7bf81d6ef998914d",
+  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
+  "checksum": "sha256:7586ca7d1633c23edf45c56c105f3d4c20d67ada5629b0605156f472fdf16309",
   "clusters": {
     "reviews.review.review.Review": {
       "aggregate": {
@@ -11,7 +11,6 @@
             "kind": "text",
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "Text"
           },
           "cons": {
@@ -56,7 +55,6 @@
           },
           "moderation_notes": {
             "kind": "text",
-            "sanitize": true,
             "type": "Text"
           },
           "order_id": {
@@ -123,7 +121,6 @@
             "max_length": 200,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "unhelpful_count": {
@@ -160,6 +157,48 @@
           ],
           "pre": []
         },
+        "method_edges": {
+          "add_seller_reply": {
+            "raises": [
+              "reviews.review.events.SellerReplyAdded"
+            ]
+          },
+          "approve": {
+            "raises": [
+              "reviews.review.events.ReviewApproved"
+            ]
+          },
+          "edit": {
+            "raises": [
+              "reviews.review.events.ReviewEdited"
+            ]
+          },
+          "reject": {
+            "raises": [
+              "reviews.review.events.ReviewRejected"
+            ]
+          },
+          "remove": {
+            "raises": [
+              "reviews.review.events.ReviewRemoved"
+            ]
+          },
+          "report": {
+            "raises": [
+              "reviews.review.events.ReviewReported"
+            ]
+          },
+          "submit": {
+            "raises": [
+              "reviews.review.events.ReviewSubmitted"
+            ]
+          },
+          "vote": {
+            "raises": [
+              "reviews.review.events.HelpfulVoteRecorded"
+            ]
+          }
+        },
         "module": "reviews.review.review",
         "name": "Review",
         "options": {
@@ -182,6 +221,16 @@
               "edit_review"
             ]
           },
+          "method_edges": {
+            "edit_review": {
+              "invokes": [
+                {
+                  "element": "reviews.review.review.Review",
+                  "method": "edit"
+                }
+              ]
+            }
+          },
           "module": "reviews.review.editing",
           "name": "EditReviewHandler",
           "part_of": "reviews.review.review.Review",
@@ -199,6 +248,20 @@
             "Reviews.ModerateReview.v1": [
               "moderate_review"
             ]
+          },
+          "method_edges": {
+            "moderate_review": {
+              "invokes": [
+                {
+                  "element": "reviews.review.review.Review",
+                  "method": "approve"
+                },
+                {
+                  "element": "reviews.review.review.Review",
+                  "method": "reject"
+                }
+              ]
+            }
           },
           "module": "reviews.review.moderation",
           "name": "ModerateReviewHandler",
@@ -218,6 +281,16 @@
               "remove_review"
             ]
           },
+          "method_edges": {
+            "remove_review": {
+              "invokes": [
+                {
+                  "element": "reviews.review.review.Review",
+                  "method": "remove"
+                }
+              ]
+            }
+          },
           "module": "reviews.review.removal",
           "name": "RemoveReviewHandler",
           "part_of": "reviews.review.review.Review",
@@ -235,6 +308,16 @@
             "Reviews.AddSellerReply.v1": [
               "add_seller_reply"
             ]
+          },
+          "method_edges": {
+            "add_seller_reply": {
+              "invokes": [
+                {
+                  "element": "reviews.review.review.Review",
+                  "method": "add_seller_reply"
+                }
+              ]
+            }
           },
           "module": "reviews.review.reply",
           "name": "AddSellerReplyHandler",
@@ -254,6 +337,16 @@
               "report_review"
             ]
           },
+          "method_edges": {
+            "report_review": {
+              "invokes": [
+                {
+                  "element": "reviews.review.review.Review",
+                  "method": "report"
+                }
+              ]
+            }
+          },
           "module": "reviews.review.reporting",
           "name": "ReportReviewHandler",
           "part_of": "reviews.review.review.Review",
@@ -272,6 +365,16 @@
               "submit_review"
             ]
           },
+          "method_edges": {
+            "submit_review": {
+              "invokes": [
+                {
+                  "element": "reviews.review.review.Review",
+                  "method": "submit"
+                }
+              ]
+            }
+          },
           "module": "reviews.review.submission",
           "name": "SubmitReviewHandler",
           "part_of": "reviews.review.review.Review",
@@ -289,6 +392,16 @@
             "Reviews.VoteOnReview.v1": [
               "vote_on_review"
             ]
+          },
+          "method_edges": {
+            "vote_on_review": {
+              "invokes": [
+                {
+                  "element": "reviews.review.review.Review",
+                  "method": "vote"
+                }
+              ]
+            }
           },
           "module": "reviews.review.voting",
           "name": "VoteOnReviewHandler",
@@ -309,7 +422,6 @@
           "fields": {
             "body": {
               "kind": "text",
-              "sanitize": true,
               "type": "Text"
             },
             "cons": {
@@ -343,7 +455,6 @@
             "title": {
               "kind": "standard",
               "max_length": 200,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -362,7 +473,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "moderator_id": {
@@ -374,7 +484,6 @@
             "reason": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "review_id": {
@@ -399,7 +508,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "removed_by": {
@@ -407,7 +515,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "review_id": {
@@ -431,7 +538,6 @@
               "kind": "text",
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "Text"
             },
             "review_id": {
@@ -466,7 +572,6 @@
             "detail": {
               "kind": "standard",
               "max_length": 500,
-              "sanitize": true,
               "type": "String"
             },
             "reason": {
@@ -474,7 +579,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "review_id": {
@@ -498,7 +602,6 @@
               "kind": "text",
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "Text"
             },
             "cons": {
@@ -541,7 +644,6 @@
               "max_length": 200,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "variant_id": {
@@ -576,7 +678,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -619,7 +720,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "voted_at": {
@@ -651,7 +751,6 @@
             "alt_text": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "display_order": {
@@ -676,7 +775,6 @@
               "max_length": 500,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -704,7 +802,6 @@
               "kind": "text",
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "Text"
             },
             "id": {
@@ -777,7 +874,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "voted_at": {
@@ -854,7 +950,6 @@
           "fields": {
             "body": {
               "kind": "text",
-              "sanitize": true,
               "type": "Text"
             },
             "edited_at": {
@@ -875,7 +970,6 @@
             "title": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -914,7 +1008,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "rejected_at": {
@@ -964,7 +1057,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "removed_at": {
@@ -977,7 +1069,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "review_id": {
@@ -1002,7 +1093,6 @@
             "detail": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "reason": {
@@ -1010,7 +1100,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "report_count": {
@@ -1052,7 +1141,6 @@
               "kind": "text",
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "Text"
             },
             "cons": {
@@ -1109,7 +1197,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "variant_id": {
@@ -1121,7 +1208,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1141,7 +1227,6 @@
               "kind": "text",
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "Text"
             },
             "replied_at": {
@@ -1263,7 +1348,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "rejected_at": {
@@ -1286,10 +1370,148 @@
   },
   "diagnostics": [
     {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "reviews.review.editing.EditReview",
+      "level": "info",
+      "message": "Command `EditReview` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "reviews.review.moderation.ModerateReview",
+      "level": "info",
+      "message": "Command `ModerateReview` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "reviews.review.reporting.ReportReview",
+      "level": "info",
+      "message": "Command `ReportReview` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "reviews.review.voting.VoteOnReview",
+      "level": "info",
+      "message": "Command `VoteOnReview` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "handler_completeness",
       "code": "PROJECTION_WITHOUT_PROJECTOR",
       "element": "reviews.projections.verified_purchases.VerifiedPurchases",
       "level": "warning",
-      "message": "Projection `VerifiedPurchases` has no projector to populate it"
+      "message": "Projection `VerifiedPurchases` has no projector to populate it",
+      "rule": {
+        "fix": "Add a projector for the projection, or set `externally_populated=True` if it is filled by a subscriber.",
+        "rationale": "A projection with no projector is never populated, so queries against it will always return empty."
+      },
+      "suggestion": "Add a projector for the projection, or set `externally_populated=True` if it is filled by a subscriber.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "reviews.projections.product_rating.ProductRating",
+      "field": "average_rating",
+      "level": "info",
+      "message": "Field `average_rating` on projection `ProductRating` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "reviews.projections.product_rating.ProductRating",
+      "field": "total_reviews",
+      "level": "info",
+      "message": "Field `total_reviews` on projection `ProductRating` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "reviews.projections.product_rating.ProductRating",
+      "field": "verified_review_count",
+      "level": "info",
+      "message": "Field `verified_review_count` on projection `ProductRating` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "reviews.projections.review_detail.ReviewDetail",
+      "field": "images",
+      "level": "info",
+      "message": "Field `images` on projection `ReviewDetail` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
     }
   ],
   "domain": {
@@ -1374,6 +1596,7 @@
     "SUBSCRIBER": [
       "reviews.review.ordering_subscriber.OrderDeliveredSubscriber"
     ],
+    "UPCASTER": [],
     "VALUE_OBJECT": [
       "reviews.review.review.Rating"
     ]
@@ -1393,7 +1616,7 @@
       }
     }
   },
-  "ir_version": "0.1.0",
+  "ir_version": "0.2.0",
   "projections": {
     "reviews.projections.customer_reviews.CustomerReviews": {
       "projection": {
@@ -1431,7 +1654,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "title": {
@@ -1439,7 +1661,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -1556,7 +1777,6 @@
             "kind": "text",
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "Text"
           },
           "customer_id": {
@@ -1596,7 +1816,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "submitted_at": {
@@ -1608,13 +1827,11 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "verified_purchase": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -1654,6 +1871,32 @@
             "Reviews.ReviewSubmitted.v1": [
               "on_review_submitted"
             ]
+          },
+          "method_edges": {
+            "on_review_approved": {
+              "invokes": [
+                {
+                  "element": "reviews.review.review.Review",
+                  "method": "remove"
+                }
+              ]
+            },
+            "on_review_rejected": {
+              "invokes": [
+                {
+                  "element": "reviews.review.review.Review",
+                  "method": "remove"
+                }
+              ]
+            },
+            "on_review_removed": {
+              "invokes": [
+                {
+                  "element": "reviews.review.review.Review",
+                  "method": "remove"
+                }
+              ]
+            }
           },
           "module": "reviews.projections.moderation_queue",
           "name": "ModerationQueueProjector",
@@ -1793,7 +2036,6 @@
             "kind": "text",
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "Text"
           },
           "cons": {
@@ -1812,7 +2054,6 @@
             "default": "False",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "helpful_count": {
@@ -1830,7 +2071,6 @@
             "default": "False",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "product_id": {
@@ -1862,7 +2102,6 @@
           },
           "seller_reply_body": {
             "kind": "text",
-            "sanitize": true,
             "type": "Text"
           },
           "title": {
@@ -1870,7 +2109,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "unhelpful_count": {
@@ -1885,7 +2123,6 @@
           "verified_purchase": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -1930,6 +2167,16 @@
             "Reviews.SellerReplyAdded.v1": [
               "on_seller_reply_added"
             ]
+          },
+          "method_edges": {
+            "on_review_removed": {
+              "invokes": [
+                {
+                  "element": "reviews.review.review.Review",
+                  "method": "remove"
+                }
+              ]
+            }
           },
           "module": "reviews.projections.product_reviews",
           "name": "ProductReviewsProjector",
@@ -1995,7 +2242,6 @@
             "kind": "text",
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "Text"
           },
           "cons": {
@@ -2018,7 +2264,6 @@
             "default": "False",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "helpful_count": {
@@ -2028,19 +2273,16 @@
           },
           "images": {
             "kind": "text",
-            "sanitize": true,
             "type": "Text"
           },
           "is_edited": {
             "default": "False",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "moderation_notes": {
             "kind": "text",
-            "sanitize": true,
             "type": "Text"
           },
           "order_id": {
@@ -2081,7 +2323,6 @@
           },
           "seller_reply_body": {
             "kind": "text",
-            "sanitize": true,
             "type": "Text"
           },
           "status": {
@@ -2089,7 +2330,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "title": {
@@ -2097,7 +2337,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "unhelpful_count": {
@@ -2116,7 +2355,6 @@
           "verified_purchase": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -2221,7 +2459,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "delivered_at": {
@@ -2234,7 +2471,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "product_id": {
@@ -2242,13 +2478,11 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "variant_id": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "vp_id": {

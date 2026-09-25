@@ -33,8 +33,9 @@ These are NOT part of the default `make test`. Run them on purpose:
 `test_p20_projector_idempotency.py` is the worked example of the approach: its
 expected value is computed by hand (one approved review -> count 1), independent
 of the event stream, so it catches a real bug (a redelivered event double-counts)
-that a "projection == fold(events)" check cannot. It is currently `xfail` because
-the bug is real; when the projector is made idempotent it will pass.
+that a "projection == fold(events)" check cannot. It passes because
+`ProductRatingProjector` dedupes on its own `counted_reviews` (ticket T0.3). It
+does not use Protean's `idempotent` projector option from proteanhq/protean#1042.
 
 ## Adding a check
 

@@ -18,9 +18,10 @@ WHAT THIS CHECKS
 
 WHY THIS WAS DEFERRED FROM T2.1, AND IS ENGINE-MARKED
     Both CI envs (memory, test) are `sync`, so a real sync-vs-async comparison
-    needs the async engine + Redis + Postgres — unreliable in CI (proteanhq/
-    protean#1055). So it is `@pytest.mark.engine` (deselected via `-m "not engine"`)
-    and runs in the base (async) env. The `sync`/`async` test-body equivalence at
+    needs the async engine + Redis + Postgres, which was unreliable in CI
+    (proteanhq/protean#1055, now fixed in the pin). It stays `@pytest.mark.engine`
+    (deselected via `-m "not engine"`) until an engine CI job is re-added, and
+    runs in the base (async) env. The `sync`/`async` test-body equivalence at
     the helper level is already covered by `process_and_wait`/`drain` (T0.1); this
     check adds the end-to-end read-model equivalence.
 

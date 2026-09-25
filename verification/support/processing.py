@@ -27,8 +27,10 @@ SCOPE / HONESTY
     This is a ShopStream-local seed. The richer version - one that also returns
     the events that fired and any handler error, without reaching into framework
     internals - belongs in `protean.testing`. Filed upstream as
-    proteanhq/protean#1065. Until that lands, this helper deliberately returns
-    only the command result and leaves event/read-model assertions to the caller.
+    proteanhq/protean#1065, now fixed: `protean.testing` ships `process_and_wait`
+    and `drain`. Switching to them is follow-up work. Until then this helper
+    returns only the command result and leaves event/read-model assertions to
+    the caller.
 
     The `async` branch (`drain`) can only be exercised with a live engine +
     broker, so it is covered by the engine-marked DLQ test, not by the in-memory

@@ -16,7 +16,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "protean[postgresql,message-db,redis,telemetry] @ git+https://github.com/proteanhq/protean.git@main",
+    "protean[postgresql,message-db,redis,telemetry,server] @ git+https://github.com/proteanhq/protean.git@main",
     "python-dotenv>=1.0.0",
     "structlog>=24.1.0",
     "python-json-logger>=2.0.7",

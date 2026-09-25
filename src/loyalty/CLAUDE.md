@@ -121,15 +121,19 @@ ShopStream's **second** process manager and the one that exercises the saga feat
 
 Flow: `RedemptionRequested` (start) → reserve points (`RedeemPoints` on the RewardAccount) +
 advance to `points_reserved` → issue voucher → `VoucherIssued` ⇒ complete (`mark_as_complete()`),
-or `VoucherIssuanceFailed` ⇒ **compensate** (refund, `end=True`). Its full forward + compensation
+or `VoucherIssuanceFailed` ⇒ **compensate** (refund, `end=True`). The start handler checks
+`RewardAccount.redemption_blocker(points)` before it dispatches `RedeemPoints`. When the account
+cannot cover the points, the saga records `rejected` and ends without dispatching anything. A
+failed nested `RedeemPoints` would roll back the saga's own transaction, so it cannot catch the error
+afterwards. Its full forward + compensation
 logic is unit-tested with `given()` in `tests/loyalty/domain/test_redemption_saga.py`.
 
-**Sync limitation ([proteanhq/protean#1048](https://github.com/proteanhq/protean/issues/1048),
-0.17.0):** multi-step PMs don't cascade under `event_processing="sync"` — a later handler re-enters
-before the start transition persists, so the saga can't load its own in-flight instance and stops
-after the reserve step. The synchronous end-to-end completion tests are `xfail` against #1048, and
-the `RedemptionView` projector skips a transition whose view doesn't exist yet (out-of-order
-delivery under the same re-entrancy).
+**Sync cascade ([proteanhq/protean#1048](https://github.com/proteanhq/protean/issues/1048), fixed):**
+multi-step PMs used to stop after the reserve step under `event_processing="sync"`, because a later
+handler re-entered before the start transition persisted. Protean now drains sync events
+breadth-first, so the saga completes, and the synchronous end-to-end completion tests pass as guards.
+`RedemptionView._set` still skips a transition event whose create row is missing. That skip was the
+#1048 workaround; it stays as a guard against out-of-order delivery.
 
 ## Events
 
@@ -298,7 +302,8 @@ then asserts the message is in the DLQ via `broker.dlq_depth` / `dlq_list` and *
 broker, so it skips under the in-memory broker. It also **runs locally only**: driving a full
 engine inside pytest is unreliable in CI — even isolated with every broker reachable, the engine's
 poll loops drop their Redis connections mid-run (filed upstream as **proteanhq/protean#1055**), so
-CI deselects it with `-m "not engine"`. Locally it runs under `make test` / `make test-loyalty`.
+CI deselects it with `-m "not engine"`. #1055 is fixed in the Protean pin (main 6b4cd312, after 0.17.0); CI still deselects it until
+an engine CI job is re-added. Locally it runs under `make test` / `make test-loyalty`.
 The command-handler half (`EmitPoison` → fail) is covered synchronously by
 `tests/loyalty/application/test_poison_command.py`. This handler is the *only* intentional failure
 in ShopStream and never runs in real flows.

@@ -314,11 +314,10 @@ an explicit **compensation** path, and **`end=True`** (the success branch finali
 `mark_as_complete()` instead, so both styles are shown). The voucher port fails deterministically
 for reward codes containing `FAIL`, which drives the compensation branch in tests and demos.
 
-**Trade-off:** Multi-step PMs don't yet cascade under `event_processing="sync"`
-([proteanhq/protean#1048](https://github.com/proteanhq/protean/issues/1048), milestone 0.17.0) — a
-later handler re-enters before the start transition persists, so the saga stops after the reserve
-step. Its full forward + compensation logic is therefore covered by `given()` unit tests, and the
-synchronous end-to-end completion tests are `xfail` against #1048 (they flip when it lands).
+**Sync cascade:** multi-step PMs used to stop after the reserve step under
+`event_processing="sync"` ([proteanhq/protean#1048](https://github.com/proteanhq/protean/issues/1048),
+now fixed). The full forward + compensation logic is covered by `given()` unit tests, and the
+synchronous end-to-end completion tests now pass as guards.
 
 ## Source Code Map
 

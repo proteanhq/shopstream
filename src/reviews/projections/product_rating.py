@@ -2,10 +2,10 @@
 
 Idempotent projector: it records which reviews it has already counted
 (``counted_reviews``), so a redelivered ``ReviewApproved`` / ``ReviewRemoved``
-is a no-op. Protean delivers events at least once and does not dedupe on the
-consume side (proteanhq/protean#1042), so an accumulating projector must guard
-itself or it double-counts. All aggregate stats are derived from
-``counted_reviews`` rather than incremented in place.
+is a no-op. Protean delivers events at least once, so an accumulating projector
+must guard itself or it double-counts. Protean now has an opt-in `idempotent`
+projector option; this projector keeps its own guard. All aggregate stats are
+derived from ``counted_reviews`` rather than incremented in place.
 """
 
 from protean.core.projector import on

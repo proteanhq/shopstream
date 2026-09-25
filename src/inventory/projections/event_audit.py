@@ -19,10 +19,8 @@ NOT by projectors, which require every handler to target a concrete event class 
 this is an ``@event_handler`` writing the read model directly rather than an
 ``@projector``.
 
-KNOWN ISSUE: under ``event_processing="sync"`` the wildcard handler is silently skipped
-because ``EventStore.handlers_for`` matches only concrete event ``__type__`` keys and
-ignores ``$any``. Filed upstream as proteanhq/protean#1023. It fires correctly via the
-async Engine path and via direct ``_handle``; the affected test is marked ``xfail``.
+The wildcard handler also runs under ``event_processing="sync"``;
+``tests/inventory/integration/test_event_audit_projection.py`` guards that.
 """
 
 import uuid

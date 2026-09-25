@@ -25,7 +25,6 @@ was deducted, so there is nothing to compensate — the redemption is simply aba
 
 import logging
 
-from protean.exceptions import ValidationError
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
@@ -65,23 +64,29 @@ class RedemptionSaga:
 
         from loyalty.redemption.commands import ReserveRedemptionPoints
         from loyalty.reward.points import RedeemPoints
+        from loyalty.reward.reward_account import RewardAccount
 
-        try:
-            current_domain.process(
-                RedeemPoints(
-                    account_id=event.account_id,
-                    amount=event.points,
-                    reason=f"redemption:{event.redemption_id}",
-                ),
-                asynchronous=False,
-            )
-        except ValidationError as exc:
+        # Check before dispatching. `RedeemPoints` runs inside this handler's
+        # transaction, so if it failed, the saga's own state change would be rolled
+        # back with it and the rejection would never be recorded.
+        account = current_domain.repository_for(RewardAccount).get(event.account_id)
+        blocker = account.redemption_blocker(event.points)
+        if blocker is not None:
             # Insufficient balance (or closed account): nothing was deducted, so there is
             # nothing to compensate. Abandon the redemption.
             self.status = "rejected"
-            self.failure_reason = str(exc)
+            self.failure_reason = blocker
             self.mark_as_complete()
             return
+
+        current_domain.process(
+            RedeemPoints(
+                account_id=event.account_id,
+                amount=event.points,
+                reason=f"redemption:{event.redemption_id}",
+            ),
+            asynchronous=False,
+        )
 
         self.status = "reserving"
         current_domain.process(

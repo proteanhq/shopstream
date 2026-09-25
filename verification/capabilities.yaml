@@ -58,7 +58,7 @@ capabilities:
     guarded_by: verification/oracles/test_lowstock_projector_concurrency.py
     property: "concurrent level-triggered events for one key yield exactly one row; no command fails on the create-create race"
     source: A
-    status: covered   # projector made concurrency-safe (nested-UoW upsert); relates to proteanhq/protean#1076
+    status: covered   # projector made concurrency-safe (per-projector transient retry, proteanhq/protean#1076)
 
   - name: outbox_dual_write
     taught_by: src/payments/domain.toml   # external_brokers = ["global"]
@@ -79,7 +79,7 @@ capabilities:
     guarded_by: verification/oracles/test_crash_window_reconcile.py
     property: "a durable event whose relational commit crashed is still published after reconcile (P21)"
     source: A
-    status: partial   # T1.3: window characterized (passes); recovery broken on message-db (proteanhq/protean#1073), xfail
+    status: covered   # T1.3: window characterized and recovery guarded; proteanhq/protean#1073 fixed
 
   - name: cross_domain_acl_subscriber
     taught_by: src/reviews/review/ordering_subscriber.py

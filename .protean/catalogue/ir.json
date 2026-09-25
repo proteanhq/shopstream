@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:2701bb7eb79e6a5ede996f60cc4058ff5791c7abe9dc1964194eafae6dcf1365",
+  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
+  "checksum": "sha256:db3ca1ba2d9acca0d765ab0a7602b4ce33a5c4b085dd4f55caa0c49a56d73656",
   "clusters": {
     "catalogue.category.category.Category": {
       "aggregate": {
@@ -45,7 +45,6 @@
             "max_length": 100,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "parent_category_id": {
@@ -95,6 +94,40 @@
               "update_category"
             ]
           },
+          "method_edges": {
+            "create_category": {
+              "invokes": [
+                {
+                  "element": "catalogue.category.category.Category",
+                  "method": "create"
+                }
+              ]
+            },
+            "deactivate_category": {
+              "invokes": [
+                {
+                  "element": "catalogue.category.category.Category",
+                  "method": "deactivate"
+                }
+              ]
+            },
+            "reorder_category": {
+              "invokes": [
+                {
+                  "element": "catalogue.category.category.Category",
+                  "method": "reorder"
+                }
+              ]
+            },
+            "update_category": {
+              "invokes": [
+                {
+                  "element": "catalogue.category.category.Category",
+                  "method": "update_details"
+                }
+              ]
+            }
+          },
           "module": "catalogue.category.management",
           "name": "ManageCategoryHandler",
           "part_of": "catalogue.category.category.Category",
@@ -123,7 +156,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "parent_category_id": {
@@ -197,7 +229,6 @@
             "name": {
               "kind": "standard",
               "max_length": 100,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -233,7 +264,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "parent_category_id": {
@@ -293,7 +323,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -349,7 +378,6 @@
           "brand": {
             "kind": "standard",
             "max_length": 100,
-            "sanitize": true,
             "type": "String"
           },
           "category_id": {
@@ -363,7 +391,6 @@
           },
           "description": {
             "kind": "text",
-            "sanitize": true,
             "type": "Text"
           },
           "id": {
@@ -419,7 +446,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -440,7 +466,6 @@
             "default": "Public",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -475,6 +500,16 @@
               "create_product"
             ]
           },
+          "method_edges": {
+            "create_product": {
+              "invokes": [
+                {
+                  "element": "catalogue.product.product.Product",
+                  "method": "create"
+                }
+              ]
+            }
+          },
           "module": "catalogue.product.creation",
           "name": "CreateProductHandler",
           "part_of": "catalogue.product.product.Product",
@@ -492,6 +527,16 @@
             "Catalogue.UpdateProductDetails.v1": [
               "update_details"
             ]
+          },
+          "method_edges": {
+            "update_details": {
+              "invokes": [
+                {
+                  "element": "catalogue.product.product.Product",
+                  "method": "update_details"
+                }
+              ]
+            }
           },
           "module": "catalogue.product.details",
           "name": "ManageProductDetailsHandler",
@@ -513,6 +558,24 @@
             "Catalogue.RemoveProductImage.v1": [
               "remove_image"
             ]
+          },
+          "method_edges": {
+            "add_image": {
+              "invokes": [
+                {
+                  "element": "catalogue.product.product.Product",
+                  "method": "add_image"
+                }
+              ]
+            },
+            "remove_image": {
+              "invokes": [
+                {
+                  "element": "catalogue.product.product.Product",
+                  "method": "remove_image"
+                }
+              ]
+            }
           },
           "module": "catalogue.product.images",
           "name": "ManageImagesHandler",
@@ -538,6 +601,32 @@
               "discontinue_product"
             ]
           },
+          "method_edges": {
+            "activate_product": {
+              "invokes": [
+                {
+                  "element": "catalogue.product.product.Product",
+                  "method": "activate"
+                }
+              ]
+            },
+            "archive_product": {
+              "invokes": [
+                {
+                  "element": "catalogue.product.product.Product",
+                  "method": "archive"
+                }
+              ]
+            },
+            "discontinue_product": {
+              "invokes": [
+                {
+                  "element": "catalogue.product.product.Product",
+                  "method": "discontinue"
+                }
+              ]
+            }
+          },
           "module": "catalogue.product.lifecycle",
           "name": "ManageLifecycleHandler",
           "part_of": "catalogue.product.product.Product",
@@ -561,6 +650,32 @@
             "Catalogue.UpdateVariantPrice.v1": [
               "update_variant_price"
             ]
+          },
+          "method_edges": {
+            "add_variant": {
+              "invokes": [
+                {
+                  "element": "catalogue.product.product.Product",
+                  "method": "add_variant"
+                }
+              ]
+            },
+            "set_tier_price": {
+              "invokes": [
+                {
+                  "element": "catalogue.product.product.Product",
+                  "method": "set_tier_price"
+                }
+              ]
+            },
+            "update_variant_price": {
+              "invokes": [
+                {
+                  "element": "catalogue.product.product.Product",
+                  "method": "update_variant_price"
+                }
+              ]
+            }
           },
           "module": "catalogue.product.variants",
           "name": "ManageVariantsHandler",
@@ -588,7 +703,6 @@
             "brand": {
               "kind": "standard",
               "max_length": 100,
-              "sanitize": true,
               "type": "String"
             },
             "category_id": {
@@ -598,19 +712,16 @@
             "description": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "meta_description": {
               "kind": "standard",
               "max_length": 160,
-              "sanitize": true,
               "type": "String"
             },
             "meta_title": {
               "kind": "standard",
               "max_length": 70,
-              "sanitize": true,
               "type": "String"
             },
             "seller_id": {
@@ -622,13 +733,11 @@
               "max_length": 50,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "slug": {
               "kind": "standard",
               "max_length": 200,
-              "sanitize": true,
               "type": "String"
             },
             "title": {
@@ -636,13 +745,11 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "visibility": {
               "kind": "standard",
               "max_length": 20,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -665,25 +772,21 @@
             "brand": {
               "kind": "standard",
               "max_length": 100,
-              "sanitize": true,
               "type": "String"
             },
             "description": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "meta_description": {
               "kind": "standard",
               "max_length": 160,
-              "sanitize": true,
               "type": "String"
             },
             "meta_title": {
               "kind": "standard",
               "max_length": 70,
-              "sanitize": true,
               "type": "String"
             },
             "product_id": {
@@ -695,13 +798,11 @@
             "slug": {
               "kind": "standard",
               "max_length": 200,
-              "sanitize": true,
               "type": "String"
             },
             "title": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -719,7 +820,6 @@
             "alt_text": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "is_primary": {
@@ -738,7 +838,6 @@
               "max_length": 500,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -845,13 +944,11 @@
               "default": "USD",
               "kind": "standard",
               "max_length": 3,
-              "sanitize": true,
               "type": "String"
             },
             "dimension_unit": {
               "kind": "standard",
               "max_length": 2,
-              "sanitize": true,
               "type": "String"
             },
             "height": {
@@ -873,13 +970,11 @@
               "max_length": 50,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "weight_unit": {
               "kind": "standard",
               "max_length": 2,
-              "sanitize": true,
               "type": "String"
             },
             "weight_value": {
@@ -918,7 +1013,6 @@
               "max_length": 50,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "variant_id": {
@@ -948,7 +1042,6 @@
               "default": "USD",
               "kind": "standard",
               "max_length": 3,
-              "sanitize": true,
               "type": "String"
             },
             "product_id": {
@@ -979,7 +1072,6 @@
             "alt_text": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "display_order": {
@@ -1009,7 +1101,6 @@
               "max_length": 500,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1115,7 +1206,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1179,7 +1269,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "status": {
@@ -1187,7 +1276,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "title": {
@@ -1195,7 +1283,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1215,13 +1302,11 @@
             "brand": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "description": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "product_id": {
@@ -1235,7 +1320,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1267,7 +1351,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1306,7 +1389,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1352,7 +1434,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "price": {
@@ -1371,7 +1452,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "variant_id": {
@@ -1408,7 +1488,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "product_id": {
@@ -1428,7 +1507,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1450,7 +1528,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "new_price": {
@@ -1503,7 +1580,6 @@
               "default": "cm",
               "kind": "standard",
               "max_length": 2,
-              "sanitize": true,
               "type": "String"
             },
             "width": {
@@ -1537,7 +1613,6 @@
               "default": "USD",
               "kind": "standard",
               "max_length": 3,
-              "sanitize": true,
               "type": "String"
             },
             "tier_prices": {
@@ -1564,19 +1639,16 @@
             "meta_description": {
               "kind": "standard",
               "max_length": 160,
-              "sanitize": true,
               "type": "String"
             },
             "meta_title": {
               "kind": "standard",
               "max_length": 70,
-              "sanitize": true,
               "type": "String"
             },
             "slug": {
               "kind": "standard",
               "max_length": 200,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1599,7 +1671,6 @@
               "default": "kg",
               "kind": "standard",
               "max_length": 2,
-              "sanitize": true,
               "type": "String"
             },
             "value": {
@@ -1628,7 +1699,6 @@
               "max_length": 50,
               "min_length": 3,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1674,7 +1744,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "status": {
@@ -1682,7 +1751,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "title": {
@@ -1690,7 +1758,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -1716,7 +1783,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -1741,7 +1807,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "product_id": {
@@ -1761,7 +1826,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -1771,7 +1835,382 @@
       }
     ]
   },
-  "diagnostics": [],
+  "diagnostics": [
+    {
+      "category": "aggregate_design",
+      "code": "AGGREGATE_NO_INVARIANTS",
+      "element": "catalogue.category.category.Category",
+      "level": "info",
+      "message": "Aggregate `Category` has no pre/post invariants (own or inherited); it enforces no business rules and may be an anemic data holder.",
+      "rule": {
+        "fix": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+        "rationale": "An aggregate is a consistency boundary. With no pre- or post-invariants it enforces no business rules and is usually an anemic data holder rather than a true aggregate."
+      },
+      "suggestion": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+      "teaching_skills": [
+        "add-validation",
+        "aggregate",
+        "protean-overview",
+        "refactor-move-logic-to-aggregate"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "catalogue.category.management.ReorderCategory",
+      "level": "info",
+      "message": "Command `ReorderCategory` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "catalogue.product.lifecycle.DiscontinueProduct",
+      "level": "info",
+      "message": "Command `DiscontinueProduct` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.category.events.CategoryCreated",
+      "level": "info",
+      "message": "Event CategoryCreated is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.category.events.CategoryDeactivated",
+      "level": "info",
+      "message": "Event CategoryDeactivated is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.category.events.CategoryDetailsUpdated",
+      "level": "info",
+      "message": "Event CategoryDetailsUpdated is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.category.events.CategoryReordered",
+      "level": "info",
+      "message": "Event CategoryReordered is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.product.events.ProductActivated",
+      "level": "info",
+      "message": "Event ProductActivated is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.product.events.ProductArchived",
+      "level": "info",
+      "message": "Event ProductArchived is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.product.events.ProductCreated",
+      "level": "info",
+      "message": "Event ProductCreated is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.product.events.ProductDetailsUpdated",
+      "level": "info",
+      "message": "Event ProductDetailsUpdated is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.product.events.ProductDiscontinued",
+      "level": "info",
+      "message": "Event ProductDiscontinued is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.product.events.ProductImageAdded",
+      "level": "info",
+      "message": "Event ProductImageAdded is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.product.events.ProductImageRemoved",
+      "level": "info",
+      "message": "Event ProductImageRemoved is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.product.events.TierPriceSet",
+      "level": "info",
+      "message": "Event TierPriceSet is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.product.events.VariantAdded",
+      "level": "info",
+      "message": "Event VariantAdded is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "catalogue.product.events.VariantPriceChanged",
+      "level": "info",
+      "message": "Event VariantPriceChanged is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "catalogue.projections.product_detail.ProductDetail",
+      "field": "attributes",
+      "level": "info",
+      "message": "Field `attributes` on projection `ProductDetail` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "catalogue.projections.product_detail.ProductDetail",
+      "field": "meta_description",
+      "level": "info",
+      "message": "Field `meta_description` on projection `ProductDetail` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "catalogue.projections.product_detail.ProductDetail",
+      "field": "meta_title",
+      "level": "info",
+      "message": "Field `meta_title` on projection `ProductDetail` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "catalogue.projections.product_detail.ProductDetail",
+      "field": "slug",
+      "level": "info",
+      "message": "Field `slug` on projection `ProductDetail` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "catalogue.projections.product_detail.ProductDetail",
+      "field": "visibility",
+      "level": "info",
+      "message": "Field `visibility` on projection `ProductDetail` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "aggregate_design",
+      "code": "VALUE_OBJECT_MUTABLE_FIELD",
+      "element": "catalogue.product.product.Price",
+      "field": "tier_prices",
+      "level": "warning",
+      "message": "Value object `Price` has mutable field `tier_prices` (`dict`); value objects must be immutable.",
+      "rule": {
+        "fix": "Replace the mutable collection with an immutable representation, or move the collection onto the containing entity or aggregate. If the values form a concept with its own identity, model them as an entity referenced by the aggregate instead.",
+        "rationale": "Value objects are compared by value and must be immutable. A `List` or `Dict` field gives the value object mutable internal state, so two instances that should be equal can diverge and value equality no longer holds."
+      },
+      "suggestion": "Replace the mutable collection with an immutable representation, or move the collection onto the containing entity or aggregate. If the values form a concept with its own identity, model them as an entity referenced by the aggregate instead.",
+      "teaching_skills": [
+        "refactor-extract-value-object",
+        "value-object"
+      ]
+    }
+  ],
   "domain": {
     "camel_case_name": "Catalogue",
     "command_processing": "sync",
@@ -1865,6 +2304,7 @@
     ],
     "REPOSITORY": [],
     "SUBSCRIBER": [],
+    "UPCASTER": [],
     "VALUE_OBJECT": [
       "catalogue.product.product.Dimensions",
       "catalogue.product.product.Price",
@@ -1879,7 +2319,7 @@
     "process_managers": {},
     "subscribers": {}
   },
-  "ir_version": "0.1.0",
+  "ir_version": "0.2.0",
   "projections": {
     "catalogue.projections.category_products.CategoryProducts": {
       "projection": {
@@ -1896,7 +2336,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "product_count": {
@@ -2039,7 +2478,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "parent_category_id": {
@@ -2144,7 +2582,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "entry_id": {
@@ -2224,7 +2661,6 @@
           "brand": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "category_id": {
@@ -2238,7 +2674,6 @@
           "currency": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "max_price": {
@@ -2252,7 +2687,6 @@
           "primary_image_url": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "product_id": {
@@ -2266,7 +2700,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "status": {
@@ -2274,7 +2707,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "title": {
@@ -2282,7 +2714,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "variant_count": {
@@ -2375,7 +2806,6 @@
             "status": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -2412,7 +2842,6 @@
           "brand": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "category_id": {
@@ -2425,7 +2854,6 @@
           },
           "description": {
             "kind": "text",
-            "sanitize": true,
             "type": "Text"
           },
           "images": {
@@ -2437,13 +2865,11 @@
           "meta_description": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "meta_title": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "product_id": {
@@ -2461,13 +2887,11 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "slug": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "status": {
@@ -2475,7 +2899,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "title": {
@@ -2483,7 +2906,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -2499,7 +2921,6 @@
           "visibility": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -2624,7 +3045,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "status": {
@@ -2632,7 +3052,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "title": {
@@ -2640,7 +3059,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {

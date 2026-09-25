@@ -128,8 +128,9 @@ whether it gates PRs / nightly / releases.
   that path minutes-slow (150×25 ≈ 47 min); the aggregate-level version runs the
   same coverage in ~1.7s. State-machine correctness is what this targets.
 - Finding: an all-default `StockLevels` VO round-trips to None (surfaced while
-  building this); filed proteanhq/protean#1078. The model mirrors the aggregate's
-  own None-as-zeros handling.
+  building this); filed proteanhq/protean#1078. The model mirrored the aggregate's
+  own None-as-zeros handling until the fix landed in the pin; it now reads the
+  levels directly.
 - Note: not literal concurrency (that is T1.1, multi-process) — this explores
   sequential interleavings an example-based test would miss.
 
@@ -144,11 +145,13 @@ whether it gates PRs / nightly / releases.
   `test_outbox_exactly_once`, #1042 → `test_p20_projector_idempotency`.
 - New named regressions in `test_protean_regressions.py`:
   - `test_1039_...` — datetime payloads are ISO-8601/UTC (guard, passes).
-  - `test_1071_...` — in-memory adapter enforces `Index(unique=True)`; an UPGRADE
-    TRIPWIRE (`xfail(strict)`): fixed upstream but not yet in ShopStream's Protean
-    pin, so it flips when the pin is bumped.
-- Still-open bugs carry live xfails: #1073 (`test_crash_window_reconcile`), #1055
-  (engine CI, `test_dlq` local-only).
+  - `test_1071_...` — in-memory adapter enforces `Index(unique=True)`. It was an
+    upgrade tripwire (`xfail(strict)`) until the pin took the fix; it is now a
+    passing guard.
+- Still-open bugs at the time: #1073 (`test_crash_window_reconcile`, a live xfail)
+  and #1055 (engine CI; `test_dlq` deselected with `-m "not engine"`, no xfail).
+  Both are now fixed upstream. #1073's xfail came out in #38. #1078 gained a guard
+  (`test_1078_...`) in the bump to Protean main 6b4cd312 (after 0.17.0).
 - Bugs with no natural ShopStream reproduction (#1038 Decimal, #1046 Date, #1056
   Auto-increment) are recorded in the manifest rather than force-fit.
 

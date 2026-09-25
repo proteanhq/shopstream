@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:9b3918fa93b6123e340daece254bcbee57e04cc675435ea6fae987d18da08825",
+  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
+  "checksum": "sha256:d2ae64513d7cf9343e2e9fd121797a9c03903e99773b3778a181149f7e44e532",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -17,7 +17,6 @@
             "max_length": 20,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "discount_type": {
@@ -30,7 +29,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "discount_value": {
@@ -57,7 +55,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "starts_on": {
@@ -74,7 +71,6 @@
             "default": "draft",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -83,6 +79,28 @@
         "invariants": {
           "post": [],
           "pre": []
+        },
+        "method_edges": {
+          "activate": {
+            "raises": [
+              "loyalty.campaign.events.CampaignActivated"
+            ]
+          },
+          "expire": {
+            "raises": [
+              "loyalty.campaign.events.CampaignExpired"
+            ]
+          },
+          "launch": {
+            "raises": [
+              "loyalty.campaign.events.CampaignLaunched"
+            ]
+          },
+          "pause": {
+            "raises": [
+              "loyalty.campaign.events.CampaignPaused"
+            ]
+          }
         },
         "module": "loyalty.campaign.campaign",
         "name": "PromoCampaign",
@@ -114,6 +132,40 @@
             "Loyalty.PauseCampaign.v1": [
               "pause"
             ]
+          },
+          "method_edges": {
+            "activate": {
+              "invokes": [
+                {
+                  "element": "loyalty.campaign.campaign.PromoCampaign",
+                  "method": "activate"
+                }
+              ]
+            },
+            "expire": {
+              "invokes": [
+                {
+                  "element": "loyalty.campaign.campaign.PromoCampaign",
+                  "method": "expire"
+                }
+              ]
+            },
+            "launch": {
+              "invokes": [
+                {
+                  "element": "loyalty.campaign.campaign.PromoCampaign",
+                  "method": "launch"
+                }
+              ]
+            },
+            "pause": {
+              "invokes": [
+                {
+                  "element": "loyalty.campaign.campaign.PromoCampaign",
+                  "method": "pause"
+                }
+              ]
+            }
           },
           "module": "loyalty.campaign.management",
           "name": "PromoCampaignHandler",
@@ -171,7 +223,6 @@
               "max_length": 20,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "discount_type": {
@@ -179,7 +230,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "discount_value": {
@@ -196,7 +246,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "starts_on": {
@@ -223,7 +272,6 @@
             "reason": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -306,7 +354,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -326,7 +373,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "expired_at": {
@@ -351,7 +397,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "campaign_id": {
@@ -359,7 +404,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "discount_type": {
@@ -367,7 +411,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "discount_value": {
@@ -389,7 +432,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "starts_on": {
@@ -413,7 +455,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "paused_at": {
@@ -424,7 +465,6 @@
             "reason": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -452,7 +492,6 @@
             "default": "intentional DLQ demo failure",
             "kind": "standard",
             "max_length": 120,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -461,6 +500,13 @@
         "invariants": {
           "post": [],
           "pre": []
+        },
+        "method_edges": {
+          "detonate": {
+            "raises": [
+              "loyalty.dlq.poison.PoisonDetonated"
+            ]
+          }
         },
         "module": "loyalty.dlq.poison",
         "name": "PoisonPill",
@@ -484,6 +530,16 @@
               "emit"
             ]
           },
+          "method_edges": {
+            "emit": {
+              "invokes": [
+                {
+                  "element": "loyalty.dlq.poison.PoisonPill",
+                  "method": "detonate"
+                }
+              ]
+            }
+          },
           "module": "loyalty.dlq.poison",
           "name": "EmitPoisonHandler",
           "part_of": "loyalty.dlq.poison.PoisonPill",
@@ -505,7 +561,6 @@
               "default": "intentional DLQ demo failure",
               "kind": "standard",
               "max_length": 120,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -548,7 +603,6 @@
             "note": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "occurred_at": {
@@ -582,13 +636,11 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "failure_reason": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "id": {
@@ -612,7 +664,6 @@
             "max_length": 40,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "status": {
@@ -626,13 +677,11 @@
             "default": "requested",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "voucher_code": {
             "kind": "standard",
             "max_length": 40,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -678,6 +727,52 @@
               "reserve"
             ]
           },
+          "method_edges": {
+            "compensate": {
+              "invokes": [
+                {
+                  "element": "loyalty.redemption.redemption.Redemption",
+                  "method": "compensate"
+                }
+              ]
+            },
+            "complete": {
+              "invokes": [
+                {
+                  "element": "loyalty.redemption.redemption.Redemption",
+                  "method": "complete"
+                }
+              ]
+            },
+            "issue": {
+              "invokes": [
+                {
+                  "element": "loyalty.redemption.redemption.Redemption",
+                  "method": "fail_voucher"
+                },
+                {
+                  "element": "loyalty.redemption.redemption.Redemption",
+                  "method": "issue_voucher"
+                }
+              ]
+            },
+            "request": {
+              "invokes": [
+                {
+                  "element": "loyalty.redemption.redemption.Redemption",
+                  "method": "request"
+                }
+              ]
+            },
+            "reserve": {
+              "invokes": [
+                {
+                  "element": "loyalty.redemption.redemption.Redemption",
+                  "method": "reserve_points"
+                }
+              ]
+            }
+          },
           "module": "loyalty.redemption.commands",
           "name": "RedemptionHandler",
           "part_of": "loyalty.redemption.redemption.Redemption",
@@ -699,7 +794,6 @@
               "default": "voucher unavailable",
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "redemption_id": {
@@ -763,7 +857,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "points": {
@@ -776,7 +869,6 @@
               "max_length": 40,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -817,7 +909,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "points": {
@@ -830,7 +921,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "reserved_at": {
@@ -860,7 +950,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "redemption_id": {
@@ -868,7 +957,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "refunded_points": {
@@ -898,7 +986,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "voucher_code": {
@@ -906,7 +993,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -926,7 +1012,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "points": {
@@ -939,7 +1024,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "requested_at": {
@@ -952,7 +1036,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -977,7 +1060,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "redemption_id": {
@@ -985,7 +1067,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1010,7 +1091,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "voucher_code": {
@@ -1018,7 +1098,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1100,7 +1179,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "entries": {
@@ -1123,7 +1201,6 @@
             "max_length": 12,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "membership_since": {
@@ -1139,7 +1216,6 @@
           "referral_code": {
             "kind": "standard",
             "max_length": 12,
-            "sanitize": true,
             "type": "String"
           },
           "status": {
@@ -1151,7 +1227,6 @@
             "default": "Active",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "tier": {
@@ -1164,7 +1239,6 @@
             "default": "bronze",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -1213,6 +1287,16 @@
               "enroll"
             ]
           },
+          "method_edges": {
+            "enroll": {
+              "invokes": [
+                {
+                  "element": "loyalty.reward.reward_account.RewardAccount",
+                  "method": "enroll"
+                }
+              ]
+            }
+          },
           "module": "loyalty.reward.enrollment",
           "name": "EnrollRewardAccountHandler",
           "part_of": "loyalty.reward.reward_account.RewardAccount",
@@ -1233,6 +1317,24 @@
             "Loyalty.RedeemPoints.v1": [
               "redeem"
             ]
+          },
+          "method_edges": {
+            "earn": {
+              "invokes": [
+                {
+                  "element": "loyalty.reward.reward_account.RewardAccount",
+                  "method": "earn_points"
+                }
+              ]
+            },
+            "redeem": {
+              "invokes": [
+                {
+                  "element": "loyalty.reward.reward_account.RewardAccount",
+                  "method": "redeem_points"
+                }
+              ]
+            }
           },
           "module": "loyalty.reward.points",
           "name": "PointsHandler",
@@ -1256,13 +1358,11 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "member_code": {
               "kind": "standard",
               "max_length": 12,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1291,7 +1391,6 @@
               "default": "order",
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1320,7 +1419,6 @@
               "default": "redemption",
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1341,7 +1439,6 @@
               "max_length": 20,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "id": {
@@ -1370,7 +1467,6 @@
               "default": "active",
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1416,7 +1512,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "id": {
@@ -1433,7 +1528,6 @@
             "reason": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "reward_account": {
@@ -1471,7 +1565,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "card_number": {
@@ -1479,7 +1572,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "issued_on": {
@@ -1487,7 +1579,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1507,7 +1598,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "amount": {
@@ -1523,7 +1613,6 @@
             "customer_id": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "occurred_at": {
@@ -1534,7 +1623,6 @@
             "reason": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1555,7 +1643,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "amount": {
@@ -1571,7 +1658,6 @@
             "customer_id": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "occurred_at": {
@@ -1582,7 +1668,6 @@
             "reason": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1603,7 +1688,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "closed_at": {
@@ -1628,7 +1712,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "customer_id": {
@@ -1636,7 +1719,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "enrolled_at": {
@@ -1649,7 +1731,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "tier": {
@@ -1657,7 +1738,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1678,7 +1758,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "customer_id": {
@@ -1686,7 +1765,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "lifetime_points": {
@@ -1699,7 +1777,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "occurred_at": {
@@ -1712,7 +1789,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1745,7 +1821,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "amount": {
@@ -1761,7 +1836,6 @@
           "customer_id": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "occurred_at": {
@@ -1772,7 +1846,6 @@
           "reason": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -1787,7 +1860,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "amount": {
@@ -1803,7 +1875,6 @@
           "customer_id": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "occurred_at": {
@@ -1814,7 +1885,6 @@
           "reason": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -1829,7 +1899,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "customer_id": {
@@ -1837,7 +1906,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "enrolled_at": {
@@ -1850,7 +1918,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "tier": {
@@ -1858,7 +1925,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -1873,7 +1939,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "customer_id": {
@@ -1881,7 +1946,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "lifetime_points": {
@@ -1894,7 +1958,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "occurred_at": {
@@ -1907,7 +1970,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -1919,16 +1981,505 @@
   },
   "diagnostics": [
     {
+      "category": "naming_conventions",
+      "code": "AGGREGATE_NOT_NOUN",
+      "element": "loyalty.reward.reward_account.Auditable",
+      "level": "info",
+      "message": "Aggregate `Auditable` is named as a verb, gerund, or adjective; aggregates read best as nouns",
+      "rule": {
+        "fix": "Rename the aggregate to the domain-concept noun it represents (e.g. `Order` rather than `OrderProcessing`).",
+        "rationale": "An aggregate models a thing in the domain, so a noun name (`Order`) reads truthfully; a gerund, verb, or adjective (`OrderProcessing`) reads like a process or capability rather than an entity."
+      },
+      "suggestion": "Rename the aggregate to the domain-concept noun it represents (e.g. `Order` rather than `OrderProcessing`).",
+      "teaching_skills": [
+        "aggregate"
+      ]
+    },
+    {
+      "category": "aggregate_design",
+      "code": "AGGREGATE_NO_INVARIANTS",
+      "element": "loyalty.campaign.campaign.PromoCampaign",
+      "level": "info",
+      "message": "Aggregate `PromoCampaign` has no pre/post invariants (own or inherited); it enforces no business rules and may be an anemic data holder.",
+      "rule": {
+        "fix": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+        "rationale": "An aggregate is a consistency boundary. With no pre- or post-invariants it enforces no business rules and is usually an anemic data holder rather than a true aggregate."
+      },
+      "suggestion": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+      "teaching_skills": [
+        "add-validation",
+        "aggregate",
+        "protean-overview",
+        "refactor-move-logic-to-aggregate"
+      ]
+    },
+    {
+      "category": "aggregate_design",
+      "code": "AGGREGATE_NO_INVARIANTS",
+      "element": "loyalty.dlq.poison.PoisonPill",
+      "level": "info",
+      "message": "Aggregate `PoisonPill` has no pre/post invariants (own or inherited); it enforces no business rules and may be an anemic data holder.",
+      "rule": {
+        "fix": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+        "rationale": "An aggregate is a consistency boundary. With no pre- or post-invariants it enforces no business rules and is usually an anemic data holder rather than a true aggregate."
+      },
+      "suggestion": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+      "teaching_skills": [
+        "add-validation",
+        "aggregate",
+        "protean-overview",
+        "refactor-move-logic-to-aggregate"
+      ]
+    },
+    {
+      "category": "handler_completeness",
       "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
       "element": "loyalty.reward.reward_account.Auditable",
       "level": "warning",
-      "message": "Aggregate `Auditable` has no command handler \u2014 no write path exists"
+      "message": "Aggregate `Auditable` has no command handler \u2014 no write path exists",
+      "rule": {
+        "fix": "Add a command handler for the aggregate, or model it as a read-only projection if no writes are expected.",
+        "rationale": "An aggregate with no command handler has no write path \u2014 nothing can change its state."
+      },
+      "suggestion": "Add a command handler for the aggregate, or model it as a read-only projection if no writes are expected.",
+      "teaching_skills": [
+        "aggregate"
+      ]
     },
     {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "loyalty.campaign.management.ExpireCampaign",
+      "level": "info",
+      "message": "Command `ExpireCampaign` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "loyalty.campaign.management.LaunchCampaign",
+      "level": "info",
+      "message": "Command `LaunchCampaign` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "loyalty.campaign.management.PauseCampaign",
+      "level": "info",
+      "message": "Command `PauseCampaign` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "loyalty.dlq.poison.EmitPoison",
+      "level": "info",
+      "message": "Command `EmitPoison` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "loyalty.redemption.commands.CompensateRedemption",
+      "level": "info",
+      "message": "Command `CompensateRedemption` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "loyalty.redemption.commands.IssueRedemptionVoucher",
+      "level": "info",
+      "message": "Command `IssueRedemptionVoucher` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "loyalty.redemption.commands.ReserveRedemptionPoints",
+      "level": "info",
+      "message": "Command `ReserveRedemptionPoints` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "loyalty.reward.enrollment.EnrollRewardAccount",
+      "level": "info",
+      "message": "Command `EnrollRewardAccount` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "loyalty.reward.points.EarnPoints",
+      "level": "info",
+      "message": "Command `EarnPoints` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "loyalty.reward.points.RedeemPoints",
+      "level": "info",
+      "message": "Command `RedeemPoints` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "deprecation",
+      "code": "DEPRECATED_OPTION",
+      "element": "loyalty.campaign.campaign.PromoCampaign",
+      "level": "info",
+      "message": "Option `is_event_sourced` is deprecated, scheduled for removal in v1.0.0; use `event_sourced` instead.",
+      "rule": {
+        "fix": "Use `event_sourced` instead of the deprecated alias.",
+        "rationale": "The option is a deprecated alias scheduled for removal."
+      },
+      "suggestion": "Use `event_sourced` instead of the deprecated alias."
+    },
+    {
+      "category": "handler_completeness",
       "code": "UNHANDLED_EVENT",
       "element": "loyalty.reward.events.MembershipCardIssued",
       "level": "warning",
-      "message": "Event MembershipCardIssued has no registered handler"
+      "message": "Event MembershipCardIssued has no registered handler",
+      "rule": {
+        "fix": "Register an event handler, projector, or process manager for this event, or mark it `published=True` if it is intentionally external.",
+        "rationale": "An event with no registered handler is published but never consumed, so a state change goes unobserved."
+      },
+      "suggestion": "Register an event handler, projector, or process manager for this event, or mark it `published=True` if it is intentionally external.",
+      "teaching_skills": [
+        "event"
+      ]
+    },
+    {
+      "category": "persistence",
+      "code": "UNINDEXED_FILTER_PATH",
+      "element": "loyalty.reward.reward_account.RewardAccount",
+      "field": "points_balance",
+      "level": "warning",
+      "message": "Field `points_balance` on aggregate `RewardAccount` is filtered by `loyalty.reward.repository.RewardAccountRepository.never_redeemed, line 24` but no declared index covers it, so the query scans the whole table.",
+      "rule": {
+        "fix": "Add an index led by this field to the aggregate (`indexes=[Index(\"field\")]`), or suppress the check when the table is small or the query is a one-off (admin/reporting).",
+        "rationale": "A repository filter on a field with no covering index forces a full table scan on a relational backend. The cost is invisible on small development data and grows with the production table."
+      },
+      "suggestion": "Index(\"points_balance\")  # add to `RewardAccount` indexes",
+      "teaching_skills": [
+        "add-field"
+      ]
+    },
+    {
+      "category": "persistence",
+      "code": "UNINDEXED_FILTER_PATH",
+      "element": "loyalty.reward.reward_account.RewardAccount",
+      "field": "status",
+      "level": "warning",
+      "message": "Field `status` on aggregate `RewardAccount` is filtered by `loyalty.reward.repository.RewardAccountRepository.top_savers, line 20` but no declared index covers it, so the query scans the whole table.",
+      "rule": {
+        "fix": "Add an index led by this field to the aggregate (`indexes=[Index(\"field\")]`), or suppress the check when the table is small or the query is a one-off (admin/reporting).",
+        "rationale": "A repository filter on a field with no covering index forces a full table scan on a relational backend. The cost is invisible on small development data and grows with the production table."
+      },
+      "suggestion": "Index(\"status\")  # add to `RewardAccount` indexes",
+      "teaching_skills": [
+        "add-field"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.redemption.events.PointsReserved",
+      "level": "info",
+      "message": "Event PointsReserved is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.redemption.events.RedemptionCompensated",
+      "level": "info",
+      "message": "Event RedemptionCompensated is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.redemption.events.RedemptionCompleted",
+      "level": "info",
+      "message": "Event RedemptionCompleted is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.redemption.events.RedemptionRequested",
+      "level": "info",
+      "message": "Event RedemptionRequested is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.redemption.events.VoucherIssuanceFailed",
+      "level": "info",
+      "message": "Event VoucherIssuanceFailed is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.redemption.events.VoucherIssued",
+      "level": "info",
+      "message": "Event VoucherIssued is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.reward.events.MembershipCardIssued",
+      "level": "info",
+      "message": "Event MembershipCardIssued is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.reward.events.PointsEarned",
+      "level": "info",
+      "message": "Event PointsEarned is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.reward.events.PointsRedeemed",
+      "level": "info",
+      "message": "Event PointsRedeemed is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.reward.events.RewardAccountClosed",
+      "level": "info",
+      "message": "Event RewardAccountClosed is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.reward.events.RewardAccountEnrolled",
+      "level": "info",
+      "message": "Event RewardAccountEnrolled is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.reward.events.TierUpgraded",
+      "level": "info",
+      "message": "Event TierUpgraded is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "loyalty.projections.redemption_view.RedemptionView",
+      "field": "failure_reason",
+      "level": "info",
+      "message": "Field `failure_reason` on projection `RedemptionView` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "loyalty.projections.redemption_view.RedemptionView",
+      "field": "voucher_code",
+      "level": "info",
+      "message": "Field `voucher_code` on projection `RedemptionView` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
     }
   ],
   "domain": {
@@ -2043,6 +2594,10 @@
       "loyalty.reward.payments_subscriber.PaymentRefundedSubscriber",
       "loyalty.reward.reviews_subscriber.ReviewApprovedSubscriber"
     ],
+    "UPCASTER": [
+      "loyalty.campaign.upcasters.UpcastCampaignLaunchedV1ToV2",
+      "loyalty.campaign.upcasters.UpcastCampaignLaunchedV2ToV3"
+    ],
     "VALUE_OBJECT": []
   },
   "flows": {
@@ -2078,7 +2633,6 @@
           "failure_reason": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "id": {
@@ -2099,7 +2653,6 @@
           "reward_code": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "started_at": {
@@ -2110,13 +2663,11 @@
             "default": "new",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "voucher_code": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -2216,7 +2767,7 @@
       }
     }
   },
-  "ir_version": "0.1.0",
+  "ir_version": "0.2.0",
   "projections": {
     "loyalty.projections.campaign_catalog.CampaignCatalog": {
       "projection": {
@@ -2225,7 +2776,6 @@
           "campaign_code": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "campaign_id": {
@@ -2237,7 +2787,6 @@
           "discount_type": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "discount_value": {
@@ -2252,7 +2801,6 @@
           "name": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "starts_on": {
@@ -2262,7 +2810,6 @@
           "status": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -2341,7 +2888,6 @@
             "status": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -2384,7 +2930,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "points_balance": {
@@ -2395,7 +2940,6 @@
           "tier": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -2489,7 +3033,6 @@
           "failure_reason": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "points": {
@@ -2506,13 +3049,11 @@
           "reward_code": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "status": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -2522,7 +3063,6 @@
           "voucher_code": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -2627,7 +3167,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "lifetime_points": {
@@ -2638,7 +3177,6 @@
           "member_code": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "points_balance": {
@@ -2649,13 +3187,11 @@
           "status": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "tier": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -2746,5 +3282,17 @@
         }
       }
     }
+  },
+  "upcasters": {
+    "CampaignLaunched": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      },
+      {
+        "from_version": 2,
+        "to_version": 3
+      }
+    ]
   }
 }

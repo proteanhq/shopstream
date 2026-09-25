@@ -21,13 +21,13 @@ HOW THE CRASH IS SIMULATED (deterministically, in-process)
     relational commit (step 2) while the event-store append (step 1) has already
     landed — exactly the ADR-0015 window, with no real process kill needed.
 
-STATUS - the recovery half is a known gap (xfail)
-    `test_crash_leaves_event_durable_but_unpublished` passes: it characterizes the
-    window (event durable, outbox row missing). `test_reconcile_restores_...`
-    asserts the DESIRED recovery and currently FAILS: `reconcile_outbox` is a
-    no-op against Message-DB because `read_last_message("$all")` returns None, so
-    the lost row is never restored. Filed as proteanhq/protean#1073; marked
-    xfail(strict=True) so it flips the day the fix lands.
+STATUS - both tests are guards
+    `test_crash_leaves_event_durable_but_unpublished` characterizes the window
+    (event durable, outbox row missing). `test_reconcile_restores_...` asserts the
+    recovery: `reconcile_outbox` restores the lost row. It was xfail while
+    `reconcile_outbox` was a no-op against Message-DB (`read_last_message("$all")`
+    returned None, proteanhq/protean#1073). That fix is in the pin, so both tests
+    now guard against regression.
 
 WHY POSTGRES + MESSAGE-DB ONLY
     The two-store split and the SQLAlchemy-commit seam only exist with the real

@@ -27,6 +27,10 @@ for _p in (_REPO, os.path.join(_REPO, "src")):
 
 _INITED = False
 
+# The outbox's unique index. A stale writer on an event-sourced aggregate trips it
+# before Message-DB can report the version conflict.
+OUTBOX_KEY = "uq_outbox_message_id_target_broker"
+
 
 def _domain(env: str, retry_config: dict | None):
     """Init the inventory domain once per worker process.
@@ -55,6 +59,9 @@ def reserve_once(args):
       "ok"                   - the reservation committed
       "conflict"             - lost the optimistic-concurrency race (ExpectedVersionError)
       "insufficient"         - stock genuinely exhausted (ValidationError)
+      "outbox_collision"     - lost the race, but Protean reported it as a unique
+                               violation on the outbox key instead of a version
+                               conflict (open Protean bug, see the oracle)
       "<ExceptionName>"      - anything unexpected (surfaces as a test failure)
     """
     env, item_id, order_id, barrier, retry_config = args
@@ -82,6 +89,8 @@ def reserve_once(args):
                 return "insufficient"
             return f"ValidationError:{exc}"
         except Exception as exc:  # noqa: BLE001
+            if OUTBOX_KEY in str(exc):
+                return "outbox_collision"
             return f"{type(exc).__name__}:{str(exc)[:80]}"
 
 
@@ -90,10 +99,9 @@ def project_low_stock_once(args):
 
     Deterministically reproduces the projector's concurrent-create window: every
     worker fires the projector for the SAME fresh item at the same instant, so
-    they all take the create path before any commits. A version-retry loop mimics
-    the framework's `_handle` wrapper so that update-update races (the projection
-    has its own `_version`) are retried the way production would — leaving the
-    create-create collision as the only thing under test.
+    they all take the create path before any commits. The handler is called
+    directly, so the framework's own version and transient retry run exactly as
+    they do in production.
 
     Returns "ok", "version_exhausted", or "<ExceptionName>:<msg>".
     """
