@@ -39,13 +39,14 @@ ShopStream reproduction and are noted as such.)
 | [#1042](https://github.com/proteanhq/protean/issues/1042) | **guard** | No consume-side idempotency → projector double-counts | `oracles/test_p20_projector_idempotency.py` |
 | [#1046](https://github.com/proteanhq/protean/issues/1046) | fixed | `Date` field on a command/event breaks the message checksum | no ShopStream repro (no `Date` field on commands/events) |
 | [#1048](https://github.com/proteanhq/protean/issues/1048) | **guard** | Multi-step process managers don't cascade under `sync` | `tests/loyalty/**` RedemptionSaga (full-cascade completion tests, xfails flipped) |
-| [#1055](https://github.com/proteanhq/protean/issues/1055) | **open** | `Engine(test_mode).run()` unreliable in CI vs Redis | `tests/loyalty/integration/test_dlq.py` (`-m engine`, local-only) |
+| [#1055](https://github.com/proteanhq/protean/issues/1055) | fixed | `Engine(test_mode).run()` unreliable in CI vs Redis | `tests/loyalty/integration/test_dlq.py` (`-m engine`, local-only). Closed upstream; CI still deselects `-m engine` until the engine job is re-added |
 | [#1056](https://github.com/proteanhq/protean/issues/1056) | fixed | `repository.add()` doesn't reflect `Auto(increment=True)` back onto the aggregate | no ShopStream repro (no `increment=True` in any domain) |
 | [#1065](https://github.com/proteanhq/protean/issues/1065) | fixed | `process_and_wait` belongs in `protean.testing` | `verification/support/processing.py` (local seed; swap when adopted) |
 | [#1071](https://github.com/proteanhq/protean/issues/1071) | **guard** | In-memory adapter ignores `Index(unique=True)` | `regression/test_protean_regressions.py::test_1071_memory_adapter_enforces_unique_index` (+ `oracles/test_outbox_exactly_once.py`, Postgres) |
 | [#1073](https://github.com/proteanhq/protean/issues/1073) | **guard** | `reconcile_outbox` no-op on Message-DB (`read_last_message("$all")` is None) | `oracles/test_crash_window_reconcile.py::test_reconcile_restores_the_lost_outbox_row` |
 | [#1076](https://github.com/proteanhq/protean/issues/1076) | fixed | Projectors reject `retries`/`retry_exceptions` options | `src/inventory/projections/low_stock_report.py` uses a nested-UoW workaround; simplify to the option when adopted |
-| [#1078](https://github.com/proteanhq/protean/issues/1078) | **open** | All-default ValueObject round-trips to `None` | `verification/model/test_inventory_model.py` mirrors None-as-zeros |
+| [#1078](https://github.com/proteanhq/protean/issues/1078) | **guard** | All-default ValueObject round-trips to `None` | `regression/test_protean_regressions.py::test_1078_all_default_value_object_round_trips` |
+| not filed | **open** | `current_domain` warns "Working outside of domain context" when its type is probed (pytest collection) | `regression/test_protean_regressions.py::test_current_domain_type_probe_outside_context_is_silent` |
 
 **Run**
 

@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:c614fcca31dddab90730224469be398e74bbf2884ffe5e8619ccfe2bcba67b5b",
+  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
+  "checksum": "sha256:39cf1e1d9f36e04bb4c86d2f00c4e4090c27efa7094b415af3ad203d0371bb48",
   "clusters": {
     "inventory.stock.stock.InventoryItem": {
       "aggregate": {
@@ -64,7 +64,6 @@
             "max_length": 50,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -89,6 +88,68 @@
         "invariants": {
           "post": [],
           "pre": []
+        },
+        "method_edges": {
+          "_check_low_stock": {
+            "raises": [
+              "inventory.stock.events.LowStockDetected"
+            ]
+          },
+          "adjust_stock": {
+            "raises": [
+              "inventory.stock.events.StockAdjusted"
+            ]
+          },
+          "commit_stock": {
+            "raises": [
+              "inventory.stock.events.StockCommitted"
+            ]
+          },
+          "confirm_reservation": {
+            "raises": [
+              "inventory.stock.events.ReservationConfirmed"
+            ]
+          },
+          "create": {
+            "raises": [
+              "inventory.stock.events.StockInitialized"
+            ]
+          },
+          "mark_damaged": {
+            "raises": [
+              "inventory.stock.events.StockMarkedDamaged"
+            ]
+          },
+          "receive_stock": {
+            "raises": [
+              "inventory.stock.events.StockReceived"
+            ]
+          },
+          "record_stock_check": {
+            "raises": [
+              "inventory.stock.events.StockCheckRecorded"
+            ]
+          },
+          "release_reservation": {
+            "raises": [
+              "inventory.stock.events.ReservationReleased"
+            ]
+          },
+          "reserve": {
+            "raises": [
+              "inventory.stock.events.StockReserved"
+            ]
+          },
+          "return_to_stock": {
+            "raises": [
+              "inventory.stock.events.StockReturned"
+            ]
+          },
+          "write_off_damaged": {
+            "raises": [
+              "inventory.stock.events.DamagedStockWrittenOff"
+            ]
+          }
         },
         "module": "inventory.stock.stock",
         "name": "InventoryItem",
@@ -115,6 +176,24 @@
               "record_stock_check"
             ]
           },
+          "method_edges": {
+            "adjust_stock": {
+              "invokes": [
+                {
+                  "element": "inventory.stock.stock.InventoryItem",
+                  "method": "adjust_stock"
+                }
+              ]
+            },
+            "record_stock_check": {
+              "invokes": [
+                {
+                  "element": "inventory.stock.stock.InventoryItem",
+                  "method": "record_stock_check"
+                }
+              ]
+            }
+          },
           "module": "inventory.stock.adjustment",
           "name": "StockAdjustmentHandler",
           "part_of": "inventory.stock.stock.InventoryItem",
@@ -135,6 +214,24 @@
             "Inventory.WriteOffDamaged.v1": [
               "write_off_damaged"
             ]
+          },
+          "method_edges": {
+            "mark_damaged": {
+              "invokes": [
+                {
+                  "element": "inventory.stock.stock.InventoryItem",
+                  "method": "mark_damaged"
+                }
+              ]
+            },
+            "write_off_damaged": {
+              "invokes": [
+                {
+                  "element": "inventory.stock.stock.InventoryItem",
+                  "method": "write_off_damaged"
+                }
+              ]
+            }
           },
           "module": "inventory.stock.damage",
           "name": "DamageHandler",
@@ -172,6 +269,16 @@
               "initialize_stock"
             ]
           },
+          "method_edges": {
+            "initialize_stock": {
+              "invokes": [
+                {
+                  "element": "inventory.stock.stock.InventoryItem",
+                  "method": "create"
+                }
+              ]
+            }
+          },
           "module": "inventory.stock.initialization",
           "name": "InitializeStockHandler",
           "part_of": "inventory.stock.stock.InventoryItem",
@@ -189,6 +296,16 @@
             "Inventory.ReceiveStock.v1": [
               "receive_stock"
             ]
+          },
+          "method_edges": {
+            "receive_stock": {
+              "invokes": [
+                {
+                  "element": "inventory.stock.stock.InventoryItem",
+                  "method": "receive_stock"
+                }
+              ]
+            }
           },
           "module": "inventory.stock.receiving",
           "name": "ReceiveStockHandler",
@@ -214,6 +331,32 @@
               "reserve_stock"
             ]
           },
+          "method_edges": {
+            "confirm_reservation": {
+              "invokes": [
+                {
+                  "element": "inventory.stock.stock.InventoryItem",
+                  "method": "confirm_reservation"
+                }
+              ]
+            },
+            "release_reservation": {
+              "invokes": [
+                {
+                  "element": "inventory.stock.stock.InventoryItem",
+                  "method": "release_reservation"
+                }
+              ]
+            },
+            "reserve_stock": {
+              "invokes": [
+                {
+                  "element": "inventory.stock.stock.InventoryItem",
+                  "method": "reserve"
+                }
+              ]
+            }
+          },
           "module": "inventory.stock.reservation",
           "name": "ReservationHandler",
           "part_of": "inventory.stock.stock.InventoryItem",
@@ -232,6 +375,16 @@
               "return_to_stock"
             ]
           },
+          "method_edges": {
+            "return_to_stock": {
+              "invokes": [
+                {
+                  "element": "inventory.stock.stock.InventoryItem",
+                  "method": "return_to_stock"
+                }
+              ]
+            }
+          },
           "module": "inventory.stock.returns",
           "name": "ReturnToStockHandler",
           "part_of": "inventory.stock.stock.InventoryItem",
@@ -249,6 +402,16 @@
             "Inventory.CommitStock.v1": [
               "commit_stock"
             ]
+          },
+          "method_edges": {
+            "commit_stock": {
+              "invokes": [
+                {
+                  "element": "inventory.stock.stock.InventoryItem",
+                  "method": "commit_stock"
+                }
+              ]
+            }
           },
           "module": "inventory.stock.shipping",
           "name": "CommitStockHandler",
@@ -273,7 +436,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "adjustment_type": {
@@ -281,7 +443,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "inventory_item_id": {
@@ -300,7 +461,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -320,7 +480,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "counted_quantity": {
@@ -362,7 +521,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -382,7 +540,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "inventory_item_id": {
@@ -455,7 +612,6 @@
               "max_length": 50,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "variant_id": {
@@ -496,7 +652,6 @@
             "reference": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -546,7 +701,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "reservation_id": {
@@ -698,7 +852,6 @@
               "default": "Active",
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -753,7 +906,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "inventory_item_id": {
@@ -833,7 +985,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "variant_id": {
@@ -929,7 +1080,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "released_at": {
@@ -967,7 +1117,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "adjustment_type": {
@@ -975,7 +1124,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "inventory_item_id": {
@@ -1015,7 +1163,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1041,7 +1188,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "counted_quantity": {
@@ -1176,7 +1322,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "variant_id": {
@@ -1256,7 +1401,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1306,7 +1450,6 @@
             "reference": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1501,7 +1644,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -1518,6 +1660,33 @@
         "invariants": {
           "post": [],
           "pre": []
+        },
+        "method_edges": {
+          "add_zone": {
+            "raises": [
+              "inventory.warehouse.events.ZoneAdded"
+            ]
+          },
+          "create": {
+            "raises": [
+              "inventory.warehouse.events.WarehouseCreated"
+            ]
+          },
+          "deactivate": {
+            "raises": [
+              "inventory.warehouse.events.WarehouseDeactivated"
+            ]
+          },
+          "remove_zone": {
+            "raises": [
+              "inventory.warehouse.events.ZoneRemoved"
+            ]
+          },
+          "update_details": {
+            "raises": [
+              "inventory.warehouse.events.WarehouseUpdated"
+            ]
+          }
         },
         "module": "inventory.warehouse.warehouse",
         "name": "Warehouse",
@@ -1553,6 +1722,48 @@
               "update_warehouse"
             ]
           },
+          "method_edges": {
+            "add_zone": {
+              "invokes": [
+                {
+                  "element": "inventory.warehouse.warehouse.Warehouse",
+                  "method": "add_zone"
+                }
+              ]
+            },
+            "create_warehouse": {
+              "invokes": [
+                {
+                  "element": "inventory.warehouse.warehouse.Warehouse",
+                  "method": "create"
+                }
+              ]
+            },
+            "deactivate_warehouse": {
+              "invokes": [
+                {
+                  "element": "inventory.warehouse.warehouse.Warehouse",
+                  "method": "deactivate"
+                }
+              ]
+            },
+            "remove_zone": {
+              "invokes": [
+                {
+                  "element": "inventory.warehouse.warehouse.Warehouse",
+                  "method": "remove_zone"
+                }
+              ]
+            },
+            "update_warehouse": {
+              "invokes": [
+                {
+                  "element": "inventory.warehouse.warehouse.Warehouse",
+                  "method": "update_details"
+                }
+              ]
+            }
+          },
           "module": "inventory.warehouse.management",
           "name": "WarehouseManagementHandler",
           "part_of": "inventory.warehouse.warehouse.Warehouse",
@@ -1582,13 +1793,11 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "zone_type": {
               "kind": "standard",
               "max_length": 50,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1618,7 +1827,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1682,7 +1890,6 @@
             "name": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "warehouse_id": {
@@ -1721,7 +1928,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "zone_type": {
@@ -1733,7 +1939,6 @@
               "default": "Regular",
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1782,7 +1987,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "warehouse_id": {
@@ -1838,7 +2042,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "updated_at": {
@@ -1887,7 +2090,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "zone_type": {
@@ -1895,7 +2097,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1947,7 +2148,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "country": {
@@ -1955,7 +2155,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "postal_code": {
@@ -1963,13 +2162,11 @@
               "max_length": 20,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "state": {
               "kind": "standard",
               "max_length": 100,
-              "sanitize": true,
               "type": "String"
             },
             "street": {
@@ -1977,7 +2174,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -2029,7 +2225,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "variant_id": {
@@ -2077,7 +2272,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "released_at": {
@@ -2150,10 +2344,422 @@
   },
   "diagnostics": [
     {
+      "category": "aggregate_design",
+      "code": "AGGREGATE_NO_INVARIANTS",
+      "element": "inventory.stock.stock.InventoryItem",
+      "level": "info",
+      "message": "Aggregate `InventoryItem` has no pre/post invariants (own or inherited); it enforces no business rules and may be an anemic data holder.",
+      "rule": {
+        "fix": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+        "rationale": "An aggregate is a consistency boundary. With no pre- or post-invariants it enforces no business rules and is usually an anemic data holder rather than a true aggregate."
+      },
+      "suggestion": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+      "teaching_skills": [
+        "add-validation",
+        "aggregate",
+        "protean-overview",
+        "refactor-move-logic-to-aggregate"
+      ]
+    },
+    {
+      "category": "aggregate_design",
+      "code": "AGGREGATE_NO_INVARIANTS",
+      "element": "inventory.warehouse.warehouse.Warehouse",
+      "level": "info",
+      "message": "Aggregate `Warehouse` has no pre/post invariants (own or inherited); it enforces no business rules and may be an anemic data holder.",
+      "rule": {
+        "fix": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+        "rationale": "An aggregate is a consistency boundary. With no pre- or post-invariants it enforces no business rules and is usually an anemic data holder rather than a true aggregate."
+      },
+      "suggestion": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+      "teaching_skills": [
+        "add-validation",
+        "aggregate",
+        "protean-overview",
+        "refactor-move-logic-to-aggregate"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "inventory.stock.adjustment.AdjustStock",
+      "level": "info",
+      "message": "Command `AdjustStock` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "inventory.stock.adjustment.RecordStockCheck",
+      "level": "info",
+      "message": "Command `RecordStockCheck` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "inventory.stock.damage.WriteOffDamaged",
+      "level": "info",
+      "message": "Command `WriteOffDamaged` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "inventory.stock.expiry.ExpireStaleReservations",
+      "level": "info",
+      "message": "Command `ExpireStaleReservations` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "inventory.stock.initialization.InitializeStock",
+      "level": "info",
+      "message": "Command `InitializeStock` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "inventory.stock.receiving.ReceiveStock",
+      "level": "info",
+      "message": "Command `ReceiveStock` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "inventory.stock.reservation.ReleaseReservation",
+      "level": "info",
+      "message": "Command `ReleaseReservation` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "inventory.stock.reservation.ReserveStock",
+      "level": "info",
+      "message": "Command `ReserveStock` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "inventory.stock.returns.ReturnToStock",
+      "level": "info",
+      "message": "Command `ReturnToStock` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "inventory.stock.shipping.CommitStock",
+      "level": "info",
+      "message": "Command `CommitStock` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "deprecation",
+      "code": "DEPRECATED_OPTION",
+      "element": "inventory.stock.stock.InventoryItem",
+      "level": "info",
+      "message": "Option `is_event_sourced` is deprecated, scheduled for removal in v1.0.0; use `event_sourced` instead.",
+      "rule": {
+        "fix": "Use `event_sourced` instead of the deprecated alias.",
+        "rationale": "The option is a deprecated alias scheduled for removal."
+      },
+      "suggestion": "Use `event_sourced` instead of the deprecated alias."
+    },
+    {
+      "category": "handler_completeness",
       "code": "PROJECTION_WITHOUT_PROJECTOR",
       "element": "inventory.projections.event_audit.EventAudit",
       "level": "warning",
-      "message": "Projection `EventAudit` has no projector to populate it"
+      "message": "Projection `EventAudit` has no projector to populate it",
+      "rule": {
+        "fix": "Add a projector for the projection, or set `externally_populated=True` if it is filled by a subscriber.",
+        "rationale": "A projection with no projector is never populated, so queries against it will always return empty."
+      },
+      "suggestion": "Add a projector for the projection, or set `externally_populated=True` if it is filled by a subscriber.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "inventory.projections.low_stock_report.LowStockReport",
+      "field": "detected_at",
+      "level": "info",
+      "message": "Field `detected_at` on projection `LowStockReport` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "inventory.projections.low_stock_report.LowStockReport",
+      "field": "product_id",
+      "level": "info",
+      "message": "Field `product_id` on projection `LowStockReport` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "inventory.projections.low_stock_report.LowStockReport",
+      "field": "reorder_point",
+      "level": "info",
+      "message": "Field `reorder_point` on projection `LowStockReport` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "inventory.projections.low_stock_report.LowStockReport",
+      "field": "sku",
+      "level": "info",
+      "message": "Field `sku` on projection `LowStockReport` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "inventory.projections.low_stock_report.LowStockReport",
+      "field": "variant_id",
+      "level": "info",
+      "message": "Field `variant_id` on projection `LowStockReport` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "inventory.projections.product_availability.ProductAvailability",
+      "field": "is_in_stock",
+      "level": "info",
+      "message": "Field `is_in_stock` on projection `ProductAvailability` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "inventory.projections.product_availability.ProductAvailability",
+      "field": "product_id",
+      "level": "info",
+      "message": "Field `product_id` on projection `ProductAvailability` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "inventory.projections.product_availability.ProductAvailability",
+      "field": "variant_id",
+      "level": "info",
+      "message": "Field `variant_id` on projection `ProductAvailability` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "inventory.projections.shrinkage_report.ShrinkageReport",
+      "field": "product_id",
+      "level": "info",
+      "message": "Field `product_id` on projection `ShrinkageReport` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "inventory.projections.shrinkage_report.ShrinkageReport",
+      "field": "sku",
+      "level": "info",
+      "message": "Field `sku` on projection `ShrinkageReport` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "inventory.projections.shrinkage_report.ShrinkageReport",
+      "field": "total_shrinkage_value",
+      "level": "info",
+      "message": "Field `total_shrinkage_value` on projection `ShrinkageReport` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "inventory.projections.shrinkage_report.ShrinkageReport",
+      "field": "warehouse_id",
+      "level": "info",
+      "message": "Field `warehouse_id` on projection `ShrinkageReport` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
     }
   ],
   "domain": {
@@ -2261,6 +2867,7 @@
       "inventory.stock.fulfillment_subscriber.FulfillmentEventsSubscriber",
       "inventory.stock.ordering_subscriber.OrderingEventsSubscriber"
     ],
+    "UPCASTER": [],
     "VALUE_OBJECT": [
       "inventory.stock.stock.StockLevels",
       "inventory.warehouse.warehouse.WarehouseAddress"
@@ -2299,7 +2906,7 @@
       }
     }
   },
-  "ir_version": "0.1.0",
+  "ir_version": "0.2.0",
   "projections": {
     "inventory.projections.event_audit.EventAudit": {
       "projection": {
@@ -2314,13 +2921,11 @@
           "causation_id": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "correlation_id": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "event_type": {
@@ -2328,7 +2933,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "inventory_item_id": {
@@ -2338,7 +2942,6 @@
           "qualified_type": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "recorded_at": {
@@ -2349,7 +2952,6 @@
           "stream": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -2421,7 +3023,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -2530,7 +3131,6 @@
           "sku": {
             "kind": "standard",
             "max_length": 50,
-            "sanitize": true,
             "type": "String"
           },
           "total_value": {
@@ -2654,7 +3254,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "variant_id": {
@@ -2865,7 +3464,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -2952,7 +3550,6 @@
           "sku": {
             "kind": "standard",
             "max_length": 50,
-            "sanitize": true,
             "type": "String"
           },
           "total_adjustments": {
@@ -3034,7 +3631,6 @@
           "actor": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "description": {
@@ -3042,7 +3638,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "entry_id": {
@@ -3056,7 +3651,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "inventory_item_id": {
@@ -3169,13 +3763,11 @@
           "city": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "country": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "created_at": {
@@ -3192,7 +3784,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -3305,7 +3896,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {

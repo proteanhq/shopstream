@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:666a263cd830552441c1dc839bc9365fdc18ee78e8880bf05fe7640a8eea2cc8",
+  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
+  "checksum": "sha256:d443b7120310cb8f1267e669ec8afe921fa1789488f07963644e36e71f063168",
   "clusters": {
     "ordering.cart.cart.ShoppingCart": {
       "aggregate": {
@@ -33,7 +33,6 @@
           "session_id": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "status": {
@@ -64,6 +63,43 @@
             "cart_must_have_items_to_convert"
           ],
           "pre": []
+        },
+        "method_edges": {
+          "abandon": {
+            "raises": [
+              "ordering.cart.events.CartAbandoned"
+            ]
+          },
+          "add_item": {
+            "raises": [
+              "ordering.cart.events.CartItemAdded"
+            ]
+          },
+          "apply_coupon": {
+            "raises": [
+              "ordering.cart.events.CartCouponApplied"
+            ]
+          },
+          "convert_to_order": {
+            "raises": [
+              "ordering.cart.events.CartConverted"
+            ]
+          },
+          "merge_guest_cart": {
+            "raises": [
+              "ordering.cart.events.CartsMerged"
+            ]
+          },
+          "remove_item": {
+            "raises": [
+              "ordering.cart.events.CartItemRemoved"
+            ]
+          },
+          "update_item_quantity": {
+            "raises": [
+              "ordering.cart.events.CartQuantityUpdated"
+            ]
+          }
         },
         "module": "ordering.cart.cart",
         "name": "ShoppingCart",
@@ -105,6 +141,16 @@
               "convert_to_order"
             ]
           },
+          "method_edges": {
+            "convert_to_order": {
+              "invokes": [
+                {
+                  "element": "ordering.cart.cart.ShoppingCart",
+                  "method": "convert_to_order"
+                }
+              ]
+            }
+          },
           "module": "ordering.cart.conversion",
           "name": "ConvertCartHandler",
           "part_of": "ordering.cart.cart.ShoppingCart",
@@ -122,6 +168,16 @@
             "Ordering.ApplyCouponToCart.v1": [
               "apply_coupon"
             ]
+          },
+          "method_edges": {
+            "apply_coupon": {
+              "invokes": [
+                {
+                  "element": "ordering.cart.cart.ShoppingCart",
+                  "method": "apply_coupon"
+                }
+              ]
+            }
           },
           "module": "ordering.cart.coupons",
           "name": "ApplyCouponHandler",
@@ -147,6 +203,32 @@
               "update_cart_quantity"
             ]
           },
+          "method_edges": {
+            "add_to_cart": {
+              "invokes": [
+                {
+                  "element": "ordering.cart.cart.ShoppingCart",
+                  "method": "add_item"
+                }
+              ]
+            },
+            "remove_from_cart": {
+              "invokes": [
+                {
+                  "element": "ordering.cart.cart.ShoppingCart",
+                  "method": "remove_item"
+                }
+              ]
+            },
+            "update_cart_quantity": {
+              "invokes": [
+                {
+                  "element": "ordering.cart.cart.ShoppingCart",
+                  "method": "update_item_quantity"
+                }
+              ]
+            }
+          },
           "module": "ordering.cart.items",
           "name": "ManageCartItemsHandler",
           "part_of": "ordering.cart.cart.ShoppingCart",
@@ -170,6 +252,32 @@
             "Ordering.MergeGuestCart.v1": [
               "merge_guest_cart"
             ]
+          },
+          "method_edges": {
+            "abandon_cart": {
+              "invokes": [
+                {
+                  "element": "ordering.cart.cart.ShoppingCart",
+                  "method": "abandon"
+                }
+              ]
+            },
+            "create_cart": {
+              "invokes": [
+                {
+                  "element": "ordering.cart.cart.ShoppingCart",
+                  "method": "create"
+                }
+              ]
+            },
+            "merge_guest_cart": {
+              "invokes": [
+                {
+                  "element": "ordering.cart.cart.ShoppingCart",
+                  "method": "merge_guest_cart"
+                }
+              ]
+            }
           },
           "module": "ordering.cart.management",
           "name": "ManageCartHandler",
@@ -239,7 +347,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -369,7 +476,6 @@
             "session_id": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -534,7 +640,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -666,7 +771,6 @@
             "source_session_id": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -712,25 +816,21 @@
           "cancellation_reason": {
             "kind": "standard",
             "max_length": 500,
-            "sanitize": true,
             "type": "String"
           },
           "cancelled_by": {
             "kind": "standard",
             "max_length": 50,
-            "sanitize": true,
             "type": "String"
           },
           "carrier": {
             "kind": "standard",
             "max_length": 100,
-            "sanitize": true,
             "type": "String"
           },
           "coupon_code": {
             "kind": "standard",
             "max_length": 100,
-            "sanitize": true,
             "type": "String"
           },
           "created_at": {
@@ -746,7 +846,6 @@
           "estimated_delivery": {
             "kind": "standard",
             "max_length": 10,
-            "sanitize": true,
             "type": "String"
           },
           "id": {
@@ -763,25 +862,21 @@
             "default": "web",
             "kind": "standard",
             "max_length": 20,
-            "sanitize": true,
             "type": "String"
           },
           "payment_id": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "payment_method": {
             "kind": "standard",
             "max_length": 50,
-            "sanitize": true,
             "type": "String"
           },
           "payment_status": {
             "kind": "standard",
             "max_length": 50,
-            "sanitize": true,
             "type": "String"
           },
           "pricing": {
@@ -791,7 +886,6 @@
           "shipment_id": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "shipping_address": {
@@ -876,7 +970,6 @@
           "tracking_number": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -889,6 +982,103 @@
         "invariants": {
           "post": [],
           "pre": []
+        },
+        "method_edges": {
+          "add_item": {
+            "raises": [
+              "ordering.order.events.ItemAdded"
+            ]
+          },
+          "apply_coupon": {
+            "raises": [
+              "ordering.order.events.CouponApplied"
+            ]
+          },
+          "approve_return": {
+            "raises": [
+              "ordering.order.events.ReturnApproved"
+            ]
+          },
+          "cancel": {
+            "raises": [
+              "ordering.order.events.OrderCancelled"
+            ]
+          },
+          "complete": {
+            "raises": [
+              "ordering.order.events.OrderCompleted"
+            ]
+          },
+          "confirm": {
+            "raises": [
+              "ordering.order.events.OrderConfirmed"
+            ]
+          },
+          "create": {
+            "raises": [
+              "ordering.order.events.OrderCreated"
+            ]
+          },
+          "mark_processing": {
+            "raises": [
+              "ordering.order.events.OrderProcessing"
+            ]
+          },
+          "record_delivery": {
+            "raises": [
+              "ordering.order.events.OrderDelivered"
+            ]
+          },
+          "record_partial_shipment": {
+            "raises": [
+              "ordering.order.events.OrderPartiallyShipped"
+            ]
+          },
+          "record_payment_failure": {
+            "raises": [
+              "ordering.order.events.PaymentFailed"
+            ]
+          },
+          "record_payment_pending": {
+            "raises": [
+              "ordering.order.events.PaymentPending"
+            ]
+          },
+          "record_payment_success": {
+            "raises": [
+              "ordering.order.events.PaymentSucceeded"
+            ]
+          },
+          "record_return": {
+            "raises": [
+              "ordering.order.events.OrderReturned"
+            ]
+          },
+          "record_shipment": {
+            "raises": [
+              "ordering.order.events.OrderShipped"
+            ]
+          },
+          "refund": {
+            "raises": [
+              "ordering.order.events.OrderRefunded"
+            ]
+          },
+          "remove_item": {
+            "raises": [
+              "ordering.order.events.ItemRemoved"
+            ]
+          },
+          "request_return": {
+            "raises": [
+              "ordering.order.events.ReturnRequested"
+            ]
+          },
+          "update_item_quantity": {
+            "raises": [
+              "ordering.order.events.ItemQuantityUpdated"
+            ]
+          }
         },
         "module": "ordering.order.order",
         "name": "Order",
@@ -915,6 +1105,24 @@
               "refund_order"
             ]
           },
+          "method_edges": {
+            "cancel_order": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "cancel"
+                }
+              ]
+            },
+            "refund_order": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "refund"
+                }
+              ]
+            }
+          },
           "module": "ordering.order.cancellation",
           "name": "CancelOrderHandler",
           "part_of": "ordering.order.order.Order",
@@ -932,6 +1140,16 @@
             "Ordering.CompleteOrder.v1": [
               "complete_order"
             ]
+          },
+          "method_edges": {
+            "complete_order": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "complete"
+                }
+              ]
+            }
           },
           "module": "ordering.order.completion",
           "name": "CompleteOrderHandler",
@@ -951,6 +1169,16 @@
               "confirm_order"
             ]
           },
+          "method_edges": {
+            "confirm_order": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "confirm"
+                }
+              ]
+            }
+          },
           "module": "ordering.order.confirmation",
           "name": "ConfirmOrderHandler",
           "part_of": "ordering.order.order.Order",
@@ -968,6 +1196,16 @@
             "Ordering.CreateOrder.v1": [
               "create_order"
             ]
+          },
+          "method_edges": {
+            "create_order": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "create"
+                }
+              ]
+            }
           },
           "module": "ordering.order.creation",
           "name": "CreateOrderHandler",
@@ -996,6 +1234,40 @@
               "record_shipment"
             ]
           },
+          "method_edges": {
+            "mark_processing": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "mark_processing"
+                }
+              ]
+            },
+            "record_delivery": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "record_delivery"
+                }
+              ]
+            },
+            "record_partial_shipment": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "record_partial_shipment"
+                }
+              ]
+            },
+            "record_shipment": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "record_shipment"
+                }
+              ]
+            }
+          },
           "module": "ordering.order.fulfillment",
           "name": "RecordFulfillmentHandler",
           "part_of": "ordering.order.order.Order",
@@ -1023,6 +1295,40 @@
               "update_item_quantity"
             ]
           },
+          "method_edges": {
+            "add_item": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "add_item"
+                }
+              ]
+            },
+            "apply_coupon": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "apply_coupon"
+                }
+              ]
+            },
+            "remove_item": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "remove_item"
+                }
+              ]
+            },
+            "update_item_quantity": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "update_item_quantity"
+                }
+              ]
+            }
+          },
           "module": "ordering.order.modification",
           "name": "ModifyOrderHandler",
           "part_of": "ordering.order.order.Order",
@@ -1046,6 +1352,32 @@
             "Ordering.RecordPaymentSuccess.v1": [
               "record_payment_success"
             ]
+          },
+          "method_edges": {
+            "record_payment_failure": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "record_payment_failure"
+                }
+              ]
+            },
+            "record_payment_pending": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "record_payment_pending"
+                }
+              ]
+            },
+            "record_payment_success": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "record_payment_success"
+                }
+              ]
+            }
           },
           "module": "ordering.order.payment",
           "name": "RecordPaymentHandler",
@@ -1071,6 +1403,32 @@
               "request_return"
             ]
           },
+          "method_edges": {
+            "approve_return": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "approve_return"
+                }
+              ]
+            },
+            "record_return": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "record_return"
+                }
+              ]
+            },
+            "request_return": {
+              "invokes": [
+                {
+                  "element": "ordering.order.order.Order",
+                  "method": "request_return"
+                }
+              ]
+            }
+          },
           "module": "ordering.order.returns",
           "name": "ManageReturnsHandler",
           "part_of": "ordering.order.order.Order",
@@ -1094,7 +1452,6 @@
               "max_length": 50,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "order_id": {
@@ -1108,7 +1465,6 @@
               "max_length": 500,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1190,7 +1546,6 @@
               "default": "USD",
               "kind": "standard",
               "max_length": 3,
-              "sanitize": true,
               "type": "String"
             },
             "customer_id": {
@@ -1219,7 +1574,6 @@
               "default": "web",
               "kind": "standard",
               "max_length": 20,
-              "sanitize": true,
               "type": "String"
             },
             "shipping_address": {
@@ -1295,7 +1649,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "order_id": {
@@ -1309,7 +1662,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "shipped_item_ids": {
@@ -1323,7 +1675,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1343,13 +1694,11 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "estimated_delivery": {
               "kind": "standard",
               "max_length": 10,
-              "sanitize": true,
               "type": "String"
             },
             "order_id": {
@@ -1363,7 +1712,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "shipped_item_ids": {
@@ -1377,7 +1725,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1415,7 +1762,6 @@
               "max_length": 50,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "title": {
@@ -1423,7 +1769,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "unit_price": {
@@ -1455,7 +1800,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "order_id": {
@@ -1541,7 +1885,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "reason": {
@@ -1549,7 +1892,6 @@
               "max_length": 500,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1575,7 +1917,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "payment_method": {
@@ -1583,7 +1924,6 @@
               "max_length": 50,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1614,7 +1954,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "payment_method": {
@@ -1622,7 +1961,6 @@
               "max_length": 50,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1690,7 +2028,6 @@
               "max_length": 500,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1766,7 +2103,6 @@
               "max_length": 50,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "tax_amount": {
@@ -1779,7 +2115,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "unit_price": {
@@ -1830,7 +2165,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "order_id": {
@@ -1890,7 +2224,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "sku": {
@@ -1898,7 +2231,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "title": {
@@ -1906,7 +2238,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "unit_price": {
@@ -1914,7 +2245,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "variant_id": {
@@ -1952,7 +2282,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "new_subtotal": {
@@ -1971,7 +2300,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "updated_at": {
@@ -2042,7 +2370,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "order_id": {
@@ -2056,7 +2383,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -2136,7 +2462,6 @@
               "default": "USD",
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "customer_id": {
@@ -2170,7 +2495,6 @@
               "default": "web",
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "shipping_address": {
@@ -2241,7 +2565,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "order_id": {
@@ -2255,7 +2578,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "shipped_at": {
@@ -2274,7 +2596,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -2379,13 +2700,11 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "estimated_delivery": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "order_id": {
@@ -2399,7 +2718,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "shipped_at": {
@@ -2418,7 +2736,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -2450,7 +2767,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "reason": {
@@ -2458,7 +2774,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -2490,7 +2805,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "payment_method": {
@@ -2498,7 +2812,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -2535,7 +2848,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "payment_method": {
@@ -2543,7 +2855,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -2594,7 +2905,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "requested_at": {
@@ -2620,7 +2930,6 @@
               "default": "USD",
               "kind": "standard",
               "max_length": 3,
-              "sanitize": true,
               "type": "String"
             },
             "discount_total": {
@@ -2667,7 +2976,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "country": {
@@ -2675,7 +2983,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "postal_code": {
@@ -2683,13 +2990,11 @@
               "max_length": 20,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "state": {
               "kind": "standard",
               "max_length": 100,
-              "sanitize": true,
               "type": "String"
             },
             "street": {
@@ -2697,7 +3002,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -2745,7 +3049,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "order_id": {
@@ -2759,7 +3062,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -2801,7 +3103,6 @@
             "default": "USD",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "customer_id": {
@@ -2835,7 +3136,6 @@
             "default": "web",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "shipping_address": {
@@ -2913,10 +3213,311 @@
   },
   "diagnostics": [
     {
+      "category": "aggregate_design",
+      "code": "AGGREGATE_NO_INVARIANTS",
+      "element": "ordering.order.order.Order",
+      "level": "info",
+      "message": "Aggregate `Order` has no pre/post invariants (own or inherited); it enforces no business rules and may be an anemic data holder.",
+      "rule": {
+        "fix": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+        "rationale": "An aggregate is a consistency boundary. With no pre- or post-invariants it enforces no business rules and is usually an anemic data holder rather than a true aggregate."
+      },
+      "suggestion": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+      "teaching_skills": [
+        "add-validation",
+        "aggregate",
+        "protean-overview",
+        "refactor-move-logic-to-aggregate"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "ordering.cart.abandonment.DetectAbandonedCarts",
+      "level": "info",
+      "message": "Command `DetectAbandonedCarts` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "ordering.cart.coupons.ApplyCouponToCart",
+      "level": "info",
+      "message": "Command `ApplyCouponToCart` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "ordering.cart.management.AbandonCart",
+      "level": "info",
+      "message": "Command `AbandonCart` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "ordering.order.cancellation.RefundOrder",
+      "level": "info",
+      "message": "Command `RefundOrder` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "ordering.order.fulfillment.RecordDelivery",
+      "level": "info",
+      "message": "Command `RecordDelivery` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "ordering.order.fulfillment.RecordPartialShipment",
+      "level": "info",
+      "message": "Command `RecordPartialShipment` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "ordering.order.fulfillment.RecordShipment",
+      "level": "info",
+      "message": "Command `RecordShipment` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "ordering.order.modification.ApplyCoupon",
+      "level": "info",
+      "message": "Command `ApplyCoupon` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "ordering.order.payment.RecordPaymentFailure",
+      "level": "info",
+      "message": "Command `RecordPaymentFailure` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "ordering.order.payment.RecordPaymentPending",
+      "level": "info",
+      "message": "Command `RecordPaymentPending` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "ordering.order.payment.RecordPaymentSuccess",
+      "level": "info",
+      "message": "Command `RecordPaymentSuccess` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "ordering.order.returns.RecordReturn",
+      "level": "info",
+      "message": "Command `RecordReturn` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "deprecation",
+      "code": "DEPRECATED_OPTION",
+      "element": "ordering.order.order.Order",
+      "level": "info",
+      "message": "Option `is_event_sourced` is deprecated, scheduled for removal in v1.0.0; use `event_sourced` instead.",
+      "rule": {
+        "fix": "Use `event_sourced` instead of the deprecated alias.",
+        "rationale": "The option is a deprecated alias scheduled for removal."
+      },
+      "suggestion": "Use `event_sourced` instead of the deprecated alias."
+    },
+    {
+      "category": "naming_conventions",
+      "code": "EVENT_NOT_PAST_TENSE",
+      "element": "ordering.order.events.OrderProcessing",
+      "level": "info",
+      "message": "Event `OrderProcessing` is named as a gerund; domain events read best in the past tense",
+      "rule": {
+        "fix": "Rename the event to the past tense (e.g. `OrderPlaced`).",
+        "rationale": "A domain event records a fact that has already happened, so a past-tense name (`OrderPlaced`) reads truthfully; a gerund (`OrderPlacing`) describes an in-flight action and reads like a command."
+      },
+      "suggestion": "Rename the event to the past tense (e.g. `OrderPlaced`).",
+      "teaching_skills": [
+        "event"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "EVENT_NOT_PAST_TENSE",
+      "element": "ordering.order.events.PaymentPending",
+      "level": "info",
+      "message": "Event `PaymentPending` is named as a gerund; domain events read best in the past tense",
+      "rule": {
+        "fix": "Rename the event to the past tense (e.g. `OrderPlaced`).",
+        "rationale": "A domain event records a fact that has already happened, so a past-tense name (`OrderPlaced`) reads truthfully; a gerund (`OrderPlacing`) describes an in-flight action and reads like a command."
+      },
+      "suggestion": "Rename the event to the past tense (e.g. `OrderPlaced`).",
+      "teaching_skills": [
+        "event"
+      ]
+    },
+    {
+      "category": "handler_completeness",
       "code": "PROJECTION_WITHOUT_PROJECTOR",
       "element": "ordering.projections.suspended_accounts.SuspendedAccount",
       "level": "warning",
-      "message": "Projection `SuspendedAccount` has no projector to populate it"
+      "message": "Projection `SuspendedAccount` has no projector to populate it",
+      "rule": {
+        "fix": "Add a projector for the projection, or set `externally_populated=True` if it is filled by a subscriber.",
+        "rationale": "A projection with no projector is never populated, so queries against it will always return empty."
+      },
+      "suggestion": "Add a projector for the projection, or set `externally_populated=True` if it is filled by a subscriber.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "ordering.projections.cart_view.CartView",
+      "field": "created_at",
+      "level": "info",
+      "message": "Field `created_at` on projection `CartView` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "ordering.projections.cart_view.CartView",
+      "field": "customer_id",
+      "level": "info",
+      "message": "Field `customer_id` on projection `CartView` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "ordering.projections.cart_view.CartView",
+      "field": "session_id",
+      "level": "info",
+      "message": "Field `session_id` on projection `CartView` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
     }
   ],
   "domain": {
@@ -3060,6 +3661,9 @@
       "ordering.order.fulfillment_subscriber.FulfillmentEventsSubscriber",
       "ordering.order.identity_subscriber.IdentityEventsSubscriber"
     ],
+    "UPCASTER": [
+      "ordering.order.creation.UpcastOrderCreatedV1ToV2"
+    ],
     "VALUE_OBJECT": [
       "ordering.order.order.OrderPricing",
       "ordering.order.order.ShippingAddress"
@@ -3083,7 +3687,6 @@
           "failure_reason": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "id": {
@@ -3113,7 +3716,6 @@
             "default": "new",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -3226,7 +3828,7 @@
       }
     }
   },
-  "ir_version": "0.1.0",
+  "ir_version": "0.2.0",
   "projections": {
     "ordering.projections.abandoned_checkouts.AbandonedCheckout": {
       "projection": {
@@ -3240,7 +3842,6 @@
             "default": "USD",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "customer_id": {
@@ -3351,7 +3952,6 @@
           "session_id": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "status": {
@@ -3359,7 +3959,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -3468,7 +4067,6 @@
             "default": "USD",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "customer_id": {
@@ -3497,7 +4095,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -3617,7 +4214,6 @@
             "status": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -3652,7 +4248,6 @@
             "max_length": 10,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "orders_cancelled": {
@@ -3748,25 +4343,21 @@
           "cancellation_reason": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "cancelled_by": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "carrier": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "coupon_code": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "created_at": {
@@ -3777,7 +4368,6 @@
             "default": "USD",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "customer_id": {
@@ -3793,7 +4383,6 @@
           "estimated_delivery": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "grand_total": {
@@ -3816,31 +4405,26 @@
             "default": "web",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "payment_id": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "payment_method": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "payment_status": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "shipment_id": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "shipping_address": {
@@ -3857,7 +4441,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "subtotal": {
@@ -3871,7 +4454,6 @@
           "tracking_number": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -4016,7 +4598,6 @@
             "default": "USD",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "customer_id": {
@@ -4045,7 +4626,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -4184,7 +4764,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "entry_id": {
@@ -4203,7 +4782,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "occurred_at": {
@@ -4381,7 +4959,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -4485,7 +5062,6 @@
           "reason": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "suspended_at": {
@@ -4510,5 +5086,13 @@
       "queries": {},
       "query_handlers": {}
     }
+  },
+  "upcasters": {
+    "OrderCreated": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ]
   }
 }

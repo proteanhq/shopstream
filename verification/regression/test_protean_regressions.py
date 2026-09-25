@@ -20,6 +20,7 @@ See README.md for the full manifest (every filed issue → its guard → status)
 from __future__ import annotations
 
 import os
+import warnings
 from datetime import datetime
 
 import pytest
@@ -95,3 +96,61 @@ def test_1071_memory_adapter_enforces_unique_index():
     except Exception:
         rejected = True
     assert rejected, "in-memory adapter accepted a row that violates the (message_id, target_broker) unique index"
+
+
+@pytest.mark.usefixtures("inventory_ctx")
+def test_1078_all_default_value_object_round_trips():
+    """proteanhq/protean#1078 (guard): an all-default ValueObject survives event replay.
+
+    An event-sourced aggregate whose ValueObject had only falsy fields (every
+    `StockLevels` count at 0) came back as `None` after a persist and reload. The
+    pin bump to Protean 0.17.0 landed the fix, so this is now a permanent guard.
+    """
+    import uuid
+
+    from protean import current_domain
+
+    from inventory.stock.stock import InventoryItem, StockLevels
+
+    item = InventoryItem.create(
+        product_id=str(uuid.uuid4()),
+        variant_id=str(uuid.uuid4()),
+        warehouse_id=str(uuid.uuid4()),
+        sku=f"SKU-{uuid.uuid4().hex[:8]}",
+        initial_quantity=0,
+        reorder_point=0,
+    )
+    repo = current_domain.repository_for(InventoryItem)
+    repo.add(item)
+
+    reloaded = repo.get(item.id)
+    assert reloaded.levels == StockLevels(on_hand=0, reserved=0, available=0, in_transit=0, damaged=0)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="current_domain's __class__ property warns 'Working outside of domain context' on a type probe",
+)
+def test_current_domain_type_probe_outside_context_is_silent():
+    """Protean finding (not filed): probing `current_domain`'s type outside a context warns.
+
+    Test modules import `current_domain` at module level. During collection pytest
+    runs `isinstance(obj, type)` and `issubclass(...)` over every module attribute,
+    which reads the proxy's `__class__`. With no domain context active, that read
+    goes through `_find_domain()` and emits the "Working outside of domain context"
+    `UserWarning`, so collection prints it for dozens of modules. The proxy is meant
+    to act like `None` when nothing is active; a type probe is not domain use and
+    should stay silent, the way `_domain_now()` reads the stack without warning.
+    """
+    from protean import current_domain
+    from protean.utils.globals import _domain_context_stack
+
+    assert _domain_context_stack.top is None, "precondition: no domain context is active"
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+        is_type = isinstance(current_domain, type)
+
+    assert is_type is False
+    messages = [str(w.message) for w in caught]
+    assert not any("outside of domain context" in m for m in messages), messages

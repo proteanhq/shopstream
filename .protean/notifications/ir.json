@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:0379f7207953a6d21d3070cd13866b4e9bdb29b9775d36424ec9089b8582ea50",
+  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
+  "checksum": "sha256:f3d8d61c1ea6e7ec215282d7bd4d449f53ae7f5ba720b57dffbd11b67b98510a",
   "clusters": {
     "notifications.notification.notification.Notification": {
       "aggregate": {
@@ -11,7 +11,6 @@
             "kind": "text",
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "Text"
           },
           "channel": {
@@ -25,7 +24,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "context_data": {
@@ -44,7 +42,6 @@
           "failure_reason": {
             "kind": "standard",
             "max_length": 500,
-            "sanitize": true,
             "type": "String"
           },
           "id": {
@@ -80,7 +77,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "recipient_id": {
@@ -97,7 +93,6 @@
             "default": "Customer",
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "retry_count": {
@@ -116,13 +111,11 @@
           "source_event_id": {
             "kind": "standard",
             "max_length": 200,
-            "sanitize": true,
             "type": "String"
           },
           "source_event_type": {
             "kind": "standard",
             "max_length": 200,
-            "sanitize": true,
             "type": "String"
           },
           "status": {
@@ -156,13 +149,11 @@
           "subject": {
             "kind": "standard",
             "max_length": 500,
-            "sanitize": true,
             "type": "String"
           },
           "template_name": {
             "kind": "standard",
             "max_length": 200,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -175,6 +166,43 @@
         "invariants": {
           "post": [],
           "pre": []
+        },
+        "method_edges": {
+          "cancel": {
+            "raises": [
+              "notifications.notification.events.NotificationCancelled"
+            ]
+          },
+          "create": {
+            "raises": [
+              "notifications.notification.events.NotificationCreated"
+            ]
+          },
+          "mark_bounced": {
+            "raises": [
+              "notifications.notification.events.NotificationBounced"
+            ]
+          },
+          "mark_delivered": {
+            "raises": [
+              "notifications.notification.events.NotificationDelivered"
+            ]
+          },
+          "mark_failed": {
+            "raises": [
+              "notifications.notification.events.NotificationFailed"
+            ]
+          },
+          "mark_sent": {
+            "raises": [
+              "notifications.notification.events.NotificationSent"
+            ]
+          },
+          "retry": {
+            "raises": [
+              "notifications.notification.events.NotificationRetried"
+            ]
+          }
         },
         "module": "notifications.notification.notification",
         "name": "Notification",
@@ -198,6 +226,16 @@
               "cancel_notification"
             ]
           },
+          "method_edges": {
+            "cancel_notification": {
+              "invokes": [
+                {
+                  "element": "notifications.notification.notification.Notification",
+                  "method": "cancel"
+                }
+              ]
+            }
+          },
           "module": "notifications.notification.cancellation",
           "name": "CancelNotificationHandler",
           "part_of": "notifications.notification.notification.Notification",
@@ -216,6 +254,16 @@
               "retry_notification"
             ]
           },
+          "method_edges": {
+            "retry_notification": {
+              "invokes": [
+                {
+                  "element": "notifications.notification.notification.Notification",
+                  "method": "retry"
+                }
+              ]
+            }
+          },
           "module": "notifications.notification.retry",
           "name": "RetryNotificationHandler",
           "part_of": "notifications.notification.notification.Notification",
@@ -233,6 +281,20 @@
             "Notifications.ProcessScheduledNotifications.v1": [
               "process_scheduled"
             ]
+          },
+          "method_edges": {
+            "process_scheduled": {
+              "invokes": [
+                {
+                  "element": "notifications.notification.notification.Notification",
+                  "method": "mark_failed"
+                },
+                {
+                  "element": "notifications.notification.notification.Notification",
+                  "method": "mark_sent"
+                }
+              ]
+            }
           },
           "module": "notifications.notification.scheduler",
           "name": "ProcessScheduledNotificationsHandler",
@@ -263,7 +325,6 @@
               "max_length": 500,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -319,6 +380,20 @@
               "on_notification_created"
             ]
           },
+          "method_edges": {
+            "on_notification_created": {
+              "invokes": [
+                {
+                  "element": "notifications.notification.notification.Notification",
+                  "method": "mark_failed"
+                },
+                {
+                  "element": "notifications.notification.notification.Notification",
+                  "method": "mark_sent"
+                }
+              ]
+            }
+          },
           "module": "notifications.notification.dispatch",
           "name": "NotificationDispatcher",
           "part_of": "notifications.notification.notification.Notification",
@@ -348,7 +423,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "notification_id": {
@@ -362,7 +436,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "recipient_id": {
@@ -394,7 +467,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "notification_id": {
@@ -408,7 +480,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "recipient_id": {
@@ -435,7 +506,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "created_at": {
@@ -454,7 +524,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "recipient_id": {
@@ -468,7 +537,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "scheduled_for": {
@@ -478,19 +546,16 @@
             "source_event_type": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "subject": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "template_name": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -511,7 +576,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "delivered_at": {
@@ -549,7 +613,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "failed_at": {
@@ -573,7 +636,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "recipient_id": {
@@ -605,7 +667,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "notification_id": {
@@ -648,7 +709,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "notification_id": {
@@ -714,13 +774,11 @@
           "quiet_hours_end": {
             "kind": "standard",
             "max_length": 5,
-            "sanitize": true,
             "type": "String"
           },
           "quiet_hours_start": {
             "kind": "standard",
             "max_length": 5,
-            "sanitize": true,
             "type": "String"
           },
           "sms_enabled": {
@@ -744,6 +802,38 @@
         "invariants": {
           "post": [],
           "pre": []
+        },
+        "method_edges": {
+          "clear_quiet_hours": {
+            "raises": [
+              "notifications.preference.events.QuietHoursCleared"
+            ]
+          },
+          "create_default": {
+            "raises": [
+              "notifications.preference.events.PreferencesCreated"
+            ]
+          },
+          "resubscribe_to": {
+            "raises": [
+              "notifications.preference.events.TypeResubscribed"
+            ]
+          },
+          "set_quiet_hours": {
+            "raises": [
+              "notifications.preference.events.QuietHoursSet"
+            ]
+          },
+          "unsubscribe_from": {
+            "raises": [
+              "notifications.preference.events.TypeUnsubscribed"
+            ]
+          },
+          "update_channels": {
+            "raises": [
+              "notifications.preference.events.ChannelsUpdated"
+            ]
+          }
         },
         "module": "notifications.preference.preference",
         "name": "NotificationPreference",
@@ -773,6 +863,32 @@
               "update_preferences"
             ]
           },
+          "method_edges": {
+            "clear_quiet_hours": {
+              "invokes": [
+                {
+                  "element": "notifications.preference.preference.NotificationPreference",
+                  "method": "clear_quiet_hours"
+                }
+              ]
+            },
+            "set_quiet_hours": {
+              "invokes": [
+                {
+                  "element": "notifications.preference.preference.NotificationPreference",
+                  "method": "set_quiet_hours"
+                }
+              ]
+            },
+            "update_preferences": {
+              "invokes": [
+                {
+                  "element": "notifications.preference.preference.NotificationPreference",
+                  "method": "update_channels"
+                }
+              ]
+            }
+          },
           "module": "notifications.preference.management",
           "name": "ManagePreferencesHandler",
           "part_of": "notifications.preference.preference.NotificationPreference",
@@ -793,6 +909,24 @@
             "Notifications.UnsubscribeFromType.v1": [
               "unsubscribe"
             ]
+          },
+          "method_edges": {
+            "resubscribe": {
+              "invokes": [
+                {
+                  "element": "notifications.preference.preference.NotificationPreference",
+                  "method": "resubscribe_to"
+                }
+              ]
+            },
+            "unsubscribe": {
+              "invokes": [
+                {
+                  "element": "notifications.preference.preference.NotificationPreference",
+                  "method": "unsubscribe_from"
+                }
+              ]
+            }
           },
           "module": "notifications.preference.subscription",
           "name": "ManageSubscriptionsHandler",
@@ -841,7 +975,6 @@
               "max_length": 5,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "start": {
@@ -849,7 +982,6 @@
               "max_length": 5,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -905,7 +1037,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -931,7 +1062,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1082,7 +1212,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "preference_id": {
@@ -1096,7 +1225,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "updated_at": {
@@ -1128,7 +1256,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "preference_id": {
@@ -1166,7 +1293,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "preference_id": {
@@ -1195,7 +1321,172 @@
   "contracts": {
     "events": []
   },
-  "diagnostics": [],
+  "diagnostics": [
+    {
+      "category": "aggregate_design",
+      "code": "AGGREGATE_NO_INVARIANTS",
+      "element": "notifications.notification.notification.Notification",
+      "level": "info",
+      "message": "Aggregate `Notification` has no pre/post invariants (own or inherited); it enforces no business rules and may be an anemic data holder.",
+      "rule": {
+        "fix": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+        "rationale": "An aggregate is a consistency boundary. With no pre- or post-invariants it enforces no business rules and is usually an anemic data holder rather than a true aggregate."
+      },
+      "suggestion": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+      "teaching_skills": [
+        "add-validation",
+        "aggregate",
+        "protean-overview",
+        "refactor-move-logic-to-aggregate"
+      ]
+    },
+    {
+      "category": "aggregate_design",
+      "code": "AGGREGATE_NO_INVARIANTS",
+      "element": "notifications.preference.preference.NotificationPreference",
+      "level": "info",
+      "message": "Aggregate `NotificationPreference` has no pre/post invariants (own or inherited); it enforces no business rules and may be an anemic data holder.",
+      "rule": {
+        "fix": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+        "rationale": "An aggregate is a consistency boundary. With no pre- or post-invariants it enforces no business rules and is usually an anemic data holder rather than a true aggregate."
+      },
+      "suggestion": "Add one or more `@invariant.pre` or `@invariant.post` methods expressing the business rules the aggregate must always satisfy, or reconsider whether this concept is an aggregate at all.",
+      "teaching_skills": [
+        "add-validation",
+        "aggregate",
+        "protean-overview",
+        "refactor-move-logic-to-aggregate"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "notifications.notification.retry.RetryNotification",
+      "level": "info",
+      "message": "Command `RetryNotification` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "notifications.preference.management.ClearQuietHours",
+      "level": "info",
+      "message": "Command `ClearQuietHours` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "notifications.preference.subscription.ResubscribeToType",
+      "level": "info",
+      "message": "Command `ResubscribeToType` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "notifications.preference.subscription.UnsubscribeFromType",
+      "level": "info",
+      "message": "Command `UnsubscribeFromType` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "notifications.projections.notification_log.NotificationLog",
+      "field": "delivered_at",
+      "level": "info",
+      "message": "Field `delivered_at` on projection `NotificationLog` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "notifications.projections.notification_log.NotificationLog",
+      "field": "failure_reason",
+      "level": "info",
+      "message": "Field `failure_reason` on projection `NotificationLog` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "notifications.projections.notification_log.NotificationLog",
+      "field": "retry_count",
+      "level": "info",
+      "message": "Field `retry_count` on projection `NotificationLog` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNSOURCED_PROJECTION_FIELD",
+      "element": "notifications.projections.notification_log.NotificationLog",
+      "field": "sent_at",
+      "level": "info",
+      "message": "Field `sent_at` on projection `NotificationLog` is filled by no projector write, so it renders as a dead column.",
+      "rule": {
+        "fix": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+        "rationale": "A projection field that no projector method writes is a dead column: it renders in the read model and carries a type, but nothing ever fills it. The check reads what projector methods write. A construction whose field set it cannot read disables it for the whole projection (a `**kwargs` splat, or a template mapping passed positionally), and when no projector write is observed at all the whole projection is skipped. It works from observed writes, so it is advisory: when the projector writes some fields, a sibling field filled only through a path the check cannot follow (a helper, a dict splat) can still be flagged."
+      },
+      "suggestion": "Write the field from the projector method that handles the event carrying it, or drop the field from the projection if nothing sources it.",
+      "teaching_skills": [
+        "add-read-model",
+        "projection"
+      ]
+    }
+  ],
   "domain": {
     "camel_case_name": "Notifications",
     "command_processing": "sync",
@@ -1278,6 +1569,7 @@
       "notifications.notification.review_subscriber.ReviewEventsSubscriber",
       "notifications.preference.identity_subscriber.PreferenceIdentitySubscriber"
     ],
+    "UPCASTER": [],
     "VALUE_OBJECT": []
   },
   "flows": {
@@ -1367,7 +1659,7 @@
       }
     }
   },
-  "ir_version": "0.1.0",
+  "ir_version": "0.2.0",
   "projections": {
     "notifications.projections.customer_notifications.CustomerNotifications": {
       "projection": {
@@ -1378,7 +1670,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "created_at": {
@@ -1402,7 +1693,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "status": {
@@ -1410,13 +1700,11 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "subject": {
             "kind": "standard",
             "max_length": 500,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -1507,13 +1795,11 @@
           "quiet_hours_end": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "quiet_hours_start": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "sms_enabled": {
@@ -1597,7 +1883,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "failed_at": {
@@ -1607,7 +1892,6 @@
           "failure_reason": {
             "kind": "standard",
             "max_length": 500,
-            "sanitize": true,
             "type": "String"
           },
           "max_retries": {
@@ -1626,7 +1910,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "recipient_id": {
@@ -1697,7 +1980,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "created_at": {
@@ -1711,7 +1993,6 @@
           "failure_reason": {
             "kind": "standard",
             "max_length": 500,
-            "sanitize": true,
             "type": "String"
           },
           "notification_id": {
@@ -1725,7 +2006,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "recipient_id": {
@@ -1739,7 +2019,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "retry_count": {
@@ -1758,7 +2037,6 @@
           "source_event_type": {
             "kind": "standard",
             "max_length": 200,
-            "sanitize": true,
             "type": "String"
           },
           "status": {
@@ -1766,19 +2044,16 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "subject": {
             "kind": "standard",
             "max_length": 500,
-            "sanitize": true,
             "type": "String"
           },
           "template_name": {
             "kind": "standard",
             "max_length": 200,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {
@@ -1854,7 +2129,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "count": {
@@ -1867,7 +2141,6 @@
             "max_length": 10,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "notification_type": {
@@ -1875,7 +2148,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "stat_key": {
@@ -1884,7 +2156,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "updated_at": {

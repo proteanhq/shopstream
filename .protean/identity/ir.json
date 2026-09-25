@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.1.0/schema.json",
-  "checksum": "sha256:189927d44cda609da793f7b3f326199353c533b7df775faab6f585c66e15909f",
+  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
+  "checksum": "sha256:198c2782df76b6ef62fc72b8ab2809144959e56a689698f08af8204bb8cc1171",
   "clusters": {
     "identity.customer.customer.Customer": {
       "aggregate": {
@@ -21,7 +21,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String",
             "unique": true
           },
@@ -127,6 +126,32 @@
               "suspend_account"
             ]
           },
+          "method_edges": {
+            "close_account": {
+              "invokes": [
+                {
+                  "element": "identity.customer.customer.Customer",
+                  "method": "close"
+                }
+              ]
+            },
+            "reactivate_account": {
+              "invokes": [
+                {
+                  "element": "identity.customer.customer.Customer",
+                  "method": "reactivate"
+                }
+              ]
+            },
+            "suspend_account": {
+              "invokes": [
+                {
+                  "element": "identity.customer.customer.Customer",
+                  "method": "suspend"
+                }
+              ]
+            }
+          },
           "module": "identity.customer.account",
           "name": "ManageAccountHandler",
           "part_of": "identity.customer.customer.Customer",
@@ -154,6 +179,40 @@
               "update_address"
             ]
           },
+          "method_edges": {
+            "add_address": {
+              "invokes": [
+                {
+                  "element": "identity.customer.customer.Customer",
+                  "method": "add_address"
+                }
+              ]
+            },
+            "remove_address": {
+              "invokes": [
+                {
+                  "element": "identity.customer.customer.Customer",
+                  "method": "remove_address"
+                }
+              ]
+            },
+            "set_default_address": {
+              "invokes": [
+                {
+                  "element": "identity.customer.customer.Customer",
+                  "method": "set_default_address"
+                }
+              ]
+            },
+            "update_address": {
+              "invokes": [
+                {
+                  "element": "identity.customer.customer.Customer",
+                  "method": "update_address"
+                }
+              ]
+            }
+          },
           "module": "identity.customer.addresses",
           "name": "ManageAddressesHandler",
           "part_of": "identity.customer.customer.Customer",
@@ -171,6 +230,16 @@
             "Identity.UpdateProfile.v1": [
               "update_profile"
             ]
+          },
+          "method_edges": {
+            "update_profile": {
+              "invokes": [
+                {
+                  "element": "identity.customer.customer.Customer",
+                  "method": "update_profile"
+                }
+              ]
+            }
           },
           "module": "identity.customer.profile",
           "name": "ManageProfileHandler",
@@ -190,6 +259,16 @@
               "register_customer"
             ]
           },
+          "method_edges": {
+            "register_customer": {
+              "invokes": [
+                {
+                  "element": "identity.customer.customer.Customer",
+                  "method": "register"
+                }
+              ]
+            }
+          },
           "module": "identity.customer.registration",
           "name": "RegisterCustomerHandler",
           "part_of": "identity.customer.customer.Customer",
@@ -207,6 +286,16 @@
             "Identity.UpgradeTier.v1": [
               "upgrade_tier"
             ]
+          },
+          "method_edges": {
+            "upgrade_tier": {
+              "invokes": [
+                {
+                  "element": "identity.customer.customer.Customer",
+                  "method": "upgrade_tier"
+                }
+              ]
+            }
           },
           "module": "identity.customer.tier",
           "name": "ManageTierHandler",
@@ -273,7 +362,6 @@
               "max_length": 500,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -293,7 +381,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "country": {
@@ -301,7 +388,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "customer_id": {
@@ -313,19 +399,16 @@
             "geo_lat": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "geo_lng": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "label": {
               "kind": "standard",
               "max_length": 20,
-              "sanitize": true,
               "type": "String"
             },
             "postal_code": {
@@ -333,13 +416,11 @@
               "max_length": 20,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "state": {
               "kind": "standard",
               "max_length": 100,
-              "sanitize": true,
               "type": "String"
             },
             "street": {
@@ -347,7 +428,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -419,13 +499,11 @@
             "city": {
               "kind": "standard",
               "max_length": 100,
-              "sanitize": true,
               "type": "String"
             },
             "country": {
               "kind": "standard",
               "max_length": 100,
-              "sanitize": true,
               "type": "String"
             },
             "customer_id": {
@@ -437,25 +515,21 @@
             "label": {
               "kind": "standard",
               "max_length": 20,
-              "sanitize": true,
               "type": "String"
             },
             "postal_code": {
               "kind": "standard",
               "max_length": 20,
-              "sanitize": true,
               "type": "String"
             },
             "state": {
               "kind": "standard",
               "max_length": 100,
-              "sanitize": true,
               "type": "String"
             },
             "street": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -479,25 +553,21 @@
             "date_of_birth": {
               "kind": "standard",
               "max_length": 10,
-              "sanitize": true,
               "type": "String"
             },
             "first_name": {
               "kind": "standard",
               "max_length": 100,
-              "sanitize": true,
               "type": "String"
             },
             "last_name": {
               "kind": "standard",
               "max_length": 100,
-              "sanitize": true,
               "type": "String"
             },
             "phone": {
               "kind": "standard",
               "max_length": 20,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -515,7 +585,6 @@
             "date_of_birth": {
               "kind": "standard",
               "max_length": 10,
-              "sanitize": true,
               "type": "String"
             },
             "email": {
@@ -523,7 +592,6 @@
               "max_length": 254,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "external_id": {
@@ -531,7 +599,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "first_name": {
@@ -539,7 +606,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "last_name": {
@@ -547,13 +613,11 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "phone": {
               "kind": "standard",
               "max_length": 20,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -579,7 +643,6 @@
               "max_length": 20,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -600,7 +663,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "country": {
@@ -608,7 +670,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "customer": {
@@ -641,7 +702,6 @@
               "default": "Home",
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "postal_code": {
@@ -649,13 +709,11 @@
               "max_length": 20,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "state": {
               "kind": "standard",
               "max_length": 100,
-              "sanitize": true,
               "type": "String"
             },
             "street": {
@@ -663,7 +721,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -752,7 +809,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "suspended_at": {
@@ -785,7 +841,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "country": {
@@ -793,7 +848,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "customer_id": {
@@ -812,7 +866,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "postal_code": {
@@ -820,13 +873,11 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "state": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "street": {
@@ -834,7 +885,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -884,13 +934,11 @@
             "city": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "country": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "customer_id": {
@@ -902,25 +950,21 @@
             "label": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "postal_code": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "state": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             },
             "street": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -947,7 +991,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "external_id": {
@@ -955,7 +998,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "first_name": {
@@ -963,7 +1005,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "last_name": {
@@ -971,7 +1012,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "registered_at": {
@@ -1031,7 +1071,6 @@
             "date_of_birth": {
               "kind": "standard",
               "max_length": 10,
-              "sanitize": true,
               "type": "String"
             },
             "first_name": {
@@ -1039,7 +1078,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "last_name": {
@@ -1047,13 +1085,11 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "phone": {
               "kind": "standard",
               "max_length": 255,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1080,7 +1116,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "previous_tier": {
@@ -1088,7 +1123,6 @@
               "max_length": 255,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "upgraded_at": {
@@ -1147,7 +1181,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "last_name": {
@@ -1155,7 +1188,6 @@
               "max_length": 100,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             },
             "phone": {
@@ -1181,7 +1213,6 @@
               "max_length": 254,
               "min_length": 1,
               "required": true,
-              "sanitize": true,
               "type": "String"
             }
           },
@@ -1232,7 +1263,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "suspended_at": {
@@ -1258,7 +1288,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "external_id": {
@@ -1266,7 +1295,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "first_name": {
@@ -1274,7 +1302,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "last_name": {
@@ -1282,7 +1309,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "registered_at": {
@@ -1297,7 +1323,228 @@
       }
     ]
   },
-  "diagnostics": [],
+  "diagnostics": [
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "identity.customer.account.CloseAccount",
+      "level": "info",
+      "message": "Command `CloseAccount` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "identity.customer.account.ReactivateAccount",
+      "level": "info",
+      "message": "Command `ReactivateAccount` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "identity.customer.account.SuspendAccount",
+      "level": "info",
+      "message": "Command `SuspendAccount` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "identity.customer.tier.UpgradeTier",
+      "level": "info",
+      "message": "Command `UpgradeTier` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "identity.customer.events.AccountClosed",
+      "level": "info",
+      "message": "Event AccountClosed is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "identity.customer.events.AccountReactivated",
+      "level": "info",
+      "message": "Event AccountReactivated is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "identity.customer.events.AccountSuspended",
+      "level": "info",
+      "message": "Event AccountSuspended is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "identity.customer.events.AddressAdded",
+      "level": "info",
+      "message": "Event AddressAdded is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "identity.customer.events.AddressRemoved",
+      "level": "info",
+      "message": "Event AddressRemoved is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "identity.customer.events.AddressUpdated",
+      "level": "info",
+      "message": "Event AddressUpdated is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "identity.customer.events.CustomerRegistered",
+      "level": "info",
+      "message": "Event CustomerRegistered is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "identity.customer.events.DefaultAddressChanged",
+      "level": "info",
+      "message": "Event DefaultAddressChanged is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "identity.customer.events.ProfileUpdated",
+      "level": "info",
+      "message": "Event ProfileUpdated is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "identity.customer.events.TierUpgraded",
+      "level": "info",
+      "message": "Event TierUpgraded is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    }
+  ],
   "domain": {
     "camel_case_name": "Identity",
     "command_processing": "sync",
@@ -1372,6 +1619,7 @@
     ],
     "REPOSITORY": [],
     "SUBSCRIBER": [],
+    "UPCASTER": [],
     "VALUE_OBJECT": [
       "identity.customer.customer.GeoCoordinates",
       "identity.customer.customer.Profile",
@@ -1384,7 +1632,7 @@
     "process_managers": {},
     "subscribers": {}
   },
-  "ir_version": "0.1.0",
+  "ir_version": "0.2.0",
   "projections": {
     "identity.projections.address_book.AddressBook": {
       "projection": {
@@ -1498,7 +1746,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "external_id": {
@@ -1506,7 +1753,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "first_name": {
@@ -1514,7 +1760,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "last_name": {
@@ -1522,13 +1767,11 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "phone": {
             "kind": "standard",
             "max_length": 255,
-            "sanitize": true,
             "type": "String"
           },
           "registered_at": {
@@ -1540,7 +1783,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "tier": {
@@ -1548,7 +1790,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           }
         },
@@ -1647,7 +1888,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "email": {
@@ -1713,7 +1953,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "first_name": {
@@ -1721,7 +1960,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "last_name": {
@@ -1729,7 +1967,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           },
           "tier": {
@@ -1737,7 +1974,6 @@
             "max_length": 255,
             "min_length": 1,
             "required": true,
-            "sanitize": true,
             "type": "String"
           }
         },

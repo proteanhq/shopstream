@@ -121,12 +121,9 @@ class InventoryStateMachine(RuleBasedStateMachine):
     @invariant()
     def matches_model(self):
         levels = self.item.levels
-        # An all-default StockLevels (every field 0) round-trips to None
-        # (proteanhq/protean#1078); the aggregate itself treats that as zeros
-        # (`self.levels.x if self.levels else 0`), so mirror that here.
-        on_hand = levels.on_hand if levels else 0
-        reserved = levels.reserved if levels else 0
-        available = levels.available if levels else 0
+        on_hand = levels.on_hand
+        reserved = levels.reserved
+        available = levels.available
         assert on_hand == self.model.on_hand, f"on_hand {on_hand} != {self.model.on_hand}"
         assert reserved == self.model.reserved, f"reserved {reserved} != {self.model.reserved}"
         assert available == self.model.available, f"available {available} != {self.model.available}"

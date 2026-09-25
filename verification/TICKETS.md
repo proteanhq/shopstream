@@ -147,8 +147,9 @@ whether it gates PRs / nightly / releases.
   - `test_1071_...` — in-memory adapter enforces `Index(unique=True)`; an UPGRADE
     TRIPWIRE (`xfail(strict)`): fixed upstream but not yet in ShopStream's Protean
     pin, so it flips when the pin is bumped.
-- Still-open bugs carry live xfails: #1073 (`test_crash_window_reconcile`), #1055
-  (engine CI, `test_dlq` local-only).
+- Still-open bugs carried live xfails: #1073 (`test_crash_window_reconcile`), #1055
+  (engine CI, `test_dlq` local-only). Both are now fixed in the pin; #1073's xfail
+  is gone, and #1078 gained a guard (`test_1078_...`) in the 0.17.0 pin bump.
 - Bugs with no natural ShopStream reproduction (#1038 Decimal, #1046 Date, #1056
   Auto-increment) are recorded in the manifest rather than force-fit.
 
