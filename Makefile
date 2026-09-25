@@ -246,11 +246,19 @@ pre-commit: ## Run pre-commit hooks on all files
 # ──────────────────────────────────────────────
 # Domain diagnostics (protean check)
 # ──────────────────────────────────────────────
-domain-check: ## Run protean check on all domains
+# Fails on errors only; warnings are printed but pass. Since Protean 0.17.0 a
+# warning also exits 1, and `[lint] level = "error"` in domain.toml is dropped by
+# the config loader, so a 1 is re-checked against the JSON error count. Any
+# other nonzero exit (2 is a usage or config error) fails.
+domain-check: ## Run protean check on all domains (fails on errors, not warnings)
 	@failed=0; \
 	for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
-		PYTHONPATH=src uv run protean check --domain=$$d.domain || \
-			if [ $$? -eq 1 ]; then failed=1; fi; \
+		PYTHONPATH=src uv run protean check --domain=$$d.domain; rc=$$?; \
+		if [ $$rc -eq 1 ]; then \
+			errors=$$(PYTHONPATH=src uv run protean check --domain=$$d.domain --format=json 2>/dev/null \
+				| uv run python -c 'import json, sys; print(json.load(sys.stdin)["data"]["counts"]["errors"])') || errors=unknown; \
+			if [ "$$errors" != "0" ]; then echo "$$d: $$errors error(s)"; failed=1; fi; \
+		elif [ $$rc -ne 0 ]; then failed=1; fi; \
 	done; \
 	exit $$failed
 

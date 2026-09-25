@@ -47,6 +47,7 @@ ShopStream reproduction and are noted as such.)
 | [#1076](https://github.com/proteanhq/protean/issues/1076) | fixed | Projectors reject `retries`/`retry_exceptions` options | `src/inventory/projections/low_stock_report.py` uses a nested-UoW workaround; simplify to the option when adopted |
 | [#1078](https://github.com/proteanhq/protean/issues/1078) | **guard** | All-default ValueObject round-trips to `None` | `regression/test_protean_regressions.py::test_1078_all_default_value_object_round_trips` |
 | not filed | **open** | `current_domain` warns "Working outside of domain context" when its type is probed (pytest collection) | `regression/test_protean_regressions.py::test_current_domain_type_probe_outside_context_is_silent` |
+| not filed | **open** | `[lint]` table in `domain.toml` is dropped by the config loader, so `[lint].level` cannot be set | `regression/test_protean_regressions.py::test_lint_table_in_domain_toml_is_loaded` |
 
 **Run**
 

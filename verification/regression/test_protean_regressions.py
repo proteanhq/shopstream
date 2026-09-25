@@ -154,3 +154,27 @@ def test_current_domain_type_probe_outside_context_is_silent():
     assert is_type is False
     messages = [str(w.message) for w in caught]
     assert not any("outside of domain context" in m for m in messages), messages
+
+
+@pytest.mark.xfail(
+    strict=True,
+    reason="Config2 keeps only keys from _default_config(), so a [lint] table in domain.toml is dropped",
+)
+def test_lint_table_in_domain_toml_is_loaded(tmp_path):
+    """Protean finding (not filed): the `[lint]` table in `domain.toml` never reaches the config.
+
+    Protean's configuration docs describe a `[lint]` table (`level`, `suppressions`,
+    and more) that `protean check` reads through `domain.config.get("lint", {})`.
+    `Config2._normalize_config` keeps only the top-level keys that `_default_config()`
+    defines, and `lint` is not one of them, so the table is silently discarded and
+    `[lint].level` stays at its `"warn"` default. ShopStream's `make domain-check`
+    works around it by reading the error count from `protean check --format=json`.
+    """
+    from protean.domain.config import Config2
+
+    (tmp_path / "domain.toml").write_text('debug = true\n\n[lint]\nlevel = "error"\n')
+
+    config = Config2.load_from_path(str(tmp_path))
+
+    assert config["debug"] is True, "precondition: the domain.toml was read"
+    assert config.get("lint") == {"level": "error"}
