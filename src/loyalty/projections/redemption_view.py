@@ -85,10 +85,10 @@ class RedemptionViewProjector:
         try:
             view = repo.get(redemption_id)
         except ObjectNotFoundError:
-            # The create projector (on `RedemptionRequested`) has not run yet. The
-            # re-entrant sync dispatch that caused this (proteanhq/protean#1048) is fixed,
-            # and Protean now drains sync events breadth-first. The skip stays as a guard
-            # against out-of-order delivery rather than crashing the projector.
+            # The create projector (on `RedemptionRequested`) has not run yet. Protean
+            # now drains sync events breadth-first, so this should not happen under sync
+            # processing. The skip stays as a guard against out-of-order delivery rather
+            # than crashing the projector.
             return
         for field, value in changes.items():
             setattr(view, field, value)
