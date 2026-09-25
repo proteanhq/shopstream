@@ -10,7 +10,7 @@ from datetime import UTC, datetime, timedelta
 
 import structlog
 from protean import handle
-from protean.exceptions import InvalidOperationError, ValidationError
+from protean.exceptions import ObjectNotFoundError
 from protean.fields import DateTime, Integer
 from protean.utils.globals import current_domain
 from protean.utils.processing import Priority, processing_priority
@@ -69,30 +69,41 @@ class ExpireStaleReservationsHandler:
 
             from inventory.stock.reservation import ReleaseReservation
 
+            # Every release joins this handler's transaction. A failed release would
+            # roll back all of them, so skip any the aggregate would reject, and let
+            # an unexpected failure fail the whole batch instead of reporting success.
+            repo = current_domain.repository_for(InventoryItem)
             expired_count = 0
             for reservation in expired:
                 try:
-                    current_domain.process(
-                        ReleaseReservation(
-                            inventory_item_id=str(reservation.inventory_item_id),
-                            reservation_id=str(reservation.reservation_id),
-                            reason="timeout",
-                        ),
-                        asynchronous=False,
-                    )
-                    expired_count += 1
-                    logger.info(
-                        "Released stale reservation",
-                        reservation_id=str(reservation.reservation_id),
-                        order_id=str(reservation.order_id),
-                        expired_at=str(reservation.expires_at),
-                    )
-                except (ValidationError, InvalidOperationError) as exc:
+                    item = repo.get(str(reservation.inventory_item_id))
+                except ObjectNotFoundError:
+                    blocker = "Inventory item not found"
+                else:
+                    blocker = item.release_blocker(reservation.reservation_id)
+                if blocker is not None:
                     logger.warning(
-                        "Failed to release stale reservation",
+                        "Skipped stale reservation",
                         reservation_id=str(reservation.reservation_id),
-                        error=str(exc),
+                        error=blocker,
                     )
+                    continue
+
+                current_domain.process(
+                    ReleaseReservation(
+                        inventory_item_id=str(reservation.inventory_item_id),
+                        reservation_id=str(reservation.reservation_id),
+                        reason="timeout",
+                    ),
+                    asynchronous=False,
+                )
+                expired_count += 1
+                logger.info(
+                    "Released stale reservation",
+                    reservation_id=str(reservation.reservation_id),
+                    order_id=str(reservation.order_id),
+                    expired_at=str(reservation.expires_at),
+                )
 
             logger.info("Stale reservation cleanup complete", expired_count=expired_count)
             return expired_count

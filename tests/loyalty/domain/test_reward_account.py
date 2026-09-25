@@ -59,6 +59,15 @@ class TestRewardAccountRules:
         with pytest.raises(ValidationError, match="cannot be negative"):
             account.redeem_points(50)
 
+    def test_redemption_blocker_matches_redeem_points(self):
+        account = RewardAccount.enroll(customer_id="cust-1")
+        account.earn_points(30)
+        assert account.redemption_blocker(30) is None
+        assert account.redemption_blocker(31) == "Points balance cannot be negative"
+        assert account.redemption_blocker(0) == "Amount must be positive"
+        account.close()
+        assert account.redemption_blocker(10) == "A closed reward account cannot be modified"
+
     def test_invalid_tier_choice_is_rejected(self):
         account = RewardAccount.enroll(customer_id="cust-1")
         with pytest.raises(ValidationError):

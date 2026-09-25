@@ -400,20 +400,58 @@ class TestLowStockReportProjection:
         assert report.is_critical is True
         assert report.current_available == 0
 
-    def test_projector_retries_the_create_race_conflict(self):
+    def test_projector_retries_the_create_race_conflict(self, monkeypatch):
         """A lost create race (primary-key conflict at commit) is retried, not raised.
 
-        The race itself needs real, isolated transactions; see
+        The first `get` misses while the row already exists, as it does for the
+        loser of a real race. The projector then tries to create a duplicate row,
+        the commit fails, and the retry takes the update path. The real race
+        needs isolated transactions; see
         verification/oracles/test_lowstock_projector_concurrency.py.
         """
-        from protean.exceptions import TransactionError, ValidationError
+        from protean.exceptions import ObjectNotFoundError
 
-        from inventory.projections.low_stock_report import LowStockReportProjector
+        item_id = _initialize_stock(initial_quantity=12, reorder_point=10)
+        current_domain.process(
+            AdjustStock(
+                inventory_item_id=item_id,
+                quantity_change=-3,
+                adjustment_type=AdjustmentType.SHRINKAGE.value,
+                reason="Loss detected",
+                adjusted_by="mgr-001",
+            ),
+            asynchronous=False,
+        )
+        assert current_domain.repository_for(LowStockReport).get(item_id).current_available == 9
 
-        meta = LowStockReportProjector.meta_
-        assert meta.retries > 0
-        assert TransactionError in meta.retry_exceptions
-        assert ValidationError in meta.retry_exceptions
+        repo_cls = type(current_domain.repository_for(LowStockReport))
+        real_get = repo_cls.get
+        misses = []
+
+        def get_that_misses_once(self, identifier):
+            if not misses:
+                misses.append(identifier)
+                raise ObjectNotFoundError(f"{identifier} not found")
+            return real_get(self, identifier)
+
+        monkeypatch.setattr(repo_cls, "get", get_that_misses_once)
+
+        current_domain.process(
+            AdjustStock(
+                inventory_item_id=item_id,
+                quantity_change=-2,
+                adjustment_type=AdjustmentType.SHRINKAGE.value,
+                reason="Loss detected",
+                adjusted_by="mgr-001",
+            ),
+            asynchronous=False,
+        )
+
+        assert misses == [item_id]
+        monkeypatch.undo()
+        report = current_domain.repository_for(LowStockReport).get(item_id)
+        assert report.current_available == 7
+        assert report.is_critical is False
 
     def test_removed_when_restocked_above_threshold(self):
         item_id = _initialize_stock(initial_quantity=15, reorder_point=10)

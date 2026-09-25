@@ -3,8 +3,9 @@
 WHAT THIS CHECKS
     Protean delivers events to projectors at least once (a message can be
     delivered more than once: after publish-then-crash the engine re-publishes
-    it). Protean does NOT dedupe events on the consume side. So a projector that
-    is not idempotent will apply the same event twice and corrupt its read model.
+    it). Protean dedupes on the consume side only for projectors that opt in with
+    `idempotent=True`. So a projector that is not idempotent will apply the same
+    event twice and corrupt its read model.
 
     Property P20: delivering one event N times must leave the read model in the
     same state as delivering it once.
@@ -22,8 +23,8 @@ WHY THIS CHECK IS DIFFERENT FROM "projection == fold(events)"
 STATUS
     Passing: ProductRatingProjector records which reviews it has counted
     (counted_reviews) and treats a redelivered ReviewApproved as a no-op
-    (ticket T0.3). The framework-level fix (consume-side dedup) is separate:
-    proteanhq/protean#1042.
+    (ticket T0.3). It does not use Protean's opt-in consume-side dedup
+    (`idempotent=True`, proteanhq/protean#1042).
 
 RUN (no Docker):
     .venv/bin/python -m pytest \

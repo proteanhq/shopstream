@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:d443b7120310cb8f1267e669ec8afe921fa1789488f07963644e36e71f063168",
+  "checksum": "sha256:1f3f1cc5baac993c32032d9544a7acb9ec9079dc55f33546b9c5277cc07ee510",
   "clusters": {
     "ordering.cart.cart.ShoppingCart": {
       "aggregate": {
@@ -122,6 +122,16 @@
             "Ordering.DetectAbandonedCarts.v1": [
               "detect_abandoned_carts"
             ]
+          },
+          "method_edges": {
+            "detect_abandoned_carts": {
+              "invokes": [
+                {
+                  "element": "ordering.cart.cart.ShoppingCart",
+                  "method": "abandon_blocker"
+                }
+              ]
+            }
           },
           "module": "ordering.cart.abandonment",
           "name": "DetectAbandonedCartsHandler",

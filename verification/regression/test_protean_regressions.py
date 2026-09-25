@@ -149,7 +149,7 @@ def test_current_domain_probe_outside_context_is_silent():
     runs `getattr(obj, "__test__", None)` (`_pytest/compat.py`) and `isinstance`
     checks over every module attribute. With no domain context active, both go
     through the proxy's `_find_domain()` and emit the "Working outside of domain
-    context" `UserWarning`, so collection prints it for dozens of modules.
+    context" `UserWarning`, so collection prints it for 9 modules in `tests/`.
 
     The proxy's docstring promises None-like results outside a context, not
     silence, and Protean's own tests assert that `bool`/`repr` warn. So this is a
@@ -241,3 +241,49 @@ def test_is_event_sourced_warning_points_at_the_decorator():
     if not deprecations:
         pytest.fail("precondition: the deprecation warning was raised")
     assert deprecations[0].filename == __file__, deprecations[0].filename
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the outermost UnitOfWork rolls back a doomed transaction and returns without raising",
+)
+def test_outer_commit_of_a_doomed_transaction_raises():
+    """Protean finding (not filed): a doomed transaction ends without an error.
+
+    A nested UnitOfWork joins the outermost one, so a nested rollback marks the
+    whole transaction rollback-only. When the outermost UnitOfWork then commits,
+    `UnitOfWork.commit` sees `_rollback_only`, logs a warning, rolls back and
+    returns. Nothing tells the caller the work was lost. A command handler that
+    catches the error from a nested `domain.process(...)` and carries on returns
+    as if it succeeded, and none of its writes persist. ShopStream's batch
+    handlers `ExpireStaleReservations` and `DetectAbandonedCarts` do exactly this.
+    """
+    from protean import Domain
+    from protean.core.unit_of_work import UnitOfWork
+    from protean.fields import String
+
+    domain = Domain(name="DoomedTransactionProbe")
+
+    @domain.aggregate
+    class Probe:
+        name = String()
+
+    domain.init(traverse=False)
+
+    with domain.domain_context():
+        outer_error = None
+        try:
+            with UnitOfWork():
+                domain.repository_for(Probe).add(Probe(name="lost"))
+                try:
+                    with UnitOfWork():
+                        raise RuntimeError("inner failure")
+                except RuntimeError:
+                    pass
+        except Exception as exc:  # noqa: BLE001
+            outer_error = exc
+
+        if domain.repository_for(Probe).query.all().total != 0:
+            pytest.fail("precondition: the nested rollback discarded the outer write")
+        assert outer_error is not None, "the outer UnitOfWork returned normally"

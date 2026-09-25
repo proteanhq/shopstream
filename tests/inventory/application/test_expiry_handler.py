@@ -4,15 +4,17 @@ Covers:
 - Stale reservations (past expiry) are released when the command runs
 - No stale reservations results in a no-op
 - Fresh reservations (not yet expired) are not released
+- A stale view row is skipped without rolling back the other releases
 """
 
 from datetime import UTC, datetime, timedelta
 
 from protean import current_domain
 
+from inventory.projections.reservation_status import ReservationStatus
 from inventory.stock.expiry import ExpireStaleReservations
 from inventory.stock.initialization import InitializeStock
-from inventory.stock.reservation import ReserveStock
+from inventory.stock.reservation import ReleaseReservation, ReserveStock
 from inventory.stock.stock import InventoryItem
 
 
@@ -110,90 +112,69 @@ class TestExpireStaleReservations:
         assert item.levels.available == 85
 
 
-class TestExpireStaleReservationsProcessFailure:
-    """Mock-based: ValidationError/InvalidOperationError during reservation release is caught."""
+class TestExpireStaleReservationsStaleProjection:
+    """The ReservationStatus view can lag the aggregate. A release the aggregate would
+    reject must not roll back the good releases in the same batch."""
 
-    def test_continues_after_process_raises_validation_error(self):
-        from unittest.mock import MagicMock, patch
+    def _reserve_expired(self, item_id, order_id, quantity):
+        current_domain.process(
+            ReserveStock(
+                inventory_item_id=item_id,
+                order_id=order_id,
+                quantity=quantity,
+                expires_at=datetime.now(UTC) - timedelta(minutes=30),
+            ),
+            asynchronous=False,
+        )
+        return str(current_domain.repository_for(InventoryItem).get(item_id).reservations[-1].id)
 
-        from protean.exceptions import ValidationError
+    def _mark_active_in_view(self, reservation_id):
+        view_repo = current_domain.repository_for(ReservationStatus)
+        view = view_repo.get(reservation_id)
+        view.status = "Active"
+        view_repo.add(view)
 
-        from inventory.stock.expiry import ExpireStaleReservationsHandler
+    def test_skips_already_released_reservation_and_keeps_the_rest(self):
+        released_item = _initialize_stock(sku="SKU-RELEASED")
+        good_item = _initialize_stock(sku="SKU-GOOD")
+        released_id = self._reserve_expired(released_item, "ord-released", 5)
+        self._reserve_expired(good_item, "ord-good", 5)
 
-        handler = ExpireStaleReservationsHandler()
+        # Released already, but the view still says Active.
+        current_domain.process(
+            ReleaseReservation(inventory_item_id=released_item, reservation_id=released_id, reason="manual"),
+            asynchronous=False,
+        )
+        self._mark_active_in_view(released_id)
 
-        # Create a mock command
-        as_of = datetime.now(UTC)
-        mock_command = MagicMock()
-        mock_command.as_of = as_of
-        mock_command.older_than_minutes = 0
+        result = current_domain.process(
+            ExpireStaleReservations(older_than_minutes=0, as_of=datetime.now(UTC)),
+            asynchronous=False,
+        )
 
-        # Create mock expired reservations
-        mock_reservation = MagicMock()
-        mock_reservation.reservation_id = "res-fail-001"
-        mock_reservation.inventory_item_id = "item-fail-001"
-        mock_reservation.order_id = "ord-fail-001"
-        mock_reservation.expires_at = (as_of - timedelta(minutes=30)).replace(tzinfo=None)
+        assert result == 1
+        good = current_domain.repository_for(InventoryItem).get(good_item)
+        assert good.levels.reserved == 0
+        assert good.levels.available == 100
 
-        mock_query_result = MagicMock()
-        mock_query_result.items = [mock_reservation]
-
-        mock_view = MagicMock()
-        mock_view.query.filter.return_value.all.return_value = mock_query_result
-
-        with patch("inventory.stock.expiry.current_domain") as mock_domain:
-            mock_domain.view_for = MagicMock(return_value=mock_view)
-            mock_domain.process = MagicMock(side_effect=ValidationError({"error": ["Reservation already released"]}))
-            # Should not raise; catches the error, logs warning, and continues
-            result = handler.expire_stale_reservations(mock_command)
-            # expired_count should be 0 since all attempts failed
-            assert result == 0
-            # process was called once (for the one expired reservation)
-            mock_domain.process.assert_called_once()
-
-    def test_continues_after_process_raises_invalid_operation_error(self):
-        from unittest.mock import MagicMock, patch
-
-        from protean.exceptions import InvalidOperationError
-
-        from inventory.stock.expiry import ExpireStaleReservationsHandler
-
-        handler = ExpireStaleReservationsHandler()
-
-        as_of = datetime.now(UTC)
-        mock_command = MagicMock()
-        mock_command.as_of = as_of
-        mock_command.older_than_minutes = 0
-
-        # Two expired reservations: first fails, second should still be attempted
-        mock_res1 = MagicMock()
-        mock_res1.reservation_id = "res-fail-002"
-        mock_res1.inventory_item_id = "item-fail-002"
-        mock_res1.order_id = "ord-fail-002"
-        mock_res1.expires_at = (as_of - timedelta(minutes=30)).replace(tzinfo=None)
-
-        mock_res2 = MagicMock()
-        mock_res2.reservation_id = "res-ok-001"
-        mock_res2.inventory_item_id = "item-ok-001"
-        mock_res2.order_id = "ord-ok-001"
-        mock_res2.expires_at = (as_of - timedelta(minutes=20)).replace(tzinfo=None)
-
-        mock_query_result = MagicMock()
-        mock_query_result.items = [mock_res1, mock_res2]
-
-        mock_view = MagicMock()
-        mock_view.query.filter.return_value.all.return_value = mock_query_result
-
-        with patch("inventory.stock.expiry.current_domain") as mock_domain:
-            mock_domain.view_for = MagicMock(return_value=mock_view)
-            # First call fails, second succeeds
-            mock_domain.process = MagicMock(
-                side_effect=[
-                    InvalidOperationError("Reservation in wrong state"),
-                    None,
-                ]
+    def test_skips_reservation_whose_item_is_missing(self):
+        good_item = _initialize_stock(sku="SKU-GOOD")
+        self._reserve_expired(good_item, "ord-good", 5)
+        current_domain.repository_for(ReservationStatus).add(
+            ReservationStatus(
+                reservation_id="res-orphan",
+                inventory_item_id="item-missing",
+                order_id="ord-orphan",
+                quantity=3,
+                status="Active",
+                expires_at=datetime.now(UTC) - timedelta(minutes=30),
             )
-            result = handler.expire_stale_reservations(mock_command)
-            # Only the second one succeeded
-            assert result == 1
-            assert mock_domain.process.call_count == 2
+        )
+
+        result = current_domain.process(
+            ExpireStaleReservations(older_than_minutes=0, as_of=datetime.now(UTC)),
+            asynchronous=False,
+        )
+
+        assert result == 1
+        assert current_domain.repository_for(InventoryItem).get(good_item).levels.reserved == 0

@@ -15,6 +15,7 @@ from protean import current_domain
 
 from loyalty.projections.redemption_view import RedemptionView
 from loyalty.redemption.commands import RequestRedemption
+from loyalty.redemption.saga import RedemptionSaga
 from loyalty.reward.enrollment import EnrollRewardAccount
 from loyalty.reward.points import EarnPoints
 from loyalty.reward.reward_account import RewardAccount
@@ -81,3 +82,20 @@ class TestRedemptionFullFlow:
         view = _view(rid)
         assert view.status == "compensated"
         assert _balance(account_id) == 500  # compensation refunded the reserved points
+
+
+class TestRedemptionRejected:
+    """An account that cannot cover the redemption: the saga records the rejection."""
+
+    def test_insufficient_balance_persists_the_rejected_saga(self):
+        account_id = _funded_account(customer_id="cust-redeem-poor", points=40)
+        rid = _request(account_id, points=100)
+
+        # The saga's rejection is stored. Before the pre-check, the failed nested
+        # RedeemPoints rolled back the saga's own transaction, so nothing was stored.
+        stream = f"{RedemptionSaga.meta_.stream_category}-{rid}"
+        transitions = current_domain.event_store.store.read(stream)
+        assert len(transitions) == 1
+        assert transitions[0].data["state"]["status"] == "rejected"
+        assert transitions[0].data["state"]["failure_reason"] == "Points balance cannot be negative"
+        assert _balance(account_id) == 40  # nothing was deducted

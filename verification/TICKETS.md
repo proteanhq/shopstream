@@ -145,9 +145,9 @@ whether it gates PRs / nightly / releases.
   `test_outbox_exactly_once`, #1042 → `test_p20_projector_idempotency`.
 - New named regressions in `test_protean_regressions.py`:
   - `test_1039_...` — datetime payloads are ISO-8601/UTC (guard, passes).
-  - `test_1071_...` — in-memory adapter enforces `Index(unique=True)`; an UPGRADE
-    TRIPWIRE (`xfail(strict)`): fixed upstream but not yet in ShopStream's Protean
-    pin, so it flips when the pin is bumped.
+  - `test_1071_...` — in-memory adapter enforces `Index(unique=True)`. It was an
+    upgrade tripwire (`xfail(strict)`) until the pin took the fix; it is now a
+    passing guard.
 - Still-open bugs at the time: #1073 (`test_crash_window_reconcile`, a live xfail)
   and #1055 (engine CI; `test_dlq` deselected with `-m "not engine"`, no xfail).
   Both are now fixed upstream. #1073's xfail came out in #38. #1078 gained a guard

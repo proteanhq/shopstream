@@ -4,6 +4,7 @@ Covers:
 - Idle carts with items are marked as abandoned
 - No idle carts results in a no-op
 - Active carts within the threshold are not abandoned
+- A stale view row is skipped without rolling back the other carts
 """
 
 from datetime import UTC, datetime, timedelta
@@ -13,7 +14,7 @@ from protean import current_domain
 from ordering.cart.abandonment import DetectAbandonedCarts
 from ordering.cart.cart import ShoppingCart
 from ordering.cart.items import AddToCart
-from ordering.cart.management import CreateCart
+from ordering.cart.management import AbandonCart, CreateCart
 from ordering.projections.cart_view import CartView
 
 
@@ -124,86 +125,45 @@ class TestDetectAbandonedCarts:
         assert cart.status in ("Active", "Active")
 
 
-class TestDetectAbandonedCartsProcessFailure:
-    """Mock-based: ValidationError/InvalidOperationError during cart abandonment is caught."""
+class TestDetectAbandonedCartsStaleProjection:
+    """The CartView can lag the aggregate. A cart the aggregate would refuse to
+    abandon must not roll back the other carts in the same batch."""
 
-    def test_continues_after_process_raises_validation_error(self):
-        from unittest.mock import MagicMock, patch
+    def _make_idle_in_view(self, cart_id, status="Active"):
+        repo = current_domain.repository_for(CartView)
+        view = repo.get(cart_id)
+        view.status = status
+        view.updated_at = datetime.now(UTC) - timedelta(hours=48)
+        repo.add(view)
 
-        from protean.exceptions import ValidationError
+    def test_skips_already_abandoned_cart_and_keeps_the_rest(self):
+        stale_cart = _create_cart_with_items()
+        good_cart = _create_cart_with_items()
 
-        from ordering.cart.abandonment import DetectAbandonedCartsHandler
+        # Abandoned already, but the view still says Active.
+        current_domain.process(AbandonCart(cart_id=stale_cart), asynchronous=False)
+        self._make_idle_in_view(stale_cart)
+        self._make_idle_in_view(good_cart)
 
-        handler = DetectAbandonedCartsHandler()
+        result = current_domain.process(
+            DetectAbandonedCarts(idle_threshold_hours=24, as_of=datetime.now(UTC)),
+            asynchronous=False,
+        )
 
-        as_of = datetime.now(UTC)
-        mock_command = MagicMock()
-        mock_command.as_of = as_of
-        mock_command.idle_threshold_hours = 0
+        assert result == 1
+        assert current_domain.repository_for(ShoppingCart).get(good_cart).status == "Abandoned"
 
-        # Create a mock idle cart with items
-        mock_cart = MagicMock()
-        mock_cart.cart_id = "cart-fail-001"
-        mock_cart.customer_id = "cust-fail-001"
-        mock_cart.item_count = 3
-        mock_cart.updated_at = (as_of - timedelta(hours=48)).replace(tzinfo=None)
+    def test_skips_cart_missing_from_the_aggregate_store(self):
+        good_cart = _create_cart_with_items()
+        self._make_idle_in_view(good_cart)
+        orphan = current_domain.repository_for(CartView).get(good_cart).to_dict()
+        orphan["cart_id"] = "cart-missing"
+        current_domain.repository_for(CartView).add(CartView(**orphan))
 
-        mock_query_result = MagicMock()
-        mock_query_result.items = [mock_cart]
+        result = current_domain.process(
+            DetectAbandonedCarts(idle_threshold_hours=24, as_of=datetime.now(UTC)),
+            asynchronous=False,
+        )
 
-        mock_view = MagicMock()
-        mock_view.query.filter.return_value.all.return_value = mock_query_result
-
-        with patch("ordering.cart.abandonment.current_domain") as mock_domain:
-            mock_domain.view_for = MagicMock(return_value=mock_view)
-            mock_domain.process = MagicMock(side_effect=ValidationError({"error": ["Cart already abandoned"]}))
-            # Should not raise; catches the error and continues
-            result = handler.detect_abandoned_carts(mock_command)
-            assert result == 0
-            mock_domain.process.assert_called_once()
-
-    def test_continues_after_process_raises_invalid_operation_error(self):
-        from unittest.mock import MagicMock, patch
-
-        from protean.exceptions import InvalidOperationError
-
-        from ordering.cart.abandonment import DetectAbandonedCartsHandler
-
-        handler = DetectAbandonedCartsHandler()
-
-        as_of = datetime.now(UTC)
-        mock_command = MagicMock()
-        mock_command.as_of = as_of
-        mock_command.idle_threshold_hours = 0
-
-        # Two idle carts: first fails, second succeeds
-        mock_cart1 = MagicMock()
-        mock_cart1.cart_id = "cart-fail-002"
-        mock_cart1.customer_id = "cust-fail-002"
-        mock_cart1.item_count = 2
-        mock_cart1.updated_at = (as_of - timedelta(hours=48)).replace(tzinfo=None)
-
-        mock_cart2 = MagicMock()
-        mock_cart2.cart_id = "cart-ok-001"
-        mock_cart2.customer_id = "cust-ok-001"
-        mock_cart2.item_count = 1
-        mock_cart2.updated_at = (as_of - timedelta(hours=24)).replace(tzinfo=None)
-
-        mock_query_result = MagicMock()
-        mock_query_result.items = [mock_cart1, mock_cart2]
-
-        mock_view = MagicMock()
-        mock_view.query.filter.return_value.all.return_value = mock_query_result
-
-        with patch("ordering.cart.abandonment.current_domain") as mock_domain:
-            mock_domain.view_for = MagicMock(return_value=mock_view)
-            # First call fails, second succeeds
-            mock_domain.process = MagicMock(
-                side_effect=[
-                    InvalidOperationError("Cart in wrong state"),
-                    None,
-                ]
-            )
-            result = handler.detect_abandoned_carts(mock_command)
-            assert result == 1
-            assert mock_domain.process.call_count == 2
+        assert result == 1
+        assert current_domain.repository_for(ShoppingCart).get(good_cart).status == "Abandoned"

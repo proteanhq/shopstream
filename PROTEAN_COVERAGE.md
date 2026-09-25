@@ -109,8 +109,8 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 
 ## Protean bugs surfaced (filed; milestone 0.16.1)
 
-This branch pins Protean to git `main`. #1023/#1025/#1028/#1034/#1046 are fixed there, and the
-pin was bumped to Protean main `c79c497`, which also lands #1048 (sync PM cascade) and #1056
+This branch pins Protean to git `main`, currently `6b4cd312` (after 0.17.0). #1023/#1025/#1028/
+#1034/#1046 are fixed there, and so are #1048 (sync PM cascade), #1055 (engine in CI) and #1056
 (Auto-increment) — the loyalty `RedemptionSaga` now cascades to completion synchronously and its
 completion tests are permanent guards (no longer `xfail`).
 

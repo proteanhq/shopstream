@@ -11,7 +11,7 @@ from datetime import UTC, datetime, timedelta
 
 import structlog
 from protean import handle
-from protean.exceptions import InvalidOperationError, ValidationError
+from protean.exceptions import ObjectNotFoundError
 from protean.fields import DateTime, Integer
 from protean.utils.globals import current_domain
 from protean.utils.processing import Priority, processing_priority
@@ -66,27 +66,36 @@ class DetectAbandonedCartsHandler:
 
             from ordering.cart.management import AbandonCart
 
+            # Every AbandonCart joins this handler's transaction. A failed one would
+            # roll back all of them, so skip any cart the aggregate would reject, and
+            # let an unexpected failure fail the whole batch instead of reporting success.
+            repo = current_domain.repository_for(ShoppingCart)
             abandoned_count = 0
             for cart in abandoned:
                 try:
-                    current_domain.process(
-                        AbandonCart(cart_id=str(cart.cart_id)),
-                        asynchronous=False,
-                    )
-                    abandoned_count += 1
-                    logger.info(
-                        "Marked cart as abandoned",
-                        cart_id=str(cart.cart_id),
-                        customer_id=str(cart.customer_id) if cart.customer_id else None,
-                        item_count=cart.item_count,
-                        last_updated=str(cart.updated_at),
-                    )
-                except (ValidationError, InvalidOperationError) as exc:
+                    blocker = repo.get(str(cart.cart_id)).abandon_blocker()
+                except ObjectNotFoundError:
+                    blocker = "Cart not found"
+                if blocker is not None:
                     logger.warning(
-                        "Failed to abandon cart",
+                        "Skipped cart",
                         cart_id=str(cart.cart_id),
-                        error=str(exc),
+                        error=blocker,
                     )
+                    continue
+
+                current_domain.process(
+                    AbandonCart(cart_id=str(cart.cart_id)),
+                    asynchronous=False,
+                )
+                abandoned_count += 1
+                logger.info(
+                    "Marked cart as abandoned",
+                    cart_id=str(cart.cart_id),
+                    customer_id=str(cart.customer_id) if cart.customer_id else None,
+                    item_count=cart.item_count,
+                    last_updated=str(cart.updated_at),
+                )
 
             logger.info("Cart abandonment detection complete", abandoned_count=abandoned_count)
             return abandoned_count

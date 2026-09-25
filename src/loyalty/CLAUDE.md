@@ -121,13 +121,19 @@ ShopStream's **second** process manager and the one that exercises the saga feat
 
 Flow: `RedemptionRequested` (start) → reserve points (`RedeemPoints` on the RewardAccount) +
 advance to `points_reserved` → issue voucher → `VoucherIssued` ⇒ complete (`mark_as_complete()`),
-or `VoucherIssuanceFailed` ⇒ **compensate** (refund, `end=True`). Its full forward + compensation
+or `VoucherIssuanceFailed` ⇒ **compensate** (refund, `end=True`). The start handler checks
+`RewardAccount.redemption_blocker(points)` before it dispatches `RedeemPoints`. When the account
+cannot cover the points, the saga records `rejected` and ends without dispatching anything. A
+failed nested `RedeemPoints` would roll back the saga's own transaction, so it cannot catch the error
+afterwards. Its full forward + compensation
 logic is unit-tested with `given()` in `tests/loyalty/domain/test_redemption_saga.py`.
 
 **Sync cascade ([proteanhq/protean#1048](https://github.com/proteanhq/protean/issues/1048), fixed):**
 multi-step PMs used to stop after the reserve step under `event_processing="sync"`, because a later
 handler re-entered before the start transition persisted. Protean now drains sync events
 breadth-first, so the saga completes, and the synchronous end-to-end completion tests pass as guards.
+`RedemptionView._set` still skips a transition event whose create row is missing. That skip was the
+#1048 workaround; it stays as a guard against out-of-order delivery.
 
 ## Events
 

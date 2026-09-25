@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:39cf1e1d9f36e04bb4c86d2f00c4e4090c27efa7094b415af3ad203d0371bb48",
+  "checksum": "sha256:5e386ea68c4eb38687c7318d99e54ad7dfd033c46cec9dceb6b5efb367916c5c",
   "clusters": {
     "inventory.stock.stock.InventoryItem": {
       "aggregate": {
@@ -250,6 +250,16 @@
             "Inventory.ExpireStaleReservations.v1": [
               "expire_stale_reservations"
             ]
+          },
+          "method_edges": {
+            "expire_stale_reservations": {
+              "invokes": [
+                {
+                  "element": "inventory.stock.stock.InventoryItem",
+                  "method": "release_blocker"
+                }
+              ]
+            }
           },
           "module": "inventory.stock.expiry",
           "name": "ExpireStaleReservationsHandler",

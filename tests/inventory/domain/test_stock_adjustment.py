@@ -136,6 +136,25 @@ class TestAdjustStock:
         assert len(low_stock_events) == 1
         assert low_stock_events[0].current_available == 0
 
+    def test_adjustment_above_reorder_point_does_not_trigger_low_stock(self):
+        item = _make_item(initial_quantity=100, reorder_point=10)
+        item.adjust_stock(
+            quantity_change=-5,
+            adjustment_type=AdjustmentType.SHRINKAGE.value,
+            reason="Loss",
+            adjusted_by="manager-001",
+        )
+        assert item.levels.available == 95
+        assert any(isinstance(e, StockAdjusted) for e in item._events)
+        assert not any(isinstance(e, LowStockDetected) for e in item._events)
+
+    def test_low_stock_check_skips_item_without_levels(self):
+        item = _make_item(initial_quantity=0, reorder_point=10)
+        item._events = []
+        item.levels = None
+        item._check_low_stock()
+        assert item._events == []
+
 
 class TestRecordStockCheck:
     def test_stock_check_records_count(self):

@@ -266,10 +266,22 @@ class ShoppingCart:
             )
         )
 
+    def abandon_blocker(self):
+        """Return why `abandon` would be rejected, or None if it would succeed.
+
+        The batch abandonment handler checks this before dispatching `AbandonCart`.
+        A failed nested command rolls back the caller's whole transaction, so
+        catching its error afterwards is too late.
+        """
+        if CartStatus(self.status) != CartStatus.ACTIVE:
+            return "Only active carts can be abandoned"
+        return None
+
     def abandon(self):
         """Mark cart as abandoned."""
-        if CartStatus(self.status) != CartStatus.ACTIVE:
-            raise ValidationError({"status": ["Only active carts can be abandoned"]})
+        blocker = self.abandon_blocker()
+        if blocker is not None:
+            raise ValidationError({"status": [blocker]})
 
         self.status = CartStatus.ABANDONED.value
         now = datetime.now(UTC)

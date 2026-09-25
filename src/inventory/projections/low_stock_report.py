@@ -66,6 +66,11 @@ def _upsert_low_stock(item_id, *, current_available, detected_at, create_kwargs)
 # The fix is a per-projector transient retry on that conflict. A nested
 # UnitOfWork inside the handler cannot catch it: nesting joins the handler's own
 # UnitOfWork, so the conflict only raises at the handler's commit.
+#
+# `TransactionError` is the conflict on PostgreSQL. `ValidationError` is the same
+# conflict on the memory adapter ("already present"); with `TransactionError`
+# alone the memory-mode race test fails. The cost: a genuine `ValidationError`
+# in any of these handlers is also retried 5 times before it surfaces.
 @inventory.projector(
     projector_for=LowStockReport,
     aggregates=[InventoryItem],

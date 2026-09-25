@@ -90,10 +90,9 @@ def project_low_stock_once(args):
 
     Deterministically reproduces the projector's concurrent-create window: every
     worker fires the projector for the SAME fresh item at the same instant, so
-    they all take the create path before any commits. A version-retry loop mimics
-    the framework's `_handle` wrapper so that update-update races (the projection
-    has its own `_version`) are retried the way production would — leaving the
-    create-create collision as the only thing under test.
+    they all take the create path before any commits. The handler is called
+    directly, so the framework's own version and transient retry run exactly as
+    they do in production.
 
     Returns "ok", "version_exhausted", or "<ExceptionName>:<msg>".
     """

@@ -16,10 +16,10 @@ WHAT THIS CHECKS
 
 WHY THIS NEEDS THE ASYNC ENGINE (not the sync test suite)
     The saga is a multi-step PM whose transitions fan out across the ordering,
-    inventory and payments engines and the external Redis bus (DB 15). Under
-    `event_processing="sync"` it hits proteanhq/protean#1048 (a multi-step PM
-    re-enters before its start transition persists and stops after the first
-    step), so it cannot cascade to cancellation. This check therefore drives the
+    inventory and payments engines and the external Redis bus (DB 15). The sync
+    cascade bug (proteanhq/protean#1048) is fixed, but the saga's cross-domain
+    steps travel over the external bus, which only the running engines consume,
+    so the sync suite cannot follow it to cancellation. This check therefore drives the
     REAL stack over HTTP and reads terminal state back. It is `@pytest.mark.engine`
     (local-only, deselected in CI via `-m "not engine"`, same as the DLQ test) -
     the engine's poll loops are unreliable in CI against Redis (proteanhq/protean

@@ -232,17 +232,29 @@ class InventoryItem:
         )
         self._check_low_stock()
 
-    def release_reservation(self, reservation_id, reason):
-        """Release a reservation, returning stock to available."""
+    def release_blocker(self, reservation_id):
+        """Return why `release_reservation` would be rejected, or None if it would succeed.
+
+        A batch caller checks this before dispatching `ReleaseReservation`. A failed
+        nested command rolls back the caller's whole transaction, so catching its
+        error afterwards is too late.
+        """
         reservation = next(
             (r for r in (self.reservations or []) if str(r.id) == str(reservation_id)),
             None,
         )
         if reservation is None:
-            raise ValidationError({"reservation_id": ["Reservation not found"]})
-
+            return "Reservation not found"
         if ReservationStatus(reservation.status) != ReservationStatus.ACTIVE:
-            raise ValidationError({"reservation_id": [f"Cannot release reservation in {reservation.status} state"]})
+            return f"Cannot release reservation in {reservation.status} state"
+        return None
+
+    def release_reservation(self, reservation_id, reason):
+        """Release a reservation, returning stock to available."""
+        blocker = self.release_blocker(reservation_id)
+        if blocker is not None:
+            raise ValidationError({"reservation_id": [blocker]})
+        reservation = next(r for r in self.reservations if str(r.id) == str(reservation_id))
 
         available = self.levels.available if self.levels else 0
         new_available = available + reservation.quantity

@@ -260,6 +260,21 @@ class RewardAccount(Auditable):
             )
         )
 
+    def redemption_blocker(self, amount):
+        """Return why `redeem_points(amount)` would be rejected, or None if it would succeed.
+
+        Callers that dispatch `RedeemPoints` from inside their own transaction check
+        this first. A failed nested command rolls back the caller's whole
+        transaction, so catching its error afterwards is too late.
+        """
+        if amount <= 0:
+            return "Amount must be positive"
+        if self.status == AccountStatus.CLOSED.value:
+            return "A closed reward account cannot be modified"
+        if self.points_balance < amount:
+            return "Points balance cannot be negative"
+        return None
+
     def redeem_points(self, amount, reason="redemption"):
         from loyalty.reward.events import PointsRedeemed
 
