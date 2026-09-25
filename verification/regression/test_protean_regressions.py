@@ -287,3 +287,66 @@ def test_outer_commit_of_a_doomed_transaction_raises():
         if domain.repository_for(Probe).query.all().total != 0:
             pytest.fail("precondition: the nested rollback discarded the outer write")
         assert outer_error is not None, "the outer UnitOfWork returned normally"
+
+
+@pytest.mark.skipif(
+    ENV != "test",
+    reason="needs the Postgres outbox and a Message-DB event store; the in-memory adapters do not autoflush",
+)
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="a stale write on an event-sourced aggregate with a published event fails on the outbox unique index",
+)
+@pytest.mark.usefixtures("inventory_ctx")
+def test_stale_event_sourced_write_raises_expected_version_error():
+    """Protean finding (not filed): a stale write surfaces as an IntegrityError.
+
+    For an event-sourced aggregate, the Message-DB append decides the version
+    conflict. `UnitOfWork._do_commit` writes the outbox rows before that append.
+    A published event gets a second row for the external broker, and saving it
+    runs `_validate_unique`, whose query autoflushes the first row. The outbox
+    message id is `<stream>-<version>`, so the stale writer's row has the same
+    `(message_id, target_broker)` as the winner's and Postgres rejects it. The
+    caller gets `sqlalchemy.exc.IntegrityError` instead of `ExpectedVersionError`,
+    so version retry never runs and a concurrent `ReserveStock` fails outright.
+    Guarded under real contention by `oracles/test_no_lost_updates.py`.
+    """
+    import uuid
+    from datetime import UTC, timedelta
+
+    from protean import current_domain
+    from protean.core.unit_of_work import UnitOfWork
+    from protean.exceptions import ExpectedVersionError
+
+    from inventory.stock.stock import InventoryItem
+
+    repo = current_domain.repository_for(InventoryItem)
+    item = InventoryItem.create(
+        product_id=str(uuid.uuid4()),
+        variant_id=str(uuid.uuid4()),
+        warehouse_id=str(uuid.uuid4()),
+        sku=f"SKU-{uuid.uuid4().hex[:8]}",
+        initial_quantity=5,
+        reorder_point=-1,
+    )
+    repo.add(item)
+    expires_at = datetime.now(UTC) + timedelta(minutes=15)
+
+    stale = repo.get(item.id)
+    with UnitOfWork():
+        winner = repo.get(item.id)
+        winner.reserve(order_id=str(uuid.uuid4()), quantity=1, expires_at=expires_at)
+        repo.add(winner)
+
+    outcome = None
+    try:
+        with UnitOfWork():
+            stale.reserve(order_id=str(uuid.uuid4()), quantity=1, expires_at=expires_at)
+            repo.add(stale)
+    except Exception as exc:  # noqa: BLE001
+        outcome = exc
+
+    if repo.get(item.id).levels.reserved != 1:
+        pytest.fail("precondition: only the winner's reservation persisted")
+    assert isinstance(outcome, ExpectedVersionError), repr(outcome)

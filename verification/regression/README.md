@@ -50,6 +50,7 @@ ShopStream reproduction and are noted as such.)
 | not filed | **open** | The `is_event_sourced` deprecation warning is attributed to `protean/domain/__init__.py` instead of the decorator that used the option (`stacklevel` one frame short) | `regression/test_protean_regressions.py::test_is_event_sourced_warning_points_at_the_decorator` |
 | not filed | **open** | The outermost UnitOfWork rolls back a transaction a nested UnitOfWork doomed, then returns without raising, so the caller sees success for writes that were lost | `regression/test_protean_regressions.py::test_outer_commit_of_a_doomed_transaction_raises` |
 | not filed | **open** | A top-level `[lint]` table in `domain.toml` is dropped by the config loader, while an env overlay (`[test.lint]`) loads. The key filter is applied to one and not the other | `regression/test_protean_regressions.py::test_lint_table_in_domain_toml_is_loaded` |
+| not filed | **open** | A stale write on an event-sourced aggregate that raises a published event fails with an outbox `IntegrityError` instead of `ExpectedVersionError`: the UnitOfWork writes outbox rows before the Message-DB append, and the external-broker row's unique check autoflushes the internal row, whose `<stream>-<version>` key clashes with the winner's. Version retry never runs | `regression/test_protean_regressions.py::test_stale_event_sourced_write_raises_expected_version_error` (+ `oracles/test_no_lost_updates.py`, liveness xfails) |
 
 **Run**
 

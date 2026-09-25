@@ -27,6 +27,10 @@ for _p in (_REPO, os.path.join(_REPO, "src")):
 
 _INITED = False
 
+# The outbox's unique index. A stale writer on an event-sourced aggregate trips it
+# before Message-DB can report the version conflict.
+OUTBOX_KEY = "uq_outbox_message_id_target_broker"
+
 
 def _domain(env: str, retry_config: dict | None):
     """Init the inventory domain once per worker process.
@@ -55,6 +59,9 @@ def reserve_once(args):
       "ok"                   - the reservation committed
       "conflict"             - lost the optimistic-concurrency race (ExpectedVersionError)
       "insufficient"         - stock genuinely exhausted (ValidationError)
+      "outbox_collision"     - lost the race, but Protean reported it as a unique
+                               violation on the outbox key instead of a version
+                               conflict (open Protean bug, see the oracle)
       "<ExceptionName>"      - anything unexpected (surfaces as a test failure)
     """
     env, item_id, order_id, barrier, retry_config = args
@@ -82,6 +89,8 @@ def reserve_once(args):
                 return "insufficient"
             return f"ValidationError:{exc}"
         except Exception as exc:  # noqa: BLE001
+            if OUTBOX_KEY in str(exc):
+                return "outbox_collision"
             return f"{type(exc).__name__}:{str(exc)[:80]}"
 
 
