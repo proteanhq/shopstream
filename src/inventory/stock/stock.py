@@ -161,7 +161,7 @@ class InventoryItem:
     # -------------------------------------------------------------------
     def _check_low_stock(self):
         """Raise LowStockDetected if available is at or below reorder point."""
-        if self.levels and self.levels.available <= self.reorder_point:
+        if self.levels is not None and self.levels.available <= self.reorder_point:
             self.raise_(
                 LowStockDetected(
                     inventory_item_id=str(self.id),

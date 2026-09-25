@@ -15,9 +15,10 @@ API only line up on Redis). It therefore skips under the in-memory broker.
 **Marked `engine` → runs locally only.** Driving a full engine inside a pytest is unreliable in
 CI: even in an isolated job with every broker reachable, the engine's subscription poll loops drop
 their Redis connections mid-run ("Connection closed by server" → `redis_instance` becomes None), so
-the pipeline never completes and nothing reaches the DLQ. This reproduces only in CI, not locally —
-filed upstream as proteanhq/protean#1055. CI therefore deselects this test with `-m "not engine"`;
-it runs under `make test` / `make test-loyalty`. The command-handler half is covered synchronously
+the pipeline never completes and nothing reaches the DLQ. This reproduced only in CI, not locally,
+and was filed upstream as proteanhq/protean#1055. That issue is now fixed in the Protean pin, but CI
+still deselects this test with `-m "not engine"` until an engine CI job is re-added. It runs under
+`make test` / `make test-loyalty`. The command-handler half is covered synchronously
 by `tests/loyalty/application/test_poison_command.py`.
 """
 

@@ -121,6 +121,21 @@ class TestAdjustStock:
         assert len(low_stock_events) == 1
         assert low_stock_events[0].current_available == 5
 
+    def test_adjustment_to_zero_available_triggers_low_stock(self):
+        # All-zero StockLevels is falsy, so a truthiness guard skipped the event
+        # exactly when stock ran out.
+        item = _make_item(initial_quantity=5, reorder_point=10)
+        item.adjust_stock(
+            quantity_change=-5,
+            adjustment_type=AdjustmentType.SHRINKAGE.value,
+            reason="Loss",
+            adjusted_by="manager-001",
+        )
+        assert item.levels.on_hand == 0
+        low_stock_events = [e for e in item._events if isinstance(e, LowStockDetected)]
+        assert len(low_stock_events) == 1
+        assert low_stock_events[0].current_available == 0
+
 
 class TestRecordStockCheck:
     def test_stock_check_records_count(self):

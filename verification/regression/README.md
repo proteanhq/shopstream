@@ -44,10 +44,11 @@ ShopStream reproduction and are noted as such.)
 | [#1065](https://github.com/proteanhq/protean/issues/1065) | fixed | `process_and_wait` belongs in `protean.testing` | `verification/support/processing.py` (local seed; swap when adopted) |
 | [#1071](https://github.com/proteanhq/protean/issues/1071) | **guard** | In-memory adapter ignores `Index(unique=True)` | `regression/test_protean_regressions.py::test_1071_memory_adapter_enforces_unique_index` (+ `oracles/test_outbox_exactly_once.py`, Postgres) |
 | [#1073](https://github.com/proteanhq/protean/issues/1073) | **guard** | `reconcile_outbox` no-op on Message-DB (`read_last_message("$all")` is None) | `oracles/test_crash_window_reconcile.py::test_reconcile_restores_the_lost_outbox_row` |
-| [#1076](https://github.com/proteanhq/protean/issues/1076) | fixed | Projectors reject `retries`/`retry_exceptions` options | `src/inventory/projections/low_stock_report.py` uses a nested-UoW workaround; simplify to the option when adopted |
+| [#1076](https://github.com/proteanhq/protean/issues/1076) | fixed | Projectors reject `retries`/`retry_exceptions` options | `src/inventory/projections/low_stock_report.py` uses `retries`/`retry_exceptions` (guarded by `oracles/test_lowstock_projector_concurrency.py`, Postgres) |
 | [#1078](https://github.com/proteanhq/protean/issues/1078) | **guard** | All-default ValueObject round-trips to `None` | `regression/test_protean_regressions.py::test_1078_all_default_value_object_round_trips` |
-| not filed | **open** | `current_domain` warns "Working outside of domain context" when its type is probed (pytest collection) | `regression/test_protean_regressions.py::test_current_domain_type_probe_outside_context_is_silent` |
-| not filed | **open** | `[lint]` table in `domain.toml` is dropped by the config loader, so `[lint].level` cannot be set | `regression/test_protean_regressions.py::test_lint_table_in_domain_toml_is_loaded` |
+| not filed | **open** (feature request) | `current_domain` has no warning-free probe: `getattr`/`isinstance` outside a context warn "Working outside of domain context" (pytest collection). Predates the 0.16.0 → main bump | `regression/test_protean_regressions.py::test_current_domain_probe_outside_context_is_silent` |
+| not filed | **open** | The `is_event_sourced` deprecation warning is attributed to `protean/domain/__init__.py` instead of the decorator that used the option (`stacklevel` one frame short) | `regression/test_protean_regressions.py::test_is_event_sourced_warning_points_at_the_decorator` |
+| not filed | **open** | A top-level `[lint]` table in `domain.toml` is dropped by the config loader, while an env overlay (`[test.lint]`) loads. The key filter is applied to one and not the other | `regression/test_protean_regressions.py::test_lint_table_in_domain_toml_is_loaded` |
 
 **Run**
 

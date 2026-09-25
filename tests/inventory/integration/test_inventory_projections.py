@@ -381,6 +381,40 @@ class TestLowStockReportProjection:
         assert report.is_critical is True
         assert report.current_available == 0
 
+    def test_critical_when_adjusted_to_zero(self):
+        """Adjusting stock to exactly zero still records a critical report."""
+        item_id = _initialize_stock(initial_quantity=5, reorder_point=10)
+
+        current_domain.process(
+            AdjustStock(
+                inventory_item_id=item_id,
+                quantity_change=-5,
+                adjustment_type=AdjustmentType.SHRINKAGE.value,
+                reason="Loss detected",
+                adjusted_by="mgr-001",
+            ),
+            asynchronous=False,
+        )
+
+        report = current_domain.repository_for(LowStockReport).get(item_id)
+        assert report.is_critical is True
+        assert report.current_available == 0
+
+    def test_projector_retries_the_create_race_conflict(self):
+        """A lost create race (primary-key conflict at commit) is retried, not raised.
+
+        The race itself needs real, isolated transactions; see
+        verification/oracles/test_lowstock_projector_concurrency.py.
+        """
+        from protean.exceptions import TransactionError, ValidationError
+
+        from inventory.projections.low_stock_report import LowStockReportProjector
+
+        meta = LowStockReportProjector.meta_
+        assert meta.retries > 0
+        assert TransactionError in meta.retry_exceptions
+        assert ValidationError in meta.retry_exceptions
+
     def test_removed_when_restocked_above_threshold(self):
         item_id = _initialize_stock(initial_quantity=15, reorder_point=10)
 

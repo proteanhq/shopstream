@@ -104,7 +104,10 @@ def test_1078_all_default_value_object_round_trips():
 
     An event-sourced aggregate whose ValueObject had only falsy fields (every
     `StockLevels` count at 0) came back as `None` after a persist and reload. The
-    pin bump to Protean 0.17.0 landed the fix, so this is now a permanent guard.
+    fix touched both the attribute setter (`ValueObject.__set__`) and
+    serialization (`to_dict`), so the test checks the reloaded attribute and its
+    serialized form. The fix arrived with the pin bump to Protean main 6b4cd312
+    (after 0.17.0), so this is now a permanent guard.
     """
     import uuid
 
@@ -125,32 +128,47 @@ def test_1078_all_default_value_object_round_trips():
 
     reloaded = repo.get(item.id)
     assert reloaded.levels == StockLevels(on_hand=0, reserved=0, available=0, in_transit=0, damaged=0)
+    assert reloaded.to_dict()["levels"] == {
+        "on_hand": 0,
+        "reserved": 0,
+        "available": 0,
+        "in_transit": 0,
+        "damaged": 0,
+    }
 
 
 @pytest.mark.xfail(
     strict=True,
-    reason="current_domain's __class__ property warns 'Working outside of domain context' on a type probe",
+    raises=AssertionError,
+    reason="current_domain warns 'Working outside of domain context' on attribute and type probes",
 )
-def test_current_domain_type_probe_outside_context_is_silent():
-    """Protean finding (not filed): probing `current_domain`'s type outside a context warns.
+def test_current_domain_probe_outside_context_is_silent():
+    """Protean finding (not filed, feature request): `current_domain` has no warning-free probe.
 
     Test modules import `current_domain` at module level. During collection pytest
-    runs `isinstance(obj, type)` and `issubclass(...)` over every module attribute,
-    which reads the proxy's `__class__`. With no domain context active, that read
-    goes through `_find_domain()` and emits the "Working outside of domain context"
-    `UserWarning`, so collection prints it for dozens of modules. The proxy is meant
-    to act like `None` when nothing is active; a type probe is not domain use and
-    should stay silent, the way `_domain_now()` reads the stack without warning.
+    runs `getattr(obj, "__test__", None)` (`_pytest/compat.py`) and `isinstance`
+    checks over every module attribute. With no domain context active, both go
+    through the proxy's `_find_domain()` and emit the "Working outside of domain
+    context" `UserWarning`, so collection prints it for dozens of modules.
+
+    The proxy's docstring promises None-like results outside a context, not
+    silence, and Protean's own tests assert that `bool`/`repr` warn. So this is a
+    request for a probe that stays quiet (as `_domain_now()` already reads the
+    stack without warning), not a regression. The warning predates this pin: it
+    showed on Protean 0.16.0 too, and `pyproject.toml` filters it for the suite.
     """
     from protean import current_domain
     from protean.utils.globals import _domain_context_stack
 
-    assert _domain_context_stack.top is None, "precondition: no domain context is active"
+    if _domain_context_stack.top is not None:
+        pytest.fail("precondition: no domain context may be active")
 
     with warnings.catch_warnings(record=True) as caught:
         warnings.simplefilter("always")
+        test_attr = getattr(current_domain, "__test__", None)
         is_type = isinstance(current_domain, type)
 
+    assert test_attr is None
     assert is_type is False
     messages = [str(w.message) for w in caught]
     assert not any("outside of domain context" in m for m in messages), messages
@@ -158,23 +176,67 @@ def test_current_domain_type_probe_outside_context_is_silent():
 
 @pytest.mark.xfail(
     strict=True,
-    reason="Config2 keeps only keys from _default_config(), so a [lint] table in domain.toml is dropped",
+    raises=AssertionError,
+    reason="Config2 keeps only keys from _default_config(), so a top-level [lint] table in domain.toml is dropped",
 )
-def test_lint_table_in_domain_toml_is_loaded(tmp_path):
-    """Protean finding (not filed): the `[lint]` table in `domain.toml` never reaches the config.
+def test_lint_table_in_domain_toml_is_loaded(tmp_path, monkeypatch):
+    """Protean finding (not filed): a top-level `[lint]` table in `domain.toml` is dropped.
 
     Protean's configuration docs describe a `[lint]` table (`level`, `suppressions`,
-    and more) that `protean check` reads through `domain.config.get("lint", {})`.
-    `Config2._normalize_config` keeps only the top-level keys that `_default_config()`
-    defines, and `lint` is not one of them, so the table is silently discarded and
-    `[lint].level` stays at its `"warn"` default. ShopStream's `make domain-check`
-    works around it by reading the error count from `protean check --format=json`.
+    and more) that `protean check` and `protean verify` read through
+    `domain.config.get("lint", {})`. `Config2._normalize_config` keeps only the
+    top-level keys that `_default_config()` defines, and `lint` is not one of
+    them, so a top-level `[lint]` is discarded. An environment overlay such as
+    `[test.lint]` is deep-merged without that key filter, so it does load. The
+    bug is that the filter is applied to one and not the other.
+
+    ShopStream's `make domain-check` works around it by reading the error count
+    from `protean check --format=json`.
     """
     from protean.domain.config import Config2
 
-    (tmp_path / "domain.toml").write_text('debug = true\n\n[lint]\nlevel = "error"\n')
+    (tmp_path / "domain.toml").write_text('debug = true\n\n[lint]\nlevel = "error"\n\n[test.lint]\nlevel = "error"\n')
 
+    monkeypatch.setenv("PROTEAN_ENV", "test")
+    overlay = Config2.load_from_path(str(tmp_path))
+    if overlay.get("lint", {}).get("level") != "error":
+        pytest.fail("precondition: the [test.lint] overlay should load")
+
+    monkeypatch.delenv("PROTEAN_ENV")
     config = Config2.load_from_path(str(tmp_path))
 
-    assert config["debug"] is True, "precondition: the domain.toml was read"
-    assert config.get("lint") == {"level": "error"}
+    if config["debug"] is not True:
+        pytest.fail("precondition: the domain.toml was read")
+    assert config.get("lint", {}).get("level") == "error"
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the is_event_sourced deprecation warning is attributed to protean/domain/__init__.py, not the caller",
+)
+def test_is_event_sourced_warning_points_at_the_decorator():
+    """Protean finding (not filed): the `is_event_sourced` warning names the wrong line.
+
+    Registering an element with the deprecated `is_event_sourced=True` warns, but
+    the warning's file and line are Protean's own `_domain_element.wrap` in
+    `protean/domain/__init__.py`, not the `@domain.aggregate(...)` line that used
+    the option. The `stacklevel` stops one frame short, so a user cannot see which
+    of their elements to change.
+    """
+    from protean import Domain
+    from protean.fields import String
+
+    domain = Domain(name="StacklevelProbe")
+
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter("always")
+
+        @domain.aggregate(is_event_sourced=True)
+        class Probe:
+            name = String()
+
+    deprecations = [w for w in caught if "is_event_sourced" in str(w.message)]
+    if not deprecations:
+        pytest.fail("precondition: the deprecation warning was raised")
+    assert deprecations[0].filename == __file__, deprecations[0].filename
