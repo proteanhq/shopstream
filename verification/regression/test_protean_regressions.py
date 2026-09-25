@@ -190,8 +190,9 @@ def test_lint_table_in_domain_toml_is_loaded(tmp_path, monkeypatch):
     `[test.lint]` is deep-merged without that key filter, so it does load. The
     bug is that the filter is applied to one and not the other.
 
-    ShopStream's `make domain-check` works around it by reading the error count
-    from `protean check --format=json`.
+    On this pin any warning makes `protean check` exit 1. Because the `[lint]`
+    table is dropped, ShopStream cannot set `level = "error"` to keep
+    `make domain-check` failing on errors only.
     """
     from protean.domain.config import Config2
 

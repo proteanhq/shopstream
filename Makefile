@@ -246,55 +246,40 @@ pre-commit: ## Run pre-commit hooks on all files
 # ──────────────────────────────────────────────
 # Domain diagnostics (protean check)
 # ──────────────────────────────────────────────
-# Fails on errors only; warnings are printed but pass. On Protean main 6b4cd312
-# (after 0.17.0) a warning also exits 1. The usual fix, `[lint] level = "error"`
-# at the top of domain.toml, is dropped by the config loader (pinned by the
-# xfail `test_lint_table_in_domain_toml_is_loaded` in
-# verification/regression/test_protean_regressions.py). So an exit of 1 is
-# re-checked against the JSON error count. Any other nonzero exit (2 is a usage
-# or config error) fails. Sets `failed=1` for domain $(1) when it has errors.
-define protean_check_errors_only
-PYTHONPATH=src uv run protean check --domain=$(1).domain; rc=$$?; \
-if [ $$rc -eq 1 ]; then \
-	errors=$$(PYTHONPATH=src uv run protean check --domain=$(1).domain --format=json 2>/dev/null \
-		| uv run python -c 'import json, sys; print(json.load(sys.stdin)["data"]["counts"]["errors"])') || errors=unknown; \
-	if [ "$$errors" != "0" ]; then echo "$(1): $$errors error(s)"; failed=1; fi; \
-elif [ $$rc -ne 0 ]; then failed=1; fi
-endef
-
-domain-check: ## Run protean check on all domains (fails on errors, not warnings)
+domain-check: ## Run protean check on all domains
 	@failed=0; \
 	for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
-		$(call protean_check_errors_only,$$d); \
+		PYTHONPATH=src uv run protean check --domain=$$d.domain || \
+			if [ $$? -eq 1 ]; then failed=1; fi; \
 	done; \
 	exit $$failed
 
-domain-check-identity: ## Run protean check on identity domain (fails on errors, not warnings)
-	@failed=0; $(call protean_check_errors_only,identity); exit $$failed
+domain-check-identity: ## Run protean check on identity domain
+	PYTHONPATH=src uv run protean check --domain=identity.domain
 
-domain-check-catalogue: ## Run protean check on catalogue domain (fails on errors, not warnings)
-	@failed=0; $(call protean_check_errors_only,catalogue); exit $$failed
+domain-check-catalogue: ## Run protean check on catalogue domain
+	PYTHONPATH=src uv run protean check --domain=catalogue.domain
 
-domain-check-ordering: ## Run protean check on ordering domain (fails on errors, not warnings)
-	@failed=0; $(call protean_check_errors_only,ordering); exit $$failed
+domain-check-ordering: ## Run protean check on ordering domain
+	PYTHONPATH=src uv run protean check --domain=ordering.domain
 
-domain-check-inventory: ## Run protean check on inventory domain (fails on errors, not warnings)
-	@failed=0; $(call protean_check_errors_only,inventory); exit $$failed
+domain-check-inventory: ## Run protean check on inventory domain
+	PYTHONPATH=src uv run protean check --domain=inventory.domain
 
-domain-check-payments: ## Run protean check on payments domain (fails on errors, not warnings)
-	@failed=0; $(call protean_check_errors_only,payments); exit $$failed
+domain-check-payments: ## Run protean check on payments domain
+	PYTHONPATH=src uv run protean check --domain=payments.domain
 
-domain-check-fulfillment: ## Run protean check on fulfillment domain (fails on errors, not warnings)
-	@failed=0; $(call protean_check_errors_only,fulfillment); exit $$failed
+domain-check-fulfillment: ## Run protean check on fulfillment domain
+	PYTHONPATH=src uv run protean check --domain=fulfillment.domain
 
-domain-check-reviews: ## Run protean check on reviews domain (fails on errors, not warnings)
-	@failed=0; $(call protean_check_errors_only,reviews); exit $$failed
+domain-check-reviews: ## Run protean check on reviews domain
+	PYTHONPATH=src uv run protean check --domain=reviews.domain
 
-domain-check-notifications: ## Run protean check on notifications domain (fails on errors, not warnings)
-	@failed=0; $(call protean_check_errors_only,notifications); exit $$failed
+domain-check-notifications: ## Run protean check on notifications domain
+	PYTHONPATH=src uv run protean check --domain=notifications.domain
 
-domain-check-loyalty: ## Run protean check on loyalty domain (fails on errors, not warnings)
-	@failed=0; $(call protean_check_errors_only,loyalty); exit $$failed
+domain-check-loyalty: ## Run protean check on loyalty domain
+	PYTHONPATH=src uv run protean check --domain=loyalty.domain
 
 # ──────────────────────────────────────────────
 # IR & Schema Generation
