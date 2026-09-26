@@ -96,7 +96,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | Capability | Status | Where |
 |---|---|---|
 | OpenTelemetry (OTLP HTTP spans) | ⚠️ | wired via `instrument_app(...)` in `src/app.py`; `[production.telemetry]` production overlay; no dedicated assertion found |
-| structured logging + correlation processor | ⚠️ | wired via `configure_logging(extra_processors=[protean_correlation_processor])`; `logging.toml`; no dedicated assertion found |
+| structured logging + correlation processor | ✅ | `Domain.configure_logging` reads `[logging]` from each `src/<context>/domain.toml`; the API calls `identity.configure_logging()` in `src/app.py` before any `init()`. `tests/test_logging_config.py` checks the config level, the `PROTEAN_LOG_LEVEL` override, the root correlation filter, and that the nine `[logging]` tables match. Engines (`protean server`, single worker) never read `[logging]`: `verification/regression/test_protean_regressions.py::test_server_single_worker_applies_domain_toml_logging_level` (strict xfail) |
 | correlation & causation identity | ✅ | `src/shared/enrichment.py`; verified E2E by `scripts/verify-observatory.sh` (correlation chain + causation tree) |
 | Observatory (timeline, causation graph, domain visualizer) | ✅ | `make observatory`; `scripts/verify-observatory.sh` (~66 checks); `scripts/verify-domain-visualizer.sh` |
 | message tracing | ✅ | Observatory Trace API (recent, search, causation tree) checked in `scripts/verify-observatory.sh` |

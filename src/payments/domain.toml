@@ -73,6 +73,13 @@ URI = "${REDIS_URL|redis://127.0.0.1:16379/4}"
 provider = "redis"
 URI = "${REDIS_EXTERNAL_URL|redis://127.0.0.1:16379/15}"
 
+# Logging, read by Domain.configure_logging. An empty level means
+# PROTEAN_LOG_LEVEL applies, or else the PROTEAN_ENV default. Logs go to
+# stdout only. Keep this table the same in every domain.toml
+# (tests/test_logging_config.py checks it).
+[logging]
+level = ""
+
 # ──────────────────────────────────────────────
 # Test overrides (PROTEAN_ENV=test)
 # Separate database so test runs don't destroy dev data.
