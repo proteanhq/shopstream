@@ -18,10 +18,9 @@ from protean.integrations.fastapi import (
     instrument_app,
     register_exception_handlers,
 )
-from protean.integrations.logging import protean_correlation_processor
-from protean.utils.logging import configure_logging
 from scalar_fastapi import get_scalar_api_reference
 
+from api_logging import configure_api_logging
 from catalogue.api import category_router, product_router
 from catalogue.domain import catalogue
 from fulfillment.api import fulfillment_router
@@ -42,9 +41,11 @@ from reviews.api import review_router
 from reviews.domain import reviews
 
 # ---------------------------------------------------------------------------
-# Structured logging — environment-aware, with automatic correlation context
+# Structured logging, from identity's [logging] table in domain.toml. This
+# runs before any init(), so each domain's init() finds the root handlers and
+# skips its own setup.
 # ---------------------------------------------------------------------------
-configure_logging(extra_processors=[protean_correlation_processor])
+configure_api_logging()
 
 # ---------------------------------------------------------------------------
 # Domain initialization

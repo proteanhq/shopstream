@@ -20,6 +20,7 @@ See README.md for the full manifest (every filed issue → its guard → status)
 from __future__ import annotations
 
 import os
+import sys
 import warnings
 from datetime import datetime
 
@@ -209,6 +210,99 @@ def test_lint_table_in_domain_toml_is_loaded(tmp_path, monkeypatch):
     if config["debug"] is not True:
         pytest.fail("precondition: the domain.toml was read")
     assert config.get("lint", {}).get("level") == "error"
+
+
+@pytest.fixture
+def bare_root_logger():
+    """Give the test a root logger with no handlers at NOTSET, and restore it afterwards.
+
+    pytest's log capture puts handlers on the root logger. `Domain.init()` skips
+    its own logging setup when the root has handlers, so leaving them in place
+    would hide a Protean fix. NOTSET means a run where nothing sets up logging
+    cannot match the probe level by accident.
+    """
+    import logging
+
+    import structlog
+
+    root = logging.getLogger()
+    named = {
+        name: logger.level
+        for name, logger in logging.root.manager.loggerDict.items()
+        if isinstance(logger, logging.Logger)
+    }
+    saved = (root.level, root.handlers[:], root.filters[:], structlog.get_config())
+    root.handlers[:] = []
+    root.setLevel(logging.NOTSET)
+    yield root
+    level, handlers, filters, structlog_config = saved
+    root.setLevel(level)
+    root.handlers[:] = handlers
+    root.filters[:] = filters
+    for name, logger_level in named.items():
+        logging.getLogger(name).setLevel(logger_level)
+    structlog.configure(**structlog_config)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason=(
+        "protean server (single worker) calls configure_logging(level=PROTEAN_LOG_LEVEL or 'INFO') "
+        "before Domain.init(); init then sees root handlers and skips Domain.configure_logging, "
+        "so [logging] in domain.toml and the correlation processor are never applied "
+        "(proteanhq/protean#1635)"
+    ),
+)
+def test_server_single_worker_applies_domain_toml_logging_level(tmp_path, monkeypatch, bare_root_logger):
+    """Protean finding #1635: `protean server` ignores `[logging]` in `domain.toml`.
+
+    With one worker (the default, and how every ShopStream engine runs), the
+    `server` command (`protean/cli/__init__.py:209`) calls
+    `configure_logging(level=os.getenv("PROTEAN_LOG_LEVEL", "INFO"))` before it
+    loads the domain. `Domain.init()` then finds handlers on the root logger and
+    skips all of `Domain.configure_logging`: the `[logging]` level, redaction,
+    the correlation processor and filter, the OpenTelemetry processor and
+    `per_logger`. Engine logs therefore carry no `correlation_id`. The `main`
+    callback's comment (`protean/cli/__init__.py:136`) says the fallback is to
+    defer to `Domain.init()`. `protean observatory` has the same gap
+    (`protean/cli/observatory.py:62`).
+
+    The probe level is ERROR, not a default level, so a Protean change that
+    stops setting up logging at all does not pass by accident.
+    """
+    import logging
+
+    import protean.cli
+    from typer.testing import CliRunner
+
+    class _StoppedEngine:
+        def __init__(self, *_args, **_kwargs):
+            self.exit_code = 0
+
+        def run(self):
+            pass
+
+    (tmp_path / "domain.toml").write_text('[logging]\nlevel = "ERROR"\n')
+    (tmp_path / "logging_probe_domain.py").write_text(
+        'from protean import Domain\n\nprobe = Domain(name="LoggingProbe")\n'
+    )
+    monkeypatch.syspath_prepend(str(tmp_path))
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.delenv("DOMAIN_ROOT_PATH", raising=False)
+    monkeypatch.delenv("PROTEAN_LOG_LEVEL", raising=False)
+    monkeypatch.delenv("PROTEAN_NO_AUTO_LOGGING", raising=False)
+    monkeypatch.setattr(protean.cli, "Engine", _StoppedEngine)
+    monkeypatch.delitem(sys.modules, "logging_probe_domain", raising=False)
+
+    result = CliRunner().invoke(protean.cli.app, ["server", "--domain", "logging_probe_domain"])
+    module = sys.modules.pop("logging_probe_domain", None)
+
+    if result.exit_code != 0:
+        pytest.fail(f"precondition: protean server ran and exited cleanly\n{result.output}\n{result.exception!r}")
+    if module is None or module.probe.config["logging"]["level"] != "ERROR":
+        pytest.fail("precondition: the probe domain loaded its domain.toml")
+    assert bare_root_logger.level == logging.ERROR, logging.getLevelName(bare_root_logger.level)
 
 
 def _pytest_project(tmp_path, test_source: str, ini: str = "") -> str:

@@ -299,6 +299,8 @@ debug = false
 database_uri = "${DATABASE_URL|postgresql://.../<domain>}"
 ```
 
+Logging settings go in a context's `domain.toml` under `[logging]`. When the table is absent, as it is in every context today, Protean's defaults apply.
+
 ### Environment Overlays
 
 Protean applies config sections from `domain.toml` based on `PROTEAN_ENV`:
