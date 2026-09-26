@@ -29,7 +29,8 @@ _INITED = False
 
 # The outbox's unique index. Before proteanhq/protean#1628 was fixed, a stale
 # writer on an event-sourced aggregate tripped it before Message-DB could report
-# the version conflict. The tag keeps that regression easy to recognise.
+# the version conflict. The worker reports this case as `outbox_collision`, so a
+# regression is easy to spot.
 OUTBOX_KEY = "uq_outbox_message_id_target_broker"
 
 
