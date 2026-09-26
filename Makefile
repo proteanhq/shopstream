@@ -249,8 +249,7 @@ pre-commit: ## Run pre-commit hooks on all files
 domain-check: ## Run protean check on all domains
 	@failed=0; \
 	for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
-		PYTHONPATH=src uv run protean check --domain=$$d.domain || \
-			if [ $$? -eq 1 ]; then failed=1; fi; \
+		PYTHONPATH=src uv run protean check --domain=$$d.domain || failed=1; \
 	done; \
 	exit $$failed
 
@@ -425,7 +424,7 @@ engine-fulfillment-scaled: ## Start Fulfillment engine with 4 workers
 # Docker-based Engine Workers
 # ──────────────────────────────────────────────
 engine-docker: ## Start all engines in Docker (1 worker each)
-	docker compose up engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-notifications engine-loyalty
+	docker compose up engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty
 
 engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue, 2 ordering, 2 inventory, 2 payments, 2 fulfillment)
 	docker compose up --scale engine-identity=3 --scale engine-catalogue=2 --scale engine-ordering=2 --scale engine-inventory=2 --scale engine-payments=2 --scale engine-fulfillment=2
