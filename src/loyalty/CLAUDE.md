@@ -302,7 +302,7 @@ then asserts the message is in the DLQ via `broker.dlq_depth` / `dlq_list` and *
 broker, so it skips under the in-memory broker. It also **runs locally only**: driving a full
 engine inside pytest is unreliable in CI — even isolated with every broker reachable, the engine's
 poll loops drop their Redis connections mid-run (filed upstream as **proteanhq/protean#1055**), so
-CI deselects it with `-m "not engine"`. #1055 is fixed in the Protean pin (main 6b4cd312, after 0.17.0); CI still deselects it until
+CI deselects it with `-m "not engine"`. #1055 is fixed in the Protean pin (main e79a817, after 0.17.0); CI still deselects it until
 an engine CI job is re-added. Locally it runs under `make test` / `make test-loyalty`.
 The command-handler half (`EmitPoison` → fail) is covered synchronously by
 `tests/loyalty/application/test_poison_command.py`. This handler is the *only* intentional failure

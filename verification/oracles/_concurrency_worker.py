@@ -27,8 +27,10 @@ for _p in (_REPO, os.path.join(_REPO, "src")):
 
 _INITED = False
 
-# The outbox's unique index. A stale writer on an event-sourced aggregate trips it
-# before Message-DB can report the version conflict.
+# The outbox's unique index. Before proteanhq/protean#1628 was fixed, a stale
+# writer on an event-sourced aggregate tripped it before Message-DB could report
+# the version conflict. The worker reports this case as `outbox_collision`, so a
+# regression is easy to spot.
 OUTBOX_KEY = "uq_outbox_message_id_target_broker"
 
 
@@ -61,7 +63,8 @@ def reserve_once(args):
       "insufficient"         - stock genuinely exhausted (ValidationError)
       "outbox_collision"     - lost the race, but Protean reported it as a unique
                                violation on the outbox key instead of a version
-                               conflict (open Protean bug, see the oracle)
+                               conflict (proteanhq/protean#1628, fixed; the oracle
+                               treats it as an unexpected outcome)
       "<ExceptionName>"      - anything unexpected (surfaces as a test failure)
     """
     env, item_id, order_id, barrier, retry_config = args

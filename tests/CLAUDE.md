@@ -132,26 +132,27 @@ tests/
   - `/application/` → `@pytest.mark.application`
   - `/integration/` → `@pytest.mark.integration` + `@pytest.mark.slow`
 
-### Domain `conftest.py` (identity/catalogue/reviews)
-Three fixtures, all auto-used:
+### Domain `conftest.py` (one per package under `tests/`)
+Two fixtures built on Protean's `DomainFixture`:
 
-1. **`_<domain>_domain`** (session scope) — Sets `PROTEAN_ENV`, imports and initializes domain
-2. **`setup_db`** (session scope) — Creates DB schema once, drops after all tests
-3. **`run_around_tests`** (function scope) — Pushes domain context before each test, resets all data stores after (providers, brokers, event store)
+1. **`<domain>_bed`** (session scope): imports the domain, wraps it in a `DomainFixture`, calls `setup()` once (init plus schema) and `teardown()` at the end
+2. **`_ctx`** (function scope, auto-used): enters `bed.domain_context()` for each test. On exit it resets the fixture's own domain's providers, brokers and event store
 
 ```python
+@pytest.fixture(scope="session")
+def identity_bed():
+    from identity.domain import identity
+
+    bed = DomainFixture(identity)
+    bed.setup()
+    yield bed
+    bed.teardown()
+
+
 @pytest.fixture(autouse=True)
-def run_around_tests(_identity_domain):
-    ctx = _identity_domain.domain_context()
-    ctx.push()
-    yield
-    # Reset all data stores
-    for _, provider in current_domain.providers.items():
-        provider._data_reset()
-    for _, broker in current_domain.brokers.items():
-        broker._data_reset()
-    current_domain.event_store.store._data_reset()
-    ctx.pop()
+def _ctx(identity_bed):
+    with identity_bed.domain_context():
+        yield
 ```
 
 ## Test Patterns

@@ -244,36 +244,30 @@ def bare_root_logger():
     structlog.configure(**structlog_config)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason=(
-        "protean server (single worker) calls configure_logging(level=PROTEAN_LOG_LEVEL or 'INFO') "
-        "before Domain.init(); init then sees root handlers and skips Domain.configure_logging, "
-        "so [logging] in domain.toml and the correlation processor are never applied "
-        "(proteanhq/protean#1635)"
-    ),
-)
 def test_server_single_worker_applies_domain_toml_logging_level(tmp_path, monkeypatch, bare_root_logger):
-    """Protean finding #1635: `protean server` ignores `[logging]` in `domain.toml`.
+    """proteanhq/protean#1635 (guard): `protean server` applies `[logging]` from `domain.toml`.
 
     With one worker (the default, and how every ShopStream engine runs), the
-    `server` command (`protean/cli/__init__.py:209`) calls
+    `server` command calls
     `configure_logging(level=os.getenv("PROTEAN_LOG_LEVEL", "INFO"))` before it
-    loads the domain. `Domain.init()` then finds handlers on the root logger and
-    skips all of `Domain.configure_logging`: the `[logging]` level, redaction,
-    the correlation processor and filter, the OpenTelemetry processor and
-    `per_logger`. Engine logs therefore carry no `correlation_id`. The `main`
-    callback's comment (`protean/cli/__init__.py:136`) says the fallback is to
-    defer to `Domain.init()`. `protean observatory` has the same gap
-    (`protean/cli/observatory.py:62`).
+    loads the domain. Before the fix, `Domain.init()` then found handlers on the
+    root logger and skipped all of `Domain.configure_logging`: the `[logging]`
+    level, redaction, the correlation processor and filter, the OpenTelemetry
+    processor and `per_logger`, so engine logs carried no `correlation_id`.
+    `protean observatory` had the same gap. The fix (proteanhq/protean#1640)
+    makes both commands call `apply_domain_logging` after the domain loads,
+    which replaces that early setup with the domain's `[logging]`. It arrived
+    with the pin bump to Protean main e79a817, so this is now a permanent guard.
 
     The probe level is ERROR, not a default level, so a Protean change that
-    stops setting up logging at all does not pass by accident.
+    stops setting up logging at all does not pass by accident. The test also
+    checks for the correlation filter, so a fix that applies only the level
+    does not pass.
     """
     import logging
 
     import protean.cli
+    from protean.integrations.logging import ProteanCorrelationFilter
     from typer.testing import CliRunner
 
     class _StoppedEngine:
@@ -303,6 +297,7 @@ def test_server_single_worker_applies_domain_toml_logging_level(tmp_path, monkey
     if module is None or module.probe.config["logging"]["level"] != "ERROR":
         pytest.fail("precondition: the probe domain loaded its domain.toml")
     assert bare_root_logger.level == logging.ERROR, logging.getLevelName(bare_root_logger.level)
+    assert any(isinstance(f, ProteanCorrelationFilter) for f in bare_root_logger.filters), bare_root_logger.filters
 
 
 def _pytest_project(tmp_path, test_source: str, ini: str = "") -> str:
@@ -408,19 +403,15 @@ def test_verify_tests_stage_counts_passes_from_the_summary(tmp_path, monkeypatch
     assert stage["passed"] == 1
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="the is_event_sourced deprecation warning is attributed to protean/domain/__init__.py, not the caller",
-)
 def test_is_event_sourced_warning_points_at_the_decorator():
-    """Protean finding (not filed): the `is_event_sourced` warning names the wrong line.
+    """proteanhq/protean#1630 (guard): the `is_event_sourced` warning names the caller's line.
 
-    Registering an element with the deprecated `is_event_sourced=True` warns, but
-    the warning's file and line are Protean's own `_domain_element.wrap` in
+    Registering an element with the deprecated `is_event_sourced=True` warns. The
+    warning's file and line used to be Protean's own `_domain_element.wrap` in
     `protean/domain/__init__.py`, not the `@domain.aggregate(...)` line that used
-    the option. The `stacklevel` stops one frame short, so a user cannot see which
-    of their elements to change.
+    the option, because the `stacklevel` stopped one frame short. The fix
+    (proteanhq/protean#1643) arrived with the pin bump to Protean main e79a817,
+    so this is now a permanent guard.
     """
     from protean import Domain
     from protean.fields import String
@@ -486,27 +477,21 @@ def test_outer_commit_of_a_doomed_transaction_raises():
         assert outer_error is not None, "the outer UnitOfWork returned normally"
 
 
-@pytest.mark.skipif(
-    ENV != "test",
-    reason="needs the Postgres outbox and a Message-DB event store; the in-memory adapters do not autoflush",
-)
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="a stale write on an event-sourced aggregate with a published event fails on the outbox unique index",
-)
 @pytest.mark.usefixtures("inventory_ctx")
 def test_stale_event_sourced_write_raises_expected_version_error():
-    """Protean finding (not filed): a stale write surfaces as an IntegrityError.
+    """proteanhq/protean#1628 (guard): a stale event-sourced write raises `ExpectedVersionError`.
 
     For an event-sourced aggregate, the Message-DB append decides the version
-    conflict. `UnitOfWork._do_commit` writes the outbox rows before that append.
-    A published event gets a second row for the external broker, and saving it
-    runs `_validate_unique`, whose query autoflushes the first row. The outbox
-    message id is `<stream>-<version>`, so the stale writer's row has the same
-    `(message_id, target_broker)` as the winner's and Postgres rejects it. The
-    caller gets `sqlalchemy.exc.IntegrityError` instead of `ExpectedVersionError`,
-    so version retry never runs and a concurrent `ReserveStock` fails outright.
+    conflict. `UnitOfWork._do_commit` used to write the outbox rows before that
+    append. A published event gets a second row for the external broker, and
+    saving it ran `_validate_unique`, whose query autoflushed the first row. The
+    outbox message id is `<stream>-<version>`, so the stale writer's row had the
+    same `(message_id, target_broker)` as the winner's and the outbox's unique
+    index rejected it. The caller got `sqlalchemy.exc.IntegrityError` on
+    Postgres, or a `ValidationError` from the in-memory adapter, instead of
+    `ExpectedVersionError`. So version retry never ran and a concurrent
+    `ReserveStock` failed outright. The test runs on both. The fix (proteanhq/protean#1637) arrived with
+    the pin bump to Protean main e79a817, so this is now a permanent guard.
     Guarded under real contention by `oracles/test_no_lost_updates.py`.
     """
     import uuid
@@ -516,7 +501,15 @@ def test_stale_event_sourced_write_raises_expected_version_error():
     from protean.core.unit_of_work import UnitOfWork
     from protean.exceptions import ExpectedVersionError
 
+    from inventory.stock.events import StockReserved
     from inventory.stock.stock import InventoryItem
+
+    # The bug needs a second outbox row for the same event, which only a
+    # published event with an external broker produces.
+    if not StockReserved.meta_.published:
+        pytest.fail("precondition: StockReserved is a published event")
+    if not current_domain.config["outbox"].get("external_brokers"):
+        pytest.fail("precondition: the inventory outbox writes to an external broker")
 
     repo = current_domain.repository_for(InventoryItem)
     item = InventoryItem.create(
@@ -544,6 +537,5 @@ def test_stale_event_sourced_write_raises_expected_version_error():
     except Exception as exc:  # noqa: BLE001
         outcome = exc
 
-    if repo.get(item.id).levels.reserved != 1:
-        pytest.fail("precondition: only the winner's reservation persisted")
+    assert repo.get(item.id).levels.reserved == 1, "lost update: the stale write overwrote the winner's reservation"
     assert isinstance(outcome, ExpectedVersionError), repr(outcome)
