@@ -1,9 +1,11 @@
 """Logging config: the API reads identity's [logging] table, and the nine tables match.
 
-Each test that runs a logging setup restores the root logger and structlog
-afterwards, so later tests' log capture keeps working.
+Each test that runs a logging setup restores the root logger, the named
+loggers' levels and structlog afterwards, so later tests' log capture keeps
+working.
 """
 
+import ast
 import logging
 import tomllib
 from pathlib import Path
@@ -27,33 +29,54 @@ CONTEXTS = {
 
 @pytest.fixture
 def api_logging(monkeypatch):
-    """Return app.configure_api_logging and the identity domain it reads.
+    """Return `configure_api_logging` and the identity domain it reads.
 
-    Importing `app` initialises the domains, so it happens before the env
-    changes below. `PROTEAN_ENV` is then set to `development` so the fallback
-    level is DEBUG, apart from the WARNING and ERROR levels the tests assert.
-    The domain config is already loaded, so this changes only that fallback.
-    The root logger and structlog config are restored afterwards.
+    `PROTEAN_ENV` is set to `development`, so the fallback level is DEBUG,
+    which differs from the WARNING and ERROR levels the tests assert. The
+    domain config is already loaded, so this changes only that fallback. The
+    root starts at NOTSET, so a setup that does nothing fails every level
+    assertion.
     """
-    root = logging.getLogger()
-    saved = (root.level, root.handlers[:], root.filters[:], structlog.get_config())
+    from api_logging import configure_api_logging
+    from identity.domain import identity
 
-    import app
+    root = logging.getLogger()
+    named = {
+        name: logger.level
+        for name, logger in logging.root.manager.loggerDict.items()
+        if isinstance(logger, logging.Logger)
+    }
+    saved = (root.level, root.handlers[:], root.filters[:], structlog.get_config())
 
     monkeypatch.setenv("PROTEAN_ENV", "development")
     monkeypatch.delenv("PROTEAN_LOG_LEVEL", raising=False)
-    yield app.configure_api_logging, app.identity
+    root.setLevel(logging.NOTSET)
+    yield configure_api_logging, identity
 
     level, handlers, filters, structlog_config = saved
     root.setLevel(level)
     root.handlers[:] = handlers
     root.filters[:] = filters
+    for name, logger_level in named.items():
+        logging.getLogger(name).setLevel(logger_level)
     structlog.configure(**structlog_config)
 
 
 def test_api_logging_uses_the_domain_toml_level(api_logging, monkeypatch):
     configure_api_logging, identity = api_logging
     monkeypatch.setitem(identity.config["logging"], "level", "WARNING")
+
+    configure_api_logging()
+
+    assert logging.getLogger().level == logging.WARNING
+
+
+def test_api_logging_reads_identity_not_another_domain(api_logging, monkeypatch):
+    from catalogue.domain import catalogue
+
+    configure_api_logging, identity = api_logging
+    monkeypatch.setitem(identity.config["logging"], "level", "WARNING")
+    monkeypatch.setitem(catalogue.config["logging"], "level", "ERROR")
 
     configure_api_logging()
 
@@ -91,16 +114,43 @@ def test_api_logging_attaches_the_correlation_filter(api_logging):
     assert [type(f) for f in root.filters if isinstance(f, ProteanCorrelationFilter)] == [ProteanCorrelationFilter]
 
 
+def _module_level_call_lines(tree: ast.Module) -> list[tuple[int, str]]:
+    """(line, dotted name) of each call made as a module-level statement."""
+    calls = []
+    for node in tree.body:
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Call):
+            calls.append((node.lineno, ast.unparse(node.value.func)))
+    return calls
+
+
+def test_app_sets_up_logging_once_before_the_first_domain_init():
+    tree = ast.parse((SRC / "app.py").read_text())
+    calls = _module_level_call_lines(tree)
+    setup_lines = [line for line, name in calls if name == "configure_api_logging"]
+    init_lines = [line for line, name in calls if name.endswith(".init")]
+
+    assert len(setup_lines) == 1, calls
+    assert init_lines, calls
+    assert setup_lines[0] < min(init_lines)
+
+
 def test_domain_toml_logging_tables_do_not_drift():
     tables = {}
+    overlays = []
     for path in sorted(SRC.glob("*/domain.toml")):
         with path.open("rb") as f:
             config = tomllib.load(f)
         if "logging" in config:
             tables[path.parent.name] = config["logging"]
+        overlays += [
+            f"src/{path.parent.name}/domain.toml [{env}.logging]"
+            for env, table in config.items()
+            if env != "logging" and isinstance(table, dict) and "logging" in table
+        ]
 
     assert set(tables) == CONTEXTS, f"contexts missing a top-level [logging]: {CONTEXTS - set(tables)}"
     expected = tables["identity"]
     assert expected == {"level": ""}
     for context, table in tables.items():
         assert table == expected, f"src/{context}/domain.toml [logging] differs from identity's: {table}"
+    assert overlays == [], f"env overlays change [logging] in one file only: {overlays}"

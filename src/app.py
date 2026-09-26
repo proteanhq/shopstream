@@ -12,7 +12,7 @@ import contextlib
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from protean import Domain, g
+from protean import g
 from protean.integrations.fastapi import (
     DomainContextMiddleware,
     instrument_app,
@@ -20,6 +20,7 @@ from protean.integrations.fastapi import (
 )
 from scalar_fastapi import get_scalar_api_reference
 
+from api_logging import configure_api_logging
 from catalogue.api import category_router, product_router
 from catalogue.domain import catalogue
 from fulfillment.api import fulfillment_router
@@ -39,18 +40,11 @@ from payments.domain import payments
 from reviews.api import review_router
 from reviews.domain import reviews
 
-
 # ---------------------------------------------------------------------------
-# Structured logging. The level comes from identity's [logging] table in
-# domain.toml; PROTEAN_LOG_LEVEL takes precedence over it. This runs before
-# any init(), so each domain's init() finds the root handlers and skips its
-# own setup.
+# Structured logging, from identity's [logging] table in domain.toml. This
+# runs before any init(), so each domain's init() finds the root handlers and
+# skips its own setup.
 # ---------------------------------------------------------------------------
-def configure_api_logging(domain: Domain = identity) -> None:
-    """Set up the API process's logging from `domain`'s [logging] config."""
-    domain.configure_logging()
-
-
 configure_api_logging()
 
 # ---------------------------------------------------------------------------
