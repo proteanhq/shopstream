@@ -70,6 +70,7 @@ services:
       - FULFILLMENT_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/fulfillment_local
       - REVIEWS_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/reviews_local
       - NOTIFICATIONS_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/notifications_local
+      - LOYALTY_DATABASE_URL=postgresql://postgres:postgres@postgres:5432/loyalty_local
       - MESSAGE_DB_URL=postgresql://message_store:message_store@message-db:5432/message_store
       - REDIS_URL=redis://redis:6379/0
     depends_on:
