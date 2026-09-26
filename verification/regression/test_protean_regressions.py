@@ -211,6 +211,76 @@ def test_lint_table_in_domain_toml_is_loaded(tmp_path, monkeypatch):
     assert config.get("lint", {}).get("level") == "error"
 
 
+def _pytest_project(tmp_path, test_source: str) -> str:
+    """A one-test pytest project in `tmp_path`, cut off from ShopStream's pytest config."""
+    (tmp_path / "pytest.ini").write_text("[pytest]\n")
+    (tmp_path / "test_probe.py").write_text(test_source)
+    return str(tmp_path)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="protean verify's tests stage removes PROTEAN_ENV from the pytest subprocess",
+)
+def test_verify_tests_stage_keeps_protean_env(tmp_path, monkeypatch):
+    """Protean finding (not filed): `protean verify` drops `PROTEAN_ENV` before its tests stage.
+
+    `_run_tests` in `protean/cli/verify.py` pops `PROTEAN_ENV` (and `PROTEAN_DEBUG`,
+    `VIRTUAL_ENV`) from the environment it hands to `python -m pytest`. The init and
+    check stages run in the verify process and do see `PROTEAN_ENV`. So
+    `PROTEAN_ENV=memory protean verify` inits and checks under `memory` and then
+    tests under Protean's pytest plugin default, `test`, which points at Postgres.
+    `scripts/verify-domains.sh` works around it with `--protean-env memory` in
+    `PYTEST_ADDOPTS`.
+    """
+    from protean.cli.verify import _run_tests
+
+    project = _pytest_project(
+        tmp_path,
+        "import os\n\ndef test_env():\n    assert os.environ.get('PROTEAN_ENV') == 'memory'\n",
+    )
+    monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
+    monkeypatch.setenv("PROTEAN_ENV", "memory")
+
+    stage, output = _run_tests(project)
+
+    if stage["passed"] + stage["failed"] != 1:
+        pytest.fail(f"precondition: the probe test ran once\n{output}")
+    assert stage["status"] == "pass", output
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="protean verify counts failed tests from the first 'N failed' anywhere in the pytest output",
+)
+def test_verify_tests_stage_counts_failures_from_the_summary(tmp_path, monkeypatch):
+    """Protean finding (not filed): `protean verify` can report a port number as the failure count.
+
+    `_run_tests` reads the counts with `re.search(r"(\\d+) failed", output)`, which
+    matches the first hit anywhere in pytest's output, not the summary line. A
+    failure message that contains "<number> failed" wins. Seen in ShopStream: with
+    the tests stage under the `test` env and no Postgres running, `verify -d
+    identity.domain` reported `"failed": 15432`, taken from psycopg2's
+    "connection to server at "localhost", port 15432 failed". The status comes
+    from the return code, so only the count is wrong.
+    """
+    from protean.cli.verify import _run_tests
+
+    project = _pytest_project(
+        tmp_path,
+        "def test_db():\n    raise AssertionError('connection to server on port 15432 failed')\n",
+    )
+    monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
+
+    stage, output = _run_tests(project)
+
+    if stage["status"] != "fail" or "1 failed" not in output:
+        pytest.fail(f"precondition: the probe test ran and failed\n{output}")
+    assert stage["failed"] == 1
+
+
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
