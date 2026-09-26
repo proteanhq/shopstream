@@ -1,4 +1,4 @@
-"""Logging config: the API reads identity's [logging] table, and the nine tables match.
+"""Logging config: the API reads identity's [logging] config, and no domain.toml overrides it.
 
 Each test that runs a logging setup restores the root logger, the named
 loggers' levels and structlog afterwards, so later tests' log capture keeps
@@ -134,23 +134,24 @@ def test_app_sets_up_logging_once_before_the_first_domain_init():
     assert setup_lines[0] < min(init_lines)
 
 
-def test_domain_toml_logging_tables_do_not_drift():
-    tables = {}
-    overlays = []
+def test_no_domain_toml_declares_logging():
+    """Protean's defaults (`level = ""`, `log_dir = ""`) cover every context.
+
+    A context that needs a real override, a `per_logger` level say, adds its
+    table on purpose and updates this test.
+    """
+    tables = []
     for path in sorted(SRC.glob("*/domain.toml")):
         with path.open("rb") as f:
             config = tomllib.load(f)
+        context = path.parent.name
         if "logging" in config:
-            tables[path.parent.name] = config["logging"]
-        overlays += [
-            f"src/{path.parent.name}/domain.toml [{env}.logging]"
+            tables.append(f"src/{context}/domain.toml [logging]")
+        tables += [
+            f"src/{context}/domain.toml [{env}.logging]"
             for env, table in config.items()
-            if env != "logging" and isinstance(table, dict) and "logging" in table
+            if isinstance(table, dict) and "logging" in table
         ]
 
-    assert set(tables) == CONTEXTS, f"contexts missing a top-level [logging]: {CONTEXTS - set(tables)}"
-    expected = tables["identity"]
-    assert expected == {"level": ""}
-    for context, table in tables.items():
-        assert table == expected, f"src/{context}/domain.toml [logging] differs from identity's: {table}"
-    assert overlays == [], f"env overlays change [logging] in one file only: {overlays}"
+    assert {path.parent.name for path in SRC.glob("*/domain.toml")} == CONTEXTS
+    assert tables == [], f"unexpected [logging] tables: {tables}"

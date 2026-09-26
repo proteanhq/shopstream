@@ -64,13 +64,6 @@ provider = "redis"
 URI = "${REDIS_CACHE_URL|redis://127.0.0.1:16379/9}"
 TTL = 3600
 
-# Logging, read by Domain.configure_logging. An empty level means
-# PROTEAN_LOG_LEVEL applies, or else the PROTEAN_ENV default. Logs go to
-# console only, no log files. Keep this table the same in every domain.toml
-# (tests/test_logging_config.py checks it).
-[logging]
-level = ""
-
 # ──────────────────────────────────────────────
 # Test overrides (PROTEAN_ENV=test)
 # ──────────────────────────────────────────────
