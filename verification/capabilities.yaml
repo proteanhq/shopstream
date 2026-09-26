@@ -163,4 +163,4 @@ capabilities:
     guarded_by: verification/support/test_verify_domains_script.py   # the gate on canned envelopes; the real run is `bash scripts/verify-domains.sh`
     property: "each context inits with traversal, runs Domain.check, and passes its own tests in memory mode, with per-stage status read from the JSON envelope"
     source: B
-    status: partial   # #51: init and tests gate; the check stage is printed but does not gate until the rules are adopted (#56); Make target and CI wiring land in #57
+    status: partial   # #51: init and tests gate; the check stage is printed but does not gate until the rules are adopted (#56). The guard test covers the gate on canned envelopes only; the property itself is checked by running the script by hand until #57 wires it into CI

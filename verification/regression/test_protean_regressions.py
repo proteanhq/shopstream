@@ -211,9 +211,9 @@ def test_lint_table_in_domain_toml_is_loaded(tmp_path, monkeypatch):
     assert config.get("lint", {}).get("level") == "error"
 
 
-def _pytest_project(tmp_path, test_source: str) -> str:
-    """A one-test pytest project in `tmp_path`, cut off from ShopStream's pytest config."""
-    (tmp_path / "pytest.ini").write_text("[pytest]\n")
+def _pytest_project(tmp_path, test_source: str, ini: str = "") -> str:
+    """A small pytest project in `tmp_path`, cut off from ShopStream's pytest config."""
+    (tmp_path / "pytest.ini").write_text(f"[pytest]\n{ini}")
     (tmp_path / "test_probe.py").write_text(test_source)
     return str(tmp_path)
 
@@ -279,6 +279,39 @@ def test_verify_tests_stage_counts_failures_from_the_summary(tmp_path, monkeypat
     if stage["status"] != "fail" or "1 failed" not in output:
         pytest.fail(f"precondition: the probe test ran and failed\n{output}")
     assert stage["failed"] == 1
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="protean verify counts passed tests from the first 'N passed' anywhere in the pytest output",
+)
+def test_verify_tests_stage_counts_passes_from_the_summary(tmp_path, monkeypatch):
+    """Protean finding (not filed): `protean verify` can read the passed count from a skip reason.
+
+    `_run_tests` reads the passed count with `re.search(r"(\\d+) passed", output)`, the
+    same first-match read as the failed count. With `-ra` in a project's addopts (ShopStream
+    has it), pytest prints skip reasons before the summary line, so a reason such as
+    "0 passed on this platform" is read as the passed count. `scripts/verify-domains.sh`
+    fails a context whose tests stage passed zero tests, so this count feeds its gate.
+    """
+    from protean.cli.verify import _run_tests
+
+    project = _pytest_project(
+        tmp_path,
+        "import pytest\n\n"
+        "def test_ok():\n    pass\n\n"
+        "@pytest.mark.skip(reason='0 passed on this platform')\n"
+        "def test_skipped():\n    pass\n",
+        ini="addopts = -ra\n",
+    )
+    monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
+
+    stage, output = _run_tests(project)
+
+    if stage["status"] != "pass" or "1 passed, 1 skipped" not in output:
+        pytest.fail(f"precondition: one test passed and one was skipped\n{output}")
+    assert stage["passed"] == 1
 
 
 @pytest.mark.xfail(

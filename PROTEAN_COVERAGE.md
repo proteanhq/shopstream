@@ -105,7 +105,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | the IR + baselines + backward-compat gate | ✅ | `.protean/<domain>/ir.json`; `make ir`/`ir-check`/`ir-diff`; `verification/contracts/test_ir_gate.py` + `make ir-gate` |
 | docs generated from the IR | ✅ | `make docs-generate`; committed `docs/<domain>/catalog.md`; `make docs-check` CI gate |
 | fitness functions | 🚧 | absent. Architectural discipline is enforced through `make check-src-clean` and the IR gate; no Protean fitness-function element is used. The follow-up is a fitness-function exerciser |
-| `protean verify` subcommand | 🚧 | absent. The `make verify-*` targets are ShopStream shell scripts; the follow-up is to wire the real `protean verify` (init + check + tests) in |
+| `protean verify` subcommand | ⚠️ | `scripts/verify-domains.sh` runs `protean verify --json` (init + check + tests) per context in memory mode and gates on init and tests; the check stage does not gate until #56, and the Make target and CI wiring land in #57. The `make verify-*` targets are separate stack-level scripts |
 
 ## Protean bugs surfaced (filed; milestone 0.16.1)
 
@@ -138,7 +138,7 @@ is covered by `given()` unit tests and by end-to-end completion tests (now perma
 
 ## Follow-ups (need design or infrastructure)
 
-**Coverage-gap backlog** (the 🚧 rows in the tables above, features that still need a ShopStream example, mapped 2026-08-16): temporal queries, `sequential_by` partitioned consumer, circuit breaker, stream retention/trimming, custom subscription profiles, CloudEvents envelope, fitness functions, `protean verify`, plus `Auto(increment=True)`.
+**Coverage-gap backlog** (the 🚧 rows in the tables above, features that still need a ShopStream example, mapped 2026-08-16): temporal queries, `sequential_by` partitioned consumer, circuit breaker, stream retention/trimming, custom subscription profiles, CloudEvents envelope, fitness functions, plus `Auto(increment=True)`.
 
 - **`Auto(increment)`**: a loyalty exerciser + regression test (see the table above; the id-reflection wart is fixed on main via #1056).
 - **Infra wiring — done.** loyalty is fully wired: `app.py`, `.protean/config.toml [domains]`,

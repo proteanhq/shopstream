@@ -18,7 +18,8 @@ set -euo pipefail
 # adopted (#56).
 #
 # On a full run (no context arguments) the cross-domain tests in tests/integration/ run
-# once more at the end, as plain pytest, since they belong to no single context.
+# once more at the end, as plain pytest, since they belong to no single context. That
+# run also fails when no test passed.
 #
 # Needs no running stack: everything runs on the in-memory adapters.
 #
@@ -49,7 +50,15 @@ if [ "$#" -gt 0 ]; then
             exit 2
         fi
     done
-    SELECTED=("$@")
+    # Keep each named context once, in the order given.
+    SELECTED=()
+    for arg in "$@"; do
+        seen=0
+        for ctx in ${SELECTED[@]+"${SELECTED[@]}"}; do
+            if [ "$arg" = "$ctx" ]; then seen=1; fi
+        done
+        if [ "$seen" -eq 0 ]; then SELECTED+=("$arg"); fi
+    done
     RUN_INTEGRATION=0
 else
     SELECTED=("${CONTEXTS[@]}")
@@ -68,6 +77,8 @@ PY=(uv run --no-sync python)
 PROTEAN=(uv run --no-sync protean)
 
 LOG_DIR="$(mktemp -d "${TMPDIR:-/tmp}/verify-domains.XXXXXX")"
+# If the script stops early, say where the logs are rather than leaving them unnamed.
+trap 'rc=$?; if [ "$rc" -ne 0 ] && [ -d "$LOG_DIR" ]; then echo "Logs kept in $LOG_DIR"; fi' EXIT
 
 FAILED=()
 
@@ -79,34 +90,54 @@ import json
 import sys
 
 path, context, seconds = sys.argv[1], sys.argv[2], sys.argv[3]
+rerun = f"uv run --no-sync pytest tests/{context}/ --protean-env memory -m 'not engine'"
+
+
+def first_line(text):
+    lines = str(text or "").strip().splitlines()
+    return lines[0] if lines else ""
+
+
 try:
     with open(path) as fh:
-        stages = json.load(fh)["data"]["stages"]
-    init, check, tests = stages["init"], stages["check"], stages["tests"]
-except (OSError, ValueError, KeyError, TypeError) as exc:
-    print(f"  {context:<14} no usable JSON from protean verify ({exc})  {seconds}s  fail")
+        data = json.load(fh)["data"]
+    stages = data.get("stages") or {}
+    init, check, tests = (stages.get(name) or {} for name in ("init", "check", "tests"))
+    counts = check.get("counts") or {}
+    errors = counts.get("errors", "-")
+    warnings = counts.get("warnings", "-")
+    infos = counts.get("infos", "-")
+    passed = tests.get("passed", 0)
+    failed = tests.get("failed", 0)
+    init_status = init.get("status", "missing")
+    check_status = check.get("status", "missing")
+    tests_status = tests.get("status", "missing")
+    ran_tests = isinstance(passed, int) and passed > 0
+
+    ok = init_status == "pass" and tests_status == "pass" and ran_tests
+    line = (
+        f"  {context:<14} init={init_status:<7} "
+        f"check={check_status:<7} ({errors} errors, {warnings} warnings, {infos} infos)  "
+        f"tests={tests_status:<7} ({passed} passed, {failed} failed)  {seconds}s"
+    )
+    notes = []
+    if first_line(data.get("error")):
+        notes.append(f"verify error: {first_line(data['error'])}")
+    if first_line(init.get("error")):
+        notes.append(f"init error: {first_line(init['error'])}")
+    if check_status == "fail":
+        notes.append("check does not gate yet; the protean check rules are adopted in #56")
+    if tests_status == "pass" and not ran_tests:
+        notes.append("tests stage ran no tests")
+    if init_status == "pass" and not (tests_status == "pass" and ran_tests):
+        notes.append(f"rerun the tests with: {rerun}")
+except Exception as exc:  # any envelope shape we cannot read fails this context only
+    print(f"  {context:<14} no usable JSON from protean verify ({type(exc).__name__}: {exc})  {seconds}s  fail")
     sys.exit(0)
 
-counts = check.get("counts", {})
-errors = counts.get("errors", "-")
-warnings = counts.get("warnings", "-")
-infos = counts.get("infos", "-")
-passed = tests.get("passed", 0)
-failed = tests.get("failed", 0)
-
-ok = init["status"] == "pass" and tests["status"] == "pass" and passed > 0
-line = (
-    f"  {context:<14} init={init['status']:<7} "
-    f"check={check['status']:<7} ({errors} errors, {warnings} warnings, {infos} infos)  "
-    f"tests={tests['status']:<7} ({passed} passed, {failed} failed)  {seconds}s"
-)
 print(f"{line}  {'ok' if ok else 'fail'}")
-if init.get("error"):
-    print(f"      init error: {init['error'].strip().splitlines()[0]}")
-if check["status"] == "fail":
-    print("      check does not gate yet; the protean check rules are adopted in #56")
-if tests["status"] == "pass" and passed == 0:
-    print("      tests stage ran no tests")
+for note in notes:
+    print(f"      {note}")
 PY
 }
 
@@ -124,36 +155,42 @@ for ctx in "${SELECTED[@]}"; do
         > "$json" 2> "$LOG_DIR/$ctx.stderr.log" || rc=$?
     seconds=$(( $(date +%s) - start ))
 
-    summary=$(summarize "$json" "$ctx" "$seconds")
+    summary=$(summarize "$json" "$ctx" "$seconds") \
+        || summary="  $(printf '%-14s' "$ctx") could not read the verify output  ${seconds}s  fail"
     echo "$summary"
     if [ "$(echo "$summary" | head -1 | awk '{print $NF}')" != "ok" ]; then
         FAILED+=("$ctx")
-        echo "      verify exited $rc; rerun the tests with:"
-        echo "      uv run pytest tests/$ctx/ --protean-env memory -m 'not engine'"
+        echo "      verify exited $rc"
     fi
 done
 
 if [ "$RUN_INTEGRATION" -eq 1 ]; then
     start=$(date +%s)
     rc=0
-    "${PY[@]}" -m pytest tests/integration/ --protean-env memory -m "not engine" -q \
+    # An empty PYTEST_ADDOPTS keeps the caller's options (--co, -k, -x) from changing
+    # what this run checks.
+    PYTEST_ADDOPTS="" "${PY[@]}" -m pytest tests/integration/ --protean-env memory -m "not engine" -q \
         > "$LOG_DIR/integration.log" 2>&1 || rc=$?
     seconds=$(( $(date +%s) - start ))
     result=$(grep -E '[0-9]+ (passed|failed|error)' "$LOG_DIR/integration.log" | tail -1 || true)
-    if [ "$rc" -eq 0 ]; then
-        echo "  $(printf '%-14s' integration) pytest tests/integration/: ${result}  ${seconds}s  ok"
-    else
+    if [ "$rc" -ne 0 ]; then
         FAILED+=("integration")
         echo "  $(printf '%-14s' integration) pytest tests/integration/ exited $rc: ${result}  ${seconds}s  fail"
+    elif ! echo "$result" | grep -Eq '(^|[^0-9])[1-9][0-9]* passed'; then
+        # Exit 0 with nothing passed (all skipped, or collection only) is not a pass.
+        FAILED+=("integration")
+        echo "  $(printf '%-14s' integration) pytest tests/integration/: no test passed (${result})  ${seconds}s  fail"
+    else
+        echo "  $(printf '%-14s' integration) pytest tests/integration/: ${result}  ${seconds}s  ok"
     fi
 fi
 
 echo ""
 if [ "${#FAILED[@]}" -eq 0 ]; then
     rm -rf "$LOG_DIR"
+    if [ "$RUN_INTEGRATION" -eq 1 ]; then SELECTED+=("integration"); fi
     echo "All passed (${SELECTED[*]})"
     exit 0
 fi
 echo "Failed: ${FAILED[*]}"
-echo "Logs kept in $LOG_DIR"
-exit 1
+exit 1  # the EXIT trap prints where the logs are
