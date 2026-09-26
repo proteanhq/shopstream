@@ -376,6 +376,7 @@ make format            # Ruff formatting
 make typecheck         # MyPy type checking
 make check             # All checks (lint + typecheck + test)
 make pre-commit        # Run pre-commit hooks
+bash scripts/verify-domains.sh  # protean verify (init, check, tests) for all nine contexts, memory mode, no running stack needed
 ```
 
 ### Docker
