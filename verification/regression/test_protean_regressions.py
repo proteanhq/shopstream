@@ -250,11 +250,12 @@ def bare_root_logger():
     reason=(
         "protean server (single worker) calls configure_logging(level=PROTEAN_LOG_LEVEL or 'INFO') "
         "before Domain.init(); init then sees root handlers and skips Domain.configure_logging, "
-        "so [logging] in domain.toml and the correlation processor are never applied"
+        "so [logging] in domain.toml and the correlation processor are never applied "
+        "(proteanhq/protean#1635)"
     ),
 )
 def test_server_single_worker_applies_domain_toml_logging_level(tmp_path, monkeypatch, bare_root_logger):
-    """Protean finding (not filed): `protean server` ignores `[logging]` in `domain.toml`.
+    """Protean finding #1635: `protean server` ignores `[logging]` in `domain.toml`.
 
     With one worker (the default, and how every ShopStream engine runs), the
     `server` command (`protean/cli/__init__.py:209`) calls
