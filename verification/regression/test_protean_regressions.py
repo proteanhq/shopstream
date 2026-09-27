@@ -484,7 +484,7 @@ def test_outer_commit_of_a_doomed_transaction_raises():
 )
 @pytest.mark.usefixtures("inventory_ctx")
 def test_event_sourced_repository_get_or_none_returns_none_on_a_miss():
-    """Protean finding (not filed): the event-sourced repository has no `get_or_none`.
+    """Protean finding (proteanhq/protean#1659): the event-sourced repository has no `get_or_none`.
 
     proteanhq/protean#1279 added `get_or_none` to `BaseRepository`, so CQRS aggregates
     and projections can look up a row that may not exist without catching
