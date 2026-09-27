@@ -52,54 +52,46 @@ class ModerationQueueProjector:
     @on(ReviewApproved)
     def on_review_approved(self, event):
         repo = current_domain.repository_for(ModerationQueue)
-        try:
-            mq = repo.get(event.review_id)
-            repo.remove(mq)
-        except Exception:
-            pass
+        if repo.get_or_none(event.review_id) is not None:
+            repo.query.filter(review_id=event.review_id).delete()
 
     @on(ReviewRejected)
     def on_review_rejected(self, event):
         repo = current_domain.repository_for(ModerationQueue)
-        try:
-            mq = repo.get(event.review_id)
-            repo.remove(mq)
-        except Exception:
-            pass
+        if repo.get_or_none(event.review_id) is not None:
+            repo.query.filter(review_id=event.review_id).delete()
 
     @on(ReviewReported)
     def on_review_reported(self, event):
         repo = current_domain.repository_for(ModerationQueue)
-        try:
-            mq = repo.get(event.review_id)
+        mq = repo.get_or_none(event.review_id)
+        if mq is not None:
             mq.report_count = event.report_count
             mq.last_reported_at = event.reported_at
             repo.add(mq)
-        except Exception:
-            # Review was published (not in queue). Enrich from aggregate and re-add.
-            try:
-                review = current_domain.repository_for(Review).get(event.review_id)
-                mq = ModerationQueue(
-                    review_id=event.review_id,
-                    product_id=str(review.product_id),
-                    customer_id=str(review.customer_id),
-                    rating=review.rating.score,
-                    title=review.title,
-                    body=review.body,
-                    verified_purchase=str(review.verified_purchase),
-                    report_count=event.report_count,
-                    status="Reported",
-                    last_reported_at=event.reported_at,
-                )
-                repo.add(mq)
-            except Exception:
-                pass  # Cannot enrich — skip silently
+            return
+
+        # Review was published (not in queue). Enrich from aggregate and re-add.
+        review = current_domain.repository_for(Review).get_or_none(event.review_id)
+        if review is None:
+            return  # Cannot enrich — skip silently
+        repo.add(
+            ModerationQueue(
+                review_id=event.review_id,
+                product_id=str(review.product_id),
+                customer_id=str(review.customer_id),
+                rating=review.rating.score,
+                title=review.title,
+                body=review.body,
+                verified_purchase=str(review.verified_purchase),
+                report_count=event.report_count,
+                status="Reported",
+                last_reported_at=event.reported_at,
+            )
+        )
 
     @on(ReviewRemoved)
     def on_review_removed(self, event):
         repo = current_domain.repository_for(ModerationQueue)
-        try:
-            mq = repo.get(event.review_id)
-            repo.remove(mq)
-        except Exception:
-            pass
+        if repo.get_or_none(event.review_id) is not None:
+            repo.query.filter(review_id=event.review_id).delete()

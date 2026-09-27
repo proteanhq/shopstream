@@ -127,11 +127,9 @@ class TestModerationQueueProjection:
     def test_removed_on_approve(self):
         review_id = _submit_review(product_id="prod-mq-2", customer_id="cust-mq-2")
         _approve(review_id)
-        try:
-            current_domain.repository_for(ModerationQueue).get(review_id)
-            raise AssertionError("ModerationQueue entry should have been removed")
-        except Exception:
-            pass  # Expected — entry removed after approval
+        assert current_domain.repository_for(ModerationQueue).get_or_none(review_id) is None, (
+            "ModerationQueue entry should have been removed"
+        )
 
 
 class TestProductReviewsProjection:
@@ -149,11 +147,9 @@ class TestProductReviewsProjection:
             RemoveReview(review_id=review_id, removed_by="Admin", reason="Policy"),
             asynchronous=False,
         )
-        try:
-            current_domain.repository_for(ProductReviews).get(review_id)
-            raise AssertionError("ProductReviews entry should have been removed")
-        except Exception:
-            pass  # Expected — entry removed
+        assert current_domain.repository_for(ProductReviews).get_or_none(review_id) is None, (
+            "ProductReviews entry should have been removed"
+        )
 
     def test_vote_counts_updated(self):
         review_id = _submit_review(product_id="prod-pr-3", customer_id="cust-pr-3")

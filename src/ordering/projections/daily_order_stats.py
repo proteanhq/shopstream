@@ -5,7 +5,6 @@ and refunded, along with revenue totals. Keyed by date (YYYY-MM-DD).
 """
 
 from protean.core.projector import on
-from protean.exceptions import ObjectNotFoundError
 from protean.fields import Float, Integer, String
 from protean.utils.globals import current_domain
 
@@ -32,19 +31,18 @@ class DailyOrderStats:
 
 def _get_or_create(date_key):
     repo = current_domain.repository_for(DailyOrderStats)
-    try:
-        return repo.get(date_key)
-    except ObjectNotFoundError:
-        record = DailyOrderStats(
-            date=date_key,
-            orders_created=0,
-            orders_completed=0,
-            orders_cancelled=0,
-            orders_refunded=0,
-            total_revenue=0.0,
-            total_refunds=0.0,
-        )
+    record = repo.get_or_none(date_key)
+    if record is not None:
         return record
+    return DailyOrderStats(
+        date=date_key,
+        orders_created=0,
+        orders_completed=0,
+        orders_cancelled=0,
+        orders_refunded=0,
+        total_revenue=0.0,
+        total_refunds=0.0,
+    )
 
 
 @ordering.projector(projector_for=DailyOrderStats, aggregates=[Order])

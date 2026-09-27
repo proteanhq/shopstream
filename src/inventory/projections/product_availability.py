@@ -43,20 +43,20 @@ def _build_key(product_id, variant_id):
 def _get_or_create(product_id, variant_id, timestamp):
     key = _build_key(product_id, variant_id)
     repo = current_domain.repository_for(ProductAvailability)
-    try:
-        return repo.get(key)
-    except Exception:
-        return ProductAvailability(
-            product_variant_key=key,
-            product_id=product_id,
-            variant_id=variant_id,
-            total_available=0,
-            total_on_hand=0,
-            total_reserved=0,
-            warehouse_count=0,
-            is_in_stock=False,
-            updated_at=timestamp,
-        )
+    pa = repo.get_or_none(key)
+    if pa is not None:
+        return pa
+    return ProductAvailability(
+        product_variant_key=key,
+        product_id=product_id,
+        variant_id=variant_id,
+        total_available=0,
+        total_on_hand=0,
+        total_reserved=0,
+        warehouse_count=0,
+        is_in_stock=False,
+        updated_at=timestamp,
+    )
 
 
 def _save(pa):
@@ -80,11 +80,10 @@ class ProductAvailabilityProjector:
         """Use delta: new_on_hand - previous_on_hand = quantity received."""
         from inventory.projections.inventory_level import InventoryLevel
 
-        try:
-            level = current_domain.repository_for(InventoryLevel).get(event.inventory_item_id)
-            pa = _get_or_create(level.product_id, level.variant_id, event.received_at)
-        except Exception:
+        level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)
+        if level is None:
             return
+        pa = _get_or_create(level.product_id, level.variant_id, event.received_at)
 
         pa.total_on_hand = pa.total_on_hand + event.quantity
         pa.total_available = pa.total_available + event.quantity
@@ -95,11 +94,10 @@ class ProductAvailabilityProjector:
     def on_stock_reserved(self, event):
         from inventory.projections.inventory_level import InventoryLevel
 
-        try:
-            level = current_domain.repository_for(InventoryLevel).get(event.inventory_item_id)
-            pa = _get_or_create(level.product_id, level.variant_id, event.reserved_at)
-        except Exception:
+        level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)
+        if level is None:
             return
+        pa = _get_or_create(level.product_id, level.variant_id, event.reserved_at)
 
         pa.total_reserved = pa.total_reserved + event.quantity
         pa.total_available = pa.total_available - event.quantity
@@ -110,11 +108,10 @@ class ProductAvailabilityProjector:
     def on_reservation_released(self, event):
         from inventory.projections.inventory_level import InventoryLevel
 
-        try:
-            level = current_domain.repository_for(InventoryLevel).get(event.inventory_item_id)
-            pa = _get_or_create(level.product_id, level.variant_id, event.released_at)
-        except Exception:
+        level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)
+        if level is None:
             return
+        pa = _get_or_create(level.product_id, level.variant_id, event.released_at)
 
         pa.total_reserved = pa.total_reserved - event.quantity
         pa.total_available = pa.total_available + event.quantity
@@ -125,11 +122,10 @@ class ProductAvailabilityProjector:
     def on_stock_committed(self, event):
         from inventory.projections.inventory_level import InventoryLevel
 
-        try:
-            level = current_domain.repository_for(InventoryLevel).get(event.inventory_item_id)
-            pa = _get_or_create(level.product_id, level.variant_id, event.committed_at)
-        except Exception:
+        level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)
+        if level is None:
             return
+        pa = _get_or_create(level.product_id, level.variant_id, event.committed_at)
 
         pa.total_on_hand = pa.total_on_hand - event.quantity
         pa.total_reserved = pa.total_reserved - event.quantity
@@ -140,11 +136,10 @@ class ProductAvailabilityProjector:
     def on_stock_adjusted(self, event):
         from inventory.projections.inventory_level import InventoryLevel
 
-        try:
-            level = current_domain.repository_for(InventoryLevel).get(event.inventory_item_id)
-            pa = _get_or_create(level.product_id, level.variant_id, event.adjusted_at)
-        except Exception:
+        level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)
+        if level is None:
             return
+        pa = _get_or_create(level.product_id, level.variant_id, event.adjusted_at)
 
         pa.total_on_hand = pa.total_on_hand + event.quantity_change
         pa.total_available = pa.total_available + event.quantity_change
@@ -155,11 +150,10 @@ class ProductAvailabilityProjector:
     def on_stock_marked_damaged(self, event):
         from inventory.projections.inventory_level import InventoryLevel
 
-        try:
-            level = current_domain.repository_for(InventoryLevel).get(event.inventory_item_id)
-            pa = _get_or_create(level.product_id, level.variant_id, event.marked_at)
-        except Exception:
+        level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)
+        if level is None:
             return
+        pa = _get_or_create(level.product_id, level.variant_id, event.marked_at)
 
         pa.total_on_hand = pa.total_on_hand - event.quantity
         pa.total_available = pa.total_available - event.quantity
@@ -170,11 +164,10 @@ class ProductAvailabilityProjector:
     def on_stock_returned(self, event):
         from inventory.projections.inventory_level import InventoryLevel
 
-        try:
-            level = current_domain.repository_for(InventoryLevel).get(event.inventory_item_id)
-            pa = _get_or_create(level.product_id, level.variant_id, event.returned_at)
-        except Exception:
+        level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)
+        if level is None:
             return
+        pa = _get_or_create(level.product_id, level.variant_id, event.returned_at)
 
         pa.total_on_hand = pa.total_on_hand + event.quantity
         pa.total_available = pa.total_available + event.quantity

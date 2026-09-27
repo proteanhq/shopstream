@@ -125,65 +125,6 @@ class TestAccountReactivatedHandler:
         )
 
 
-class TestAccountSuspendedMockNotFound:
-    """Mock-based test: ObjectNotFoundError in on_account_suspended triggers create path."""
-
-    def test_creates_suspended_account_when_repo_get_raises(self):
-        from unittest.mock import MagicMock, patch
-
-        from protean.exceptions import ObjectNotFoundError
-
-        subscriber = IdentityEventsSubscriber()
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "SuspendedAccount not found"})
-
-        with patch("ordering.order.identity_subscriber.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            subscriber(
-                _build_message(
-                    "Identity.AccountSuspended.v1",
-                    {
-                        "customer_id": "cust-mock-001",
-                        "reason": "Fraud detected",
-                        "suspended_at": datetime.now(UTC).isoformat(),
-                    },
-                )
-            )
-            # repo.add should have been called to create the new record
-            mock_repo.add.assert_called_once()
-            created = mock_repo.add.call_args[0][0]
-            assert created.customer_id == "cust-mock-001"
-            assert created.reason == "Fraud detected"
-
-
-class TestAccountReactivatedMockNotFound:
-    """Mock-based test: ObjectNotFoundError in on_account_reactivated is silently caught."""
-
-    def test_passes_when_repo_get_raises_not_found(self):
-        from unittest.mock import MagicMock, patch
-
-        from protean.exceptions import ObjectNotFoundError
-
-        subscriber = IdentityEventsSubscriber()
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "SuspendedAccount not found"})
-
-        with patch("ordering.order.identity_subscriber.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            # Should not raise
-            subscriber(
-                _build_message(
-                    "Identity.AccountReactivated.v1",
-                    {
-                        "customer_id": "cust-mock-never",
-                        "reactivated_at": datetime.now(UTC).isoformat(),
-                    },
-                )
-            )
-            # delete won't be reached since get() raised ObjectNotFoundError
-            mock_repo.query.filter.assert_not_called()
-
-
 class TestIgnoresUnrelatedEvents:
     def test_ignores_non_matching_identity_events(self):
         """Events on the identity stream that aren't handled should be ignored."""

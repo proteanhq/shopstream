@@ -39,11 +39,10 @@ class NotificationDispatcher:
 
         repo = current_domain.repository_for(Notification)
 
-        try:
-            notification = repo.get(event.notification_id)
-        except Exception:
+        notification = repo.get_or_none(event.notification_id)
+        if notification is None:
             logger.error(
-                "Failed to load notification for dispatch",
+                "Notification not found for dispatch",
                 notification_id=str(event.notification_id),
             )
             return

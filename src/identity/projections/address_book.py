@@ -25,10 +25,10 @@ class AddressBookProjector:
     @on(AddressAdded)
     def on_address_added(self, event):
         repo = current_domain.repository_for(AddressBook)
-        try:
-            book = repo.get(event.customer_id)
+        book = repo.get_or_none(event.customer_id)
+        if book is not None:
             entries = list(book.addresses or [])
-        except Exception:
+        else:
             book = AddressBook(
                 customer_id=event.customer_id,
                 addresses=[],

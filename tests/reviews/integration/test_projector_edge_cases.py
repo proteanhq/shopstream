@@ -14,7 +14,7 @@ from reviews.projections.customer_reviews import (
 )
 from reviews.projections.moderation_queue import ModerationQueue, ModerationQueueProjector
 from reviews.projections.product_rating import ProductRating, ProductRatingProjector
-from reviews.projections.product_reviews import ProductReviewsProjector
+from reviews.projections.product_reviews import ProductReviews, ProductReviewsProjector
 from reviews.projections.review_detail import ReviewDetail, ReviewDetailProjector
 from reviews.review.events import (
     HelpfulVoteRecorded,
@@ -59,11 +59,9 @@ class TestReviewDetailProjectorEdgeCases:
         # Should not raise — just return early
         projector.on_review_edited(event)
         # Verify nothing was created
-        try:
-            current_domain.repository_for(ReviewDetail).get("nonexistent-rd-edit")
-            raise AssertionError("Should not exist")
-        except Exception:
-            pass
+        assert current_domain.repository_for(ReviewDetail).get_or_none("nonexistent-rd-edit") is None, (
+            "Should not exist"
+        )
 
     def test_approve_nonexistent_skips(self):
         projector = ReviewDetailProjector()
@@ -180,11 +178,7 @@ class TestModerationQueueProjectorEdgeCases:
         repo.query.filter(review_id=review_id).delete()
 
         # Verify it's actually gone
-        try:
-            repo.get(review_id)
-            raise AssertionError("Should not find MQ entry")
-        except Exception:
-            pass
+        assert repo.get_or_none(review_id) is None, "Should not find MQ entry"
 
         # Now call projector directly for the reported event on a non-queued review
         projector = ModerationQueueProjector()
@@ -220,11 +214,9 @@ class TestModerationQueueProjectorEdgeCases:
         projector.on_review_reported(event)
 
         # Verify no MQ entry was created (can't create without aggregate data)
-        try:
-            current_domain.repository_for(ModerationQueue).get("totally-nonexistent-review")
-            raise AssertionError("Should not find MQ entry")
-        except Exception:
-            pass
+        assert current_domain.repository_for(ModerationQueue).get_or_none("totally-nonexistent-review") is None, (
+            "Should not find MQ entry"
+        )
 
 
 class TestProductRatingEdgeCases:
@@ -280,6 +272,21 @@ class TestProductReviewsEdgeCases:
             voted_at=datetime.now(UTC),
         )
         projector.on_helpful_vote_recorded(event)
+
+    def test_remove_on_nonexistent_skips(self):
+        projector = ProductReviewsProjector()
+        event = ReviewRemoved(
+            review_id="nonexistent-prv-remove",
+            product_id="prod-prv-remove",
+            customer_id="cust-prv-remove",
+            rating=3,
+            removed_by="Admin",
+            reason="Policy",
+            removed_at=datetime.now(UTC),
+        )
+        # Should not raise: the review was never published, so there is no row to delete
+        projector.on_review_removed(event)
+        assert current_domain.repository_for(ProductReviews).get_or_none("nonexistent-prv-remove") is None
 
 
 class TestReviewDetailEditBranches:

@@ -1,7 +1,7 @@
 """Low stock report — items below reorder point for purchasing alerts."""
 
 from protean.core.projector import on
-from protean.exceptions import ObjectNotFoundError, TransactionError, ValidationError
+from protean.exceptions import TransactionError, ValidationError
 from protean.fields import Boolean, DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
 
@@ -27,17 +27,14 @@ class LowStockReport:
 def _upsert_low_stock(item_id, *, current_available, detected_at, create_kwargs):
     """Upsert the single LowStockReport row: update it if present, else create it.
 
-    Concurrent movements on the same item can both miss on `get` and both try to
+    Concurrent movements on the same item can both miss on `get_or_none` and both try to
     CREATE. The loser's primary-key conflict surfaces when the projector's
     UnitOfWork commits. The projector's transient retry (see below) runs the
-    handler again in a fresh UnitOfWork; by then the row exists and the `get`
+    handler again in a fresh UnitOfWork; by then the row exists and the lookup
     takes the update path.
     """
     repo = current_domain.repository_for(LowStockReport)
-    try:
-        report = repo.get(item_id)
-    except ObjectNotFoundError:
-        report = None
+    report = repo.get_or_none(item_id)
 
     if report is not None:
         report.current_available = current_available
@@ -97,9 +94,8 @@ class LowStockReportProjector:
     def on_stock_received(self, event):
         """Remove from low stock report if restocked above threshold."""
         repo = current_domain.repository_for(LowStockReport)
-        try:
-            report = repo.get(event.inventory_item_id)
-        except Exception:
+        report = repo.get_or_none(event.inventory_item_id)
+        if report is None:
             return  # Not in the report
 
         # Use event's new_available and report's stored reorder_point
@@ -114,9 +110,8 @@ class LowStockReportProjector:
     def on_stock_returned(self, event):
         """Remove from low stock report if returns bring stock above threshold."""
         repo = current_domain.repository_for(LowStockReport)
-        try:
-            report = repo.get(event.inventory_item_id)
-        except Exception:
+        report = repo.get_or_none(event.inventory_item_id)
+        if report is None:
             return
 
         if event.new_available > report.reorder_point:

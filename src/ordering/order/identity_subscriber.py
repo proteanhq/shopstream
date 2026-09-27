@@ -11,7 +11,6 @@ No dependency on shared event classes or register_external_event.
 """
 
 import structlog
-from protean.exceptions import ObjectNotFoundError
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
@@ -50,17 +49,15 @@ class IdentityEventsSubscriber:
             reason=reason,
         )
         repo = current_domain.repository_for(SuspendedAccount)
-        try:
-            repo.get(customer_id)
-            # Already tracked
-        except ObjectNotFoundError:
-            repo.add(
-                SuspendedAccount(
-                    customer_id=customer_id,
-                    reason=reason,
-                    suspended_at=suspended_at,
-                )
+        if repo.get_or_none(customer_id) is not None:
+            return  # Already tracked
+        repo.add(
+            SuspendedAccount(
+                customer_id=customer_id,
+                reason=reason,
+                suspended_at=suspended_at,
             )
+        )
 
     def _on_account_reactivated(self, data: dict) -> None:
         """Remove the suspension record when an account is reactivated."""
@@ -71,8 +68,6 @@ class IdentityEventsSubscriber:
             customer_id=customer_id,
         )
         repo = current_domain.repository_for(SuspendedAccount)
-        try:
-            repo.get(customer_id)
-            repo.query.filter(customer_id=customer_id).delete()
-        except ObjectNotFoundError:
-            pass  # Already removed or never existed
+        if repo.get_or_none(customer_id) is None:
+            return  # Already removed or never existed
+        repo.query.filter(customer_id=customer_id).delete()

@@ -116,11 +116,9 @@ class TestModerationQueueReported:
             ),
             asynchronous=False,
         )
-        try:
-            current_domain.repository_for(ModerationQueue).get(review_id)
-            raise AssertionError("ModerationQueue entry should have been removed")
-        except Exception:
-            pass
+        assert current_domain.repository_for(ModerationQueue).get_or_none(review_id) is None, (
+            "ModerationQueue entry should have been removed"
+        )
 
     def test_remove_clears_from_queue(self):
         review_id = _submit_review(product_id="prod-mq-rmq", customer_id="cust-mq-rmq")
@@ -139,11 +137,9 @@ class TestModerationQueueReported:
             RemoveReview(review_id=review_id, removed_by="Admin", reason="Policy"),
             asynchronous=False,
         )
-        try:
-            current_domain.repository_for(ModerationQueue).get(review_id)
-            raise AssertionError("ModerationQueue entry should have been removed")
-        except Exception:
-            pass
+        assert current_domain.repository_for(ModerationQueue).get_or_none(review_id) is None, (
+            "ModerationQueue entry should have been removed"
+        )
 
 
 class TestReviewDetailFullLifecycle:
@@ -308,11 +304,7 @@ class TestProductReviewsVoteAndRemove:
             RemoveReview(review_id=review_id, removed_by="Admin", reason="Policy"),
             asynchronous=False,
         )
-        try:
-            current_domain.repository_for(ProductReviews).get(review_id)
-            raise AssertionError("Should have been removed")
-        except Exception:
-            pass
+        assert current_domain.repository_for(ProductReviews).get_or_none(review_id) is None, "Should have been removed"
 
 
 class TestCustomerReviewsEditNoTitleNoRating:

@@ -27,19 +27,16 @@ class NotificationStatsProjector:
 
         date_str = event.sent_at.strftime("%Y-%m-%d") if event.sent_at else "unknown"
         # We need the notification type — load from NotificationLog or Notification
-        try:
-            notif = current_domain.repository_for(Notification).get(event.notification_id)
-            notification_type = notif.notification_type
-        except Exception:
-            notification_type = "Unknown"
+        notif = current_domain.repository_for(Notification).get_or_none(event.notification_id)
+        notification_type = notif.notification_type if notif is not None else "Unknown"
 
         stat_key = f"{date_str}:{notification_type}:{event.channel}"
 
-        try:
-            stat = repo.get(stat_key)
+        stat = repo.get_or_none(stat_key)
+        if stat is not None:
             stat.count = stat.count + 1
             stat.updated_at = event.sent_at
-        except Exception:
+        else:
             stat = NotificationStats(
                 stat_key=stat_key,
                 date=date_str,

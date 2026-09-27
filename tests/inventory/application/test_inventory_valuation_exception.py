@@ -1,15 +1,15 @@
-"""Mock-based tests for InventoryValuation projector exception branches.
+"""InventoryValuation projector: handlers skip when there is no valuation row.
 
-Covers the ObjectNotFoundError branch in _get_view (line 56) where repo.get()
-fails and returns (repo, None), causing the handler to return early.
+Covers the miss branch in _get_view, where `get_or_none` finds no row and the
+handler returns without writing. Uses the real repository.
 """
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
 
-from protean.exceptions import ObjectNotFoundError
+from protean import current_domain
 
 from inventory.projections.inventory_valuation import (
+    InventoryValuation,
     InventoryValuationProjector,
 )
 from inventory.stock.events import (
@@ -22,7 +22,7 @@ from inventory.stock.events import (
 
 
 class TestInventoryValuationNotFound:
-    """When _get_view raises ObjectNotFoundError, handlers should return gracefully."""
+    """When _get_view finds no row, handlers return without creating one."""
 
     def test_stock_received_returns_when_view_not_found(self):
         projector = InventoryValuationProjector()
@@ -34,14 +34,8 @@ class TestInventoryValuationNotFound:
             new_available=10,
             received_at=datetime.now(UTC),
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "InventoryValuation not found"})
-        with patch("inventory.projections.inventory_valuation.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            # Should not raise
-            projector.on_stock_received(event)
-            # repo.add should NOT be called since view is None
-            mock_repo.add.assert_not_called()
+        projector.on_stock_received(event)
+        assert current_domain.repository_for(InventoryValuation).get_or_none(event.inventory_item_id) is None
 
     def test_stock_committed_returns_when_view_not_found(self):
         projector = InventoryValuationProjector()
@@ -56,12 +50,8 @@ class TestInventoryValuationNotFound:
             new_reserved=0,
             committed_at=datetime.now(UTC),
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "InventoryValuation not found"})
-        with patch("inventory.projections.inventory_valuation.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            projector.on_stock_committed(event)
-            mock_repo.add.assert_not_called()
+        projector.on_stock_committed(event)
+        assert current_domain.repository_for(InventoryValuation).get_or_none(event.inventory_item_id) is None
 
     def test_stock_adjusted_returns_when_view_not_found(self):
         projector = InventoryValuationProjector()
@@ -77,12 +67,8 @@ class TestInventoryValuationNotFound:
             new_available=95,
             adjusted_at=datetime.now(UTC),
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "InventoryValuation not found"})
-        with patch("inventory.projections.inventory_valuation.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            projector.on_stock_adjusted(event)
-            mock_repo.add.assert_not_called()
+        projector.on_stock_adjusted(event)
+        assert current_domain.repository_for(InventoryValuation).get_or_none(event.inventory_item_id) is None
 
     def test_stock_returned_returns_when_view_not_found(self):
         projector = InventoryValuationProjector()
@@ -95,12 +81,8 @@ class TestInventoryValuationNotFound:
             new_available=93,
             returned_at=datetime.now(UTC),
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "InventoryValuation not found"})
-        with patch("inventory.projections.inventory_valuation.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            projector.on_stock_returned(event)
-            mock_repo.add.assert_not_called()
+        projector.on_stock_returned(event)
+        assert current_domain.repository_for(InventoryValuation).get_or_none(event.inventory_item_id) is None
 
     def test_damaged_stock_written_off_returns_when_view_not_found(self):
         projector = InventoryValuationProjector()
@@ -113,9 +95,5 @@ class TestInventoryValuationNotFound:
             new_damaged=3,
             written_off_at=datetime.now(UTC),
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "InventoryValuation not found"})
-        with patch("inventory.projections.inventory_valuation.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            projector.on_damaged_stock_written_off(event)
-            mock_repo.add.assert_not_called()
+        projector.on_damaged_stock_written_off(event)
+        assert current_domain.repository_for(InventoryValuation).get_or_none(event.inventory_item_id) is None

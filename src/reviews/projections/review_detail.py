@@ -71,9 +71,8 @@ class ReviewDetailProjector:
     @on(ReviewEdited)
     def on_review_edited(self, event):
         repo = current_domain.repository_for(ReviewDetail)
-        try:
-            rd = repo.get(event.review_id)
-        except Exception:
+        rd = repo.get_or_none(event.review_id)
+        if rd is None:
             return
         if event.title:
             rd.title = event.title
@@ -89,9 +88,8 @@ class ReviewDetailProjector:
     @on(ReviewApproved)
     def on_review_approved(self, event):
         repo = current_domain.repository_for(ReviewDetail)
-        try:
-            rd = repo.get(event.review_id)
-        except Exception:
+        rd = repo.get_or_none(event.review_id)
+        if rd is None:
             return
         rd.status = "Published"
         rd.updated_at = event.approved_at
@@ -100,9 +98,8 @@ class ReviewDetailProjector:
     @on(ReviewRejected)
     def on_review_rejected(self, event):
         repo = current_domain.repository_for(ReviewDetail)
-        try:
-            rd = repo.get(event.review_id)
-        except Exception:
+        rd = repo.get_or_none(event.review_id)
+        if rd is None:
             return
         rd.status = "Rejected"
         rd.moderation_notes = event.reason
@@ -112,9 +109,8 @@ class ReviewDetailProjector:
     @on(HelpfulVoteRecorded)
     def on_helpful_vote_recorded(self, event):
         repo = current_domain.repository_for(ReviewDetail)
-        try:
-            rd = repo.get(event.review_id)
-        except Exception:
+        rd = repo.get_or_none(event.review_id)
+        if rd is None:
             return
         rd.helpful_count = event.helpful_count
         rd.unhelpful_count = event.unhelpful_count
@@ -123,9 +119,8 @@ class ReviewDetailProjector:
     @on(ReviewReported)
     def on_review_reported(self, event):
         repo = current_domain.repository_for(ReviewDetail)
-        try:
-            rd = repo.get(event.review_id)
-        except Exception:
+        rd = repo.get_or_none(event.review_id)
+        if rd is None:
             return
         rd.report_count = event.report_count
         repo.add(rd)
@@ -133,9 +128,8 @@ class ReviewDetailProjector:
     @on(ReviewRemoved)
     def on_review_removed(self, event):
         repo = current_domain.repository_for(ReviewDetail)
-        try:
-            rd = repo.get(event.review_id)
-        except Exception:
+        rd = repo.get_or_none(event.review_id)
+        if rd is None:
             return
         rd.status = "Removed"
         rd.moderation_notes = event.reason
@@ -145,9 +139,8 @@ class ReviewDetailProjector:
     @on(SellerReplyAdded)
     def on_seller_reply_added(self, event):
         repo = current_domain.repository_for(ReviewDetail)
-        try:
-            rd = repo.get(event.review_id)
-        except Exception:
+        rd = repo.get_or_none(event.review_id)
+        if rd is None:
             return
         rd.has_seller_reply = "True"
         rd.seller_reply_body = event.body

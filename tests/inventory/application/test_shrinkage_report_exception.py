@@ -1,15 +1,15 @@
-"""Mock-based tests for ShrinkageReport projector exception branches.
+"""ShrinkageReport projector: a miss on the item's row creates a fresh record.
 
-Covers the ObjectNotFoundError branch in _get_or_create (line 34) where
-repo.get() fails and a new ShrinkageReport record is created instead.
+Covers the miss branch in _get_or_create, where `get_or_none` finds no row and a
+new ShrinkageReport is built instead. Uses the real repository.
 """
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
 
-from protean.exceptions import ObjectNotFoundError
+from protean import current_domain
 
 from inventory.projections.shrinkage_report import (
+    ShrinkageReport,
     ShrinkageReportProjector,
     _get_or_create,
 )
@@ -17,31 +17,33 @@ from inventory.stock.events import DamagedStockWrittenOff, StockAdjusted, StockM
 
 
 class TestShrinkageReportGetOrCreate:
-    """When _get_or_create encounters ObjectNotFoundError, it should create a new record."""
+    """When no row exists for the item, _get_or_create builds a new record."""
 
     def test_creates_new_record_when_not_found(self):
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "ShrinkageReport not found"})
-        mock_event = MagicMock()
-        mock_event.inventory_item_id = "item-new-001"
-        mock_event.product_id = "prod-001"
-        mock_event.sku = "SKU-001"
-        mock_event.warehouse_id = "wh-001"
+        event = StockMarkedDamaged(
+            inventory_item_id="item-new-001",
+            product_id="prod-001",
+            quantity=1,
+            reason="Dropped",
+            previous_on_hand=10,
+            new_on_hand=9,
+            previous_damaged=0,
+            new_damaged=1,
+            new_available=9,
+            marked_at=datetime.now(UTC),
+        )
 
-        with patch("inventory.projections.shrinkage_report.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            record = _get_or_create(mock_event)
+        record = _get_or_create(event)
 
-        assert record is not None
         assert record.inventory_item_id == "item-new-001"
         assert record.product_id == "prod-001"
         assert record.total_adjustments == 0
         assert record.total_damaged == 0
         assert record.total_written_off == 0
         assert record.total_shrinkage_value == 0.0
-        # _get_or_create returns a new record without calling repo.add;
+        # _get_or_create returns a new record without saving it;
         # the caller's repo.add handles both insert and update
-        mock_repo.add.assert_not_called()
+        assert current_domain.repository_for(ShrinkageReport).get_or_none("item-new-001") is None
 
     def test_stock_adjusted_creates_record_when_not_found(self):
         projector = ShrinkageReportProjector()
@@ -57,15 +59,12 @@ class TestShrinkageReportGetOrCreate:
             new_available=47,
             adjusted_at=datetime.now(UTC),
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "ShrinkageReport not found"})
+        projector.on_stock_adjusted(event)
 
-        with patch("inventory.projections.shrinkage_report.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            # Should not raise; creates a new record then the handler adds it
-            projector.on_stock_adjusted(event)
-            # repo.add called once by the handler (not by _get_or_create)
-            mock_repo.add.assert_called_once()
+        record = current_domain.repository_for(ShrinkageReport).get_or_none(event.inventory_item_id)
+        assert record is not None
+        assert record.product_id == event.product_id
+        assert record.total_adjustments == 3
 
     def test_stock_marked_damaged_creates_record_when_not_found(self):
         projector = ShrinkageReportProjector()
@@ -81,13 +80,12 @@ class TestShrinkageReportGetOrCreate:
             new_available=38,
             marked_at=datetime.now(UTC),
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "ShrinkageReport not found"})
+        projector.on_stock_marked_damaged(event)
 
-        with patch("inventory.projections.shrinkage_report.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            projector.on_stock_marked_damaged(event)
-            mock_repo.add.assert_called_once()
+        record = current_domain.repository_for(ShrinkageReport).get_or_none(event.inventory_item_id)
+        assert record is not None
+        assert record.product_id == event.product_id
+        assert record.total_damaged == 2
 
     def test_damaged_written_off_creates_record_when_not_found(self):
         projector = ShrinkageReportProjector()
@@ -100,10 +98,9 @@ class TestShrinkageReportGetOrCreate:
             new_damaged=2,
             written_off_at=datetime.now(UTC),
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "ShrinkageReport not found"})
+        projector.on_damaged_stock_written_off(event)
 
-        with patch("inventory.projections.shrinkage_report.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            projector.on_damaged_stock_written_off(event)
-            mock_repo.add.assert_called_once()
+        record = current_domain.repository_for(ShrinkageReport).get_or_none(event.inventory_item_id)
+        assert record is not None
+        assert record.product_id == event.product_id
+        assert record.total_written_off == 1

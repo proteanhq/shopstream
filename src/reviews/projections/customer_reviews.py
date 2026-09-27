@@ -48,9 +48,8 @@ class CustomerReviewsProjector:
 
     def _update_status(self, review_id, status, updated_at):
         repo = current_domain.repository_for(CustomerReviews)
-        try:
-            cr = repo.get(review_id)
-        except Exception:
+        cr = repo.get_or_none(review_id)
+        if cr is None:
             return
         cr.status = status
         cr.updated_at = updated_at
@@ -59,9 +58,8 @@ class CustomerReviewsProjector:
     @on(ReviewEdited)
     def on_review_edited(self, event):
         repo = current_domain.repository_for(CustomerReviews)
-        try:
-            cr = repo.get(event.review_id)
-        except Exception:
+        cr = repo.get_or_none(event.review_id)
+        if cr is None:
             return
         if event.title:
             cr.title = event.title

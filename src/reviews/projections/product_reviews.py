@@ -68,9 +68,8 @@ class ProductReviewsProjector:
     @on(HelpfulVoteRecorded)
     def on_helpful_vote_recorded(self, event):
         repo = current_domain.repository_for(ProductReviews)
-        try:
-            pr = repo.get(event.review_id)
-        except Exception:
+        pr = repo.get_or_none(event.review_id)
+        if pr is None:
             return  # Review not yet published
         pr.helpful_count = event.helpful_count
         pr.unhelpful_count = event.unhelpful_count
@@ -79,18 +78,15 @@ class ProductReviewsProjector:
     @on(ReviewRemoved)
     def on_review_removed(self, event):
         repo = current_domain.repository_for(ProductReviews)
-        try:
-            pr = repo.get(event.review_id)
-            repo.remove(pr)
-        except Exception:
-            pass  # Already removed or never published
+        if repo.get_or_none(event.review_id) is None:
+            return  # Already removed or never published
+        repo.query.filter(review_id=event.review_id).delete()
 
     @on(SellerReplyAdded)
     def on_seller_reply_added(self, event):
         repo = current_domain.repository_for(ProductReviews)
-        try:
-            pr = repo.get(event.review_id)
-        except Exception:
+        pr = repo.get_or_none(event.review_id)
+        if pr is None:
             return
         pr.has_seller_reply = "True"
         pr.seller_reply_body = event.body

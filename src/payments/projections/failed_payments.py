@@ -32,9 +32,8 @@ class FailedPaymentProjector:
     def on_payment_failed(self, event):
         repo = current_domain.repository_for(FailedPayment)
 
-        try:
-            record = repo.get(event.payment_id)
-        except Exception:
+        record = repo.get_or_none(event.payment_id)
+        if record is None:
             record = FailedPayment(
                 payment_id=event.payment_id,
                 order_id=event.order_id,
@@ -53,22 +52,20 @@ class FailedPaymentProjector:
     @on(PaymentRetryInitiated)
     def on_payment_retry_initiated(self, event):
         repo = current_domain.repository_for(FailedPayment)
-        try:
-            record = repo.get(event.payment_id)
-            record.status = "retrying"
-            record.attempt_number = event.attempt_number
-            record.updated_at = event.retried_at
-            repo.add(record)
-        except Exception:
-            pass  # No failed record to update
+        record = repo.get_or_none(event.payment_id)
+        if record is None:
+            return  # No failed record to update
+        record.status = "retrying"
+        record.attempt_number = event.attempt_number
+        record.updated_at = event.retried_at
+        repo.add(record)
 
     @on(PaymentSucceeded)
     def on_payment_succeeded(self, event):
         repo = current_domain.repository_for(FailedPayment)
-        try:
-            record = repo.get(event.payment_id)
-            record.status = "recovered"
-            record.updated_at = event.succeeded_at
-            repo.add(record)
-        except Exception:
-            pass  # Not a previously failed payment
+        record = repo.get_or_none(event.payment_id)
+        if record is None:
+            return  # Not a previously failed payment
+        record.status = "recovered"
+        record.updated_at = event.succeeded_at
+        repo.add(record)

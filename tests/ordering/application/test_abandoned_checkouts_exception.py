@@ -1,53 +1,65 @@
-"""Mock-based tests for AbandonedCheckout projector exception branches.
+"""AbandonedCheckout projector: confirm and cancel skip when there is no row.
 
-Covers the ObjectNotFoundError branches in:
-- on_order_confirmed (line 51): catches ObjectNotFoundError and passes
-- on_order_cancelled (line 61): catches ObjectNotFoundError and passes
+Covers the miss branches in on_order_confirmed and on_order_cancelled, where
+`get_or_none` finds no row and the handler does nothing. Uses the real repository.
 """
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
 
-from protean.exceptions import ObjectNotFoundError
+from protean import current_domain
 
 from ordering.order.events import OrderCancelled, OrderConfirmed
 from ordering.projections.abandoned_checkouts import (
+    AbandonedCheckout,
     AbandonedCheckoutProjector,
 )
 
 
 class TestAbandonedCheckoutNotFound:
-    """When repo.get() raises ObjectNotFoundError, the handlers should pass silently."""
+    """When no row exists for the order, the handlers return without error."""
 
     def test_on_order_confirmed_passes_when_not_found(self):
-        projector = AbandonedCheckoutProjector()
-        event = OrderConfirmed(
-            order_id="ord-missing-001",
-            confirmed_at=datetime.now(UTC),
+        AbandonedCheckoutProjector().on_order_confirmed(
+            OrderConfirmed(order_id="ord-missing-001", confirmed_at=datetime.now(UTC))
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "AbandonedCheckout not found"})
-
-        with patch("ordering.projections.abandoned_checkouts.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            # Should not raise
-            projector.on_order_confirmed(event)
-            # delete won't be reached since get() raised ObjectNotFoundError
-            mock_repo.query.filter.assert_not_called()
+        assert current_domain.repository_for(AbandonedCheckout).get_or_none("ord-missing-001") is None
 
     def test_on_order_cancelled_passes_when_not_found(self):
-        projector = AbandonedCheckoutProjector()
-        event = OrderCancelled(
-            order_id="ord-missing-002",
-            reason="No stock",
-            cancelled_by="System",
-            cancelled_at=datetime.now(UTC),
+        AbandonedCheckoutProjector().on_order_cancelled(
+            OrderCancelled(
+                order_id="ord-missing-002",
+                reason="No stock",
+                cancelled_by="System",
+                cancelled_at=datetime.now(UTC),
+            )
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "AbandonedCheckout not found"})
+        assert current_domain.repository_for(AbandonedCheckout).get_or_none("ord-missing-002") is None
 
-        with patch("ordering.projections.abandoned_checkouts.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            # Should not raise
-            projector.on_order_cancelled(event)
-            mock_repo.query.filter.assert_not_called()
+
+class TestAbandonedCheckoutFound:
+    """When a row exists for the order, confirm and cancel delete it."""
+
+    def _seed(self, order_id):
+        repo = current_domain.repository_for(AbandonedCheckout)
+        repo.add(AbandonedCheckout(order_id=order_id, customer_id="cust-ac-001"))
+        assert repo.get_or_none(order_id) is not None
+        return repo
+
+    def test_on_order_confirmed_deletes_existing_row(self):
+        repo = self._seed("ord-ac-001")
+        AbandonedCheckoutProjector().on_order_confirmed(
+            OrderConfirmed(order_id="ord-ac-001", confirmed_at=datetime.now(UTC))
+        )
+        assert repo.get_or_none("ord-ac-001") is None
+
+    def test_on_order_cancelled_deletes_existing_row(self):
+        repo = self._seed("ord-ac-002")
+        AbandonedCheckoutProjector().on_order_cancelled(
+            OrderCancelled(
+                order_id="ord-ac-002",
+                reason="No stock",
+                cancelled_by="System",
+                cancelled_at=datetime.now(UTC),
+            )
+        )
+        assert repo.get_or_none("ord-ac-002") is None

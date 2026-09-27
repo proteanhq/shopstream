@@ -5,7 +5,6 @@ are created, activated, discontinued, or archived.
 """
 
 from protean.core.projector import on
-from protean.exceptions import ObjectNotFoundError
 from protean.fields import DateTime, Dict, Identifier, Integer, List, String
 from protean.utils.globals import current_domain
 
@@ -49,9 +48,8 @@ class CategoryProductsProjector:
         if not event.category_id:
             return
         repo = current_domain.repository_for(CategoryProducts)
-        try:
-            view = repo.get(str(event.category_id))
-        except ObjectNotFoundError:
+        view = repo.get_or_none(str(event.category_id))
+        if view is None:
             return
 
         products = list(view.products or [])

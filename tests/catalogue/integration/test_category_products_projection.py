@@ -167,31 +167,21 @@ class TestCategoryProductsProjection:
 
 
 class TestCategoryProductsNotFound:
-    """Mock-based: on_product_created returns early when category doesn't exist."""
+    """on_product_created returns early when the category has no CategoryProducts row."""
 
     def test_on_product_created_returns_when_category_not_found(self):
-        from unittest.mock import MagicMock, patch
-
-        from protean.exceptions import ObjectNotFoundError
-
         from catalogue.product.events import ProductCreated
         from catalogue.projections.category_products import CategoryProductsProjector
 
-        projector = CategoryProductsProjector()
-        event = ProductCreated(
-            product_id="prod-orphan-001",
-            sku="ORPHAN-001",
-            title="Orphan Product",
-            category_id="nonexistent-category",
-            status="Draft",
-            created_at=datetime.now(UTC),
+        CategoryProductsProjector().on_product_created(
+            ProductCreated(
+                product_id="prod-orphan-001",
+                sku="ORPHAN-001",
+                title="Orphan Product",
+                category_id="nonexistent-category",
+                status="Draft",
+                created_at=datetime.now(UTC),
+            )
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "CategoryProducts not found"})
 
-        with patch("catalogue.projections.category_products.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            # Should not raise; returns early
-            projector.on_product_created(event)
-            # repo.add should NOT be called since we returned early
-            mock_repo.add.assert_not_called()
+        assert current_domain.repository_for(CategoryProducts).get_or_none("nonexistent-category") is None
