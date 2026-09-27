@@ -337,6 +337,18 @@ REDIS_URL=redis://127.0.0.1:6379/0
 SECRET_KEY=change-me-in-production
 ```
 
+### Logging
+
+`PROTEAN_LOG_LEVEL` sets Protean's log level. Allowed values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, and `CRITICAL`. It replaces the `--debug` flag, which Protean removed from `protean server` in 0.17.0. When it is unset, Protean picks a level from the environment: DEBUG when `PROTEAN_ENV` is unset (development), WARNING under `test`, and INFO otherwise. It does not change uvicorn's own startup and access lines in the API.
+
+Set it in `.env` for `docker compose`. Only `docker compose` reads `.env`; the compose default is INFO for the API and every engine. A local `make engine-<domain>` run does not read `.env`, so put the variable in front of the command instead:
+
+```bash
+PROTEAN_LOG_LEVEL=DEBUG make engine-ordering
+```
+
+This also works for multi-worker engines, such as `make engine-ordering-scaled`. Each worker applies it once its domain has loaded, so a worker's first few lines stay at INFO.
+
 ## Available Commands
 
 Run `make help` for the full list.
