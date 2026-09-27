@@ -26,7 +26,11 @@ class CampaignActivated:
     activated_at = DateTime(required=True)
 
 
-@loyalty.event(part_of="PromoCampaign")
+# Lenient loading: a stored pause payload with a field this class does not declare still loads.
+# Protean drops the unknown field and records its name in metadata.extensions["_dropped_fields"].
+# CampaignPaused has no upcaster, so dropping fields here cannot hide an upcaster bug. Every
+# other loyalty event stays strict.
+@loyalty.event(part_of="PromoCampaign", lenient=True)
 class CampaignPaused:
     campaign_id = String(required=True)
     reason = String()

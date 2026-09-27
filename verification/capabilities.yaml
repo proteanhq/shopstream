@@ -102,6 +102,20 @@ capabilities:
     source: A
     status: covered
 
+  - name: upcaster_gap_check
+    taught_by: src/loyalty/campaign/upcasters.py
+    guarded_by: verification/contracts/test_upcaster_gap.py
+    property: "a version-N event missing an upcaster edge is flagged by `protean check` (UPCASTER_GAP); the real loyalty and ordering chains are not"
+    source: A
+    status: covered
+
+  - name: lenient_deserialization
+    taught_by: src/loyalty/campaign/events.py   # CampaignPaused(lenient=True)
+    guarded_by: tests/loyalty/application/test_lenient_deserialization.py
+    property: "a lenient event drops an unknown stored field and records its name in _dropped_fields; a non-lenient event still raises DeserializationError"
+    source: A
+    status: covered
+
   - name: saga_process_manager
     taught_by: src/ordering/checkout/saga.py
     guarded_by: verification/resilience/test_saga_compensation.py
