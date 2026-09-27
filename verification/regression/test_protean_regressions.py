@@ -576,7 +576,7 @@ def test_stale_event_sourced_write_raises_expected_version_error():
     reason="auto_now stamping on save runs @invariant.pre against the post-change state",
 )
 def test_auto_now_stamp_does_not_run_pre_invariants():
-    """Protean finding (not filed yet): saving a closed RewardAccount fails its own pre-invariant.
+    """Protean finding (proteanhq/protean#1663): saving a closed RewardAccount fails its own pre-invariant.
 
     `RewardAccount.closed_accounts_are_immutable` is an `@invariant.pre` that rejects
     any change to an account that is already Closed. `close()` itself passes, because
