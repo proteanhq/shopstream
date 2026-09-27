@@ -26,7 +26,10 @@ class CampaignActivated:
     activated_at = DateTime(required=True)
 
 
-@loyalty.event(part_of="PromoCampaign")
+# Older pause payloads may carry a field this class has since retired. Lenient loading drops
+# such a field on replay (recording it in metadata.extensions["_dropped_fields"]) instead of
+# failing; every other loyalty event stays strict.
+@loyalty.event(part_of="PromoCampaign", lenient=True)
 class CampaignPaused:
     campaign_id = String(required=True)
     reason = String()
