@@ -144,7 +144,7 @@ def test_1078_all_default_value_object_round_trips():
     reason="current_domain warns 'Working outside of domain context' on attribute and type probes",
 )
 def test_current_domain_probe_outside_context_is_silent():
-    """Protean finding (not filed, feature request): `current_domain` has no warning-free probe.
+    """Protean finding (proteanhq/protean#1632, feature request): `current_domain` has no warning-free probe.
 
     Test modules import `current_domain` at module level. During collection pytest
     runs `getattr(obj, "__test__", None)` (`_pytest/compat.py`) and `isinstance`
@@ -181,7 +181,7 @@ def test_current_domain_probe_outside_context_is_silent():
     reason="Config2 keeps only keys from _default_config(), so a top-level [lint] table in domain.toml is dropped",
 )
 def test_lint_table_in_domain_toml_is_loaded(tmp_path, monkeypatch):
-    """Protean finding (not filed): a top-level `[lint]` table in `domain.toml` is dropped.
+    """Protean finding (proteanhq/protean#1629): a top-level `[lint]` table in `domain.toml` is dropped.
 
     Protean's configuration docs describe a `[lint]` table (`level`, `suppressions`,
     and more) that `protean check` and `protean verify` read through
@@ -313,7 +313,7 @@ def _pytest_project(tmp_path, test_source: str, ini: str = "") -> str:
     reason="protean verify's tests stage removes PROTEAN_ENV from the pytest subprocess",
 )
 def test_verify_tests_stage_keeps_protean_env(tmp_path, monkeypatch):
-    """Protean finding (not filed): `protean verify` drops `PROTEAN_ENV` before its tests stage.
+    """Protean finding (proteanhq/protean#1662): `protean verify` drops `PROTEAN_ENV` before its tests stage.
 
     `_run_tests` in `protean/cli/verify.py` pops `PROTEAN_ENV` (and `PROTEAN_DEBUG`,
     `VIRTUAL_ENV`) from the environment it hands to `python -m pytest`. The init and
@@ -345,7 +345,7 @@ def test_verify_tests_stage_keeps_protean_env(tmp_path, monkeypatch):
     reason="protean verify counts failed tests from the first 'N failed' anywhere in the pytest output",
 )
 def test_verify_tests_stage_counts_failures_from_the_summary(tmp_path, monkeypatch):
-    """Protean finding (not filed): `protean verify` can report a port number as the failure count.
+    """Protean finding (proteanhq/protean#1661): `protean verify` can report a port number as the failure count.
 
     `_run_tests` reads the counts with `re.search(r"(\\d+) failed", output)`, which
     matches the first hit anywhere in pytest's output, not the summary line. A
@@ -376,7 +376,7 @@ def test_verify_tests_stage_counts_failures_from_the_summary(tmp_path, monkeypat
     reason="protean verify counts passed tests from the first 'N passed' anywhere in the pytest output",
 )
 def test_verify_tests_stage_counts_passes_from_the_summary(tmp_path, monkeypatch):
-    """Protean finding (not filed): `protean verify` can read the passed count from a skip reason.
+    """Protean finding (proteanhq/protean#1661): `protean verify` can read the passed count from a skip reason.
 
     `_run_tests` reads the passed count with `re.search(r"(\\d+) passed", output)`, the
     same first-match read as the failed count. With `-ra` in a project's addopts (ShopStream
@@ -437,7 +437,7 @@ def test_is_event_sourced_warning_points_at_the_decorator():
     reason="the outermost UnitOfWork rolls back a doomed transaction and returns without raising",
 )
 def test_outer_commit_of_a_doomed_transaction_raises():
-    """Protean finding (not filed): a doomed transaction ends without an error.
+    """Protean finding (proteanhq/protean#1631): a doomed transaction ends without an error.
 
     A nested UnitOfWork joins the outermost one, so a nested rollback marks the
     whole transaction rollback-only. When the outermost UnitOfWork then commits,
