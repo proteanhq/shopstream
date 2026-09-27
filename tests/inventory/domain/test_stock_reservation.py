@@ -12,6 +12,7 @@ from inventory.stock.events import (
     StockReserved,
 )
 from inventory.stock.stock import InventoryItem, ReservationStatus
+from tests.conftest import as_utc
 
 
 def _make_item(**overrides):
@@ -47,6 +48,19 @@ class TestReserveStock:
         assert str(reservation.order_id) == "ord-001"
         assert reservation.quantity == 20
         assert reservation.status == ReservationStatus.ACTIVE.value
+
+    def test_default_expiry_is_fifteen_minutes_past_the_domain_clock(self, frozen_clock):
+        from inventory.domain import inventory
+
+        frozen_now = datetime(2030, 3, 1, 9, 0, tzinfo=UTC)
+        frozen_clock(inventory, frozen_now)
+        item = _make_item(initial_quantity=100)
+
+        item.reserve(order_id="ord-001", quantity=20)
+
+        reservation = item.reservations[0]
+        assert as_utc(reservation.expires_at) == frozen_now + timedelta(minutes=15)
+        assert as_utc(reservation.reserved_at) == frozen_now
 
     def test_reserve_fails_with_zero_quantity(self):
         item = _make_item(initial_quantity=100)

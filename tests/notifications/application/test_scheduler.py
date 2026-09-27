@@ -147,3 +147,32 @@ class TestProcessScheduledNotifications:
 
         # Restore
         adapter.send = original_send
+
+
+FROZEN_NOW = datetime(2030, 6, 1, 12, 0, tzinfo=UTC)
+
+
+class TestProcessScheduledNotificationsWithDomainClock:
+    """Without `as_of`, the scheduler decides what is due by the notifications domain clock."""
+
+    def setup_method(self):
+        reset_channels()
+
+    def teardown_method(self):
+        reset_channels()
+
+    def test_dispatches_once_the_clock_reaches_scheduled_time(self, frozen_clock):
+        from notifications.domain import notifications
+
+        clock = frozen_clock(notifications, FROZEN_NOW)
+        nid = _create_scheduled_notification(
+            scheduled_for=FROZEN_NOW + timedelta(hours=1), recipient_id="cust-sched-clock"
+        )
+        repo = current_domain.repository_for(Notification)
+
+        current_domain.process(ProcessScheduledNotifications(), asynchronous=False)
+        assert repo.get(nid).status == NotificationStatus.PENDING.value
+
+        clock.advance(timedelta(hours=1, minutes=1))
+        current_domain.process(ProcessScheduledNotifications(), asynchronous=False)
+        assert repo.get(nid).status == NotificationStatus.SENT.value

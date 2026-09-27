@@ -567,3 +567,43 @@ def test_stale_event_sourced_write_raises_expected_version_error():
 
     assert repo.get(item.id).levels.reserved == 1, "lost update: the stale write overwrote the winner's reservation"
     assert isinstance(outcome, ExpectedVersionError), repr(outcome)
+
+
+@pytest.mark.usefixtures("loyalty_ctx")
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="auto_now stamping on save runs @invariant.pre against the post-change state",
+)
+def test_auto_now_stamp_does_not_run_pre_invariants():
+    """Protean finding (proteanhq/protean#1663): saving a closed RewardAccount fails its own pre-invariant.
+
+    `RewardAccount.closed_accounts_are_immutable` is an `@invariant.pre` that rejects
+    any change to an account that is already Closed. `close()` itself passes, because
+    the check runs before the status is assigned. On save, `BaseDAO._apply_pre_persist_hooks`
+    stamps the `auto_now` field `updated_at` through `setattr`
+    (`_stamp_lifecycle_timestamps` in `protean/port/dao.py`). That assignment runs the
+    pre-invariants again, now against the Closed status, so the save raises
+    `ValidationError`. A framework-owned stamp should not run the aggregate's
+    business pre-checks. Aggregate enrichers run in the same hook and also assign
+    through `setattr`, so loyalty's `stamp_actor` enricher hits the same check. The
+    fix has to cover the whole pre-persist hook, not only the timestamp stamping.
+    """
+    from protean import current_domain
+    from protean.exceptions import ValidationError
+
+    from loyalty.reward.reward_account import AccountStatus, RewardAccount
+
+    repo = current_domain.repository_for(RewardAccount)
+    account = RewardAccount.enroll(customer_id="cust-close-save")
+    repo.add(account)
+    account = repo.get(account.id)
+    account.close()
+
+    try:
+        repo.add(account)
+    except ValidationError as exc:
+        # Re-raised as AssertionError so the strict xfail matches only this failure.
+        raise AssertionError(f"saving a just-closed account failed: {exc.messages}") from exc
+
+    assert repo.get(account.id).status == AccountStatus.CLOSED.value

@@ -143,8 +143,9 @@ Nine subscribers across eight streams — `identity::customer` is consumed by tw
 
 There is no resident daemon; scheduling is command-driven. `ProcessScheduledNotifications`
 (triggered via the maintenance endpoint, e.g. by cron) dispatches PENDING notifications whose
-`scheduled_for <= as_of`. Scheduled notifications originate from the ordering subscriber (review
-prompt) and cart subscriber (cart recovery); the dispatch handler skips them at creation time.
+`scheduled_for <= as_of` (`as_of` defaults to the domain clock). Scheduled notifications
+originate from the ordering subscriber (review prompt) and cart subscriber (cart recovery); the
+dispatch handler skips them at creation time.
 
 ## API
 

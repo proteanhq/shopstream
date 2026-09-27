@@ -1,7 +1,8 @@
 """RewardAccount aggregate — a customer's loyalty points account.
 
 Exercises several Protean capabilities not used elsewhere in ShopStream:
-  * an **abstract base aggregate** (`Auditable`) shared via inheritance,
+  * an **abstract base aggregate** (`Auditable`) shared via inheritance, with its audit
+    fields stamped on save by `auto_now` / `auto_now_add` and an aggregate enricher,
   * a **non-Enum `choices`** list on `tier`,
   * an **`@invariant.pre`** state guard (closed accounts are immutable) alongside an
     **`@invariant.post`** business rule (balance never negative),
@@ -19,6 +20,7 @@ from protean import invariant
 from protean.exceptions import ValidationError
 from protean.fields import Date, DateTime, HasMany, HasOne, Integer, Reference, String
 from protean.fields.validators import RegexValidator
+from protean.utils.globals import g
 
 from loyalty.domain import loyalty
 
@@ -40,13 +42,36 @@ def generate_member_code(length=8):
 
 @loyalty.aggregate(abstract=True)
 class Auditable:
-    """Abstract base contributing audit timestamps to concrete aggregates."""
+    """Abstract base contributing audit fields to concrete aggregates.
 
-    created_at = DateTime(default=lambda: datetime.now(UTC))
-    updated_at = DateTime(default=lambda: datetime.now(UTC))
+    The framework stamps both timestamps from the domain clock when the aggregate is
+    saved: ``created_at`` on the first save only, ``updated_at`` on every save. They are
+    ``None`` until then. The ``stamp_actor`` aggregate enricher fills ``created_by`` and
+    ``updated_by``.
+    """
 
-    def touch(self):
-        self.updated_at = datetime.now(UTC)
+    created_at = DateTime(auto_now_add=True)
+    updated_at = DateTime(auto_now=True)
+    created_by = String(max_length=255)
+    updated_by = String(max_length=255)
+
+
+@loyalty.aggregate_enricher
+def stamp_actor(aggregate):
+    """Record who saved an `Auditable` aggregate.
+
+    The actor is the ``actor_id`` bound on the domain context's ``g`` (the API binds it
+    from the ``X-Actor-Id`` header). Saves with no bound actor, such as engine-driven
+    handlers, record ``"system"``. ``created_by`` is set only when the aggregate is first
+    inserted, the same rule ``auto_now_add`` follows for ``created_at``. A row stored
+    before these fields existed keeps both empty.
+    """
+    if not isinstance(aggregate, Auditable):
+        return
+    actor = g.get("actor_id") or "system"
+    aggregate.updated_by = actor
+    if not aggregate.state_.is_persisted:
+        aggregate.created_by = actor
 
 
 class AccountStatus(Enum):
@@ -198,7 +223,6 @@ class RewardAccount(Auditable):
             raise ValidationError({"card": ["Account already has a membership card"]})
         issued_on = date.today()
         self.card = MembershipCard(card_number=card_number, issued_on=issued_on)
-        self.touch()
         self.raise_(
             MembershipCardIssued(
                 account_id=self.id,
@@ -226,7 +250,6 @@ class RewardAccount(Auditable):
         self.points_balance += amount
         self.lifetime_points += amount
         self._record_entry("earn", amount, reason)
-        self.touch()
         self.raise_(
             PointsEarned(
                 account_id=self.id,
@@ -248,7 +271,6 @@ class RewardAccount(Auditable):
             return  # already at or above the earned tier — never downgrade
         old_tier = self.tier
         self.tier = earned_tier
-        self.touch()
         self.raise_(
             TierUpgraded(
                 account_id=self.id,
@@ -283,7 +305,6 @@ class RewardAccount(Auditable):
         # Over-redemption is caught by the balance_never_negative post-invariant.
         self.points_balance -= amount
         self._record_entry("redeem", amount, reason)
-        self.touch()
         self.raise_(
             PointsRedeemed(
                 account_id=self.id,
@@ -313,7 +334,6 @@ class RewardAccount(Auditable):
             return
         self.points_balance -= clawed
         self._record_entry("adjust", clawed, reason)
-        self.touch()
         self.raise_(
             PointsRedeemed(
                 account_id=self.id,

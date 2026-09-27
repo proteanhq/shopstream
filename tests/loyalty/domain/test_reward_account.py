@@ -17,8 +17,10 @@ class TestRewardAccountBehavior:
 
     def test_inherits_audit_fields_from_abstract_base(self):
         account = RewardAccount.enroll(customer_id="cust-1")
-        assert account.created_at is not None
-        assert account.updated_at is not None
+        # Declared on Auditable; the save stamps them, so an unsaved account has none yet.
+        for name in ("created_at", "updated_at", "created_by", "updated_by"):
+            assert hasattr(account, name)
+            assert getattr(account, name) is None
 
     def test_earn_points_increases_balance_and_records_ledger_entry(self):
         account = RewardAccount.enroll(customer_id="cust-1")

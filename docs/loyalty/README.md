@@ -61,7 +61,14 @@ plus a shared abstract base aggregate.
 ### Auditable (Abstract Base Aggregate)
 
 `Auditable` is an **abstract aggregate** (`@loyalty.aggregate(abstract=True)`) that
-contributes `created_at` / `updated_at` timestamps and a `touch()` helper. `RewardAccount`
+contributes four audit fields. `created_at` (`auto_now_add`) and `updated_at` (`auto_now`) are
+stamped by the framework from the domain clock when the aggregate is saved. `created_by` and
+`updated_by` are filled by the `stamp_actor` aggregate enricher from `g.actor_id`. The API
+binds `g.actor_id` from the `X-Actor-Id` request header, so a save made while the request is
+handled records that header. A save made later by an engine worker (the `earn-async` endpoint,
+the cross-domain subscribers, and the RedemptionSaga's `RedeemPoints` when events are
+processed asynchronously) runs in a fresh context and records `"system"`, as does a request
+without the header. `created_by` is set only when the row is first inserted. `RewardAccount`
 inherits from it. Abstract aggregates are never persisted on their own — they exist purely
 to share fields and behaviour across concrete aggregates.
 

@@ -48,10 +48,11 @@ Later, a command credits points:
 2. Increases `lifetime_points` by `amount` (lifetime only ever grows).
 3. Appends a `PointsLedgerEntry` (`entry_type="earn"`, `balance_after`, `reason`,
    `occurred_at`) via the `HasMany` helper `add_entries(...)`.
-4. `touch()`es the audit timestamp.
-5. Raises `PointsEarned`.
+4. Raises `PointsEarned`.
 
-The handler persists with `current_domain.repository_for(RewardAccount).add(account)`.
+The handler persists with `current_domain.repository_for(RewardAccount).add(account)`. That
+save stamps `updated_at` from the domain clock. It also sets `updated_by` from the request's
+`X-Actor-Id` header when the command runs inside the request, and `"system"` otherwise.
 
 ### 3. Redeeming Points
 

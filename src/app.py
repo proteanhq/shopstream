@@ -79,6 +79,43 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ---------------------------------------------------------------------------
+# User context middleware: populates Protean's `g` with the caller's identity.
+# Starlette runs the last-added middleware first, so this one is added before
+# DomainContextMiddleware to run inside the domain context that middleware pushes.
+# Correlation IDs are handled automatically by DomainContextMiddleware.
+# ---------------------------------------------------------------------------
+# Matches the `created_by` / `updated_by` field length on loyalty's `Auditable`.
+_MAX_ACTOR_ID_LENGTH = 255
+
+
+class UserContextMiddleware:
+    """Copy the `X-User-Id` and `X-Actor-Id` headers into the request's `g`.
+
+    `g.user_id` feeds the message enrichers. `g.actor_id` feeds the loyalty audit
+    enricher, which records `"system"` when the header is absent.
+    """
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http":
+            headers = dict(scope.get("headers", []))
+            # errors="replace": a header that is not valid UTF-8 must not fail the request
+            user_id = headers.get(b"x-user-id", b"").decode(errors="replace") or None
+            actor_id = headers.get(b"x-actor-id", b"").decode(errors="replace").strip()[:_MAX_ACTOR_ID_LENGTH] or None
+
+            with contextlib.suppress(AttributeError):
+                # No-op for paths DomainContextMiddleware maps to no domain
+                g.user_id = user_id
+                g.actor_id = actor_id
+
+        await self.app(scope, receive, send)
+
+
+app.add_middleware(UserContextMiddleware)
+
 app.add_middleware(
     DomainContextMiddleware,
     route_domain_map={
@@ -98,29 +135,6 @@ app.add_middleware(
     },
 )
 
-
-# ---------------------------------------------------------------------------
-# User context middleware — populates Protean's `g` with user identity
-# Correlation IDs are handled automatically by DomainContextMiddleware.
-# ---------------------------------------------------------------------------
-class UserContextMiddleware:
-    """Extract user_id from headers into Protean's thread-local g."""
-
-    def __init__(self, app):
-        self.app = app
-
-    async def __call__(self, scope, receive, send):
-        if scope["type"] == "http":
-            headers = dict(scope.get("headers", []))
-            user_id = headers.get(b"x-user-id", b"").decode() or None
-
-            with contextlib.suppress(AttributeError):
-                g.user_id = user_id  # No-op when no domain context is active
-
-        await self.app(scope, receive, send)
-
-
-app.add_middleware(UserContextMiddleware)
 
 # ---------------------------------------------------------------------------
 # OpenTelemetry instrumentation (opt-in via [telemetry] in domain.toml)

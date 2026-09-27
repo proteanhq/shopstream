@@ -16,6 +16,7 @@ from inventory.stock.expiry import ExpireStaleReservations
 from inventory.stock.initialization import InitializeStock
 from inventory.stock.reservation import ReleaseReservation, ReserveStock
 from inventory.stock.stock import InventoryItem
+from tests.conftest import as_utc
 
 
 def _initialize_stock(**overrides):
@@ -178,3 +179,46 @@ class TestExpireStaleReservationsStaleProjection:
 
         assert result == 1
         assert current_domain.repository_for(InventoryItem).get(good_item).levels.reserved == 0
+
+
+FROZEN_NOW = datetime(2030, 6, 1, 12, 0, tzinfo=UTC)
+
+
+class TestReservationExpiryWithDomainClock:
+    """Default reservation expiry and the expiry job both read the inventory domain clock."""
+
+    def test_default_expiry_is_fifteen_minutes_past_the_clock(self, frozen_clock):
+        from inventory.domain import inventory
+
+        frozen_clock(inventory, FROZEN_NOW)
+        item_id = _initialize_stock(initial_quantity=100)
+
+        current_domain.process(
+            ReserveStock(inventory_item_id=item_id, order_id="ord-clock-001", quantity=5),
+            asynchronous=False,
+        )
+
+        reservation = current_domain.repository_for(InventoryItem).get(item_id).reservations[-1]
+        assert as_utc(reservation.expires_at) == FROZEN_NOW + timedelta(minutes=15)
+        assert as_utc(reservation.reserved_at) == FROZEN_NOW
+
+    def test_releases_reservation_once_the_clock_passes_its_expiry(self, frozen_clock):
+        from inventory.domain import inventory
+
+        clock = frozen_clock(inventory, FROZEN_NOW)
+        item_id = _initialize_stock(initial_quantity=100)
+        current_domain.process(
+            ReserveStock(inventory_item_id=item_id, order_id="ord-clock-002", quantity=10),
+            asynchronous=False,
+        )
+
+        # At the frozen time the reservation has 15 minutes left, so nothing is released.
+        current_domain.process(ExpireStaleReservations(older_than_minutes=0), asynchronous=False)
+        assert current_domain.repository_for(InventoryItem).get(item_id).levels.reserved == 10
+
+        clock.advance(timedelta(minutes=16))
+        current_domain.process(ExpireStaleReservations(older_than_minutes=0), asynchronous=False)
+
+        item = current_domain.repository_for(InventoryItem).get(item_id)
+        assert item.levels.reserved == 0
+        assert item.levels.available == 100

@@ -1,6 +1,6 @@
 """FastAPI routes for the Inventory domain — stock and warehouses."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from fastapi import APIRouter
 from protean.utils.globals import current_domain
@@ -75,7 +75,7 @@ async def receive_stock(inventory_item_id: str, body: ReceiveStockRequest) -> St
 async def reserve_stock(inventory_item_id: str, body: ReserveStockRequest) -> ReservationIdResponse:
     expires_at = None
     if body.expires_in_minutes:
-        expires_at = datetime.now(UTC) + timedelta(minutes=body.expires_in_minutes)
+        expires_at = current_domain.clock.now() + timedelta(minutes=body.expires_in_minutes)
     command = ReserveStock(
         inventory_item_id=inventory_item_id,
         order_id=body.order_id,

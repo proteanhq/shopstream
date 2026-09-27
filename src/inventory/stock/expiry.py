@@ -6,7 +6,7 @@ projection for Active reservations past their expiry time and dispatches
 ReleaseReservation commands for each.
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 import structlog
 from protean import handle
@@ -27,7 +27,7 @@ class ExpireStaleReservations:
     """Release reservations older than the specified threshold."""
 
     older_than_minutes = Integer(default=15)
-    as_of = DateTime()  # Optional: defaults to now
+    as_of = DateTime()  # Optional: defaults to the domain clock
 
 
 @inventory.command_handler(part_of=InventoryItem)
@@ -35,8 +35,8 @@ class ExpireStaleReservationsHandler:
     @handle(ExpireStaleReservations)
     def expire_stale_reservations(self, command):
         with processing_priority(Priority.LOW):
-            as_of = command.as_of or datetime.now(UTC)
-            threshold_minutes = command.older_than_minutes or 15
+            as_of = command.as_of or current_domain.clock.now()
+            threshold_minutes = 15 if command.older_than_minutes is None else command.older_than_minutes
             cutoff = as_of - timedelta(minutes=threshold_minutes)
             # Strip tzinfo for comparison with naive datetimes from DB
             cutoff_naive = cutoff.replace(tzinfo=None)

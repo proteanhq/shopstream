@@ -7,7 +7,7 @@ commands for each. The resulting CartAbandoned events are consumed by the
 Notifications domain to send recovery emails.
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 import structlog
 from protean import handle
@@ -27,7 +27,7 @@ class DetectAbandonedCarts:
     """Flag active carts idle beyond the specified threshold."""
 
     idle_threshold_hours = Integer(default=24)
-    as_of = DateTime()  # Optional: defaults to now
+    as_of = DateTime()  # Optional: defaults to the domain clock
 
 
 @ordering.command_handler(part_of=ShoppingCart)
@@ -35,8 +35,8 @@ class DetectAbandonedCartsHandler:
     @handle(DetectAbandonedCarts)
     def detect_abandoned_carts(self, command):
         with processing_priority(Priority.LOW):
-            as_of = command.as_of or datetime.now(UTC)
-            threshold_hours = command.idle_threshold_hours or 24
+            as_of = command.as_of or current_domain.clock.now()
+            threshold_hours = 24 if command.idle_threshold_hours is None else command.idle_threshold_hours
             cutoff = as_of - timedelta(hours=threshold_hours)
             # Strip tzinfo for comparison with naive datetimes from DB
             cutoff_naive = cutoff.replace(tzinfo=None)
