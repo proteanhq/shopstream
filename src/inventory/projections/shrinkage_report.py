@@ -5,7 +5,6 @@ Provides aggregate shrinkage data for loss prevention and auditing.
 """
 
 from protean.core.projector import on
-from protean.exceptions import ObjectNotFoundError
 from protean.fields import DateTime, Float, Identifier, Integer, List, String
 from protean.utils.globals import current_domain
 
@@ -30,21 +29,20 @@ class ShrinkageReport:
 
 def _get_or_create(event):
     repo = current_domain.repository_for(ShrinkageReport)
-    try:
-        return repo.get(str(event.inventory_item_id))
-    except ObjectNotFoundError:
-        record = ShrinkageReport(
-            inventory_item_id=event.inventory_item_id,
-            product_id=event.product_id,
-            sku=getattr(event, "sku", None),
-            warehouse_id=getattr(event, "warehouse_id", None),
-            total_adjustments=0,
-            total_damaged=0,
-            total_written_off=0,
-            total_shrinkage_value=0.0,
-            adjustment_reasons=[],
-        )
+    record = repo.get_or_none(str(event.inventory_item_id))
+    if record is not None:
         return record
+    return ShrinkageReport(
+        inventory_item_id=event.inventory_item_id,
+        product_id=event.product_id,
+        sku=getattr(event, "sku", None),
+        warehouse_id=getattr(event, "warehouse_id", None),
+        total_adjustments=0,
+        total_damaged=0,
+        total_written_off=0,
+        total_shrinkage_value=0.0,
+        adjustment_reasons=[],
+    )
 
 
 @inventory.projector(projector_for=ShrinkageReport, aggregates=[InventoryItem])

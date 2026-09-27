@@ -49,9 +49,8 @@ class CustomerNotificationsProjector:
 
     def _update_status(self, notification_id, status, updated_at):
         repo = current_domain.repository_for(CustomerNotifications)
-        try:
-            cn = repo.get(notification_id)
-        except Exception:
+        cn = repo.get_or_none(notification_id)
+        if cn is None:
             return
         cn.status = status
         cn.updated_at = updated_at

@@ -11,7 +11,6 @@ from datetime import UTC, datetime, timedelta
 
 import structlog
 from protean import handle
-from protean.exceptions import ObjectNotFoundError
 from protean.fields import DateTime, Integer
 from protean.utils.globals import current_domain
 from protean.utils.processing import Priority, processing_priority
@@ -72,10 +71,8 @@ class DetectAbandonedCartsHandler:
             repo = current_domain.repository_for(ShoppingCart)
             abandoned_count = 0
             for cart in abandoned:
-                try:
-                    blocker = repo.get(str(cart.cart_id)).abandon_blocker()
-                except ObjectNotFoundError:
-                    blocker = "Cart not found"
+                aggregate = repo.get_or_none(str(cart.cart_id))
+                blocker = "Cart not found" if aggregate is None else aggregate.abandon_blocker()
                 if blocker is not None:
                     logger.warning(
                         "Skipped cart",

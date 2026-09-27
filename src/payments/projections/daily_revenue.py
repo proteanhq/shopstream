@@ -27,9 +27,8 @@ class DailyRevenueProjector:
         repo = current_domain.repository_for(DailyRevenue)
         date_key = event.succeeded_at.date().isoformat()
 
-        try:
-            record = repo.get(date_key)
-        except Exception:
+        record = repo.get_or_none(date_key)
+        if record is None:
             record = DailyRevenue(
                 date=date_key,
                 currency=event.currency,
@@ -45,9 +44,8 @@ class DailyRevenueProjector:
         repo = current_domain.repository_for(DailyRevenue)
         date_key = event.completed_at.date().isoformat()
 
-        try:
-            record = repo.get(date_key)
-        except Exception:
+        record = repo.get_or_none(date_key)
+        if record is None:
             record = DailyRevenue(date=date_key)
 
         record.total_refunded = (record.total_refunded or 0.0) + event.amount

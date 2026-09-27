@@ -32,18 +32,15 @@ class FailedNotificationsProjector:
         repo = current_domain.repository_for(FailedNotifications)
 
         # Look up the notification for type info
-        try:
-            notif = current_domain.repository_for(Notification).get(event.notification_id)
-            notification_type = notif.notification_type
-        except Exception:
-            notification_type = "Unknown"
+        notif = current_domain.repository_for(Notification).get_or_none(event.notification_id)
+        notification_type = notif.notification_type if notif is not None else "Unknown"
 
-        try:
-            failed = repo.get(event.notification_id)
+        failed = repo.get_or_none(event.notification_id)
+        if failed is not None:
             failed.failure_reason = event.reason
             failed.retry_count = event.retry_count
             failed.failed_at = event.failed_at
-        except Exception:
+        else:
             failed = FailedNotifications(
                 notification_id=event.notification_id,
                 recipient_id=event.recipient_id,
@@ -61,18 +58,12 @@ class FailedNotificationsProjector:
     def on_notification_retried(self, event):
         """Remove from failed queue when retried (it goes back to pending)."""
         repo = current_domain.repository_for(FailedNotifications)
-        try:
-            repo.get(event.notification_id)
+        if repo.get_or_none(event.notification_id) is not None:
             repo.query.filter(notification_id=event.notification_id).delete()
-        except Exception:
-            pass
 
     @on(NotificationSent)
     def on_notification_sent(self, event):
         """Remove from failed queue when successfully sent."""
         repo = current_domain.repository_for(FailedNotifications)
-        try:
-            repo.get(event.notification_id)
+        if repo.get_or_none(event.notification_id) is not None:
             repo.query.filter(notification_id=event.notification_id).delete()
-        except Exception:
-            pass

@@ -42,11 +42,11 @@ class DeliveryPerformanceProjector:
         record_id = f"{carrier}-{date_str}"
 
         repo = current_domain.repository_for(DeliveryPerformanceView)
-        try:
-            view = repo.get(record_id)
+        view = repo.get_or_none(record_id)
+        if view is not None:
             view.total_shipments = (view.total_shipments or 0) + 1
             view.updated_at = event.shipped_at
-        except Exception:
+        else:
             view = DeliveryPerformanceView(
                 id=record_id,
                 carrier=carrier,

@@ -1,16 +1,27 @@
 """Integration tests for Inventory projections — verify projectors update read models."""
 
+from datetime import UTC, datetime
+
 import pytest
 from protean import current_domain
 
 from inventory.projections.inventory_level import InventoryLevel
 from inventory.projections.low_stock_report import LowStockReport
-from inventory.projections.product_availability import ProductAvailability
+from inventory.projections.product_availability import ProductAvailability, ProductAvailabilityProjector
 from inventory.projections.reservation_status import ReservationStatus
 from inventory.projections.stock_movement_log import StockMovementLog
 from inventory.projections.warehouse_stock import WarehouseStock
 from inventory.stock.adjustment import AdjustStock
 from inventory.stock.damage import MarkDamaged, WriteOffDamaged
+from inventory.stock.events import (
+    ReservationReleased,
+    StockAdjusted,
+    StockCommitted,
+    StockMarkedDamaged,
+    StockReceived,
+    StockReserved,
+    StockReturned,
+)
 from inventory.stock.initialization import InitializeStock
 from inventory.stock.receiving import ReceiveStock
 from inventory.stock.reservation import ConfirmReservation, ReleaseReservation, ReserveStock
@@ -320,6 +331,121 @@ class TestProductAvailabilityProjection:
         assert pa.is_in_stock is True
 
 
+_NOW = datetime.now(UTC)
+_MISSING = "inv-item-without-level"
+
+# One event factory per ProductAvailability handler that looks up InventoryLevel first.
+# Factories, because events can only be built once the domain is initialized.
+_EVENTS_WITHOUT_LEVEL = [
+    (
+        "on_stock_received",
+        lambda: StockReceived(
+            inventory_item_id=_MISSING,
+            quantity=5,
+            previous_on_hand=0,
+            new_on_hand=5,
+            new_available=5,
+            received_at=_NOW,
+        ),
+    ),
+    (
+        "on_stock_reserved",
+        lambda: StockReserved(
+            inventory_item_id=_MISSING,
+            reservation_id="res-x",
+            order_id="ord-x",
+            quantity=5,
+            previous_available=5,
+            new_available=0,
+            reserved_at=_NOW,
+            expires_at=_NOW,
+        ),
+    ),
+    (
+        "on_reservation_released",
+        lambda: ReservationReleased(
+            inventory_item_id=_MISSING,
+            reservation_id="res-x",
+            order_id="ord-x",
+            quantity=5,
+            reason="cancelled",
+            previous_available=0,
+            new_available=5,
+            released_at=_NOW,
+        ),
+    ),
+    (
+        "on_stock_committed",
+        lambda: StockCommitted(
+            inventory_item_id=_MISSING,
+            reservation_id="res-x",
+            order_id="ord-x",
+            quantity=5,
+            previous_on_hand=5,
+            new_on_hand=0,
+            previous_reserved=5,
+            new_reserved=0,
+            committed_at=_NOW,
+        ),
+    ),
+    (
+        "on_stock_adjusted",
+        lambda: StockAdjusted(
+            inventory_item_id=_MISSING,
+            product_id="prod-x",
+            adjustment_type="Count",
+            quantity_change=3,
+            reason="recount",
+            adjusted_by="ops",
+            previous_on_hand=0,
+            new_on_hand=3,
+            new_available=3,
+            adjusted_at=_NOW,
+        ),
+    ),
+    (
+        "on_stock_marked_damaged",
+        lambda: StockMarkedDamaged(
+            inventory_item_id=_MISSING,
+            product_id="prod-x",
+            quantity=1,
+            reason="crushed",
+            previous_on_hand=5,
+            new_on_hand=4,
+            previous_damaged=0,
+            new_damaged=1,
+            new_available=4,
+            marked_at=_NOW,
+        ),
+    ),
+    (
+        "on_stock_returned",
+        lambda: StockReturned(
+            inventory_item_id=_MISSING,
+            quantity=2,
+            order_id="ord-x",
+            previous_on_hand=0,
+            new_on_hand=2,
+            new_available=2,
+            returned_at=_NOW,
+        ),
+    ),
+]
+
+
+class TestProductAvailabilityWithoutInventoryLevel:
+    @pytest.mark.parametrize(
+        ("handler", "make_event"), _EVENTS_WITHOUT_LEVEL, ids=[h for h, _ in _EVENTS_WITHOUT_LEVEL]
+    )
+    def test_event_without_inventory_level_is_skipped(self, handler, make_event):
+        repo = current_domain.repository_for(ProductAvailability)
+        assert current_domain.repository_for(InventoryLevel).get_or_none(_MISSING) is None
+
+        getattr(ProductAvailabilityProjector(), handler)(make_event())
+
+        assert repo.query.all().total == 0
+
+
 # ---------------------------------------------------------------------------
 # WarehouseStock projection
 # ---------------------------------------------------------------------------
@@ -403,14 +529,12 @@ class TestLowStockReportProjection:
     def test_projector_retries_the_create_race_conflict(self, monkeypatch):
         """A lost create race (primary-key conflict at commit) is retried, not raised.
 
-        The first `get` misses while the row already exists, as it does for the
-        loser of a real race. The projector then tries to create a duplicate row,
-        the commit fails, and the retry takes the update path. The real race
+        The first `get_or_none` misses while the row already exists, as it does
+        for the loser of a real race. The projector then tries to create a duplicate
+        row, the commit fails, and the retry takes the update path. The real race
         needs isolated transactions; see
         verification/oracles/test_lowstock_projector_concurrency.py.
         """
-        from protean.exceptions import ObjectNotFoundError
-
         item_id = _initialize_stock(initial_quantity=12, reorder_point=10)
         current_domain.process(
             AdjustStock(
@@ -425,16 +549,16 @@ class TestLowStockReportProjection:
         assert current_domain.repository_for(LowStockReport).get(item_id).current_available == 9
 
         repo_cls = type(current_domain.repository_for(LowStockReport))
-        real_get = repo_cls.get
+        real_get_or_none = repo_cls.get_or_none
         misses = []
 
-        def get_that_misses_once(self, identifier):
+        def get_or_none_that_misses_once(self, identifier):
             if not misses:
                 misses.append(identifier)
-                raise ObjectNotFoundError(f"{identifier} not found")
-            return real_get(self, identifier)
+                return None
+            return real_get_or_none(self, identifier)
 
-        monkeypatch.setattr(repo_cls, "get", get_that_misses_once)
+        monkeypatch.setattr(repo_cls, "get_or_none", get_or_none_that_misses_once)
 
         current_domain.process(
             AdjustStock(

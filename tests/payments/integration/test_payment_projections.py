@@ -1,14 +1,19 @@
 """Integration tests for payment projections."""
 
-from protean import current_domain
+from datetime import UTC, datetime
 
+import pytest
+from protean import current_domain
+from protean.exceptions import TransactionError
+
+from payments.payment.events import PaymentRetryInitiated
 from payments.payment.initiation import InitiatePayment
 from payments.payment.payment import Payment
 from payments.payment.refund import ProcessRefundWebhook, RequestRefund
 from payments.payment.retry import RetryPayment
 from payments.payment.webhook import ProcessPaymentWebhook
 from payments.projections.daily_revenue import DailyRevenue
-from payments.projections.failed_payments import FailedPayment
+from payments.projections.failed_payments import FailedPayment, FailedPaymentProjector
 from payments.projections.payment_status import PaymentStatusView
 
 _idem_counter = 0
@@ -163,6 +168,18 @@ class TestFailedPaymentProjection:
         record = current_domain.repository_for(FailedPayment).get(payment_id)
         assert record.status == "recovered"
 
+    def test_retry_without_failed_record_is_skipped(self):
+        FailedPaymentProjector().on_payment_retry_initiated(
+            PaymentRetryInitiated(
+                payment_id="pay-never-failed",
+                order_id="ord-never-failed",
+                attempt_number=2,
+                attempt_id="att-never-failed",
+                retried_at=datetime.now(UTC),
+            )
+        )
+        assert current_domain.repository_for(FailedPayment).get_or_none("pay-never-failed") is None
+
 
 class TestDailyRevenueProjection:
     def test_revenue_recorded_on_success(self):
@@ -208,3 +225,57 @@ class TestDailyRevenueProjection:
             if record.total_refunded and record.total_refunded > 0:
                 assert record.refund_count >= 1
                 assert record.net_revenue == record.total_revenue - record.total_refunded
+
+
+class _ConnectionLost(Exception):
+    """Stands in for a database error that is not a miss."""
+
+
+def _chain(exc):
+    """Yield exc and every exception it wraps: causes, contexts and group members."""
+    seen = set()
+    pending = [exc]
+    while pending:
+        current = pending.pop()
+        if current is None or id(current) in seen:
+            continue
+        seen.add(id(current))
+        yield current
+        pending.extend([current.__cause__, current.__context__])
+        pending.extend(getattr(current, "exceptions", ()))
+
+
+class TestDailyRevenueLookupErrors:
+    def test_database_error_on_lookup_reaches_the_caller(self, monkeypatch):
+        """A lookup error other than a miss propagates instead of resetting the day's row.
+
+        The old broad `except Exception` treated any error as "no row yet" and wrote a
+        fresh DailyRevenue over the existing one. `get_or_none` only absorbs a miss.
+        """
+        _create_and_succeed_payment(amount=120.00)
+        repo = current_domain.repository_for(DailyRevenue)
+        records = repo.query.all().items
+        assert len(records) == 1
+        before = records[0]
+        assert before.total_revenue == 120.00
+        assert before.transaction_count == 1
+
+        dao_cls = type(repo._dao)
+        real_get = dao_cls.get
+
+        def get_that_fails_for_daily_revenue(self, identifier):
+            if self.entity_cls is DailyRevenue:
+                raise _ConnectionLost("connection lost")
+            return real_get(self, identifier)
+
+        monkeypatch.setattr(dao_cls, "get", get_that_fails_for_daily_revenue)
+
+        with pytest.raises(TransactionError) as exc_info:
+            _create_and_succeed_payment(amount=80.00)
+
+        assert any(isinstance(e, _ConnectionLost) for e in _chain(exc_info.value))
+
+        monkeypatch.undo()
+        after = repo.get(before.date)
+        assert after.total_revenue == 120.00
+        assert after.transaction_count == 1

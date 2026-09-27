@@ -79,12 +79,9 @@ class RedemptionViewProjector:
         )
 
     def _set(self, redemption_id, **changes):
-        from protean.exceptions import ObjectNotFoundError
-
         repo = current_domain.repository_for(RedemptionView)
-        try:
-            view = repo.get(redemption_id)
-        except ObjectNotFoundError:
+        view = repo.get_or_none(redemption_id)
+        if view is None:
             # The create projector (on `RedemptionRequested`) has not run yet. Protean
             # now drains sync events breadth-first, so this should not happen under sync
             # processing. The skip stays as a guard against out-of-order delivery rather

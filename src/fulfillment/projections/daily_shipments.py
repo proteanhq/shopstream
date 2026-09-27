@@ -3,7 +3,6 @@
 from datetime import datetime
 
 from protean.core.projector import on
-from protean.exceptions import ObjectNotFoundError
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
 
@@ -36,19 +35,18 @@ def _date_key(dt: datetime) -> str:
 
 def _get_or_create(date_str: str, timestamp: datetime):
     repo = current_domain.repository_for(DailyShipmentsView)
-    try:
-        return repo.get(date_str)
-    except ObjectNotFoundError:
-        view = DailyShipmentsView(
-            id=date_str,
-            date=date_str,
-            total_created=0,
-            total_shipped=0,
-            total_delivered=0,
-            total_exceptions=0,
-            updated_at=timestamp,
-        )
+    view = repo.get_or_none(date_str)
+    if view is not None:
         return view
+    return DailyShipmentsView(
+        id=date_str,
+        date=date_str,
+        total_created=0,
+        total_shipped=0,
+        total_delivered=0,
+        total_exceptions=0,
+        updated_at=timestamp,
+    )
 
 
 @fulfillment.projector(projector_for=DailyShipmentsView, aggregates=[Fulfillment])

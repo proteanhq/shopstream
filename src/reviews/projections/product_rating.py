@@ -58,11 +58,10 @@ def _recompute(pr):
 
 
 def _is_verified(review_id) -> bool:
-    try:
-        review = current_domain.repository_for(Review).get(review_id)
-        return bool(review.verified_purchase)
-    except Exception:
+    review = current_domain.repository_for(Review).get_or_none(review_id)
+    if review is None:
         return False
+    return bool(review.verified_purchase)
 
 
 @reviews.projector(projector_for=ProductRating, aggregates=[Review])
@@ -70,9 +69,8 @@ class ProductRatingProjector:
     @on(ReviewApproved)
     def on_review_approved(self, event):
         repo = current_domain.repository_for(ProductRating)
-        try:
-            pr = repo.get(event.product_id)
-        except Exception:
+        pr = repo.get_or_none(event.product_id)
+        if pr is None:
             pr = ProductRating(
                 product_id=event.product_id,
                 rating_distribution=_default_distribution(),
@@ -93,9 +91,8 @@ class ProductRatingProjector:
     @on(ReviewRemoved)
     def on_review_removed(self, event):
         repo = current_domain.repository_for(ProductRating)
-        try:
-            pr = repo.get(event.product_id)
-        except Exception:
+        pr = repo.get_or_none(event.product_id)
+        if pr is None:
             return  # no rating record to update
 
         counted = dict(pr.counted_reviews or {})

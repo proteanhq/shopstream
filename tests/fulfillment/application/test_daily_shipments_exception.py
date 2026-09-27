@@ -1,13 +1,12 @@
-"""Mock-based tests for DailyShipmentsView projector exception branches.
+"""DailyShipmentsView projector: a miss on the day's row creates a fresh view.
 
-Covers the ObjectNotFoundError branch in _get_or_create (line 41) where
-repo.get() fails and a new DailyShipmentsView record is created instead.
+Covers the miss branch in _get_or_create, where `get_or_none` finds no row for
+the date and a new DailyShipmentsView is built instead. Uses the real repository.
 """
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
 
-from protean.exceptions import ObjectNotFoundError
+from protean import current_domain
 
 from fulfillment.fulfillment.events import (
     DeliveryConfirmed,
@@ -17,106 +16,90 @@ from fulfillment.fulfillment.events import (
 )
 from fulfillment.projections.daily_shipments import (
     DailyShipmentsProjector,
+    DailyShipmentsView,
     _get_or_create,
 )
 
+_DAY = datetime(2026, 2, 15, 12, 0, tzinfo=UTC)
+
+
+def _saved_view():
+    view = current_domain.repository_for(DailyShipmentsView).get_or_none("2026-02-15")
+    assert view is not None, "Expected the projector to persist a view for 2026-02-15"
+    return view
+
 
 class TestDailyShipmentsGetOrCreate:
-    """When _get_or_create encounters ObjectNotFoundError, it should create a new view."""
+    """When no row exists for the date, _get_or_create builds a new, unsaved view."""
 
     def test_creates_new_view_when_not_found(self):
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "DailyShipmentsView not found"})
-        now = datetime.now(UTC)
+        view = _get_or_create("2026-02-15", _DAY)
 
-        with patch("fulfillment.projections.daily_shipments.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            view = _get_or_create("2026-02-15", now)
-
-        assert view is not None
         assert view.date == "2026-02-15"
         assert view.total_created == 0
         assert view.total_shipped == 0
         assert view.total_delivered == 0
         assert view.total_exceptions == 0
-        assert view.updated_at == now
+        assert view.updated_at == _DAY
+        # _get_or_create does not persist; the handler does
+        assert current_domain.repository_for(DailyShipmentsView).get_or_none("2026-02-15") is None
 
     def test_on_fulfillment_created_creates_view_when_not_found(self):
-        projector = DailyShipmentsProjector()
-        now = datetime.now(UTC)
-        event = FulfillmentCreated(
-            fulfillment_id="ful-new-001",
-            order_id="ord-001",
-            customer_id="cust-001",
-            items=[],
-            item_count=2,
-            created_at=now,
+        DailyShipmentsProjector().on_fulfillment_created(
+            FulfillmentCreated(
+                fulfillment_id="ful-new-001",
+                order_id="ord-001",
+                customer_id="cust-001",
+                items=[],
+                item_count=2,
+                created_at=_DAY,
+            )
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "DailyShipmentsView not found"})
-
-        with patch("fulfillment.projections.daily_shipments.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            projector.on_fulfillment_created(event)
-            # repo.add should be called to persist the newly created+updated view
-            mock_repo.add.assert_called_once()
-            saved_view = mock_repo.add.call_args[0][0]
-            assert saved_view.total_created == 1
+        assert _saved_view().total_created == 1
 
     def test_on_shipment_handed_off_creates_view_when_not_found(self):
-        projector = DailyShipmentsProjector()
-        now = datetime.now(UTC)
-        event = ShipmentHandedOff(
-            fulfillment_id="ful-new-002",
-            order_id="ord-002",
-            carrier="UPS",
-            tracking_number="1Z999AA10123456784",
-            shipped_at=now,
+        DailyShipmentsProjector().on_shipment_handed_off(
+            ShipmentHandedOff(
+                fulfillment_id="ful-new-002",
+                order_id="ord-002",
+                carrier="UPS",
+                tracking_number="1Z999AA10123456784",
+                shipped_at=_DAY,
+            )
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "DailyShipmentsView not found"})
-
-        with patch("fulfillment.projections.daily_shipments.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            projector.on_shipment_handed_off(event)
-            mock_repo.add.assert_called_once()
-            saved_view = mock_repo.add.call_args[0][0]
-            assert saved_view.total_shipped == 1
+        assert _saved_view().total_shipped == 1
 
     def test_on_delivery_confirmed_creates_view_when_not_found(self):
-        projector = DailyShipmentsProjector()
-        now = datetime.now(UTC)
-        event = DeliveryConfirmed(
-            fulfillment_id="ful-new-003",
-            order_id="ord-003",
-            actual_delivery=now,
-            delivered_at=now,
+        DailyShipmentsProjector().on_delivery_confirmed(
+            DeliveryConfirmed(
+                fulfillment_id="ful-new-003",
+                order_id="ord-003",
+                actual_delivery=_DAY,
+                delivered_at=_DAY,
+            )
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "DailyShipmentsView not found"})
-
-        with patch("fulfillment.projections.daily_shipments.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            projector.on_delivery_confirmed(event)
-            mock_repo.add.assert_called_once()
-            saved_view = mock_repo.add.call_args[0][0]
-            assert saved_view.total_delivered == 1
+        assert _saved_view().total_delivered == 1
 
     def test_on_delivery_exception_creates_view_when_not_found(self):
-        projector = DailyShipmentsProjector()
-        now = datetime.now(UTC)
-        event = DeliveryException(
-            fulfillment_id="ful-new-004",
-            order_id="ord-004",
-            reason="Address not found",
-            occurred_at=now,
+        DailyShipmentsProjector().on_delivery_exception(
+            DeliveryException(
+                fulfillment_id="ful-new-004",
+                order_id="ord-004",
+                reason="Address not found",
+                occurred_at=_DAY,
+            )
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "DailyShipmentsView not found"})
+        assert _saved_view().total_exceptions == 1
 
-        with patch("fulfillment.projections.daily_shipments.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            projector.on_delivery_exception(event)
-            mock_repo.add.assert_called_once()
-            saved_view = mock_repo.add.call_args[0][0]
-            assert saved_view.total_exceptions == 1
+    def test_second_event_updates_existing_view(self):
+        projector = DailyShipmentsProjector()
+        for n in (1, 2):
+            projector.on_delivery_exception(
+                DeliveryException(
+                    fulfillment_id=f"ful-upd-{n}",
+                    order_id=f"ord-upd-{n}",
+                    reason="Address not found",
+                    occurred_at=_DAY,
+                )
+            )
+        assert _saved_view().total_exceptions == 2

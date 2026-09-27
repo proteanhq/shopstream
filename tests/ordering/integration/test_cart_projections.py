@@ -85,3 +85,29 @@ class TestCartViewProjection:
 
         view = current_domain.repository_for(CartView).get(cart_id)
         assert view.item_count == 1
+
+
+class TestCartViewGetOrNone:
+    def test_hit_returns_projected_items(self):
+        cart_id = _create_cart(customer_id="cust-cv-gon")
+        current_domain.process(
+            AddToCart(cart_id=cart_id, product_id="prod-gon-1", variant_id="var-gon-1", quantity=2),
+            asynchronous=False,
+        )
+        current_domain.process(
+            AddToCart(cart_id=cart_id, product_id="prod-gon-2", variant_id="var-gon-2", quantity=5),
+            asynchronous=False,
+        )
+
+        view = current_domain.repository_for(CartView).get_or_none(cart_id)
+
+        assert view is not None
+        assert view.cart_id == cart_id
+        assert view.item_count == 2
+        assert [(i["product_id"], i["variant_id"], i["quantity"]) for i in view.items] == [
+            ("prod-gon-1", "var-gon-1", 2),
+            ("prod-gon-2", "var-gon-2", 5),
+        ]
+
+    def test_miss_returns_none(self):
+        assert current_domain.repository_for(CartView).get_or_none("missing-cart-id") is None

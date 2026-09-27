@@ -37,13 +37,12 @@ class CategoryTreeProjector:
 
         current_parent_id = parent_category_id
         while current_parent_id:
-            try:
-                parent_node = repo.get(current_parent_id)
-                crumbs.insert(0, parent_node.name)
-                # Walk up the tree
-                current_parent_id = parent_node.parent_category_id
-            except Exception:
+            parent_node = repo.get_or_none(current_parent_id)
+            if parent_node is None:
                 break
+            crumbs.insert(0, parent_node.name)
+            # Walk up the tree
+            current_parent_id = parent_node.parent_category_id
 
         return crumbs
 
@@ -89,9 +88,8 @@ class CategoryTreeProjector:
         if not event.category_id:
             return
         repo = current_domain.repository_for(CategoryTree)
-        try:
-            node = repo.get(event.category_id)
-            node.product_count = (node.product_count or 0) + 1
-            repo.add(node)
-        except Exception:
-            pass
+        node = repo.get_or_none(event.category_id)
+        if node is None:
+            return
+        node.product_count = (node.product_count or 0) + 1
+        repo.add(node)

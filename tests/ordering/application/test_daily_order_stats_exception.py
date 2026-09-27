@@ -1,33 +1,35 @@
-"""Mock-based tests for DailyOrderStats projector exception branches.
+"""DailyOrderStats projector: a miss on the day's row creates a fresh record.
 
-Covers the ObjectNotFoundError branch in _get_or_create (line 37) where
-repo.get() fails and a new DailyOrderStats record is created instead.
+Covers the miss branch in _get_or_create, where `get_or_none` finds no row for
+the date and a new DailyOrderStats is built instead. Uses the real repository.
 """
 
 from datetime import UTC, datetime
-from unittest.mock import MagicMock, patch
 
-from protean.exceptions import ObjectNotFoundError
+from protean import current_domain
 
 from ordering.order.events import OrderCancelled, OrderCreated
 from ordering.projections.daily_order_stats import (
+    DailyOrderStats,
     DailyOrderStatsProjector,
     _get_or_create,
 )
 
+_DAY = datetime(2026, 1, 15, 12, 0, tzinfo=UTC)
+
+
+def _saved_record():
+    record = current_domain.repository_for(DailyOrderStats).get_or_none("2026-01-15")
+    assert record is not None, "Expected the projector to persist a record for 2026-01-15"
+    return record
+
 
 class TestDailyOrderStatsGetOrCreate:
-    """When _get_or_create encounters ObjectNotFoundError, it should create a new record."""
+    """When no row exists for the date, _get_or_create builds a new, unsaved record."""
 
     def test_creates_new_record_when_not_found(self):
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "DailyOrderStats not found"})
+        record = _get_or_create("2026-01-15")
 
-        with patch("ordering.projections.daily_order_stats.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            record = _get_or_create("2026-01-15")
-
-        assert record is not None
         assert record.date == "2026-01-15"
         assert record.orders_created == 0
         assert record.orders_completed == 0
@@ -35,41 +37,46 @@ class TestDailyOrderStatsGetOrCreate:
         assert record.orders_refunded == 0
         assert record.total_revenue == 0.0
         assert record.total_refunds == 0.0
-        mock_repo.add.assert_not_called()
+        # _get_or_create does not persist; the handler does
+        assert current_domain.repository_for(DailyOrderStats).get_or_none("2026-01-15") is None
 
     def test_on_order_created_creates_record_when_not_found(self):
-        projector = DailyOrderStatsProjector()
-        event = OrderCreated(
-            order_id="ord-new-001",
-            customer_id="cust-001",
-            items=[],
-            shipping_address={},
-            billing_address={},
-            subtotal=100.0,
-            grand_total=110.0,
-            created_at=datetime.now(UTC),
+        DailyOrderStatsProjector().on_order_created(
+            OrderCreated(
+                order_id="ord-new-001",
+                customer_id="cust-001",
+                items=[],
+                shipping_address={},
+                billing_address={},
+                subtotal=100.0,
+                grand_total=110.0,
+                created_at=_DAY,
+            )
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "DailyOrderStats not found"})
-
-        with patch("ordering.projections.daily_order_stats.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            projector.on_order_created(event)
-            # Only the handler calls repo.add (not _get_or_create)
-            mock_repo.add.assert_called_once()
+        record = _saved_record()
+        assert record.orders_created == 1
+        assert record.total_revenue == 110.0
 
     def test_on_order_cancelled_creates_record_when_not_found(self):
-        projector = DailyOrderStatsProjector()
-        event = OrderCancelled(
-            order_id="ord-cancel-001",
-            reason="Changed mind",
-            cancelled_by="Customer",
-            cancelled_at=datetime.now(UTC),
+        DailyOrderStatsProjector().on_order_cancelled(
+            OrderCancelled(
+                order_id="ord-cancel-001",
+                reason="Changed mind",
+                cancelled_by="Customer",
+                cancelled_at=_DAY,
+            )
         )
-        mock_repo = MagicMock()
-        mock_repo.get.side_effect = ObjectNotFoundError({"_entity": "DailyOrderStats not found"})
+        assert _saved_record().orders_cancelled == 1
 
-        with patch("ordering.projections.daily_order_stats.current_domain") as mock_domain:
-            mock_domain.repository_for = MagicMock(return_value=mock_repo)
-            projector.on_order_cancelled(event)
-            mock_repo.add.assert_called_once()
+    def test_second_event_updates_existing_record(self):
+        projector = DailyOrderStatsProjector()
+        for n in (1, 2):
+            projector.on_order_cancelled(
+                OrderCancelled(
+                    order_id=f"ord-cancel-upd-{n}",
+                    reason="Changed mind",
+                    cancelled_by="Customer",
+                    cancelled_at=_DAY,
+                )
+            )
+        assert _saved_record().orders_cancelled == 2

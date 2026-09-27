@@ -60,9 +60,8 @@ class NotificationLogProjector:
 
     def _update_log(self, notification_id, **fields):
         repo = current_domain.repository_for(NotificationLog)
-        try:
-            log = repo.get(notification_id)
-        except Exception:
+        log = repo.get_or_none(notification_id)
+        if log is None:
             return
         for key, value in fields.items():
             setattr(log, key, value)

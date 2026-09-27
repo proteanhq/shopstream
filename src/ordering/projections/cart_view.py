@@ -35,9 +35,8 @@ class CartViewProjector:
     @on(CartItemAdded)
     def on_item_added(self, event):
         repo = current_domain.repository_for(CartView)
-        try:
-            view = repo.get(event.cart_id)
-        except Exception:
+        view = repo.get_or_none(event.cart_id)
+        if view is None:
             # Cart view doesn't exist yet — create it
             view = CartView(
                 cart_id=event.cart_id,
@@ -129,13 +128,13 @@ class CartViewProjector:
 
     @staticmethod
     def _get_or_create_view(repo, cart_id):
-        try:
-            return repo.get(cart_id)
-        except Exception:
-            return CartView(
-                cart_id=cart_id,
-                status="Active",
-                items=[],
-                applied_coupons=[],
-                item_count=0,
-            )
+        view = repo.get_or_none(cart_id)
+        if view is not None:
+            return view
+        return CartView(
+            cart_id=cart_id,
+            status="Active",
+            items=[],
+            applied_coupons=[],
+            item_count=0,
+        )

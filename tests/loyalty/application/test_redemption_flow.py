@@ -11,10 +11,13 @@ synchronous pass. Multi-step process managers cascade under ``event_processing="
 proteanhq/protean#1048 was fixed, so the saga runs to a terminal state deterministically.
 """
 
+from datetime import UTC, datetime
+
 from protean import current_domain
 
-from loyalty.projections.redemption_view import RedemptionView
+from loyalty.projections.redemption_view import RedemptionView, RedemptionViewProjector
 from loyalty.redemption.commands import RequestRedemption
+from loyalty.redemption.events import PointsReserved
 from loyalty.redemption.saga import RedemptionSaga
 from loyalty.reward.enrollment import EnrollRewardAccount
 from loyalty.reward.points import EarnPoints
@@ -99,3 +102,20 @@ class TestRedemptionRejected:
         assert transitions[0].data["state"]["status"] == "rejected"
         assert transitions[0].data["state"]["failure_reason"] == "Points balance cannot be negative"
         assert _balance(account_id) == 40  # nothing was deducted
+
+
+class TestRedemptionViewOutOfOrder:
+    def test_update_before_the_view_exists_is_skipped(self):
+        repo = current_domain.repository_for(RedemptionView)
+        assert repo.get_or_none("redemption-not-yet-viewed") is None
+
+        RedemptionViewProjector().on_points_reserved(
+            PointsReserved(
+                redemption_id="redemption-not-yet-viewed",
+                account_id="acct-x",
+                points=10,
+                reserved_at=datetime.now(UTC),
+            )
+        )
+
+        assert repo.get_or_none("redemption-not-yet-viewed") is None

@@ -5,7 +5,6 @@ are inserted on creation and removed when confirmed or cancelled.
 """
 
 from protean.core.projector import on
-from protean.exceptions import ObjectNotFoundError
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
 
@@ -44,18 +43,12 @@ class AbandonedCheckoutProjector:
     def on_order_confirmed(self, event):
         """Remove from abandoned checkouts — order was confirmed."""
         repo = current_domain.repository_for(AbandonedCheckout)
-        try:
-            repo.get(str(event.order_id))
+        if repo.get_or_none(str(event.order_id)) is not None:
             repo.query.filter(order_id=str(event.order_id)).delete()
-        except ObjectNotFoundError:
-            pass
 
     @on(OrderCancelled)
     def on_order_cancelled(self, event):
         """Remove from abandoned checkouts — order was explicitly cancelled."""
         repo = current_domain.repository_for(AbandonedCheckout)
-        try:
-            repo.get(str(event.order_id))
+        if repo.get_or_none(str(event.order_id)) is not None:
             repo.query.filter(order_id=str(event.order_id)).delete()
-        except ObjectNotFoundError:
-            pass

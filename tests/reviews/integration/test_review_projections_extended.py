@@ -76,6 +76,41 @@ class TestCustomerReviewsFullLifecycle:
         assert cr.status == "Removed"
 
 
+class TestModerationQueueEdited:
+    def test_edit_pending_review_updates_queue_entry(self):
+        review_id = _submit_review(product_id="prod-mq-ed1", customer_id="cust-mq-ed1")
+        current_domain.process(
+            EditReview(review_id=review_id, customer_id="cust-mq-ed1", title="Sharper title", rating=2),
+            asynchronous=False,
+        )
+        mq = current_domain.repository_for(ModerationQueue).get(review_id)
+        assert mq.title == "Sharper title"
+        assert mq.rating == 2
+        assert mq.body == "This is a review body that is long enough for validation."
+        assert mq.status == "Pending"
+
+    def test_edited_rejected_review_re_enters_queue(self):
+        review_id = _submit_review(product_id="prod-mq-ed2", customer_id="cust-mq-ed2")
+        current_domain.process(
+            ModerateReview(review_id=review_id, moderator_id="mod-001", action="Reject", reason="Too short"),
+            asynchronous=False,
+        )
+        repo = current_domain.repository_for(ModerationQueue)
+        assert repo.get_or_none(review_id) is None
+
+        current_domain.process(
+            EditReview(review_id=review_id, customer_id="cust-mq-ed2", title="Rewritten title"),
+            asynchronous=False,
+        )
+        mq = repo.get(review_id)
+        assert mq.status == "Pending"
+        assert mq.title == "Rewritten title"
+        assert mq.product_id == "prod-mq-ed2"
+        assert mq.customer_id == "cust-mq-ed2"
+        assert mq.rating == 4
+        assert mq.report_count == 0
+
+
 class TestModerationQueueReported:
     def test_reported_published_review_added_to_queue(self):
         review_id = _submit_review(product_id="prod-mq-rpt1", customer_id="cust-mq-rpt1")
@@ -91,6 +126,7 @@ class TestModerationQueueReported:
         )
         mq = current_domain.repository_for(ModerationQueue).get(review_id)
         assert mq.report_count == 1
+        assert mq.status == "Reported"
 
     def test_reported_pending_review_updated_in_queue(self):
         review_id = _submit_review(product_id="prod-mq-rpt2", customer_id="cust-mq-rpt2")
@@ -116,11 +152,9 @@ class TestModerationQueueReported:
             ),
             asynchronous=False,
         )
-        try:
-            current_domain.repository_for(ModerationQueue).get(review_id)
-            raise AssertionError("ModerationQueue entry should have been removed")
-        except Exception:
-            pass
+        assert current_domain.repository_for(ModerationQueue).get_or_none(review_id) is None, (
+            "ModerationQueue entry should have been removed"
+        )
 
     def test_remove_clears_from_queue(self):
         review_id = _submit_review(product_id="prod-mq-rmq", customer_id="cust-mq-rmq")
@@ -139,11 +173,9 @@ class TestModerationQueueReported:
             RemoveReview(review_id=review_id, removed_by="Admin", reason="Policy"),
             asynchronous=False,
         )
-        try:
-            current_domain.repository_for(ModerationQueue).get(review_id)
-            raise AssertionError("ModerationQueue entry should have been removed")
-        except Exception:
-            pass
+        assert current_domain.repository_for(ModerationQueue).get_or_none(review_id) is None, (
+            "ModerationQueue entry should have been removed"
+        )
 
 
 class TestReviewDetailFullLifecycle:
@@ -308,11 +340,7 @@ class TestProductReviewsVoteAndRemove:
             RemoveReview(review_id=review_id, removed_by="Admin", reason="Policy"),
             asynchronous=False,
         )
-        try:
-            current_domain.repository_for(ProductReviews).get(review_id)
-            raise AssertionError("Should have been removed")
-        except Exception:
-            pass
+        assert current_domain.repository_for(ProductReviews).get_or_none(review_id) is None, "Should have been removed"
 
 
 class TestCustomerReviewsEditNoTitleNoRating:

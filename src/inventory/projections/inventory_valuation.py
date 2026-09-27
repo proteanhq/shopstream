@@ -5,7 +5,6 @@ Unit cost is derived from the most recent StockReceived event.
 """
 
 from protean.core.projector import on
-from protean.exceptions import ObjectNotFoundError
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
 
@@ -56,10 +55,7 @@ class InventoryValuationProjector:
     def _get_view(self, inventory_item_id):
         """Get the valuation record, or None if it doesn't exist yet."""
         repo = current_domain.repository_for(InventoryValuation)
-        try:
-            return repo, repo.get(str(inventory_item_id))
-        except ObjectNotFoundError:
-            return repo, None
+        return repo, repo.get_or_none(str(inventory_item_id))
 
     @on(StockReceived)
     def on_stock_received(self, event):

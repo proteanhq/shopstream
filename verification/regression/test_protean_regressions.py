@@ -477,6 +477,34 @@ def test_outer_commit_of_a_doomed_transaction_raises():
         assert outer_error is not None, "the outer UnitOfWork returned normally"
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AttributeError,
+    reason="BaseEventSourcedRepository has no get_or_none; only BaseRepository gained it (proteanhq/protean#1279)",
+)
+@pytest.mark.usefixtures("inventory_ctx")
+def test_event_sourced_repository_get_or_none_returns_none_on_a_miss():
+    """Protean finding (not filed): the event-sourced repository has no `get_or_none`.
+
+    proteanhq/protean#1279 added `get_or_none` to `BaseRepository`, so CQRS aggregates
+    and projections can look up a row that may not exist without catching
+    `ObjectNotFoundError`. `BaseEventSourcedRepository` has only `add` and `get`, so
+    `src/inventory/stock/expiry.py` still catches `ObjectNotFoundError` around
+    `repository_for(InventoryItem).get(...)`.
+    """
+    from protean import current_domain
+    from protean.core.event_sourced_repository import BaseEventSourcedRepository
+    from protean.core.repository import BaseRepository
+
+    from inventory.stock.stock import InventoryItem
+
+    repo = current_domain.repository_for(InventoryItem)
+    if not isinstance(repo, BaseEventSourcedRepository) or not hasattr(BaseRepository, "get_or_none"):
+        pytest.fail("precondition: InventoryItem uses the event-sourced repository and BaseRepository has get_or_none")
+
+    assert repo.get_or_none("inventory-item-that-does-not-exist") is None
+
+
 @pytest.mark.usefixtures("inventory_ctx")
 def test_stale_event_sourced_write_raises_expected_version_error():
     """proteanhq/protean#1628 (guard): a stale event-sourced write raises `ExpectedVersionError`.
