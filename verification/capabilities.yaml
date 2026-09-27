@@ -112,7 +112,7 @@ capabilities:
   - name: lenient_deserialization
     taught_by: src/loyalty/campaign/events.py   # CampaignPaused(lenient=True)
     guarded_by: tests/loyalty/application/test_lenient_deserialization.py
-    property: "a lenient event drops an unknown stored field and records it in _dropped_fields; a non-lenient event still raises DeserializationError"
+    property: "a lenient event drops an unknown stored field and records its name in _dropped_fields; a non-lenient event still raises DeserializationError"
     source: A
     status: covered
 

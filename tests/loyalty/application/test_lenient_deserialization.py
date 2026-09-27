@@ -62,6 +62,7 @@ class TestLenientCampaignPaused:
                 "reason": "budget",
                 "paused_at": "2025-01-01T00:00:00+00:00",
                 "paused_by": "ops-bot",
+                "ticket": "OPS-42",
             },
         )
 
@@ -71,7 +72,20 @@ class TestLenientCampaignPaused:
         assert event.campaign_id == "promo-lenient-001"
         assert event.reason == "budget"
         assert "paused_by" not in event.to_dict()
-        assert event._metadata.extensions["_dropped_fields"] == ["paused_by"]
+        assert "ticket" not in event.to_dict()
+        assert event._metadata.extensions["_dropped_fields"] == ["paused_by", "ticket"]
+
+    def test_missing_required_field_still_raises(self):
+        message = _stored_message(
+            "promo-lenient-003",
+            "CampaignPaused",
+            {"reason": "budget", "paused_at": "2025-01-01T00:00:00+00:00", "paused_by": "ops-bot"},
+        )
+
+        with pytest.raises(DeserializationError) as exc_info:
+            message.to_domain_object()
+
+        assert "campaign_id" in str(exc_info.value)
 
     def test_payload_without_extra_field_records_nothing(self):
         message = _stored_message(

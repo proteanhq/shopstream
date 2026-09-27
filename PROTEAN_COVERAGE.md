@@ -35,8 +35,8 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `@upcaster` (single step) | ✅ | ordering OrderCreated v1→v2 |
 | `@upcaster` (multi-step chain) | ✅ | loyalty CampaignLaunched v1→v2→v3 |
 | `@upcaster` string `event_type` | ✅ | loyalty `UpcastCampaignLaunchedV1ToV2` (`event_type="CampaignLaunched"`); V2ToV3 keeps the class form |
-| `UPCASTER_GAP` check | ✅ | `verification/contracts/test_upcaster_gap.py` — removing loyalty's v1→v2 upcaster is flagged; real loyalty + ordering chains are clean |
-| event `lenient` option | ✅ | loyalty `CampaignPaused(lenient=True)` drops unknown stored fields into `_dropped_fields`; other events stay strict (`tests/loyalty/application/test_lenient_deserialization.py`) |
+| `UPCASTER_GAP` check | ✅ | `verification/contracts/test_upcaster_gap.py`: removing loyalty's v1→v2 upcaster is flagged; real loyalty + ordering chains are clean |
+| event `lenient` option | ✅ | loyalty `CampaignPaused(lenient=True)` drops unknown stored fields and records their names in `_dropped_fields`, but still rejects a missing required field; other events stay strict (`tests/loyalty/application/test_lenient_deserialization.py`) |
 | `@process_manager` (saga, string correlate) | ✅ | ordering `OrderCheckoutSaga` |
 | `@process_manager` (dict correlate + compensation + `end`) | ✅ | loyalty `RedemptionSaga` — reserve → issue → complete, compensating (refund) on voucher failure; `correlate={"redemption_id": ...}`, `end=True` + `mark_as_complete()` |
 | event/command enrichers | ✅ | all domains (`register_command_enricher` / `register_event_enricher`) + `bind_event_context` (payments/reviews) |

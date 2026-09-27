@@ -148,11 +148,16 @@ and `PointsRedeemed` into customer notifications.
 
 **PromoCampaign events** (`campaign/events.py`): `CampaignLaunched` (`__version__ = 3`),
 `CampaignActivated`, `CampaignPaused`, `CampaignExpired` (+ auto `PromoCampaignFactEvent`).
+`CampaignPaused` is `lenient=True`: a stored payload with an unknown field loads, and the dropped
+names go to `metadata.extensions["_dropped_fields"]`. Every other loyalty event stays strict.
 
 ### Upcasters
 **File:** `campaign/upcasters.py` — the only **multi-step** upcaster chain in ShopStream:
 - `UpcastCampaignLaunchedV1ToV2` — renames `discount_pct` &rarr; `discount_value`, adds `discount_type`
 - `UpcastCampaignLaunchedV2ToV3` — adds optional `starts_on` / `ends_on`
+
+V1->V2 names its event as a string (`event_type="CampaignLaunched"`); V2->V3 passes the class.
+Both forms are supported, and a v1 replay runs both.
 
 ## Commands & Handlers
 
