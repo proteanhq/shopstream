@@ -62,13 +62,15 @@ def stamp_actor(aggregate):
 
     The actor is the ``actor_id`` bound on the domain context's ``g`` (the API binds it
     from the ``X-Actor-Id`` header). Saves with no bound actor, such as engine-driven
-    handlers, record ``"system"``. ``created_by`` is set on the first save and kept after.
+    handlers, record ``"system"``. ``created_by`` is set only when the aggregate is first
+    inserted, the same rule ``auto_now_add`` follows for ``created_at``. A row stored
+    before these fields existed keeps both empty.
     """
     if not isinstance(aggregate, Auditable):
         return
     actor = g.get("actor_id") or "system"
     aggregate.updated_by = actor
-    if aggregate.created_by is None:
+    if not aggregate.state_.is_persisted:
         aggregate.created_by = actor
 
 

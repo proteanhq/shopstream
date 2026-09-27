@@ -40,6 +40,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `@process_manager` (saga, string correlate) | ✅ | ordering `OrderCheckoutSaga` |
 | `@process_manager` (dict correlate + compensation + `end`) | ✅ | loyalty `RedemptionSaga` — reserve → issue → complete, compensating (refund) on voucher failure; `correlate={"redemption_id": ...}`, `end=True` + `mark_as_complete()` |
 | event/command enrichers | ✅ | all domains (`register_command_enricher` / `register_event_enricher`) + `bind_event_context` (payments/reviews) |
+| `@aggregate_enricher` | ⛔ | loyalty `stamp_actor` fills `Auditable.created_by` / `updated_by` from `g.actor_id` (the API's `X-Actor-Id`), or `"system"` (`tests/loyalty/application/test_audit_fields.py`, `tests/loyalty/integration/test_audit_actor_api.py`). Partly blocked: saving a closed `RewardAccount` fails, because the stamps run its `@invariant.pre` (`verification/regression/test_protean_regressions.py::test_auto_now_stamp_does_not_run_pre_invariants`) |
 | `@database_model` (custom ORM) | ✅ | loyalty `RewardAccountViewPostgresModel` (`projections/reward_account_view_model.py`) — hand-written SQLAlchemy model overriding `RewardAccountView`'s columns (`Text` + indexed `customer_id`), registered `database="postgresql"` so Postgres uses it and the memory provider falls back to the auto-generated model; both paths asserted in `tests/loyalty/integration/test_custom_database_model.py` |
 | `@email` / `send_email`, `ReadView` element | N/A | notifications uses bespoke channel ports; `view_for()` covers projection reads |
 
@@ -58,6 +59,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `@invariant.post` | ✅ | widespread |
 | `@invariant.pre` | ✅ | loyalty RewardAccount (`closed_accounts_are_immutable`) |
 | `atomic_change` | ✅ | identity `add_address` |
+| `DateTime(auto_now_add=True)` / `DateTime(auto_now=True)` | ⛔ | loyalty `Auditable.created_at` / `updated_at`, stamped from the domain clock on save (`tests/loyalty/application/test_audit_fields.py`). Same block as `@aggregate_enricher`: a closed `RewardAccount` cannot be saved |
 | portable `Index` on projections | ✅ | ordering/fulfillment/reviews (added in PR #8) |
 
 ## Event sourcing / messaging / persistence
@@ -67,7 +69,8 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | `@apply`, `from_events`, `_create_new`, `_version` | ✅ | Order/Payment/InventoryItem/PromoCampaign |
 | snapshots — `snapshot_threshold` + `create_snapshot` | ✅ | loyalty (`snapshot_threshold=5`) |
 | bulk `create_snapshots()` | ✅ | loyalty PromoCampaign (**#1028** fixed on main) |
-| command `deadline` + `CommandExpiredError` | ✅ | payments (PR #8) |
+| command `deadline` + `CommandExpiredError` | ✅ | payments (PR #8); the deadline is checked against the domain clock (`tests/payments/application/test_deadline_and_retry.py`, frozen clock) |
+| `domain.clock` (injectable clock) | ✅ | the ordering abandonment, inventory expiry and notifications scheduler jobs default `as_of` to it, and inventory reservation expiry counts from it. Tests swap in a `FrozenClock` through the `frozen_clock` fixture (`tests/conftest.py`) |
 | handler `retries`/`backoff`/`retry_exceptions` + `transient_retry` | ✅ | payments (PR #8) |
 | `Q` / `F` / lookups (gte/in/…) | ✅ | loyalty `RewardAccountRepository` |
 | cache provider (`[caches.*]`) | ✅ | loyalty `[caches.loyalty]` |

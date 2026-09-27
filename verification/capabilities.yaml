@@ -140,14 +140,14 @@ capabilities:
   - name: auto_now
     taught_by: src/loyalty/reward/reward_account.py   # Auditable.created_at / updated_at
     guarded_by: tests/loyalty/application/test_audit_fields.py
-    property: "created_at is stamped once on the first save, updated_at on every save, both from the domain clock"
+    property: "created_at is stamped on insert only, updated_at on every save, both from the domain clock"
     source: A
     status: covered
 
   - name: aggregate_enricher
     taught_by: src/loyalty/reward/reward_account.py   # stamp_actor
     guarded_by: tests/loyalty/integration/test_audit_actor_api.py   # + tests/loyalty/application/test_audit_fields.py
-    property: "each save records the request's X-Actor-Id (or system), created_by is kept after the first save"
+    property: "a save made during an API request records its X-Actor-Id; a save with no bound actor (engine, subscriber, no header) records system; created_by is set only on insert"
     source: A
     status: covered
 

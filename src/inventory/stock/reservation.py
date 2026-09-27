@@ -1,7 +1,5 @@
 """Stock reservation — commands and handler."""
 
-from datetime import timedelta
-
 from protean import handle
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -44,14 +42,10 @@ class ReservationHandler:
         repo = current_domain.repository_for(InventoryItem)
         item = repo.get(command.inventory_item_id)
 
-        expires_at = command.expires_at
-        if expires_at is None:
-            expires_at = current_domain.clock.now() + timedelta(minutes=15)
-
         item.reserve(
             order_id=command.order_id,
             quantity=command.quantity,
-            expires_at=expires_at,
+            expires_at=command.expires_at,
         )
         repo.add(item)
 

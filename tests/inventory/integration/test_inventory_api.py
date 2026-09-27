@@ -1,5 +1,7 @@
 """Integration tests for Inventory API endpoints via TestClient."""
 
+from datetime import UTC, datetime, timedelta
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -7,6 +9,7 @@ from protean import current_domain
 
 from inventory.api.routes import inventory_router
 from inventory.stock.stock import InventoryItem
+from tests.conftest import as_utc
 
 
 @pytest.fixture()
@@ -117,6 +120,23 @@ class TestReserveStockEndpoint:
         # Verify the returned ID matches the actual reservation
         item = current_domain.repository_for(InventoryItem).get(item_id)
         assert str(item.reservations[-1].id) == data["reservation_id"]
+
+    def test_reservation_expiry_is_counted_from_the_domain_clock(self, client, frozen_clock):
+        from inventory.domain import inventory
+
+        frozen_now = datetime(2030, 3, 1, 9, 0, tzinfo=UTC)
+        frozen_clock(inventory, frozen_now)
+        item_id = _initialize_stock(client, initial_quantity=100)
+
+        response = client.post(
+            f"/inventory/{item_id}/reserve",
+            json={"order_id": "ord-clock", "quantity": 5, "expires_in_minutes": 30},
+        )
+        assert response.status_code == 201
+
+        reservation = current_domain.repository_for(InventoryItem).get(item_id).reservations[-1]
+        assert as_utc(reservation.expires_at) == frozen_now + timedelta(minutes=30)
+        assert as_utc(reservation.reserved_at) == frozen_now
 
 
 class TestReleaseReservationEndpoint:

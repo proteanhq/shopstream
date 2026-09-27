@@ -37,7 +37,8 @@ Inherits the abstract base aggregate `Auditable` (`@loyalty.aggregate(abstract=T
 `created_at` (`auto_now_add`), `updated_at` (`auto_now`), `created_by`, `updated_by`). The
 framework stamps the timestamps from the domain clock on save. The `stamp_actor` aggregate
 enricher sets the two actor fields from `g.actor_id` (bound by the API from `X-Actor-Id`),
-or `"system"` when no actor is bound. `created_by` is set on the first save only.
+or `"system"` when no actor is bound. `created_by` is set only on the insert, like
+`created_at`, so an account row stored before these fields existed keeps both empty.
 
 Root fields: `customer_id`, `status` (`AccountStatus`), `tier` (non-Enum `choices`:
 bronze/silver/gold/platinum), `points_balance` (default 0), `lifetime_points` (default 0),

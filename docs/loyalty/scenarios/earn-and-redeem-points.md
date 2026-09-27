@@ -51,7 +51,8 @@ Later, a command credits points:
 4. Raises `PointsEarned`.
 
 The handler persists with `current_domain.repository_for(RewardAccount).add(account)`. That
-save stamps `updated_at` from the domain clock and `updated_by` with the acting user.
+save stamps `updated_at` from the domain clock. It also sets `updated_by` from the request's
+`X-Actor-Id` header when the command runs inside the request, and `"system"` otherwise.
 
 ### 3. Redeeming Points
 

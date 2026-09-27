@@ -1,5 +1,8 @@
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -40,22 +43,42 @@ class FrozenClock:
         self._now += delta
 
 
-@pytest.fixture()
-def frozen_clock():
-    """Return `freeze(domain, at)`, which installs a `FrozenClock` on `domain`.
+@contextmanager
+def frozen_clocks() -> Iterator[Callable[[Any, datetime], FrozenClock]]:
+    """Yield `freeze(domain, at)`, which installs a `FrozenClock` on `domain`.
 
     Each domain is set up once per session, so a stub left behind would freeze time
-    for every later test. Teardown puts back the clock each domain had before.
+    for every later test. On exit, each domain gets back the clock it had before.
     """
-    originals = {}
+    originals: dict[Any, Any] = {}
 
-    def freeze(domain, at: datetime) -> FrozenClock:
+    def freeze(domain: Any, at: datetime) -> FrozenClock:
         originals.setdefault(domain, domain.clock)
         clock = FrozenClock(at)
         domain.clock = clock
         return clock
 
-    yield freeze
+    try:
+        yield freeze
+    finally:
+        for domain, original in originals.items():
+            domain.clock = original
 
-    for domain, original in originals.items():
-        domain.clock = original
+
+@pytest.fixture()
+def frozen_clock():
+    """Return `freeze(domain, at)`; the domains' own clocks come back on teardown."""
+    with frozen_clocks() as freeze:
+        yield freeze
+
+
+def as_utc(value: datetime) -> datetime:
+    """Return `value` as an aware UTC datetime.
+
+    The Postgres adapter reads `DateTime` columns back without a timezone, and the
+    values it stores are UTC. `astimezone` would read such a value as local time, so a
+    naive value gets UTC attached instead.
+    """
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)

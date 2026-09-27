@@ -6,15 +6,19 @@ save, and the `stamp_actor` aggregate enricher fills `created_by` / `updated_by`
 test a fresh `g`, so an actor bound here does not leak into the next test.
 """
 
+import asyncio
 from datetime import UTC, datetime, timedelta
 
 from protean import current_domain, g
+from protean.server.engine import Engine
 
 from loyalty.domain import loyalty
 from loyalty.redemption.redemption import Redemption
 from loyalty.reward.enrollment import EnrollRewardAccount
+from loyalty.reward.ordering_subscriber import DELIVERY_BONUS_POINTS, OrderDeliveredSubscriber
 from loyalty.reward.points import EarnPoints
 from loyalty.reward.reward_account import RewardAccount
+from tests.conftest import as_utc
 
 T1 = datetime(2030, 6, 1, 12, 0, tzinfo=UTC)
 T2 = T1 + timedelta(hours=3)
@@ -34,8 +38,8 @@ class TestAuditTimestamps:
 
         account = _load(_enroll())
 
-        assert account.created_at.astimezone(UTC) == T1
-        assert account.updated_at.astimezone(UTC) == T1
+        assert as_utc(account.created_at) == T1
+        assert as_utc(account.updated_at) == T1
 
     def test_later_save_moves_updated_at_and_keeps_created_at(self, frozen_clock):
         clock = frozen_clock(loyalty, T1)
@@ -46,8 +50,8 @@ class TestAuditTimestamps:
 
         account = _load(account_id)
         assert account.points_balance == 50
-        assert account.created_at.astimezone(UTC) == T1
-        assert account.updated_at.astimezone(UTC) == T2
+        assert as_utc(account.created_at) == T1
+        assert as_utc(account.updated_at) == T2
 
     def test_direct_repository_add_is_stamped(self, frozen_clock):
         frozen_clock(loyalty, T1)
@@ -57,13 +61,32 @@ class TestAuditTimestamps:
         current_domain.repository_for(RewardAccount).add(account)
 
         stored = _load(account.id)
-        assert stored.created_at.astimezone(UTC) == T1
-        assert stored.updated_at.astimezone(UTC) == T1
+        assert as_utc(stored.created_at) == T1
+        assert as_utc(stored.updated_at) == T1
         assert stored.created_by == "system"
         assert stored.updated_by == "system"
 
 
 class TestAuditActor:
+    def test_row_stored_without_a_creator_keeps_it_empty(self):
+        g.actor_id = "alice"
+        repo = current_domain.repository_for(RewardAccount)
+        account_id = _enroll("cust-audit-legacy")
+        # A row saved before the audit fields existed has no creator or creation time.
+        legacy = repo.get(account_id)
+        legacy.created_by = None
+        legacy.created_at = None
+        repo.add(legacy)
+
+        g.actor_id = "carol"
+        current_domain.process(EarnPoints(account_id=account_id, amount=10), asynchronous=False)
+
+        account = _load(account_id)
+        assert account.points_balance == 10
+        assert account.created_by is None
+        assert account.created_at is None
+        assert account.updated_by == "carol"
+
     def test_save_without_an_actor_records_system(self):
         account = _load(_enroll())
 
@@ -96,3 +119,24 @@ class TestAuditActor:
         assert stored.points == 100
         assert not hasattr(stored, "created_by")
         assert not hasattr(stored, "updated_by")
+
+
+class TestEngineDrivenSave:
+    def test_subscriber_run_by_the_engine_records_system(self):
+        g.actor_id = "alice"
+        account_id = _enroll("cust-audit-engine")
+        engine = Engine(loyalty, test_mode=True)
+        payload = {
+            "metadata": {"headers": {"type": "Ordering.OrderDelivered.v1"}},
+            "data": {"order_id": "ord-audit", "customer_id": "cust-audit-engine"},
+        }
+
+        # The engine runs each subscriber in a fresh domain context, so the actor bound
+        # on this test's context does not reach the save.
+        handled = asyncio.run(engine.handle_broker_message(OrderDeliveredSubscriber, payload))
+
+        assert handled is True
+        account = _load(account_id)
+        assert account.points_balance == DELIVERY_BONUS_POINTS
+        assert account.created_by == "alice"
+        assert account.updated_by == "system"

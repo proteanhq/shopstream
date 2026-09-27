@@ -80,7 +80,7 @@ app.add_middleware(
 )
 
 # ---------------------------------------------------------------------------
-# User context middleware — populates Protean's `g` with the caller's identity.
+# User context middleware: populates Protean's `g` with the caller's identity.
 # Starlette runs the last-added middleware first, so this one is added before
 # DomainContextMiddleware to run inside the domain context that middleware pushes.
 # Correlation IDs are handled automatically by DomainContextMiddleware.
@@ -102,8 +102,9 @@ class UserContextMiddleware:
     async def __call__(self, scope, receive, send):
         if scope["type"] == "http":
             headers = dict(scope.get("headers", []))
-            user_id = headers.get(b"x-user-id", b"").decode() or None
-            actor_id = headers.get(b"x-actor-id", b"").decode().strip()[:_MAX_ACTOR_ID_LENGTH] or None
+            # errors="replace": a header that is not valid UTF-8 must not fail the request
+            user_id = headers.get(b"x-user-id", b"").decode(errors="replace") or None
+            actor_id = headers.get(b"x-actor-id", b"").decode(errors="replace").strip()[:_MAX_ACTOR_ID_LENGTH] or None
 
             with contextlib.suppress(AttributeError):
                 # No-op for paths DomainContextMiddleware maps to no domain

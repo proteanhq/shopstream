@@ -16,6 +16,7 @@ from inventory.stock.expiry import ExpireStaleReservations
 from inventory.stock.initialization import InitializeStock
 from inventory.stock.reservation import ReleaseReservation, ReserveStock
 from inventory.stock.stock import InventoryItem
+from tests.conftest import as_utc
 
 
 def _initialize_stock(**overrides):
@@ -198,8 +199,8 @@ class TestReservationExpiryWithDomainClock:
         )
 
         reservation = current_domain.repository_for(InventoryItem).get(item_id).reservations[-1]
-        assert reservation.expires_at.astimezone(UTC) == FROZEN_NOW + timedelta(minutes=15)
-        assert reservation.reserved_at.astimezone(UTC) == FROZEN_NOW
+        assert as_utc(reservation.expires_at) == FROZEN_NOW + timedelta(minutes=15)
+        assert as_utc(reservation.reserved_at) == FROZEN_NOW
 
     def test_releases_reservation_once_the_clock_passes_its_expiry(self, frozen_clock):
         from inventory.domain import inventory
