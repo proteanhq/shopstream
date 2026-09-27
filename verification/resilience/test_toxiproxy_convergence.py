@@ -154,10 +154,8 @@ def _pending_outbox(inventory) -> int:
 def _reserved(inventory, item_id):
     from inventory.projections.inventory_level import InventoryLevel
 
-    try:
-        return inventory.repository_for(InventoryLevel).get(item_id).reserved
-    except Exception:  # noqa: BLE001 - projection not created yet
-        return None
+    level = inventory.repository_for(InventoryLevel).get_or_none(item_id)  # None: projection not created yet
+    return None if level is None else level.reserved
 
 
 def _run_fixed_workload(inventory) -> str:

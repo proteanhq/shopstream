@@ -100,9 +100,8 @@ def _run_workload(inventory, *, product_id, variant_id, warehouse_id, sku) -> st
 def _level_view(inventory, item_id) -> dict | None:
     from inventory.projections.inventory_level import InventoryLevel
 
-    try:
-        level = inventory.repository_for(InventoryLevel).get(item_id)
-    except Exception:  # noqa: BLE001 - projection not created yet
+    level = inventory.repository_for(InventoryLevel).get_or_none(item_id)
+    if level is None:  # projection not created yet
         return None
     return {k: v for k, v in level.to_dict().items() if k not in _VOLATILE}
 

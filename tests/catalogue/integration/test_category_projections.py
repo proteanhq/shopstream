@@ -9,7 +9,7 @@ from catalogue.category.management import (
     UpdateCategory,
 )
 from catalogue.product.creation import CreateProduct
-from catalogue.projections.category_tree import CategoryTree
+from catalogue.projections.category_tree import CategoryTree, CategoryTreeProjector
 
 
 def _create_category(**overrides):
@@ -96,3 +96,23 @@ class TestCategoryTreeProjection:
 
         node = current_domain.repository_for(CategoryTree).get(category_id)
         assert node.product_count == 0
+
+
+class TestCategoryTreeMissingRows:
+    def test_breadcrumb_stops_at_a_missing_parent(self):
+        root_id = _create_category(name="Electronics")
+        phones_id = _create_category(name="Phones", parent_category_id=root_id)
+        repo = current_domain.repository_for(CategoryTree)
+        repo.query.filter(category_id=root_id).delete()
+
+        crumbs = CategoryTreeProjector()._build_breadcrumb(None, "Smartphones", phones_id)
+
+        assert crumbs == ["Phones", "Smartphones"]
+
+    def test_product_in_a_category_without_a_tree_node_is_skipped(self):
+        current_domain.process(
+            CreateProduct(sku="P-ORPHAN", title="Orphan Product", category_id="cat-without-node"),
+            asynchronous=False,
+        )
+
+        assert current_domain.repository_for(CategoryTree).get_or_none("cat-without-node") is None

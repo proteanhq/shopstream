@@ -230,10 +230,8 @@ class TestFailedNotificationsProjection:
 
         # Check if failed projection was created
         repo = current_domain.repository_for(FailedNotifications)
-        try:
-            failed = repo.get(nid)
-            assert str(failed.notification_id) == nid
-            assert str(failed.recipient_id) == "cust-fail-proj-1"
-            assert failed.failure_reason is not None
-        except Exception:
-            pass  # Projection may not trigger in sync test mode
+        failed = repo.get_or_none(nid)
+        assert failed is not None
+        assert str(failed.notification_id) == nid
+        assert str(failed.recipient_id) == "cust-fail-proj-1"
+        assert failed.failure_reason == "SMTP error"

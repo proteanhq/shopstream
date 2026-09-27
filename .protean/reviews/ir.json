@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:7586ca7d1633c23edf45c56c105f3d4c20d67ada5629b0605156f472fdf16309",
+  "checksum": "sha256:21b269a142be090c784d2a5d465de9dfee01b410d77afcc3626c58b7bae43bfd",
   "clusters": {
     "reviews.review.review.Review": {
       "aggregate": {
@@ -1859,6 +1859,9 @@
             "Reviews.ReviewApproved.v1": [
               "on_review_approved"
             ],
+            "Reviews.ReviewEdited.v1": [
+              "on_review_edited"
+            ],
             "Reviews.ReviewRejected.v1": [
               "on_review_rejected"
             ],
@@ -1871,32 +1874,6 @@
             "Reviews.ReviewSubmitted.v1": [
               "on_review_submitted"
             ]
-          },
-          "method_edges": {
-            "on_review_approved": {
-              "invokes": [
-                {
-                  "element": "reviews.review.review.Review",
-                  "method": "remove"
-                }
-              ]
-            },
-            "on_review_rejected": {
-              "invokes": [
-                {
-                  "element": "reviews.review.review.Review",
-                  "method": "remove"
-                }
-              ]
-            },
-            "on_review_removed": {
-              "invokes": [
-                {
-                  "element": "reviews.review.review.Review",
-                  "method": "remove"
-                }
-              ]
-            }
           },
           "module": "reviews.projections.moderation_queue",
           "name": "ModerationQueueProjector",
@@ -2167,16 +2144,6 @@
             "Reviews.SellerReplyAdded.v1": [
               "on_seller_reply_added"
             ]
-          },
-          "method_edges": {
-            "on_review_removed": {
-              "invokes": [
-                {
-                  "element": "reviews.review.review.Review",
-                  "method": "remove"
-                }
-              ]
-            }
           },
           "module": "reviews.projections.product_reviews",
           "name": "ProductReviewsProjector",

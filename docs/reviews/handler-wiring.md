@@ -58,6 +58,7 @@ flowchart LR
         proj_reviews_projections_moderation_queue_ModerationQueueProjector[ModerationQueueProjector → ModerationQueue]
     end
     evt_reviews_review_events_ReviewApproved([ReviewApproved]) --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
+    evt_reviews_review_events_ReviewEdited([ReviewEdited]) --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
     evt_reviews_review_events_ReviewRejected([ReviewRejected]) --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
     evt_reviews_review_events_ReviewRemoved([ReviewRemoved]) --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
     evt_reviews_review_events_ReviewReported([ReviewReported]) --> proj_reviews_projections_moderation_queue_ModerationQueueProjector

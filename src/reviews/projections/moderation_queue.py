@@ -7,12 +7,13 @@ from protean.utils.globals import current_domain
 from reviews.domain import reviews
 from reviews.review.events import (
     ReviewApproved,
+    ReviewEdited,
     ReviewRejected,
     ReviewRemoved,
     ReviewReported,
     ReviewSubmitted,
 )
-from reviews.review.review import Review
+from reviews.review.review import Review, ReviewStatus
 
 
 @reviews.projection
@@ -49,6 +50,40 @@ class ModerationQueueProjector:
             )
         )
 
+    @on(ReviewEdited)
+    def on_review_edited(self, event):
+        repo = current_domain.repository_for(ModerationQueue)
+        mq = repo.get_or_none(event.review_id)
+        if mq is not None:
+            if event.title:
+                mq.title = event.title
+            if event.body:
+                mq.body = event.body
+            if event.rating:
+                mq.rating = event.rating
+            repo.add(mq)
+            return
+
+        # A rejected review left the queue. Editing it moves it back to Pending,
+        # so it re-enters the queue for another round of moderation.
+        review = current_domain.repository_for(Review).get_or_none(event.review_id)
+        if review is None or review.status != ReviewStatus.PENDING.value:
+            return
+        repo.add(
+            ModerationQueue(
+                review_id=event.review_id,
+                product_id=str(review.product_id),
+                customer_id=str(review.customer_id),
+                rating=review.rating.score,
+                title=review.title,
+                body=review.body,
+                verified_purchase=str(review.verified_purchase),
+                report_count=review.report_count,
+                status="Pending",
+                submitted_at=event.edited_at,
+            )
+        )
+
     @on(ReviewApproved)
     def on_review_approved(self, event):
         repo = current_domain.repository_for(ModerationQueue)
@@ -74,7 +109,7 @@ class ModerationQueueProjector:
         # Review was published (not in queue). Enrich from aggregate and re-add.
         review = current_domain.repository_for(Review).get_or_none(event.review_id)
         if review is None:
-            return  # Cannot enrich — skip silently
+            return  # Cannot enrich: skip silently
         repo.add(
             ModerationQueue(
                 review_id=event.review_id,

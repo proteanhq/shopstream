@@ -76,6 +76,7 @@ flowchart LR
     evt_reviews_review_events_ReviewRemoved --> proj_reviews_projections_customer_reviews_CustomerReviewsProjector
     evt_reviews_review_events_ReviewSubmitted --> proj_reviews_projections_customer_reviews_CustomerReviewsProjector
     evt_reviews_review_events_ReviewApproved --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
+    evt_reviews_review_events_ReviewEdited --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
     evt_reviews_review_events_ReviewRejected --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
     evt_reviews_review_events_ReviewRemoved --> proj_reviews_projections_moderation_queue_ModerationQueueProjector
     evt_reviews_review_events_ReviewReported --> proj_reviews_projections_moderation_queue_ModerationQueueProjector

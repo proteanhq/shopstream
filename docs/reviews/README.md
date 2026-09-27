@@ -112,12 +112,12 @@ stateDiagram-v2
 | Event | Trigger | Consequence |
 |-------|---------|-------------|
 | `ReviewSubmitted` | Customer submits a new review | ModerationQueue, CustomerReviews, ReviewDetail projections created |
-| `ReviewEdited` | Customer edits their pending/rejected review | CustomerReviews, ReviewDetail projections updated; re-submitted reviews return to Pending |
+| `ReviewEdited` | Customer edits their pending/rejected review | CustomerReviews, ReviewDetail, ModerationQueue projections updated; re-submitted reviews return to Pending and re-enter ModerationQueue |
 | `ReviewApproved` | Moderator approves a pending review | ProductReviews created, ProductRating updated, ModerationQueue entry removed, CustomerReviews/ReviewDetail updated |
 | `ReviewRejected` | Moderator rejects a pending review | ModerationQueue entry removed, CustomerReviews/ReviewDetail updated |
 | `HelpfulVoteRecorded` | Customer votes a review as helpful or unhelpful | ProductReviews and ReviewDetail projections updated with vote counts |
 | `ReviewReported` | Customer reports a review for moderation | ModerationQueue entry updated (or re-added with enrichment from aggregate) |
-| `ReviewRemoved` | Admin removes a published review | ProductReviews deleted, ProductRating updated (decremented), ModerationQueue/CustomerReviews/ReviewDetail updated |
+| `ReviewRemoved` | Admin removes a published review | ProductReviews deleted, ProductRating updated (decremented), ModerationQueue entry removed, CustomerReviews/ReviewDetail updated |
 | `SellerReplyAdded` | Seller responds to a published review | ProductReviews and ReviewDetail projections updated |
 
 ## Command Flows
@@ -139,7 +139,7 @@ stateDiagram-v2
 | `ProductReviews` | Published reviews on the product detail page: rating, title, body, votes, seller reply | `ReviewApproved` (create), `HelpfulVoteRecorded`, `ReviewRemoved` (delete), `SellerReplyAdded` |
 | `ProductRating` | Aggregated rating per product: average, star distribution, total/verified review counts | `ReviewApproved` (add to distribution), `ReviewRemoved` (subtract from distribution) |
 | `CustomerReviews` | Customer's review history across all statuses for their account page | `ReviewSubmitted` (create), all status-change events |
-| `ModerationQueue` | Pending and reported reviews awaiting moderator action | `ReviewSubmitted` (add), `ReviewApproved`/`ReviewRejected` (remove), `ReviewReported` (update/re-add), `ReviewRemoved` (remove) |
+| `ModerationQueue` | Pending and reported reviews awaiting moderator action | `ReviewSubmitted` (add), `ReviewEdited` (update, or re-add a re-submitted review), `ReviewApproved`/`ReviewRejected` (remove), `ReviewReported` (update/re-add), `ReviewRemoved` (remove) |
 | `VerifiedPurchases` | Customer+product→order mapping for verified purchase checks | Populated by `OrderingEventsHandler` (cross-domain, not a projector) |
 | `ReviewDetail` | Full detail view of a single review with all metadata | All 8 events |
 

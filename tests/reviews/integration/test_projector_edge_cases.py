@@ -198,6 +198,63 @@ class TestModerationQueueProjectorEdgeCases:
         assert mq.customer_id == "cust-mq-enrich"
         assert mq.rating == 4
         assert mq.title == "Edge case test"
+        assert mq.status == "Reported"
+
+    def test_approve_without_queue_entry_skips(self):
+        projector = ModerationQueueProjector()
+        projector.on_review_approved(
+            ReviewApproved(
+                review_id="nonexistent-mq-apr",
+                product_id="prod-x",
+                customer_id="cust-x",
+                rating=4,
+                moderator_id="mod-x",
+                approved_at=datetime.now(UTC),
+            )
+        )
+        assert current_domain.repository_for(ModerationQueue).get_or_none("nonexistent-mq-apr") is None
+
+    def test_reject_without_queue_entry_skips(self):
+        projector = ModerationQueueProjector()
+        projector.on_review_rejected(
+            ReviewRejected(
+                review_id="nonexistent-mq-rej",
+                product_id="prod-x",
+                customer_id="cust-x",
+                moderator_id="mod-x",
+                reason="Bad",
+                rejected_at=datetime.now(UTC),
+            )
+        )
+        assert current_domain.repository_for(ModerationQueue).get_or_none("nonexistent-mq-rej") is None
+
+    def test_edit_without_queue_entry_or_aggregate_skips(self):
+        projector = ModerationQueueProjector()
+        projector.on_review_edited(ReviewEdited(review_id="nonexistent-mq-ed", edited_at=datetime.now(UTC)))
+        assert current_domain.repository_for(ModerationQueue).get_or_none("nonexistent-mq-ed") is None
+
+    def test_edit_of_published_review_does_not_re_add_it(self):
+        """Only a review back in Pending re-enters the queue on edit."""
+        review_id = _submit_and_get_id(product_id="prod-mq-ed-pub", customer_id="cust-mq-ed-pub")
+        current_domain.process(
+            ModerateReview(review_id=review_id, moderator_id="mod-x", action="Approve"),
+            asynchronous=False,
+        )
+        repo = current_domain.repository_for(ModerationQueue)
+        assert repo.get_or_none(review_id) is None
+
+        ModerationQueueProjector().on_review_edited(
+            ReviewEdited(review_id=review_id, title="Sneaky edit", edited_at=datetime.now(UTC))
+        )
+        assert repo.get_or_none(review_id) is None
+
+    def test_edit_without_content_keeps_queue_entry_content(self):
+        review_id = _submit_and_get_id(product_id="prod-mq-ed-blank", customer_id="cust-mq-ed-blank")
+        ModerationQueueProjector().on_review_edited(ReviewEdited(review_id=review_id, edited_at=datetime.now(UTC)))
+        mq = current_domain.repository_for(ModerationQueue).get(review_id)
+        assert mq.title == "Edge case test"
+        assert mq.rating == 4
+        assert mq.body == "This is a review body long enough for edge case testing."
 
     def test_reported_review_not_in_queue_no_aggregate(self):
         """When a reported event arrives for a review that doesn't exist in MQ or

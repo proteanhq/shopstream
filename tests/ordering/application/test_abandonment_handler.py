@@ -94,23 +94,13 @@ class TestDetectAbandonedCarts:
         assert view.status == "Active"
 
     def test_empty_carts_are_not_abandoned(self):
-        """Carts without items should not be marked as abandoned even if idle."""
+        """An empty cart has no CartView row (only CartItemAdded creates one), so
+        the detector never sees it, even with a zero idle threshold."""
         cart_id = current_domain.process(
             CreateCart(customer_id="cust-empty-cart"),
             asynchronous=False,
         )
-
-        # Set updated_at to the past but cart has no items
-        repo = current_domain.repository_for(CartView)
-        try:
-            view = repo.get(cart_id)
-        except Exception:
-            # CartView might not exist yet (no items added = no CartItemAdded event)
-            # which means the handler won't find it either -- test passes
-            return
-
-        view.updated_at = datetime.now(UTC) - timedelta(hours=48)
-        repo.add(view)
+        assert current_domain.repository_for(CartView).get_or_none(cart_id) is None
 
         current_domain.process(
             DetectAbandonedCarts(
@@ -120,9 +110,8 @@ class TestDetectAbandonedCarts:
             asynchronous=False,
         )
 
-        # Cart should still be Active (no CartView exists for empty cart)
         cart = current_domain.repository_for(ShoppingCart).get(cart_id)
-        assert cart.status in ("Active", "Active")
+        assert cart.status == "Active"
 
 
 class TestDetectAbandonedCartsStaleProjection:
