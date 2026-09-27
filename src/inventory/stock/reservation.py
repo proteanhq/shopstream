@@ -1,6 +1,6 @@
 """Stock reservation — commands and handler."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from protean import handle
 from protean.fields import DateTime, Identifier, Integer, String
@@ -17,7 +17,7 @@ class ReserveStock:
     inventory_item_id = Identifier(required=True)
     order_id = Identifier(required=True)
     quantity = Integer(required=True)
-    expires_at = DateTime()  # Optional; defaults to 15 minutes from now
+    expires_at = DateTime()  # Optional; defaults to 15 minutes past the domain clock
 
 
 @inventory.command(part_of="InventoryItem")
@@ -46,7 +46,7 @@ class ReservationHandler:
 
         expires_at = command.expires_at
         if expires_at is None:
-            expires_at = datetime.now(UTC) + timedelta(minutes=15)
+            expires_at = current_domain.clock.now() + timedelta(minutes=15)
 
         item.reserve(
             order_id=command.order_id,

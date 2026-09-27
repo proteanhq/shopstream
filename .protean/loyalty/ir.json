@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:d2ae64513d7cf9343e2e9fd121797a9c03903e99773b3778a181149f7e44e532",
+  "checksum": "sha256:8a19b93954dc0f8ed43aabfca5d4bfcaaec3cfd1677e340f002f64fe7bb9afa6",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -1113,13 +1113,17 @@
     },
     "loyalty.reward.reward_account.Auditable": {
       "aggregate": {
-        "description": "Abstract base contributing audit timestamps to concrete aggregates.",
+        "description": "Abstract base contributing audit fields to concrete aggregates.\n\nThe framework stamps both timestamps from the domain clock when the aggregate is\nsaved: ``created_at`` on the first save only, ``updated_at`` on every save. They are\n``None`` until then. The ``stamp_actor`` aggregate enricher fills ``created_by`` and\n``updated_by``.",
         "element_type": "AGGREGATE",
         "fields": {
           "created_at": {
-            "default": "<callable>",
             "kind": "standard",
             "type": "DateTime"
+          },
+          "created_by": {
+            "kind": "standard",
+            "max_length": 255,
+            "type": "String"
           },
           "id": {
             "auto_generated": true,
@@ -1128,9 +1132,13 @@
             "type": "Auto"
           },
           "updated_at": {
-            "default": "<callable>",
             "kind": "standard",
             "type": "DateTime"
+          },
+          "updated_by": {
+            "kind": "standard",
+            "max_length": 255,
+            "type": "String"
           }
         },
         "fqn": "loyalty.reward.reward_account.Auditable",
@@ -1170,9 +1178,13 @@
             "target": "loyalty.reward.reward_account.MembershipCard"
           },
           "created_at": {
-            "default": "<callable>",
             "kind": "standard",
             "type": "DateTime"
+          },
+          "created_by": {
+            "kind": "standard",
+            "max_length": 255,
+            "type": "String"
           },
           "customer_id": {
             "kind": "standard",
@@ -1242,9 +1254,13 @@
             "type": "String"
           },
           "updated_at": {
-            "default": "<callable>",
             "kind": "standard",
             "type": "DateTime"
+          },
+          "updated_by": {
+            "kind": "standard",
+            "max_length": 255,
+            "type": "String"
           }
         },
         "fqn": "loyalty.reward.reward_account.RewardAccount",

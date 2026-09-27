@@ -27,6 +27,7 @@ from protean.fields import (
     String,
     ValueObject,
 )
+from protean.utils.globals import current_domain
 
 from inventory.domain import inventory
 from inventory.stock.events import (
@@ -211,12 +212,12 @@ class InventoryItem:
         if available < quantity:
             raise ValidationError({"quantity": [f"Insufficient stock: {available} available, {quantity} requested"]})
 
+        now = current_domain.clock.now()
         if expires_at is None:
-            expires_at = datetime.now(UTC) + timedelta(minutes=15)
+            expires_at = now + timedelta(minutes=15)
 
         reservation_id = str(uuid4())
         new_available = available - quantity
-        now = datetime.now(UTC)
 
         self.raise_(
             StockReserved(

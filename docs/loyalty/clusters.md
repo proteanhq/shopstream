@@ -52,8 +52,10 @@ classDiagram
     class loyalty_reward_reward_account_Auditable["Auditable"] {
         <<Aggregate>>
         +created_at DateTime
+        +created_by String
         +id Auto~identifier~
         +updated_at DateTime
+        +updated_by String
     }
 ```
 
@@ -65,6 +67,7 @@ classDiagram
         <<Aggregate>>
         +card MembershipCard
         +created_at DateTime
+        +created_by String
         +customer_id String~required~
         +entries PointsLedgerEntry[]
         +id Auto~identifier~
@@ -76,6 +79,7 @@ classDiagram
         +status String
         +tier String
         +updated_at DateTime
+        +updated_by String
     }
     note for loyalty_reward_reward_account_RewardAccount "closed_accounts_are_immutable"
     note for loyalty_reward_reward_account_RewardAccount "balance_never_negative"

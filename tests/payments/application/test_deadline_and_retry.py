@@ -67,6 +67,40 @@ class TestPaymentCommandDeadline:
         assert payment.status == PaymentStatus.PENDING.value
 
 
+FROZEN_NOW = datetime(2030, 6, 1, 12, 0, tzinfo=UTC)
+
+
+class TestPaymentCommandDeadlineWithDomainClock:
+    """The deadline check compares against the payments domain clock, not the wall clock."""
+
+    def test_deadline_passed_by_the_clock_rejects_the_command(self, frozen_clock):
+        from payments.domain import payments
+
+        clock = frozen_clock(payments, FROZEN_NOW)
+        clock.advance(timedelta(minutes=2))
+
+        # The deadline is years ahead of the wall clock but behind the frozen clock.
+        with pytest.raises(CommandExpiredError):
+            current_domain.process(
+                _command(idempotency_key="idem-clock-expired"),
+                asynchronous=False,
+                deadline=FROZEN_NOW + timedelta(minutes=1),
+            )
+        assert current_domain.event_store.store.read("payments::payment") == []
+
+    def test_deadline_ahead_of_the_clock_processes_normally(self, frozen_clock):
+        from payments.domain import payments
+
+        frozen_clock(payments, FROZEN_NOW)
+
+        payment_id = current_domain.process(
+            _command(idempotency_key="idem-clock-ok"),
+            asynchronous=False,
+            deadline=FROZEN_NOW + timedelta(minutes=1),
+        )
+        assert current_domain.repository_for(Payment).get(payment_id).status == PaymentStatus.PENDING.value
+
+
 class TestPaymentTransientRetryConfig:
     def test_transient_retry_enabled_for_payments(self):
         cfg = current_domain.config.get("server", {}).get("transient_retry", {})

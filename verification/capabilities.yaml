@@ -130,6 +130,27 @@ capabilities:
     source: A
     status: covered
 
+  - name: domain_clock
+    taught_by: src/inventory/stock/expiry.py   # + ordering abandonment, notifications scheduler, reservation expiry
+    guarded_by: tests/inventory/application/test_expiry_handler.py   # + the frozen-clock tests in ordering, notifications, payments
+    property: "time-based handlers and the command deadline read domain.clock, so a frozen clock decides the outcome"
+    source: A
+    status: covered
+
+  - name: auto_now
+    taught_by: src/loyalty/reward/reward_account.py   # Auditable.created_at / updated_at
+    guarded_by: tests/loyalty/application/test_audit_fields.py
+    property: "created_at is stamped once on the first save, updated_at on every save, both from the domain clock"
+    source: A
+    status: covered
+
+  - name: aggregate_enricher
+    taught_by: src/loyalty/reward/reward_account.py   # stamp_actor
+    guarded_by: tests/loyalty/integration/test_audit_actor_api.py   # + tests/loyalty/application/test_audit_fields.py
+    property: "each save records the request's X-Actor-Id (or system), created_by is kept after the first save"
+    source: A
+    status: covered
+
   - name: ir_backward_compat
     taught_by: .protean/   # committed IR baselines per domain
     guarded_by: verification/contracts/test_ir_gate.py   # + `make ir-gate` in CI

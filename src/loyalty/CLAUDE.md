@@ -34,7 +34,10 @@ resolves to the reporting provider transparently. See root `PROTEAN_COVERAGE.md`
 **File:** `reward/reward_account.py`
 
 Inherits the abstract base aggregate `Auditable` (`@loyalty.aggregate(abstract=True)`:
-`created_at`, `updated_at`, `touch()`).
+`created_at` (`auto_now_add`), `updated_at` (`auto_now`), `created_by`, `updated_by`). The
+framework stamps the timestamps from the domain clock on save. The `stamp_actor` aggregate
+enricher sets the two actor fields from `g.actor_id` (bound by the API from `X-Actor-Id`),
+or `"system"` when no actor is bound. `created_by` is set on the first save only.
 
 Root fields: `customer_id`, `status` (`AccountStatus`), `tier` (non-Enum `choices`:
 bronze/silver/gold/platinum), `points_balance` (default 0), `lifetime_points` (default 0),

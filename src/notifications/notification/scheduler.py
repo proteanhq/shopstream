@@ -4,8 +4,6 @@ This handler is invoked by a background job or cron to dispatch
 notifications whose scheduled_for time has passed.
 """
 
-from datetime import UTC, datetime
-
 import structlog
 from protean.fields import DateTime
 from protean.utils.globals import current_domain
@@ -24,7 +22,7 @@ logger = structlog.get_logger(__name__)
 class ProcessScheduledNotifications:
     """Request to process all due scheduled notifications."""
 
-    as_of: DateTime()  # Optional: process as of this time (defaults to now)
+    as_of: DateTime()  # Optional: process as of this time (defaults to the domain clock)
 
 
 @notifications.command_handler(part_of=Notification)
@@ -32,7 +30,7 @@ class ProcessScheduledNotificationsHandler:
     @handle(ProcessScheduledNotifications)
     def process_scheduled(self, command: ProcessScheduledNotifications):
         with processing_priority(Priority.LOW):
-            as_of = command.as_of or datetime.now(UTC)
+            as_of = command.as_of or current_domain.clock.now()
             repo = current_domain.repository_for(Notification)
 
             # Find pending notifications with scheduled_for <= now

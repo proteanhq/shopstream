@@ -156,3 +156,67 @@ class TestDetectAbandonedCartsStaleProjection:
 
         assert result == 1
         assert current_domain.repository_for(ShoppingCart).get(good_cart).status == "Abandoned"
+
+
+FROZEN_NOW = datetime(2030, 6, 1, 12, 0, tzinfo=UTC)
+
+
+class TestDetectAbandonedCartsWithDomainClock:
+    """Without `as_of`, the job measures idleness against the ordering domain clock."""
+
+    def _idle_cart(self, last_activity):
+        cart_id = _create_cart_with_items()
+        repo = current_domain.repository_for(CartView)
+        view = repo.get(cart_id)
+        view.updated_at = last_activity
+        repo.add(view)
+        return cart_id
+
+    def test_flags_cart_idle_past_threshold_by_the_clock(self, frozen_clock):
+        from ordering.domain import ordering
+
+        frozen_clock(ordering, FROZEN_NOW)
+        # 25 hours idle by the frozen clock, but in the future by the wall clock.
+        cart_id = self._idle_cart(FROZEN_NOW - timedelta(hours=25))
+
+        current_domain.process(DetectAbandonedCarts(idle_threshold_hours=24), asynchronous=False)
+
+        assert current_domain.repository_for(CartView).get(cart_id).status == "Abandoned"
+
+    def test_leaves_cart_within_threshold_by_the_clock(self, frozen_clock):
+        from ordering.domain import ordering
+
+        clock = frozen_clock(ordering, FROZEN_NOW)
+        cart_id = self._idle_cart(FROZEN_NOW - timedelta(hours=23))
+
+        current_domain.process(DetectAbandonedCarts(idle_threshold_hours=24), asynchronous=False)
+        assert current_domain.repository_for(CartView).get(cart_id).status == "Active"
+
+        clock.advance(timedelta(hours=2))
+        current_domain.process(DetectAbandonedCarts(idle_threshold_hours=24), asynchronous=False)
+        assert current_domain.repository_for(CartView).get(cart_id).status == "Abandoned"
+
+    def test_zero_threshold_is_honoured(self, frozen_clock):
+        from ordering.domain import ordering
+
+        frozen_clock(ordering, FROZEN_NOW)
+        # One hour idle: flagged with no grace period, where the 24-hour default would not.
+        cart_id = self._idle_cart(FROZEN_NOW - timedelta(hours=1))
+
+        current_domain.process(DetectAbandonedCarts(idle_threshold_hours=0), asynchronous=False)
+
+        assert current_domain.repository_for(CartView).get(cart_id).status == "Abandoned"
+
+    def test_explicit_as_of_wins_over_the_clock(self, frozen_clock):
+        from ordering.domain import ordering
+
+        frozen_clock(ordering, FROZEN_NOW)
+        cart_id = self._idle_cart(FROZEN_NOW - timedelta(hours=25))
+
+        # Two days before the frozen time, the cart had not been touched yet.
+        current_domain.process(
+            DetectAbandonedCarts(idle_threshold_hours=24, as_of=FROZEN_NOW - timedelta(days=2)),
+            asynchronous=False,
+        )
+
+        assert current_domain.repository_for(CartView).get(cart_id).status == "Active"
