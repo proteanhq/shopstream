@@ -144,10 +144,10 @@ ignore_missing_imports = true
 [tool.pytest.ini_options]
 minversion = "8.0"
 testpaths = ["tests"]
-# Put the repo root on sys.path so the shared `verification/` helpers (e.g.
-# verification.support.processing) import cleanly under importlib mode. `uv run
-# pytest` runs the console script, which — unlike `python -m pytest` — does not
-# add the cwd, so tests importing `verification` fail to collect in CI without this.
+# Put the repo root on sys.path so modules under `verification/` can import
+# `verification.*` (e.g. verification.conformance) under importlib mode. `uv run
+# pytest` runs the console script, which (unlike `python -m pytest`) does not
+# add the cwd, so `verification/` runs fail to collect in CI without this.
 pythonpath = ["."]
 python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]

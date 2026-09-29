@@ -305,7 +305,7 @@ raises**. Under asynchronous event processing the engine delivers `PoisonDetonat
 fails, and after the retries are exhausted the engine routes the message to `loyalty::poison_pill:dlq`.
 
 `tests/loyalty/integration/test_dlq.py` is ShopStream's **only engine-driven test** (`@pytest.mark.engine`):
-it flips loyalty to async + fast-fail retries, processes `EmitPoison`, runs `Engine(test_mode=True)`,
+it flips loyalty to async + fast-fail retries, processes `EmitPoison`, runs the engine through `protean.testing.drain`,
 then asserts the message is in the DLQ via `broker.dlq_depth` / `dlq_list` and **replays** it with
 `broker.dlq_replay`. DLQ routing and the `broker.dlq_*` API only line up on the **Redis** streams
 broker, so it skips under the in-memory broker. It also **runs locally only**: driving a full
