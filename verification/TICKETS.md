@@ -11,20 +11,18 @@ whether it gates PRs / nightly / releases.
 
 ## Phase 0 - foundation (do first)
 
-**T0.1 - `process_and_wait(command)` helper** `[A]` `[gate]` - DONE (local seed; upstream filed)
-- `verification/support/processing.py` ships `process_and_wait(command, domain)`
-  and the `drain(domain, until=...)` primitive under it. Same test body works
-  whether events fire inline (sync: memory/test env) or via a background engine
-  (async): sync returns as soon as the handler does; async drains the engine.
-- Sync contract is covered end to end in CI (`verification/support/test_processing.py`,
-  memory mode); the async control flow (cycle count, early stop, max-cycle bound,
-  sync-vs-async branching) is covered there too with a stubbed engine. The real
-  engine path is exercised by the DLQ test, now refactored onto `drain`
-  (`tests/loyalty/integration/test_dlq.py`) — validated locally against Redis.
-- The richer version — one that also returns the events that fired and any
-  handler error without reaching into framework internals — belongs in
-  `protean.testing`. Filed upstream as proteanhq/protean#1065. When it lands,
-  swap this seed for it and migrate the remaining `loadtests/` `time.sleep`s.
+**T0.1 - `process_and_wait(command)` helper** `[A]` `[gate]` - DONE (adopted from Protean)
+- The helper moved upstream (proteanhq/protean#1065) and ShopStream now uses
+  `protean.testing.process_and_wait` and `protean.testing.drain`. The local seed
+  under `verification/support/` is deleted. The framework
+  `process_and_wait` returns a `ProcessResult` with the command result, the events
+  fired in the command's correlation chain, and any error.
+- The sync contract is checked end to end in CI (`verification/support/test_processing.py`,
+  memory mode), including that `outcome.events` holds the `ReviewSubmitted` the
+  command fired. The async branch and `drain` are tested in Protean. The DLQ test
+  (`tests/loyalty/integration/test_dlq.py`) runs the engine through
+  `protean.testing.drain`.
+- Still open: migrate the remaining `loadtests/` `time.sleep`s.
 
 **T0.2 - Turn the IR diff into a real gate** `[A/C]` `[gate]` - DONE
 - `.protean/config.toml` strictness set to `strict` (breaking changes now exit 1).
@@ -214,9 +212,9 @@ whether it gates PRs / nightly / releases.
   events, same fold, so the read model must match whichever path ran. `make
   sync-async-verify`. `@pytest.mark.engine` + base(async) env (needs the live engine
   + Redis, #1055) — deselected in CI and skips cleanly under memory/test, so it
-  never breaks the normal suite. (The helper-level `sync`/`async` equivalence stays
-  covered by `process_and_wait`/`drain`, T0.1; this adds the end-to-end read-model
-  equivalence.)
+  never breaks the normal suite. (The helper-level `sync`/`async` equivalence is
+  covered by `protean.testing.process_and_wait`/`drain`, tested upstream, T0.1; this
+  adds the end-to-end read-model equivalence.)
 
 **T2.2 - Cross-domain payload contracts (P15)** `[A]` `[gate]` - DONE
 - `verification/contracts/test_acl_payloads.py`. For every stream, a real instance

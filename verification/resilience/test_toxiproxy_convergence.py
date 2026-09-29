@@ -130,6 +130,10 @@ def inventory_domain():
     _clear_toxics()
 
 
+# Hand-rolled on purpose: before each engine pass this loop calls
+# `broker._ensure_connection()` and suppresses an exception from the pass.
+# `protean.testing.drain` does neither. This test drops the broker connection on
+# purpose, so it depends on both.
 def _drain(inventory, *, until, max_cycles=10) -> int:
     from protean.server.engine import Engine
 

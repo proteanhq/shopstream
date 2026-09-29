@@ -25,10 +25,10 @@ by `tests/loyalty/application/test_poison_command.py`.
 import pytest
 import redis
 from protean import current_domain
+from protean.testing import drain
 
 from loyalty.dlq.poison import EmitPoison
 from loyalty.domain import loyalty
-from verification.support.processing import drain
 
 DLQ_STREAM = "loyalty::poison_pill:dlq"
 SOURCE_STREAM = "loyalty::poison_pill"
@@ -80,7 +80,7 @@ class TestDeadLetterQueue:
         # 2. Run the engine until the message has flowed outbox → publish → deliver → fail → DLQ.
         #    With max_retries=1 a single delivery exhausts retries immediately, but the multi-step
         #    pipeline can need more than one bounded test-mode run, so re-run until the DLQ fills.
-        #    `drain` (verification/support) is the shared primitive for exactly this bounded
+        #    `protean.testing.drain` is the framework primitive for exactly this bounded
         #    "run the engine until it settles" loop. Each Engine() owns its connections, so
         #    reconnect the broker inside the predicate after each run (the engine closes the pool).
         def _depth() -> int:
