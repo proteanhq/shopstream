@@ -22,8 +22,9 @@ WHY THIS WAS DEFERRED FROM T2.1, AND IS ENGINE-MARKED
     (proteanhq/protean#1055, now fixed in the pin). It stays `@pytest.mark.engine`
     (deselected via `-m "not engine"`) until an engine CI job is re-added, and
     runs in the base (async) env. The `sync`/`async` test-body equivalence at
-    the helper level is covered by `protean.testing.process_and_wait`/`drain`,
-    tested upstream (T0.1); this check adds the end-to-end read-model equivalence.
+    the helper level is not checked here: `protean.testing.process_and_wait` and
+    `drain` are tested in Protean (T0.1). This check covers the end-to-end
+    read-model equivalence.
 
 RUN:
     make docker-up && make truncate-db
@@ -106,9 +107,10 @@ def _level_view(inventory, item_id) -> dict | None:
     return {k: v for k, v in level.to_dict().items() if k not in _VOLATILE}
 
 
-# Hand-rolled on purpose: before each engine pass this loop calls
-# `broker._ensure_connection()` and suppresses an exception from the pass.
-# `protean.testing.drain` does neither, so switching to it would change the check.
+# Hand-rolled on purpose: this loop suppresses an exception from each engine
+# pass, and `protean.testing.drain` lets it propagate. The
+# `broker._ensure_connection()` call is a leftover: since proteanhq/protean#1086
+# the Redis broker reconnects on its own after a close.
 def _drain(inventory, *, until, max_cycles=10) -> None:
     from protean.server.engine import Engine
 

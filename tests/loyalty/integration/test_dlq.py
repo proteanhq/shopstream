@@ -80,9 +80,9 @@ class TestDeadLetterQueue:
         # 2. Run the engine until the message has flowed outbox → publish → deliver → fail → DLQ.
         #    With max_retries=1 a single delivery exhausts retries immediately, but the multi-step
         #    pipeline can need more than one bounded test-mode run, so re-run until the DLQ fills.
-        #    `protean.testing.drain` is the framework primitive for exactly this bounded
-        #    "run the engine until it settles" loop. Each Engine() owns its connections, so
-        #    reconnect the broker inside the predicate after each run (the engine closes the pool).
+        #    `protean.testing.drain` runs this bounded "run the engine until it settles" loop.
+        #    The manual `redis_instance` reset below is a leftover: since proteanhq/protean#1086
+        #    the broker reconnects on its own after the engine closes it.
         def _depth() -> int:
             b = loyalty.brokers["default"]
             b.redis_instance = redis.Redis.from_url(b.conn_info["URI"])

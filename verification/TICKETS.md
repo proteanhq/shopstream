@@ -12,14 +12,17 @@ whether it gates PRs / nightly / releases.
 ## Phase 0 - foundation (do first)
 
 **T0.1 - `process_and_wait(command)` helper** `[A]` `[gate]` - DONE (adopted from Protean)
-- The helper moved upstream (proteanhq/protean#1065) and ShopStream now uses
+- Protean now ships its own version (proteanhq/protean#1065) and ShopStream uses
   `protean.testing.process_and_wait` and `protean.testing.drain`. The local seed
   under `verification/support/` is deleted. The framework
   `process_and_wait` returns a `ProcessResult` with the command result, the events
-  fired in the command's correlation chain, and any error.
+  fired in the command's correlation chain, and the error from a sync handler or a
+  rejected submission. An async handler failure is absorbed by the engine and is
+  not reported there.
 - The sync contract is checked end to end in CI (`verification/support/test_processing.py`,
-  memory mode), including that `outcome.events` holds the `ReviewSubmitted` the
-  command fired. The async branch and `drain` are tested in Protean. The DLQ test
+  memory mode), including that `outcome.events` holds only the events each
+  command fired, and that a failing command comes back as `outcome.failed` with
+  the error set. The async branch and `drain` are tested in Protean. The DLQ test
   (`tests/loyalty/integration/test_dlq.py`) runs the engine through
   `protean.testing.drain`.
 - Still open: migrate the remaining `loadtests/` `time.sleep`s.
@@ -212,9 +215,9 @@ whether it gates PRs / nightly / releases.
   events, same fold, so the read model must match whichever path ran. `make
   sync-async-verify`. `@pytest.mark.engine` + base(async) env (needs the live engine
   + Redis, #1055) — deselected in CI and skips cleanly under memory/test, so it
-  never breaks the normal suite. (The helper-level `sync`/`async` equivalence is
-  covered by `protean.testing.process_and_wait`/`drain`, tested upstream, T0.1; this
-  adds the end-to-end read-model equivalence.)
+  never breaks the normal suite. (The helpers themselves,
+  `protean.testing.process_and_wait` and `drain`, are tested in Protean, T0.1; this
+  check covers the end-to-end read-model equivalence.)
 
 **T2.2 - Cross-domain payload contracts (P15)** `[A]` `[gate]` - DONE
 - `verification/contracts/test_acl_payloads.py`. For every stream, a real instance

@@ -130,10 +130,13 @@ def inventory_domain():
     _clear_toxics()
 
 
-# Hand-rolled on purpose: before each engine pass this loop calls
-# `broker._ensure_connection()` and suppresses an exception from the pass.
-# `protean.testing.drain` does neither. This test drops the broker connection on
-# purpose, so it depends on both.
+# Hand-rolled on purpose: this loop suppresses an exception from each engine
+# pass, and `protean.testing.drain` lets it propagate. This test drops the broker
+# connection on purpose, so a pass that raises would change what it checks.
+# The `broker._ensure_connection()` call is a leftover for reconnecting after a
+# close: since proteanhq/protean#1086 the Redis broker does that on its own.
+# #1086 revives only a closed client, so the inline "won't re-establish" comment
+# below is out of date except for a dropped TCP connection.
 def _drain(inventory, *, until, max_cycles=10) -> int:
     from protean.server.engine import Engine
 
