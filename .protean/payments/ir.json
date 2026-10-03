@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:019d8a020d23fb5d3deb2f01adad303ab21c0b68285e0be7b875662cdafb6cfe",
+  "checksum": "sha256:64cda181dd69788221498ae9a87805be11691426f364ac9e2286158ad77342f5",
   "clusters": {
     "payments.invoice.invoice.Invoice": {
       "aggregate": {
@@ -1757,18 +1757,6 @@
       "teaching_skills": [
         "command"
       ]
-    },
-    {
-      "category": "deprecation",
-      "code": "DEPRECATED_OPTION",
-      "element": "payments.payment.payment.Payment",
-      "level": "info",
-      "message": "Option `is_event_sourced` is deprecated, scheduled for removal in v1.0.0; use `event_sourced` instead.",
-      "rule": {
-        "fix": "Use `event_sourced` instead of the deprecated alias.",
-        "rationale": "The option is a deprecated alias scheduled for removal."
-      },
-      "suggestion": "Use `event_sourced` instead of the deprecated alias."
     },
     {
       "category": "naming_conventions",

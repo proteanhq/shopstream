@@ -120,7 +120,7 @@ stateDiagram-v2
 ### PromoCampaign (Aggregate, Event-Sourced)
 
 A PromoCampaign represents a promotion's complete history. It is **event-sourced**
-(`is_event_sourced=True`, `fact_events=True`): state is rebuilt by replaying events through
+(`event_sourced=True`, `fact_events=True`): state is rebuilt by replaying events through
 `@apply` handlers, and after every persist Protean auto-emits a complete-state
 `PromoCampaignFactEvent` (Event-Carried State Transfer) on the campaign's `-fact-` stream.
 

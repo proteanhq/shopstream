@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:1f3f1cc5baac993c32032d9544a7acb9ec9079dc55f33546b9c5277cc07ee510",
+  "checksum": "sha256:e787f1e3425e09b366520ae686f9a84a8bfc97036b41f4c66f288926932bde8e",
   "clusters": {
     "ordering.cart.cart.ShoppingCart": {
       "aggregate": {
@@ -3419,18 +3419,6 @@
       "teaching_skills": [
         "command"
       ]
-    },
-    {
-      "category": "deprecation",
-      "code": "DEPRECATED_OPTION",
-      "element": "ordering.order.order.Order",
-      "level": "info",
-      "message": "Option `is_event_sourced` is deprecated, scheduled for removal in v1.0.0; use `event_sourced` instead.",
-      "rule": {
-        "fix": "Use `event_sourced` instead of the deprecated alias.",
-        "rationale": "The option is a deprecated alias scheduled for removal."
-      },
-      "suggestion": "Use `event_sourced` instead of the deprecated alias."
     },
     {
       "category": "naming_conventions",

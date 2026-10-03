@@ -12,7 +12,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | Capability | Status | Where |
 |---|---|---|
 | `@aggregate` (state-based) | ✅ | identity Customer, catalogue Product, loyalty RewardAccount, … |
-| `@aggregate(is_event_sourced=True)` + `@apply` | ✅ | ordering Order, payments Payment, inventory InventoryItem, loyalty PromoCampaign |
+| `@aggregate(event_sourced=True)` + `@apply` | ✅ | ordering Order, payments Payment, inventory InventoryItem, loyalty PromoCampaign |
 | `@aggregate(abstract=True)` + inheritance | ✅ | loyalty `Auditable` → RewardAccount |
 | `@aggregate(fact_events=True)` | ✅ | loyalty PromoCampaign (`PromoCampaignFactEvent`) |
 | `@entity` | ✅ | loyalty MembershipCard, PointsLedgerEntry; OrderItem; … |

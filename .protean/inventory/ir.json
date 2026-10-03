@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:5e386ea68c4eb38687c7318d99e54ad7dfd033c46cec9dceb6b5efb367916c5c",
+  "checksum": "sha256:ba44fdd958256539c72684228f2eb5b21acd2751619b7a24eef05c107aa91da8",
   "clusters": {
     "inventory.stock.stock.InventoryItem": {
       "aggregate": {
@@ -2538,18 +2538,6 @@
       "teaching_skills": [
         "command"
       ]
-    },
-    {
-      "category": "deprecation",
-      "code": "DEPRECATED_OPTION",
-      "element": "inventory.stock.stock.InventoryItem",
-      "level": "info",
-      "message": "Option `is_event_sourced` is deprecated, scheduled for removal in v1.0.0; use `event_sourced` instead.",
-      "rule": {
-        "fix": "Use `event_sourced` instead of the deprecated alias.",
-        "rationale": "The option is a deprecated alias scheduled for removal."
-      },
-      "suggestion": "Use `event_sourced` instead of the deprecated alias."
     },
     {
       "category": "handler_completeness",

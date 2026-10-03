@@ -126,7 +126,7 @@ class Refund:
 # ---------------------------------------------------------------------------
 # Aggregate Root (Event Sourced)
 # ---------------------------------------------------------------------------
-@payments.aggregate(is_event_sourced=True)
+@payments.aggregate(event_sourced=True)
 class Payment:
     order_id = Identifier(required=True)
     customer_id = Identifier(required=True)

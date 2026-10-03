@@ -170,6 +170,7 @@ filterwarnings = [
     "ignore:usefixtures.*without arguments has no effect:",
     "ignore:This declarative base already contains a class:sqlalchemy.exc.SAWarning",
     "ignore:Working outside of domain context:UserWarning",
+    "error::protean.exceptions.ProteanDeprecationWarning",
 ]
 
 # Coverage configuration

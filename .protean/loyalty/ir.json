@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:8a19b93954dc0f8ed43aabfca5d4bfcaaec3cfd1677e340f002f64fe7bb9afa6",
+  "checksum": "sha256:07d98105b56fbbf5804ee727a8bf8d1ebd16db47e3af125f324bb1fd7cc4623b",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -2211,18 +2211,6 @@
       "teaching_skills": [
         "command"
       ]
-    },
-    {
-      "category": "deprecation",
-      "code": "DEPRECATED_OPTION",
-      "element": "loyalty.campaign.campaign.PromoCampaign",
-      "level": "info",
-      "message": "Option `is_event_sourced` is deprecated, scheduled for removal in v1.0.0; use `event_sourced` instead.",
-      "rule": {
-        "fix": "Use `event_sourced` instead of the deprecated alias.",
-        "rationale": "The option is a deprecated alias scheduled for removal."
-      },
-      "suggestion": "Use `event_sourced` instead of the deprecated alias."
     },
     {
       "category": "handler_completeness",

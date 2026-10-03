@@ -156,7 +156,7 @@ class OrderItem:
 # ---------------------------------------------------------------------------
 # Aggregate Root (Event Sourced)
 # ---------------------------------------------------------------------------
-@ordering.aggregate(is_event_sourced=True)
+@ordering.aggregate(event_sourced=True)
 class Order:
     customer_id = Identifier(required=True)
     status = Status(

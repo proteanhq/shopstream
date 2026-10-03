@@ -105,7 +105,7 @@ class Reservation:
 # ---------------------------------------------------------------------------
 # Aggregate Root (Event Sourced)
 # ---------------------------------------------------------------------------
-@inventory.aggregate(is_event_sourced=True)
+@inventory.aggregate(event_sourced=True)
 class InventoryItem:
     """Event-sourced aggregate tracking stock for one product variant at one warehouse."""
 
