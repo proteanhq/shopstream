@@ -607,3 +607,125 @@ def test_auto_now_stamp_does_not_run_pre_invariants():
         raise AssertionError(f"saving a just-closed account failed: {exc.messages}") from exc
 
     assert repo.get(account.id).status == AccountStatus.CLOSED.value
+
+
+def _sync_dispatch_probe(projector_failure: Exception):
+    """Build a sync-dispatch domain whose one event handler always raises ``projector_failure``.
+
+    Returns the domain, its ``LabelParcel`` command class, and a list that gets one
+    entry each time the command handler body runs.
+    """
+    from protean import Domain, current_domain, handle
+    from protean.fields import Identifier, String
+
+    domain = Domain(
+        name="SyncDispatchRetryProbe",
+        config={
+            "databases": {"default": {"provider": "memory"}},
+            "event_store": {"provider": "memory"},
+            "brokers": {"default": {"provider": "inline"}},
+            "command_processing": "sync",
+            "event_processing": "sync",
+        },
+    )
+    domain.config["server"]["version_retry"]["base_delay_seconds"] = 0.001
+    handled: list[str] = []
+
+    @domain.aggregate
+    class Parcel:
+        label = String(required=True)
+
+    @domain.event(part_of=Parcel)
+    class ParcelLabelled:
+        parcel_id = Identifier(required=True)
+
+    @domain.command(part_of=Parcel)
+    class LabelParcel:
+        label = String(required=True)
+
+    @domain.command_handler(part_of=Parcel)
+    class ParcelCommandHandler:
+        @handle(LabelParcel)
+        def label_parcel(self, command):
+            handled.append(command.label)
+            parcel = Parcel(label=command.label)
+            parcel.raise_(ParcelLabelled(parcel_id=parcel.id))
+            current_domain.repository_for(Parcel).add(parcel)
+
+    @domain.event_handler(part_of=Parcel)
+    class ParcelLabelledHandler:
+        @handle(ParcelLabelled)
+        def react(self, event):  # noqa: ARG002
+            raise projector_failure
+
+    domain.init(traverse=False)
+    return domain, Parcel, LabelParcel, handled
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="version retry re-runs a command whose commit already succeeded when a sync handler raises ExpectedVersionError",
+)
+def test_committed_command_is_not_rerun_when_a_sync_handler_raises_expected_version_error():
+    """Protean finding (not yet filed upstream): a committed command runs again.
+
+    Under ``event_processing = "sync"``, `UnitOfWork.commit` dispatches events
+    after the relational commit, inside the same `try`. A handler that raises
+    `ExpectedVersionError` ends the drain, and the commit re-raises it as itself.
+    The command handler's version retry then runs the whole command again, though
+    its first attempt is already saved. With the default ``max_retries = 3`` the
+    command body runs 4 times and saves 4 aggregates.
+    `tests/inventory/application/test_handler_failure_isolation.py` shows the same
+    bug on `ReceiveStock`: the 30-unit receipt is applied 4 times.
+    """
+    from protean.exceptions import ExpectedVersionError
+
+    domain, parcel_cls, label_parcel, handled = _sync_dispatch_probe(ExpectedVersionError("simulated conflict"))
+
+    with domain.domain_context():
+        with pytest.raises(ExpectedVersionError):
+            domain.process(label_parcel(label="fragile"), asynchronous=False)
+        saved = domain.repository_for(parcel_cls).query.all().total
+
+    if not handled:
+        pytest.fail("precondition: the command handler ran")
+    assert handled == ["fragile"], f"the command body ran {len(handled)} times"
+    assert saved == 1
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="a ValueError at commit is reported as ExpectedVersionError (proteanhq/protean#1682)",
+)
+def test_1682_value_error_from_a_sync_handler_is_not_a_version_conflict():
+    """Protean finding (proteanhq/protean#1682): a handler's `ValueError` becomes a version conflict.
+
+    `UnitOfWork.commit` turns any `ValueError` into `ExpectedVersionError`, unless
+    it was raised while the outbox rows were being saved. Sync dispatch runs
+    later in the same `try`, so a `ValueError` from an event handler takes that
+    branch. The outbox setting makes no difference. The caller gets
+    `ExpectedVersionError`, and version retry runs the already committed command
+    again, 4 times in all. #1682 describes the commit path only. Sync dispatch is
+    a second route to the same branch.
+    """
+    from protean.exceptions import TransactionError
+
+    failure = ValueError("handler bug, not a version conflict")
+    domain, parcel_cls, label_parcel, handled = _sync_dispatch_probe(failure)
+
+    outcome = None
+    with domain.domain_context():
+        try:
+            domain.process(label_parcel(label="fragile"), asynchronous=False)
+        except Exception as exc:  # noqa: BLE001
+            outcome = exc
+        saved = domain.repository_for(parcel_cls).query.all().total
+
+    if not handled:
+        pytest.fail("precondition: the command handler ran")
+    assert isinstance(outcome, TransactionError), repr(outcome)
+    assert outcome.__cause__ is failure
+    assert handled == ["fragile"], f"the command body ran {len(handled)} times"
+    assert saved == 1
