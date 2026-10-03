@@ -13,12 +13,20 @@ test profiles use):
 
 Each test also pins what the caller of ``current_domain.process(...)`` gets back.
 Sync dispatch runs inside the command's ``UnitOfWork.commit()``, after the
-aggregate is saved. The commit wraps a handler failure in a ``TransactionError``
-with the original exception on ``__cause__``, except ``ExpectedVersionError``,
-which reaches the caller as itself.
+aggregate is saved. The commit sorts a handler failure by type:
 
-Do not raise ``ValueError`` from a fake handler here: the commit reports a
-``ValueError`` as ``ExpectedVersionError`` and the command is retried.
+- ``ExpectedVersionError`` and ``ConfigurationError`` reach the caller as
+  themselves.
+- A ``ValueError`` and a SQLAlchemy ``StaleDataError`` come back as a new
+  ``ExpectedVersionError``.
+- Any other ``Exception``, or an ``ExceptionGroup`` of several, is wrapped in a
+  ``TransactionError`` with the original on ``__cause__``.
+- A ``BaseException`` that is not an ``Exception`` passes through untouched.
+
+Do not raise ``ValueError`` from a fake handler here. The commit reports it as
+``ExpectedVersionError``, and version retry runs the committed command again
+(proteanhq/protean#1682, pinned by
+``verification/regression/test_protean_regressions.py::test_1682_value_error_from_a_sync_handler_is_not_a_version_conflict``).
 """
 
 from collections.abc import Callable
@@ -28,7 +36,7 @@ from protean import Domain, current_domain, handle
 from protean.exceptions import ExpectedVersionError, TransactionError
 from protean.fields import Identifier, String
 
-from inventory.projections.event_audit import EventAuditHandler
+from inventory.projections.event_audit import EventAudit, EventAuditHandler
 from inventory.projections.inventory_level import InventoryLevel, InventoryLevelProjector
 from inventory.projections.inventory_valuation import InventoryValuation, InventoryValuationProjector
 from inventory.projections.low_stock_report import LowStockReport, LowStockReportProjector
@@ -97,6 +105,7 @@ def _seed_low_stock_item():
     )
     for projector_cls in STOCK_RECEIVED_PROJECTORS:
         assert not _receipt_applied(projector_cls, item_id), f"precondition: {projector_cls.__name__} not yet updated"
+    assert _audited_receipts(item_id) == 0, "precondition: no StockReceived audit row yet"
     return item_id
 
 
@@ -133,6 +142,11 @@ def _receipt_applied(projector_cls, item_id) -> bool:
     if projector_cls is LowStockReportProjector:
         return current_domain.repository_for(LowStockReport).get_or_none(item_id) is None
     raise AssertionError(f"no read-model check for {projector_cls.__name__}")
+
+
+def _audited_receipts(item_id) -> int:
+    rows = current_domain.repository_for(EventAudit).query.filter(inventory_item_id=item_id).all().items
+    return len([row for row in rows if row.event_type == "StockReceived"])
 
 
 def _stock_received_method(projector_cls) -> Callable:
@@ -216,6 +230,7 @@ class TestOneProjectorFails:
         for projector_cls in STOCK_RECEIVED_PROJECTORS:
             if projector_cls is not InventoryLevelProjector:
                 assert _receipt_applied(projector_cls, item_id), f"{projector_cls.__name__} did not run"
+        assert _audited_receipts(item_id) == 1
         # The aggregate was saved before dispatch, once.
         _assert_item_on_hand(item_id, ON_HAND_AFTER)
 
@@ -225,8 +240,8 @@ class TestTwoProjectorsFail:
         item_id = _seed_low_stock_item()
         warehouse_failure = RuntimeError("warehouse stock projector is down")
         movement_failure = KeyError("movement log projector is down")
-        _replace_stock_received(monkeypatch, WarehouseStockProjector, _raise(warehouse_failure))
-        _replace_stock_received(monkeypatch, StockMovementLogProjector, _raise(movement_failure))
+        warehouse_calls = _replace_stock_received(monkeypatch, WarehouseStockProjector, _raise(warehouse_failure))
+        movement_calls = _replace_stock_received(monkeypatch, StockMovementLogProjector, _raise(movement_failure))
         queued = _queue_stock_received_in_order(
             monkeypatch, _failing_first(WarehouseStockProjector, StockMovementLogProjector)
         )
@@ -239,10 +254,13 @@ class TestTwoProjectorsFail:
         assert isinstance(group, ExceptionGroup)
         assert len(group.exceptions) == 2
         assert {id(exc) for exc in group.exceptions} == {id(warehouse_failure), id(movement_failure)}
+        assert warehouse_calls == [item_id]
+        assert movement_calls == [item_id]
         failing = {WarehouseStockProjector, StockMovementLogProjector}
         for projector_cls in STOCK_RECEIVED_PROJECTORS:
             if projector_cls not in failing:
                 assert _receipt_applied(projector_cls, item_id), f"{projector_cls.__name__} did not run"
+        assert _audited_receipts(item_id) == 1
         _assert_item_on_hand(item_id, ON_HAND_AFTER)
 
 
@@ -302,7 +320,14 @@ class TestExpectedVersionErrorEveryTime:
             _receive(item_id)
 
         assert type(excinfo.value) is ExpectedVersionError
-        assert len(queued) > 0, "StockReceived was never dispatched"
+        # The receipt was committed before dispatch, yet the command handler's own
+        # version retry runs ReceiveStock again on each attempt, so StockReceived
+        # is dispatched max_retries + 1 times. This is a Protean bug, not yet filed
+        # upstream. The correct behaviour (the command runs once) is pinned as a
+        # strict xfail in verification/regression/test_protean_regressions.py::
+        # test_committed_command_is_not_rerun_when_a_sync_handler_raises_expected_version_error.
+        # When Protean fixes it, this count drops to 1 and this test fails.
+        assert len(queued) == max_retries + 1
         # Each dispatch runs the classes queued before the failing projector, then
         # the failing one, and stops there.
         assert ran == [*before, failing] * len(queued)
