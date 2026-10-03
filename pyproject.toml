@@ -170,6 +170,10 @@ filterwarnings = [
     "ignore:usefixtures.*without arguments has no effect:",
     "ignore:This declarative base already contains a class:sqlalchemy.exc.SAWarning",
     "ignore:Working outside of domain context:UserWarning",
+    # Keep this entry last: pytest applies the last matching entry, and
+    # ProteanDeprecationWarning subclasses DeprecationWarning, which is ignored above.
+    # verification/contracts/test_warning_filters.py fails if the order breaks.
+    "error::protean.exceptions.ProteanDeprecationWarning",
 ]
 
 # Coverage configuration

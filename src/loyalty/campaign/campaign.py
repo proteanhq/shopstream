@@ -26,7 +26,7 @@ DISCOUNT_TYPES = ["percentage", "fixed", "points_multiplier"]
 CAMPAIGN_STATUSES = ["draft", "active", "paused", "expired"]
 
 
-@loyalty.aggregate(is_event_sourced=True, fact_events=True)
+@loyalty.aggregate(event_sourced=True, fact_events=True)
 class PromoCampaign:
     campaign_code = String(required=True, max_length=20)
     name = String(required=True, max_length=255)
