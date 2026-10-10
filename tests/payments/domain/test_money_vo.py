@@ -30,3 +30,11 @@ class TestMoney:
     def test_more_than_four_decimal_places_rejected(self):
         with pytest.raises(ValidationError):
             Money(value=Decimal("0.12345"))
+
+    def test_nineteen_digits_accepted(self):
+        money = Money(value=Decimal("1" * 15 + ".0001"))
+        assert money.value == Decimal("1" * 15 + ".0001")
+
+    def test_more_than_nineteen_digits_rejected(self):
+        with pytest.raises(ValidationError):
+            Money(value=Decimal("1" * 16 + ".0001"))

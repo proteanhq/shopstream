@@ -2,6 +2,7 @@
 
 from decimal import Decimal
 
+import pytest
 from protean.testing import given
 
 from payments.payment.events import PaymentInitiated
@@ -45,10 +46,16 @@ class TestPaymentCreation:
         assert result.amount.currency == "USD"
 
     def test_create_rounds_float_artifacts_in_amount(self):
-        # 3 * 19.99 is 59.970000000000006 as a float.
-        result = given(Payment).process(_initiate(amount=3 * 19.99))
+        # 0.1 + 0.2 is 0.30000000000000004 as a float.
+        result = given(Payment).process(_initiate(amount=0.1 + 0.2))
         assert result.accepted
-        assert result.amount.value == Decimal("59.97")
+        assert result.amount.value == Decimal("0.3")
+
+    @pytest.mark.parametrize("amount", [0.00004, 10.12345])
+    def test_create_rejects_a_fifth_decimal_place(self, amount):
+        result = given(Payment).process(_initiate(amount=amount))
+        assert result.rejected
+        assert "no more than 4 decimal places" in result.rejection_messages[0]
 
     def test_create_sets_status_to_pending(self):
         result = given(Payment).process(_initiate())

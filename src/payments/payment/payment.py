@@ -42,9 +42,17 @@ from payments.payment.events import (
     RefundCompleted,
     RefundRequested,
 )
-from shared.money import to_money
+from shared.money import has_more_than_four_places, to_money
 
 MAX_PAYMENT_ATTEMPTS = 3
+
+
+def _check_money_places(amount: float) -> None:
+    # Money is stored at 4 places, while events carry the float as given. A
+    # fifth place would be rounded away in storage but kept in the event, so
+    # the refund guard, the aggregate and the projections would disagree.
+    if has_more_than_four_places(amount):
+        raise ValidationError({"amount": [f"Amount ({amount}) must have no more than 4 decimal places"]})
 
 
 # ---------------------------------------------------------------------------
@@ -175,6 +183,7 @@ class Payment:
         Uses _create_new() for event-sourced aggregates. All state is set
         via the PaymentInitiated event's @apply handler.
         """
+        _check_money_places(amount)
         now = datetime.now(UTC)
         payment = cls._create_new()
         payment.raise_(
@@ -280,6 +289,7 @@ class Payment:
 
         # PaymentInitiated, the first event of every payment, always sets amount.
         assert self.amount is not None
+        _check_money_places(amount)
         refund_total = to_money(self.total_refunded) + to_money(amount)
         if refund_total > self.amount.value:
             raise ValidationError(

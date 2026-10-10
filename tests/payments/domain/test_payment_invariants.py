@@ -193,6 +193,15 @@ class TestRefundAmountGuards:
         assert result.rejected
         assert "would exceed" in result.rejection_messages[0]
 
+    @pytest.mark.parametrize("amount", [100.00004, 100.00005, 50.00004])
+    def test_refund_with_a_fifth_decimal_place_is_rejected(self, amount):
+        result = given(Payment).process(_initiate())
+        payment_id = str(result.aggregate.id)
+        result = _succeed(result)
+        result = result.process(RequestRefund(payment_id=payment_id, amount=amount, reason="Test"))
+        assert result.rejected
+        assert "no more than 4 decimal places" in result.rejection_messages[0]
+
     def test_exact_amount_refund_is_allowed(self):
         result = given(Payment).process(_initiate())
         payment_id = str(result.aggregate.id)

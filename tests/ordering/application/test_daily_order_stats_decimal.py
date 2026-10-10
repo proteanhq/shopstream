@@ -7,7 +7,9 @@ amount to a 4-place Decimal before adding it.
 from datetime import UTC, datetime
 from decimal import Decimal
 
+import pytest
 from protean import current_domain
+from protean.utils.reflection import fields
 
 from ordering.order.events import OrderCreated, OrderRefunded
 from ordering.projections.daily_order_stats import DailyOrderStats, DailyOrderStatsProjector
@@ -45,10 +47,15 @@ class TestDailyOrderStatsDecimal:
         assert record.total_revenue == Decimal("0.3")
 
     def test_float_artifacts_in_a_grand_total_are_rounded(self):
-        # 3 * 19.99 is 59.970000000000006, more places than the scale-4 field accepts.
-        DailyOrderStatsProjector().on_order_created(_order_created("ord-dec-3", 3 * 19.99))
+        # 0.1 + 0.2 is 0.30000000000000004, more places than the scale-4 field accepts.
+        DailyOrderStatsProjector().on_order_created(_order_created("ord-dec-3", 0.1 + 0.2))
 
-        assert _saved_record().total_revenue == Decimal("59.97")
+        assert str(_saved_record().total_revenue) == "0.3000"
+
+    @pytest.mark.parametrize("field_name", ["total_revenue", "total_refunds"])
+    def test_money_fields_are_numeric_19_4(self, field_name):
+        field = fields(DailyOrderStats)[field_name]
+        assert (field.precision, field.scale) == (19, 4)
 
     def test_refunds_of_tenths_sum_exactly(self):
         projector = DailyOrderStatsProjector()

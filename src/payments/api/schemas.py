@@ -134,6 +134,7 @@ class PaymentStatusResponse(BaseModel):
 
     @field_serializer("amount", "total_refunded")
     def _money_as_string(self, value: Decimal | None) -> str | None:
-        # The memory store keeps a Decimal at the scale it was written with,
-        # while Postgres returns NUMERIC(19, 4). Both are sent with 4 places.
+        # Protean's Decimal(scale=4) limits the number of places but does not
+        # pad to them, so the memory store returns the Decimal("0") default as
+        # "0". Postgres NUMERIC(19, 4) pads to "0.0000". Both are sent padded.
         return None if value is None else str(to_money(value))

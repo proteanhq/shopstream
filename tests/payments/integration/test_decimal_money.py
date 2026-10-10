@@ -36,6 +36,10 @@ def _require_postgres(projection):
 
 def _pay_and_refund_tenths(payment_amount=10.0):
     """Pay ``payment_amount``, then complete refunds of 0.1 and 0.2."""
+    return _pay_and_refund(payment_amount, (0.1, 0.2))
+
+
+def _pay_and_refund(payment_amount, refunds):
     payment_id = current_domain.process(
         InitiatePayment(
             order_id="ord-decimal-001",
@@ -56,7 +60,7 @@ def _pay_and_refund_tenths(payment_amount=10.0):
         ),
         asynchronous=False,
     )
-    for index, amount in enumerate((0.1, 0.2)):
+    for index, amount in enumerate(refunds):
         current_domain.process(
             RequestRefund(payment_id=payment_id, amount=amount, reason="Partial"),
             asynchronous=False,
@@ -100,8 +104,31 @@ class TestPaymentStatusRoundTrip:
         view = current_domain.repository_for(PaymentStatusView).get(payment_id)
         assert isinstance(view.total_refunded, Decimal)
         assert view.total_refunded == Decimal("0.3")
+        assert isinstance(view.amount, Decimal)
         assert view.amount == Decimal("10")
         assert view.status == "Partially_Refunded"
+
+    def test_view_rounds_float_artifacts_in_the_payment_amount(self):
+        # 0.1 + 0.2 is 0.30000000000000004 as a float.
+        payment_id = _pay_and_refund(0.1 + 0.2, ())
+
+        view = current_domain.repository_for(PaymentStatusView).get(payment_id)
+        assert str(view.amount) == "0.3000"
+
+    @pytest.mark.parametrize(
+        ("payment_amount", "refunds", "status"),
+        [
+            (1.0, (0.3333, 0.3333, 0.3333), "Partially_Refunded"),
+            (0.3, (0.1, 0.2), "Refunded"),
+        ],
+    )
+    def test_aggregate_and_view_agree_on_the_status(self, payment_amount, refunds, status):
+        payment_id = _pay_and_refund(payment_amount, refunds)
+
+        payment = current_domain.repository_for(Payment).get(payment_id)
+        view = current_domain.repository_for(PaymentStatusView).get(payment_id)
+        assert payment.status == status
+        assert view.status == status
 
     def test_api_sends_money_as_strings_with_four_places(self, client):
         payment_id = _pay_and_refund_tenths()
@@ -143,8 +170,6 @@ class TestPaymentStatusRoundTrip:
         payment_id = _pay_and_refund_tenths()
 
         view = current_domain.repository_for(PaymentStatusView).get(payment_id)
-        # NUMERIC(19, 4) comes back at scale 4, so the exponent shows the value came from Postgres.
-        assert view.total_refunded.as_tuple().exponent == -4
         assert view.total_refunded == Decimal("0.3")
         assert client.get(f"/payments/{payment_id}").json()["total_refunded"] == "0.3000"
 

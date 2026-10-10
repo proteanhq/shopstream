@@ -33,7 +33,8 @@ class TestMoneyConstruction:
 
     def test_zero_amount_is_valid(self):
         money = Money(amount=0.0)
-        assert money.amount == 0.0
+        assert money.amount == Decimal("0")
+        assert isinstance(money.amount, Decimal)
 
     def test_large_amount(self):
         money = Money(amount=Decimal("999999.99"), currency="JPY")
