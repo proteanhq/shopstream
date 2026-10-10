@@ -1,5 +1,7 @@
 """Application tests for payment initiation via domain.process()."""
 
+from decimal import Decimal
+
 from protean import current_domain
 
 from payments.payment.initiation import InitiatePayment
@@ -54,4 +56,5 @@ class TestInitiatePaymentFlow:
     def test_initiate_sets_amount(self):
         payment_id = _initiate_payment(amount=199.99)
         payment = current_domain.repository_for(Payment).get(payment_id)
-        assert payment.amount.value == 199.99
+        assert payment.amount.value == Decimal("199.99")
+        assert isinstance(payment.amount.value, Decimal)

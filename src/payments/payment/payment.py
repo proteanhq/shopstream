@@ -14,6 +14,7 @@ Refund sub-flow:
 """
 
 from datetime import UTC, datetime
+from decimal import Decimal as D
 from enum import Enum
 from uuid import uuid4
 
@@ -21,6 +22,7 @@ from protean import apply
 from protean.exceptions import ValidationError
 from protean.fields import (
     DateTime,
+    Decimal,
     Float,
     HasMany,
     Identifier,
@@ -40,6 +42,7 @@ from payments.payment.events import (
     RefundCompleted,
     RefundRequested,
 )
+from shared.money import to_money
 
 MAX_PAYMENT_ATTEMPTS = 3
 
@@ -71,7 +74,7 @@ class Money:
     """Monetary amount with currency."""
 
     currency: str = String(max_length=3, default="USD")
-    value: float = Float(default=0.0)
+    value: D = Decimal(precision=19, scale=4, default=D("0"))
 
 
 @payments.value_object(part_of="Payment")
@@ -214,7 +217,7 @@ class Payment:
                 payment_id=str(self.id),
                 order_id=str(self.order_id),
                 customer_id=str(self.customer_id),
-                amount=self.amount.value,
+                amount=float(self.amount.value),
                 currency=self.amount.currency,
                 gateway_transaction_id=gateway_transaction_id,
                 succeeded_at=now,
@@ -277,13 +280,10 @@ class Payment:
 
         # PaymentInitiated, the first event of every payment, always sets amount.
         assert self.amount is not None
-        if self.total_refunded + amount > self.amount.value:
+        refund_total = to_money(self.total_refunded) + to_money(amount)
+        if refund_total > self.amount.value:
             raise ValidationError(
-                {
-                    "amount": [
-                        f"Refund total ({self.total_refunded + amount}) would exceed payment amount ({self.amount.value})"
-                    ]
-                }
+                {"amount": [f"Refund total ({refund_total}) would exceed payment amount ({self.amount.value})"]}
             )
 
         now = datetime.now(UTC)
@@ -329,7 +329,7 @@ class Payment:
         self.id = event.payment_id
         self.order_id = event.order_id
         self.customer_id = event.customer_id
-        self.amount = Money(currency=event.currency, value=event.amount)
+        self.amount = Money(currency=event.currency, value=to_money(event.amount))
         self.status = PaymentStatus.PENDING.value
         self.payment_method = PaymentMethod(
             method_type=event.payment_method_type,
@@ -422,7 +422,7 @@ class Payment:
         self.total_refunded = (self.total_refunded or 0.0) + event.amount
         # PaymentInitiated, the first event of every payment, always sets amount.
         assert self.amount is not None
-        if self.total_refunded >= self.amount.value:
+        if to_money(self.total_refunded) >= self.amount.value:
             self.status = PaymentStatus.REFUNDED.value
         else:
             self.status = PaymentStatus.PARTIALLY_REFUNDED.value

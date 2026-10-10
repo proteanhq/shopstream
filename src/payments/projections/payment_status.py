@@ -1,9 +1,10 @@
 """Payment status — real-time payment state view."""
 
 from datetime import datetime
+from decimal import Decimal as D
 
 from protean.core.projector import on
-from protean.fields import DateTime, Float, Identifier, Integer, String
+from protean.fields import DateTime, Decimal, Identifier, Integer, String
 from protean.utils.globals import current_domain
 
 from payments.domain import payments
@@ -17,6 +18,7 @@ from payments.payment.events import (
     RefundRequested,
 )
 from payments.payment.payment import Payment
+from shared.money import to_money
 
 
 @payments.projection
@@ -24,13 +26,13 @@ class PaymentStatusView:
     payment_id: str = Identifier(identifier=True, required=True)
     order_id: str = Identifier(required=True)
     customer_id: str = Identifier(required=True)
-    amount: float | None = Float()
+    amount: D | None = Decimal(precision=19, scale=4)
     currency: str = String(default="USD")
     status: str = String(required=True)
     gateway_transaction_id: str | None = String()
     attempt_count: int = Integer(default=1)
     failure_reason: str | None = String()
-    total_refunded: float = Float(default=0.0)
+    total_refunded: D = Decimal(precision=19, scale=4, default=D("0"))
     created_at: datetime | None = DateTime()
     updated_at: datetime | None = DateTime()
 
@@ -44,7 +46,7 @@ class PaymentStatusProjector:
                 payment_id=event.payment_id,
                 order_id=event.order_id,
                 customer_id=event.customer_id,
-                amount=event.amount,
+                amount=to_money(event.amount),
                 currency=event.currency,
                 status="Pending",
                 attempt_count=1,
@@ -101,7 +103,7 @@ class PaymentStatusProjector:
     def on_refund_completed(self, event: RefundCompleted) -> None:
         repo = current_domain.repository_for(PaymentStatusView)
         view = repo.get(event.payment_id)
-        view.total_refunded = (view.total_refunded or 0.0) + event.amount
+        view.total_refunded = to_money(view.total_refunded) + to_money(event.amount)
         if view.total_refunded >= view.amount:
             view.status = "Refunded"
         else:

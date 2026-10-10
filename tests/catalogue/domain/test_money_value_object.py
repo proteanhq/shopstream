@@ -1,5 +1,7 @@
 """Tests for the Money value object."""
 
+from decimal import Decimal
+
 import pytest
 from protean.exceptions import ValidationError
 from protean.utils.reflection import declared_fields
@@ -24,8 +26,9 @@ class TestMoneyConstruction:
         assert money.currency == "USD"
 
     def test_valid_money_with_explicit_currency(self):
-        money = Money(amount=99.99, currency="EUR")
-        assert money.amount == 99.99
+        money = Money(amount=Decimal("99.99"), currency="EUR")
+        assert money.amount == Decimal("99.99")
+        assert isinstance(money.amount, Decimal)
         assert money.currency == "EUR"
 
     def test_zero_amount_is_valid(self):
@@ -33,14 +36,26 @@ class TestMoneyConstruction:
         assert money.amount == 0.0
 
     def test_large_amount(self):
-        money = Money(amount=999999.99, currency="JPY")
-        assert money.amount == 999999.99
+        money = Money(amount=Decimal("999999.99"), currency="JPY")
+        assert money.amount == Decimal("999999.99")
+
+    def test_sum_of_tenths_is_exact(self):
+        money = Money(amount=Decimal("0.1") + Decimal("0.2"))
+        assert money.amount == Decimal("0.3")
 
 
 class TestMoneyInvariants:
     def test_negative_amount_rejected(self):
         with pytest.raises(ValidationError):
             Money(amount=-0.01)
+
+    def test_more_than_four_decimal_places_rejected(self):
+        with pytest.raises(ValidationError):
+            Money(amount=Decimal("0.12345"))
+
+    def test_more_than_nineteen_digits_rejected(self):
+        with pytest.raises(ValidationError):
+            Money(amount=Decimal("1" * 16 + ".0001"))
 
     def test_missing_amount_rejected(self):
         with pytest.raises(ValidationError):

@@ -84,7 +84,7 @@ classDiagram
     class payments_payment_payment_Money["Money"] {
         <<ValueObject>>
         +currency String
-        +value Float
+        +value Decimal
     }
     payments_payment_payment_Payment *-- payments_payment_payment_Money : amount
     class payments_payment_payment_PaymentMethod["PaymentMethod"] {

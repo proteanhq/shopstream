@@ -4,8 +4,10 @@ Maintains daily aggregated counts of orders created, completed, cancelled,
 and refunded, along with revenue totals. Keyed by date (YYYY-MM-DD).
 """
 
+from decimal import Decimal as D
+
 from protean.core.projector import on
-from protean.fields import Float, Integer, String
+from protean.fields import Decimal, Integer, String
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
@@ -16,6 +18,7 @@ from ordering.order.events import (
     OrderRefunded,
 )
 from ordering.order.order import Order
+from shared.money import to_money
 
 
 @ordering.projection
@@ -25,8 +28,8 @@ class DailyOrderStats:
     orders_completed: int = Integer(default=0)
     orders_cancelled: int = Integer(default=0)
     orders_refunded: int = Integer(default=0)
-    total_revenue: float = Float(default=0.0)
-    total_refunds: float = Float(default=0.0)
+    total_revenue: D = Decimal(precision=19, scale=4, default=D("0"))
+    total_refunds: D = Decimal(precision=19, scale=4, default=D("0"))
 
 
 def _get_or_create(date_key: str) -> DailyOrderStats:
@@ -40,8 +43,8 @@ def _get_or_create(date_key: str) -> DailyOrderStats:
         orders_completed=0,
         orders_cancelled=0,
         orders_refunded=0,
-        total_revenue=0.0,
-        total_refunds=0.0,
+        total_revenue=D("0"),
+        total_refunds=D("0"),
     )
 
 
@@ -52,7 +55,7 @@ class DailyOrderStatsProjector:
         date_key = event.created_at.date().isoformat()
         record = _get_or_create(date_key)
         record.orders_created = (record.orders_created or 0) + 1
-        record.total_revenue = (record.total_revenue or 0.0) + (event.grand_total or 0.0)
+        record.total_revenue = to_money(record.total_revenue) + to_money(event.grand_total)
         current_domain.repository_for(DailyOrderStats).add(record)
 
     @on(OrderCompleted)
@@ -74,5 +77,5 @@ class DailyOrderStatsProjector:
         date_key = event.refunded_at.date().isoformat()
         record = _get_or_create(date_key)
         record.orders_refunded = (record.orders_refunded or 0) + 1
-        record.total_refunds = (record.total_refunds or 0.0) + (event.refund_amount or 0.0)
+        record.total_refunds = to_money(record.total_refunds) + to_money(event.refund_amount)
         current_domain.repository_for(DailyOrderStats).add(record)
