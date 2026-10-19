@@ -34,7 +34,7 @@ class InvoiceStatusView:
 @payments.projector(projector_for=InvoiceStatusView, aggregates=[Invoice])
 class InvoiceStatusProjector:
     @on(InvoiceGenerated)
-    def on_invoice_generated(self, event):
+    def on_invoice_generated(self, event: InvoiceGenerated) -> None:
         current_domain.repository_for(InvoiceStatusView).add(
             InvoiceStatusView(
                 invoice_id=event.invoice_id,
@@ -49,7 +49,7 @@ class InvoiceStatusProjector:
         )
 
     @on(InvoiceIssued)
-    def on_invoice_issued(self, event):
+    def on_invoice_issued(self, event: InvoiceIssued) -> None:
         repo = current_domain.repository_for(InvoiceStatusView)
         view = repo.get(event.invoice_id)
         view.status = "Issued"
@@ -58,7 +58,7 @@ class InvoiceStatusProjector:
         repo.add(view)
 
     @on(InvoicePaid)
-    def on_invoice_paid(self, event):
+    def on_invoice_paid(self, event: InvoicePaid) -> None:
         repo = current_domain.repository_for(InvoiceStatusView)
         view = repo.get(event.invoice_id)
         view.status = "Paid"
@@ -67,7 +67,7 @@ class InvoiceStatusProjector:
         repo.add(view)
 
     @on(InvoiceVoided)
-    def on_invoice_voided(self, event):
+    def on_invoice_voided(self, event: InvoiceVoided) -> None:
         repo = current_domain.repository_for(InvoiceStatusView)
         view = repo.get(event.invoice_id)
         view.status = "Voided"

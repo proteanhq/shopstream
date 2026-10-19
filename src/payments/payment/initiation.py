@@ -42,7 +42,7 @@ class InitiatePayment:
 )
 class InitiatePaymentHandler:
     @handle(InitiatePayment)
-    def initiate_payment(self, command):
+    def initiate_payment(self, command: InitiatePayment) -> str:
         # Enrich this handler's wide event (protean.access) with business
         # dimensions for revenue/fraud observability — these only the
         # application knows, and they flow through to log aggregators.

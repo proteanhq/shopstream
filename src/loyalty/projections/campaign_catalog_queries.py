@@ -21,11 +21,11 @@ class ListCampaigns:
 @loyalty.query_handler(part_of=CampaignCatalog)
 class CampaignCatalogQueryHandler:
     @read(GetCampaign)
-    def get_campaign(self, query):
+    def get_campaign(self, query: GetCampaign) -> CampaignCatalog:
         return current_domain.view_for(CampaignCatalog).get(query.campaign_id)
 
     @read(ListCampaigns)
-    def list_campaigns(self, query):
+    def list_campaigns(self, query: ListCampaigns) -> list[CampaignCatalog]:
         qs = current_domain.view_for(CampaignCatalog).query
         if query.status:
             qs = qs.filter(status=query.status)

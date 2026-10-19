@@ -166,7 +166,7 @@ class Payment:
         last4: str | None,
         gateway_name: str,
         idempotency_key: str,
-    ):
+    ) -> "Payment":
         """Create a new payment for an order.
 
         Uses _create_new() for event-sourced aggregates. All state is set
@@ -207,6 +207,8 @@ class Payment:
     def record_success(self, gateway_transaction_id: str) -> None:
         """Record successful payment capture from gateway webhook."""
         now = datetime.now(UTC)
+        # PaymentInitiated, the first event of every payment, always sets amount.
+        assert self.amount is not None
         self.raise_(
             PaymentSucceeded(
                 payment_id=str(self.id),
@@ -273,6 +275,8 @@ class Payment:
                 {"status": ["Refunds can only be requested for succeeded or partially refunded payments"]}
             )
 
+        # PaymentInitiated, the first event of every payment, always sets amount.
+        assert self.amount is not None
         if self.total_refunded + amount > self.amount.value:
             raise ValidationError(
                 {
@@ -321,7 +325,7 @@ class Payment:
     # @apply methods — rebuild state during event replay
     # -------------------------------------------------------------------
     @apply
-    def _on_payment_initiated(self, event: PaymentInitiated):
+    def _on_payment_initiated(self, event: PaymentInitiated) -> None:
         self.id = event.payment_id
         self.order_id = event.order_id
         self.customer_id = event.customer_id
@@ -348,12 +352,12 @@ class Payment:
         )
 
     @apply
-    def _on_payment_processing(self, event: PaymentProcessing):
+    def _on_payment_processing(self, event: PaymentProcessing) -> None:
         self.status = PaymentStatus.PROCESSING.value
         self.updated_at = event.processing_at
 
     @apply
-    def _on_payment_succeeded(self, event: PaymentSucceeded):
+    def _on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         self.status = PaymentStatus.SUCCEEDED.value
         self.gateway_info = GatewayInfo(
             gateway_name=self.gateway_info.gateway_name if self.gateway_info else "",
@@ -369,7 +373,7 @@ class Payment:
             latest.gateway_transaction_id = event.gateway_transaction_id
 
     @apply
-    def _on_payment_failed(self, event: PaymentFailed):
+    def _on_payment_failed(self, event: PaymentFailed) -> None:
         self.status = PaymentStatus.FAILED.value
         self.updated_at = event.failed_at
 
@@ -380,7 +384,7 @@ class Payment:
             latest.failure_reason = event.reason
 
     @apply
-    def _on_payment_retry_initiated(self, event: PaymentRetryInitiated):
+    def _on_payment_retry_initiated(self, event: PaymentRetryInitiated) -> None:
         self.status = PaymentStatus.PENDING.value
         self.attempt_count = event.attempt_number
         self.updated_at = event.retried_at
@@ -395,7 +399,7 @@ class Payment:
         )
 
     @apply
-    def _on_refund_requested(self, event: RefundRequested):
+    def _on_refund_requested(self, event: RefundRequested) -> None:
         self.add_refunds(
             Refund(
                 id=event.refund_id,
@@ -408,7 +412,7 @@ class Payment:
         self.updated_at = event.requested_at
 
     @apply
-    def _on_refund_completed(self, event: RefundCompleted):
+    def _on_refund_completed(self, event: RefundCompleted) -> None:
         refund = next((r for r in (self.refunds or []) if str(r.id) == str(event.refund_id)), None)
         if refund:
             refund.status = RefundStatus.COMPLETED.value
@@ -416,6 +420,8 @@ class Payment:
             refund.processed_at = event.completed_at
 
         self.total_refunded = (self.total_refunded or 0.0) + event.amount
+        # PaymentInitiated, the first event of every payment, always sets amount.
+        assert self.amount is not None
         if self.total_refunded >= self.amount.value:
             self.status = PaymentStatus.REFUNDED.value
         else:

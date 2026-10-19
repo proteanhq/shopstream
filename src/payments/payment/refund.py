@@ -32,10 +32,10 @@ class ProcessRefundWebhook:
 @payments.command_handler(part_of=Payment)
 class RefundHandler:
     @handle(RequestRefund)
-    def request_refund(self, command):
+    def request_refund(self, command: RequestRefund) -> str:
         repo = current_domain.repository_for(Payment)
         payment = repo.get(command.payment_id)
-        refund_id = payment.request_refund(
+        refund_id: str = payment.request_refund(
             amount=command.amount,
             reason=command.reason,
         )
@@ -43,7 +43,7 @@ class RefundHandler:
         return refund_id
 
     @handle(ProcessRefundWebhook)
-    def process_refund_webhook(self, command):
+    def process_refund_webhook(self, command: ProcessRefundWebhook) -> None:
         repo = current_domain.repository_for(Payment)
         payment = repo.get(command.payment_id)
         payment.complete_refund(

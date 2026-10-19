@@ -15,15 +15,15 @@ from loyalty.reward.reward_account import RewardAccount
 
 @loyalty.repository(part_of=RewardAccount)
 class RewardAccountRepository:
-    def top_savers(self, limit=3):
+    def top_savers(self, limit: int = 3) -> list[RewardAccount]:
         """Active accounts with the highest balances (order_by + limit)."""
         return self._dao.query.filter(status="Active").order_by("-points_balance").limit(limit).all().items
 
-    def never_redeemed(self):
+    def never_redeemed(self) -> list[RewardAccount]:
         """Accounts whose balance still equals lifetime points (F field comparison)."""
         return self._dao.query.filter(points_balance=F("lifetime_points")).all().items
 
-    def eligible_for_promo(self, tiers, min_balance):
+    def eligible_for_promo(self, tiers: list[str], min_balance: int) -> list[RewardAccount]:
         """Accounts in any of `tiers` OR with at least `min_balance` points.
 
         Combines a Q-object OR with the ``in`` and ``gte`` lookups.

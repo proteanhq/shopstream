@@ -12,6 +12,7 @@ State Machine:
 
 from datetime import UTC, datetime
 from enum import Enum
+from typing import Protocol
 from uuid import uuid4
 
 from protean import value_object_from_entity
@@ -50,6 +51,16 @@ class InvoiceLineItem:
 InvoiceLineItemInput = value_object_from_entity(InvoiceLineItem, name="InvoiceLineItemInput", exclude={"total"})
 
 
+# mypy cannot use the runtime-built InvoiceLineItemInput as a type, so this names the fields the code reads.
+class InvoiceLineItemData(Protocol):
+    @property
+    def description(self) -> str: ...
+    @property
+    def quantity(self) -> float: ...
+    @property
+    def unit_price(self) -> float: ...
+
+
 @payments.aggregate
 class Invoice:
     order_id: str = Identifier(required=True)
@@ -77,9 +88,9 @@ class Invoice:
         cls,
         order_id: str,
         customer_id: str,
-        line_items_data: "list[InvoiceLineItemInput]",
+        line_items_data: list[InvoiceLineItemData],
         tax: float = 0.0,
-    ):
+    ) -> "Invoice":
         """Create a new invoice for an order.
 
         ``line_items_data`` is a list of ``InvoiceLineItemInput`` value objects

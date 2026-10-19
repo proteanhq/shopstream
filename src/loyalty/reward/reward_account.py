@@ -17,6 +17,7 @@ from datetime import UTC, date, datetime
 from enum import Enum
 
 from protean import Index, invariant
+from protean.core.aggregate import BaseAggregate
 from protean.exceptions import ValidationError
 from protean.fields import Date, DateTime, HasMany, HasOne, Integer, Reference, String
 from protean.fields.validators import RegexValidator
@@ -27,7 +28,7 @@ from loyalty.domain import loyalty
 _CODE_ALPHABET = string.ascii_uppercase + string.digits
 
 
-def generate_member_code(length=8):
+def generate_member_code(length: int = 8) -> str:
     """Generate a valid member code (uppercase alphanumeric, no 3-in-a-row repeat).
 
     Every account is assigned its own member code, so ``member_code`` is required and
@@ -57,7 +58,7 @@ class Auditable:
 
 
 @loyalty.aggregate_enricher
-def stamp_actor(aggregate):
+def stamp_actor(aggregate: BaseAggregate) -> None:
     """Record who saved an `Auditable` aggregate.
 
     The actor is the ``actor_id`` bound on the domain context's ``g`` (the API binds it
@@ -94,7 +95,7 @@ TIER_THRESHOLDS = [
 ]
 
 
-def tier_for_lifetime_points(lifetime_points):
+def tier_for_lifetime_points(lifetime_points: int) -> str:
     """Return the highest tier whose threshold the lifetime points have reached."""
     for tier, threshold in TIER_THRESHOLDS:
         if lifetime_points >= threshold:
@@ -111,7 +112,7 @@ class NoTripleRepeatValidator:
 
     message = "Member code cannot repeat a character 3 or more times consecutively"
 
-    def __call__(self, value):
+    def __call__(self, value: object) -> None:
         if value is None:
             return
         text = str(value)
@@ -184,12 +185,12 @@ class RewardAccount(Auditable):
     entries = HasMany("PointsLedgerEntry")
 
     @invariant.post
-    def balance_never_negative(self):
+    def balance_never_negative(self) -> None:
         if self.points_balance < 0:
             raise ValidationError({"points_balance": ["Points balance cannot be negative"]})
 
     @invariant.pre
-    def closed_accounts_are_immutable(self):
+    def closed_accounts_are_immutable(self) -> None:
         # Runs before each field assignment, against the pre-mutation state — so the
         # close() transition itself (Active/Frozen -> Closed) passes, but any later
         # mutation of an already-closed account is rejected.
@@ -197,7 +198,9 @@ class RewardAccount(Auditable):
             raise ValidationError({"_account": ["A closed reward account cannot be modified"]})
 
     @classmethod
-    def enroll(cls, customer_id, member_code=None, referral_code=None):
+    def enroll(
+        cls, customer_id: str, member_code: str | None = None, referral_code: str | None = None
+    ) -> "RewardAccount":
         from loyalty.reward.events import RewardAccountEnrolled
 
         account = cls(
@@ -216,7 +219,7 @@ class RewardAccount(Auditable):
         )
         return account
 
-    def issue_card(self, card_number):
+    def issue_card(self, card_number: str) -> None:
         from loyalty.reward.events import MembershipCardIssued
 
         if self.card is not None:
@@ -231,7 +234,7 @@ class RewardAccount(Auditable):
             )
         )
 
-    def _record_entry(self, entry_type, amount, reason=None):
+    def _record_entry(self, entry_type: str, amount: int, reason: str | None = None) -> None:
         self.add_entries(
             PointsLedgerEntry(
                 entry_type=entry_type,
@@ -242,7 +245,7 @@ class RewardAccount(Auditable):
             )
         )
 
-    def earn_points(self, amount, reason="order"):
+    def earn_points(self, amount: int, reason: str | None = "order") -> None:
         from loyalty.reward.events import PointsEarned
 
         if amount <= 0:
@@ -262,7 +265,7 @@ class RewardAccount(Auditable):
         )
         self._maybe_upgrade_tier()
 
-    def _maybe_upgrade_tier(self):
+    def _maybe_upgrade_tier(self) -> None:
         """Promote the account if lifetime points have crossed a tier threshold."""
         from loyalty.reward.events import TierUpgraded
 
@@ -282,7 +285,7 @@ class RewardAccount(Auditable):
             )
         )
 
-    def redemption_blocker(self, amount):
+    def redemption_blocker(self, amount: int) -> str | None:
         """Return why `redeem_points(amount)` would be rejected, or None if it would succeed.
 
         Callers that dispatch `RedeemPoints` from inside their own transaction check
@@ -297,7 +300,7 @@ class RewardAccount(Auditable):
             return "Points balance cannot be negative"
         return None
 
-    def redeem_points(self, amount, reason="redemption"):
+    def redeem_points(self, amount: int, reason: str | None = "redemption") -> None:
         from loyalty.reward.events import PointsRedeemed
 
         if amount <= 0:
@@ -316,7 +319,7 @@ class RewardAccount(Auditable):
             )
         )
 
-    def claw_back_points(self, amount, reason="refund_clawback"):
+    def claw_back_points(self, amount: int, reason: str | None = "refund_clawback") -> None:
         """Reverse points after a refund — deduct up to the available balance.
 
         Unlike redemption, a clawback is **clamped** to the current balance (it never drives the
@@ -345,7 +348,7 @@ class RewardAccount(Auditable):
             )
         )
 
-    def close(self):
+    def close(self) -> None:
         from loyalty.reward.events import RewardAccountClosed
 
         self.status = AccountStatus.CLOSED.value

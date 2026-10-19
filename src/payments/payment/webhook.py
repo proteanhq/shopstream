@@ -4,6 +4,7 @@ Handles gateway webhook callbacks for payment success/failure.
 """
 
 from protean import handle
+from protean.exceptions import ValidationError
 from protean.fields import Identifier, String
 from protean.utils.globals import current_domain
 
@@ -24,11 +25,13 @@ class ProcessPaymentWebhook:
 @payments.command_handler(part_of=Payment)
 class ProcessWebhookHandler:
     @handle(ProcessPaymentWebhook)
-    def process_webhook(self, command):
+    def process_webhook(self, command: ProcessPaymentWebhook) -> None:
         repo = current_domain.repository_for(Payment)
         payment = repo.get(command.payment_id)
 
         if command.gateway_status == "succeeded":
+            if command.gateway_transaction_id is None:
+                raise ValidationError({"gateway_transaction_id": ["is required when gateway_status is succeeded"]})
             payment.record_success(
                 gateway_transaction_id=command.gateway_transaction_id,
             )

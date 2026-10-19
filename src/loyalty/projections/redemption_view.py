@@ -38,7 +38,7 @@ class RedemptionView:
 @loyalty.projector(projector_for=RedemptionView, aggregates=[Redemption])
 class RedemptionViewProjector:
     @on(RedemptionRequested)
-    def on_requested(self, event):
+    def on_requested(self, event: RedemptionRequested) -> None:
         current_domain.repository_for(RedemptionView).add(
             RedemptionView(
                 redemption_id=event.redemption_id,
@@ -51,11 +51,11 @@ class RedemptionViewProjector:
         )
 
     @on(PointsReserved)
-    def on_points_reserved(self, event):
+    def on_points_reserved(self, event: PointsReserved) -> None:
         self._set(event.redemption_id, status="points_reserved", updated_at=event.reserved_at)
 
     @on(VoucherIssued)
-    def on_voucher_issued(self, event):
+    def on_voucher_issued(self, event: VoucherIssued) -> None:
         self._set(
             event.redemption_id,
             status="voucher_issued",
@@ -64,15 +64,15 @@ class RedemptionViewProjector:
         )
 
     @on(VoucherIssuanceFailed)
-    def on_voucher_failed(self, event):
+    def on_voucher_failed(self, event: VoucherIssuanceFailed) -> None:
         self._set(event.redemption_id, failure_reason=event.reason, updated_at=event.failed_at)
 
     @on(RedemptionCompleted)
-    def on_completed(self, event):
+    def on_completed(self, event: RedemptionCompleted) -> None:
         self._set(event.redemption_id, status="completed", updated_at=event.completed_at)
 
     @on(RedemptionCompensated)
-    def on_compensated(self, event):
+    def on_compensated(self, event: RedemptionCompensated) -> None:
         self._set(
             event.redemption_id,
             status="compensated",
@@ -80,7 +80,7 @@ class RedemptionViewProjector:
             updated_at=event.compensated_at,
         )
 
-    def _set(self, redemption_id, **changes):
+    def _set(self, redemption_id: str, **changes: object) -> None:
         repo = current_domain.repository_for(RedemptionView)
         view = repo.get_or_none(redemption_id)
         if view is None:

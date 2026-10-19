@@ -47,7 +47,7 @@ class CompensateRedemption:
 @loyalty.command_handler(part_of=Redemption)
 class RedemptionHandler:
     @handle(RequestRedemption)
-    def request(self, command: RequestRedemption):
+    def request(self, command: RequestRedemption) -> str:
         redemption = Redemption.request(
             account_id=command.account_id,
             points=command.points,
@@ -57,14 +57,14 @@ class RedemptionHandler:
         return redemption.id
 
     @handle(ReserveRedemptionPoints)
-    def reserve(self, command: ReserveRedemptionPoints):
+    def reserve(self, command: ReserveRedemptionPoints) -> None:
         repo = current_domain.repository_for(Redemption)
         redemption = repo.get(command.redemption_id)
         redemption.reserve_points()
         repo.add(redemption)
 
     @handle(IssueRedemptionVoucher)
-    def issue(self, command: IssueRedemptionVoucher):
+    def issue(self, command: IssueRedemptionVoucher) -> None:
         repo = current_domain.repository_for(Redemption)
         redemption = repo.get(command.redemption_id)
         try:
@@ -75,14 +75,14 @@ class RedemptionHandler:
         repo.add(redemption)
 
     @handle(CompleteRedemption)
-    def complete(self, command: CompleteRedemption):
+    def complete(self, command: CompleteRedemption) -> None:
         repo = current_domain.repository_for(Redemption)
         redemption = repo.get(command.redemption_id)
         redemption.complete()
         repo.add(redemption)
 
     @handle(CompensateRedemption)
-    def compensate(self, command: CompensateRedemption):
+    def compensate(self, command: CompensateRedemption) -> None:
         repo = current_domain.repository_for(Redemption)
         redemption = repo.get(command.redemption_id)
         redemption.compensate(command.refunded_points, command.reason)

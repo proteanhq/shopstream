@@ -14,7 +14,7 @@ from protean.utils.globals import current_domain
 from loyalty.projections.campaign_catalog import CampaignCatalog
 
 
-def active_points_multiplier(on_date=None):
+def active_points_multiplier(on_date: date | None = None) -> int:
     """Return the highest active ``points_multiplier`` factor, or 1 if none apply.
 
     A campaign counts as active when its catalog status is ``active`` and ``on_date``

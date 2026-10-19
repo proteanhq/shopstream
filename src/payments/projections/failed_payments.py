@@ -31,7 +31,7 @@ class FailedPayment:
 @payments.projector(projector_for=FailedPayment, aggregates=[Payment])
 class FailedPaymentProjector:
     @on(PaymentFailed)
-    def on_payment_failed(self, event):
+    def on_payment_failed(self, event: PaymentFailed) -> None:
         repo = current_domain.repository_for(FailedPayment)
 
         record = repo.get_or_none(event.payment_id)
@@ -52,7 +52,7 @@ class FailedPaymentProjector:
         repo.add(record)
 
     @on(PaymentRetryInitiated)
-    def on_payment_retry_initiated(self, event):
+    def on_payment_retry_initiated(self, event: PaymentRetryInitiated) -> None:
         repo = current_domain.repository_for(FailedPayment)
         record = repo.get_or_none(event.payment_id)
         if record is None:
@@ -63,7 +63,7 @@ class FailedPaymentProjector:
         repo.add(record)
 
     @on(PaymentSucceeded)
-    def on_payment_succeeded(self, event):
+    def on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         repo = current_domain.repository_for(FailedPayment)
         record = repo.get_or_none(event.payment_id)
         if record is None:

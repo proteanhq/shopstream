@@ -19,7 +19,7 @@ class VoidInvoice:
 @payments.command_handler(part_of=Invoice)
 class VoidInvoiceHandler:
     @handle(VoidInvoice)
-    def void_invoice(self, command):
+    def void_invoice(self, command: VoidInvoice) -> None:
         repo = current_domain.repository_for(Invoice)
         invoice = repo.get(command.invoice_id)
         invoice.void(reason=command.reason)

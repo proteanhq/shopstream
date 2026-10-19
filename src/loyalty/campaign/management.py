@@ -46,7 +46,7 @@ class ExpireCampaign:
 @loyalty.command_handler(part_of=PromoCampaign)
 class PromoCampaignHandler:
     @handle(LaunchCampaign)
-    def launch(self, command: LaunchCampaign):
+    def launch(self, command: LaunchCampaign) -> str:
         campaign = PromoCampaign.launch(
             campaign_code=command.campaign_code,
             name=command.name,
@@ -59,21 +59,21 @@ class PromoCampaignHandler:
         return str(campaign.id)
 
     @handle(ActivateCampaign)
-    def activate(self, command: ActivateCampaign):
+    def activate(self, command: ActivateCampaign) -> None:
         repo = current_domain.repository_for(PromoCampaign)
         campaign = repo.get(command.campaign_id)
         campaign.activate()
         repo.add(campaign)
 
     @handle(PauseCampaign)
-    def pause(self, command: PauseCampaign):
+    def pause(self, command: PauseCampaign) -> None:
         repo = current_domain.repository_for(PromoCampaign)
         campaign = repo.get(command.campaign_id)
         campaign.pause(reason=command.reason)
         repo.add(campaign)
 
     @handle(ExpireCampaign)
-    def expire(self, command: ExpireCampaign):
+    def expire(self, command: ExpireCampaign) -> None:
         repo = current_domain.repository_for(PromoCampaign)
         campaign = repo.get(command.campaign_id)
         campaign.expire()

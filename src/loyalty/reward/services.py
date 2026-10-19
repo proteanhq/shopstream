@@ -17,7 +17,7 @@ from loyalty.reward.transfer import TransferPoints
 @loyalty.application_service(part_of=RewardAccount)
 class LoyaltyService:
     @use_case
-    def transfer_points(self, source_id, target_id, amount):
+    def transfer_points(self, source_id: str, target_id: str, amount: int) -> dict[str, int]:
         repo = current_domain.repository_for(RewardAccount)
         source = repo.get(source_id)
         target = repo.get(target_id)

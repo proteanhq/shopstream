@@ -129,6 +129,8 @@ class RedemptionSaga:
         self.failure_reason = event.reason
 
         # Compensating action: give back the points reserved in step 1.
+        # on_requested, the start handler, always sets account_id before this step runs.
+        assert self.account_id is not None
         current_domain.process(
             EarnPoints(
                 account_id=self.account_id,

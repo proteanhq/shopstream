@@ -17,7 +17,7 @@ class EnrollRewardAccount:
 @loyalty.command_handler(part_of=RewardAccount)
 class EnrollRewardAccountHandler:
     @handle(EnrollRewardAccount)
-    def enroll(self, command: EnrollRewardAccount):
+    def enroll(self, command: EnrollRewardAccount) -> str:
         account = RewardAccount.enroll(
             customer_id=command.customer_id,
             member_code=command.member_code or None,

@@ -38,7 +38,7 @@ class PaymentStatusView:
 @payments.projector(projector_for=PaymentStatusView, aggregates=[Payment])
 class PaymentStatusProjector:
     @on(PaymentInitiated)
-    def on_payment_initiated(self, event):
+    def on_payment_initiated(self, event: PaymentInitiated) -> None:
         current_domain.repository_for(PaymentStatusView).add(
             PaymentStatusView(
                 payment_id=event.payment_id,
@@ -54,7 +54,7 @@ class PaymentStatusProjector:
         )
 
     @on(PaymentProcessing)
-    def on_payment_processing(self, event):
+    def on_payment_processing(self, event: PaymentProcessing) -> None:
         repo = current_domain.repository_for(PaymentStatusView)
         view = repo.get(event.payment_id)
         view.status = "Processing"
@@ -62,7 +62,7 @@ class PaymentStatusProjector:
         repo.add(view)
 
     @on(PaymentSucceeded)
-    def on_payment_succeeded(self, event):
+    def on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         repo = current_domain.repository_for(PaymentStatusView)
         view = repo.get(event.payment_id)
         view.status = "Succeeded"
@@ -71,7 +71,7 @@ class PaymentStatusProjector:
         repo.add(view)
 
     @on(PaymentFailed)
-    def on_payment_failed(self, event):
+    def on_payment_failed(self, event: PaymentFailed) -> None:
         repo = current_domain.repository_for(PaymentStatusView)
         view = repo.get(event.payment_id)
         view.status = "Failed"
@@ -81,7 +81,7 @@ class PaymentStatusProjector:
         repo.add(view)
 
     @on(PaymentRetryInitiated)
-    def on_payment_retry_initiated(self, event):
+    def on_payment_retry_initiated(self, event: PaymentRetryInitiated) -> None:
         repo = current_domain.repository_for(PaymentStatusView)
         view = repo.get(event.payment_id)
         view.status = "Pending"
@@ -91,14 +91,14 @@ class PaymentStatusProjector:
         repo.add(view)
 
     @on(RefundRequested)
-    def on_refund_requested(self, event):
+    def on_refund_requested(self, event: RefundRequested) -> None:
         repo = current_domain.repository_for(PaymentStatusView)
         view = repo.get(event.payment_id)
         view.updated_at = event.requested_at
         repo.add(view)
 
     @on(RefundCompleted)
-    def on_refund_completed(self, event):
+    def on_refund_completed(self, event: RefundCompleted) -> None:
         repo = current_domain.repository_for(PaymentStatusView)
         view = repo.get(event.payment_id)
         view.total_refunded = (view.total_refunded or 0.0) + event.amount

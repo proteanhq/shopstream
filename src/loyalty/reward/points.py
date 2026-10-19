@@ -26,7 +26,7 @@ class RedeemPoints:
 @loyalty.command_handler(part_of=RewardAccount)
 class PointsHandler:
     @handle(EarnPoints)
-    def earn(self, command: EarnPoints):
+    def earn(self, command: EarnPoints) -> None:
         repo = current_domain.repository_for(RewardAccount)
         account = repo.get(command.account_id)
         # Cross-aggregate read: an active points_multiplier PromoCampaign boosts the
@@ -38,7 +38,7 @@ class PointsHandler:
         repo.add(account)
 
     @handle(RedeemPoints)
-    def redeem(self, command: RedeemPoints):
+    def redeem(self, command: RedeemPoints) -> None:
         repo = current_domain.repository_for(RewardAccount)
         account = repo.get(command.account_id)
         account.redeem_points(command.amount, reason=command.reason)

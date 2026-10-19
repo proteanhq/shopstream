@@ -32,7 +32,7 @@ class RewardAccountView:
 @loyalty.projector(projector_for=RewardAccountView, aggregates=[RewardAccount])
 class RewardAccountViewProjector:
     @on(RewardAccountEnrolled)
-    def on_enrolled(self, event):
+    def on_enrolled(self, event: RewardAccountEnrolled) -> None:
         current_domain.repository_for(RewardAccountView).add(
             RewardAccountView(
                 account_id=event.account_id,
@@ -47,7 +47,7 @@ class RewardAccountViewProjector:
         )
 
     @on(PointsEarned)
-    def on_earned(self, event):
+    def on_earned(self, event: PointsEarned) -> None:
         repo = current_domain.repository_for(RewardAccountView)
         view = repo.get(event.account_id)
         view.points_balance = event.balance_after
@@ -56,7 +56,7 @@ class RewardAccountViewProjector:
         repo.add(view)
 
     @on(PointsRedeemed)
-    def on_redeemed(self, event):
+    def on_redeemed(self, event: PointsRedeemed) -> None:
         repo = current_domain.repository_for(RewardAccountView)
         view = repo.get(event.account_id)
         view.points_balance = event.balance_after
@@ -64,7 +64,7 @@ class RewardAccountViewProjector:
         repo.add(view)
 
     @on(TierUpgraded)
-    def on_tier_upgraded(self, event):
+    def on_tier_upgraded(self, event: TierUpgraded) -> None:
         repo = current_domain.repository_for(RewardAccountView)
         view = repo.get(event.account_id)
         view.tier = event.new_tier
@@ -72,7 +72,7 @@ class RewardAccountViewProjector:
         repo.add(view)
 
     @on(RewardAccountClosed)
-    def on_closed(self, event):
+    def on_closed(self, event: RewardAccountClosed) -> None:
         repo = current_domain.repository_for(RewardAccountView)
         view = repo.get(event.account_id)
         view.status = "Closed"

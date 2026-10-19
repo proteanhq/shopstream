@@ -16,5 +16,5 @@ class GetPaymentStatus:
 @payments.query_handler(part_of=PaymentStatusView)
 class PaymentStatusQueryHandler:
     @read(GetPaymentStatus)
-    def get_payment_status(self, query):
+    def get_payment_status(self, query: GetPaymentStatus) -> PaymentStatusView:
         return current_domain.view_for(PaymentStatusView).get(query.payment_id)

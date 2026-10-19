@@ -27,7 +27,7 @@ class RefundReport:
 @payments.projector(projector_for=RefundReport, aggregates=[Payment])
 class RefundReportProjector:
     @on(RefundRequested)
-    def on_refund_requested(self, event):
+    def on_refund_requested(self, event: RefundRequested) -> None:
         current_domain.repository_for(RefundReport).add(
             RefundReport(
                 refund_id=event.refund_id,
@@ -41,7 +41,7 @@ class RefundReportProjector:
         )
 
     @on(RefundCompleted)
-    def on_refund_completed(self, event):
+    def on_refund_completed(self, event: RefundCompleted) -> None:
         repo = current_domain.repository_for(RefundReport)
         record = repo.get(event.refund_id)
         record.status = "completed"

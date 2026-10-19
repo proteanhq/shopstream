@@ -32,7 +32,7 @@ class CustomerPayment:
 @payments.projector(projector_for=CustomerPayment, aggregates=[Payment])
 class CustomerPaymentProjector:
     @on(PaymentInitiated)
-    def on_payment_initiated(self, event):
+    def on_payment_initiated(self, event: PaymentInitiated) -> None:
         current_domain.repository_for(CustomerPayment).add(
             CustomerPayment(
                 payment_id=event.payment_id,
@@ -48,7 +48,7 @@ class CustomerPaymentProjector:
         )
 
     @on(PaymentSucceeded)
-    def on_payment_succeeded(self, event):
+    def on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         repo = current_domain.repository_for(CustomerPayment)
         view = repo.get(event.payment_id)
         view.status = "Succeeded"
@@ -56,7 +56,7 @@ class CustomerPaymentProjector:
         repo.add(view)
 
     @on(PaymentFailed)
-    def on_payment_failed(self, event):
+    def on_payment_failed(self, event: PaymentFailed) -> None:
         repo = current_domain.repository_for(CustomerPayment)
         view = repo.get(event.payment_id)
         view.status = "Failed"
@@ -64,7 +64,7 @@ class CustomerPaymentProjector:
         repo.add(view)
 
     @on(RefundCompleted)
-    def on_refund_completed(self, event):
+    def on_refund_completed(self, event: RefundCompleted) -> None:
         repo = current_domain.repository_for(CustomerPayment)
         view = repo.get(event.payment_id)
         view.status = "Refunded"

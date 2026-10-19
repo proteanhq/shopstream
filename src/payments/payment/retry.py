@@ -21,7 +21,7 @@ class RetryPayment:
 @payments.command_handler(part_of=Payment)
 class RetryPaymentHandler:
     @handle(RetryPayment)
-    def retry_payment(self, command):
+    def retry_payment(self, command: RetryPayment) -> None:
         repo = current_domain.repository_for(Payment)
         payment = repo.get(command.payment_id)
         payment.retry()

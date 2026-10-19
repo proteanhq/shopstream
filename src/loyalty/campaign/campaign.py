@@ -38,7 +38,15 @@ class PromoCampaign:
     launched_at: datetime | None = DateTime()
 
     @classmethod
-    def launch(cls, campaign_code, name, discount_type, discount_value, starts_on=None, ends_on=None):
+    def launch(
+        cls,
+        campaign_code: str,
+        name: str,
+        discount_type: str,
+        discount_value: int,
+        starts_on: date | None = None,
+        ends_on: date | None = None,
+    ) -> "PromoCampaign":
         campaign = cls._create_new()
         campaign.raise_(
             CampaignLaunched(
@@ -54,24 +62,24 @@ class PromoCampaign:
         )
         return campaign
 
-    def activate(self):
+    def activate(self) -> None:
         if self.status not in ("draft", "paused"):
             raise ValidationError({"status": [f"Cannot activate a {self.status} campaign"]})
         self.raise_(CampaignActivated(campaign_id=str(self.id), activated_at=datetime.now(UTC)))
 
-    def pause(self, reason=None):
+    def pause(self, reason: str | None = None) -> None:
         if self.status != "active":
             raise ValidationError({"status": ["Only an active campaign can be paused"]})
         self.raise_(CampaignPaused(campaign_id=str(self.id), reason=reason, paused_at=datetime.now(UTC)))
 
-    def expire(self):
+    def expire(self) -> None:
         if self.status == "expired":
             raise ValidationError({"status": ["Campaign already expired"]})
         self.raise_(CampaignExpired(campaign_id=str(self.id), expired_at=datetime.now(UTC)))
 
     # -- @apply handlers: rebuild state during replay ----------------------
     @apply
-    def _on_launched(self, event: CampaignLaunched):
+    def _on_launched(self, event: CampaignLaunched) -> None:
         self.id = event.campaign_id
         self.campaign_code = event.campaign_code
         self.name = event.name
@@ -83,13 +91,13 @@ class PromoCampaign:
         self.launched_at = event.launched_at
 
     @apply
-    def _on_activated(self, event: CampaignActivated):  # noqa: ARG002
+    def _on_activated(self, event: CampaignActivated) -> None:  # noqa: ARG002
         self.status = "active"
 
     @apply
-    def _on_paused(self, event: CampaignPaused):  # noqa: ARG002
+    def _on_paused(self, event: CampaignPaused) -> None:  # noqa: ARG002
         self.status = "paused"
 
     @apply
-    def _on_expired(self, event: CampaignExpired):  # noqa: ARG002
+    def _on_expired(self, event: CampaignExpired) -> None:  # noqa: ARG002
         self.status = "expired"

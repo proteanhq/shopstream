@@ -23,7 +23,7 @@ class DailyRevenue:
 @payments.projector(projector_for=DailyRevenue, aggregates=[Payment])
 class DailyRevenueProjector:
     @on(PaymentSucceeded)
-    def on_payment_succeeded(self, event):
+    def on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         repo = current_domain.repository_for(DailyRevenue)
         date_key = event.succeeded_at.date().isoformat()
 
@@ -40,7 +40,7 @@ class DailyRevenueProjector:
         repo.add(record)
 
     @on(RefundCompleted)
-    def on_refund_completed(self, event):
+    def on_refund_completed(self, event: RefundCompleted) -> None:
         repo = current_domain.repository_for(DailyRevenue)
         date_key = event.completed_at.date().isoformat()
 

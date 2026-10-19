@@ -16,5 +16,5 @@ class GetRewardAccount:
 @loyalty.query_handler(part_of=RewardAccountView)
 class RewardAccountViewQueryHandler:
     @read(GetRewardAccount)
-    def get_reward_account(self, query):
+    def get_reward_account(self, query: GetRewardAccount) -> RewardAccountView:
         return current_domain.view_for(RewardAccountView).get(query.account_id)

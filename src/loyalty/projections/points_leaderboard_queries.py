@@ -20,5 +20,5 @@ class GetLeaderboardStanding:
 @loyalty.query_handler(part_of=PointsLeaderboard)
 class PointsLeaderboardQueryHandler:
     @read(GetLeaderboardStanding)
-    def get_standing(self, query):
+    def get_standing(self, query: GetLeaderboardStanding) -> PointsLeaderboard:
         return current_domain.view_for(PointsLeaderboard).get(query.account_id)

@@ -16,5 +16,5 @@ class GetRedemption:
 @loyalty.query_handler(part_of=RedemptionView)
 class RedemptionViewQueryHandler:
     @read(GetRedemption)
-    def get_redemption(self, query):
+    def get_redemption(self, query: GetRedemption) -> RedemptionView:
         return current_domain.view_for(RedemptionView).get(query.redemption_id)

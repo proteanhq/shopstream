@@ -44,7 +44,7 @@ class CampaignCatalog:
 @loyalty.projector(projector_for=CampaignCatalog, aggregates=[PromoCampaign])
 class CampaignCatalogProjector:
     @on(CampaignLaunched)
-    def on_launched(self, event):
+    def on_launched(self, event: CampaignLaunched) -> None:
         current_domain.repository_for(CampaignCatalog).add(
             CampaignCatalog(
                 campaign_id=event.campaign_id,
@@ -60,18 +60,18 @@ class CampaignCatalogProjector:
         )
 
     @on(CampaignActivated)
-    def on_activated(self, event):
+    def on_activated(self, event: CampaignActivated) -> None:
         self._set_status(event.campaign_id, "active", event.activated_at)
 
     @on(CampaignPaused)
-    def on_paused(self, event):
+    def on_paused(self, event: CampaignPaused) -> None:
         self._set_status(event.campaign_id, "paused", event.paused_at)
 
     @on(CampaignExpired)
-    def on_expired(self, event):
+    def on_expired(self, event: CampaignExpired) -> None:
         self._set_status(event.campaign_id, "expired", event.expired_at)
 
-    def _set_status(self, campaign_id, status, occurred_at):
+    def _set_status(self, campaign_id: str, status: str, occurred_at: datetime) -> None:
         repo = current_domain.repository_for(CampaignCatalog)
         entry = repo.get(campaign_id)
         entry.status = status
