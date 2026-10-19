@@ -31,6 +31,20 @@ external_brokers = ["global"]
 messages_per_tick = 50
 tick_interval = 0.01
 
+# `protean check` findings waived for this context. Each entry silences the first N
+# findings of that code, so a new finding of the same code fails the check again.
+[lint.suppressions]
+# Auditable is an abstract aggregate (RewardAccount's base), so it can have no command
+# handler. The rule does not skip abstract aggregates, unlike its sibling rules.
+AGGREGATE_WITHOUT_COMMAND_HANDLER = 1
+# MembershipCardIssued records the card issue on the account's stream. No read model
+# shows membership cards yet, so nothing handles the event.
+UNHANDLED_EVENT = 1
+# RewardAccount.points_balance in RewardAccountRepository.never_redeemed. The filter
+# compares two columns (points_balance = lifetime_points), which a single-column index
+# would not serve.
+UNINDEXED_FILTER_PATH = 1
+
 # Default Database (development / PROTEAN_ENV unset)
 [databases.default]
 provider = "postgresql"

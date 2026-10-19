@@ -8,7 +8,7 @@ from protean.fields import DateTime, Identifier, String
 from reviews.domain import reviews
 
 
-@reviews.projection
+@reviews.projection(externally_populated=True)
 class VerifiedPurchases:
     vp_id = Identifier(identifier=True, required=True)
     customer_id = String(required=True)

@@ -203,6 +203,59 @@ def test_lint_table_in_domain_toml_is_loaded(tmp_path, monkeypatch):
     assert config.get("lint", {}).get("level") == "error"
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="AGGREGATE_WITHOUT_COMMAND_HANDLER flags abstract aggregates, which cannot have a handler",
+)
+def test_abstract_aggregate_is_not_flagged_without_command_handler():
+    """Protean finding (not yet filed upstream): `protean check` flags an abstract aggregate.
+
+    An aggregate declared with `abstract=True` is a base for concrete aggregates and
+    cannot have a command handler of its own. `IRBuilder._diagnose_aggregate_without_command_handler`
+    walks every cluster and skips only `protean.adapters.*`, so it reports the base as
+    an aggregate with no write path. Its sibling cluster rules filter abstract
+    aggregates out through `_abstract_aggregate_fqns()`. Loyalty's `Auditable` base
+    trips this rule, and `src/loyalty/domain.toml` suppresses it.
+    """
+    from protean import Domain, handle
+    from protean.fields import String
+
+    domain = Domain(name="AbstractAggregateCheckProbe")
+
+    @domain.aggregate(abstract=True)
+    class Tracked:
+        created_by = String(max_length=50)
+
+    @domain.aggregate
+    class Ticket(Tracked):
+        title = String(required=True)
+
+    @domain.command(part_of=Ticket)
+    class OpenTicket:
+        title = String(required=True)
+
+    @domain.command_handler(part_of=Ticket)
+    class TicketCommandHandler:
+        @handle(OpenTicket)
+        def open_ticket(self, command):  # noqa: ARG002
+            pass
+
+    # A concrete aggregate with no handler, so the rule has one finding it must make.
+    @domain.aggregate
+    class Orphan:
+        name = String()
+
+    report = domain.check(traverse=False)
+
+    if report["counts"]["errors"]:
+        pytest.fail(f"precondition: the probe domain has no errors: {report['errors']}")
+    flagged = [d["element"] for d in report["diagnostics"] if d["code"] == "AGGREGATE_WITHOUT_COMMAND_HANDLER"]
+    if not any(element.endswith(".Orphan") for element in flagged):
+        pytest.fail(f"precondition: the rule flags a concrete aggregate with no handler: {flagged}")
+    assert not any(element.endswith(".Tracked") for element in flagged), flagged
+
+
 @pytest.fixture
 def bare_root_logger():
     """Give the test a root logger with no handlers at NOTSET, and restore it afterwards.

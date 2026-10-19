@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:6076edc04ca37f466ecff6f768644258b0b031acde083c219774cf1facb81105",
+  "checksum": "sha256:15628a30ade76cebcb4271995a7958332b0e861493db5415fa57db15754e1a66",
   "clusters": {
     "ordering.cart.cart.ShoppingCart": {
       "aggregate": {
@@ -3303,22 +3303,6 @@
     },
     {
       "category": "handler_completeness",
-      "code": "PROJECTION_WITHOUT_PROJECTOR",
-      "element": "ordering.projections.suspended_accounts.SuspendedAccount",
-      "level": "warning",
-      "message": "Projection `SuspendedAccount` has no projector to populate it",
-      "rule": {
-        "fix": "Add a projector for the projection, or set `externally_populated=True` if it is filled by a subscriber.",
-        "rationale": "A projection with no projector is never populated, so queries against it will always return empty."
-      },
-      "suggestion": "Add a projector for the projection, or set `externally_populated=True` if it is filled by a subscriber.",
-      "teaching_skills": [
-        "add-read-model",
-        "projection"
-      ]
-    },
-    {
-      "category": "handler_completeness",
       "code": "UNSOURCED_PROJECTION_FIELD",
       "element": "ordering.projections.cart_view.CartView",
       "field": "created_at",
@@ -4932,7 +4916,7 @@
         "name": "SuspendedAccount",
         "options": {
           "cache": null,
-          "externally_populated": false,
+          "externally_populated": true,
           "limit": 100,
           "order_by": [],
           "provider": "default",

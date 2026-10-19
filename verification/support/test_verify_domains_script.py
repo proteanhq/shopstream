@@ -219,14 +219,22 @@ def test_verify_usage_error_is_printed(tmp_path):
     assert "verify error: --path is not a directory" in result.stdout
 
 
-def test_check_failure_is_printed_but_does_not_gate(tmp_path):
+def test_check_failure_fails_the_context_and_the_run(tmp_path):
     # verify exits 4 when check fails, even though init and tests passed.
-    result, _ = _run(tmp_path, _envelope(check="fail", warnings=2), 4, "reviews")
+    result, _ = _run(tmp_path, _envelope(check="fail", warnings=2), 4, "reviews", "loyalty")
 
-    assert result.returncode == 0, result.stdout + result.stderr
-    assert "check=fail    (0 errors, 2 warnings, 3 infos)" in result.stdout
-    assert "adopted in #56" in result.stdout
+    assert result.returncode == 1, result.stdout + result.stderr
+    lines = result.stdout.splitlines()
+    reviews_line = next(line for line in lines if line.startswith("  reviews "))
+    assert "check=fail    (0 errors, 2 warnings, 3 infos)" in reviews_line
+    assert reviews_line.endswith("fail")
+    assert (
+        "see the check findings with: PYTHONPATH=src PROTEAN_ENV=memory uv run --no-sync protean check -d reviews.domain"
+        in result.stdout
+    )
     assert "rerun the tests" not in result.stdout
+    assert "Failed: reviews loyalty" in result.stdout
+    assert "Logs kept in" in result.stdout
 
 
 @pytest.mark.parametrize(

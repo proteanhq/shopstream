@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:1b262626a22a9d7ca7f461e99ef1bc1358fd863d50d11b0d59851f9036a03f66",
+  "checksum": "sha256:78c8bd3bb97145a2ba6ce3a095b15b8d6388bfe4aaceea6183b4a69f45b48018",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -1269,6 +1269,14 @@
         },
         "fqn": "loyalty.reward.reward_account.RewardAccount",
         "identity_field": "id",
+        "indexes": [
+          {
+            "fields": [
+              "status"
+            ],
+            "unique": false
+          }
+        ],
         "invariants": {
           "post": [
             "balance_never_negative"
@@ -2054,22 +2062,6 @@
       ]
     },
     {
-      "category": "handler_completeness",
-      "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
-      "element": "loyalty.reward.reward_account.Auditable",
-      "level": "warning",
-      "message": "Aggregate `Auditable` has no command handler, so no write path exists",
-      "rule": {
-        "fix": "Add a command handler for the aggregate, or model it as a read-only projection if no writes are expected.",
-        "rationale": "An aggregate with no command handler has no write path, so nothing can change its state."
-      },
-      "suggestion": "Add a command handler for the aggregate, or model it as a read-only projection if no writes are expected.",
-      "teaching_skills": [
-        "aggregate",
-        "audit-domain"
-      ]
-    },
-    {
       "category": "naming_conventions",
       "code": "COMMAND_NOT_IMPERATIVE",
       "element": "loyalty.campaign.management.ExpireCampaign",
@@ -2187,53 +2179,6 @@
       "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
       "teaching_skills": [
         "command"
-      ]
-    },
-    {
-      "category": "handler_completeness",
-      "code": "UNHANDLED_EVENT",
-      "element": "loyalty.reward.events.MembershipCardIssued",
-      "level": "warning",
-      "message": "Event MembershipCardIssued has no registered handler",
-      "rule": {
-        "fix": "Register an event handler, projector, or process manager for this event, or mark it `published=True` if it is intentionally external.",
-        "rationale": "An event with no registered handler is published but never consumed, so a state change goes unobserved."
-      },
-      "suggestion": "Register an event handler, projector, or process manager for this event, or mark it `published=True` if it is intentionally external.",
-      "teaching_skills": [
-        "event"
-      ]
-    },
-    {
-      "category": "persistence",
-      "code": "UNINDEXED_FILTER_PATH",
-      "element": "loyalty.reward.reward_account.RewardAccount",
-      "field": "points_balance",
-      "level": "warning",
-      "message": "Field `points_balance` on aggregate `RewardAccount` is filtered by `loyalty.reward.repository.RewardAccountRepository.never_redeemed, line 24` but no declared index covers it, so the query scans the whole table.",
-      "rule": {
-        "fix": "Add an index led by this field to the aggregate (`indexes=[Index(\"field\")]`), or suppress the check when the table is small or the query is a one-off (admin/reporting).",
-        "rationale": "A repository filter on a field with no covering index forces a full table scan on a relational backend. The cost is invisible on small development data and grows with the production table."
-      },
-      "suggestion": "Index(\"points_balance\")  # add to `RewardAccount` indexes",
-      "teaching_skills": [
-        "add-field"
-      ]
-    },
-    {
-      "category": "persistence",
-      "code": "UNINDEXED_FILTER_PATH",
-      "element": "loyalty.reward.reward_account.RewardAccount",
-      "field": "status",
-      "level": "warning",
-      "message": "Field `status` on aggregate `RewardAccount` is filtered by `loyalty.reward.repository.RewardAccountRepository.top_savers, line 20` but no declared index covers it, so the query scans the whole table.",
-      "rule": {
-        "fix": "Add an index led by this field to the aggregate (`indexes=[Index(\"field\")]`), or suppress the check when the table is small or the query is a one-off (admin/reporting).",
-        "rationale": "A repository filter on a field with no covering index forces a full table scan on a relational backend. The cost is invisible on small development data and grows with the production table."
-      },
-      "suggestion": "Index(\"status\")  # add to `RewardAccount` indexes",
-      "teaching_skills": [
-        "add-field"
       ]
     },
     {

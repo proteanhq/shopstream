@@ -34,7 +34,7 @@ from inventory.domain import inventory
 from inventory.stock.stock import InventoryItem
 
 
-@inventory.projection
+@inventory.projection(externally_populated=True)
 class EventAudit:
     audit_id = Identifier(identifier=True, required=True)
     inventory_item_id = Identifier()

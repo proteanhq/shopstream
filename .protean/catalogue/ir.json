@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:f39b93df5bf4de33d77b0f067d574a495cead986c3e7452ae8786f0cc561c754",
+  "checksum": "sha256:212bacdd93aba14a520986c5519d85e079e4798a8789ff66307eec0e2f971650",
   "clusters": {
     "catalogue.category.category.Category": {
       "aggregate": {
@@ -2192,23 +2192,6 @@
       "teaching_skills": [
         "add-read-model",
         "projection"
-      ]
-    },
-    {
-      "category": "aggregate_design",
-      "code": "VALUE_OBJECT_MUTABLE_FIELD",
-      "element": "catalogue.product.product.Price",
-      "field": "tier_prices",
-      "level": "warning",
-      "message": "Value object `Price` has mutable field `tier_prices` (`dict`); value objects must be immutable.",
-      "rule": {
-        "fix": "Replace the mutable collection with an immutable representation, or move the collection onto the containing entity or aggregate. If the values form a concept with its own identity, model them as an entity referenced by the aggregate instead.",
-        "rationale": "Value objects are compared by value and must be immutable. A `List` or `Dict` field gives the value object mutable internal state, so two instances that should be equal can diverge and value equality no longer holds."
-      },
-      "suggestion": "Replace the mutable collection with an immutable representation, or move the collection onto the containing entity or aggregate. If the values form a concept with its own identity, model them as an entity referenced by the aggregate instead.",
-      "teaching_skills": [
-        "refactor-extract-value-object",
-        "value-object"
       ]
     }
   ],
