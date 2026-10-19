@@ -39,7 +39,7 @@ class AbandonCart:
 @ordering.command_handler(part_of=ShoppingCart)
 class ManageCartHandler:
     @handle(CreateCart)
-    def create_cart(self, command):
+    def create_cart(self, command: CreateCart) -> str:
         cart = ShoppingCart.create(
             customer_id=command.customer_id,
             session_id=command.session_id,
@@ -48,7 +48,7 @@ class ManageCartHandler:
         return str(cart.id)
 
     @handle(MergeGuestCart)
-    def merge_guest_cart(self, command):
+    def merge_guest_cart(self, command: MergeGuestCart) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
 
@@ -56,7 +56,7 @@ class ManageCartHandler:
         repo.add(cart)
 
     @handle(AbandonCart)
-    def abandon_cart(self, command):
+    def abandon_cart(self, command: AbandonCart) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
         cart.abandon()

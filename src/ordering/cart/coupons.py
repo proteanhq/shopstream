@@ -19,7 +19,7 @@ class ApplyCouponToCart:
 @ordering.command_handler(part_of=ShoppingCart)
 class ApplyCouponHandler:
     @handle(ApplyCouponToCart)
-    def apply_coupon(self, command):
+    def apply_coupon(self, command: ApplyCouponToCart) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
         cart.apply_coupon(coupon_code=command.coupon_code)

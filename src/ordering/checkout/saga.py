@@ -110,6 +110,8 @@ class OrderCheckoutSaga:
             self.status = "failed"
             from ordering.order.cancellation import CancelOrder
 
+            # The start handler sets order_id, and later events reach this saga by correlating on it.
+            assert self.order_id is not None
             try:
                 current_domain.process(
                     CancelOrder(

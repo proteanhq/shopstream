@@ -64,7 +64,7 @@ class OrderDetail:
 @ordering.projector(projector_for=OrderDetail, aggregates=[Order])
 class OrderDetailProjector:
     @on(OrderCreated)
-    def on_order_created(self, event):
+    def on_order_created(self, event: OrderCreated) -> None:
         current_domain.repository_for(OrderDetail).add(
             OrderDetail(
                 order_id=event.order_id,
@@ -86,7 +86,7 @@ class OrderDetailProjector:
         )
 
     @on(ItemAdded)
-    def on_item_added(self, event):
+    def on_item_added(self, event: ItemAdded) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         items = list(detail.items) if detail.items else []
@@ -107,7 +107,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(ItemRemoved)
-    def on_item_removed(self, event):
+    def on_item_removed(self, event: ItemRemoved) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         items = list(detail.items) if detail.items else []
@@ -118,7 +118,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(ItemQuantityUpdated)
-    def on_item_quantity_updated(self, event):
+    def on_item_quantity_updated(self, event: ItemQuantityUpdated) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         items = list(detail.items) if detail.items else []
@@ -132,14 +132,14 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(CouponApplied)
-    def on_coupon_applied(self, event):
+    def on_coupon_applied(self, event: CouponApplied) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.coupon_code = event.coupon_code
         repo.add(detail)
 
     @on(OrderConfirmed)
-    def on_order_confirmed(self, event):
+    def on_order_confirmed(self, event: OrderConfirmed) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Confirmed"
@@ -147,7 +147,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(PaymentPending)
-    def on_payment_pending(self, event):
+    def on_payment_pending(self, event: PaymentPending) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Payment_Pending"
@@ -157,7 +157,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(PaymentSucceeded)
-    def on_payment_succeeded(self, event):
+    def on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Paid"
@@ -167,7 +167,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(PaymentFailed)
-    def on_payment_failed(self, event):
+    def on_payment_failed(self, event: PaymentFailed) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Confirmed"
@@ -175,7 +175,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(OrderProcessing)
-    def on_order_processing(self, event):
+    def on_order_processing(self, event: OrderProcessing) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Processing"
@@ -183,7 +183,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(OrderShipped)
-    def on_order_shipped(self, event):
+    def on_order_shipped(self, event: OrderShipped) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Shipped"
@@ -195,7 +195,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(OrderPartiallyShipped)
-    def on_order_partially_shipped(self, event):
+    def on_order_partially_shipped(self, event: OrderPartiallyShipped) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Partially_Shipped"
@@ -206,7 +206,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(OrderDelivered)
-    def on_order_delivered(self, event):
+    def on_order_delivered(self, event: OrderDelivered) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Delivered"
@@ -214,7 +214,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(OrderCompleted)
-    def on_order_completed(self, event):
+    def on_order_completed(self, event: OrderCompleted) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Completed"
@@ -222,7 +222,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(ReturnRequested)
-    def on_return_requested(self, event):
+    def on_return_requested(self, event: ReturnRequested) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Return_Requested"
@@ -230,7 +230,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(ReturnApproved)
-    def on_return_approved(self, event):
+    def on_return_approved(self, event: ReturnApproved) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Return_Approved"
@@ -238,7 +238,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(OrderReturned)
-    def on_order_returned(self, event):
+    def on_order_returned(self, event: OrderReturned) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Returned"
@@ -246,7 +246,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(OrderCancelled)
-    def on_order_cancelled(self, event):
+    def on_order_cancelled(self, event: OrderCancelled) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Cancelled"
@@ -256,7 +256,7 @@ class OrderDetailProjector:
         repo.add(detail)
 
     @on(OrderRefunded)
-    def on_order_refunded(self, event):
+    def on_order_refunded(self, event: OrderRefunded) -> None:
         repo = current_domain.repository_for(OrderDetail)
         detail = repo.get(event.order_id)
         detail.status = "Refunded"

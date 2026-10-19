@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import Any
 
 from protean.core.projector import on
+from protean.core.repository import BaseRepository
 from protean.fields import DateTime, Dict, Identifier, Integer, List, String
 from protean.utils.globals import current_domain
 
@@ -36,7 +37,7 @@ class CartView:
 @ordering.projector(projector_for=CartView, aggregates=[ShoppingCart])
 class CartViewProjector:
     @on(CartItemAdded)
-    def on_item_added(self, event):
+    def on_item_added(self, event: CartItemAdded) -> None:
         repo = current_domain.repository_for(CartView)
         view = repo.get_or_none(event.cart_id)
         if view is None:
@@ -77,7 +78,7 @@ class CartViewProjector:
         repo.add(view)
 
     @on(CartQuantityUpdated)
-    def on_quantity_updated(self, event):
+    def on_quantity_updated(self, event: CartQuantityUpdated) -> None:
         repo = current_domain.repository_for(CartView)
         view = repo.get(event.cart_id)
         items = list(view.items) if view.items else []
@@ -89,7 +90,7 @@ class CartViewProjector:
         repo.add(view)
 
     @on(CartItemRemoved)
-    def on_item_removed(self, event):
+    def on_item_removed(self, event: CartItemRemoved) -> None:
         repo = current_domain.repository_for(CartView)
         view = repo.get(event.cart_id)
         items = list(view.items) if view.items else []
@@ -99,7 +100,7 @@ class CartViewProjector:
         repo.add(view)
 
     @on(CartCouponApplied)
-    def on_coupon_applied(self, event):
+    def on_coupon_applied(self, event: CartCouponApplied) -> None:
         repo = current_domain.repository_for(CartView)
         view = self._get_or_create_view(repo, event.cart_id)
         coupons = list(view.applied_coupons) if view.applied_coupons else []
@@ -108,21 +109,21 @@ class CartViewProjector:
         repo.add(view)
 
     @on(CartsMerged)
-    def on_carts_merged(self, event):
+    def on_carts_merged(self, event: CartsMerged) -> None:
         repo = current_domain.repository_for(CartView)
         view = self._get_or_create_view(repo, event.cart_id)
         view.item_count = (view.item_count or 0) + event.items_merged_count
         repo.add(view)
 
     @on(CartConverted)
-    def on_cart_converted(self, event):
+    def on_cart_converted(self, event: CartConverted) -> None:
         repo = current_domain.repository_for(CartView)
         view = self._get_or_create_view(repo, event.cart_id)
         view.status = "Converted"
         repo.add(view)
 
     @on(CartAbandoned)
-    def on_cart_abandoned(self, event):
+    def on_cart_abandoned(self, event: CartAbandoned) -> None:
         repo = current_domain.repository_for(CartView)
         view = self._get_or_create_view(repo, event.cart_id)
         view.status = "Abandoned"
@@ -130,8 +131,8 @@ class CartViewProjector:
         repo.add(view)
 
     @staticmethod
-    def _get_or_create_view(repo, cart_id):
-        view = repo.get_or_none(cart_id)
+    def _get_or_create_view(repo: BaseRepository, cart_id: str) -> CartView:
+        view: CartView | None = repo.get_or_none(cart_id)
         if view is not None:
             return view
         return CartView(

@@ -53,7 +53,7 @@ class ApplyCoupon:
 @ordering.command_handler(part_of=Order)
 class ModifyOrderHandler:
     @handle(AddItem)
-    def add_item(self, command):
+    def add_item(self, command: AddItem) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.add_item(
@@ -67,14 +67,14 @@ class ModifyOrderHandler:
         repo.add(order)
 
     @handle(RemoveItem)
-    def remove_item(self, command):
+    def remove_item(self, command: RemoveItem) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.remove_item(item_id=command.item_id)
         repo.add(order)
 
     @handle(UpdateItemQuantity)
-    def update_item_quantity(self, command):
+    def update_item_quantity(self, command: UpdateItemQuantity) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.update_item_quantity(
@@ -84,7 +84,7 @@ class ModifyOrderHandler:
         repo.add(order)
 
     @handle(ApplyCoupon)
-    def apply_coupon(self, command):
+    def apply_coupon(self, command: ApplyCoupon) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.apply_coupon(coupon_code=command.coupon_code)

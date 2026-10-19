@@ -38,7 +38,7 @@ class RemoveFromCart:
 @ordering.command_handler(part_of=ShoppingCart)
 class ManageCartItemsHandler:
     @handle(AddToCart)
-    def add_to_cart(self, command):
+    def add_to_cart(self, command: AddToCart) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
         cart.add_item(
@@ -49,7 +49,7 @@ class ManageCartItemsHandler:
         repo.add(cart)
 
     @handle(UpdateCartQuantity)
-    def update_cart_quantity(self, command):
+    def update_cart_quantity(self, command: UpdateCartQuantity) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
         cart.update_item_quantity(
@@ -59,7 +59,7 @@ class ManageCartItemsHandler:
         repo.add(cart)
 
     @handle(RemoveFromCart)
-    def remove_from_cart(self, command):
+    def remove_from_cart(self, command: RemoveFromCart) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
         cart.remove_item(item_id=command.item_id)

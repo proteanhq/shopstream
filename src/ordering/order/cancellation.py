@@ -28,7 +28,7 @@ class RefundOrder:
 @ordering.command_handler(part_of=Order)
 class CancelOrderHandler:
     @handle(CancelOrder)
-    def cancel_order(self, command):
+    def cancel_order(self, command: CancelOrder) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.cancel(
@@ -38,7 +38,7 @@ class CancelOrderHandler:
         repo.add(order)
 
     @handle(RefundOrder)
-    def refund_order(self, command):
+    def refund_order(self, command: RefundOrder) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.refund(refund_amount=command.refund_amount)

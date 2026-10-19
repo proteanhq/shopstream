@@ -33,7 +33,7 @@ class CreateOrder:
 @ordering.command_handler(part_of=Order)
 class CreateOrderHandler:
     @handle(CreateOrder)
-    def create_order(self, command):
+    def create_order(self, command: CreateOrder) -> str:
         with processing_priority(Priority.HIGH):
             items_data = command.items
             shipping_address = command.shipping_address
@@ -67,6 +67,6 @@ class CreateOrderHandler:
 class UpcastOrderCreatedV1ToV2(BaseUpcaster):
     """v1 had no order_source field — default to 'web'."""
 
-    def upcast(self, data: dict) -> dict:
+    def upcast(self, data: dict[str, Any]) -> dict[str, Any]:
         data["order_source"] = "web"
         return data

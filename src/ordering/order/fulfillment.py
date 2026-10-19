@@ -52,14 +52,14 @@ class RecordDelivery:
 @ordering.command_handler(part_of=Order)
 class RecordFulfillmentHandler:
     @handle(MarkProcessing)
-    def mark_processing(self, command):
+    def mark_processing(self, command: MarkProcessing) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.mark_processing()
         repo.add(order)
 
     @handle(RecordShipment)
-    def record_shipment(self, command):
+    def record_shipment(self, command: RecordShipment) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
 
@@ -73,7 +73,7 @@ class RecordFulfillmentHandler:
         repo.add(order)
 
     @handle(RecordPartialShipment)
-    def record_partial_shipment(self, command):
+    def record_partial_shipment(self, command: RecordPartialShipment) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
 
@@ -86,7 +86,7 @@ class RecordFulfillmentHandler:
         repo.add(order)
 
     @handle(RecordDelivery)
-    def record_delivery(self, command):
+    def record_delivery(self, command: RecordDelivery) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.record_delivery()

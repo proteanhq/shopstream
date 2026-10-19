@@ -4,6 +4,8 @@ These are external contracts (anti-corruption layer) — separate from
 internal Protean commands.
 """
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -230,7 +232,7 @@ class CartViewResponse(BaseModel):
     cart_id: str
     customer_id: str | None = None
     session_id: str | None = None
-    items: list[dict] | None = None
+    items: list[dict[str, Any]] | None = None
     applied_coupons: list[str] | None = None
     status: str
     item_count: int = 0
@@ -242,9 +244,9 @@ class OrderDetailResponse(BaseModel):
     order_id: str
     customer_id: str
     status: str
-    items: list[dict] | None = None
-    shipping_address: dict | None = None
-    billing_address: dict | None = None
+    items: list[dict[str, Any]] | None = None
+    shipping_address: dict[str, Any] | None = None
+    billing_address: dict[str, Any] | None = None
     subtotal: float | None = None
     shipping_cost: float | None = None
     tax_total: float | None = None
@@ -282,7 +284,7 @@ class TimelineEntryResponse(BaseModel):
     event_type: str
     description: str
     occurred_at: str | None = None
-    event_metadata: dict | None = None
+    event_metadata: dict[str, Any] | None = None
 
 
 class CustomerOrderResponse(BaseModel):

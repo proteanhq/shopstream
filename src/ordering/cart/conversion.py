@@ -18,7 +18,7 @@ class ConvertToOrder:
 @ordering.command_handler(part_of=ShoppingCart)
 class ConvertCartHandler:
     @handle(ConvertToOrder)
-    def convert_to_order(self, command):
+    def convert_to_order(self, command: ConvertToOrder) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
         cart.convert_to_order()

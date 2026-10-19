@@ -37,21 +37,21 @@ class RecordReturn:
 @ordering.command_handler(part_of=Order)
 class ManageReturnsHandler:
     @handle(RequestReturn)
-    def request_return(self, command):
+    def request_return(self, command: RequestReturn) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.request_return(reason=command.reason)
         repo.add(order)
 
     @handle(ApproveReturn)
-    def approve_return(self, command):
+    def approve_return(self, command: ApproveReturn) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.approve_return()
         repo.add(order)
 
     @handle(RecordReturn)
-    def record_return(self, command):
+    def record_return(self, command: RecordReturn) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
 

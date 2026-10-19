@@ -43,7 +43,7 @@ class RecordPaymentFailure:
 @ordering.command_handler(part_of=Order)
 class RecordPaymentHandler:
     @handle(RecordPaymentPending)
-    def record_payment_pending(self, command):
+    def record_payment_pending(self, command: RecordPaymentPending) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.record_payment_pending(
@@ -53,7 +53,7 @@ class RecordPaymentHandler:
         repo.add(order)
 
     @handle(RecordPaymentSuccess)
-    def record_payment_success(self, command):
+    def record_payment_success(self, command: RecordPaymentSuccess) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.record_payment_success(
@@ -64,7 +64,7 @@ class RecordPaymentHandler:
         repo.add(order)
 
     @handle(RecordPaymentFailure)
-    def record_payment_failure(self, command):
+    def record_payment_failure(self, command: RecordPaymentFailure) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.record_payment_failure(

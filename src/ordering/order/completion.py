@@ -18,7 +18,7 @@ class CompleteOrder:
 @ordering.command_handler(part_of=Order)
 class CompleteOrderHandler:
     @handle(CompleteOrder)
-    def complete_order(self, command):
+    def complete_order(self, command: CompleteOrder) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.complete()

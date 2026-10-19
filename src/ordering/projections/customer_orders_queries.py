@@ -1,6 +1,7 @@
 """Queries for the CustomerOrders projection."""
 
 from protean import read
+from protean.core.queryset import ResultSet
 from protean.fields import Identifier, Integer, String
 from protean.utils.globals import current_domain
 
@@ -19,7 +20,7 @@ class ListCustomerOrders:
 @ordering.query_handler(part_of=CustomerOrders)
 class CustomerOrdersQueryHandler:
     @read(ListCustomerOrders)
-    def list_customer_orders(self, query):
+    def list_customer_orders(self, query: ListCustomerOrders) -> ResultSet:
         qs = current_domain.view_for(CustomerOrders).query.filter(customer_id=query.customer_id)
         if query.status:
             qs = qs.filter(status=query.status)

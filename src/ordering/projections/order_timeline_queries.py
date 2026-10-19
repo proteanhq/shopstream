@@ -1,6 +1,7 @@
 """Queries for the OrderTimeline projection."""
 
 from protean import read
+from protean.core.queryset import ResultSet
 from protean.fields import Identifier
 from protean.utils.globals import current_domain
 
@@ -16,7 +17,7 @@ class GetOrderTimeline:
 @ordering.query_handler(part_of=OrderTimeline)
 class OrderTimelineQueryHandler:
     @read(GetOrderTimeline)
-    def get_order_timeline(self, query):
+    def get_order_timeline(self, query: GetOrderTimeline) -> ResultSet:
         return (
             current_domain.view_for(OrderTimeline).query.filter(order_id=query.order_id).order_by("occurred_at").all()
         )

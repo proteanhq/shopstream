@@ -46,7 +46,13 @@ class OrderTimeline:
     event_metadata: dict[str, Any] = Dict()
 
 
-def _add_entry(order_id, event_type, description, occurred_at, event_metadata=None):
+def _add_entry(
+    order_id: str,
+    event_type: str,
+    description: str,
+    occurred_at: datetime,
+    event_metadata: dict[str, Any] | None = None,
+) -> None:
     current_domain.repository_for(OrderTimeline).add(
         OrderTimeline(
             entry_id=str(uuid.uuid4()),
@@ -62,19 +68,19 @@ def _add_entry(order_id, event_type, description, occurred_at, event_metadata=No
 @ordering.projector(projector_for=OrderTimeline, aggregates=[Order])
 class OrderTimelineProjector:
     @on(OrderCreated)
-    def on_order_created(self, event):
+    def on_order_created(self, event: OrderCreated) -> None:
         _add_entry(event.order_id, "OrderCreated", "Order was created", event.created_at)
 
     @on(ItemAdded)
-    def on_item_added(self, event):
+    def on_item_added(self, event: ItemAdded) -> None:
         _add_entry(event.order_id, "ItemAdded", f"Item {event.title} added (qty: {event.quantity})", datetime.now(UTC))
 
     @on(ItemRemoved)
-    def on_item_removed(self, event):
+    def on_item_removed(self, event: ItemRemoved) -> None:
         _add_entry(event.order_id, "ItemRemoved", f"Item {event.item_id} removed", datetime.now(UTC))
 
     @on(ItemQuantityUpdated)
-    def on_item_quantity_updated(self, event):
+    def on_item_quantity_updated(self, event: ItemQuantityUpdated) -> None:
         _add_entry(
             event.order_id,
             "ItemQuantityUpdated",
@@ -83,31 +89,31 @@ class OrderTimelineProjector:
         )
 
     @on(CouponApplied)
-    def on_coupon_applied(self, event):
+    def on_coupon_applied(self, event: CouponApplied) -> None:
         _add_entry(event.order_id, "CouponApplied", f"Coupon '{event.coupon_code}' applied", datetime.now(UTC))
 
     @on(OrderConfirmed)
-    def on_order_confirmed(self, event):
+    def on_order_confirmed(self, event: OrderConfirmed) -> None:
         _add_entry(event.order_id, "OrderConfirmed", "Order was confirmed", event.confirmed_at)
 
     @on(PaymentPending)
-    def on_payment_pending(self, event):
+    def on_payment_pending(self, event: PaymentPending) -> None:
         _add_entry(event.order_id, "PaymentPending", f"Payment initiated via {event.payment_method}", datetime.now(UTC))
 
     @on(PaymentSucceeded)
-    def on_payment_succeeded(self, event):
+    def on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         _add_entry(event.order_id, "PaymentSucceeded", f"Payment of {event.amount} succeeded", datetime.now(UTC))
 
     @on(PaymentFailed)
-    def on_payment_failed(self, event):
+    def on_payment_failed(self, event: PaymentFailed) -> None:
         _add_entry(event.order_id, "PaymentFailed", f"Payment failed: {event.reason}", datetime.now(UTC))
 
     @on(OrderProcessing)
-    def on_order_processing(self, event):
+    def on_order_processing(self, event: OrderProcessing) -> None:
         _add_entry(event.order_id, "OrderProcessing", "Order processing started", event.started_at)
 
     @on(OrderShipped)
-    def on_order_shipped(self, event):
+    def on_order_shipped(self, event: OrderShipped) -> None:
         _add_entry(
             event.order_id,
             "OrderShipped",
@@ -116,35 +122,35 @@ class OrderTimelineProjector:
         )
 
     @on(OrderPartiallyShipped)
-    def on_order_partially_shipped(self, event):
+    def on_order_partially_shipped(self, event: OrderPartiallyShipped) -> None:
         _add_entry(event.order_id, "OrderPartiallyShipped", f"Partial shipment via {event.carrier}", event.shipped_at)
 
     @on(OrderDelivered)
-    def on_order_delivered(self, event):
+    def on_order_delivered(self, event: OrderDelivered) -> None:
         _add_entry(event.order_id, "OrderDelivered", "Order was delivered", event.delivered_at)
 
     @on(OrderCompleted)
-    def on_order_completed(self, event):
+    def on_order_completed(self, event: OrderCompleted) -> None:
         _add_entry(event.order_id, "OrderCompleted", "Order completed", event.completed_at)
 
     @on(ReturnRequested)
-    def on_return_requested(self, event):
+    def on_return_requested(self, event: ReturnRequested) -> None:
         _add_entry(event.order_id, "ReturnRequested", f"Return requested: {event.reason}", event.requested_at)
 
     @on(ReturnApproved)
-    def on_return_approved(self, event):
+    def on_return_approved(self, event: ReturnApproved) -> None:
         _add_entry(event.order_id, "ReturnApproved", "Return approved", event.approved_at)
 
     @on(OrderReturned)
-    def on_order_returned(self, event):
+    def on_order_returned(self, event: OrderReturned) -> None:
         _add_entry(event.order_id, "OrderReturned", "Items returned and received", event.returned_at)
 
     @on(OrderCancelled)
-    def on_order_cancelled(self, event):
+    def on_order_cancelled(self, event: OrderCancelled) -> None:
         _add_entry(
             event.order_id, "OrderCancelled", f"Cancelled by {event.cancelled_by}: {event.reason}", event.cancelled_at
         )
 
     @on(OrderRefunded)
-    def on_order_refunded(self, event):
+    def on_order_refunded(self, event: OrderRefunded) -> None:
         _add_entry(event.order_id, "OrderRefunded", f"Refunded {event.refund_amount}", event.refunded_at)

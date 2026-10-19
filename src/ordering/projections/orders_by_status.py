@@ -40,7 +40,7 @@ class OrdersByStatus:
 @ordering.projector(projector_for=OrdersByStatus, aggregates=[Order])
 class OrdersByStatusProjector:
     @on(OrderCreated)
-    def on_order_created(self, event):
+    def on_order_created(self, event: OrderCreated) -> None:
         current_domain.repository_for(OrdersByStatus).add(
             OrdersByStatus(
                 order_id=event.order_id,
@@ -52,7 +52,7 @@ class OrdersByStatusProjector:
             )
         )
 
-    def _update_status(self, order_id, status, updated_at=None):
+    def _update_status(self, order_id: str, status: str, updated_at: datetime | None = None) -> None:
         repo = current_domain.repository_for(OrdersByStatus)
         record = repo.get(order_id)
         record.status = status
@@ -61,57 +61,57 @@ class OrdersByStatusProjector:
         repo.add(record)
 
     @on(OrderConfirmed)
-    def on_order_confirmed(self, event):
+    def on_order_confirmed(self, event: OrderConfirmed) -> None:
         self._update_status(event.order_id, "Confirmed", event.confirmed_at)
 
     @on(PaymentPending)
-    def on_payment_pending(self, event):
+    def on_payment_pending(self, event: PaymentPending) -> None:
         self._update_status(event.order_id, "Payment_Pending")
 
     @on(PaymentSucceeded)
-    def on_payment_succeeded(self, event):
+    def on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         self._update_status(event.order_id, "Paid")
 
     @on(PaymentFailed)
-    def on_payment_failed(self, event):
+    def on_payment_failed(self, event: PaymentFailed) -> None:
         self._update_status(event.order_id, "Confirmed")
 
     @on(OrderProcessing)
-    def on_order_processing(self, event):
+    def on_order_processing(self, event: OrderProcessing) -> None:
         self._update_status(event.order_id, "Processing", event.started_at)
 
     @on(OrderShipped)
-    def on_order_shipped(self, event):
+    def on_order_shipped(self, event: OrderShipped) -> None:
         self._update_status(event.order_id, "Shipped", event.shipped_at)
 
     @on(OrderPartiallyShipped)
-    def on_order_partially_shipped(self, event):
+    def on_order_partially_shipped(self, event: OrderPartiallyShipped) -> None:
         self._update_status(event.order_id, "Partially_Shipped", event.shipped_at)
 
     @on(OrderDelivered)
-    def on_order_delivered(self, event):
+    def on_order_delivered(self, event: OrderDelivered) -> None:
         self._update_status(event.order_id, "Delivered", event.delivered_at)
 
     @on(OrderCompleted)
-    def on_order_completed(self, event):
+    def on_order_completed(self, event: OrderCompleted) -> None:
         self._update_status(event.order_id, "Completed", event.completed_at)
 
     @on(ReturnRequested)
-    def on_return_requested(self, event):
+    def on_return_requested(self, event: ReturnRequested) -> None:
         self._update_status(event.order_id, "Return_Requested", event.requested_at)
 
     @on(ReturnApproved)
-    def on_return_approved(self, event):
+    def on_return_approved(self, event: ReturnApproved) -> None:
         self._update_status(event.order_id, "Return_Approved", event.approved_at)
 
     @on(OrderReturned)
-    def on_order_returned(self, event):
+    def on_order_returned(self, event: OrderReturned) -> None:
         self._update_status(event.order_id, "Returned", event.returned_at)
 
     @on(OrderCancelled)
-    def on_order_cancelled(self, event):
+    def on_order_cancelled(self, event: OrderCancelled) -> None:
         self._update_status(event.order_id, "Cancelled", event.cancelled_at)
 
     @on(OrderRefunded)
-    def on_order_refunded(self, event):
+    def on_order_refunded(self, event: OrderRefunded) -> None:
         self._update_status(event.order_id, "Refunded", event.refunded_at)

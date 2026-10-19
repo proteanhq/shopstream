@@ -1,6 +1,7 @@
 """Queries for the OrderDetail projection."""
 
 from protean import read
+from protean.core.projection import BaseProjection
 from protean.fields import Identifier
 from protean.utils.globals import current_domain
 
@@ -16,5 +17,5 @@ class GetOrderDetail:
 @ordering.query_handler(part_of=OrderDetail)
 class OrderDetailQueryHandler:
     @read(GetOrderDetail)
-    def get_order_detail(self, query):
+    def get_order_detail(self, query: GetOrderDetail) -> BaseProjection:
         return current_domain.view_for(OrderDetail).get(query.order_id)

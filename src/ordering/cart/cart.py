@@ -7,6 +7,7 @@ merging, and converts to an Order at checkout.
 
 from datetime import UTC, datetime
 from enum import Enum
+from typing import Any
 
 from protean import invariant
 from protean.exceptions import ValidationError
@@ -59,7 +60,7 @@ class ShoppingCart:
     updated_at: datetime | None = DateTime()
 
     @invariant.post
-    def cart_must_have_items_to_convert(self):
+    def cart_must_have_items_to_convert(self) -> None:
         if self.status == CartStatus.CONVERTED.value and not self.items:
             raise ValidationError({"cart": ["Cannot convert an empty cart to an order"]})
 
@@ -67,7 +68,7 @@ class ShoppingCart:
     # Factory
     # -------------------------------------------------------------------
     @classmethod
-    def create(cls, customer_id=None, session_id=None):
+    def create(cls, customer_id: str | None = None, session_id: str | None = None) -> "ShoppingCart":
         now = datetime.now(UTC)
         return cls(
             customer_id=customer_id,
@@ -81,7 +82,7 @@ class ShoppingCart:
     # -------------------------------------------------------------------
     # Item management
     # -------------------------------------------------------------------
-    def add_item(self, product_id, variant_id, quantity):
+    def add_item(self, product_id: str, variant_id: str, quantity: int) -> None:
         """Add an item to the cart (or increase quantity if already present)."""
         if CartStatus(self.status) != CartStatus.ACTIVE:
             raise ValidationError({"status": ["Items can only be added to an active cart"]})
@@ -119,7 +120,7 @@ class ShoppingCart:
             )
         )
 
-    def update_item_quantity(self, item_id, new_quantity):
+    def update_item_quantity(self, item_id: str, new_quantity: int) -> None:
         """Update the quantity of an existing cart item."""
         if CartStatus(self.status) != CartStatus.ACTIVE:
             raise ValidationError({"status": ["Item quantities can only be updated in an active cart"]})
@@ -142,7 +143,7 @@ class ShoppingCart:
             )
         )
 
-    def remove_item(self, item_id):
+    def remove_item(self, item_id: str) -> None:
         """Remove an item from the cart."""
         if CartStatus(self.status) != CartStatus.ACTIVE:
             raise ValidationError({"status": ["Items can only be removed from an active cart"]})
@@ -165,7 +166,7 @@ class ShoppingCart:
     # -------------------------------------------------------------------
     # Coupon management
     # -------------------------------------------------------------------
-    def apply_coupon(self, coupon_code):
+    def apply_coupon(self, coupon_code: str) -> None:
         """Apply a coupon code to the cart."""
         if CartStatus(self.status) != CartStatus.ACTIVE:
             raise ValidationError({"status": ["Coupons can only be applied to an active cart"]})
@@ -189,7 +190,7 @@ class ShoppingCart:
     # -------------------------------------------------------------------
     # Cart merging (guest → authenticated)
     # -------------------------------------------------------------------
-    def merge_guest_cart(self, guest_cart_items):
+    def merge_guest_cart(self, guest_cart_items: list[dict[str, Any]]) -> None:
         """Merge items from a guest cart into this authenticated cart.
 
         Args:
@@ -237,7 +238,7 @@ class ShoppingCart:
     # -------------------------------------------------------------------
     # Cart lifecycle
     # -------------------------------------------------------------------
-    def convert_to_order(self):
+    def convert_to_order(self) -> None:
         """Mark cart as converted to an order."""
         if CartStatus(self.status) != CartStatus.ACTIVE:
             raise ValidationError({"status": ["Only active carts can be converted"]})
@@ -266,7 +267,7 @@ class ShoppingCart:
             )
         )
 
-    def abandon_blocker(self):
+    def abandon_blocker(self) -> str | None:
         """Return why `abandon` would be rejected, or None if it would succeed.
 
         The batch abandonment handler checks this before dispatching `AbandonCart`.
@@ -277,7 +278,7 @@ class ShoppingCart:
             return "Only active carts can be abandoned"
         return None
 
-    def abandon(self):
+    def abandon(self) -> None:
         """Mark cart as abandoned."""
         blocker = self.abandon_blocker()
         if blocker is not None:

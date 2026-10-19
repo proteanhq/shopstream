@@ -33,7 +33,7 @@ class DetectAbandonedCarts:
 @ordering.command_handler(part_of=ShoppingCart)
 class DetectAbandonedCartsHandler:
     @handle(DetectAbandonedCarts)
-    def detect_abandoned_carts(self, command):
+    def detect_abandoned_carts(self, command: DetectAbandonedCarts) -> int:
         with processing_priority(Priority.LOW):
             as_of = command.as_of or current_domain.clock.now()
             threshold_hours = 24 if command.idle_threshold_hours is None else command.idle_threshold_hours
