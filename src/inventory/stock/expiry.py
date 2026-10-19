@@ -10,7 +10,6 @@ from datetime import timedelta
 
 import structlog
 from protean import handle
-from protean.exceptions import ObjectNotFoundError
 from protean.fields import DateTime, Integer
 from protean.utils.globals import current_domain
 from protean.utils.processing import Priority, processing_priority
@@ -75,9 +74,8 @@ class ExpireStaleReservationsHandler:
             repo = current_domain.repository_for(InventoryItem)
             expired_count = 0
             for reservation in expired:
-                try:
-                    item = repo.get(str(reservation.inventory_item_id))
-                except ObjectNotFoundError:
+                item = repo.get_or_none(str(reservation.inventory_item_id))
+                if item is None:
                     blocker = "Inventory item not found"
                 else:
                     blocker = item.release_blocker(reservation.reservation_id)

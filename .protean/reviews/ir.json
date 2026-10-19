@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:21b269a142be090c784d2a5d465de9dfee01b410d77afcc3626c58b7bae43bfd",
+  "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
+  "checksum": "sha256:b214d267dbdb43db6e683fbfae5e7693c5bbdd3ae978d0510048611334875411",
   "clusters": {
     "reviews.review.review.Review": {
       "aggregate": {
@@ -1601,6 +1601,14 @@
       "reviews.review.review.Rating"
     ]
   },
+  "enrichers": {
+    "command": [
+      "shared.enrichment.enrich_command"
+    ],
+    "event": [
+      "shared.enrichment.enrich_event"
+    ]
+  },
   "flows": {
     "domain_services": {},
     "process_managers": {},
@@ -1616,7 +1624,7 @@
       }
     }
   },
-  "ir_version": "0.2.0",
+  "ir_version": "0.3.0",
   "projections": {
     "reviews.projections.customer_reviews.CustomerReviews": {
       "projection": {

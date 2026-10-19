@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:76aca10e85b138f4f56a1fa17c79abadfd1bfdaa4d2f317785f413b7133855ea",
+  "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
+  "checksum": "sha256:a32ed6dccc7585dd7883f135293f2650f94aea9260ee3fa5b39d3d730c5b931a",
   "clusters": {
     "fulfillment.fulfillment.fulfillment.Fulfillment": {
       "aggregate": {
@@ -1636,83 +1636,9 @@
       "teaching_skills": [
         "add-validation",
         "aggregate",
+        "audit-domain",
         "protean-overview",
         "refactor-move-logic-to-aggregate"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "fulfillment.fulfillment.delivery.RecordDeliveryConfirmation",
-      "level": "info",
-      "message": "Command `RecordDeliveryConfirmation` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "fulfillment.fulfillment.delivery.RecordDeliveryException",
-      "level": "info",
-      "message": "Command `RecordDeliveryException` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "fulfillment.fulfillment.packing.RecordPacking",
-      "level": "info",
-      "message": "Command `RecordPacking` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "fulfillment.fulfillment.picking.RecordItemPicked",
-      "level": "info",
-      "message": "Command `RecordItemPicked` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "fulfillment.fulfillment.shipping.RecordHandoff",
-      "level": "info",
-      "message": "Command `RecordHandoff` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
       ]
     },
     {
@@ -1824,6 +1750,14 @@
       "fulfillment.fulfillment.fulfillment.ShipmentInfo"
     ]
   },
+  "enrichers": {
+    "command": [
+      "shared.enrichment.enrich_command"
+    ],
+    "event": [
+      "shared.enrichment.enrich_event"
+    ]
+  },
   "flows": {
     "domain_services": {},
     "process_managers": {},
@@ -1848,7 +1782,7 @@
       }
     }
   },
-  "ir_version": "0.2.0",
+  "ir_version": "0.3.0",
   "projections": {
     "fulfillment.projections.daily_shipments.DailyShipmentsView": {
       "projection": {

@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:64cda181dd69788221498ae9a87805be11691426f364ac9e2286158ad77342f5",
+  "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
+  "checksum": "sha256:da17c887043a4d4195b4589fb263ab9c36ee6aaa1c5693e08ccc5f01e5d1a39f",
   "clusters": {
     "payments.invoice.invoice.Invoice": {
       "aggregate": {
@@ -1691,6 +1691,7 @@
       "teaching_skills": [
         "add-validation",
         "aggregate",
+        "audit-domain",
         "protean-overview",
         "refactor-move-logic-to-aggregate"
       ]
@@ -1709,6 +1710,7 @@
       "teaching_skills": [
         "add-validation",
         "aggregate",
+        "audit-domain",
         "protean-overview",
         "refactor-move-logic-to-aggregate"
       ]
@@ -1719,21 +1721,6 @@
       "element": "payments.invoice.voiding.VoidInvoice",
       "level": "info",
       "message": "Command `VoidInvoice` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "payments.payment.initiation.InitiatePayment",
-      "level": "info",
-      "message": "Command `InitiatePayment` does not start with an imperative verb; commands read best as verb-first phrases",
       "rule": {
         "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
         "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
@@ -1861,6 +1848,14 @@
       "payments.payment.payment.PaymentMethod"
     ]
   },
+  "enrichers": {
+    "command": [
+      "shared.enrichment.enrich_command"
+    ],
+    "event": [
+      "shared.enrichment.enrich_event"
+    ]
+  },
   "flows": {
     "domain_services": {},
     "process_managers": {},
@@ -1876,7 +1871,7 @@
       }
     }
   },
-  "ir_version": "0.2.0",
+  "ir_version": "0.3.0",
   "projections": {
     "payments.projections.customer_payments.CustomerPayment": {
       "projection": {

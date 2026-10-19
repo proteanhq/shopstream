@@ -175,25 +175,16 @@ def test_current_domain_probe_outside_context_is_silent():
     assert not any("outside of domain context" in m for m in messages), messages
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="Config2 keeps only keys from _default_config(), so a top-level [lint] table in domain.toml is dropped",
-)
 def test_lint_table_in_domain_toml_is_loaded(tmp_path, monkeypatch):
-    """Protean finding (proteanhq/protean#1629): a top-level `[lint]` table in `domain.toml` is dropped.
+    """proteanhq/protean#1629 (guard): a top-level `[lint]` table in `domain.toml` is loaded.
 
     Protean's configuration docs describe a `[lint]` table (`level`, `suppressions`,
     and more) that `protean check` and `protean verify` read through
-    `domain.config.get("lint", {})`. `Config2._normalize_config` keeps only the
-    top-level keys that `_default_config()` defines, and `lint` is not one of
-    them, so a top-level `[lint]` is discarded. An environment overlay such as
-    `[test.lint]` is deep-merged without that key filter, so it does load. The
-    bug is that the filter is applied to one and not the other.
-
-    On this pin any warning makes `protean check` exit 1. Because the `[lint]`
-    table is dropped, ShopStream cannot set `level = "error"` to keep
-    `make domain-check` failing on errors only.
+    `domain.config.get("lint", {})`. `Config2._normalize_config` used to keep only
+    the top-level keys that `_default_config()` defines, and `lint` was not one of
+    them, so a top-level `[lint]` was discarded. An environment overlay such as
+    `[test.lint]` was deep-merged without that key filter, so it did load. Fixed
+    in proteanhq/protean#1646 (`c421861`).
     """
     from protean.domain.config import Config2
 
@@ -307,21 +298,17 @@ def _pytest_project(tmp_path, test_source: str, ini: str = "") -> str:
     return str(tmp_path)
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="protean verify's tests stage removes PROTEAN_ENV from the pytest subprocess",
-)
 def test_verify_tests_stage_keeps_protean_env(tmp_path, monkeypatch):
-    """Protean finding (proteanhq/protean#1662): `protean verify` drops `PROTEAN_ENV` before its tests stage.
+    """proteanhq/protean#1662 (guard): `protean verify` keeps `PROTEAN_ENV` for its tests stage.
 
-    `_run_tests` in `protean/cli/verify.py` pops `PROTEAN_ENV` (and `PROTEAN_DEBUG`,
-    `VIRTUAL_ENV`) from the environment it hands to `python -m pytest`. The init and
-    check stages run in the verify process and do see `PROTEAN_ENV`. So
-    `PROTEAN_ENV=memory protean verify` inits and checks under `memory` and then
-    tests under Protean's pytest plugin default, `test`, which points at Postgres.
-    `scripts/verify-domains.sh` works around it with `--protean-env memory` in
-    `PYTEST_ADDOPTS`.
+    `_run_tests` in `protean/cli/verify.py` used to pop `PROTEAN_ENV` (and
+    `PROTEAN_DEBUG`, `VIRTUAL_ENV`) from the environment it handed to
+    `python -m pytest`. The init and check stages run in the verify process and
+    did see `PROTEAN_ENV`. So `PROTEAN_ENV=memory protean verify` inited and
+    checked under `memory` and then tested under Protean's pytest plugin default,
+    `test`, which points at Postgres. Fixed in proteanhq/protean#1810 (`29e1252`):
+    `--env` names one environment for all three stages, and `_run_tests` hands it
+    to the pytest child even when the shell exports a different `PROTEAN_ENV`.
     """
     from protean.cli.verify import _run_tests
 
@@ -330,30 +317,26 @@ def test_verify_tests_stage_keeps_protean_env(tmp_path, monkeypatch):
         "import os\n\ndef test_env():\n    assert os.environ.get('PROTEAN_ENV') == 'memory'\n",
     )
     monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
-    monkeypatch.setenv("PROTEAN_ENV", "memory")
+    monkeypatch.setenv("PROTEAN_ENV", "test")
 
-    stage, output = _run_tests(project)
+    stage, output = _run_tests(project, "memory")
 
     if stage["passed"] + stage["failed"] != 1:
         pytest.fail(f"precondition: the probe test ran once\n{output}")
     assert stage["status"] == "pass", output
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="protean verify counts failed tests from the first 'N failed' anywhere in the pytest output",
-)
 def test_verify_tests_stage_counts_failures_from_the_summary(tmp_path, monkeypatch):
-    """Protean finding (proteanhq/protean#1661): `protean verify` can report a port number as the failure count.
+    """proteanhq/protean#1661 (guard): `protean verify` reads the failure count from the summary line.
 
-    `_run_tests` reads the counts with `re.search(r"(\\d+) failed", output)`, which
-    matches the first hit anywhere in pytest's output, not the summary line. A
-    failure message that contains "<number> failed" wins. Seen in ShopStream: with
+    `_run_tests` used to read the counts with `re.search(r"(\\d+) failed", output)`,
+    which matches the first hit anywhere in pytest's output, not the summary line.
+    A failure message that contains "<number> failed" won. Seen in ShopStream: with
     the tests stage under the `test` env and no Postgres running, `verify -d
     identity.domain` reported `"failed": 15432`, taken from psycopg2's
     "connection to server at "localhost", port 15432 failed". The status comes
-    from the return code, so only the count is wrong.
+    from the return code, so only the count was wrong. Fixed in
+    proteanhq/protean#1801 (`0a5103f`).
     """
     from protean.cli.verify import _run_tests
 
@@ -363,26 +346,22 @@ def test_verify_tests_stage_counts_failures_from_the_summary(tmp_path, monkeypat
     )
     monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
 
-    stage, output = _run_tests(project)
+    stage, output = _run_tests(project, "memory")
 
     if stage["status"] != "fail" or "1 failed" not in output:
         pytest.fail(f"precondition: the probe test ran and failed\n{output}")
     assert stage["failed"] == 1
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="protean verify counts passed tests from the first 'N passed' anywhere in the pytest output",
-)
 def test_verify_tests_stage_counts_passes_from_the_summary(tmp_path, monkeypatch):
-    """Protean finding (proteanhq/protean#1661): `protean verify` can read the passed count from a skip reason.
+    """proteanhq/protean#1661 (guard): `protean verify` reads the passed count from the summary line.
 
-    `_run_tests` reads the passed count with `re.search(r"(\\d+) passed", output)`, the
-    same first-match read as the failed count. With `-ra` in a project's addopts (ShopStream
-    has it), pytest prints skip reasons before the summary line, so a reason such as
-    "0 passed on this platform" is read as the passed count. `scripts/verify-domains.sh`
+    `_run_tests` used to read the passed count with `re.search(r"(\\d+) passed", output)`,
+    the same first-match read as the failed count. With `-ra` in a project's addopts
+    (ShopStream has it), pytest prints skip reasons before the summary line, so a reason
+    such as "0 passed on this platform" was read as the passed count. `scripts/verify-domains.sh`
     fails a context whose tests stage passed zero tests, so this count feeds its gate.
+    Fixed in proteanhq/protean#1801 (`0a5103f`).
     """
     from protean.cli.verify import _run_tests
 
@@ -396,7 +375,7 @@ def test_verify_tests_stage_counts_passes_from_the_summary(tmp_path, monkeypatch
     )
     monkeypatch.delenv("PYTEST_ADDOPTS", raising=False)
 
-    stage, output = _run_tests(project)
+    stage, output = _run_tests(project, "memory")
 
     if stage["status"] != "pass" or "1 passed, 1 skipped" not in output:
         pytest.fail(f"precondition: one test passed and one was skipped\n{output}")
@@ -477,20 +456,15 @@ def test_outer_commit_of_a_doomed_transaction_raises():
         assert outer_error is not None, "the outer UnitOfWork returned normally"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AttributeError,
-    reason="BaseEventSourcedRepository has no get_or_none; only BaseRepository gained it (proteanhq/protean#1279)",
-)
 @pytest.mark.usefixtures("inventory_ctx")
 def test_event_sourced_repository_get_or_none_returns_none_on_a_miss():
-    """Protean finding (proteanhq/protean#1659): the event-sourced repository has no `get_or_none`.
+    """proteanhq/protean#1659 (guard): the event-sourced repository has `get_or_none`.
 
     proteanhq/protean#1279 added `get_or_none` to `BaseRepository`, so CQRS aggregates
     and projections can look up a row that may not exist without catching
-    `ObjectNotFoundError`. `BaseEventSourcedRepository` has only `add` and `get`, so
-    `src/inventory/stock/expiry.py` still catches `ObjectNotFoundError` around
-    `repository_for(InventoryItem).get(...)`.
+    `ObjectNotFoundError`. `BaseEventSourcedRepository` had only `add` and `get`.
+    Fixed in proteanhq/protean#1824 (`9f20ad1`). `src/inventory/stock/expiry.py`
+    uses it.
     """
     from protean import current_domain
     from protean.core.event_sourced_repository import BaseEventSourcedRepository
@@ -570,24 +544,18 @@ def test_stale_event_sourced_write_raises_expected_version_error():
 
 
 @pytest.mark.usefixtures("loyalty_ctx")
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="auto_now stamping on save runs @invariant.pre against the post-change state",
-)
 def test_auto_now_stamp_does_not_run_pre_invariants():
-    """Protean finding (proteanhq/protean#1663): saving a closed RewardAccount fails its own pre-invariant.
+    """proteanhq/protean#1663 (guard): saving a closed RewardAccount passes its own pre-invariant.
 
     `RewardAccount.closed_accounts_are_immutable` is an `@invariant.pre` that rejects
     any change to an account that is already Closed. `close()` itself passes, because
     the check runs before the status is assigned. On save, `BaseDAO._apply_pre_persist_hooks`
     stamps the `auto_now` field `updated_at` through `setattr`
-    (`_stamp_lifecycle_timestamps` in `protean/port/dao.py`). That assignment runs the
-    pre-invariants again, now against the Closed status, so the save raises
-    `ValidationError`. A framework-owned stamp should not run the aggregate's
-    business pre-checks. Aggregate enrichers run in the same hook and also assign
-    through `setattr`, so loyalty's `stamp_actor` enricher hits the same check. The
-    fix has to cover the whole pre-persist hook, not only the timestamp stamping.
+    (`_stamp_lifecycle_timestamps` in `protean/port/dao.py`). That assignment used to
+    run the pre-invariants again, now against the Closed status, so the save raised
+    `ValidationError`. Aggregate enrichers run in the same hook and also assign
+    through `setattr`, so loyalty's `stamp_actor` enricher hit the same check. Fixed
+    for the whole pre-persist hook in proteanhq/protean#1811 (`3a546f3`).
     """
     from protean import current_domain
     from protean.exceptions import ValidationError
@@ -603,7 +571,6 @@ def test_auto_now_stamp_does_not_run_pre_invariants():
     try:
         repo.add(account)
     except ValidationError as exc:
-        # Re-raised as AssertionError so the strict xfail matches only this failure.
         raise AssertionError(f"saving a just-closed account failed: {exc.messages}") from exc
 
     assert repo.get(account.id).status == AccountStatus.CLOSED.value
@@ -694,21 +661,15 @@ def test_committed_command_is_not_rerun_when_a_sync_handler_raises_expected_vers
     assert saved == 1
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="a ValueError at commit is reported as ExpectedVersionError (proteanhq/protean#1682)",
-)
 def test_1682_value_error_from_a_sync_handler_is_not_a_version_conflict():
-    """Protean finding (proteanhq/protean#1682): a handler's `ValueError` becomes a version conflict.
+    """proteanhq/protean#1682 (guard): a handler's `ValueError` is not reported as a version conflict.
 
-    `UnitOfWork.commit` turns any `ValueError` into `ExpectedVersionError`, unless
-    it was raised while the outbox rows were being saved. Sync dispatch runs
-    later in the same `try`, so a `ValueError` from an event handler takes that
-    branch. The outbox setting makes no difference. The caller gets
-    `ExpectedVersionError`, and version retry runs the already committed command
-    again, 4 times in all. #1682 describes the commit path only. Sync dispatch is
-    a second route to the same branch.
+    `UnitOfWork.commit` used to turn any `ValueError` into `ExpectedVersionError`,
+    unless it was raised while the outbox rows were being saved. Sync dispatch runs
+    later in the same `try`, so a `ValueError` from an event handler took that
+    branch, whatever the outbox setting. The caller got `ExpectedVersionError`, and
+    version retry ran the already committed command again, 4 times in all. Fixed in
+    proteanhq/protean#1760 (`64c023d`).
     """
     from protean.exceptions import TransactionError
 
