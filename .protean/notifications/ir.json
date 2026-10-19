@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:f3d8d61c1ea6e7ec215282d7bd4d449f53ae7f5ba720b57dffbd11b67b98510a",
+  "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
+  "checksum": "sha256:7b257bdf4df0d5de5e68ade258352b53617c0abb9adfc4eaabe45f6810272d33",
   "clusters": {
     "notifications.notification.notification.Notification": {
       "aggregate": {
@@ -1336,6 +1336,7 @@
       "teaching_skills": [
         "add-validation",
         "aggregate",
+        "audit-domain",
         "protean-overview",
         "refactor-move-logic-to-aggregate"
       ]
@@ -1354,6 +1355,7 @@
       "teaching_skills": [
         "add-validation",
         "aggregate",
+        "audit-domain",
         "protean-overview",
         "refactor-move-logic-to-aggregate"
       ]
@@ -1572,6 +1574,14 @@
     "UPCASTER": [],
     "VALUE_OBJECT": []
   },
+  "enrichers": {
+    "command": [
+      "shared.enrichment.enrich_command"
+    ],
+    "event": [
+      "shared.enrichment.enrich_event"
+    ]
+  },
   "flows": {
     "domain_services": {},
     "process_managers": {},
@@ -1659,7 +1669,7 @@
       }
     }
   },
-  "ir_version": "0.2.0",
+  "ir_version": "0.3.0",
   "projections": {
     "notifications.projections.customer_notifications.CustomerNotifications": {
       "projection": {

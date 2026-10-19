@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:ba44fdd958256539c72684228f2eb5b21acd2751619b7a24eef05c107aa91da8",
+  "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
+  "checksum": "sha256:e697796bbc3661f42e980b93a1a2bc0ee2b05382e219d99e4fe1ee2a252192a4",
   "clusters": {
     "inventory.stock.stock.InventoryItem": {
       "aggregate": {
@@ -2367,6 +2367,7 @@
       "teaching_skills": [
         "add-validation",
         "aggregate",
+        "audit-domain",
         "protean-overview",
         "refactor-move-logic-to-aggregate"
       ]
@@ -2385,6 +2386,7 @@
       "teaching_skills": [
         "add-validation",
         "aggregate",
+        "audit-domain",
         "protean-overview",
         "refactor-move-logic-to-aggregate"
       ]
@@ -2395,21 +2397,6 @@
       "element": "inventory.stock.adjustment.AdjustStock",
       "level": "info",
       "message": "Command `AdjustStock` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "inventory.stock.adjustment.RecordStockCheck",
-      "level": "info",
-      "message": "Command `RecordStockCheck` does not start with an imperative verb; commands read best as verb-first phrases",
       "rule": {
         "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
         "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
@@ -2470,36 +2457,6 @@
       "element": "inventory.stock.receiving.ReceiveStock",
       "level": "info",
       "message": "Command `ReceiveStock` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "inventory.stock.reservation.ReleaseReservation",
-      "level": "info",
-      "message": "Command `ReleaseReservation` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "inventory.stock.reservation.ReserveStock",
-      "level": "info",
-      "message": "Command `ReserveStock` does not start with an imperative verb; commands read best as verb-first phrases",
       "rule": {
         "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
         "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
@@ -2871,6 +2828,14 @@
       "inventory.warehouse.warehouse.WarehouseAddress"
     ]
   },
+  "enrichers": {
+    "command": [
+      "shared.enrichment.enrich_command"
+    ],
+    "event": [
+      "shared.enrichment.enrich_event"
+    ]
+  },
   "flows": {
     "domain_services": {},
     "process_managers": {},
@@ -2904,7 +2869,7 @@
       }
     }
   },
-  "ir_version": "0.2.0",
+  "ir_version": "0.3.0",
   "projections": {
     "inventory.projections.event_audit.EventAudit": {
       "projection": {

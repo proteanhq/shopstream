@@ -120,17 +120,22 @@ def test_passing_context_runs_its_own_tests_in_memory_mode(tmp_path):
 
     assert result.returncode == 0, result.stdout + result.stderr
     assert "All passed (reviews)" in result.stdout
-    assert calls.read_text().splitlines() == [
-        "verify -d reviews.domain --path . --json|--protean-env memory -m 'not engine' tests/reviews/|memory|src"
-    ]
+    [call] = calls.read_text().splitlines()
+    args, addopts, _, pythonpath = call.split("|")
+    assert (args, addopts, pythonpath) == (
+        "verify -d reviews.domain --env memory --path . --json",
+        "-m 'not engine' tests/reviews/",
+        "src",
+    )
     # Check counts are printed when check passes too.
     assert "check=pass    (0 errors, 0 warnings, 3 infos)" in result.stdout
 
 
-def test_caller_protean_env_is_overridden(tmp_path):
+def test_caller_protean_env_does_not_change_the_verify_env(tmp_path):
+    # verify ignores PROTEAN_ENV from the shell, so only its --env decides.
     _, calls = _run(tmp_path, _envelope(), 0, "reviews", PROTEAN_ENV="test")
 
-    assert calls.read_text().split("|")[2] == "memory"
+    assert "--env memory" in calls.read_text().split("|")[0]
 
 
 def test_full_run_verifies_all_nine_contexts_then_integration(tmp_path):
@@ -141,7 +146,7 @@ def test_full_run_verifies_all_nine_contexts_then_integration(tmp_path):
     lines = calls.read_text().splitlines()
     assert lines, "nothing was run"
     verify_calls = [line.split("|")[0] for line in lines[:-1]]
-    assert verify_calls == [f"verify -d {ctx}.domain --path . --json" for ctx in CONTEXTS]
+    assert verify_calls == [f"verify -d {ctx}.domain --env memory --path . --json" for ctx in CONTEXTS]
     assert lines[-1] == "pytest -m pytest tests/integration/ --protean-env memory -m not engine -q|"
     assert "integration    pytest tests/integration/: 17 passed in 2.00s" in result.stdout
     assert f"All passed ({' '.join(CONTEXTS)} integration)" in result.stdout
@@ -171,8 +176,8 @@ def test_named_contexts_run_once_each_and_skip_integration(tmp_path):
     assert result.returncode == 0, result.stdout + result.stderr
     lines = calls.read_text().splitlines()
     assert [line.split("|")[0] for line in lines] == [
-        "verify -d loyalty.domain --path . --json",
-        "verify -d reviews.domain --path . --json",
+        "verify -d loyalty.domain --env memory --path . --json",
+        "verify -d reviews.domain --env memory --path . --json",
     ]
     assert "All passed (loyalty reviews)" in result.stdout
 

@@ -65,11 +65,9 @@ else
     RUN_INTEGRATION=1
 fi
 
-# Init and check read PROTEAN_ENV in the verify process. The tests stage drops
-# PROTEAN_ENV before starting pytest, so memory mode reaches pytest through
-# --protean-env in PYTEST_ADDOPTS instead.
+# `protean verify` runs init, check and tests under its `--env` (default `test`)
+# and ignores PROTEAN_ENV from the shell, so each call passes `--env memory`.
 export PYTHONPATH="src${PYTHONPATH:+:$PYTHONPATH}"
-export PROTEAN_ENV=memory
 
 # `--no-sync` uses the project venv as it is, so a run never rewrites uv.lock or
 # replaces a locally installed Protean wheel.
@@ -150,8 +148,8 @@ for ctx in "${SELECTED[@]}"; do
     json="$LOG_DIR/$ctx.json"
     start=$(date +%s)
     rc=0
-    PYTEST_ADDOPTS="--protean-env memory -m 'not engine' tests/$ctx/" \
-        "${PROTEAN[@]}" verify -d "$ctx.domain" --path . --json \
+    PYTEST_ADDOPTS="-m 'not engine' tests/$ctx/" \
+        "${PROTEAN[@]}" verify -d "$ctx.domain" --env memory --path . --json \
         > "$json" 2> "$LOG_DIR/$ctx.stderr.log" || rc=$?
     seconds=$(( $(date +%s) - start ))
 

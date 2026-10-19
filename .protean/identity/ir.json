@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:198c2782df76b6ef62fc72b8ab2809144959e56a689698f08af8204bb8cc1171",
+  "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
+  "checksum": "sha256:06e67b21b5a34dbca0d432b6af1e7a6e438360bb0335474e546ff06d9ae95ae0",
   "clusters": {
     "identity.customer.customer.Customer": {
       "aggregate": {
@@ -1327,51 +1327,6 @@
     {
       "category": "naming_conventions",
       "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "identity.customer.account.CloseAccount",
-      "level": "info",
-      "message": "Command `CloseAccount` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "identity.customer.account.ReactivateAccount",
-      "level": "info",
-      "message": "Command `ReactivateAccount` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "identity.customer.account.SuspendAccount",
-      "level": "info",
-      "message": "Command `SuspendAccount` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
       "element": "identity.customer.tier.UpgradeTier",
       "level": "info",
       "message": "Command `UpgradeTier` does not start with an imperative verb; commands read best as verb-first phrases",
@@ -1627,12 +1582,20 @@
       "identity.shared.phone.PhoneNumber"
     ]
   },
+  "enrichers": {
+    "command": [
+      "shared.enrichment.enrich_command"
+    ],
+    "event": [
+      "shared.enrichment.enrich_event"
+    ]
+  },
   "flows": {
     "domain_services": {},
     "process_managers": {},
     "subscribers": {}
   },
-  "ir_version": "0.2.0",
+  "ir_version": "0.3.0",
   "projections": {
     "identity.projections.address_book.AddressBook": {
       "projection": {

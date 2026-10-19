@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:07d98105b56fbbf5804ee727a8bf8d1ebd16db47e3af125f324bb1fd7cc4623b",
+  "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
+  "checksum": "sha256:1b262626a22a9d7ca7f461e99ef1bc1358fd863d50d11b0d59851f9036a03f66",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -1117,6 +1117,7 @@
         "element_type": "AGGREGATE",
         "fields": {
           "created_at": {
+            "auto_now_add": true,
             "kind": "standard",
             "type": "DateTime"
           },
@@ -1132,6 +1133,7 @@
             "type": "Auto"
           },
           "updated_at": {
+            "auto_now": true,
             "kind": "standard",
             "type": "DateTime"
           },
@@ -1178,6 +1180,7 @@
             "target": "loyalty.reward.reward_account.MembershipCard"
           },
           "created_at": {
+            "auto_now_add": true,
             "kind": "standard",
             "type": "DateTime"
           },
@@ -1254,6 +1257,7 @@
             "type": "String"
           },
           "updated_at": {
+            "auto_now": true,
             "kind": "standard",
             "type": "DateTime"
           },
@@ -2025,6 +2029,7 @@
       "teaching_skills": [
         "add-validation",
         "aggregate",
+        "audit-domain",
         "protean-overview",
         "refactor-move-logic-to-aggregate"
       ]
@@ -2043,6 +2048,7 @@
       "teaching_skills": [
         "add-validation",
         "aggregate",
+        "audit-domain",
         "protean-overview",
         "refactor-move-logic-to-aggregate"
       ]
@@ -2052,14 +2058,15 @@
       "code": "AGGREGATE_WITHOUT_COMMAND_HANDLER",
       "element": "loyalty.reward.reward_account.Auditable",
       "level": "warning",
-      "message": "Aggregate `Auditable` has no command handler \u2014 no write path exists",
+      "message": "Aggregate `Auditable` has no command handler, so no write path exists",
       "rule": {
         "fix": "Add a command handler for the aggregate, or model it as a read-only projection if no writes are expected.",
-        "rationale": "An aggregate with no command handler has no write path \u2014 nothing can change its state."
+        "rationale": "An aggregate with no command handler has no write path, so nothing can change its state."
       },
       "suggestion": "Add a command handler for the aggregate, or model it as a read-only projection if no writes are expected.",
       "teaching_skills": [
-        "aggregate"
+        "aggregate",
+        "audit-domain"
       ]
     },
     {
@@ -2143,36 +2150,6 @@
       "element": "loyalty.redemption.commands.IssueRedemptionVoucher",
       "level": "info",
       "message": "Command `IssueRedemptionVoucher` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "loyalty.redemption.commands.ReserveRedemptionPoints",
-      "level": "info",
-      "message": "Command `ReserveRedemptionPoints` does not start with an imperative verb; commands read best as verb-first phrases",
-      "rule": {
-        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
-      },
-      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
-      "teaching_skills": [
-        "command"
-      ]
-    },
-    {
-      "category": "naming_conventions",
-      "code": "COMMAND_NOT_IMPERATIVE",
-      "element": "loyalty.reward.enrollment.EnrollRewardAccount",
-      "level": "info",
-      "message": "Command `EnrollRewardAccount` does not start with an imperative verb; commands read best as verb-first phrases",
       "rule": {
         "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
         "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
@@ -2604,6 +2581,17 @@
     ],
     "VALUE_OBJECT": []
   },
+  "enrichers": {
+    "aggregate": [
+      "loyalty.reward.reward_account.stamp_actor"
+    ],
+    "command": [
+      "shared.enrichment.enrich_command"
+    ],
+    "event": [
+      "shared.enrichment.enrich_event"
+    ]
+  },
   "flows": {
     "domain_services": {
       "loyalty.reward.transfer.TransferPoints": {
@@ -2771,7 +2759,7 @@
       }
     }
   },
-  "ir_version": "0.2.0",
+  "ir_version": "0.3.0",
   "projections": {
     "loyalty.projections.campaign_catalog.CampaignCatalog": {
       "projection": {

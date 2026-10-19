@@ -1,6 +1,6 @@
 {
-  "$schema": "https://protean.dev/ir/v0.2.0/schema.json",
-  "checksum": "sha256:db3ca1ba2d9acca0d765ab0a7602b4ce33a5c4b085dd4f55caa0c49a56d73656",
+  "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
+  "checksum": "sha256:f39b93df5bf4de33d77b0f067d574a495cead986c3e7452ae8786f0cc561c754",
   "clusters": {
     "catalogue.category.category.Category": {
       "aggregate": {
@@ -1850,6 +1850,7 @@
       "teaching_skills": [
         "add-validation",
         "aggregate",
+        "audit-domain",
         "protean-overview",
         "refactor-move-logic-to-aggregate"
       ]
@@ -2314,12 +2315,20 @@
       "catalogue.shared.sku.SKU"
     ]
   },
+  "enrichers": {
+    "command": [
+      "shared.enrichment.enrich_command"
+    ],
+    "event": [
+      "shared.enrichment.enrich_event"
+    ]
+  },
   "flows": {
     "domain_services": {},
     "process_managers": {},
     "subscribers": {}
   },
-  "ir_version": "0.2.0",
+  "ir_version": "0.3.0",
   "projections": {
     "catalogue.projections.category_products.CategoryProducts": {
       "projection": {
