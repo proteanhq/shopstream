@@ -217,6 +217,9 @@ make test-loyalty
 
 # Fast tests only (skip slow/integration)
 make test-fast
+
+# Check the shared Message DB's integrity (read-only, dev env)
+make eventstore-verify
 ```
 
 Tests use `PROTEAN_ENV=test`, which keeps `event_processing = "sync"` so projectors fire during UoW commit for deterministic assertions. Tests run against separate `_test` databases so they never destroy dev data (see [Configuration](#configuration)).
