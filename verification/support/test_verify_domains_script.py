@@ -8,7 +8,8 @@ interpreter, so the script's own parser and gate run unchanged. `uv run --no-syn
 python -m pytest ...` (the tests/integration/ run) is faked too: it records its args
 and prints a canned summary line. Most cases name one context (`reviews`), which skips
 the tests/integration/ run; the full-run cases name none. The well-formed envelopes
-come from Protean's `build_envelope()`, so they keep the shape `protean verify` emits.
+come from Protean's `build_envelope()`, so their outer envelope keeps the shape
+`protean verify` emits; the `data.stages` contents are still written by hand.
 
 The real nine-context run takes about a minute and nests pytest, so it stays out of
 the suite: run `bash scripts/verify-domains.sh`.

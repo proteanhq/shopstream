@@ -256,29 +256,100 @@ def test_abstract_aggregate_is_not_flagged_without_command_handler():
     assert not any(element.endswith(".Tracked") for element in flagged), flagged
 
 
+REVIEWS_IR = os.path.join(os.path.dirname(__file__), "..", "..", ".protean", "reviews", "ir.json")
+
+
+def _ir_diff(*args: str):
+    import protean.cli
+    from typer.testing import CliRunner
+
+    return CliRunner().invoke(protean.cli.app, ["ir", "diff", *args])
+
+
+def _reviews_ir_without_a_projection(tmp_path) -> str:
+    """Write the reviews baseline with one projection removed, and return its path.
+
+    Diffing it against the baseline gives a real change in either direction: an added
+    projection is safe, and a removed one is breaking.
+    """
+    import json
+
+    with open(REVIEWS_IR) as fh:
+        ir = json.load(fh)
+    if not ir["projections"]:
+        pytest.fail("precondition: the reviews baseline has a projection to remove")
+    del ir["projections"][next(iter(ir["projections"]))]
+    path = tmp_path / "reviews-ir.json"
+    path.write_text(json.dumps(ir))
+    return str(path)
+
+
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
     reason="ir diff exits 2 for non-breaking changes, the code Click uses for a usage error",
 )
-def test_ir_diff_usage_error_does_not_share_the_non_breaking_exit_code():
+def test_ir_diff_usage_error_does_not_share_the_non_breaking_exit_code(tmp_path):
     """Protean finding (not yet filed upstream): `ir diff` gives two outcomes one exit code.
 
     `protean ir diff` documents exit 2 as "non-breaking changes only". Click exits 2
     for a usage error, such as an unknown option. A CI gate that reads exit 2 as a safe
-    change therefore passes when its own command line is broken: a misspelled `--dir=`
-    ran no diff and the gate reported a non-breaking change. `scripts/ir-gate.sh`
-    works around it by accepting exit 2 only with a JSON report whose summary says
-    there are changes and none is breaking.
+    change therefore passes when its own command line is broken: the old `make ir-gate`
+    recipe would report a non-breaking change for a misspelled `--dir=`, though no diff
+    ran. `scripts/ir-gate.sh` works around it by accepting exit 2 only with a JSON
+    report whose summary says there are changes and none is breaking.
+
+    The test compares the two codes rather than pinning either one, so it flips
+    whichever of them Protean moves.
     """
-    import protean.cli
-    from typer.testing import CliRunner
+    import json
 
-    result = CliRunner().invoke(protean.cli.app, ["ir", "diff", "--no-such-flag"])
+    safe = _ir_diff(
+        "--left",
+        _reviews_ir_without_a_projection(tmp_path),
+        "--right",
+        REVIEWS_IR,
+        "--dir",
+        str(tmp_path),
+        "--format",
+        "json",
+    )
+    usage = _ir_diff("--no-such-flag")
 
-    if result.exit_code == 0 or "No such option: --no-such-flag" not in result.output:
-        pytest.fail(f"precondition: ir diff rejected the unknown option\n{result.output}")
-    assert result.exit_code != 2
+    summary = json.loads(safe.stdout)["summary"]
+    if safe.exit_code == 0 or not summary["has_changes"] or summary["has_breaking_changes"]:
+        pytest.fail(f"precondition: an added projection is a non-breaking change\n{safe.output}")
+    if usage.exit_code == 0 or "No such option: --no-such-flag" not in usage.output:
+        pytest.fail(f"precondition: ir diff rejected the unknown option\n{usage.output}")
+    assert usage.exit_code != safe.exit_code
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="ir diff exits 1 both for a breaking change and for a baseline it cannot load",
+)
+def test_ir_diff_load_error_does_not_share_the_breaking_exit_code(tmp_path):
+    """Protean finding (not yet filed upstream): `ir diff` exits 1 for two outcomes too.
+
+    It exits 1 for a breaking change, and also for an error before any diff runs, such
+    as a missing baseline file. Protean's CLI convention keeps exit 2 for an environment error. `ir diff` raises
+    `typer.Abort()` for these errors, which exits 1. A gate cannot tell from the code
+    alone whether it found a breaking change or never compared anything.
+    `scripts/ir-gate.sh` reruns the diff in text format on exit 1 so the reason is
+    printed either way.
+    """
+    breaking = _ir_diff(
+        "--left", REVIEWS_IR, "--right", _reviews_ir_without_a_projection(tmp_path), "--dir", str(tmp_path)
+    )
+    missing = str(tmp_path / "missing.json")
+    load_error = _ir_diff("--left", missing, "--right", REVIEWS_IR, "--dir", str(tmp_path))
+
+    if breaking.exit_code == 0 or "Breaking Changes" not in breaking.output:
+        pytest.fail(f"precondition: a removed projection is a breaking change\n{breaking.output}")
+    if load_error.exit_code == 0 or "file not found" not in load_error.output:
+        pytest.fail(f"precondition: ir diff reported the missing baseline\n{load_error.output}")
+    assert load_error.exit_code != breaking.exit_code
 
 
 @pytest.fixture

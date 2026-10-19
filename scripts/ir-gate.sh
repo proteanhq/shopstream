@@ -12,10 +12,16 @@ set -uo pipefail
 # the exit code alone cannot tell a safe change from a broken command line. The gate
 # accepts exit 2 only when stdout holds the JSON report and its summary says there are
 # changes and none of them is breaking. Any other exit 2 fails the gate.
+# verification/regression/README.md lists both exit-code findings.
 #
 # Exit 1 also covers `ir diff` errors (bad config, a missing baseline), not only
 # breaking changes. On exit 1 the gate runs the diff again in text format for that
 # context and prints it, so the reason is readable either way.
+#
+# `ir diff --dir=<d>` reads its config (strictness, excludes) from <d>/config.toml,
+# and the committed one is .protean/config.toml, not .protean/<context>/. So each
+# run gets a temporary directory that links the context's ir.json beside the shared
+# config.toml. Without it, the gate would follow Protean's default strictness.
 #
 # Usage:
 #   ./scripts/ir-gate.sh                     # all nine contexts
@@ -46,14 +52,27 @@ fi
 export PYTHONPATH="src${PYTHONPATH:+:$PYTHONPATH}"
 export PROTEAN_ENV=memory
 
-OUT="$(mktemp "${TMPDIR:-/tmp}/ir-gate.out.XXXXXX")"
-ERR="$(mktemp "${TMPDIR:-/tmp}/ir-gate.err.XXXXXX")"
-trap 'rm -f "$OUT" "$ERR"' EXIT
+for ctx in "${SELECTED[@]}"; do
+    if [ ! -f ".protean/$ctx/ir.json" ]; then
+        echo "ERROR: no baseline at .protean/$ctx/ir.json (run 'make ir')" >&2
+        exit 2
+    fi
+done
+
+WORK="$(mktemp -d "${TMPDIR:-/tmp}/ir-gate.XXXXXX")" || { echo "ERROR: mktemp failed" >&2; exit 2; }
+trap 'rm -rf "$WORK"' EXIT
+OUT="$WORK/stdout"
+ERR="$WORK/stderr"
+for ctx in "${SELECTED[@]}"; do
+    mkdir -p "$WORK/$ctx"
+    ln -sf "$ROOT/.protean/$ctx/ir.json" "$WORK/$ctx/ir.json"
+    ln -sf "$ROOT/.protean/config.toml" "$WORK/$ctx/config.toml"
+done
 
 ir_diff() {
     local ctx="$1"
     shift
-    uv run protean --log-level ERROR ir diff --domain="$ctx.domain" --dir=".protean/$ctx" "$@"
+    uv run protean --log-level ERROR ir diff --domain="$ctx.domain" --dir="$WORK/$ctx" "$@"
 }
 
 # Exit 0 when the file holds an `ir diff` JSON report with changes and no breaking change.
@@ -65,9 +84,9 @@ import sys
 try:
     with open(sys.argv[1]) as fh:
         summary = json.load(fh)["summary"]
+    ok = summary.get("has_changes") is True and summary.get("has_breaking_changes") is False
 except Exception:
     sys.exit(1)
-ok = summary.get("has_changes") is True and summary.get("has_breaking_changes") is False
 sys.exit(0 if ok else 1)
 PY
 }

@@ -1,7 +1,7 @@
 """Negative test for the IR backward-compatibility gate (ticket T0.2).
 
-Proves `make ir-gate` actually catches a breaking contract change instead of
-passing silently. Removing a published event from the IR must be classified
+Proves `protean ir diff`, the command `make ir-gate` runs, catches a breaking
+contract change instead of passing silently. Removing a published event from the IR must be classified
 breaking and exit non-zero under the committed strict config
 (.protean/config.toml -> [compatibility] strictness = "strict").
 

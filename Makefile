@@ -350,7 +350,7 @@ ir-diff: ## Diff live IR against saved baselines (.protean/<domain>/ir.json)
 		fi; \
 	done
 
-ir-gate: ## CI gate — fail on a BREAKING IR change vs the committed baseline (prints full detail)
+ir-gate: ## CI gate: fail unless each IR diff vs the committed baseline is clean or non-breaking (prints full detail)
 	@echo "--- protean build under test ---"; \
 	PYTHONPATH=src uv run python -c 'import importlib.metadata as m; d=m.distribution("protean"); print(d.version, (d.read_text("direct_url.json") or "").strip())'
 	@bash scripts/ir-gate.sh
