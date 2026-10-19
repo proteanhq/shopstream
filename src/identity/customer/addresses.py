@@ -4,7 +4,7 @@ from protean import handle
 from protean.fields import Identifier, String
 from protean.utils.globals import current_domain
 
-from identity.customer.customer import Customer, GeoCoordinates
+from identity.customer.customer import AddressLabel, Customer, GeoCoordinates
 from identity.domain import identity
 
 
@@ -56,7 +56,7 @@ class SetDefaultAddress:
 @identity.command_handler(part_of=Customer)
 class ManageAddressesHandler:
     @handle(AddAddress)
-    def add_address(self, command):
+    def add_address(self, command: AddAddress) -> None:
         repo = current_domain.repository_for(Customer)
         customer = repo.get(command.customer_id)
 
@@ -67,28 +67,23 @@ class ManageAddressesHandler:
                 longitude=float(command.geo_lng),
             )
 
-        kwargs = {
-            "street": command.street,
-            "city": command.city,
-            "postal_code": command.postal_code,
-            "country": command.country,
-        }
-        if command.label:
-            kwargs["label"] = command.label
-        if command.state:
-            kwargs["state"] = command.state
-        if geo:
-            kwargs["geo_coordinates"] = geo
-
-        customer.add_address(**kwargs)
+        customer.add_address(
+            street=command.street,
+            city=command.city,
+            postal_code=command.postal_code,
+            country=command.country,
+            label=command.label or AddressLabel.HOME.value,
+            state=command.state or None,
+            geo_coordinates=geo,
+        )
         repo.add(customer)
 
     @handle(UpdateAddress)
-    def update_address(self, command):
+    def update_address(self, command: UpdateAddress) -> None:
         repo = current_domain.repository_for(Customer)
         customer = repo.get(command.customer_id)
 
-        updates = {}
+        updates: dict[str, str] = {}
         for field in ("label", "street", "city", "state", "postal_code", "country"):
             value = getattr(command, field, None)
             if value is not None:
@@ -98,14 +93,14 @@ class ManageAddressesHandler:
         repo.add(customer)
 
     @handle(RemoveAddress)
-    def remove_address(self, command):
+    def remove_address(self, command: RemoveAddress) -> None:
         repo = current_domain.repository_for(Customer)
         customer = repo.get(command.customer_id)
         customer.remove_address(command.address_id)
         repo.add(customer)
 
     @handle(SetDefaultAddress)
-    def set_default_address(self, command):
+    def set_default_address(self, command: SetDefaultAddress) -> None:
         repo = current_domain.repository_for(Customer)
         customer = repo.get(command.customer_id)
         customer.set_default_address(command.address_id)
