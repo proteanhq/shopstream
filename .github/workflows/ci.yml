@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+# Install from uv.lock as committed. Without this, `uv sync` and `uv run`
+# can re-resolve Protean's git `main` and test against a different commit.
+env:
+  UV_FROZEN: "1"
+
 jobs:
   test-memory:
     runs-on: ubuntu-latest
