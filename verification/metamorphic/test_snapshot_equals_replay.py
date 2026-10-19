@@ -25,8 +25,9 @@ WHERE THE TWO PATHS COME FROM
 
 SCOPE
     Metamorphic (source B): only catches bugs that differ between the two paths.
-    PromoCampaign is ShopStream's only snapshot-configured aggregate; this check
-    lives next to it. If another domain enables snapshots, add a case here.
+    Every event-sourced aggregate snapshots: InventoryItem, Order and Payment at
+    Protean's default threshold (10), PromoCampaign at loyalty's 5. This check
+    covers PromoCampaign only, the one context that sets its own threshold.
 
 RUN (no Docker):
     .venv/bin/python -m pytest \
