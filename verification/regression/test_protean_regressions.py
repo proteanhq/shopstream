@@ -256,6 +256,31 @@ def test_abstract_aggregate_is_not_flagged_without_command_handler():
     assert not any(element.endswith(".Tracked") for element in flagged), flagged
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="ir diff exits 2 for non-breaking changes, the code Click uses for a usage error",
+)
+def test_ir_diff_usage_error_does_not_share_the_non_breaking_exit_code():
+    """Protean finding (not yet filed upstream): `ir diff` gives two outcomes one exit code.
+
+    `protean ir diff` documents exit 2 as "non-breaking changes only". Click exits 2
+    for a usage error, such as an unknown option. A CI gate that reads exit 2 as a safe
+    change therefore passes when its own command line is broken: a misspelled `--dir=`
+    ran no diff and the gate reported a non-breaking change. `scripts/ir-gate.sh`
+    works around it by accepting exit 2 only with a JSON report whose summary says
+    there are changes and none is breaking.
+    """
+    import protean.cli
+    from typer.testing import CliRunner
+
+    result = CliRunner().invoke(protean.cli.app, ["ir", "diff", "--no-such-flag"])
+
+    if result.exit_code == 0 or "No such option: --no-such-flag" not in result.output:
+        pytest.fail(f"precondition: ir diff rejected the unknown option\n{result.output}")
+    assert result.exit_code != 2
+
+
 @pytest.fixture
 def bare_root_logger():
     """Give the test a root logger with no handlers at NOTSET, and restore it afterwards.
