@@ -11,11 +11,11 @@ from identity.domain import identity
 
 @identity.projection
 class CustomerSegments:
-    customer_id: Identifier(identifier=True, required=True)
-    email: String(required=True)
-    first_name: String(required=True)
-    last_name: String(required=True)
-    tier: String(required=True)
+    customer_id: str = Identifier(identifier=True, required=True)
+    email: str = String(required=True)
+    first_name: str = String(required=True)
+    last_name: str = String(required=True)
+    tier: str = String(required=True)
 
 
 @identity.projector(projector_for=CustomerSegments, aggregates=[Customer])

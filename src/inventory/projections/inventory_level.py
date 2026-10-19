@@ -1,5 +1,7 @@
 """Inventory level — per-item stock levels for real-time display."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -21,18 +23,18 @@ from inventory.stock.stock import InventoryItem
 
 @inventory.projection
 class InventoryLevel:
-    inventory_item_id = Identifier(identifier=True, required=True)
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    warehouse_id = Identifier(required=True)
-    sku = String(required=True)
-    on_hand = Integer(default=0)
-    reserved = Integer(default=0)
-    available = Integer(default=0)
-    in_transit = Integer(default=0)
-    damaged = Integer(default=0)
-    reorder_point = Integer(default=10)
-    updated_at = DateTime()
+    inventory_item_id: str = Identifier(identifier=True, required=True)
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    warehouse_id: str = Identifier(required=True)
+    sku: str = String(required=True)
+    on_hand: int = Integer(default=0)
+    reserved: int = Integer(default=0)
+    available: int = Integer(default=0)
+    in_transit: int = Integer(default=0)
+    damaged: int = Integer(default=0)
+    reorder_point: int = Integer(default=10)
+    updated_at: datetime | None = DateTime()
 
 
 @inventory.projector(projector_for=InventoryLevel, aggregates=[InventoryItem])

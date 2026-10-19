@@ -1,5 +1,7 @@
 """Product card — lightweight listing/search projection."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -21,18 +23,18 @@ from catalogue.product.product import Product
 
 @catalogue.projection
 class ProductCard:
-    product_id: Identifier(identifier=True, required=True)
-    sku: String(required=True)
-    title: String(required=True)
-    brand: String()
-    category_id: Identifier()
-    primary_image_url: String()
-    min_price: Float()
-    max_price: Float()
-    currency: String()
-    status: String(required=True)
-    variant_count: Integer(default=0)
-    created_at: DateTime()
+    product_id: str = Identifier(identifier=True, required=True)
+    sku: str = String(required=True)
+    title: str = String(required=True)
+    brand: str | None = String()
+    category_id: str | None = Identifier()
+    primary_image_url: str | None = String()
+    min_price: float | None = Float()
+    max_price: float | None = Float()
+    currency: str | None = String()
+    status: str = String(required=True)
+    variant_count: int = Integer(default=0)
+    created_at: datetime | None = DateTime()
 
 
 @catalogue.projector(projector_for=ProductCard, aggregates=[Product])

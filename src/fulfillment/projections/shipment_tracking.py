@@ -1,5 +1,8 @@
 """Shipment tracking — customer-facing tracking page view."""
 
+from datetime import datetime
+from typing import Any
+
 from protean import Index
 from protean.core.projector import on
 from protean.fields import DateTime, Dict, Identifier, List, String
@@ -18,15 +21,15 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 # Read path: tracking timeline for an order (filter by order_id).
 @fulfillment.projection(indexes=[Index("order_id")])
 class ShipmentTrackingView:
-    fulfillment_id = Identifier(identifier=True, required=True)
-    order_id = Identifier(required=True)
-    carrier = String()
-    tracking_number = String()
-    current_status = String(required=True)
-    current_location = String()
-    events = List(Dict())
-    shipped_at = DateTime()
-    delivered_at = DateTime()
+    fulfillment_id: str = Identifier(identifier=True, required=True)
+    order_id: str = Identifier(required=True)
+    carrier: str | None = String()
+    tracking_number: str | None = String()
+    current_status: str = String(required=True)
+    current_location: str | None = String()
+    events: list[dict[str, Any]] = List(Dict())
+    shipped_at: datetime | None = DateTime()
+    delivered_at: datetime | None = DateTime()
 
 
 @fulfillment.projector(projector_for=ShipmentTrackingView, aggregates=[Fulfillment])

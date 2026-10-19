@@ -15,16 +15,16 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 class RecordDeliveryConfirmation:
     """Record confirmed delivery from the carrier."""
 
-    fulfillment_id = Identifier(required=True)
+    fulfillment_id: str = Identifier(required=True)
 
 
 @fulfillment.command(part_of="Fulfillment")
 class RecordDeliveryException:
     """Record a delivery exception from the carrier."""
 
-    fulfillment_id = Identifier(required=True)
-    reason = String(required=True, max_length=500)
-    location = String(max_length=200)
+    fulfillment_id: str = Identifier(required=True)
+    reason: str = String(required=True, max_length=500)
+    location: str | None = String(max_length=200)
 
 
 @fulfillment.command_handler(part_of=Fulfillment)

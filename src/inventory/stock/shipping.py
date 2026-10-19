@@ -12,8 +12,8 @@ from inventory.stock.stock import InventoryItem
 class CommitStock:
     """Commit reserved stock when an order ships."""
 
-    inventory_item_id = Identifier(required=True)
-    reservation_id = Identifier(required=True)
+    inventory_item_id: str = Identifier(required=True)
+    reservation_id: str = Identifier(required=True)
 
 
 @inventory.command_handler(part_of=InventoryItem)

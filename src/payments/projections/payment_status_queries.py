@@ -10,7 +10,7 @@ from payments.projections.payment_status import PaymentStatusView
 
 @payments.query(part_of=PaymentStatusView)
 class GetPaymentStatus:
-    payment_id = Identifier(required=True)
+    payment_id: str = Identifier(required=True)
 
 
 @payments.query_handler(part_of=PaymentStatusView)

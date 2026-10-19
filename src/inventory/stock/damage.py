@@ -12,18 +12,18 @@ from inventory.stock.stock import InventoryItem
 class MarkDamaged:
     """Flag stock as damaged."""
 
-    inventory_item_id = Identifier(required=True)
-    quantity = Integer(required=True)
-    reason = String(required=True)
+    inventory_item_id: str = Identifier(required=True)
+    quantity: int = Integer(required=True)
+    reason: str = String(required=True)
 
 
 @inventory.command(part_of="InventoryItem")
 class WriteOffDamaged:
     """Write off damaged stock."""
 
-    inventory_item_id = Identifier(required=True)
-    quantity = Integer(required=True)
-    approved_by = String(required=True)
+    inventory_item_id: str = Identifier(required=True)
+    quantity: int = Integer(required=True)
+    approved_by: str = String(required=True)
 
 
 @inventory.command_handler(part_of=InventoryItem)

@@ -10,9 +10,9 @@ from reviews.projections.product_reviews import ProductReviews
 
 @reviews.query(part_of=ProductReviews)
 class ListProductReviews:
-    product_id = Identifier(required=True)
-    page = Integer(default=1)
-    page_size = Integer(default=20)
+    product_id: str = Identifier(required=True)
+    page: int = Integer(default=1)
+    page_size: int = Integer(default=20)
 
 
 @reviews.query_handler(part_of=ProductReviews)

@@ -10,10 +10,10 @@ from catalogue.projections.product_card import ProductCard
 
 @catalogue.query(part_of=ProductCard)
 class ListProductCards:
-    category_id = Identifier()
-    status = String()
-    page = Integer(default=1)
-    page_size = Integer(default=20)
+    category_id: str | None = Identifier()
+    status: str | None = String()
+    page: int = Integer(default=1)
+    page_size: int = Integer(default=20)
 
 
 @catalogue.query_handler(part_of=ProductCard)

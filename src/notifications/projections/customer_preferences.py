@@ -1,5 +1,7 @@
 """Customer preferences — read model for notification channel preferences."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import Boolean, DateTime, Identifier, List, String
 from protean.utils.globals import current_domain
@@ -18,16 +20,16 @@ from notifications.preference.preference import NotificationPreference
 
 @notifications.projection
 class CustomerPreferences:
-    preference_id = Identifier(identifier=True, required=True)
-    customer_id = Identifier(required=True)
-    email_enabled = Boolean(default=True)
-    sms_enabled = Boolean(default=False)
-    push_enabled = Boolean(default=False)
-    quiet_hours_start = String()
-    quiet_hours_end = String()
-    unsubscribed_types = List(String())
-    created_at = DateTime()
-    updated_at = DateTime()
+    preference_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = Identifier(required=True)
+    email_enabled: bool = Boolean(default=True)
+    sms_enabled: bool = Boolean(default=False)
+    push_enabled: bool = Boolean(default=False)
+    quiet_hours_start: str | None = String()
+    quiet_hours_end: str | None = String()
+    unsubscribed_types: list[str] = List(String())
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @notifications.projector(projector_for=CustomerPreferences, aggregates=[NotificationPreference])

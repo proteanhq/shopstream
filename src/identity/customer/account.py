@@ -12,22 +12,22 @@ from identity.domain import identity
 class SuspendAccount:
     """Temporarily suspend a customer account, blocking further activity."""
 
-    customer_id: Identifier(required=True)
-    reason: String(required=True, max_length=500)
+    customer_id: str = Identifier(required=True)
+    reason: str = String(required=True, max_length=500)
 
 
 @identity.command(part_of="Customer")
 class ReactivateAccount:
     """Restore a suspended customer account to active status."""
 
-    customer_id: Identifier(required=True)
+    customer_id: str = Identifier(required=True)
 
 
 @identity.command(part_of="Customer")
 class CloseAccount:
     """Permanently close a customer account."""
 
-    customer_id: Identifier(required=True)
+    customer_id: str = Identifier(required=True)
 
 
 @identity.command_handler(part_of=Customer)

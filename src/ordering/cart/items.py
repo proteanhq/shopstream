@@ -12,27 +12,27 @@ from ordering.domain import ordering
 class AddToCart:
     """Add a product variant to the shopping cart (merges if already present)."""
 
-    cart_id = Identifier(required=True)
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    quantity = Integer(required=True, min_value=1)
+    cart_id: str = Identifier(required=True)
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    quantity: int = Integer(required=True, min_value=1)
 
 
 @ordering.command(part_of="ShoppingCart")
 class UpdateCartQuantity:
     """Change the quantity of an item already in the cart."""
 
-    cart_id = Identifier(required=True)
-    item_id = Identifier(required=True)
-    new_quantity = Integer(required=True, min_value=1)
+    cart_id: str = Identifier(required=True)
+    item_id: str = Identifier(required=True)
+    new_quantity: int = Integer(required=True, min_value=1)
 
 
 @ordering.command(part_of="ShoppingCart")
 class RemoveFromCart:
     """Remove an item from the shopping cart."""
 
-    cart_id = Identifier(required=True)
-    item_id = Identifier(required=True)
+    cart_id: str = Identifier(required=True)
+    item_id: str = Identifier(required=True)
 
 
 @ordering.command_handler(part_of=ShoppingCart)

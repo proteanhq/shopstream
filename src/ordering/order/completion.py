@@ -12,7 +12,7 @@ from ordering.order.order import Order
 class CompleteOrder:
     """Finalize a delivered order after the return window has expired."""
 
-    order_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
 
 
 @ordering.command_handler(part_of=Order)

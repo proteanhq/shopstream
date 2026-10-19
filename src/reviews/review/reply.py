@@ -13,9 +13,9 @@ from reviews.review.review import Review
 
 @reviews.command(part_of="Review")
 class AddSellerReply:
-    review_id = Identifier(required=True)
-    seller_id = Identifier(required=True)
-    body = Text(required=True)
+    review_id: str = Identifier(required=True)
+    seller_id: str = Identifier(required=True)
+    body: str = Text(required=True)
 
 
 @reviews.command_handler(part_of=Review)

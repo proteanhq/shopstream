@@ -1,5 +1,7 @@
 """Address book — where do our customers live?"""
 
+from typing import Any
+
 from protean.core.projector import on
 from protean.fields import Dict, Identifier, List
 from protean.utils.globals import current_domain
@@ -16,8 +18,8 @@ from identity.domain import identity
 
 @identity.projection
 class AddressBook:
-    customer_id: Identifier(identifier=True, required=True)
-    addresses: List(Dict())
+    customer_id: str = Identifier(identifier=True, required=True)
+    addresses: list[dict[str, Any]] = List(Dict())
 
 
 @identity.projector(projector_for=AddressBook, aggregates=[Customer])

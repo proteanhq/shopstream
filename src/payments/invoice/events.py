@@ -3,6 +3,8 @@
 All events are versioned, immutable facts representing invoice state changes.
 """
 
+from datetime import datetime
+
 from protean.fields import DateTime, Float, Identifier, String
 
 from payments.domain import payments
@@ -12,38 +14,38 @@ from payments.domain import payments
 class InvoiceGenerated:
     """A new invoice was generated for an order."""
 
-    invoice_id = Identifier(required=True)
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    invoice_number = String(required=True)
-    total = Float(required=True)
-    generated_at = DateTime(required=True)
+    invoice_id: str = Identifier(required=True)
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    invoice_number: str = String(required=True)
+    total: float = Float(required=True)
+    generated_at: datetime = DateTime(required=True)
 
 
 @payments.event(part_of="Invoice")
 class InvoiceIssued:
     """An invoice was sent/issued to the customer."""
 
-    invoice_id = Identifier(required=True)
-    order_id = Identifier(required=True)
-    invoice_number = String(required=True)
-    issued_at = DateTime(required=True)
+    invoice_id: str = Identifier(required=True)
+    order_id: str = Identifier(required=True)
+    invoice_number: str = String(required=True)
+    issued_at: datetime = DateTime(required=True)
 
 
 @payments.event(part_of="Invoice")
 class InvoicePaid:
     """An invoice was marked as paid."""
 
-    invoice_id = Identifier(required=True)
-    order_id = Identifier(required=True)
-    paid_at = DateTime(required=True)
+    invoice_id: str = Identifier(required=True)
+    order_id: str = Identifier(required=True)
+    paid_at: datetime = DateTime(required=True)
 
 
 @payments.event(part_of="Invoice")
 class InvoiceVoided:
     """An invoice was voided/cancelled."""
 
-    invoice_id = Identifier(required=True)
-    order_id = Identifier(required=True)
-    reason = String(required=True)
-    voided_at = DateTime(required=True)
+    invoice_id: str = Identifier(required=True)
+    order_id: str = Identifier(required=True)
+    reason: str = String(required=True)
+    voided_at: datetime = DateTime(required=True)

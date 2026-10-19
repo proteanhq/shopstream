@@ -1,5 +1,7 @@
 """Customer card — a snapshot view of a customer's key details."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, String
 from protean.utils.globals import current_domain
@@ -18,15 +20,15 @@ from identity.domain import identity
 
 @identity.projection
 class CustomerCard:
-    customer_id: Identifier(identifier=True, required=True)
-    external_id: String(required=True)
-    email: String(required=True)
-    first_name: String(required=True)
-    last_name: String(required=True)
-    phone: String()
-    status: String(required=True)
-    tier: String(required=True)
-    registered_at: DateTime()
+    customer_id: str = Identifier(identifier=True, required=True)
+    external_id: str = String(required=True)
+    email: str = String(required=True)
+    first_name: str = String(required=True)
+    last_name: str = String(required=True)
+    phone: str | None = String()
+    status: str = String(required=True)
+    tier: str = String(required=True)
+    registered_at: datetime | None = DateTime()
 
 
 @identity.projector(projector_for=CustomerCard, aggregates=[Customer])

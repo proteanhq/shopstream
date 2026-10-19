@@ -15,10 +15,10 @@ from payments.payment.payment import Payment
 class ProcessPaymentWebhook:
     """Process a payment gateway webhook callback."""
 
-    payment_id = Identifier(required=True)
-    gateway_transaction_id = String(max_length=255)
-    gateway_status = String(required=True, max_length=50)  # succeeded, failed
-    failure_reason = String(max_length=500)
+    payment_id: str = Identifier(required=True)
+    gateway_transaction_id: str | None = String(max_length=255)
+    gateway_status: str = String(required=True, max_length=50)  # succeeded, failed
+    failure_reason: str | None = String(max_length=500)
 
 
 @payments.command_handler(part_of=Payment)

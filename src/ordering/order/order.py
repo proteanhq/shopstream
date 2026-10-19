@@ -98,11 +98,11 @@ class ShippingAddress:
     the order was shipped, regardless of future address changes on the Customer.
     """
 
-    street = String(required=True, max_length=255)
-    city = String(required=True, max_length=100)
-    state = String(max_length=100)
-    postal_code = String(required=True, max_length=20)
-    country = String(required=True, max_length=100)
+    street: str = String(required=True, max_length=255)
+    city: str = String(required=True, max_length=100)
+    state: str | None = String(max_length=100)
+    postal_code: str = String(required=True, max_length=20)
+    country: str = String(required=True, max_length=100)
 
 
 @ordering.value_object(part_of="Order")
@@ -113,12 +113,12 @@ class OrderPricing:
     change later. The currency is captured alongside the amounts.
     """
 
-    subtotal = Float(default=0.0)
-    shipping_cost = Float(default=0.0)
-    tax_total = Float(default=0.0)
-    discount_total = Float(default=0.0)
-    grand_total = Float(default=0.0)
-    currency = String(max_length=3, default="USD")
+    subtotal: float = Float(default=0.0)
+    shipping_cost: float = Float(default=0.0)
+    tax_total: float = Float(default=0.0)
+    discount_total: float = Float(default=0.0)
+    grand_total: float = Float(default=0.0)
+    currency: str = String(max_length=3, default="USD")
 
 
 # ---------------------------------------------------------------------------
@@ -133,15 +133,15 @@ class OrderItem:
     shipments where some items ship before others.
     """
 
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    sku = String(required=True, max_length=50)
-    title = String(required=True, max_length=255)
-    quantity = Integer(required=True, min_value=1)
-    unit_price = Float(required=True, min_value=0.0)
-    discount = Float(default=0.0)
-    tax_amount = Float(default=0.0)
-    item_status = Status(
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    sku: str = String(required=True, max_length=50)
+    title: str = String(required=True, max_length=255)
+    quantity: int = Integer(required=True, min_value=1)
+    unit_price: float = Float(required=True, min_value=0.0)
+    discount: float = Float(default=0.0)
+    tax_amount: float = Float(default=0.0)
+    item_status: str = Status(
         ItemStatus,
         default=ItemStatus.PENDING.value,
         transitions={
@@ -158,8 +158,8 @@ class OrderItem:
 # ---------------------------------------------------------------------------
 @ordering.aggregate(event_sourced=True)
 class Order:
-    customer_id = Identifier(required=True)
-    status = Status(
+    customer_id: str = Identifier(required=True)
+    status: str = Status(
         OrderStatus,
         default=OrderStatus.CREATED.value,
         transitions={
@@ -193,19 +193,19 @@ class Order:
     shipping_address = ValueObject(ShippingAddress)
     billing_address = ValueObject(ShippingAddress)
     pricing = ValueObject(OrderPricing)
-    payment_id = String(max_length=255)
-    payment_method = String(max_length=50)
-    payment_status = String(max_length=50)
-    shipment_id = String(max_length=255)
-    carrier = String(max_length=100)
-    tracking_number = String(max_length=255)
-    estimated_delivery = String(max_length=10)  # ISO date string
-    order_source = String(max_length=20, default="web")
-    cancellation_reason = String(max_length=500)
-    cancelled_by = String(max_length=50)
-    coupon_code = String(max_length=100)
-    created_at = DateTime()
-    updated_at = DateTime()
+    payment_id: str | None = String(max_length=255)
+    payment_method: str | None = String(max_length=50)
+    payment_status: str | None = String(max_length=50)
+    shipment_id: str | None = String(max_length=255)
+    carrier: str | None = String(max_length=100)
+    tracking_number: str | None = String(max_length=255)
+    estimated_delivery: str | None = String(max_length=10)  # ISO date string
+    order_source: str = String(max_length=20, default="web")
+    cancellation_reason: str | None = String(max_length=500)
+    cancelled_by: str | None = String(max_length=50)
+    coupon_code: str | None = String(max_length=100)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     # -------------------------------------------------------------------
     # Factory method

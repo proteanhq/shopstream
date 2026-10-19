@@ -1,5 +1,7 @@
 """Warehouse directory — a listing of all warehouses with their details."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import Boolean, DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -17,15 +19,15 @@ from inventory.warehouse.warehouse import Warehouse
 
 @inventory.projection
 class WarehouseDirectory:
-    warehouse_id = Identifier(identifier=True, required=True)
-    name = String(required=True)
-    city = String()
-    country = String()
-    capacity = Integer(default=0)
-    zone_count = Integer(default=0)
-    is_active = Boolean(default=True)
-    created_at = DateTime()
-    updated_at = DateTime()
+    warehouse_id: str = Identifier(identifier=True, required=True)
+    name: str = String(required=True)
+    city: str | None = String()
+    country: str | None = String()
+    capacity: int = Integer(default=0)
+    zone_count: int = Integer(default=0)
+    is_active: bool = Boolean(default=True)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @inventory.projector(projector_for=WarehouseDirectory, aggregates=[Warehouse])

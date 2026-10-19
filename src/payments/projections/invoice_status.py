@@ -1,5 +1,7 @@
 """Invoice status — real-time invoice state view."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, String
 from protean.utils.globals import current_domain
@@ -16,17 +18,17 @@ from payments.invoice.invoice import Invoice
 
 @payments.projection
 class InvoiceStatusView:
-    invoice_id = Identifier(identifier=True, required=True)
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    invoice_number = String(required=True)
-    total = Float()
-    status = String(required=True)
-    issued_at = DateTime()
-    paid_at = DateTime()
-    voided_reason = String()
-    created_at = DateTime()
-    updated_at = DateTime()
+    invoice_id: str = Identifier(identifier=True, required=True)
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    invoice_number: str = String(required=True)
+    total: float | None = Float()
+    status: str = String(required=True)
+    issued_at: datetime | None = DateTime()
+    paid_at: datetime | None = DateTime()
+    voided_reason: str | None = String()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @payments.projector(projector_for=InvoiceStatusView, aggregates=[Invoice])

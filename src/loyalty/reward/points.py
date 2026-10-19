@@ -11,16 +11,16 @@ from loyalty.reward.reward_account import RewardAccount
 
 @loyalty.command(part_of="RewardAccount")
 class EarnPoints:
-    account_id = Identifier(required=True)
-    amount = Integer(required=True)
-    reason = String(max_length=255, default="order")
+    account_id: str = Identifier(required=True)
+    amount: int = Integer(required=True)
+    reason: str = String(max_length=255, default="order")
 
 
 @loyalty.command(part_of="RewardAccount")
 class RedeemPoints:
-    account_id = Identifier(required=True)
-    amount = Integer(required=True)
-    reason = String(max_length=255, default="redemption")
+    account_id: str = Identifier(required=True)
+    amount: int = Integer(required=True)
+    reason: str = String(max_length=255, default="redemption")
 
 
 @loyalty.command_handler(part_of=RewardAccount)

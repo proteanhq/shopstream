@@ -1,5 +1,8 @@
 """ProductReviews — published reviews for a product detail page."""
 
+from datetime import datetime
+from typing import Any
+
 from protean import Index
 from protean.core.projector import on
 from protean.fields import DateTime, Dict, Identifier, Integer, List, String, Text
@@ -18,23 +21,23 @@ from reviews.review.review import Review
 # Read path: list published reviews for a product detail page (filter by product_id).
 @reviews.projection(indexes=[Index("product_id")])
 class ProductReviews:
-    review_id = Identifier(identifier=True, required=True)
-    product_id = Identifier(required=True)
-    variant_id = Identifier()
-    customer_id = Identifier(required=True)
-    rating = Integer(required=True)
-    title = String(required=True)
-    body = Text(required=True)
-    pros = List(String())
-    cons = List(String())
-    images = List(Dict())
-    verified_purchase = String()
-    helpful_count = Integer(default=0)
-    unhelpful_count = Integer(default=0)
-    has_seller_reply = String(default="False")
-    seller_reply_body = Text()
-    is_edited = String(default="False")
-    published_at = DateTime()
+    review_id: str = Identifier(identifier=True, required=True)
+    product_id: str = Identifier(required=True)
+    variant_id: str | None = Identifier()
+    customer_id: str = Identifier(required=True)
+    rating: int = Integer(required=True)
+    title: str = String(required=True)
+    body: str = Text(required=True)
+    pros: list[str] = List(String())
+    cons: list[str] = List(String())
+    images: list[dict[str, Any]] = List(Dict())
+    verified_purchase: str | None = String()
+    helpful_count: int = Integer(default=0)
+    unhelpful_count: int = Integer(default=0)
+    has_seller_reply: str = String(default="False")
+    seller_reply_body: str | None = Text()
+    is_edited: str = String(default="False")
+    published_at: datetime | None = DateTime()
 
 
 @reviews.projector(projector_for=ProductReviews, aggregates=[Review])

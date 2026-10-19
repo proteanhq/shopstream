@@ -1,5 +1,7 @@
 """ModerationQueue — pending and reported reviews awaiting moderator action."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String, Text
 from protean.utils.globals import current_domain
@@ -18,17 +20,17 @@ from reviews.review.review import Review, ReviewStatus
 
 @reviews.projection
 class ModerationQueue:
-    review_id = Identifier(identifier=True, required=True)
-    product_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    rating = Integer(required=True)
-    title = String(required=True)
-    body = Text(required=True)
-    verified_purchase = String()
-    report_count = Integer(default=0)
-    status = String(required=True)
-    submitted_at = DateTime()
-    last_reported_at = DateTime()
+    review_id: str = Identifier(identifier=True, required=True)
+    product_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    rating: int = Integer(required=True)
+    title: str = String(required=True)
+    body: str = Text(required=True)
+    verified_purchase: str | None = String()
+    report_count: int = Integer(default=0)
+    status: str = String(required=True)
+    submitted_at: datetime | None = DateTime()
+    last_reported_at: datetime | None = DateTime()
 
 
 @reviews.projector(projector_for=ModerationQueue, aggregates=[Review])

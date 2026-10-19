@@ -15,18 +15,18 @@ from payments.payment.payment import Payment
 class RequestRefund:
     """Request a refund for a payment."""
 
-    payment_id = Identifier(required=True)
-    amount = Float(required=True)
-    reason = String(required=True, max_length=500)
+    payment_id: str = Identifier(required=True)
+    amount: float = Float(required=True)
+    reason: str = String(required=True, max_length=500)
 
 
 @payments.command(part_of="Payment")
 class ProcessRefundWebhook:
     """Process a refund confirmation from the gateway."""
 
-    payment_id = Identifier(required=True)
-    refund_id = Identifier(required=True)
-    gateway_refund_id = String(required=True, max_length=255)
+    payment_id: str = Identifier(required=True)
+    refund_id: str = Identifier(required=True)
+    gateway_refund_id: str = String(required=True, max_length=255)
 
 
 @payments.command_handler(part_of=Payment)

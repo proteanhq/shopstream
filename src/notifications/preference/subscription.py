@@ -12,16 +12,16 @@ from notifications.preference.preference import NotificationPreference
 class UnsubscribeFromType:
     """Unsubscribe a customer from a specific notification type."""
 
-    customer_id: Identifier(required=True)
-    notification_type: String(required=True, max_length=100)
+    customer_id: str = Identifier(required=True)
+    notification_type: str = String(required=True, max_length=100)
 
 
 @notifications.command(part_of="NotificationPreference")
 class ResubscribeToType:
     """Resubscribe a customer to a previously unsubscribed notification type."""
 
-    customer_id: Identifier(required=True)
-    notification_type: String(required=True, max_length=100)
+    customer_id: str = Identifier(required=True)
+    notification_type: str = String(required=True, max_length=100)
 
 
 @notifications.command_handler(part_of=NotificationPreference)

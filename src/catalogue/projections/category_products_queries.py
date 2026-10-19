@@ -10,7 +10,7 @@ from catalogue.projections.category_products import CategoryProducts
 
 @catalogue.query(part_of=CategoryProducts)
 class GetCategoryProducts:
-    category_id = Identifier(required=True)
+    category_id: str = Identifier(required=True)
 
 
 @catalogue.query_handler(part_of=CategoryProducts)

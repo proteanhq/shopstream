@@ -10,8 +10,8 @@ from loyalty.reward.reward_account import RewardAccount
 
 @loyalty.command(part_of="RewardAccount")
 class EnrollRewardAccount:
-    customer_id = String(required=True, max_length=255)
-    member_code = String(max_length=12)
+    customer_id: str = String(required=True, max_length=255)
+    member_code: str | None = String(max_length=12)
 
 
 @loyalty.command_handler(part_of=RewardAccount)

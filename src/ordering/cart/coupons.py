@@ -12,8 +12,8 @@ from ordering.domain import ordering
 class ApplyCouponToCart:
     """Apply a coupon code to a shopping cart."""
 
-    cart_id = Identifier(required=True)
-    coupon_code = String(required=True, max_length=100)
+    cart_id: str = Identifier(required=True)
+    coupon_code: str = String(required=True, max_length=100)
 
 
 @ordering.command_handler(part_of=ShoppingCart)

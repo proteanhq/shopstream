@@ -70,28 +70,28 @@ class RefundStatus(Enum):
 class Money:
     """Monetary amount with currency."""
 
-    currency = String(max_length=3, default="USD")
-    value = Float(default=0.0)
+    currency: str = String(max_length=3, default="USD")
+    value: float = Float(default=0.0)
 
 
 @payments.value_object(part_of="Payment")
 class PaymentMethod:
     """Payment method details captured at initiation time."""
 
-    method_type = String(max_length=50)  # credit_card, debit_card, bank_transfer
-    last4 = String(max_length=4)
-    expiry_month = Integer()
-    expiry_year = Integer()
+    method_type: str | None = String(max_length=50)  # credit_card, debit_card, bank_transfer
+    last4: str | None = String(max_length=4)
+    expiry_month: int | None = Integer()
+    expiry_year: int | None = Integer()
 
 
 @payments.value_object(part_of="Payment")
 class GatewayInfo:
     """Gateway-specific information about the payment."""
 
-    gateway_name = String(max_length=50)
-    gateway_transaction_id = String(max_length=255)
-    gateway_status = String(max_length=50)
-    gateway_response = String(max_length=1000)
+    gateway_name: str | None = String(max_length=50)
+    gateway_transaction_id: str | None = String(max_length=255)
+    gateway_status: str | None = String(max_length=50)
+    gateway_response: str | None = String(max_length=1000)
 
 
 # ---------------------------------------------------------------------------
@@ -101,26 +101,26 @@ class GatewayInfo:
 class PaymentAttempt:
     """A record of a single payment processing attempt."""
 
-    attempted_at = DateTime(required=True)
-    status = String(max_length=50, required=True)  # processing, succeeded, failed
-    failure_reason = String(max_length=500)
-    gateway_transaction_id = String(max_length=255)
+    attempted_at: datetime = DateTime(required=True)
+    status: str = String(max_length=50, required=True)  # processing, succeeded, failed
+    failure_reason: str | None = String(max_length=500)
+    gateway_transaction_id: str | None = String(max_length=255)
 
 
 @payments.entity(part_of="Payment")
 class Refund:
     """A refund against this payment."""
 
-    amount = Float(required=True)
-    reason = String(max_length=500, required=True)
-    status = String(
+    amount: float = Float(required=True)
+    reason: str = String(max_length=500, required=True)
+    status: str = String(
         max_length=50,
         choices=RefundStatus,
         default=RefundStatus.REQUESTED.value,
     )
-    requested_at = DateTime(required=True)
-    processed_at = DateTime()
-    gateway_refund_id = String(max_length=255)
+    requested_at: datetime = DateTime(required=True)
+    processed_at: datetime | None = DateTime()
+    gateway_refund_id: str | None = String(max_length=255)
 
 
 # ---------------------------------------------------------------------------
@@ -128,10 +128,10 @@ class Refund:
 # ---------------------------------------------------------------------------
 @payments.aggregate(event_sourced=True)
 class Payment:
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
     amount = ValueObject(Money)
-    status = Status(
+    status: str = Status(
         PaymentStatus,
         default=PaymentStatus.PENDING.value,
         transitions={
@@ -146,11 +146,11 @@ class Payment:
     gateway_info = ValueObject(GatewayInfo)
     attempts = HasMany(PaymentAttempt)
     refunds = HasMany(Refund)
-    attempt_count = Integer(default=0)
-    total_refunded = Float(default=0.0)
-    idempotency_key = String(max_length=255, required=True)
-    created_at = DateTime()
-    updated_at = DateTime()
+    attempt_count: int = Integer(default=0)
+    total_refunded: float = Float(default=0.0)
+    idempotency_key: str = String(max_length=255, required=True)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     # -------------------------------------------------------------------
     # Factory method

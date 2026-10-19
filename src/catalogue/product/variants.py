@@ -1,5 +1,7 @@
 """Variant management — commands and handler."""
 
+from typing import Any
+
 from protean import handle
 from protean.fields import Dict, Float, Identifier, String
 from protean.utils.globals import current_domain
@@ -12,37 +14,37 @@ from catalogue.product.product import Dimensions, Price, Product, Weight
 class AddVariant:
     """Add a new purchasable variant (size, color, etc.) to a product."""
 
-    product_id: Identifier(required=True)
-    variant_sku: String(required=True, max_length=50)
-    attributes: Dict()
-    base_price: Float(required=True)
-    currency: String(max_length=3, default="USD")
-    weight_value: Float()
-    weight_unit: String(max_length=2)
-    length: Float()
-    width: Float()
-    height: Float()
-    dimension_unit: String(max_length=2)
+    product_id: str = Identifier(required=True)
+    variant_sku: str = String(required=True, max_length=50)
+    attributes: dict[str, Any] = Dict()
+    base_price: float = Float(required=True)
+    currency: str = String(max_length=3, default="USD")
+    weight_value: float | None = Float()
+    weight_unit: str | None = String(max_length=2)
+    length: float | None = Float()
+    width: float | None = Float()
+    height: float | None = Float()
+    dimension_unit: str | None = String(max_length=2)
 
 
 @catalogue.command(part_of="Product")
 class UpdateVariantPrice:
     """Change the base price of an existing variant."""
 
-    product_id: Identifier(required=True)
-    variant_id: Identifier(required=True)
-    base_price: Float(required=True)
-    currency: String(max_length=3, default="USD")
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    base_price: float = Float(required=True)
+    currency: str = String(max_length=3, default="USD")
 
 
 @catalogue.command(part_of="Product")
 class SetTierPrice:
     """Set a loyalty-tier-specific discount price on a variant."""
 
-    product_id: Identifier(required=True)
-    variant_id: Identifier(required=True)
-    tier: String(required=True, max_length=50)
-    price: Float(required=True)
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    tier: str = String(required=True, max_length=50)
+    price: float = Float(required=True)
 
 
 @catalogue.command_handler(part_of=Product)

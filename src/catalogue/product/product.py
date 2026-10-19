@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 from protean import atomic_change, invariant
 from protean.exceptions import ValidationError
@@ -52,9 +53,9 @@ class Price:
     always be lower than the base price.
     """
 
-    base_price: Float(required=True, min_value=0.01)
-    currency: String(max_length=3, default="USD")
-    tier_prices: Dict()
+    base_price: float = Float(required=True, min_value=0.01)
+    currency: str = String(max_length=3, default="USD")
+    tier_prices: dict[str, Any] = Dict()
 
     @invariant.post
     def tier_prices_must_be_valid(self):
@@ -87,9 +88,9 @@ class SEO:
     URL-safe slug. The slug must be lowercase alphanumeric with hyphens only.
     """
 
-    meta_title: String(max_length=70)
-    meta_description: String(max_length=160)
-    slug: String(max_length=200)
+    meta_title: str | None = String(max_length=70)
+    meta_description: str | None = String(max_length=160)
+    slug: str | None = String(max_length=200)
 
     @invariant.post
     def slug_must_be_url_safe(self):
@@ -116,10 +117,10 @@ class Dimensions:
     Supports centimeters (cm) and inches (in) as measurement units.
     """
 
-    length: Float(min_value=0.0)
-    width: Float(min_value=0.0)
-    height: Float(min_value=0.0)
-    unit: String(max_length=2, default="cm")
+    length: float | None = Float(min_value=0.0)
+    width: float | None = Float(min_value=0.0)
+    height: float | None = Float(min_value=0.0)
+    unit: str = String(max_length=2, default="cm")
 
     @invariant.post
     def unit_must_be_valid(self):
@@ -134,8 +135,8 @@ class Weight:
     Supports kilograms (kg), pounds (lb), grams (g), and ounces (oz).
     """
 
-    value: Float(min_value=0.0)
-    unit: String(max_length=2, default="kg")
+    value: float | None = Float(min_value=0.0)
+    unit: str = String(max_length=2, default="kg")
 
     @invariant.post
     def unit_must_be_valid(self):
@@ -152,12 +153,12 @@ class Variant:
     variant to be activated for sale.
     """
 
-    variant_sku: ValueObject(SKU, required=True)
-    attributes: Dict()
-    price: ValueObject(Price, required=True)
-    weight: ValueObject(Weight)
-    dimensions: ValueObject(Dimensions)
-    is_active: Boolean(default=True)
+    variant_sku = ValueObject(SKU, required=True)
+    attributes: dict[str, Any] = Dict()
+    price = ValueObject(Price, required=True)
+    weight = ValueObject(Weight)
+    dimensions = ValueObject(Dimensions)
+    is_active: bool = Boolean(default=True)
 
 
 @catalogue.entity(part_of="Product")
@@ -168,10 +169,10 @@ class Image:
     The first image added is automatically set as primary.
     """
 
-    url: String(required=True, max_length=500)
-    alt_text: String(max_length=255)
-    is_primary: Boolean(default=False)
-    display_order: Integer(default=0)
+    url: str = String(required=True, max_length=500)
+    alt_text: str | None = String(max_length=255)
+    is_primary: bool = Boolean(default=False)
+    display_order: int = Integer(default=0)
 
 
 @catalogue.aggregate
@@ -184,16 +185,16 @@ class Product:
     have at least one variant before activation.
     """
 
-    sku: ValueObject(SKU, required=True)
-    seller_id: Identifier()
-    title: String(required=True, max_length=255)
-    description: Text()
-    category_id: Identifier()
-    brand: String(max_length=100)
-    attributes: Dict()
-    variants: HasMany(Variant)
-    images: HasMany(Image)
-    status: Status(
+    sku = ValueObject(SKU, required=True)
+    seller_id: str | None = Identifier()
+    title: str = String(required=True, max_length=255)
+    description: str | None = Text()
+    category_id: str | None = Identifier()
+    brand: str | None = String(max_length=100)
+    attributes: dict[str, Any] = Dict()
+    variants = HasMany(Variant)
+    images = HasMany(Image)
+    status: str = Status(
         ProductStatus,
         default=ProductStatus.DRAFT.value,
         transitions={
@@ -202,10 +203,10 @@ class Product:
             ProductStatus.DISCONTINUED: [ProductStatus.ACTIVE, ProductStatus.ARCHIVED],
         },
     )
-    visibility: String(choices=ProductVisibility, default=ProductVisibility.PUBLIC.value)
-    seo: ValueObject(SEO)
-    created_at: DateTime(default=datetime.now)
-    updated_at: DateTime(default=datetime.now)
+    visibility: str = String(choices=ProductVisibility, default=ProductVisibility.PUBLIC.value)
+    seo = ValueObject(SEO)
+    created_at: datetime = DateTime(default=datetime.now)
+    updated_at: datetime = DateTime(default=datetime.now)
 
     @invariant.post
     def images_cannot_exceed_maximum(self):

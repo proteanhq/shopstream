@@ -10,10 +10,10 @@ from ordering.projections.customer_orders import CustomerOrders
 
 @ordering.query(part_of=CustomerOrders)
 class ListCustomerOrders:
-    customer_id = Identifier(required=True)
-    status = String()
-    page = Integer(default=1)
-    page_size = Integer(default=20)
+    customer_id: str = Identifier(required=True)
+    status: str | None = String()
+    page: int = Integer(default=1)
+    page_size: int = Integer(default=20)
 
 
 @ordering.query_handler(part_of=CustomerOrders)

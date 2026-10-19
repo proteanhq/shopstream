@@ -1,5 +1,7 @@
 """Fulfillment status — real-time fulfillment state view for order tracking."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -23,17 +25,17 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 
 @fulfillment.projection
 class FulfillmentStatusView:
-    fulfillment_id = Identifier(identifier=True, required=True)
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    warehouse_id = String()
-    status = String(required=True)
-    carrier = String()
-    tracking_number = String()
-    item_count = Integer(default=0)
-    assigned_to = String()
-    created_at = DateTime()
-    updated_at = DateTime()
+    fulfillment_id: str = Identifier(identifier=True, required=True)
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    warehouse_id: str | None = String()
+    status: str = String(required=True)
+    carrier: str | None = String()
+    tracking_number: str | None = String()
+    item_count: int = Integer(default=0)
+    assigned_to: str | None = String()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @fulfillment.projector(projector_for=FulfillmentStatusView, aggregates=[Fulfillment])

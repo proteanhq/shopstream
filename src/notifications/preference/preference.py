@@ -33,23 +33,23 @@ class NotificationPreference:
     """
 
     # Customer link
-    customer_id: Identifier(required=True, unique=True)
+    customer_id: str = Identifier(required=True, unique=True)
 
     # Channel preferences
-    email_enabled: Boolean(default=True)
-    sms_enabled: Boolean(default=False)
-    push_enabled: Boolean(default=False)
+    email_enabled: bool = Boolean(default=True)
+    sms_enabled: bool = Boolean(default=False)
+    push_enabled: bool = Boolean(default=False)
 
     # Quiet hours (DND)
-    quiet_hours_start: String(max_length=5)  # "22:00" format
-    quiet_hours_end: String(max_length=5)  # "08:00" format
+    quiet_hours_start: str | None = String(max_length=5)  # "22:00" format
+    quiet_hours_end: str | None = String(max_length=5)  # "08:00" format
 
     # Per-type unsubscribe
-    unsubscribed_types: List(String())
+    unsubscribed_types: list[str] = List(String())
 
     # Timestamps
-    created_at: DateTime()
-    updated_at: DateTime()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     # -------------------------------------------------------------------
     # Factory

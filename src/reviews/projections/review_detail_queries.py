@@ -10,7 +10,7 @@ from reviews.projections.review_detail import ReviewDetail
 
 @reviews.query(part_of=ReviewDetail)
 class GetReviewDetail:
-    review_id = Identifier(required=True)
+    review_id: str = Identifier(required=True)
 
 
 @reviews.query_handler(part_of=ReviewDetail)

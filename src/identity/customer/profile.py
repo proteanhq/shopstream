@@ -14,11 +14,11 @@ from identity.domain import identity
 class UpdateProfile:
     """Change a customer's personal profile information (name, phone, date of birth)."""
 
-    customer_id: Identifier(required=True)
-    first_name: String(max_length=100)
-    last_name: String(max_length=100)
-    phone: String(max_length=20)
-    date_of_birth: String(max_length=10)
+    customer_id: str = Identifier(required=True)
+    first_name: str | None = String(max_length=100)
+    last_name: str | None = String(max_length=100)
+    phone: str | None = String(max_length=20)
+    date_of_birth: str | None = String(max_length=10)
 
 
 @identity.command_handler(part_of=Customer)

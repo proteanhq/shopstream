@@ -1,5 +1,7 @@
 """Stock reservation — commands and handler."""
 
+from datetime import datetime
+
 from protean import handle
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -12,27 +14,27 @@ from inventory.stock.stock import InventoryItem
 class ReserveStock:
     """Reserve stock for an order."""
 
-    inventory_item_id = Identifier(required=True)
-    order_id = Identifier(required=True)
-    quantity = Integer(required=True)
-    expires_at = DateTime()  # Optional; defaults to 15 minutes past the domain clock
+    inventory_item_id: str = Identifier(required=True)
+    order_id: str = Identifier(required=True)
+    quantity: int = Integer(required=True)
+    expires_at: datetime | None = DateTime()  # Optional; defaults to 15 minutes past the domain clock
 
 
 @inventory.command(part_of="InventoryItem")
 class ReleaseReservation:
     """Release a stock reservation."""
 
-    inventory_item_id = Identifier(required=True)
-    reservation_id = Identifier(required=True)
-    reason = String(required=True)
+    inventory_item_id: str = Identifier(required=True)
+    reservation_id: str = Identifier(required=True)
+    reason: str = String(required=True)
 
 
 @inventory.command(part_of="InventoryItem")
 class ConfirmReservation:
     """Confirm a stock reservation after order payment."""
 
-    inventory_item_id = Identifier(required=True)
-    reservation_id = Identifier(required=True)
+    inventory_item_id: str = Identifier(required=True)
+    reservation_id: str = Identifier(required=True)
 
 
 @inventory.command_handler(part_of=InventoryItem)

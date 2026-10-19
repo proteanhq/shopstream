@@ -4,6 +4,9 @@ Maintains a denormalized view of products per category, updated as products
 are created, activated, discontinued, or archived.
 """
 
+from datetime import datetime
+from typing import Any
+
 from protean.core.projector import on
 from protean.fields import DateTime, Dict, Identifier, Integer, List, String
 from protean.utils.globals import current_domain
@@ -23,11 +26,11 @@ from catalogue.product.product import Product
 
 @catalogue.projection
 class CategoryProducts:
-    category_id = Identifier(identifier=True, required=True)
-    category_name = String(required=True, max_length=255)
-    product_count = Integer(default=0)
-    products = List(Dict())
-    updated_at = DateTime()
+    category_id: str = Identifier(identifier=True, required=True)
+    category_name: str = String(required=True, max_length=255)
+    product_count: int = Integer(default=0)
+    products: list[dict[str, Any]] = List(Dict())
+    updated_at: datetime | None = DateTime()
 
 
 @catalogue.projector(projector_for=CategoryProducts, aggregates=[Product, Category])

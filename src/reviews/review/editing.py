@@ -15,13 +15,13 @@ from reviews.review.review import Review
 
 @reviews.command(part_of="Review")
 class EditReview:
-    review_id = Identifier(required=True)
-    customer_id = Identifier(required=True)  # Must match original author
-    title = String(max_length=200)
-    body = Text()
-    rating = Integer()
-    pros = List(String())
-    cons = List(String())
+    review_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)  # Must match original author
+    title: str | None = String(max_length=200)
+    body: str | None = Text()
+    rating: int | None = Integer()
+    pros: list[str] = List(String())
+    cons: list[str] = List(String())
 
 
 @reviews.command_handler(part_of=Review)

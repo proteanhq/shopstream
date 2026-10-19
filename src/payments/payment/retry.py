@@ -15,7 +15,7 @@ from payments.payment.payment import Payment
 class RetryPayment:
     """Retry a failed payment."""
 
-    payment_id = Identifier(required=True)
+    payment_id: str = Identifier(required=True)
 
 
 @payments.command_handler(part_of=Payment)

@@ -12,18 +12,18 @@ from catalogue.product.product import Product
 class AddProductImage:
     """Upload a new image for a product."""
 
-    product_id: Identifier(required=True)
-    url: String(required=True, max_length=500)
-    alt_text: String(max_length=255)
-    is_primary: Boolean(default=False)
+    product_id: str = Identifier(required=True)
+    url: str = String(required=True, max_length=500)
+    alt_text: str | None = String(max_length=255)
+    is_primary: bool = Boolean(default=False)
 
 
 @catalogue.command(part_of="Product")
 class RemoveProductImage:
     """Remove an image from a product's gallery."""
 
-    product_id: Identifier(required=True)
-    image_id: Identifier(required=True)
+    product_id: str = Identifier(required=True)
+    image_id: str = Identifier(required=True)
 
 
 @catalogue.command_handler(part_of=Product)

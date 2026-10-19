@@ -22,10 +22,10 @@ from loyalty.reward.reward_account import RewardAccount
 
 @loyalty.projection(cache="loyalty")
 class PointsLeaderboard:
-    account_id = Identifier(identifier=True, required=True)
-    customer_id = String(required=True)
-    tier = String()
-    points_balance = Integer(default=0)
+    account_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = String(required=True)
+    tier: str | None = String()
+    points_balance: int = Integer(default=0)
 
 
 @loyalty.projector(projector_for=PointsLeaderboard, aggregates=[RewardAccount])

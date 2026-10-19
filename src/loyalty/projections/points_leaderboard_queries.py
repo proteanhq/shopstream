@@ -14,7 +14,7 @@ from loyalty.projections.points_leaderboard import PointsLeaderboard
 
 @loyalty.query(part_of=PointsLeaderboard)
 class GetLeaderboardStanding:
-    account_id = Identifier(required=True)
+    account_id: str = Identifier(required=True)
 
 
 @loyalty.query_handler(part_of=PointsLeaderboard)

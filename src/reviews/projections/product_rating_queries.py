@@ -10,7 +10,7 @@ from reviews.projections.product_rating import ProductRating
 
 @reviews.query(part_of=ProductRating)
 class GetProductRating:
-    product_id = Identifier(required=True)
+    product_id: str = Identifier(required=True)
 
 
 @reviews.query_handler(part_of=ProductRating)

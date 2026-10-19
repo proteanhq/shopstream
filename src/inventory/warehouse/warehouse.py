@@ -31,19 +31,19 @@ class ZoneType(Enum):
 class WarehouseAddress:
     """Physical address of a warehouse."""
 
-    street = String(required=True, max_length=255)
-    city = String(required=True, max_length=100)
-    state = String(max_length=100)
-    postal_code = String(required=True, max_length=20)
-    country = String(required=True, max_length=100)
+    street: str = String(required=True, max_length=255)
+    city: str = String(required=True, max_length=100)
+    state: str | None = String(max_length=100)
+    postal_code: str = String(required=True, max_length=20)
+    country: str = String(required=True, max_length=100)
 
 
 @inventory.entity(part_of="Warehouse")
 class Zone:
     """A logical area within a warehouse (e.g., cold storage, hazmat)."""
 
-    zone_name = String(required=True, max_length=100)
-    zone_type = String(
+    zone_name: str = String(required=True, max_length=100)
+    zone_type: str = String(
         choices=ZoneType,
         default=ZoneType.REGULAR.value,
     )
@@ -53,13 +53,13 @@ class Zone:
 class Warehouse:
     """A physical location where inventory is stored."""
 
-    name = String(required=True, max_length=255)
+    name: str = String(required=True, max_length=255)
     address = ValueObject(WarehouseAddress)
-    capacity = Integer(default=0)
-    is_active = Boolean(default=True)
+    capacity: int = Integer(default=0)
+    is_active: bool = Boolean(default=True)
     zones = HasMany(Zone)
-    created_at = DateTime()
-    updated_at = DateTime()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     @classmethod
     def create(cls, name, address, capacity=0):

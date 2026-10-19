@@ -1,5 +1,7 @@
 """NotificationStats — daily counts by notification type and channel."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Integer, String
 from protean.utils.globals import current_domain
@@ -11,12 +13,12 @@ from notifications.notification.notification import Notification
 
 @notifications.projection
 class NotificationStats:
-    stat_key: String(identifier=True, required=True)  # "YYYY-MM-DD:type:channel"
-    date: String(required=True, max_length=10)
-    notification_type: String(required=True)
-    channel: String(required=True)
-    count: Integer(default=0)
-    updated_at: DateTime()
+    stat_key: str = String(identifier=True, required=True)  # "YYYY-MM-DD:type:channel"
+    date: str = String(required=True, max_length=10)
+    notification_type: str = String(required=True)
+    channel: str = String(required=True)
+    count: int = Integer(default=0)
+    updated_at: datetime | None = DateTime()
 
 
 @notifications.projector(projector_for=NotificationStats, aggregates=[Notification])

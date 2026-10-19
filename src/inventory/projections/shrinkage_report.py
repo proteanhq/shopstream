@@ -4,6 +4,8 @@ Tracks stock adjustments, damaged items, and write-offs per inventory item.
 Provides aggregate shrinkage data for loss prevention and auditing.
 """
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, Integer, List, String
 from protean.utils.globals import current_domain
@@ -15,16 +17,16 @@ from inventory.stock.stock import InventoryItem
 
 @inventory.projection
 class ShrinkageReport:
-    inventory_item_id = Identifier(identifier=True, required=True)
-    product_id = Identifier(required=True)
-    sku = String(max_length=50)
-    warehouse_id = Identifier()
-    total_adjustments = Integer(default=0)
-    total_damaged = Integer(default=0)
-    total_written_off = Integer(default=0)
-    total_shrinkage_value = Float(default=0.0)
-    last_adjustment_at = DateTime()
-    adjustment_reasons = List(String())
+    inventory_item_id: str = Identifier(identifier=True, required=True)
+    product_id: str = Identifier(required=True)
+    sku: str | None = String(max_length=50)
+    warehouse_id: str | None = Identifier()
+    total_adjustments: int = Integer(default=0)
+    total_damaged: int = Integer(default=0)
+    total_written_off: int = Integer(default=0)
+    total_shrinkage_value: float = Float(default=0.0)
+    last_adjustment_at: datetime | None = DateTime()
+    adjustment_reasons: list[str] = List(String())
 
 
 def _get_or_create(event):

@@ -11,8 +11,8 @@ from identity.domain import identity
 
 @identity.projection
 class CustomerLookup:
-    email: Identifier(identifier=True, required=True)
-    customer_id: String(required=True)
+    email: str = Identifier(identifier=True, required=True)
+    customer_id: str = String(required=True)
 
 
 @identity.projector(projector_for=CustomerLookup, aggregates=[Customer])

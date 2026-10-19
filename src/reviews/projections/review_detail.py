@@ -1,5 +1,7 @@
 """ReviewDetail — full detail view of a single review."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, List, String, Text
 from protean.utils.globals import current_domain
@@ -20,29 +22,29 @@ from reviews.review.review import Review
 
 @reviews.projection
 class ReviewDetail:
-    review_id = Identifier(identifier=True, required=True)
-    product_id = Identifier(required=True)
-    variant_id = Identifier()
-    customer_id = Identifier(required=True)
-    order_id = Identifier()
-    rating = Integer(required=True)
-    title = String(required=True)
-    body = Text(required=True)
-    pros = List(String())
-    cons = List(String())
-    images = Text()
-    verified_purchase = String()
-    status = String(required=True)
-    moderation_notes = Text()
-    helpful_count = Integer(default=0)
-    unhelpful_count = Integer(default=0)
-    report_count = Integer(default=0)
-    has_seller_reply = String(default="False")
-    seller_reply_body = Text()
-    seller_reply_at = DateTime()
-    is_edited = String(default="False")
-    created_at = DateTime()
-    updated_at = DateTime()
+    review_id: str = Identifier(identifier=True, required=True)
+    product_id: str = Identifier(required=True)
+    variant_id: str | None = Identifier()
+    customer_id: str = Identifier(required=True)
+    order_id: str | None = Identifier()
+    rating: int = Integer(required=True)
+    title: str = String(required=True)
+    body: str = Text(required=True)
+    pros: list[str] = List(String())
+    cons: list[str] = List(String())
+    images: str | None = Text()
+    verified_purchase: str | None = String()
+    status: str = String(required=True)
+    moderation_notes: str | None = Text()
+    helpful_count: int = Integer(default=0)
+    unhelpful_count: int = Integer(default=0)
+    report_count: int = Integer(default=0)
+    has_seller_reply: str = String(default="False")
+    seller_reply_body: str | None = Text()
+    seller_reply_at: datetime | None = DateTime()
+    is_edited: str = String(default="False")
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @reviews.projector(projector_for=ReviewDetail, aggregates=[Review])

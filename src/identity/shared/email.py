@@ -15,7 +15,7 @@ class EmailAddress:
     an email is required.
     """
 
-    address: String(required=True, max_length=254)
+    address: str = String(required=True, max_length=254)
 
     @invariant.post
     def verify_email_address(self):

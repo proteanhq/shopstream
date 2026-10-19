@@ -12,9 +12,9 @@ from inventory.stock.stock import InventoryItem
 class ReturnToStock:
     """Add returned items back to inventory."""
 
-    inventory_item_id = Identifier(required=True)
-    quantity = Integer(required=True)
-    order_id = Identifier(required=True)
+    inventory_item_id: str = Identifier(required=True)
+    quantity: int = Integer(required=True)
+    order_id: str = Identifier(required=True)
 
 
 @inventory.command_handler(part_of=InventoryItem)

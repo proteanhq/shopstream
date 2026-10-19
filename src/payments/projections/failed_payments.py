@@ -1,5 +1,7 @@
 """Failed payments — operations monitoring dashboard."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -15,15 +17,15 @@ from payments.payment.payment import Payment
 
 @payments.projection
 class FailedPayment:
-    payment_id = Identifier(identifier=True, required=True)
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    amount = Float()
-    reason = String()
-    attempt_number = Integer()
-    status = String(required=True)  # failed, retrying, recovered
-    failed_at = DateTime()
-    updated_at = DateTime()
+    payment_id: str = Identifier(identifier=True, required=True)
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    amount: float | None = Float()
+    reason: str | None = String()
+    attempt_number: int | None = Integer()
+    status: str = String(required=True)  # failed, retrying, recovered
+    failed_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @payments.projector(projector_for=FailedPayment, aggregates=[Payment])

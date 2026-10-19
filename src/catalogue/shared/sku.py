@@ -36,7 +36,7 @@ class SKU:
         rejected
     """
 
-    code: String(required=True, max_length=50, min_length=3)
+    code: str = String(required=True, max_length=50, min_length=3)
 
     @invariant.post
     def code_must_be_valid_format(self):

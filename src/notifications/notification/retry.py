@@ -12,7 +12,7 @@ from notifications.notification.notification import Notification
 class RetryNotification:
     """Request to retry a failed notification."""
 
-    notification_id: Identifier(required=True)
+    notification_id: str = Identifier(required=True)
 
 
 @notifications.command_handler(part_of=Notification)

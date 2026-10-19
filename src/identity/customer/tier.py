@@ -12,8 +12,8 @@ from identity.domain import identity
 class UpgradeTier:
     """Promote a customer to a higher loyalty tier (upgrades only, no downgrades)."""
 
-    customer_id: Identifier(required=True)
-    new_tier: String(required=True, max_length=20)
+    customer_id: str = Identifier(required=True)
+    new_tier: str = String(required=True, max_length=20)
 
 
 @identity.command_handler(part_of=Customer)

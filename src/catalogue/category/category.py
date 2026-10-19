@@ -1,6 +1,7 @@
 """Category aggregate root for product categorization."""
 
 from datetime import datetime
+from typing import Any
 
 from protean.exceptions import ValidationError
 from protean.fields import Boolean, DateTime, Dict, Identifier, Integer, String
@@ -16,14 +17,14 @@ class Category:
     parent, custom attributes, and a display order for controlling presentation.
     """
 
-    name: String(required=True, max_length=100)
-    parent_category_id: Identifier()
-    level: Integer(default=0, min_value=0, max_value=4)
-    attributes: Dict()
-    is_active: Boolean(default=True)
-    display_order: Integer(default=0)
-    created_at: DateTime(default=datetime.now)
-    updated_at: DateTime(default=datetime.now)
+    name: str = String(required=True, max_length=100)
+    parent_category_id: str | None = Identifier()
+    level: int = Integer(default=0, min_value=0, max_value=4)
+    attributes: dict[str, Any] = Dict()
+    is_active: bool = Boolean(default=True)
+    display_order: int = Integer(default=0)
+    created_at: datetime = DateTime(default=datetime.now)
+    updated_at: datetime = DateTime(default=datetime.now)
 
     @classmethod
     def create(cls, name, parent_category_id=None, level=0, attributes=None):

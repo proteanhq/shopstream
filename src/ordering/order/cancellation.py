@@ -12,17 +12,17 @@ from ordering.order.order import Order
 class CancelOrder:
     """Cancel an order before fulfillment begins (allowed in Created through Paid states)."""
 
-    order_id = Identifier(required=True)
-    reason = String(required=True, max_length=500)
-    cancelled_by = String(required=True, max_length=50)
+    order_id: str = Identifier(required=True)
+    reason: str = String(required=True, max_length=500)
+    cancelled_by: str = String(required=True, max_length=50)
 
 
 @ordering.command(part_of="Order")
 class RefundOrder:
     """Issue a refund for a cancelled or returned order."""
 
-    order_id = Identifier(required=True)
-    refund_amount = Float()  # Optional — defaults to grand_total
+    order_id: str = Identifier(required=True)
+    refund_amount: float | None = Float()  # Optional — defaults to grand_total
 
 
 @ordering.command_handler(part_of=Order)

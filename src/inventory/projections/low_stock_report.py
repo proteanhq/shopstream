@@ -1,5 +1,7 @@
 """Low stock report — items below reorder point for purchasing alerts."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.exceptions import TransactionError, ValidationError
 from protean.fields import Boolean, DateTime, Identifier, Integer, String
@@ -14,14 +16,14 @@ _UPSERT_RETRIES = 5  # bounded reload-and-retry for the create-create race
 
 @inventory.projection
 class LowStockReport:
-    inventory_item_id = Identifier(identifier=True, required=True)
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    sku = String(required=True)
-    current_available = Integer(default=0)
-    reorder_point = Integer(default=10)
-    is_critical = Boolean(default=False)  # available == 0
-    detected_at = DateTime()
+    inventory_item_id: str = Identifier(identifier=True, required=True)
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    sku: str = String(required=True)
+    current_available: int = Integer(default=0)
+    reorder_point: int = Integer(default=10)
+    is_critical: bool = Boolean(default=False)  # available == 0
+    detected_at: datetime | None = DateTime()
 
 
 def _upsert_low_stock(item_id, *, current_available, detected_at, create_kwargs):

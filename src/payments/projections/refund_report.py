@@ -1,5 +1,7 @@
 """Refund report — finance reconciliation view."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, String
 from protean.utils.globals import current_domain
@@ -11,15 +13,15 @@ from payments.payment.payment import Payment
 
 @payments.projection
 class RefundReport:
-    refund_id = Identifier(identifier=True, required=True)
-    payment_id = Identifier(required=True)
-    order_id = Identifier(required=True)
-    amount = Float(required=True)
-    reason = String()
-    status = String(required=True)  # requested, completed
-    gateway_refund_id = String()
-    requested_at = DateTime()
-    completed_at = DateTime()
+    refund_id: str = Identifier(identifier=True, required=True)
+    payment_id: str = Identifier(required=True)
+    order_id: str = Identifier(required=True)
+    amount: float = Float(required=True)
+    reason: str | None = String()
+    status: str = String(required=True)  # requested, completed
+    gateway_refund_id: str | None = String()
+    requested_at: datetime | None = DateTime()
+    completed_at: datetime | None = DateTime()
 
 
 @payments.projector(projector_for=RefundReport, aggregates=[Payment])

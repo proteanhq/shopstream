@@ -38,25 +38,25 @@ class CartItem:
     context at checkout time and locked on the Order.
     """
 
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    quantity = Integer(required=True, min_value=1)
-    added_at = DateTime()
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    quantity: int = Integer(required=True, min_value=1)
+    added_at: datetime | None = DateTime()
 
 
 @ordering.aggregate
 class ShoppingCart:
-    customer_id = Identifier()  # Nullable for guest carts
-    session_id = String(max_length=255)  # For guest cart identification
+    customer_id: str | None = Identifier()  # Nullable for guest carts
+    session_id: str | None = String(max_length=255)  # For guest cart identification
     items = HasMany(CartItem)
-    applied_coupons = List(String())
-    status = Status(
+    applied_coupons: list[str] = List(String())
+    status: str = Status(
         CartStatus,
         default=CartStatus.ACTIVE.value,
         transitions={CartStatus.ACTIVE: [CartStatus.CONVERTED, CartStatus.ABANDONED]},
     )
-    created_at = DateTime()
-    updated_at = DateTime()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     @invariant.post
     def cart_must_have_items_to_convert(self):

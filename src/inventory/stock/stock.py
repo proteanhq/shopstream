@@ -74,11 +74,11 @@ class StockLevels:
     here for query convenience.
     """
 
-    on_hand = Integer(default=0)
-    reserved = Integer(default=0)
-    available = Integer(default=0)
-    in_transit = Integer(default=0)
-    damaged = Integer(default=0)
+    on_hand: int = Integer(default=0)
+    reserved: int = Integer(default=0)
+    available: int = Integer(default=0)
+    in_transit: int = Integer(default=0)
+    damaged: int = Integer(default=0)
 
 
 # ---------------------------------------------------------------------------
@@ -92,14 +92,14 @@ class Reservation:
     CommitStock), or Active → Released (cancelled/expired).
     """
 
-    order_id = Identifier(required=True)
-    quantity = Integer(required=True, min_value=1)
-    status = String(
+    order_id: str = Identifier(required=True)
+    quantity: int = Integer(required=True, min_value=1)
+    status: str = String(
         choices=ReservationStatus,
         default=ReservationStatus.ACTIVE.value,
     )
-    reserved_at = DateTime(required=True)
-    expires_at = DateTime(required=True)
+    reserved_at: datetime = DateTime(required=True)
+    expires_at: datetime = DateTime(required=True)
 
 
 # ---------------------------------------------------------------------------
@@ -109,17 +109,17 @@ class Reservation:
 class InventoryItem:
     """Event-sourced aggregate tracking stock for one product variant at one warehouse."""
 
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    warehouse_id = Identifier(required=True)
-    sku = String(required=True, max_length=50)
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    warehouse_id: str = Identifier(required=True)
+    sku: str = String(required=True, max_length=50)
     levels = ValueObject(StockLevels)
-    reorder_point = Integer(default=10)
-    reorder_quantity = Integer(default=50)
+    reorder_point: int = Integer(default=10)
+    reorder_quantity: int = Integer(default=50)
     reservations = HasMany(Reservation)
-    last_stock_check = DateTime()
-    created_at = DateTime()
-    updated_at = DateTime()
+    last_stock_check: datetime | None = DateTime()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     # -------------------------------------------------------------------
     # Factory method

@@ -12,20 +12,20 @@ from inventory.stock.stock import InventoryItem
 class AdjustStock:
     """Manually adjust stock levels."""
 
-    inventory_item_id = Identifier(required=True)
-    quantity_change = Integer(required=True)  # Can be negative
-    adjustment_type = String(required=True)  # Count, Shrinkage, Correction, Receiving_Error
-    reason = String(required=True)
-    adjusted_by = String(required=True)
+    inventory_item_id: str = Identifier(required=True)
+    quantity_change: int = Integer(required=True)  # Can be negative
+    adjustment_type: str = String(required=True)  # Count, Shrinkage, Correction, Receiving_Error
+    reason: str = String(required=True)
+    adjusted_by: str = String(required=True)
 
 
 @inventory.command(part_of="InventoryItem")
 class RecordStockCheck:
     """Record a physical stock count."""
 
-    inventory_item_id = Identifier(required=True)
-    counted_quantity = Integer(required=True)
-    checked_by = String(required=True)
+    inventory_item_id: str = Identifier(required=True)
+    counted_quantity: int = Integer(required=True)
+    checked_by: str = String(required=True)
 
 
 @inventory.command_handler(part_of=InventoryItem)

@@ -76,39 +76,39 @@ class ServiceLevel(Enum):
 class PickList:
     """Picking assignment details."""
 
-    assigned_to = String(max_length=100)
-    assigned_at = DateTime()
-    completed_at = DateTime()
+    assigned_to: str | None = String(max_length=100)
+    assigned_at: datetime | None = DateTime()
+    completed_at: datetime | None = DateTime()
 
 
 @fulfillment.value_object(part_of="Fulfillment")
 class PackingInfo:
     """Packing completion details."""
 
-    packed_by = String(max_length=100)
-    packed_at = DateTime()
-    shipping_label_url = String(max_length=500)
+    packed_by: str | None = String(max_length=100)
+    packed_at: datetime | None = DateTime()
+    shipping_label_url: str | None = String(max_length=500)
 
 
 @fulfillment.value_object(part_of="Fulfillment")
 class ShipmentInfo:
     """Carrier shipment details."""
 
-    carrier = String(max_length=100)
-    service_level = String(max_length=50, choices=ServiceLevel)
-    tracking_number = String(max_length=255)
-    estimated_delivery = DateTime()
-    actual_delivery = DateTime()
+    carrier: str | None = String(max_length=100)
+    service_level: str | None = String(max_length=50, choices=ServiceLevel)
+    tracking_number: str | None = String(max_length=255)
+    estimated_delivery: datetime | None = DateTime()
+    actual_delivery: datetime | None = DateTime()
 
 
 @fulfillment.value_object(part_of="Fulfillment")
 class PackageDimensions:
     """Physical dimensions and weight of a package."""
 
-    weight = Float()
-    length = Float()
-    width = Float()
-    height = Float()
+    weight: float | None = Float()
+    length: float | None = Float()
+    width: float | None = Float()
+    height: float | None = Float()
 
 
 # ---------------------------------------------------------------------------
@@ -118,12 +118,12 @@ class PackageDimensions:
 class FulfillmentItem:
     """A single line item being fulfilled."""
 
-    order_item_id = Identifier(required=True)
-    product_id = Identifier(required=True)
-    sku = String(required=True, max_length=100)
-    quantity = Integer(required=True, min_value=1)
-    pick_location = String(max_length=100)
-    status = Status(
+    order_item_id: str = Identifier(required=True)
+    product_id: str = Identifier(required=True)
+    sku: str = String(required=True, max_length=100)
+    quantity: int = Integer(required=True, min_value=1)
+    pick_location: str | None = String(max_length=100)
+    status: str = Status(
         FulfillmentItemStatus,
         default=FulfillmentItemStatus.PENDING.value,
         transitions={
@@ -138,19 +138,19 @@ class FulfillmentItem:
 class Package:
     """A physical package in the shipment."""
 
-    weight = Float()
+    weight: float | None = Float()
     dimensions = ValueObject(PackageDimensions)
-    item_ids = List(String())
+    item_ids: list[str] = List(String())
 
 
 @fulfillment.entity(part_of="Fulfillment")
 class TrackingEvent:
     """A carrier tracking event."""
 
-    status = String(required=True, max_length=100)
-    location = String(max_length=200)
-    description = String(max_length=500)
-    occurred_at = DateTime(required=True)
+    status: str = String(required=True, max_length=100)
+    location: str | None = String(max_length=200)
+    description: str | None = String(max_length=500)
+    occurred_at: datetime = DateTime(required=True)
 
 
 # ---------------------------------------------------------------------------
@@ -158,10 +158,10 @@ class TrackingEvent:
 # ---------------------------------------------------------------------------
 @fulfillment.aggregate
 class Fulfillment:
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    warehouse_id = Identifier()
-    status = Status(
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    warehouse_id: str | None = Identifier()
+    status: str = Status(
         FulfillmentStatus,
         default=FulfillmentStatus.PENDING.value,
         transitions={
@@ -181,9 +181,9 @@ class Fulfillment:
     packages = HasMany(Package)
     shipment = ValueObject(ShipmentInfo)
     tracking_events = HasMany(TrackingEvent)
-    cancellation_reason = String(max_length=500)
-    created_at = DateTime()
-    updated_at = DateTime()
+    cancellation_reason: str | None = String(max_length=500)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     # -------------------------------------------------------------------
     # Factory method

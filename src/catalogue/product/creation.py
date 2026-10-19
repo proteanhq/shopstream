@@ -1,5 +1,7 @@
 """Product creation — command and handler."""
 
+from typing import Any
+
 from protean import handle
 from protean.fields import Dict, Identifier, String
 from protean.utils.globals import current_domain
@@ -12,17 +14,17 @@ from catalogue.product.product import SEO, Product
 class CreateProduct:
     """Add a new product to the catalogue in Draft status."""
 
-    sku: String(required=True, max_length=50)
-    seller_id: Identifier()
-    title: String(required=True, max_length=255)
-    description: String()
-    category_id: Identifier()
-    brand: String(max_length=100)
-    attributes: Dict()
-    visibility: String(max_length=20)
-    meta_title: String(max_length=70)
-    meta_description: String(max_length=160)
-    slug: String(max_length=200)
+    sku: str = String(required=True, max_length=50)
+    seller_id: str | None = Identifier()
+    title: str = String(required=True, max_length=255)
+    description: str | None = String()
+    category_id: str | None = Identifier()
+    brand: str | None = String(max_length=100)
+    attributes: dict[str, Any] = Dict()
+    visibility: str | None = String(max_length=20)
+    meta_title: str | None = String(max_length=70)
+    meta_description: str | None = String(max_length=160)
+    slug: str | None = String(max_length=200)
 
 
 @catalogue.command_handler(part_of=Product)

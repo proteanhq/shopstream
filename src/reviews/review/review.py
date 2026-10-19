@@ -15,6 +15,7 @@ State Machine (4 states):
 
 from datetime import UTC, datetime
 from enum import Enum
+from typing import Any
 
 from protean import atomic_change, invariant
 from protean.exceptions import ValidationError
@@ -98,7 +99,7 @@ class Rating:
         above range rejected
     """
 
-    score = Integer(required=True)
+    score: int = Integer(required=True)
 
     @invariant.post
     def score_must_be_in_range(self):
@@ -113,27 +114,27 @@ class Rating:
 class ReviewImage:
     """A photo attached to a review."""
 
-    url = String(required=True, max_length=500)
-    alt_text = String(max_length=255)
-    display_order = Integer(default=0)
+    url: str = String(required=True, max_length=500)
+    alt_text: str | None = String(max_length=255)
+    display_order: int = Integer(default=0)
 
 
 @reviews.entity(part_of="Review")
 class HelpfulVote:
     """A vote on whether a review was helpful or unhelpful."""
 
-    customer_id = Identifier(required=True)
-    vote_type = String(choices=VoteType, required=True)
-    voted_at = DateTime(required=True)
+    customer_id: str = Identifier(required=True)
+    vote_type: str = String(choices=VoteType, required=True)
+    voted_at: datetime = DateTime(required=True)
 
 
 @reviews.entity(part_of="Review")
 class SellerReply:
     """A reply from the product seller to the review."""
 
-    seller_id = Identifier(required=True)
-    body = Text(required=True)
-    replied_at = DateTime(required=True)
+    seller_id: str = Identifier(required=True)
+    body: str = Text(required=True)
+    replied_at: datetime = DateTime(required=True)
 
 
 # ---------------------------------------------------------------------------
@@ -148,26 +149,26 @@ class Review:
     """
 
     # Core identifiers
-    product_id = Identifier(required=True)
-    variant_id = Identifier()
-    customer_id = Identifier(required=True)
-    order_id = Identifier()
+    product_id: str = Identifier(required=True)
+    variant_id: str | None = Identifier()
+    customer_id: str = Identifier(required=True)
+    order_id: str | None = Identifier()
 
     # Content
     rating = ValueObject(Rating, required=True)
-    title = String(required=True, max_length=200)
-    body = Text(required=True)
-    pros = List(String())
-    cons = List(String())
+    title: str = String(required=True, max_length=200)
+    body: str = Text(required=True)
+    pros: list[str] = List(String())
+    cons: list[str] = List(String())
 
     # Media
     images = HasMany(ReviewImage)
 
     # Verification
-    verified_purchase = Boolean(default=False)
+    verified_purchase: bool = Boolean(default=False)
 
     # Status
-    status = Status(
+    status: str = Status(
         ReviewStatus,
         default=ReviewStatus.PENDING.value,
         transitions={
@@ -176,27 +177,27 @@ class Review:
             ReviewStatus.REJECTED: [ReviewStatus.PENDING],  # Re-submit after edit
         },
     )
-    moderation_notes = Text()
+    moderation_notes: str | None = Text()
 
     # Voting
     votes = HasMany(HelpfulVote)
-    helpful_count = Integer(default=0)
-    unhelpful_count = Integer(default=0)
+    helpful_count: int = Integer(default=0)
+    unhelpful_count: int = Integer(default=0)
 
     # Reporting
-    report_count = Integer(default=0)
-    reported_reasons = List(Dict())
+    report_count: int = Integer(default=0)
+    reported_reasons: list[dict[str, Any]] = List(Dict())
 
     # Seller engagement
     reply = HasMany(SellerReply)
 
     # Editing
-    is_edited = Boolean(default=False)
-    edited_at = DateTime()
+    is_edited: bool = Boolean(default=False)
+    edited_at: datetime | None = DateTime()
 
     # Timestamps
-    created_at = DateTime()
-    updated_at = DateTime()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     # -------------------------------------------------------------------
     # Invariants

@@ -12,7 +12,7 @@ from ordering.order.order import Order
 class ConfirmOrder:
     """Confirm the order, signaling the customer's commitment to purchase."""
 
-    order_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
 
 
 @ordering.command_handler(part_of=Order)

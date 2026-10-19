@@ -1,5 +1,7 @@
 """Orders by status — admin dashboard view for filtering orders by status."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, String
 from protean.utils.globals import current_domain
@@ -27,12 +29,12 @@ from ordering.order.order import Order
 
 @ordering.projection
 class OrdersByStatus:
-    order_id = Identifier(identifier=True, required=True)
-    customer_id = Identifier(required=True)
-    status = String(required=True)
-    grand_total = Float()
-    created_at = DateTime()
-    updated_at = DateTime()
+    order_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = Identifier(required=True)
+    status: str = String(required=True)
+    grand_total: float | None = Float()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @ordering.projector(projector_for=OrdersByStatus, aggregates=[Order])

@@ -4,6 +4,8 @@ Captures orders stuck in CREATED state for cart recovery purposes. Orders
 are inserted on creation and removed when confirmed or cancelled.
 """
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -15,12 +17,12 @@ from ordering.order.order import Order
 
 @ordering.projection
 class AbandonedCheckout:
-    order_id = Identifier(identifier=True, required=True)
-    customer_id = Identifier(required=True)
-    item_count = Integer(default=0)
-    grand_total = Float(default=0.0)
-    currency = String(default="USD")
-    created_at = DateTime()
+    order_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = Identifier(required=True)
+    item_count: int = Integer(default=0)
+    grand_total: float = Float(default=0.0)
+    currency: str = String(default="USD")
+    created_at: datetime | None = DateTime()
 
 
 @ordering.projector(projector_for=AbandonedCheckout, aggregates=[Order])

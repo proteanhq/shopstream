@@ -1,5 +1,7 @@
 """NotificationLog — full audit trail of all notifications."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -19,22 +21,22 @@ from notifications.notification.notification import Notification
 
 @notifications.projection
 class NotificationLog:
-    notification_id: Identifier(identifier=True, required=True)
-    recipient_id: Identifier(required=True)
-    recipient_type: String(required=True)
-    notification_type: String(required=True)
-    channel: String(required=True)
-    subject: String(max_length=500)
-    status: String(required=True)
-    template_name: String(max_length=200)
-    source_event_type: String(max_length=200)
-    failure_reason: String(max_length=500)
-    retry_count: Integer(default=0)
-    scheduled_for: DateTime()
-    created_at: DateTime()
-    sent_at: DateTime()
-    delivered_at: DateTime()
-    updated_at: DateTime()
+    notification_id: str = Identifier(identifier=True, required=True)
+    recipient_id: str = Identifier(required=True)
+    recipient_type: str = String(required=True)
+    notification_type: str = String(required=True)
+    channel: str = String(required=True)
+    subject: str | None = String(max_length=500)
+    status: str = String(required=True)
+    template_name: str | None = String(max_length=200)
+    source_event_type: str | None = String(max_length=200)
+    failure_reason: str | None = String(max_length=500)
+    retry_count: int = Integer(default=0)
+    scheduled_for: datetime | None = DateTime()
+    created_at: datetime | None = DateTime()
+    sent_at: datetime | None = DateTime()
+    delivered_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @notifications.projector(projector_for=NotificationLog, aggregates=[Notification])

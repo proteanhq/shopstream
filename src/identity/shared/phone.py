@@ -15,7 +15,7 @@ class PhoneNumber:
     Accepts digits, spaces, hyphens, parentheses, and an optional leading +.
     """
 
-    number: String(required=True, max_length=20)
+    number: str = String(required=True, max_length=20)
 
     @invariant.post
     def validate_phone_format(self):

@@ -10,7 +10,7 @@ from ordering.projections.order_detail import OrderDetail
 
 @ordering.query(part_of=OrderDetail)
 class GetOrderDetail:
-    order_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
 
 
 @ordering.query_handler(part_of=OrderDetail)

@@ -1,6 +1,6 @@
 """Customer aggregate root with Address entity, Profile and GeoCoordinates value objects."""
 
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum
 
 from protean import atomic_change, invariant
@@ -51,8 +51,8 @@ class GeoCoordinates:
     Latitude ranges from -90 to 90, longitude from -180 to 180.
     """
 
-    latitude: Float(min_value=-90.0, max_value=90.0)
-    longitude: Float(min_value=-180.0, max_value=180.0)
+    latitude: float | None = Float(min_value=-90.0, max_value=90.0)
+    longitude: float | None = Float(min_value=-180.0, max_value=180.0)
 
     @invariant.post
     def both_coordinates_required(self):
@@ -68,10 +68,10 @@ class Profile:
     It is replaced wholesale on update (value object semantics).
     """
 
-    first_name: String(required=True, max_length=100)
-    last_name: String(required=True, max_length=100)
-    phone: ValueObject(PhoneNumber)
-    date_of_birth: Date()
+    first_name: str = String(required=True, max_length=100)
+    last_name: str = String(required=True, max_length=100)
+    phone = ValueObject(PhoneNumber)
+    date_of_birth: date | None = Date()
 
 
 @identity.entity(part_of="Customer")
@@ -82,14 +82,14 @@ class Address:
     have up to 10 addresses, with exactly one marked as the default at all times.
     """
 
-    label: String(choices=AddressLabel, default=AddressLabel.HOME.value)
-    street: String(required=True, max_length=255)
-    city: String(required=True, max_length=100)
-    state: String(max_length=100)
-    postal_code: String(required=True, max_length=20)
-    country: String(required=True, max_length=100)
-    is_default: Boolean(default=False)
-    geo_coordinates: ValueObject(GeoCoordinates)
+    label: str = String(choices=AddressLabel, default=AddressLabel.HOME.value)
+    street: str = String(required=True, max_length=255)
+    city: str = String(required=True, max_length=100)
+    state: str | None = String(max_length=100)
+    postal_code: str = String(required=True, max_length=20)
+    country: str = String(required=True, max_length=100)
+    is_default: bool = Boolean(default=False)
+    geo_coordinates = ValueObject(GeoCoordinates)
 
 
 @identity.aggregate
@@ -101,11 +101,11 @@ class Customer:
     requires these elements to change together consistently.
     """
 
-    external_id: String(required=True, max_length=255, unique=True)
-    email: ValueObject(EmailAddress, required=True)
-    profile: ValueObject(Profile)
-    addresses: HasMany(Address)
-    status: Status(
+    external_id: str = String(required=True, max_length=255, unique=True)
+    email = ValueObject(EmailAddress, required=True)
+    profile = ValueObject(Profile)
+    addresses = HasMany(Address)
+    status: str = Status(
         CustomerStatus,
         default=CustomerStatus.ACTIVE.value,
         transitions={
@@ -113,7 +113,7 @@ class Customer:
             CustomerStatus.SUSPENDED: [CustomerStatus.ACTIVE, CustomerStatus.CLOSED],
         },
     )
-    tier: Status(
+    tier: str = Status(
         CustomerTier,
         default=CustomerTier.STANDARD.value,
         transitions={
@@ -122,8 +122,8 @@ class Customer:
             CustomerTier.GOLD: [CustomerTier.PLATINUM],
         },
     )
-    registered_at: DateTime(default=datetime.now)
-    last_login_at: DateTime()
+    registered_at: datetime = DateTime(default=datetime.now)
+    last_login_at: datetime | None = DateTime()
 
     @invariant.post
     def addresses_cannot_exceed_maximum(self):

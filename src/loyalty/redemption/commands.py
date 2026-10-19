@@ -17,31 +17,31 @@ from loyalty.redemption.voucher import VoucherUnavailable, issue_voucher_code
 
 @loyalty.command(part_of="Redemption")
 class RequestRedemption:
-    account_id = String(required=True, max_length=255)
-    points = Integer(required=True)
-    reward_code = String(required=True, max_length=40)
+    account_id: str = String(required=True, max_length=255)
+    points: int = Integer(required=True)
+    reward_code: str = String(required=True, max_length=40)
 
 
 @loyalty.command(part_of="Redemption")
 class ReserveRedemptionPoints:
-    redemption_id = Identifier(required=True)
+    redemption_id: str = Identifier(required=True)
 
 
 @loyalty.command(part_of="Redemption")
 class IssueRedemptionVoucher:
-    redemption_id = Identifier(required=True)
+    redemption_id: str = Identifier(required=True)
 
 
 @loyalty.command(part_of="Redemption")
 class CompleteRedemption:
-    redemption_id = Identifier(required=True)
+    redemption_id: str = Identifier(required=True)
 
 
 @loyalty.command(part_of="Redemption")
 class CompensateRedemption:
-    redemption_id = Identifier(required=True)
-    refunded_points = Integer(required=True)
-    reason = String(max_length=255, default="voucher unavailable")
+    redemption_id: str = Identifier(required=True)
+    refunded_points: int = Integer(required=True)
+    reason: str = String(max_length=255, default="voucher unavailable")
 
 
 @loyalty.command_handler(part_of=Redemption)

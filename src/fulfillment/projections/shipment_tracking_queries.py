@@ -10,7 +10,7 @@ from fulfillment.projections.shipment_tracking import ShipmentTrackingView
 
 @fulfillment.query(part_of=ShipmentTrackingView)
 class GetShipmentTracking:
-    order_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
 
 
 @fulfillment.query_handler(part_of=ShipmentTrackingView)

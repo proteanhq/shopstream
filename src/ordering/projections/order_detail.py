@@ -1,5 +1,8 @@
 """Order detail — full order view for detail pages."""
 
+from datetime import datetime
+from typing import Any
+
 from protean.core.projector import on
 from protean.fields import DateTime, Dict, Float, Identifier, List, String
 from protean.utils.globals import current_domain
@@ -31,31 +34,31 @@ from ordering.order.order import Order
 
 @ordering.projection
 class OrderDetail:
-    order_id = Identifier(identifier=True, required=True)
-    customer_id = Identifier(required=True)
-    status = String(required=True)
-    items = List(Dict())
-    shipping_address = Dict()
-    billing_address = Dict()
-    subtotal = Float()
-    shipping_cost = Float()
-    tax_total = Float()
-    discount_total = Float()
-    grand_total = Float()
-    currency = String(default="USD")
-    order_source = String(default="web")
-    payment_id = String()
-    payment_method = String()
-    payment_status = String()
-    shipment_id = String()
-    carrier = String()
-    tracking_number = String()
-    estimated_delivery = String()
-    cancellation_reason = String()
-    cancelled_by = String()
-    coupon_code = String()
-    created_at = DateTime()
-    updated_at = DateTime()
+    order_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = Identifier(required=True)
+    status: str = String(required=True)
+    items: list[dict[str, Any]] = List(Dict())
+    shipping_address: dict[str, Any] = Dict()
+    billing_address: dict[str, Any] = Dict()
+    subtotal: float | None = Float()
+    shipping_cost: float | None = Float()
+    tax_total: float | None = Float()
+    discount_total: float | None = Float()
+    grand_total: float | None = Float()
+    currency: str = String(default="USD")
+    order_source: str = String(default="web")
+    payment_id: str | None = String()
+    payment_method: str | None = String()
+    payment_status: str | None = String()
+    shipment_id: str | None = String()
+    carrier: str | None = String()
+    tracking_number: str | None = String()
+    estimated_delivery: str | None = String()
+    cancellation_reason: str | None = String()
+    cancelled_by: str | None = String()
+    coupon_code: str | None = String()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @ordering.projector(projector_for=OrderDetail, aggregates=[Order])

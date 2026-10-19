@@ -10,7 +10,7 @@ from ordering.projections.cart_view import CartView
 
 @ordering.query(part_of=CartView)
 class GetCartView:
-    cart_id = Identifier(required=True)
+    cart_id: str = Identifier(required=True)
 
 
 @ordering.query_handler(part_of=CartView)

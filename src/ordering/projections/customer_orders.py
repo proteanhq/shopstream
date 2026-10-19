@@ -1,5 +1,7 @@
 """Customer orders — per-customer order listing projection."""
 
+from datetime import datetime
+
 from protean import Index
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, Integer, String
@@ -29,14 +31,14 @@ from ordering.order.order import Order
 # Read path: list a customer's orders (filter by customer_id).
 @ordering.projection(indexes=[Index("customer_id")])
 class CustomerOrders:
-    order_id = Identifier(identifier=True, required=True)
-    customer_id = Identifier(required=True)
-    status = String(required=True)
-    grand_total = Float()
-    currency = String(default="USD")
-    item_count = Integer(default=0)
-    created_at = DateTime()
-    updated_at = DateTime()
+    order_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = Identifier(required=True)
+    status: str = String(required=True)
+    grand_total: float | None = Float()
+    currency: str = String(default="USD")
+    item_count: int = Integer(default=0)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @ordering.projector(projector_for=CustomerOrders, aggregates=[Order])

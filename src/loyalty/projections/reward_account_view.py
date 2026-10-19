@@ -1,5 +1,7 @@
 """RewardAccountView — a database-backed read model of each reward account."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -17,14 +19,14 @@ from loyalty.reward.reward_account import RewardAccount
 
 @loyalty.projection
 class RewardAccountView:
-    account_id = Identifier(identifier=True, required=True)
-    customer_id = String(required=True)
-    member_code = String()
-    tier = String()
-    status = String()
-    points_balance = Integer(default=0)
-    lifetime_points = Integer(default=0)
-    updated_at = DateTime()
+    account_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = String(required=True)
+    member_code: str | None = String()
+    tier: str | None = String()
+    status: str | None = String()
+    points_balance: int = Integer(default=0)
+    lifetime_points: int = Integer(default=0)
+    updated_at: datetime | None = DateTime()
 
 
 @loyalty.projector(projector_for=RewardAccountView, aggregates=[RewardAccount])

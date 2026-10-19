@@ -28,13 +28,13 @@ REDEMPTION_STATUSES = [
 
 @loyalty.aggregate
 class Redemption:
-    account_id = String(required=True, max_length=255)
-    points = Integer(required=True)
-    reward_code = String(required=True, max_length=40)
-    status = String(choices=REDEMPTION_STATUSES, default="requested")
-    voucher_code = String(max_length=40)
-    failure_reason = String(max_length=255)
-    requested_at = DateTime(default=lambda: datetime.now(UTC))
+    account_id: str = String(required=True, max_length=255)
+    points: int = Integer(required=True)
+    reward_code: str = String(required=True, max_length=40)
+    status: str = String(choices=REDEMPTION_STATUSES, default="requested")
+    voucher_code: str | None = String(max_length=40)
+    failure_reason: str | None = String(max_length=255)
+    requested_at: datetime = DateTime(default=lambda: datetime.now(UTC))
 
     @invariant.post
     def points_must_be_positive(self):

@@ -10,7 +10,7 @@ from loyalty.projections.redemption_view import RedemptionView
 
 @loyalty.query(part_of=RedemptionView)
 class GetRedemption:
-    redemption_id = Identifier(required=True)
+    redemption_id: str = Identifier(required=True)
 
 
 @loyalty.query_handler(part_of=RedemptionView)

@@ -1,5 +1,7 @@
 """Reservation status — active reservations view for order status checks."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -16,14 +18,14 @@ from inventory.stock.stock import InventoryItem
 
 @inventory.projection
 class ReservationStatus:
-    reservation_id = Identifier(identifier=True, required=True)
-    inventory_item_id = Identifier(required=True)
-    order_id = Identifier(required=True)
-    quantity = Integer(required=True)
-    status = String(required=True)
-    reserved_at = DateTime()
-    expires_at = DateTime()
-    updated_at = DateTime()
+    reservation_id: str = Identifier(identifier=True, required=True)
+    inventory_item_id: str = Identifier(required=True)
+    order_id: str = Identifier(required=True)
+    quantity: int = Integer(required=True)
+    status: str = String(required=True)
+    reserved_at: datetime | None = DateTime()
+    expires_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @inventory.projector(projector_for=ReservationStatus, aggregates=[InventoryItem])

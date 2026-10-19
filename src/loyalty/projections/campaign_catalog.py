@@ -12,6 +12,8 @@ single domain; `repository_for(CampaignCatalog)` resolves to the reporting provi
 transparently, so the projector, queries, and the multiplier read need no special handling.
 """
 
+from datetime import date, datetime
+
 from protean.core.projector import on
 from protean.fields import Date, DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -28,15 +30,15 @@ from loyalty.domain import loyalty
 
 @loyalty.projection(provider="reporting")
 class CampaignCatalog:
-    campaign_id = Identifier(identifier=True, required=True)
-    campaign_code = String()
-    name = String()
-    discount_type = String()
-    discount_value = Integer(default=0)
-    status = String()
-    starts_on = Date()
-    ends_on = Date()
-    updated_at = DateTime()
+    campaign_id: str = Identifier(identifier=True, required=True)
+    campaign_code: str | None = String()
+    name: str | None = String()
+    discount_type: str | None = String()
+    discount_value: int = Integer(default=0)
+    status: str | None = String()
+    starts_on: date | None = Date()
+    ends_on: date | None = Date()
+    updated_at: datetime | None = DateTime()
 
 
 @loyalty.projector(projector_for=CampaignCatalog, aggregates=[PromoCampaign])

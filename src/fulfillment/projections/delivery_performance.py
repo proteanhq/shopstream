@@ -19,14 +19,14 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 class DeliveryPerformanceView:
     """Carrier delivery performance aggregated by carrier and date."""
 
-    id = Identifier(identifier=True)
-    carrier = String(required=True)
-    date = String(required=True)  # ISO date string YYYY-MM-DD
-    total_shipments = Integer(default=0)
-    delivered_count = Integer(default=0)
-    exception_count = Integer(default=0)
-    total_delivery_hours = Float(default=0.0)
-    updated_at = DateTime()
+    id: str = Identifier(identifier=True)
+    carrier: str = String(required=True)
+    date: str = String(required=True)  # ISO date string YYYY-MM-DD
+    total_shipments: int = Integer(default=0)
+    delivered_count: int = Integer(default=0)
+    exception_count: int = Integer(default=0)
+    total_delivery_hours: float = Float(default=0.0)
+    updated_at: datetime | None = DateTime()
 
 
 def _date_key(dt: datetime) -> str:

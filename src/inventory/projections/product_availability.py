@@ -5,6 +5,8 @@ rather than reading from InventoryLevel. This avoids cross-projection
 dependencies during synchronous event processing.
 """
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import Boolean, DateTime, Identifier, Integer
 from protean.utils.globals import current_domain
@@ -25,15 +27,15 @@ from inventory.stock.stock import InventoryItem
 
 @inventory.projection
 class ProductAvailability:
-    product_variant_key = Identifier(identifier=True, required=True)  # "product_id::variant_id"
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    total_available = Integer(default=0)
-    total_on_hand = Integer(default=0)
-    total_reserved = Integer(default=0)
-    warehouse_count = Integer(default=0)
-    is_in_stock = Boolean(default=False)
-    updated_at = DateTime()
+    product_variant_key: str = Identifier(identifier=True, required=True)  # "product_id::variant_id"
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    total_available: int = Integer(default=0)
+    total_on_hand: int = Integer(default=0)
+    total_reserved: int = Integer(default=0)
+    warehouse_count: int = Integer(default=0)
+    is_in_stock: bool = Boolean(default=False)
+    updated_at: datetime | None = DateTime()
 
 
 def _build_key(product_id, variant_id):

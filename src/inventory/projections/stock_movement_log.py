@@ -1,6 +1,7 @@
 """Stock movement log — append-only audit trail of all stock changes."""
 
 import uuid
+from datetime import datetime
 
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
@@ -25,15 +26,15 @@ from inventory.stock.stock import InventoryItem
 
 @inventory.projection
 class StockMovementLog:
-    entry_id = Identifier(identifier=True, required=True)
-    inventory_item_id = Identifier(required=True)
-    event_type = String(required=True)
-    description = String(required=True)
-    quantity_change = Integer(default=0)
-    previous_level = Integer(default=0)
-    new_level = Integer(default=0)
-    actor = String()
-    occurred_at = DateTime(required=True)
+    entry_id: str = Identifier(identifier=True, required=True)
+    inventory_item_id: str = Identifier(required=True)
+    event_type: str = String(required=True)
+    description: str = String(required=True)
+    quantity_change: int = Integer(default=0)
+    previous_level: int = Integer(default=0)
+    new_level: int = Integer(default=0)
+    actor: str | None = String()
+    occurred_at: datetime = DateTime(required=True)
 
 
 def _add_entry(

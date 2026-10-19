@@ -12,21 +12,21 @@ from catalogue.product.product import Product
 class ActivateProduct:
     """Make a draft product available for sale (requires at least one variant)."""
 
-    product_id: Identifier(required=True)
+    product_id: str = Identifier(required=True)
 
 
 @catalogue.command(part_of="Product")
 class DiscontinueProduct:
     """Remove an active product from sale."""
 
-    product_id: Identifier(required=True)
+    product_id: str = Identifier(required=True)
 
 
 @catalogue.command(part_of="Product")
 class ArchiveProduct:
     """Archive a discontinued product for permanent storage."""
 
-    product_id: Identifier(required=True)
+    product_id: str = Identifier(required=True)
 
 
 @catalogue.command_handler(part_of=Product)

@@ -12,8 +12,8 @@ from notifications.notification.notification import Notification
 class CancelNotification:
     """Request to cancel a pending or scheduled notification."""
 
-    notification_id: Identifier(required=True)
-    reason: String(required=True, max_length=500)
+    notification_id: str = Identifier(required=True)
+    reason: str = String(required=True, max_length=500)
 
 
 @notifications.command_handler(part_of=Notification)

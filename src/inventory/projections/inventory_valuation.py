@@ -4,6 +4,8 @@ Maintains per-item stock valuation based on on-hand quantity and unit cost.
 Unit cost is derived from the most recent StockReceived event.
 """
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -22,15 +24,15 @@ from inventory.stock.stock import InventoryItem
 
 @inventory.projection
 class InventoryValuation:
-    inventory_item_id = Identifier(identifier=True, required=True)
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    sku = String(max_length=50)
-    warehouse_id = Identifier()
-    on_hand = Integer(default=0)
-    unit_cost = Float(default=0.0)
-    total_value = Float(default=0.0)
-    updated_at = DateTime()
+    inventory_item_id: str = Identifier(identifier=True, required=True)
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    sku: str | None = String(max_length=50)
+    warehouse_id: str | None = Identifier()
+    on_hand: int = Integer(default=0)
+    unit_cost: float = Float(default=0.0)
+    total_value: float = Float(default=0.0)
+    updated_at: datetime | None = DateTime()
 
 
 @inventory.projector(projector_for=InventoryValuation, aggregates=[InventoryItem])

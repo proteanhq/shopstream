@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 from protean import Index
 from protean.core.projector import on
@@ -37,12 +38,12 @@ from ordering.order.order import Order
 # occurred_at — a composite index serves both the filter and the sort.
 @ordering.projection(indexes=[Index("order_id", "occurred_at")])
 class OrderTimeline:
-    entry_id = Identifier(identifier=True, required=True)
-    order_id = Identifier(required=True)
-    event_type = String(required=True)
-    description = String(required=True)
-    occurred_at = DateTime(required=True)
-    event_metadata = Dict()
+    entry_id: str = Identifier(identifier=True, required=True)
+    order_id: str = Identifier(required=True)
+    event_type: str = String(required=True)
+    description: str = String(required=True)
+    occurred_at: datetime = DateTime(required=True)
+    event_metadata: dict[str, Any] = Dict()
 
 
 def _add_entry(order_id, event_type, description, occurred_at, event_metadata=None):

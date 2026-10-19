@@ -20,13 +20,13 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 class DailyShipmentsView:
     """Daily aggregate of fulfillment operations."""
 
-    id = Identifier(identifier=True)
-    date = String(required=True)  # ISO date string YYYY-MM-DD
-    total_created = Integer(default=0)
-    total_shipped = Integer(default=0)
-    total_delivered = Integer(default=0)
-    total_exceptions = Integer(default=0)
-    updated_at = DateTime()
+    id: str = Identifier(identifier=True)
+    date: str = String(required=True)  # ISO date string YYYY-MM-DD
+    total_created: int = Integer(default=0)
+    total_shipped: int = Integer(default=0)
+    total_delivered: int = Integer(default=0)
+    total_exceptions: int = Integer(default=0)
+    updated_at: datetime | None = DateTime()
 
 
 def _date_key(dt: datetime) -> str:

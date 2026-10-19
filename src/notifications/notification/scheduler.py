@@ -4,6 +4,8 @@ This handler is invoked by a background job or cron to dispatch
 notifications whose scheduled_for time has passed.
 """
 
+from datetime import datetime
+
 import structlog
 from protean.fields import DateTime
 from protean.utils.globals import current_domain
@@ -22,7 +24,7 @@ logger = structlog.get_logger(__name__)
 class ProcessScheduledNotifications:
     """Request to process all due scheduled notifications."""
 
-    as_of: DateTime()  # Optional: process as of this time (defaults to the domain clock)
+    as_of: datetime | None = DateTime()  # Optional: process as of this time (defaults to the domain clock)
 
 
 @notifications.command_handler(part_of=Notification)

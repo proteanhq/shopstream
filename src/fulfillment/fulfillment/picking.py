@@ -16,24 +16,24 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 class AssignPicker:
     """Assign a warehouse picker to begin the picking process."""
 
-    fulfillment_id = Identifier(required=True)
-    picker_name = String(required=True, max_length=100)
+    fulfillment_id: str = Identifier(required=True)
+    picker_name: str = String(required=True, max_length=100)
 
 
 @fulfillment.command(part_of="Fulfillment")
 class RecordItemPicked:
     """Record that a single item has been picked from its location."""
 
-    fulfillment_id = Identifier(required=True)
-    item_id = Identifier(required=True)
-    pick_location = String(required=True, max_length=100)
+    fulfillment_id: str = Identifier(required=True)
+    item_id: str = Identifier(required=True)
+    pick_location: str = String(required=True, max_length=100)
 
 
 @fulfillment.command(part_of="Fulfillment")
 class CompletePickList:
     """Complete the pick list — all items must have been picked."""
 
-    fulfillment_id = Identifier(required=True)
+    fulfillment_id: str = Identifier(required=True)
 
 
 @fulfillment.command_handler(part_of=Fulfillment)

@@ -13,10 +13,10 @@ from reviews.review.review import Review
 
 @reviews.command(part_of="Review")
 class ReportReview:
-    review_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    reason = String(required=True)  # ReportReason enum value
-    detail = String(max_length=500)
+    review_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    reason: str = String(required=True)  # ReportReason enum value
+    detail: str | None = String(max_length=500)
 
 
 @reviews.command_handler(part_of=Review)

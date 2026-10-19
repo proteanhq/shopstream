@@ -8,6 +8,9 @@ projector option; this projector keeps its own guard. All aggregate stats are
 derived from ``counted_reviews`` rather than incremented in place.
 """
 
+from datetime import datetime
+from typing import Any
+
 from protean.core.projector import on
 from protean.fields import DateTime, Dict, Float, Identifier, Integer
 from protean.utils.globals import current_domain
@@ -19,15 +22,15 @@ from reviews.review.review import Review
 
 @reviews.projection
 class ProductRating:
-    product_id = Identifier(identifier=True, required=True)
-    average_rating = Float(default=0.0)
-    total_reviews = Integer(default=0)
-    rating_distribution = Dict()
-    verified_review_count = Integer(default=0)
+    product_id: str = Identifier(identifier=True, required=True)
+    average_rating: float = Float(default=0.0)
+    total_reviews: int = Integer(default=0)
+    rating_distribution: dict[str, Any] = Dict()
+    verified_review_count: int = Integer(default=0)
     # review_id -> {"rating": int, "verified": bool}. The set of reviews counted
     # so far; makes the projector idempotent under at-least-once redelivery.
-    counted_reviews = Dict()
-    updated_at = DateTime()
+    counted_reviews: dict[str, Any] = Dict()
+    updated_at: datetime | None = DateTime()
 
 
 def _default_distribution():

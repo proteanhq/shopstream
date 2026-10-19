@@ -1,5 +1,8 @@
 """Product detail — full PDP (Product Detail Page) projection."""
 
+from datetime import datetime
+from typing import Any
+
 from protean.core.projector import on
 from protean.fields import DateTime, Dict, Identifier, List, String, Text
 from protean.utils.globals import current_domain
@@ -22,23 +25,23 @@ from catalogue.product.product import Product
 
 @catalogue.projection
 class ProductDetail:
-    product_id: Identifier(identifier=True, required=True)
-    sku: String(required=True)
-    seller_id: Identifier()
-    title: String(required=True)
-    description: Text()
-    category_id: Identifier()
-    brand: String()
-    attributes: Dict()
-    variants: List(Dict())
-    images: List(Dict())
-    status: String(required=True)
-    visibility: String()
-    meta_title: String()
-    meta_description: String()
-    slug: String()
-    created_at: DateTime()
-    updated_at: DateTime()
+    product_id: str = Identifier(identifier=True, required=True)
+    sku: str = String(required=True)
+    seller_id: str | None = Identifier()
+    title: str = String(required=True)
+    description: str | None = Text()
+    category_id: str | None = Identifier()
+    brand: str | None = String()
+    attributes: dict[str, Any] = Dict()
+    variants: list[dict[str, Any]] = List(Dict())
+    images: list[dict[str, Any]] = List(Dict())
+    status: str = String(required=True)
+    visibility: str | None = String()
+    meta_title: str | None = String()
+    meta_description: str | None = String()
+    slug: str | None = String()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @catalogue.projector(projector_for=ProductDetail, aggregates=[Product])

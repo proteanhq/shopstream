@@ -20,13 +20,13 @@ from ordering.order.order import Order
 
 @ordering.projection
 class DailyOrderStats:
-    date = String(identifier=True, required=True, max_length=10)  # YYYY-MM-DD
-    orders_created = Integer(default=0)
-    orders_completed = Integer(default=0)
-    orders_cancelled = Integer(default=0)
-    orders_refunded = Integer(default=0)
-    total_revenue = Float(default=0.0)
-    total_refunds = Float(default=0.0)
+    date: str = String(identifier=True, required=True, max_length=10)  # YYYY-MM-DD
+    orders_created: int = Integer(default=0)
+    orders_completed: int = Integer(default=0)
+    orders_cancelled: int = Integer(default=0)
+    orders_refunded: int = Integer(default=0)
+    total_revenue: float = Float(default=0.0)
+    total_refunds: float = Float(default=0.0)
 
 
 def _get_or_create(date_key):

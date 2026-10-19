@@ -13,9 +13,9 @@ from reviews.review.review import Review
 
 @reviews.command(part_of="Review")
 class VoteOnReview:
-    review_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    vote_type = String(required=True)  # "Helpful" or "Unhelpful"
+    review_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    vote_type: str = String(required=True)  # "Helpful" or "Unhelpful"
 
 
 @reviews.command_handler(part_of=Review)

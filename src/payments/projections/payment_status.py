@@ -1,5 +1,7 @@
 """Payment status — real-time payment state view."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -19,18 +21,18 @@ from payments.payment.payment import Payment
 
 @payments.projection
 class PaymentStatusView:
-    payment_id = Identifier(identifier=True, required=True)
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    amount = Float()
-    currency = String(default="USD")
-    status = String(required=True)
-    gateway_transaction_id = String()
-    attempt_count = Integer(default=1)
-    failure_reason = String()
-    total_refunded = Float(default=0.0)
-    created_at = DateTime()
-    updated_at = DateTime()
+    payment_id: str = Identifier(identifier=True, required=True)
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    amount: float | None = Float()
+    currency: str = String(default="USD")
+    status: str = String(required=True)
+    gateway_transaction_id: str | None = String()
+    attempt_count: int = Integer(default=1)
+    failure_reason: str | None = String()
+    total_refunded: float = Float(default=0.0)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @payments.projector(projector_for=PaymentStatusView, aggregates=[Payment])

@@ -50,10 +50,10 @@ class Auditable:
     ``updated_by``.
     """
 
-    created_at = DateTime(auto_now_add=True)
-    updated_at = DateTime(auto_now=True)
-    created_by = String(max_length=255)
-    updated_by = String(max_length=255)
+    created_at: datetime | None = DateTime(auto_now_add=True)
+    updated_at: datetime | None = DateTime(auto_now=True)
+    created_by: str | None = String(max_length=255)
+    updated_by: str | None = String(max_length=255)
 
 
 @loyalty.aggregate_enricher
@@ -124,9 +124,9 @@ class NoTripleRepeatValidator:
 class MembershipCard:
     """The physical/virtual loyalty card — a 1:1 (HasOne) child of the account."""
 
-    card_number = String(required=True, max_length=20)
-    issued_on = Date(required=True)
-    status = String(choices=["active", "suspended", "expired"], default="active")
+    card_number: str = String(required=True, max_length=20)
+    issued_on: date = Date(required=True)
+    status: str = String(choices=["active", "suspended", "expired"], default="active")
 
 
 @loyalty.entity(part_of="RewardAccount")
@@ -138,27 +138,27 @@ class PointsLedgerEntry:
     """
 
     reward_account = Reference("RewardAccount")
-    entry_type = String(
+    entry_type: str = String(
         choices=["earn", "redeem", "transfer_in", "transfer_out", "adjust"],
         required=True,
     )
-    amount = Integer(required=True)
-    balance_after = Integer(required=True)
-    reason = String(max_length=255)
-    occurred_at = DateTime(required=True)
+    amount: int = Integer(required=True)
+    balance_after: int = Integer(required=True)
+    reason: str | None = String(max_length=255)
+    occurred_at: datetime = DateTime(required=True)
 
 
 @loyalty.aggregate(indexes=[Index("status")])
 class RewardAccount(Auditable):
-    customer_id = String(required=True, max_length=255)
-    status = String(choices=AccountStatus, default=AccountStatus.ACTIVE.value)
-    tier = String(choices=TIERS, default="bronze")
-    points_balance = Integer(default=0)
-    lifetime_points = Integer(default=0)
-    membership_since = Date(default=date.today)
+    customer_id: str = String(required=True, max_length=255)
+    status: str = String(choices=AccountStatus, default=AccountStatus.ACTIVE.value)
+    tier: str = String(choices=TIERS, default="bronze")
+    points_balance: int = Integer(default=0)
+    lifetime_points: int = Integer(default=0)
+    membership_since: date = Date(default=date.today)
     # member_code carries composed custom validators (built-in RegexValidator + a custom
     # callable). It is required (always generated) — see generate_member_code / #1025.
-    member_code = String(
+    member_code: str = String(
         required=True,
         max_length=12,
         validators=[
@@ -171,7 +171,7 @@ class RewardAccount(Auditable):
     )
     # Optional validated field — exercises validators on an optional field (validators are
     # skipped when the value is None; proteanhq/protean#1025, fixed on main).
-    referral_code = String(
+    referral_code: str | None = String(
         max_length=12,
         validators=[
             RegexValidator(

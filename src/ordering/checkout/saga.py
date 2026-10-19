@@ -18,6 +18,7 @@ Flow:
 """
 
 import logging
+from datetime import datetime
 
 from protean.exceptions import ValidationError
 from protean.fields import DateTime, Float, Identifier, Integer, String
@@ -47,14 +48,14 @@ MAX_PAYMENT_RETRIES = 3
 class OrderCheckoutSaga:
     """Coordinates the checkout process, reacting only to internal ordering events."""
 
-    order_id = Identifier()
-    status = String(default="new")
-    payment_id = Identifier()
-    retry_count = Integer(default=0)
-    failure_reason = String()
-    started_at = DateTime()
-    completed_at = DateTime()
-    amount = Float()
+    order_id: str | None = Identifier()
+    status: str = String(default="new")
+    payment_id: str | None = Identifier()
+    retry_count: int = Integer(default=0)
+    failure_reason: str | None = String()
+    started_at: datetime | None = DateTime()
+    completed_at: datetime | None = DateTime()
+    amount: float | None = Float()
 
     @handle(OrderConfirmed, start=True, correlate="order_id")
     def on_order_confirmed(self, event: OrderConfirmed) -> None:

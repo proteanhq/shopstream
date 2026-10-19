@@ -12,7 +12,7 @@ from ordering.domain import ordering
 class ConvertToOrder:
     """Mark a cart as converted after checkout (cart becomes immutable)."""
 
-    cart_id = Identifier(required=True)
+    cart_id: str = Identifier(required=True)
 
 
 @ordering.command_handler(part_of=ShoppingCart)

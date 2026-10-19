@@ -12,12 +12,12 @@ from payments.invoice.invoice import Invoice, InvoiceLineItemInput
 class GenerateInvoice:
     """Generate a new invoice for an order."""
 
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
     # Typed line items derived from the InvoiceLineItem entity via
     # value_object_from_entity — no more untyped List(Dict()).
-    line_items = List(content_type=ValueObject(InvoiceLineItemInput), required=True)
-    tax = Float(default=0.0)
+    line_items: list[InvoiceLineItemInput] = List(content_type=ValueObject(InvoiceLineItemInput), required=True)
+    tax: float = Float(default=0.0)
 
 
 @payments.command_handler(part_of=Invoice)

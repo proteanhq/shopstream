@@ -1,5 +1,7 @@
 """CustomerReviews — a customer's review history across all products."""
 
+from datetime import datetime
+
 from protean import Index
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
@@ -19,14 +21,14 @@ from reviews.review.review import Review
 # Read path: list a customer's own reviews (filter by customer_id).
 @reviews.projection(indexes=[Index("customer_id")])
 class CustomerReviews:
-    review_id = Identifier(identifier=True, required=True)
-    customer_id = Identifier(required=True)
-    product_id = Identifier(required=True)
-    rating = Integer(required=True)
-    title = String(required=True)
-    status = String(required=True)
-    created_at = DateTime()
-    updated_at = DateTime()
+    review_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = Identifier(required=True)
+    product_id: str = Identifier(required=True)
+    rating: int = Integer(required=True)
+    title: str = String(required=True)
+    status: str = String(required=True)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @reviews.projector(projector_for=CustomerReviews, aggregates=[Review])

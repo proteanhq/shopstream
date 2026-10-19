@@ -15,8 +15,8 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 class CancelFulfillment:
     """Cancel a fulfillment before it has been shipped."""
 
-    fulfillment_id = Identifier(required=True)
-    reason = String(required=True, max_length=500)
+    fulfillment_id: str = Identifier(required=True)
+    reason: str = String(required=True, max_length=500)
 
 
 @fulfillment.command_handler(part_of=Fulfillment)

@@ -36,14 +36,14 @@ from inventory.stock.stock import InventoryItem
 
 @inventory.projection(externally_populated=True)
 class EventAudit:
-    audit_id = Identifier(identifier=True, required=True)
-    inventory_item_id = Identifier()
-    event_type = String(required=True)  # short class name, e.g. "StockReserved"
-    qualified_type = String()  # metadata type, e.g. "inventory.StockReserved.v1"
-    stream = String()
-    correlation_id = String()
-    causation_id = String()
-    recorded_at = DateTime(required=True)
+    audit_id: str = Identifier(identifier=True, required=True)
+    inventory_item_id: str | None = Identifier()
+    event_type: str = String(required=True)  # short class name, e.g. "StockReserved"
+    qualified_type: str | None = String()  # metadata type, e.g. "inventory.StockReserved.v1"
+    stream: str | None = String()
+    correlation_id: str | None = String()
+    causation_id: str | None = String()
+    recorded_at: datetime = DateTime(required=True)
 
 
 @inventory.event_handler(part_of=InventoryItem)

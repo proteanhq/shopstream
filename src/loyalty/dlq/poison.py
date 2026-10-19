@@ -20,14 +20,14 @@ from loyalty.domain import loyalty
 
 @loyalty.event(part_of="PoisonPill")
 class PoisonDetonated:
-    poison_id = Identifier(required=True)
-    note = String()
-    occurred_at = DateTime(required=True)
+    poison_id: str = Identifier(required=True)
+    note: str | None = String()
+    occurred_at: datetime = DateTime(required=True)
 
 
 @loyalty.aggregate
 class PoisonPill:
-    note = String(max_length=120, default="intentional DLQ demo failure")
+    note: str = String(max_length=120, default="intentional DLQ demo failure")
 
     @classmethod
     def detonate(cls, note=None):
@@ -38,7 +38,7 @@ class PoisonPill:
 
 @loyalty.command(part_of="PoisonPill")
 class EmitPoison:
-    note = String(max_length=120, default="intentional DLQ demo failure")
+    note: str = String(max_length=120, default="intentional DLQ demo failure")
 
 
 @loyalty.command_handler(part_of="PoisonPill")

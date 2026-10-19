@@ -1,5 +1,7 @@
 """Warehouse stock — per-warehouse summary for dashboard."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -21,16 +23,16 @@ from inventory.stock.stock import InventoryItem
 
 @inventory.projection
 class WarehouseStock:
-    entry_id = Identifier(identifier=True, required=True)  # Same as inventory_item_id
-    warehouse_id = Identifier(required=True)
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    sku = String(required=True)
-    on_hand = Integer(default=0)
-    reserved = Integer(default=0)
-    available = Integer(default=0)
-    damaged = Integer(default=0)
-    updated_at = DateTime()
+    entry_id: str = Identifier(identifier=True, required=True)  # Same as inventory_item_id
+    warehouse_id: str = Identifier(required=True)
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    sku: str = String(required=True)
+    on_hand: int = Integer(default=0)
+    reserved: int = Integer(default=0)
+    available: int = Integer(default=0)
+    damaged: int = Integer(default=0)
+    updated_at: datetime | None = DateTime()
 
 
 @inventory.projector(projector_for=WarehouseStock, aggregates=[InventoryItem])

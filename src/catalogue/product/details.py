@@ -1,5 +1,7 @@
 """Product details management — command and handler."""
 
+from typing import Any
+
 from protean import handle
 from protean.fields import Dict, Identifier, String
 from protean.utils.globals import current_domain
@@ -12,14 +14,14 @@ from catalogue.product.product import SEO, Product
 class UpdateProductDetails:
     """Change a product's title, description, brand, attributes, or SEO metadata."""
 
-    product_id: Identifier(required=True)
-    title: String(max_length=255)
-    description: String()
-    brand: String(max_length=100)
-    attributes: Dict()
-    meta_title: String(max_length=70)
-    meta_description: String(max_length=160)
-    slug: String(max_length=200)
+    product_id: str = Identifier(required=True)
+    title: str | None = String(max_length=255)
+    description: str | None = String()
+    brand: str | None = String(max_length=100)
+    attributes: dict[str, Any] = Dict()
+    meta_title: str | None = String(max_length=70)
+    meta_description: str | None = String(max_length=160)
+    slug: str | None = String(max_length=200)
 
 
 @catalogue.command_handler(part_of=Product)

@@ -10,12 +10,12 @@ from loyalty.projections.campaign_catalog import CampaignCatalog
 
 @loyalty.query(part_of=CampaignCatalog)
 class GetCampaign:
-    campaign_id = Identifier(required=True)
+    campaign_id: str = Identifier(required=True)
 
 
 @loyalty.query(part_of=CampaignCatalog)
 class ListCampaigns:
-    status = String()
+    status: str | None = String()
 
 
 @loyalty.query_handler(part_of=CampaignCatalog)

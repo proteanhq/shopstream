@@ -27,26 +27,26 @@ def _get_or_create_preference(repo, customer_id: str) -> "NotificationPreference
 class UpdateNotificationPreferences:
     """Update a customer's notification channel preferences."""
 
-    customer_id: Identifier(required=True)
-    email_enabled: Boolean()
-    sms_enabled: Boolean()
-    push_enabled: Boolean()
+    customer_id: str = Identifier(required=True)
+    email_enabled: bool | None = Boolean()
+    sms_enabled: bool | None = Boolean()
+    push_enabled: bool | None = Boolean()
 
 
 @notifications.command(part_of="NotificationPreference")
 class SetQuietHours:
     """Set a customer's do-not-disturb window."""
 
-    customer_id: Identifier(required=True)
-    start: String(required=True, max_length=5)
-    end: String(required=True, max_length=5)
+    customer_id: str = Identifier(required=True)
+    start: str = String(required=True, max_length=5)
+    end: str = String(required=True, max_length=5)
 
 
 @notifications.command(part_of="NotificationPreference")
 class ClearQuietHours:
     """Remove a customer's do-not-disturb window."""
 
-    customer_id: Identifier(required=True)
+    customer_id: str = Identifier(required=True)
 
 
 @notifications.command_handler(part_of=NotificationPreference)

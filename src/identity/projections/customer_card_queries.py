@@ -10,7 +10,7 @@ from identity.projections.customer_card import CustomerCard
 
 @identity.query(part_of=CustomerCard)
 class GetCustomerCard:
-    customer_id = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
 
 
 @identity.query_handler(part_of=CustomerCard)

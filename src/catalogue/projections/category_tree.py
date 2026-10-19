@@ -18,14 +18,14 @@ from catalogue.product.product import Product
 
 @catalogue.projection
 class CategoryTree:
-    category_id: Identifier(identifier=True, required=True)
-    name: String(required=True)
-    parent_category_id: Identifier()
-    level: Integer(required=True)
-    is_active: Boolean(default=True)
-    display_order: Integer(default=0)
-    breadcrumb: List(String())
-    product_count: Integer(default=0)
+    category_id: str = Identifier(identifier=True, required=True)
+    name: str = String(required=True)
+    parent_category_id: str | None = Identifier()
+    level: int = Integer(required=True)
+    is_active: bool = Boolean(default=True)
+    display_order: int = Integer(default=0)
+    breadcrumb: list[str] = List(String())
+    product_count: int = Integer(default=0)
 
 
 @catalogue.projector(projector_for=CategoryTree, aggregates=[Category, Product])

@@ -10,7 +10,7 @@ from ordering.projections.order_timeline import OrderTimeline
 
 @ordering.query(part_of=OrderTimeline)
 class GetOrderTimeline:
-    order_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
 
 
 @ordering.query_handler(part_of=OrderTimeline)

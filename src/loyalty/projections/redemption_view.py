@@ -5,6 +5,8 @@ redemption is in the saga: requested → points_reserved → voucher_issued → 
 compensated branch.
 """
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -23,14 +25,14 @@ from loyalty.redemption.redemption import Redemption
 
 @loyalty.projection
 class RedemptionView:
-    redemption_id = Identifier(identifier=True, required=True)
-    account_id = Identifier(required=True)
-    points = Integer(default=0)
-    reward_code = String()
-    status = String()
-    voucher_code = String()
-    failure_reason = String()
-    updated_at = DateTime()
+    redemption_id: str = Identifier(identifier=True, required=True)
+    account_id: str = Identifier(required=True)
+    points: int = Integer(default=0)
+    reward_code: str | None = String()
+    status: str | None = String()
+    voucher_code: str | None = String()
+    failure_reason: str | None = String()
+    updated_at: datetime | None = DateTime()
 
 
 @loyalty.projector(projector_for=RedemptionView, aggregates=[Redemption])

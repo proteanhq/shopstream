@@ -1,5 +1,8 @@
 """Cart view — current cart state for UI rendering."""
 
+from datetime import datetime
+from typing import Any
+
 from protean.core.projector import on
 from protean.fields import DateTime, Dict, Identifier, Integer, List, String
 from protean.utils.globals import current_domain
@@ -19,15 +22,15 @@ from ordering.domain import ordering
 
 @ordering.projection
 class CartView:
-    cart_id = Identifier(identifier=True, required=True)
-    customer_id = Identifier()
-    session_id = String()
-    items = List(Dict())
-    applied_coupons = List(String())
-    status = String(required=True)
-    item_count = Integer(default=0)
-    created_at = DateTime()
-    updated_at = DateTime()
+    cart_id: str = Identifier(identifier=True, required=True)
+    customer_id: str | None = Identifier()
+    session_id: str | None = String()
+    items: list[dict[str, Any]] = List(Dict())
+    applied_coupons: list[str] = List(String())
+    status: str = String(required=True)
+    item_count: int = Integer(default=0)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @ordering.projector(projector_for=CartView, aggregates=[ShoppingCart])

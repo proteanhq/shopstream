@@ -8,7 +8,7 @@ This is the only event-sourced aggregate in the loyalty domain and the only plac
 ShopStream that uses fact events.
 """
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 from protean import apply
 from protean.exceptions import ValidationError
@@ -28,14 +28,14 @@ CAMPAIGN_STATUSES = ["draft", "active", "paused", "expired"]
 
 @loyalty.aggregate(event_sourced=True, fact_events=True)
 class PromoCampaign:
-    campaign_code = String(required=True, max_length=20)
-    name = String(required=True, max_length=255)
-    discount_type = String(choices=DISCOUNT_TYPES, required=True)
-    discount_value = Integer(required=True)
-    status = String(choices=CAMPAIGN_STATUSES, default="draft")
-    starts_on = Date()
-    ends_on = Date()
-    launched_at = DateTime()
+    campaign_code: str = String(required=True, max_length=20)
+    name: str = String(required=True, max_length=255)
+    discount_type: str = String(choices=DISCOUNT_TYPES, required=True)
+    discount_value: int = Integer(required=True)
+    status: str = String(choices=CAMPAIGN_STATUSES, default="draft")
+    starts_on: date | None = Date()
+    ends_on: date | None = Date()
+    launched_at: datetime | None = DateTime()
 
     @classmethod
     def launch(cls, campaign_code, name, discount_type, discount_value, starts_on=None, ends_on=None):
