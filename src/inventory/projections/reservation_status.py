@@ -31,7 +31,7 @@ class ReservationStatus:
 @inventory.projector(projector_for=ReservationStatus, aggregates=[InventoryItem])
 class ReservationStatusProjector:
     @on(StockReserved)
-    def on_stock_reserved(self, event):
+    def on_stock_reserved(self, event: StockReserved) -> None:
         current_domain.repository_for(ReservationStatus).add(
             ReservationStatus(
                 reservation_id=event.reservation_id,
@@ -46,7 +46,7 @@ class ReservationStatusProjector:
         )
 
     @on(ReservationReleased)
-    def on_reservation_released(self, event):
+    def on_reservation_released(self, event: ReservationReleased) -> None:
         repo = current_domain.repository_for(ReservationStatus)
         reservation = repo.get(event.reservation_id)
         reservation.status = "Released"
@@ -54,7 +54,7 @@ class ReservationStatusProjector:
         repo.add(reservation)
 
     @on(ReservationConfirmed)
-    def on_reservation_confirmed(self, event):
+    def on_reservation_confirmed(self, event: ReservationConfirmed) -> None:
         repo = current_domain.repository_for(ReservationStatus)
         reservation = repo.get(event.reservation_id)
         reservation.status = "Confirmed"
@@ -62,7 +62,7 @@ class ReservationStatusProjector:
         repo.add(reservation)
 
     @on(StockCommitted)
-    def on_stock_committed(self, event):
+    def on_stock_committed(self, event: StockCommitted) -> None:
         repo = current_domain.repository_for(ReservationStatus)
         reservation = repo.get(event.reservation_id)
         reservation.status = "Committed"

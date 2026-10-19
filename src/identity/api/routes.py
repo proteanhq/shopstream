@@ -56,6 +56,8 @@ async def register_customer(body: RegisterCustomerRequest) -> CustomerIdResponse
         date_of_birth=body.date_of_birth,
     )
     result = current_domain.process(command, asynchronous=False)
+    # A synchronous process returns the handler's value, and RegisterCustomerHandler always returns the new id.
+    assert result is not None
     return CustomerIdResponse(customer_id=result)
 
 

@@ -19,7 +19,7 @@ class UpgradeTier:
 @identity.command_handler(part_of=Customer)
 class ManageTierHandler:
     @handle(UpgradeTier)
-    def upgrade_tier(self, command):
+    def upgrade_tier(self, command: UpgradeTier) -> None:
         repo = current_domain.repository_for(Customer)
         customer = repo.get(command.customer_id)
         customer.upgrade_tier(new_tier=command.new_tier)

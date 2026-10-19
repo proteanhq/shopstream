@@ -25,7 +25,7 @@ class AddressBook:
 @identity.projector(projector_for=AddressBook, aggregates=[Customer])
 class AddressBookProjector:
     @on(AddressAdded)
-    def on_address_added(self, event):
+    def on_address_added(self, event: AddressAdded) -> None:
         repo = current_domain.repository_for(AddressBook)
         book = repo.get_or_none(event.customer_id)
         if book is not None:
@@ -53,7 +53,7 @@ class AddressBookProjector:
         repo.add(book)
 
     @on(AddressUpdated)
-    def on_address_updated(self, event):
+    def on_address_updated(self, event: AddressUpdated) -> None:
         repo = current_domain.repository_for(AddressBook)
         book = repo.get(event.customer_id)
         entries = list(book.addresses or [])
@@ -70,7 +70,7 @@ class AddressBookProjector:
         repo.add(book)
 
     @on(AddressRemoved)
-    def on_address_removed(self, event):
+    def on_address_removed(self, event: AddressRemoved) -> None:
         repo = current_domain.repository_for(AddressBook)
         book = repo.get(event.customer_id)
         entries = list(book.addresses or [])
@@ -80,7 +80,7 @@ class AddressBookProjector:
         repo.add(book)
 
     @on(DefaultAddressChanged)
-    def on_default_address_changed(self, event):
+    def on_default_address_changed(self, event: DefaultAddressChanged) -> None:
         repo = current_domain.repository_for(AddressBook)
         book = repo.get(event.customer_id)
         entries = list(book.addresses or [])

@@ -29,9 +29,9 @@ class ShrinkageReport:
     adjustment_reasons: list[str] = List(String())
 
 
-def _get_or_create(event):
+def _get_or_create(event: StockAdjusted | StockMarkedDamaged | DamagedStockWrittenOff) -> ShrinkageReport:
     repo = current_domain.repository_for(ShrinkageReport)
-    record = repo.get_or_none(str(event.inventory_item_id))
+    record: ShrinkageReport | None = repo.get_or_none(str(event.inventory_item_id))
     if record is not None:
         return record
     return ShrinkageReport(
@@ -50,7 +50,7 @@ def _get_or_create(event):
 @inventory.projector(projector_for=ShrinkageReport, aggregates=[InventoryItem])
 class ShrinkageReportProjector:
     @on(StockAdjusted)
-    def on_stock_adjusted(self, event):
+    def on_stock_adjusted(self, event: StockAdjusted) -> None:
         repo = current_domain.repository_for(ShrinkageReport)
         view = _get_or_create(event)
 
@@ -70,7 +70,7 @@ class ShrinkageReportProjector:
         repo.add(view)
 
     @on(StockMarkedDamaged)
-    def on_stock_marked_damaged(self, event):
+    def on_stock_marked_damaged(self, event: StockMarkedDamaged) -> None:
         repo = current_domain.repository_for(ShrinkageReport)
         view = _get_or_create(event)
         view.total_damaged = (view.total_damaged or 0) + (event.quantity or 0)
@@ -78,7 +78,7 @@ class ShrinkageReportProjector:
         repo.add(view)
 
     @on(DamagedStockWrittenOff)
-    def on_damaged_stock_written_off(self, event):
+    def on_damaged_stock_written_off(self, event: DamagedStockWrittenOff) -> None:
         repo = current_domain.repository_for(ShrinkageReport)
         view = _get_or_create(event)
         view.total_written_off = (view.total_written_off or 0) + (event.quantity or 0)

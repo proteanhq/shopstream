@@ -1,6 +1,7 @@
 """Customer profile management — command and handler."""
 
 from datetime import date
+from typing import TypedDict
 
 from protean import handle
 from protean.fields import Identifier, String
@@ -21,11 +22,18 @@ class UpdateProfile:
     date_of_birth: str | None = String(max_length=10)
 
 
+class _ProfileChanges(TypedDict, total=False):
+    first_name: str
+    last_name: str
+    phone: str
+    date_of_birth: date
+
+
 @identity.command_handler(part_of=Customer)
 class ManageProfileHandler:
     @handle(UpdateProfile)
-    def update_profile(self, command):
-        kwargs = {}
+    def update_profile(self, command: UpdateProfile) -> None:
+        kwargs: _ProfileChanges = {}
         if command.first_name is not None:
             kwargs["first_name"] = command.first_name
         if command.last_name is not None:

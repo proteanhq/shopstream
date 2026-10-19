@@ -57,6 +57,8 @@ async def initialize_stock(body: InitializeStockRequest) -> InventoryItemIdRespo
         reorder_quantity=body.reorder_quantity,
     )
     result = current_domain.process(command, asynchronous=False)
+    # A synchronous process returns the handler's value, and InitializeStockHandler always returns the new item id.
+    assert result is not None
     return InventoryItemIdResponse(inventory_item_id=result)
 
 
@@ -83,6 +85,8 @@ async def reserve_stock(inventory_item_id: str, body: ReserveStockRequest) -> Re
         expires_at=expires_at,
     )
     result = current_domain.process(command, asynchronous=False)
+    # A synchronous process returns the handler's value, and ReservationHandler.reserve_stock always returns the new reservation id.
+    assert result is not None
     return ReservationIdResponse(reservation_id=result)
 
 
@@ -196,6 +200,8 @@ async def create_warehouse(body: CreateWarehouseRequest) -> WarehouseIdResponse:
         capacity=body.capacity,
     )
     result = current_domain.process(command, asynchronous=False)
+    # A synchronous process returns the handler's value, and WarehouseManagementHandler.create_warehouse always returns the new id.
+    assert result is not None
     return WarehouseIdResponse(warehouse_id=result)
 
 

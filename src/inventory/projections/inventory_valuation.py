@@ -7,6 +7,7 @@ Unit cost is derived from the most recent StockReceived event.
 from datetime import datetime
 
 from protean.core.projector import on
+from protean.core.repository import BaseRepository
 from protean.fields import DateTime, Float, Identifier, Integer, String
 from protean.utils.globals import current_domain
 
@@ -38,7 +39,7 @@ class InventoryValuation:
 @inventory.projector(projector_for=InventoryValuation, aggregates=[InventoryItem])
 class InventoryValuationProjector:
     @on(StockInitialized)
-    def on_stock_initialized(self, event):
+    def on_stock_initialized(self, event: StockInitialized) -> None:
         on_hand = event.initial_quantity or 0
         current_domain.repository_for(InventoryValuation).add(
             InventoryValuation(
@@ -54,13 +55,13 @@ class InventoryValuationProjector:
             )
         )
 
-    def _get_view(self, inventory_item_id):
+    def _get_view(self, inventory_item_id: str) -> tuple[BaseRepository, InventoryValuation | None]:
         """Get the valuation record, or None if it doesn't exist yet."""
         repo = current_domain.repository_for(InventoryValuation)
         return repo, repo.get_or_none(str(inventory_item_id))
 
     @on(StockReceived)
-    def on_stock_received(self, event):
+    def on_stock_received(self, event: StockReceived) -> None:
         repo, view = self._get_view(event.inventory_item_id)
         if view is None:
             return
@@ -70,7 +71,7 @@ class InventoryValuationProjector:
         repo.add(view)
 
     @on(StockCommitted)
-    def on_stock_committed(self, event):
+    def on_stock_committed(self, event: StockCommitted) -> None:
         repo, view = self._get_view(event.inventory_item_id)
         if view is None:
             return
@@ -80,7 +81,7 @@ class InventoryValuationProjector:
         repo.add(view)
 
     @on(StockAdjusted)
-    def on_stock_adjusted(self, event):
+    def on_stock_adjusted(self, event: StockAdjusted) -> None:
         repo, view = self._get_view(event.inventory_item_id)
         if view is None:
             return
@@ -90,7 +91,7 @@ class InventoryValuationProjector:
         repo.add(view)
 
     @on(StockReturned)
-    def on_stock_returned(self, event):
+    def on_stock_returned(self, event: StockReturned) -> None:
         repo, view = self._get_view(event.inventory_item_id)
         if view is None:
             return
@@ -100,7 +101,7 @@ class InventoryValuationProjector:
         repo.add(view)
 
     @on(DamagedStockWrittenOff)
-    def on_damaged_stock_written_off(self, event):
+    def on_damaged_stock_written_off(self, event: DamagedStockWrittenOff) -> None:
         repo, view = self._get_view(event.inventory_item_id)
         if view is None:
             return

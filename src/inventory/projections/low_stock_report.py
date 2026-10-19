@@ -1,6 +1,7 @@
 """Low stock report — items below reorder point for purchasing alerts."""
 
 from datetime import datetime
+from typing import TypedDict
 
 from protean.core.projector import on
 from protean.exceptions import TransactionError, ValidationError
@@ -26,7 +27,20 @@ class LowStockReport:
     detected_at: datetime | None = DateTime()
 
 
-def _upsert_low_stock(item_id, *, current_available, detected_at, create_kwargs):
+class _LowStockCreateFields(TypedDict):
+    product_id: str
+    variant_id: str
+    sku: str
+    reorder_point: int
+
+
+def _upsert_low_stock(
+    item_id: str,
+    *,
+    current_available: int,
+    detected_at: datetime,
+    create_kwargs: _LowStockCreateFields,
+) -> None:
     """Upsert the single LowStockReport row: update it if present, else create it.
 
     Concurrent movements on the same item can both miss on `get_or_none` and both try to
@@ -79,7 +93,7 @@ def _upsert_low_stock(item_id, *, current_available, detected_at, create_kwargs)
 )
 class LowStockReportProjector:
     @on(LowStockDetected)
-    def on_low_stock_detected(self, event):
+    def on_low_stock_detected(self, event: LowStockDetected) -> None:
         _upsert_low_stock(
             event.inventory_item_id,
             current_available=event.current_available,
@@ -93,7 +107,7 @@ class LowStockReportProjector:
         )
 
     @on(StockReceived)
-    def on_stock_received(self, event):
+    def on_stock_received(self, event: StockReceived) -> None:
         """Remove from low stock report if restocked above threshold."""
         repo = current_domain.repository_for(LowStockReport)
         report = repo.get_or_none(event.inventory_item_id)
@@ -109,7 +123,7 @@ class LowStockReportProjector:
             repo.add(report)
 
     @on(StockReturned)
-    def on_stock_returned(self, event):
+    def on_stock_returned(self, event: StockReturned) -> None:
         """Remove from low stock report if returns bring stock above threshold."""
         repo = current_domain.repository_for(LowStockReport)
         report = repo.get_or_none(event.inventory_item_id)

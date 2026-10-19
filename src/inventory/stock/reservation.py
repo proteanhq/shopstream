@@ -40,7 +40,7 @@ class ConfirmReservation:
 @inventory.command_handler(part_of=InventoryItem)
 class ReservationHandler:
     @handle(ReserveStock)
-    def reserve_stock(self, command):
+    def reserve_stock(self, command: ReserveStock) -> str:
         repo = current_domain.repository_for(InventoryItem)
         item = repo.get(command.inventory_item_id)
 
@@ -54,7 +54,7 @@ class ReservationHandler:
         return str(item.reservations[-1].id)
 
     @handle(ReleaseReservation)
-    def release_reservation(self, command):
+    def release_reservation(self, command: ReleaseReservation) -> None:
         repo = current_domain.repository_for(InventoryItem)
         item = repo.get(command.inventory_item_id)
         item.release_reservation(
@@ -64,7 +64,7 @@ class ReservationHandler:
         repo.add(item)
 
     @handle(ConfirmReservation)
-    def confirm_reservation(self, command):
+    def confirm_reservation(self, command: ConfirmReservation) -> None:
         repo = current_domain.repository_for(InventoryItem)
         item = repo.get(command.inventory_item_id)
         item.confirm_reservation(reservation_id=command.reservation_id)

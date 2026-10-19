@@ -55,7 +55,7 @@ class DeactivateWarehouse:
 @inventory.command_handler(part_of=Warehouse)
 class WarehouseManagementHandler:
     @handle(CreateWarehouse)
-    def create_warehouse(self, command):
+    def create_warehouse(self, command: CreateWarehouse) -> str:
         warehouse = Warehouse.create(
             name=command.name,
             address=command.address,
@@ -65,7 +65,7 @@ class WarehouseManagementHandler:
         return str(warehouse.id)
 
     @handle(UpdateWarehouse)
-    def update_warehouse(self, command):
+    def update_warehouse(self, command: UpdateWarehouse) -> None:
         repo = current_domain.repository_for(Warehouse)
         warehouse = repo.get(command.warehouse_id)
         warehouse.update_details(
@@ -75,7 +75,7 @@ class WarehouseManagementHandler:
         repo.add(warehouse)
 
     @handle(AddZone)
-    def add_zone(self, command):
+    def add_zone(self, command: AddZone) -> None:
         repo = current_domain.repository_for(Warehouse)
         warehouse = repo.get(command.warehouse_id)
         warehouse.add_zone(
@@ -85,14 +85,14 @@ class WarehouseManagementHandler:
         repo.add(warehouse)
 
     @handle(RemoveZone)
-    def remove_zone(self, command):
+    def remove_zone(self, command: RemoveZone) -> None:
         repo = current_domain.repository_for(Warehouse)
         warehouse = repo.get(command.warehouse_id)
         warehouse.remove_zone(zone_id=command.zone_id)
         repo.add(warehouse)
 
     @handle(DeactivateWarehouse)
-    def deactivate_warehouse(self, command):
+    def deactivate_warehouse(self, command: DeactivateWarehouse) -> None:
         repo = current_domain.repository_for(Warehouse)
         warehouse = repo.get(command.warehouse_id)
         warehouse.deactivate()

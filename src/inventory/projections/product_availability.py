@@ -38,14 +38,14 @@ class ProductAvailability:
     updated_at: datetime | None = DateTime()
 
 
-def _build_key(product_id, variant_id):
+def _build_key(product_id: str, variant_id: str) -> str:
     return f"{product_id}::{variant_id}"
 
 
-def _get_or_create(product_id, variant_id, timestamp):
+def _get_or_create(product_id: str, variant_id: str, timestamp: datetime) -> ProductAvailability:
     key = _build_key(product_id, variant_id)
     repo = current_domain.repository_for(ProductAvailability)
-    pa = repo.get_or_none(key)
+    pa: ProductAvailability | None = repo.get_or_none(key)
     if pa is not None:
         return pa
     return ProductAvailability(
@@ -61,7 +61,7 @@ def _get_or_create(product_id, variant_id, timestamp):
     )
 
 
-def _save(pa):
+def _save(pa: ProductAvailability) -> None:
     pa.is_in_stock = pa.total_available > 0
     current_domain.repository_for(ProductAvailability).add(pa)
 
@@ -69,7 +69,7 @@ def _save(pa):
 @inventory.projector(projector_for=ProductAvailability, aggregates=[InventoryItem])
 class ProductAvailabilityProjector:
     @on(StockInitialized)
-    def on_stock_initialized(self, event):
+    def on_stock_initialized(self, event: StockInitialized) -> None:
         pa = _get_or_create(event.product_id, event.variant_id, event.initialized_at)
         pa.total_on_hand = pa.total_on_hand + event.initial_quantity
         pa.total_available = pa.total_available + event.initial_quantity
@@ -78,7 +78,7 @@ class ProductAvailabilityProjector:
         _save(pa)
 
     @on(StockReceived)
-    def on_stock_received(self, event):
+    def on_stock_received(self, event: StockReceived) -> None:
         """Use delta: new_on_hand - previous_on_hand = quantity received."""
         from inventory.projections.inventory_level import InventoryLevel
 
@@ -93,7 +93,7 @@ class ProductAvailabilityProjector:
         _save(pa)
 
     @on(StockReserved)
-    def on_stock_reserved(self, event):
+    def on_stock_reserved(self, event: StockReserved) -> None:
         from inventory.projections.inventory_level import InventoryLevel
 
         level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)
@@ -107,7 +107,7 @@ class ProductAvailabilityProjector:
         _save(pa)
 
     @on(ReservationReleased)
-    def on_reservation_released(self, event):
+    def on_reservation_released(self, event: ReservationReleased) -> None:
         from inventory.projections.inventory_level import InventoryLevel
 
         level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)
@@ -121,7 +121,7 @@ class ProductAvailabilityProjector:
         _save(pa)
 
     @on(StockCommitted)
-    def on_stock_committed(self, event):
+    def on_stock_committed(self, event: StockCommitted) -> None:
         from inventory.projections.inventory_level import InventoryLevel
 
         level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)
@@ -135,7 +135,7 @@ class ProductAvailabilityProjector:
         _save(pa)
 
     @on(StockAdjusted)
-    def on_stock_adjusted(self, event):
+    def on_stock_adjusted(self, event: StockAdjusted) -> None:
         from inventory.projections.inventory_level import InventoryLevel
 
         level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)
@@ -149,7 +149,7 @@ class ProductAvailabilityProjector:
         _save(pa)
 
     @on(StockMarkedDamaged)
-    def on_stock_marked_damaged(self, event):
+    def on_stock_marked_damaged(self, event: StockMarkedDamaged) -> None:
         from inventory.projections.inventory_level import InventoryLevel
 
         level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)
@@ -163,7 +163,7 @@ class ProductAvailabilityProjector:
         _save(pa)
 
     @on(StockReturned)
-    def on_stock_returned(self, event):
+    def on_stock_returned(self, event: StockReturned) -> None:
         from inventory.projections.inventory_level import InventoryLevel
 
         level = current_domain.repository_for(InventoryLevel).get_or_none(event.inventory_item_id)

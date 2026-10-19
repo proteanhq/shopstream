@@ -25,7 +25,7 @@ class RegisterCustomer:
 @identity.command_handler(part_of=Customer)
 class RegisterCustomerHandler:
     @handle(RegisterCustomer)
-    def register_customer(self, command):
+    def register_customer(self, command: RegisterCustomer) -> str:
         dob = None
         if command.date_of_birth:
             dob = date.fromisoformat(command.date_of_birth)

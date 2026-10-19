@@ -2,6 +2,7 @@
 
 from datetime import date, datetime
 from enum import Enum
+from typing import Final
 
 from protean import atomic_change, invariant
 from protean.exceptions import ValidationError
@@ -14,8 +15,18 @@ from identity.shared.phone import PhoneNumber
 # Tier ordering for upgrade validation
 _TIER_ORDER = ["Standard", "Silver", "Gold", "Platinum"]
 
-# Sentinel for distinguishing "not provided" from None in partial updates
-_UNSET = object()
+
+class _Unset(Enum):
+    """Sentinel type for distinguishing "not provided" from None in partial updates.
+
+    A single-member enum (rather than a bare ``object()``) lets type checkers
+    narrow ``x is not _UNSET`` to the real argument type.
+    """
+
+    UNSET = "UNSET"
+
+
+_UNSET: Final = _Unset.UNSET
 
 
 class CustomerStatus(Enum):
@@ -55,7 +66,7 @@ class GeoCoordinates:
     longitude: float | None = Float(min_value=-180.0, max_value=180.0)
 
     @invariant.post
-    def both_coordinates_required(self):
+    def both_coordinates_required(self) -> None:
         if self.latitude is None or self.longitude is None:
             raise ValidationError({"coordinates": ["Both latitude and longitude are required"]})
 
@@ -126,12 +137,12 @@ class Customer:
     last_login_at: datetime | None = DateTime()
 
     @invariant.post
-    def addresses_cannot_exceed_maximum(self):
+    def addresses_cannot_exceed_maximum(self) -> None:
         if len(self.addresses) > 10:
             raise ValidationError({"addresses": ["Cannot have more than 10 addresses"]})
 
     @invariant.post
-    def exactly_one_default_address_when_addresses_exist(self):
+    def exactly_one_default_address_when_addresses_exist(self) -> None:
         if not self.addresses:
             return
         defaults = [a for a in self.addresses if a.is_default]
@@ -141,13 +152,13 @@ class Customer:
     @classmethod
     def register(
         cls,
-        external_id,
-        email,
-        first_name,
-        last_name,
-        phone=None,
-        date_of_birth=None,
-    ):
+        external_id: str,
+        email: str,
+        first_name: str,
+        last_name: str,
+        phone: str | None = None,
+        date_of_birth: date | None = None,
+    ) -> "Customer":
         from identity.customer.events import CustomerRegistered
 
         phone_vo = PhoneNumber(number=phone) if phone else None
@@ -180,19 +191,23 @@ class Customer:
 
     def update_profile(
         self,
-        first_name=_UNSET,
-        last_name=_UNSET,
-        phone=_UNSET,
-        date_of_birth=_UNSET,
-    ):
+        first_name: str | _Unset = _UNSET,
+        last_name: str | _Unset = _UNSET,
+        phone: str | None | _Unset = _UNSET,
+        date_of_birth: date | None | _Unset = _UNSET,
+    ) -> None:
         from identity.customer.events import ProfileUpdated
 
-        new_first = first_name if first_name is not _UNSET else self.profile.first_name
-        new_last = last_name if last_name is not _UNSET else self.profile.last_name
+        current = self.profile
+        if current is None:
+            raise ValidationError({"profile": ["Customer has no profile to update"]})
 
-        phone_vo = (PhoneNumber(number=phone) if phone else None) if phone is not _UNSET else self.profile.phone
+        new_first = first_name if first_name is not _UNSET else current.first_name
+        new_last = last_name if last_name is not _UNSET else current.last_name
 
-        new_dob = date_of_birth if date_of_birth is not _UNSET else self.profile.date_of_birth
+        phone_vo = (PhoneNumber(number=phone) if phone else None) if phone is not _UNSET else current.phone
+
+        new_dob = date_of_birth if date_of_birth is not _UNSET else current.date_of_birth
 
         self.profile = Profile(
             first_name=new_first,
@@ -212,15 +227,15 @@ class Customer:
 
     def add_address(
         self,
-        street,
-        city,
-        postal_code,
-        country,
-        label=AddressLabel.HOME.value,
-        state=None,
-        is_default=False,
-        geo_coordinates=None,
-    ):
+        street: str,
+        city: str,
+        postal_code: str,
+        country: str,
+        label: str = AddressLabel.HOME.value,
+        state: str | None = None,
+        is_default: bool = False,
+        geo_coordinates: GeoCoordinates | None = None,
+    ) -> Address:
         from identity.customer.events import AddressAdded
 
         # First address is always default
@@ -261,7 +276,7 @@ class Customer:
         )
         return address
 
-    def update_address(self, address_id, **kwargs):
+    def update_address(self, address_id: str, **kwargs: str) -> None:
         from identity.customer.events import AddressUpdated
 
         address = next((a for a in self.addresses if a.id == address_id), None)
@@ -279,7 +294,7 @@ class Customer:
             )
         )
 
-    def remove_address(self, address_id):
+    def remove_address(self, address_id: str) -> None:
         from identity.customer.events import AddressRemoved
 
         address = next((a for a in self.addresses if a.id == address_id), None)
@@ -305,7 +320,7 @@ class Customer:
             )
         )
 
-    def set_default_address(self, address_id):
+    def set_default_address(self, address_id: str) -> None:
         from identity.customer.events import DefaultAddressChanged
 
         address = next((a for a in self.addresses if a.id == address_id), None)
@@ -330,7 +345,7 @@ class Customer:
             )
         )
 
-    def suspend(self, reason):
+    def suspend(self, reason: str) -> None:
         from identity.customer.events import AccountSuspended
 
         if self.status != CustomerStatus.ACTIVE.value:
@@ -346,7 +361,7 @@ class Customer:
             )
         )
 
-    def reactivate(self):
+    def reactivate(self) -> None:
         from identity.customer.events import AccountReactivated
 
         if self.status != CustomerStatus.SUSPENDED.value:
@@ -361,7 +376,7 @@ class Customer:
             )
         )
 
-    def close(self):
+    def close(self) -> None:
         from identity.customer.events import AccountClosed
 
         self.status = CustomerStatus.CLOSED.value
@@ -373,7 +388,7 @@ class Customer:
             )
         )
 
-    def upgrade_tier(self, new_tier):
+    def upgrade_tier(self, new_tier: str) -> None:
         from identity.customer.events import TierUpgraded
 
         current_index = _TIER_ORDER.index(self.tier)

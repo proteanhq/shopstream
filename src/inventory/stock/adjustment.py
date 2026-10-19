@@ -31,7 +31,7 @@ class RecordStockCheck:
 @inventory.command_handler(part_of=InventoryItem)
 class StockAdjustmentHandler:
     @handle(AdjustStock)
-    def adjust_stock(self, command):
+    def adjust_stock(self, command: AdjustStock) -> None:
         repo = current_domain.repository_for(InventoryItem)
         item = repo.get(command.inventory_item_id)
         item.adjust_stock(
@@ -43,7 +43,7 @@ class StockAdjustmentHandler:
         repo.add(item)
 
     @handle(RecordStockCheck)
-    def record_stock_check(self, command):
+    def record_stock_check(self, command: RecordStockCheck) -> None:
         repo = current_domain.repository_for(InventoryItem)
         item = repo.get(command.inventory_item_id)
         item.record_stock_check(

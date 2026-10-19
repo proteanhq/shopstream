@@ -33,21 +33,21 @@ class CloseAccount:
 @identity.command_handler(part_of=Customer)
 class ManageAccountHandler:
     @handle(SuspendAccount)
-    def suspend_account(self, command):
+    def suspend_account(self, command: SuspendAccount) -> None:
         repo = current_domain.repository_for(Customer)
         customer = repo.get(command.customer_id)
         customer.suspend(reason=command.reason)
         repo.add(customer)
 
     @handle(ReactivateAccount)
-    def reactivate_account(self, command):
+    def reactivate_account(self, command: ReactivateAccount) -> None:
         repo = current_domain.repository_for(Customer)
         customer = repo.get(command.customer_id)
         customer.reactivate()
         repo.add(customer)
 
     @handle(CloseAccount)
-    def close_account(self, command):
+    def close_account(self, command: CloseAccount) -> None:
         repo = current_domain.repository_for(Customer)
         customer = repo.get(command.customer_id)
         customer.close()

@@ -24,7 +24,7 @@ class InitializeStock:
 @inventory.command_handler(part_of=InventoryItem)
 class InitializeStockHandler:
     @handle(InitializeStock)
-    def initialize_stock(self, command):
+    def initialize_stock(self, command: InitializeStock) -> str:
         item = InventoryItem.create(
             product_id=command.product_id,
             variant_id=command.variant_id,

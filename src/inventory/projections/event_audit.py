@@ -26,6 +26,7 @@ The wildcard handler also runs under ``event_processing="sync"``;
 import uuid
 from datetime import UTC, datetime
 
+from protean.core.event import BaseEvent
 from protean.fields import DateTime, Identifier, String
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
@@ -51,7 +52,7 @@ class EventAuditHandler:
     """Records a uniform audit row for every InventoryItem event via the wildcard."""
 
     @handle("$any")
-    def on_any_event(self, event):
+    def on_any_event(self, event: BaseEvent) -> None:
         metadata = getattr(event, "_metadata", None)
         headers = getattr(metadata, "headers", None)
         domain_meta = getattr(metadata, "domain", None)

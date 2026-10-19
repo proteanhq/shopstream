@@ -34,7 +34,7 @@ class CustomerCard:
 @identity.projector(projector_for=CustomerCard, aggregates=[Customer])
 class CustomerCardProjector:
     @on(CustomerRegistered)
-    def on_customer_registered(self, event):
+    def on_customer_registered(self, event: CustomerRegistered) -> None:
         current_domain.repository_for(CustomerCard).add(
             CustomerCard(
                 customer_id=event.customer_id,
@@ -49,7 +49,7 @@ class CustomerCardProjector:
         )
 
     @on(ProfileUpdated)
-    def on_profile_updated(self, event):
+    def on_profile_updated(self, event: ProfileUpdated) -> None:
         repo = current_domain.repository_for(CustomerCard)
         card = repo.get(event.customer_id)
         card.first_name = event.first_name
@@ -59,28 +59,28 @@ class CustomerCardProjector:
         repo.add(card)
 
     @on(AccountSuspended)
-    def on_account_suspended(self, event):
+    def on_account_suspended(self, event: AccountSuspended) -> None:
         repo = current_domain.repository_for(CustomerCard)
         card = repo.get(event.customer_id)
         card.status = "Suspended"
         repo.add(card)
 
     @on(AccountReactivated)
-    def on_account_reactivated(self, event):
+    def on_account_reactivated(self, event: AccountReactivated) -> None:
         repo = current_domain.repository_for(CustomerCard)
         card = repo.get(event.customer_id)
         card.status = "Active"
         repo.add(card)
 
     @on(AccountClosed)
-    def on_account_closed(self, event):
+    def on_account_closed(self, event: AccountClosed) -> None:
         repo = current_domain.repository_for(CustomerCard)
         card = repo.get(event.customer_id)
         card.status = "Closed"
         repo.add(card)
 
     @on(TierUpgraded)
-    def on_tier_upgraded(self, event):
+    def on_tier_upgraded(self, event: TierUpgraded) -> None:
         repo = current_domain.repository_for(CustomerCard)
         card = repo.get(event.customer_id)
         card.tier = event.new_tier

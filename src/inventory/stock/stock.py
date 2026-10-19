@@ -127,14 +127,14 @@ class InventoryItem:
     @classmethod
     def create(
         cls,
-        product_id,
-        variant_id,
-        warehouse_id,
-        sku,
-        initial_quantity=0,
-        reorder_point=10,
-        reorder_quantity=50,
-    ):
+        product_id: str,
+        variant_id: str,
+        warehouse_id: str,
+        sku: str,
+        initial_quantity: int = 0,
+        reorder_point: int = 10,
+        reorder_quantity: int = 50,
+    ) -> "InventoryItem":
         """Create a new inventory record for a product variant at a warehouse.
 
         Uses _create_new() to get a blank aggregate with auto-generated
@@ -160,7 +160,7 @@ class InventoryItem:
     # -------------------------------------------------------------------
     # Helper
     # -------------------------------------------------------------------
-    def _check_low_stock(self):
+    def _check_low_stock(self) -> None:
         """Raise LowStockDetected if available is at or below reorder point."""
         if self.levels is not None and self.levels.available <= self.reorder_point:
             self.raise_(
@@ -178,7 +178,7 @@ class InventoryItem:
     # -------------------------------------------------------------------
     # Stock receiving
     # -------------------------------------------------------------------
-    def receive_stock(self, quantity, reference=None):
+    def receive_stock(self, quantity: int, reference: str | None = None) -> None:
         """Receive stock into the warehouse."""
         if quantity <= 0:
             raise ValidationError({"quantity": ["Quantity must be positive"]})
@@ -203,7 +203,7 @@ class InventoryItem:
     # -------------------------------------------------------------------
     # Reservations
     # -------------------------------------------------------------------
-    def reserve(self, order_id, quantity, expires_at=None):
+    def reserve(self, order_id: str, quantity: int, expires_at: datetime | None = None) -> None:
         """Reserve stock for an order."""
         if quantity <= 0:
             raise ValidationError({"quantity": ["Quantity must be positive"]})
@@ -233,7 +233,7 @@ class InventoryItem:
         )
         self._check_low_stock()
 
-    def release_blocker(self, reservation_id):
+    def release_blocker(self, reservation_id: str) -> str | None:
         """Return why `release_reservation` would be rejected, or None if it would succeed.
 
         A batch caller checks this before dispatching `ReleaseReservation`. A failed
@@ -250,7 +250,7 @@ class InventoryItem:
             return f"Cannot release reservation in {reservation.status} state"
         return None
 
-    def release_reservation(self, reservation_id, reason):
+    def release_reservation(self, reservation_id: str, reason: str) -> None:
         """Release a reservation, returning stock to available."""
         blocker = self.release_blocker(reservation_id)
         if blocker is not None:
@@ -273,7 +273,7 @@ class InventoryItem:
             )
         )
 
-    def confirm_reservation(self, reservation_id):
+    def confirm_reservation(self, reservation_id: str) -> None:
         """Confirm a reservation after order payment."""
         reservation = next(
             (r for r in (self.reservations or []) if str(r.id) == str(reservation_id)),
@@ -298,7 +298,7 @@ class InventoryItem:
     # -------------------------------------------------------------------
     # Stock commitment (shipping)
     # -------------------------------------------------------------------
-    def commit_stock(self, reservation_id):
+    def commit_stock(self, reservation_id: str) -> None:
         """Commit reserved stock when an order ships. Reduces on-hand."""
         reservation = next(
             (r for r in (self.reservations or []) if str(r.id) == str(reservation_id)),
@@ -330,7 +330,7 @@ class InventoryItem:
     # -------------------------------------------------------------------
     # Stock adjustment
     # -------------------------------------------------------------------
-    def adjust_stock(self, quantity_change, adjustment_type, reason, adjusted_by):
+    def adjust_stock(self, quantity_change: int, adjustment_type: str, reason: str, adjusted_by: str) -> None:
         """Manually adjust stock levels."""
         if not reason:
             raise ValidationError({"reason": ["Reason is required for stock adjustments"]})
@@ -359,7 +359,7 @@ class InventoryItem:
         )
         self._check_low_stock()
 
-    def record_stock_check(self, counted_quantity, checked_by):
+    def record_stock_check(self, counted_quantity: int, checked_by: str) -> None:
         """Record a physical stock count."""
         expected = self.levels.on_hand if self.levels else 0
         discrepancy = counted_quantity - expected
@@ -387,7 +387,7 @@ class InventoryItem:
     # -------------------------------------------------------------------
     # Damage tracking
     # -------------------------------------------------------------------
-    def mark_damaged(self, quantity, reason):
+    def mark_damaged(self, quantity: int, reason: str) -> None:
         """Flag stock as damaged. Moves from on-hand to damaged."""
         if quantity <= 0:
             raise ValidationError({"quantity": ["Quantity must be positive"]})
@@ -421,7 +421,7 @@ class InventoryItem:
         )
         self._check_low_stock()
 
-    def write_off_damaged(self, quantity, approved_by):
+    def write_off_damaged(self, quantity: int, approved_by: str) -> None:
         """Write off damaged stock (remove from inventory)."""
         if quantity <= 0:
             raise ValidationError({"quantity": ["Quantity must be positive"]})
@@ -445,7 +445,7 @@ class InventoryItem:
     # -------------------------------------------------------------------
     # Returns
     # -------------------------------------------------------------------
-    def return_to_stock(self, quantity, order_id):
+    def return_to_stock(self, quantity: int, order_id: str) -> None:
         """Add returned items back to on-hand inventory."""
         if quantity <= 0:
             raise ValidationError({"quantity": ["Quantity must be positive"]})
@@ -471,7 +471,7 @@ class InventoryItem:
     # @apply methods — rebuild state during event replay
     # -------------------------------------------------------------------
     @apply
-    def _on_stock_initialized(self, event: StockInitialized):
+    def _on_stock_initialized(self, event: StockInitialized) -> None:
         self.id = event.inventory_item_id
         self.product_id = event.product_id
         self.variant_id = event.variant_id
@@ -490,7 +490,7 @@ class InventoryItem:
         self.updated_at = event.initialized_at
 
     @apply
-    def _on_stock_received(self, event: StockReceived):
+    def _on_stock_received(self, event: StockReceived) -> None:
         self.levels = StockLevels(
             on_hand=event.new_on_hand,
             reserved=self.levels.reserved if self.levels else 0,
@@ -501,7 +501,7 @@ class InventoryItem:
         self.updated_at = event.received_at
 
     @apply
-    def _on_stock_reserved(self, event: StockReserved):
+    def _on_stock_reserved(self, event: StockReserved) -> None:
         self.add_reservations(
             Reservation(
                 id=event.reservation_id,
@@ -524,7 +524,7 @@ class InventoryItem:
         self.updated_at = event.reserved_at
 
     @apply
-    def _on_reservation_released(self, event: ReservationReleased):
+    def _on_reservation_released(self, event: ReservationReleased) -> None:
         reservation = next(
             (r for r in (self.reservations or []) if str(r.id) == str(event.reservation_id)),
             None,
@@ -544,7 +544,7 @@ class InventoryItem:
         self.updated_at = event.released_at
 
     @apply
-    def _on_reservation_confirmed(self, event: ReservationConfirmed):
+    def _on_reservation_confirmed(self, event: ReservationConfirmed) -> None:
         reservation = next(
             (r for r in (self.reservations or []) if str(r.id) == str(event.reservation_id)),
             None,
@@ -554,7 +554,7 @@ class InventoryItem:
         self.updated_at = event.confirmed_at
 
     @apply
-    def _on_stock_committed(self, event: StockCommitted):
+    def _on_stock_committed(self, event: StockCommitted) -> None:
         # Remove the reservation after commitment
         reservation = next(
             (r for r in (self.reservations or []) if str(r.id) == str(event.reservation_id)),
@@ -573,7 +573,7 @@ class InventoryItem:
         self.updated_at = event.committed_at
 
     @apply
-    def _on_stock_adjusted(self, event: StockAdjusted):
+    def _on_stock_adjusted(self, event: StockAdjusted) -> None:
         self.levels = StockLevels(
             on_hand=event.new_on_hand,
             reserved=self.levels.reserved if self.levels else 0,
@@ -584,7 +584,7 @@ class InventoryItem:
         self.updated_at = event.adjusted_at
 
     @apply
-    def _on_stock_marked_damaged(self, event: StockMarkedDamaged):
+    def _on_stock_marked_damaged(self, event: StockMarkedDamaged) -> None:
         self.levels = StockLevels(
             on_hand=event.new_on_hand,
             reserved=self.levels.reserved if self.levels else 0,
@@ -595,7 +595,7 @@ class InventoryItem:
         self.updated_at = event.marked_at
 
     @apply
-    def _on_damaged_stock_written_off(self, event: DamagedStockWrittenOff):
+    def _on_damaged_stock_written_off(self, event: DamagedStockWrittenOff) -> None:
         self.levels = StockLevels(
             on_hand=self.levels.on_hand if self.levels else 0,
             reserved=self.levels.reserved if self.levels else 0,
@@ -606,7 +606,7 @@ class InventoryItem:
         self.updated_at = event.written_off_at
 
     @apply
-    def _on_stock_returned(self, event: StockReturned):
+    def _on_stock_returned(self, event: StockReturned) -> None:
         self.levels = StockLevels(
             on_hand=event.new_on_hand,
             reserved=self.levels.reserved if self.levels else 0,
@@ -617,11 +617,11 @@ class InventoryItem:
         self.updated_at = event.returned_at
 
     @apply
-    def _on_stock_check_recorded(self, event: StockCheckRecorded):
+    def _on_stock_check_recorded(self, event: StockCheckRecorded) -> None:
         self.last_stock_check = event.checked_at
         self.updated_at = event.checked_at
 
     @apply
-    def _on_low_stock_detected(self, event: LowStockDetected):  # noqa: ARG002
+    def _on_low_stock_detected(self, event: LowStockDetected) -> None:  # noqa: ARG002
         # Notification-only event — no state change
         pass

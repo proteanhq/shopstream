@@ -18,7 +18,7 @@ class EmailAddress:
     address: str = String(required=True, max_length=254)
 
     @invariant.post
-    def verify_email_address(self):
+    def verify_email_address(self) -> None:
         """Ensure that the email address follows a basic valid structure."""
         email = self.address
 

@@ -38,15 +38,15 @@ class StockMovementLog:
 
 
 def _add_entry(
-    inventory_item_id,
-    event_type,
-    description,
-    occurred_at,
-    quantity_change=0,
-    previous_level=0,
-    new_level=0,
-    actor=None,
-):
+    inventory_item_id: str,
+    event_type: str,
+    description: str,
+    occurred_at: datetime,
+    quantity_change: int = 0,
+    previous_level: int = 0,
+    new_level: int = 0,
+    actor: str | None = None,
+) -> None:
     current_domain.repository_for(StockMovementLog).add(
         StockMovementLog(
             entry_id=str(uuid.uuid4()),
@@ -65,7 +65,7 @@ def _add_entry(
 @inventory.projector(projector_for=StockMovementLog, aggregates=[InventoryItem])
 class StockMovementLogProjector:
     @on(StockInitialized)
-    def on_stock_initialized(self, event):
+    def on_stock_initialized(self, event: StockInitialized) -> None:
         _add_entry(
             event.inventory_item_id,
             "StockInitialized",
@@ -76,7 +76,7 @@ class StockMovementLogProjector:
         )
 
     @on(StockReceived)
-    def on_stock_received(self, event):
+    def on_stock_received(self, event: StockReceived) -> None:
         _add_entry(
             event.inventory_item_id,
             "StockReceived",
@@ -88,7 +88,7 @@ class StockMovementLogProjector:
         )
 
     @on(StockReserved)
-    def on_stock_reserved(self, event):
+    def on_stock_reserved(self, event: StockReserved) -> None:
         _add_entry(
             event.inventory_item_id,
             "StockReserved",
@@ -100,7 +100,7 @@ class StockMovementLogProjector:
         )
 
     @on(ReservationReleased)
-    def on_reservation_released(self, event):
+    def on_reservation_released(self, event: ReservationReleased) -> None:
         _add_entry(
             event.inventory_item_id,
             "ReservationReleased",
@@ -112,7 +112,7 @@ class StockMovementLogProjector:
         )
 
     @on(ReservationConfirmed)
-    def on_reservation_confirmed(self, event):
+    def on_reservation_confirmed(self, event: ReservationConfirmed) -> None:
         _add_entry(
             event.inventory_item_id,
             "ReservationConfirmed",
@@ -121,7 +121,7 @@ class StockMovementLogProjector:
         )
 
     @on(StockCommitted)
-    def on_stock_committed(self, event):
+    def on_stock_committed(self, event: StockCommitted) -> None:
         _add_entry(
             event.inventory_item_id,
             "StockCommitted",
@@ -133,7 +133,7 @@ class StockMovementLogProjector:
         )
 
     @on(StockAdjusted)
-    def on_stock_adjusted(self, event):
+    def on_stock_adjusted(self, event: StockAdjusted) -> None:
         _add_entry(
             event.inventory_item_id,
             "StockAdjusted",
@@ -146,7 +146,7 @@ class StockMovementLogProjector:
         )
 
     @on(StockMarkedDamaged)
-    def on_stock_marked_damaged(self, event):
+    def on_stock_marked_damaged(self, event: StockMarkedDamaged) -> None:
         _add_entry(
             event.inventory_item_id,
             "StockMarkedDamaged",
@@ -158,7 +158,7 @@ class StockMovementLogProjector:
         )
 
     @on(DamagedStockWrittenOff)
-    def on_damaged_stock_written_off(self, event):
+    def on_damaged_stock_written_off(self, event: DamagedStockWrittenOff) -> None:
         _add_entry(
             event.inventory_item_id,
             "DamagedStockWrittenOff",
@@ -171,7 +171,7 @@ class StockMovementLogProjector:
         )
 
     @on(StockReturned)
-    def on_stock_returned(self, event):
+    def on_stock_returned(self, event: StockReturned) -> None:
         _add_entry(
             event.inventory_item_id,
             "StockReturned",
@@ -183,7 +183,7 @@ class StockMovementLogProjector:
         )
 
     @on(StockCheckRecorded)
-    def on_stock_check_recorded(self, event):
+    def on_stock_check_recorded(self, event: StockCheckRecorded) -> None:
         _add_entry(
             event.inventory_item_id,
             "StockCheckRecorded",

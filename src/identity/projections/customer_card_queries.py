@@ -16,5 +16,5 @@ class GetCustomerCard:
 @identity.query_handler(part_of=CustomerCard)
 class CustomerCardQueryHandler:
     @read(GetCustomerCard)
-    def get_customer_card(self, query):
+    def get_customer_card(self, query: GetCustomerCard) -> CustomerCard:
         return current_domain.view_for(CustomerCard).get(query.customer_id)

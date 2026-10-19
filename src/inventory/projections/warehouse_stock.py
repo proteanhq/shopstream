@@ -38,7 +38,7 @@ class WarehouseStock:
 @inventory.projector(projector_for=WarehouseStock, aggregates=[InventoryItem])
 class WarehouseStockProjector:
     @on(StockInitialized)
-    def on_stock_initialized(self, event):
+    def on_stock_initialized(self, event: StockInitialized) -> None:
         current_domain.repository_for(WarehouseStock).add(
             WarehouseStock(
                 entry_id=event.inventory_item_id,
@@ -55,7 +55,7 @@ class WarehouseStockProjector:
         )
 
     @on(StockReceived)
-    def on_stock_received(self, event):
+    def on_stock_received(self, event: StockReceived) -> None:
         repo = current_domain.repository_for(WarehouseStock)
         ws = repo.get(event.inventory_item_id)
         ws.on_hand = event.new_on_hand
@@ -64,7 +64,7 @@ class WarehouseStockProjector:
         repo.add(ws)
 
     @on(StockReserved)
-    def on_stock_reserved(self, event):
+    def on_stock_reserved(self, event: StockReserved) -> None:
         repo = current_domain.repository_for(WarehouseStock)
         ws = repo.get(event.inventory_item_id)
         ws.reserved = ws.reserved + event.quantity
@@ -73,7 +73,7 @@ class WarehouseStockProjector:
         repo.add(ws)
 
     @on(ReservationReleased)
-    def on_reservation_released(self, event):
+    def on_reservation_released(self, event: ReservationReleased) -> None:
         repo = current_domain.repository_for(WarehouseStock)
         ws = repo.get(event.inventory_item_id)
         ws.reserved = ws.reserved - event.quantity
@@ -82,7 +82,7 @@ class WarehouseStockProjector:
         repo.add(ws)
 
     @on(StockCommitted)
-    def on_stock_committed(self, event):
+    def on_stock_committed(self, event: StockCommitted) -> None:
         repo = current_domain.repository_for(WarehouseStock)
         ws = repo.get(event.inventory_item_id)
         ws.on_hand = event.new_on_hand
@@ -92,7 +92,7 @@ class WarehouseStockProjector:
         repo.add(ws)
 
     @on(StockAdjusted)
-    def on_stock_adjusted(self, event):
+    def on_stock_adjusted(self, event: StockAdjusted) -> None:
         repo = current_domain.repository_for(WarehouseStock)
         ws = repo.get(event.inventory_item_id)
         ws.on_hand = event.new_on_hand
@@ -101,7 +101,7 @@ class WarehouseStockProjector:
         repo.add(ws)
 
     @on(StockMarkedDamaged)
-    def on_stock_marked_damaged(self, event):
+    def on_stock_marked_damaged(self, event: StockMarkedDamaged) -> None:
         repo = current_domain.repository_for(WarehouseStock)
         ws = repo.get(event.inventory_item_id)
         ws.on_hand = event.new_on_hand
@@ -111,7 +111,7 @@ class WarehouseStockProjector:
         repo.add(ws)
 
     @on(DamagedStockWrittenOff)
-    def on_damaged_stock_written_off(self, event):
+    def on_damaged_stock_written_off(self, event: DamagedStockWrittenOff) -> None:
         repo = current_domain.repository_for(WarehouseStock)
         ws = repo.get(event.inventory_item_id)
         ws.damaged = event.new_damaged
@@ -119,7 +119,7 @@ class WarehouseStockProjector:
         repo.add(ws)
 
     @on(StockReturned)
-    def on_stock_returned(self, event):
+    def on_stock_returned(self, event: StockReturned) -> None:
         repo = current_domain.repository_for(WarehouseStock)
         ws = repo.get(event.inventory_item_id)
         ws.on_hand = event.new_on_hand
