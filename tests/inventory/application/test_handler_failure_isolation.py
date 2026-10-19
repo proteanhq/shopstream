@@ -17,16 +17,12 @@ aggregate is saved. The commit sorts a handler failure by type:
 
 - ``ExpectedVersionError`` and ``ConfigurationError`` reach the caller as
   themselves.
-- A ``ValueError`` and a SQLAlchemy ``StaleDataError`` come back as a new
-  ``ExpectedVersionError``.
+- A SQLAlchemy ``StaleDataError`` comes back as a new ``ExpectedVersionError``.
 - Any other ``Exception``, or an ``ExceptionGroup`` of several, is wrapped in a
-  ``TransactionError`` with the original on ``__cause__``.
+  ``TransactionError`` with the original on ``__cause__``. That includes a
+  ``ValueError`` (proteanhq/protean#1682, guarded by
+  ``verification/regression/test_protean_regressions.py::test_1682_value_error_from_a_sync_handler_is_not_a_version_conflict``).
 - A ``BaseException`` that is not an ``Exception`` passes through untouched.
-
-Do not raise ``ValueError`` from a fake handler here. The commit reports it as
-``ExpectedVersionError``, and version retry runs the committed command again
-(proteanhq/protean#1682, pinned by
-``verification/regression/test_protean_regressions.py::test_1682_value_error_from_a_sync_handler_is_not_a_version_conflict``).
 """
 
 from collections.abc import Callable
