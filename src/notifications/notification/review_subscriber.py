@@ -7,6 +7,8 @@ broker, filters by event type, and translates into domain-local side effects.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 
 from notifications.domain import notifications
@@ -25,7 +27,7 @@ class ReviewEventsSubscriber:
     types not relevant to the Notifications domain.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
@@ -34,7 +36,7 @@ class ReviewEventsSubscriber:
         elif "ReviewRejected" in event_type:
             self._on_review_rejected(data)
 
-    def _on_review_approved(self, data: dict) -> None:
+    def _on_review_approved(self, data: dict[str, Any]) -> None:
         """Notify the customer that their review has been published."""
         create_notifications_for_customer(
             customer_id=str(data["customer_id"]),
@@ -47,7 +49,7 @@ class ReviewEventsSubscriber:
             source_event_type="Reviews.ReviewApproved.v1",
         )
 
-    def _on_review_rejected(self, data: dict) -> None:
+    def _on_review_rejected(self, data: dict[str, Any]) -> None:
         """Notify the customer that their review was rejected."""
         create_notifications_for_customer(
             customer_id=str(data["customer_id"]),

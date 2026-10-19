@@ -19,7 +19,7 @@ class CancelNotification:
 @notifications.command_handler(part_of=Notification)
 class CancelNotificationHandler:
     @handle(CancelNotification)
-    def cancel_notification(self, command: CancelNotification):
+    def cancel_notification(self, command: CancelNotification) -> None:
         repo = current_domain.repository_for(Notification)
         notification = repo.get(command.notification_id)
         notification.cancel(command.reason)

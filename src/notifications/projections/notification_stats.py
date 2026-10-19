@@ -24,7 +24,7 @@ class NotificationStats:
 @notifications.projector(projector_for=NotificationStats, aggregates=[Notification])
 class NotificationStatsProjector:
     @on(NotificationSent)
-    def on_notification_sent(self, event):
+    def on_notification_sent(self, event: NotificationSent) -> None:
         repo = current_domain.repository_for(NotificationStats)
 
         date_str = event.sent_at.strftime("%Y-%m-%d") if event.sent_at else "unknown"

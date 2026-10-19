@@ -1,5 +1,7 @@
 """Points redeemed template — sent when a customer redeems loyalty points."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -11,7 +13,7 @@ class PointsRedeemedTemplate:
     default_channels = [NotificationChannel.EMAIL.value]
 
     @staticmethod
-    def render(context: dict) -> dict:
+    def render(context: dict[str, Any]) -> dict[str, str]:
         amount = context.get("amount", "0")
         balance_after = context.get("balance_after", "0")
         reason = context.get("reason") or "your redemption"

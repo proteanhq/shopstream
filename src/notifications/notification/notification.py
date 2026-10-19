@@ -147,19 +147,19 @@ class Notification:
     @classmethod
     def create(
         cls,
-        recipient_id,
-        notification_type,
-        channel,
-        body,
-        subject=None,
-        recipient_type=RecipientType.CUSTOMER.value,
-        template_name=None,
-        source_event_type=None,
-        source_event_id=None,
-        context_data=None,
-        scheduled_for=None,
-        max_retries=3,
-    ):
+        recipient_id: str,
+        notification_type: str,
+        channel: str,
+        body: str,
+        subject: str | None = None,
+        recipient_type: str = RecipientType.CUSTOMER.value,
+        template_name: str | None = None,
+        source_event_type: str | None = None,
+        source_event_id: str | None = None,
+        context_data: dict[str, Any] | None = None,
+        scheduled_for: datetime | None = None,
+        max_retries: int = 3,
+    ) -> "Notification":
         """Create a new notification in PENDING status."""
         now = datetime.now(UTC)
 
@@ -202,7 +202,7 @@ class Notification:
     # -------------------------------------------------------------------
     # State transitions
     # -------------------------------------------------------------------
-    def mark_sent(self, sent_at=None):
+    def mark_sent(self, sent_at: datetime | None = None) -> None:
         """Mark notification as successfully sent to the channel."""
         now = sent_at or datetime.now(UTC)
         self.status = NotificationStatus.SENT.value
@@ -218,7 +218,7 @@ class Notification:
             )
         )
 
-    def mark_delivered(self, delivered_at=None):
+    def mark_delivered(self, delivered_at: datetime | None = None) -> None:
         """Mark notification as confirmed delivered."""
         now = delivered_at or datetime.now(UTC)
         self.status = NotificationStatus.DELIVERED.value
@@ -234,7 +234,7 @@ class Notification:
             )
         )
 
-    def mark_failed(self, reason):
+    def mark_failed(self, reason: str) -> None:
         """Mark notification as failed."""
         now = datetime.now(UTC)
         self.status = NotificationStatus.FAILED.value
@@ -254,7 +254,7 @@ class Notification:
             )
         )
 
-    def mark_bounced(self, reason):
+    def mark_bounced(self, reason: str) -> None:
         """Mark notification as bounced (permanent delivery failure)."""
         now = datetime.now(UTC)
         self.status = NotificationStatus.BOUNCED.value
@@ -271,7 +271,7 @@ class Notification:
             )
         )
 
-    def cancel(self, reason):
+    def cancel(self, reason: str) -> None:
         """Cancel a pending notification."""
         now = datetime.now(UTC)
         self.status = NotificationStatus.CANCELLED.value
@@ -288,7 +288,7 @@ class Notification:
             )
         )
 
-    def retry(self):
+    def retry(self) -> None:
         """Retry a failed notification."""
         if NotificationStatus(self.status) != NotificationStatus.FAILED:
             raise ValidationError({"status": ["Only failed notifications can be retried"]})

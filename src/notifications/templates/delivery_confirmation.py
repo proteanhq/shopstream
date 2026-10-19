@@ -1,5 +1,7 @@
 """Delivery confirmation template — sent when order is delivered."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -14,7 +16,7 @@ class DeliveryConfirmationTemplate:
     ]
 
     @staticmethod
-    def render(context: dict) -> dict:
+    def render(context: dict[str, Any]) -> dict[str, str]:
         order_id = context.get("order_id", "N/A")
         return {
             "subject": "Your Order Has Been Delivered",

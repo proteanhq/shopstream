@@ -7,6 +7,8 @@ broker, filters by event type, and translates into domain-local side effects.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 
 from notifications.domain import notifications
@@ -25,14 +27,14 @@ class InventoryEventsSubscriber:
     types not relevant to the Notifications domain.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
         if "LowStockDetected" in event_type:
             self._on_low_stock_detected(data)
 
-    def _on_low_stock_detected(self, data: dict) -> None:
+    def _on_low_stock_detected(self, data: dict[str, Any]) -> None:
         """Send internal Slack alert when stock drops below reorder point."""
         create_internal_notification(
             notification_type=NotificationType.LOW_STOCK_ALERT.value,

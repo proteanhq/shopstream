@@ -1,5 +1,7 @@
 """Welcome notification template — sent when a customer registers."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -11,7 +13,7 @@ class WelcomeTemplate:
     default_channels = [NotificationChannel.EMAIL.value]
 
     @staticmethod
-    def render(context: dict) -> dict:
+    def render(context: dict[str, Any]) -> dict[str, str]:
         first_name = context.get("first_name", "there")
         return {
             "subject": f"Welcome to ShopStream, {first_name}!",

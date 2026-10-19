@@ -5,12 +5,18 @@ by default; real adapters (SendGrid, Twilio, FCM, Slack API) can
 be configured via environment variables in production.
 """
 
+from notifications.channel.email_port import EmailPort
+from notifications.channel.push_port import PushPort
+from notifications.channel.slack_port import SlackPort
+from notifications.channel.sms_port import SMSPort
 from notifications.notification.notification import NotificationChannel
 
-_channel_instances: dict[str, object] = {}
+ChannelAdapter = EmailPort | SMSPort | PushPort | SlackPort
+
+_channel_instances: dict[str, ChannelAdapter] = {}
 
 
-def get_channel(channel_type: str):
+def get_channel(channel_type: str) -> ChannelAdapter:
     """Return the configured channel adapter (singleton per channel type).
 
     Args:
@@ -39,7 +45,7 @@ def get_channel(channel_type: str):
     return _channel_instances[channel_type]
 
 
-def reset_channels():
+def reset_channels() -> None:
     """Reset all channel singletons (useful for testing)."""
     global _channel_instances
     _channel_instances.clear()

@@ -18,7 +18,7 @@ class RetryNotification:
 @notifications.command_handler(part_of=Notification)
 class RetryNotificationHandler:
     @handle(RetryNotification)
-    def retry_notification(self, command: RetryNotification):
+    def retry_notification(self, command: RetryNotification) -> None:
         repo = current_domain.repository_for(Notification)
         notification = repo.get(command.notification_id)
         notification.retry()

@@ -7,6 +7,8 @@ broker, filters by event type, and translates into domain-local side effects.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -25,14 +27,14 @@ class PreferenceIdentitySubscriber:
     types not relevant to preference management.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
         if "CustomerRegistered" in event_type:
             self._on_customer_registered(data)
 
-    def _on_customer_registered(self, data: dict) -> None:
+    def _on_customer_registered(self, data: dict[str, Any]) -> None:
         """Create default notification preferences for the new customer."""
         customer_id = str(data["customer_id"])
         repo = current_domain.repository_for(NotificationPreference)

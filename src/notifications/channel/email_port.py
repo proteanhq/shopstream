@@ -1,6 +1,7 @@
 """Email channel port — abstract interface for email dispatch."""
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class EmailPort(ABC):
@@ -13,7 +14,7 @@ class EmailPort(ABC):
         subject: str,
         body: str,
         html_body: str | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Send an email message.
 
         Returns:

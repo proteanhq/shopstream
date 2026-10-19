@@ -1,5 +1,7 @@
 """Review prompt template — sent 7 days after delivery."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -14,7 +16,7 @@ class ReviewPromptTemplate:
     ]
 
     @staticmethod
-    def render(context: dict) -> dict:
+    def render(context: dict[str, Any]) -> dict[str, str]:
         order_id = context.get("order_id", "N/A")
         return {
             "subject": "How was your purchase?",

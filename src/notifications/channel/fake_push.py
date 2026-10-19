@@ -1,5 +1,6 @@
 """Fake push notification adapter — records sent pushes for testing."""
 
+from typing import Any
 from uuid import uuid4
 
 from notifications.channel.push_port import PushPort
@@ -8,12 +9,12 @@ from notifications.channel.push_port import PushPort
 class FakePushAdapter(PushPort):
     """Push adapter that records notifications in memory for test assertions."""
 
-    def __init__(self):
-        self.sent_pushes: list[dict] = []
+    def __init__(self) -> None:
+        self.sent_pushes: list[dict[str, Any]] = []
         self.should_succeed = True
         self.failure_reason = "Push delivery failed"
 
-    def configure(self, should_succeed: bool = True, failure_reason: str = "Push delivery failed"):
+    def configure(self, should_succeed: bool = True, failure_reason: str = "Push delivery failed") -> None:
         """Configure the fake adapter behavior for testing."""
         self.should_succeed = should_succeed
         self.failure_reason = failure_reason
@@ -23,8 +24,8 @@ class FakePushAdapter(PushPort):
         device_token: str,
         title: str,
         body: str,
-        data: dict | None = None,
-    ) -> dict:
+        data: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         if not self.should_succeed:
             return {
                 "message_id": None,
@@ -44,7 +45,7 @@ class FakePushAdapter(PushPort):
 
         return {"message_id": message_id, "status": "sent"}
 
-    def reset(self):
+    def reset(self) -> None:
         """Clear sent pushes (useful between tests)."""
         self.sent_pushes.clear()
         self.should_succeed = True

@@ -31,7 +31,7 @@ class CustomerNotifications:
 @notifications.projector(projector_for=CustomerNotifications, aggregates=[Notification])
 class CustomerNotificationsProjector:
     @on(NotificationCreated)
-    def on_notification_created(self, event):
+    def on_notification_created(self, event: NotificationCreated) -> None:
         # Only track customer notifications (skip internal)
         if event.recipient_type != "Customer":
             return
@@ -49,7 +49,7 @@ class CustomerNotificationsProjector:
             )
         )
 
-    def _update_status(self, notification_id, status, updated_at):
+    def _update_status(self, notification_id: str, status: str, updated_at: datetime | None) -> None:
         repo = current_domain.repository_for(CustomerNotifications)
         cn = repo.get_or_none(notification_id)
         if cn is None:
@@ -59,13 +59,13 @@ class CustomerNotificationsProjector:
         repo.add(cn)
 
     @on(NotificationSent)
-    def on_notification_sent(self, event):
+    def on_notification_sent(self, event: NotificationSent) -> None:
         self._update_status(event.notification_id, "Sent", event.sent_at)
 
     @on(NotificationDelivered)
-    def on_notification_delivered(self, event):
+    def on_notification_delivered(self, event: NotificationDelivered) -> None:
         self._update_status(event.notification_id, "Delivered", event.delivered_at)
 
     @on(NotificationFailed)
-    def on_notification_failed(self, event):
+    def on_notification_failed(self, event: NotificationFailed) -> None:
         self._update_status(event.notification_id, "Failed", event.failed_at)

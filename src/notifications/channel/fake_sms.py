@@ -1,5 +1,6 @@
 """Fake SMS adapter — records sent messages for testing."""
 
+from typing import Any
 from uuid import uuid4
 
 from notifications.channel.sms_port import SMSPort
@@ -8,17 +9,17 @@ from notifications.channel.sms_port import SMSPort
 class FakeSMSAdapter(SMSPort):
     """SMS adapter that records messages in memory for test assertions."""
 
-    def __init__(self):
-        self.sent_messages: list[dict] = []
+    def __init__(self) -> None:
+        self.sent_messages: list[dict[str, Any]] = []
         self.should_succeed = True
         self.failure_reason = "SMS delivery failed"
 
-    def configure(self, should_succeed: bool = True, failure_reason: str = "SMS delivery failed"):
+    def configure(self, should_succeed: bool = True, failure_reason: str = "SMS delivery failed") -> None:
         """Configure the fake adapter behavior for testing."""
         self.should_succeed = should_succeed
         self.failure_reason = failure_reason
 
-    def send(self, to: str, body: str) -> dict:
+    def send(self, to: str, body: str) -> dict[str, Any]:
         if not self.should_succeed:
             return {
                 "message_id": None,
@@ -36,7 +37,7 @@ class FakeSMSAdapter(SMSPort):
 
         return {"message_id": message_id, "status": "sent"}
 
-    def reset(self):
+    def reset(self) -> None:
         """Clear sent messages (useful between tests)."""
         self.sent_messages.clear()
         self.should_succeed = True

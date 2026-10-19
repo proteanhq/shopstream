@@ -1,5 +1,7 @@
 """Order confirmation template — sent when an order is created."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -11,7 +13,7 @@ class OrderConfirmationTemplate:
     default_channels = [NotificationChannel.EMAIL.value]
 
     @staticmethod
-    def render(context: dict) -> dict:
+    def render(context: dict[str, Any]) -> dict[str, str]:
         order_id = context.get("order_id", "N/A")
         grand_total = context.get("grand_total", "0.00")
         currency = context.get("currency", "USD")

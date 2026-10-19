@@ -30,7 +30,7 @@ class ProcessScheduledNotifications:
 @notifications.command_handler(part_of=Notification)
 class ProcessScheduledNotificationsHandler:
     @handle(ProcessScheduledNotifications)
-    def process_scheduled(self, command: ProcessScheduledNotifications):
+    def process_scheduled(self, command: ProcessScheduledNotifications) -> None:
         with processing_priority(Priority.LOW):
             as_of = command.as_of or current_domain.clock.now()
             repo = current_domain.repository_for(Notification)

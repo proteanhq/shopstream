@@ -8,6 +8,8 @@ broker, filters by event type, and translates into domain-local side effects.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 
 from notifications.domain import notifications
@@ -24,7 +26,7 @@ class FulfillmentEventsSubscriber:
     types not relevant to the Notifications domain.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
@@ -35,7 +37,7 @@ class FulfillmentEventsSubscriber:
         elif "DeliveryException" in event_type:
             self._on_delivery_exception(data)
 
-    def _on_shipment_handed_off(self, data: dict) -> None:
+    def _on_shipment_handed_off(self, data: dict[str, Any]) -> None:
         """Send shipping notification when order ships.
 
         Note: ShipmentHandedOff doesn't carry customer_id directly.
@@ -48,7 +50,7 @@ class FulfillmentEventsSubscriber:
             tracking_number=data.get("tracking_number"),
         )
 
-    def _on_delivery_confirmed(self, data: dict) -> None:
+    def _on_delivery_confirmed(self, data: dict[str, Any]) -> None:
         """Send delivery confirmation when order is delivered.
 
         Note: DeliveryConfirmed doesn't carry customer_id.
@@ -59,7 +61,7 @@ class FulfillmentEventsSubscriber:
             order_id=str(data.get("order_id", "")),
         )
 
-    def _on_delivery_exception(self, data: dict) -> None:
+    def _on_delivery_exception(self, data: dict[str, Any]) -> None:
         """Send delivery exception alert when there's a delivery issue.
 
         Note: DeliveryException doesn't carry customer_id.

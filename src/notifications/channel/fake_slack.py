@@ -1,5 +1,6 @@
 """Fake Slack adapter — records sent messages for testing."""
 
+from typing import Any
 from uuid import uuid4
 
 from notifications.channel.slack_port import SlackPort
@@ -8,12 +9,12 @@ from notifications.channel.slack_port import SlackPort
 class FakeSlackAdapter(SlackPort):
     """Slack adapter that records messages in memory for test assertions."""
 
-    def __init__(self):
-        self.sent_messages: list[dict] = []
+    def __init__(self) -> None:
+        self.sent_messages: list[dict[str, Any]] = []
         self.should_succeed = True
         self.failure_reason = "Slack delivery failed"
 
-    def configure(self, should_succeed: bool = True, failure_reason: str = "Slack delivery failed"):
+    def configure(self, should_succeed: bool = True, failure_reason: str = "Slack delivery failed") -> None:
         """Configure the fake adapter behavior for testing."""
         self.should_succeed = should_succeed
         self.failure_reason = failure_reason
@@ -22,8 +23,8 @@ class FakeSlackAdapter(SlackPort):
         self,
         channel: str,
         message: str,
-        blocks: list | None = None,
-    ) -> dict:
+        blocks: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
         if not self.should_succeed:
             return {
                 "message_id": None,
@@ -42,7 +43,7 @@ class FakeSlackAdapter(SlackPort):
 
         return {"message_id": message_id, "status": "sent"}
 
-    def reset(self):
+    def reset(self) -> None:
         """Clear sent messages (useful between tests)."""
         self.sent_messages.clear()
         self.should_succeed = True

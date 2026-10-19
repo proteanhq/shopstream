@@ -1,6 +1,7 @@
 """Push notification channel port — abstract interface for push dispatch."""
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class PushPort(ABC):
@@ -12,8 +13,8 @@ class PushPort(ABC):
         device_token: str,
         title: str,
         body: str,
-        data: dict | None = None,
-    ) -> dict:
+        data: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Send a push notification.
 
         Returns:
