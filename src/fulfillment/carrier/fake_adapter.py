@@ -5,6 +5,7 @@ Configurable success/failure behavior for integration testing.
 """
 
 from datetime import UTC, datetime, timedelta
+from typing import Any
 from uuid import uuid4
 
 from fulfillment.carrier.port import CarrierPort
@@ -13,11 +14,11 @@ from fulfillment.carrier.port import CarrierPort
 class FakeCarrier(CarrierPort):
     """Fake carrier that always succeeds by default."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.should_succeed = True
         self.failure_reason = "Carrier unavailable"
 
-    def configure(self, should_succeed: bool = True, failure_reason: str = "Carrier unavailable"):
+    def configure(self, should_succeed: bool = True, failure_reason: str = "Carrier unavailable") -> None:
         """Configure the fake carrier behavior for testing."""
         self.should_succeed = should_succeed
         self.failure_reason = failure_reason
@@ -28,8 +29,8 @@ class FakeCarrier(CarrierPort):
         carrier: str,
         service_level: str,
         weight: float | None = None,
-        dimensions: dict | None = None,
-    ) -> dict:
+        dimensions: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         if not self.should_succeed:
             return {
                 "shipment_id": None,
@@ -53,7 +54,7 @@ class FakeCarrier(CarrierPort):
             "estimated_delivery": estimated_delivery.isoformat(),
         }
 
-    def get_tracking(self, tracking_number: str) -> dict:
+    def get_tracking(self, tracking_number: str) -> dict[str, Any]:
         if not self.should_succeed:
             return {
                 "status": "unknown",
@@ -81,7 +82,7 @@ class FakeCarrier(CarrierPort):
             ],
         }
 
-    def cancel_shipment(self, tracking_number: str) -> dict:
+    def cancel_shipment(self, tracking_number: str) -> dict[str, Any]:
         if not self.should_succeed:
             return {"cancelled": False, "reason": self.failure_reason}
         return {"cancelled": True, "reason": "Shipment cancelled successfully"}

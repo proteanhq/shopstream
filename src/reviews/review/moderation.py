@@ -24,7 +24,7 @@ class ModerateReview:
 @reviews.command_handler(part_of=Review)
 class ModerateReviewHandler:
     @handle(ModerateReview)
-    def moderate_review(self, command):
+    def moderate_review(self, command: ModerateReview) -> None:
         repo = current_domain.repository_for(Review)
         review = repo.get(command.review_id)
 

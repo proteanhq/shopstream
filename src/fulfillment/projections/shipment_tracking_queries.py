@@ -16,7 +16,7 @@ class GetShipmentTracking:
 @fulfillment.query_handler(part_of=ShipmentTrackingView)
 class ShipmentTrackingQueryHandler:
     @read(GetShipmentTracking)
-    def get_shipment_tracking(self, query):
+    def get_shipment_tracking(self, query: GetShipmentTracking) -> ShipmentTrackingView | None:
         results = current_domain.view_for(ShipmentTrackingView).query.filter(order_id=query.order_id).all()
         if results.items:
             return results.first

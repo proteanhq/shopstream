@@ -2,10 +2,12 @@
 
 import os
 
-_carrier_instance = None
+from fulfillment.carrier.port import CarrierPort
+
+_carrier_instance: CarrierPort | None = None
 
 
-def get_carrier():
+def get_carrier() -> CarrierPort:
     """Return the configured carrier adapter (singleton).
 
     Uses FakeCarrier by default. In production, configure via
@@ -23,7 +25,7 @@ def get_carrier():
     return _carrier_instance
 
 
-def reset_carrier():
+def reset_carrier() -> None:
     """Reset the carrier singleton (useful for testing)."""
     global _carrier_instance
     _carrier_instance = None

@@ -5,6 +5,7 @@ programs against the port; adapters are swapped via configuration.
 """
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class CarrierPort(ABC):
@@ -17,8 +18,8 @@ class CarrierPort(ABC):
         carrier: str,
         service_level: str,
         weight: float | None = None,
-        dimensions: dict | None = None,
-    ) -> dict:
+        dimensions: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Create a shipment with the carrier.
 
         Returns:
@@ -27,7 +28,7 @@ class CarrierPort(ABC):
         ...
 
     @abstractmethod
-    def get_tracking(self, tracking_number: str) -> dict:
+    def get_tracking(self, tracking_number: str) -> dict[str, Any]:
         """Get current tracking status for a shipment.
 
         Returns:
@@ -36,7 +37,7 @@ class CarrierPort(ABC):
         ...
 
     @abstractmethod
-    def cancel_shipment(self, tracking_number: str) -> dict:
+    def cancel_shipment(self, tracking_number: str) -> dict[str, Any]:
         """Cancel a shipment with the carrier.
 
         Returns:

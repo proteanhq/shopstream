@@ -4,6 +4,8 @@ Only the original author can edit, only in PENDING or REJECTED status.
 Editing a rejected review re-submits it to moderation (PENDING).
 """
 
+from typing import Any
+
 from protean.exceptions import ValidationError
 from protean.fields import Identifier, Integer, List, String, Text
 from protean.utils.globals import current_domain
@@ -27,7 +29,7 @@ class EditReview:
 @reviews.command_handler(part_of=Review)
 class EditReviewHandler:
     @handle(EditReview)
-    def edit_review(self, command):
+    def edit_review(self, command: EditReview) -> None:
         repo = current_domain.repository_for(Review)
         review = repo.get(command.review_id)
 
@@ -36,7 +38,7 @@ class EditReviewHandler:
             raise ValidationError({"customer_id": ["Only the review author can edit this review"]})
 
         # Build kwargs with sentinel for unset fields
-        kwargs = {}
+        kwargs: dict[str, Any] = {}
         if command.title is not None:
             kwargs["title"] = command.title
         if command.body is not None:

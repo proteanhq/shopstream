@@ -32,7 +32,7 @@ class SubmitReview:
 @reviews.command_handler(part_of=Review)
 class SubmitReviewHandler:
     @handle(SubmitReview)
-    def submit_review(self, command):
+    def submit_review(self, command: SubmitReview) -> str:
         repo = current_domain.repository_for(Review)
 
         # Enforce one review per customer per product (exclude removed)

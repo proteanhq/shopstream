@@ -36,7 +36,7 @@ class ModerationQueue:
 @reviews.projector(projector_for=ModerationQueue, aggregates=[Review])
 class ModerationQueueProjector:
     @on(ReviewSubmitted)
-    def on_review_submitted(self, event):
+    def on_review_submitted(self, event: ReviewSubmitted) -> None:
         current_domain.repository_for(ModerationQueue).add(
             ModerationQueue(
                 review_id=event.review_id,
@@ -53,7 +53,7 @@ class ModerationQueueProjector:
         )
 
     @on(ReviewEdited)
-    def on_review_edited(self, event):
+    def on_review_edited(self, event: ReviewEdited) -> None:
         repo = current_domain.repository_for(ModerationQueue)
         mq = repo.get_or_none(event.review_id)
         if mq is not None:
@@ -87,19 +87,19 @@ class ModerationQueueProjector:
         )
 
     @on(ReviewApproved)
-    def on_review_approved(self, event):
+    def on_review_approved(self, event: ReviewApproved) -> None:
         repo = current_domain.repository_for(ModerationQueue)
         if repo.get_or_none(event.review_id) is not None:
             repo.query.filter(review_id=event.review_id).delete()
 
     @on(ReviewRejected)
-    def on_review_rejected(self, event):
+    def on_review_rejected(self, event: ReviewRejected) -> None:
         repo = current_domain.repository_for(ModerationQueue)
         if repo.get_or_none(event.review_id) is not None:
             repo.query.filter(review_id=event.review_id).delete()
 
     @on(ReviewReported)
-    def on_review_reported(self, event):
+    def on_review_reported(self, event: ReviewReported) -> None:
         repo = current_domain.repository_for(ModerationQueue)
         mq = repo.get_or_none(event.review_id)
         if mq is not None:
@@ -128,7 +128,7 @@ class ModerationQueueProjector:
         )
 
     @on(ReviewRemoved)
-    def on_review_removed(self, event):
+    def on_review_removed(self, event: ReviewRemoved) -> None:
         repo = current_domain.repository_for(ModerationQueue)
         if repo.get_or_none(event.review_id) is not None:
             repo.query.filter(review_id=event.review_id).delete()

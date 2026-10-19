@@ -22,7 +22,7 @@ class CancelFulfillment:
 @fulfillment.command_handler(part_of=Fulfillment)
 class CancelFulfillmentHandler:
     @handle(CancelFulfillment)
-    def cancel_fulfillment(self, command):
+    def cancel_fulfillment(self, command: CancelFulfillment) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.cancel(command.reason)

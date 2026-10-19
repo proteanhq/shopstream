@@ -22,7 +22,7 @@ class ReportReview:
 @reviews.command_handler(part_of=Review)
 class ReportReviewHandler:
     @handle(ReportReview)
-    def report_review(self, command):
+    def report_review(self, command: ReportReview) -> None:
         repo = current_domain.repository_for(Review)
         review = repo.get(command.review_id)
 

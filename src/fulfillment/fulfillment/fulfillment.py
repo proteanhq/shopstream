@@ -195,7 +195,7 @@ class Fulfillment:
         customer_id: str,
         items_data: list[dict],
         warehouse_id: str | None = None,
-    ):
+    ) -> "Fulfillment":
         """Create a new fulfillment for a paid order."""
         now = datetime.now(UTC)
         ff = cls(
@@ -356,6 +356,10 @@ class Fulfillment:
         )
         self.updated_at = now
 
+        # Only READY_TO_SHIP moves to SHIPPED, and generate_shipping_label set the carrier on the way there.
+        carrier = self.shipment.carrier
+        assert carrier is not None
+
         # Collect shipped item IDs for cross-domain events
         shipped_item_ids = [str(i.order_item_id) for i in (self.items or [])]
 
@@ -363,7 +367,7 @@ class Fulfillment:
             ShipmentHandedOff(
                 fulfillment_id=str(self.id),
                 order_id=str(self.order_id),
-                carrier=self.shipment.carrier,
+                carrier=carrier,
                 tracking_number=tracking_number,
                 shipped_item_ids=shipped_item_ids,
                 estimated_delivery=estimated_delivery,

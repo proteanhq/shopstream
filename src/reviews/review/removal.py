@@ -22,7 +22,7 @@ class RemoveReview:
 @reviews.command_handler(part_of=Review)
 class RemoveReviewHandler:
     @handle(RemoveReview)
-    def remove_review(self, command):
+    def remove_review(self, command: RemoveReview) -> None:
         repo = current_domain.repository_for(Review)
         review = repo.get(command.review_id)
 

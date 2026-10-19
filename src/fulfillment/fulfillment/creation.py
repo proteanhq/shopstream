@@ -23,7 +23,7 @@ class CreateFulfillment:
 @fulfillment.command_handler(part_of=Fulfillment)
 class CreateFulfillmentHandler:
     @handle(CreateFulfillment)
-    def create_fulfillment(self, command):
+    def create_fulfillment(self, command: CreateFulfillment) -> str:
         ff = Fulfillment.create(
             order_id=command.order_id,
             customer_id=command.customer_id,

@@ -127,6 +127,8 @@ async def submit_review(body: SubmitReviewRequest) -> ReviewIdResponse:
         images=[img.model_dump() for img in body.images] if body.images else [],
     )
     review_id = current_domain.process(command, asynchronous=False)
+    # A synchronous process returns the handler's value, and SubmitReviewHandler always returns the new id.
+    assert review_id is not None
     return ReviewIdResponse(review_id=review_id)
 
 

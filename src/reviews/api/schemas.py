@@ -6,6 +6,8 @@ The API layer is the external contract; commands are internal domain concepts.
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -115,7 +117,7 @@ class ProductReviewResponse(BaseModel):
     body: str
     pros: list[str] | None = None
     cons: list[str] | None = None
-    images: list[dict] | None = None
+    images: list[dict[str, Any]] | None = None
     verified_purchase: str | None = None
     helpful_count: int = 0
     unhelpful_count: int = 0
@@ -129,7 +131,7 @@ class ProductRatingResponse(BaseModel):
     product_id: str
     average_rating: float = 0.0
     total_reviews: int = 0
-    rating_distribution: dict | None = None
+    rating_distribution: dict[str, Any] | None = None
     verified_review_count: int = 0
     updated_at: str | None = None
 

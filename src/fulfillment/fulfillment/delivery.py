@@ -30,14 +30,14 @@ class RecordDeliveryException:
 @fulfillment.command_handler(part_of=Fulfillment)
 class DeliveryHandler:
     @handle(RecordDeliveryConfirmation)
-    def record_delivery(self, command):
+    def record_delivery(self, command: RecordDeliveryConfirmation) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.record_delivery()
         repo.add(ff)
 
     @handle(RecordDeliveryException)
-    def record_exception(self, command):
+    def record_exception(self, command: RecordDeliveryException) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.record_exception(

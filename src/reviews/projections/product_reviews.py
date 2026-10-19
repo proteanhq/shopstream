@@ -43,7 +43,7 @@ class ProductReviews:
 @reviews.projector(projector_for=ProductReviews, aggregates=[Review])
 class ProductReviewsProjector:
     @on(ReviewApproved)
-    def on_review_approved(self, event):
+    def on_review_approved(self, event: ReviewApproved) -> None:
         repo = current_domain.repository_for(Review)
         review = repo.get(event.review_id)
 
@@ -69,7 +69,7 @@ class ProductReviewsProjector:
         )
 
     @on(HelpfulVoteRecorded)
-    def on_helpful_vote_recorded(self, event):
+    def on_helpful_vote_recorded(self, event: HelpfulVoteRecorded) -> None:
         repo = current_domain.repository_for(ProductReviews)
         pr = repo.get_or_none(event.review_id)
         if pr is None:
@@ -79,14 +79,14 @@ class ProductReviewsProjector:
         repo.add(pr)
 
     @on(ReviewRemoved)
-    def on_review_removed(self, event):
+    def on_review_removed(self, event: ReviewRemoved) -> None:
         repo = current_domain.repository_for(ProductReviews)
         if repo.get_or_none(event.review_id) is None:
             return  # Already removed or never published
         repo.query.filter(review_id=event.review_id).delete()
 
     @on(SellerReplyAdded)
-    def on_seller_reply_added(self, event):
+    def on_seller_reply_added(self, event: SellerReplyAdded) -> None:
         repo = current_domain.repository_for(ProductReviews)
         pr = repo.get_or_none(event.review_id)
         if pr is None:

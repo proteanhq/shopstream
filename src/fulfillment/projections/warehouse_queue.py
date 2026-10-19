@@ -33,7 +33,7 @@ class WarehouseQueueView:
 @fulfillment.projector(projector_for=WarehouseQueueView, aggregates=[Fulfillment])
 class WarehouseQueueProjector:
     @on(FulfillmentCreated)
-    def on_fulfillment_created(self, event):
+    def on_fulfillment_created(self, event: FulfillmentCreated) -> None:
         current_domain.repository_for(WarehouseQueueView).add(
             WarehouseQueueView(
                 fulfillment_id=event.fulfillment_id,
@@ -47,7 +47,7 @@ class WarehouseQueueProjector:
         )
 
     @on(PickerAssigned)
-    def on_picker_assigned(self, event):
+    def on_picker_assigned(self, event: PickerAssigned) -> None:
         repo = current_domain.repository_for(WarehouseQueueView)
         view = repo.get(event.fulfillment_id)
         view.status = "Picking"
@@ -56,7 +56,7 @@ class WarehouseQueueProjector:
         repo.add(view)
 
     @on(PickingCompleted)
-    def on_picking_completed(self, event):
+    def on_picking_completed(self, event: PickingCompleted) -> None:
         repo = current_domain.repository_for(WarehouseQueueView)
         view = repo.get(event.fulfillment_id)
         view.status = "Packing"
@@ -64,7 +64,7 @@ class WarehouseQueueProjector:
         repo.add(view)
 
     @on(PackingCompleted)
-    def on_packing_completed(self, event):
+    def on_packing_completed(self, event: PackingCompleted) -> None:
         repo = current_domain.repository_for(WarehouseQueueView)
         view = repo.get(event.fulfillment_id)
         view.status = "Packed"
@@ -72,7 +72,7 @@ class WarehouseQueueProjector:
         repo.add(view)
 
     @on(ShipmentHandedOff)
-    def on_shipment_handed_off(self, event):
+    def on_shipment_handed_off(self, event: ShipmentHandedOff) -> None:
         repo = current_domain.repository_for(WarehouseQueueView)
         view = repo.get(event.fulfillment_id)
         view.status = "Shipped"
@@ -80,7 +80,7 @@ class WarehouseQueueProjector:
         repo.add(view)
 
     @on(FulfillmentCancelled)
-    def on_fulfillment_cancelled(self, event):
+    def on_fulfillment_cancelled(self, event: FulfillmentCancelled) -> None:
         repo = current_domain.repository_for(WarehouseQueueView)
         view = repo.get(event.fulfillment_id)
         view.status = "Cancelled"

@@ -35,14 +35,14 @@ class GenerateShippingLabel:
 @fulfillment.command_handler(part_of=Fulfillment)
 class PackingHandler:
     @handle(RecordPacking)
-    def record_packing(self, command):
+    def record_packing(self, command: RecordPacking) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.record_packing(command.packed_by, command.packages)
         repo.add(ff)
 
     @handle(GenerateShippingLabel)
-    def generate_shipping_label(self, command):
+    def generate_shipping_label(self, command: GenerateShippingLabel) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.generate_shipping_label(

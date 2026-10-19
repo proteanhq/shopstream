@@ -21,7 +21,7 @@ class VoteOnReview:
 @reviews.command_handler(part_of=Review)
 class VoteOnReviewHandler:
     @handle(VoteOnReview)
-    def vote_on_review(self, command):
+    def vote_on_review(self, command: VoteOnReview) -> None:
         repo = current_domain.repository_for(Review)
         review = repo.get(command.review_id)
 

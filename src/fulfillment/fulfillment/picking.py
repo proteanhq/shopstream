@@ -39,21 +39,21 @@ class CompletePickList:
 @fulfillment.command_handler(part_of=Fulfillment)
 class PickingHandler:
     @handle(AssignPicker)
-    def assign_picker(self, command):
+    def assign_picker(self, command: AssignPicker) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.assign_picker(command.picker_name)
         repo.add(ff)
 
     @handle(RecordItemPicked)
-    def record_item_picked(self, command):
+    def record_item_picked(self, command: RecordItemPicked) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.record_item_picked(command.item_id, command.pick_location)
         repo.add(ff)
 
     @handle(CompletePickList)
-    def complete_pick_list(self, command):
+    def complete_pick_list(self, command: CompletePickList) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.complete_pick_list()

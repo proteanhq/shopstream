@@ -13,9 +13,10 @@ State Machine (4 states):
     REMOVED → (terminal)
 """
 
+from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from enum import Enum
-from typing import Any
+from typing import Any, Final
 
 from protean import atomic_change, invariant
 from protean.exceptions import ValidationError
@@ -45,8 +46,18 @@ from reviews.review.events import (
     SellerReplyAdded,
 )
 
-# Sentinel for distinguishing "not provided" from None in partial updates
-_UNSET = object()
+
+class _Unset(Enum):
+    """Sentinel type for distinguishing "not provided" from None in partial updates.
+
+    A single-member enum (rather than a bare ``object()``) lets type checkers
+    narrow ``x is not _UNSET`` to the real argument type.
+    """
+
+    UNSET = "UNSET"
+
+
+_UNSET: Final = _Unset.UNSET
 
 
 # ---------------------------------------------------------------------------
@@ -102,7 +113,7 @@ class Rating:
     score: int = Integer(required=True)
 
     @invariant.post
-    def score_must_be_in_range(self):
+    def score_must_be_in_range(self) -> None:
         if self.score is not None and (self.score < 1 or self.score > 5):
             raise ValidationError({"score": ["Rating must be between 1 and 5"]})
 
@@ -203,22 +214,22 @@ class Review:
     # Invariants
     # -------------------------------------------------------------------
     @invariant.post
-    def images_cannot_exceed_maximum(self):
+    def images_cannot_exceed_maximum(self) -> None:
         if len(self.images) > 5:
             raise ValidationError({"images": ["Cannot attach more than 5 images to a review"]})
 
     @invariant.post
-    def at_most_one_seller_reply(self):
+    def at_most_one_seller_reply(self) -> None:
         if len(self.reply) > 1:
             raise ValidationError({"reply": ["A review can have at most one seller reply"]})
 
     @invariant.post
-    def body_minimum_length(self):
+    def body_minimum_length(self) -> None:
         if self.body and len(self.body.strip()) < 20:
             raise ValidationError({"body": ["Review body must be at least 20 characters"]})
 
     @invariant.post
-    def title_must_not_be_empty(self):
+    def title_must_not_be_empty(self) -> None:
         if self.title is not None and len(self.title.strip()) == 0:
             raise ValidationError({"title": ["Review title cannot be empty"]})
 
@@ -228,18 +239,18 @@ class Review:
     @classmethod
     def submit(
         cls,
-        product_id,
-        customer_id,
-        rating,
-        title,
-        body,
-        variant_id=None,
-        order_id=None,
-        verified_purchase=False,
-        pros=None,
-        cons=None,
-        images=None,
-    ):
+        product_id: str,
+        customer_id: str,
+        rating: int,
+        title: str,
+        body: str,
+        variant_id: str | None = None,
+        order_id: str | None = None,
+        verified_purchase: bool = False,
+        pros: list[str] | None = None,
+        cons: list[str] | None = None,
+        images: Sequence[Mapping[str, Any]] | None = None,
+    ) -> "Review":
         """Submit a new review."""
         now = datetime.now(UTC)
 
@@ -300,12 +311,12 @@ class Review:
     # -------------------------------------------------------------------
     def edit(
         self,
-        title=_UNSET,
-        body=_UNSET,
-        rating=_UNSET,
-        pros=_UNSET,
-        cons=_UNSET,
-    ):
+        title: str | _Unset = _UNSET,
+        body: str | _Unset = _UNSET,
+        rating: int | _Unset = _UNSET,
+        pros: list[str] | None | _Unset = _UNSET,
+        cons: list[str] | None | _Unset = _UNSET,
+    ) -> None:
         """Edit review content. Only allowed in PENDING or REJECTED status."""
         current = ReviewStatus(self.status)
         if current not in (ReviewStatus.PENDING, ReviewStatus.REJECTED):
@@ -350,7 +361,7 @@ class Review:
     # -------------------------------------------------------------------
     # Moderation
     # -------------------------------------------------------------------
-    def approve(self, moderator_id, notes=None):
+    def approve(self, moderator_id: str, notes: str | None = None) -> None:
         """Approve the review for publication."""
         now = datetime.now(UTC)
         self.status = ReviewStatus.PUBLISHED.value
@@ -368,7 +379,7 @@ class Review:
             )
         )
 
-    def reject(self, moderator_id, reason):
+    def reject(self, moderator_id: str, reason: str) -> None:
         """Reject the review."""
         now = datetime.now(UTC)
         self.status = ReviewStatus.REJECTED.value
@@ -389,7 +400,7 @@ class Review:
     # -------------------------------------------------------------------
     # Voting
     # -------------------------------------------------------------------
-    def vote(self, customer_id, vote_type):
+    def vote(self, customer_id: str, vote_type: str) -> None:
         """Record a helpful/unhelpful vote.
 
         Cannot vote on own review. Cannot vote twice.
@@ -435,7 +446,7 @@ class Review:
     # -------------------------------------------------------------------
     # Reporting
     # -------------------------------------------------------------------
-    def report(self, customer_id, reason, detail=None):
+    def report(self, customer_id: str, reason: str, detail: str | None = None) -> None:
         """Report a review for moderation. Cannot report own review."""
         if str(customer_id) == str(self.customer_id):
             raise ValidationError({"report": ["Cannot report your own review"]})
@@ -471,7 +482,7 @@ class Review:
     # -------------------------------------------------------------------
     # Removal
     # -------------------------------------------------------------------
-    def remove(self, removed_by, reason):
+    def remove(self, removed_by: str, reason: str) -> None:
         """Remove a published review."""
         now = datetime.now(UTC)
         self.status = ReviewStatus.REMOVED.value
@@ -493,7 +504,7 @@ class Review:
     # -------------------------------------------------------------------
     # Seller reply
     # -------------------------------------------------------------------
-    def add_seller_reply(self, seller_id, body):
+    def add_seller_reply(self, seller_id: str, body: str) -> None:
         """Add a reply from the seller. Only one reply allowed, only on published reviews."""
         if ReviewStatus(self.status) != ReviewStatus.PUBLISHED:
             raise ValidationError({"reply": ["Seller can only reply to published reviews"]})

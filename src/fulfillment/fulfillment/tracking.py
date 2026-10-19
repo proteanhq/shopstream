@@ -24,7 +24,7 @@ class UpdateTrackingEvent:
 @fulfillment.command_handler(part_of=Fulfillment)
 class TrackingHandler:
     @handle(UpdateTrackingEvent)
-    def update_tracking(self, command):
+    def update_tracking(self, command: UpdateTrackingEvent) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.add_tracking_event(

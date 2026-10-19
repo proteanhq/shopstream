@@ -25,7 +25,7 @@ class RecordHandoff:
 @fulfillment.command_handler(part_of=Fulfillment)
 class ShippingHandler:
     @handle(RecordHandoff)
-    def record_handoff(self, command):
+    def record_handoff(self, command: RecordHandoff) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.record_handoff(

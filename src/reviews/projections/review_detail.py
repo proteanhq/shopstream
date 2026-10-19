@@ -50,7 +50,7 @@ class ReviewDetail:
 @reviews.projector(projector_for=ReviewDetail, aggregates=[Review])
 class ReviewDetailProjector:
     @on(ReviewSubmitted)
-    def on_review_submitted(self, event):
+    def on_review_submitted(self, event: ReviewSubmitted) -> None:
         current_domain.repository_for(ReviewDetail).add(
             ReviewDetail(
                 review_id=event.review_id,
@@ -71,7 +71,7 @@ class ReviewDetailProjector:
         )
 
     @on(ReviewEdited)
-    def on_review_edited(self, event):
+    def on_review_edited(self, event: ReviewEdited) -> None:
         repo = current_domain.repository_for(ReviewDetail)
         rd = repo.get_or_none(event.review_id)
         if rd is None:
@@ -88,7 +88,7 @@ class ReviewDetailProjector:
         repo.add(rd)
 
     @on(ReviewApproved)
-    def on_review_approved(self, event):
+    def on_review_approved(self, event: ReviewApproved) -> None:
         repo = current_domain.repository_for(ReviewDetail)
         rd = repo.get_or_none(event.review_id)
         if rd is None:
@@ -98,7 +98,7 @@ class ReviewDetailProjector:
         repo.add(rd)
 
     @on(ReviewRejected)
-    def on_review_rejected(self, event):
+    def on_review_rejected(self, event: ReviewRejected) -> None:
         repo = current_domain.repository_for(ReviewDetail)
         rd = repo.get_or_none(event.review_id)
         if rd is None:
@@ -109,7 +109,7 @@ class ReviewDetailProjector:
         repo.add(rd)
 
     @on(HelpfulVoteRecorded)
-    def on_helpful_vote_recorded(self, event):
+    def on_helpful_vote_recorded(self, event: HelpfulVoteRecorded) -> None:
         repo = current_domain.repository_for(ReviewDetail)
         rd = repo.get_or_none(event.review_id)
         if rd is None:
@@ -119,7 +119,7 @@ class ReviewDetailProjector:
         repo.add(rd)
 
     @on(ReviewReported)
-    def on_review_reported(self, event):
+    def on_review_reported(self, event: ReviewReported) -> None:
         repo = current_domain.repository_for(ReviewDetail)
         rd = repo.get_or_none(event.review_id)
         if rd is None:
@@ -128,7 +128,7 @@ class ReviewDetailProjector:
         repo.add(rd)
 
     @on(ReviewRemoved)
-    def on_review_removed(self, event):
+    def on_review_removed(self, event: ReviewRemoved) -> None:
         repo = current_domain.repository_for(ReviewDetail)
         rd = repo.get_or_none(event.review_id)
         if rd is None:
@@ -139,7 +139,7 @@ class ReviewDetailProjector:
         repo.add(rd)
 
     @on(SellerReplyAdded)
-    def on_seller_reply_added(self, event):
+    def on_seller_reply_added(self, event: SellerReplyAdded) -> None:
         repo = current_domain.repository_for(ReviewDetail)
         rd = repo.get_or_none(event.review_id)
         if rd is None:

@@ -35,7 +35,7 @@ class ShipmentTrackingView:
 @fulfillment.projector(projector_for=ShipmentTrackingView, aggregates=[Fulfillment])
 class ShipmentTrackingProjector:
     @on(ShipmentHandedOff)
-    def on_shipment_handed_off(self, event):
+    def on_shipment_handed_off(self, event: ShipmentHandedOff) -> None:
         current_domain.repository_for(ShipmentTrackingView).add(
             ShipmentTrackingView(
                 fulfillment_id=event.fulfillment_id,
@@ -49,7 +49,7 @@ class ShipmentTrackingProjector:
         )
 
     @on(TrackingEventReceived)
-    def on_tracking_event_received(self, event):
+    def on_tracking_event_received(self, event: TrackingEventReceived) -> None:
         repo = current_domain.repository_for(ShipmentTrackingView)
         view = repo.get(event.fulfillment_id)
         view.current_status = event.status
@@ -69,7 +69,7 @@ class ShipmentTrackingProjector:
         repo.add(view)
 
     @on(DeliveryConfirmed)
-    def on_delivery_confirmed(self, event):
+    def on_delivery_confirmed(self, event: DeliveryConfirmed) -> None:
         repo = current_domain.repository_for(ShipmentTrackingView)
         view = repo.get(event.fulfillment_id)
         view.current_status = "Delivered"
@@ -88,7 +88,7 @@ class ShipmentTrackingProjector:
         repo.add(view)
 
     @on(DeliveryException)
-    def on_delivery_exception(self, event):
+    def on_delivery_exception(self, event: DeliveryException) -> None:
         repo = current_domain.repository_for(ShipmentTrackingView)
         view = repo.get(event.fulfillment_id)
         view.current_status = "Exception"
