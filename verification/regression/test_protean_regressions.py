@@ -632,10 +632,10 @@ def _sync_dispatch_probe(projector_failure: Exception):
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
-    reason="version retry re-runs a command whose commit already succeeded when a sync handler raises ExpectedVersionError",
+    reason="version retry re-runs a command whose commit already succeeded when a sync handler raises ExpectedVersionError (proteanhq/protean#1883)",
 )
 def test_committed_command_is_not_rerun_when_a_sync_handler_raises_expected_version_error():
-    """Protean finding (not yet filed upstream): a committed command runs again.
+    """Protean finding (proteanhq/protean#1883): a committed command runs again.
 
     Under ``event_processing = "sync"``, `UnitOfWork.commit` dispatches events
     after the relational commit, inside the same `try`. A handler that raises
