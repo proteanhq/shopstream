@@ -32,10 +32,12 @@ messages_per_tick = 50
 tick_interval = 0.01
 
 # `protean check` findings waived for this context. Each entry silences the first N
-# findings of that code, so a new finding of the same code fails the check again.
+# findings of that code in sorted order, not the element named below. When the named
+# finding goes away, lower the count, or it will waive the next finding of that code.
 [lint.suppressions]
-# Auditable is an abstract aggregate (RewardAccount's base), so it can have no command
-# handler. The rule does not skip abstract aggregates, unlike its sibling rules.
+# Auditable is an abstract aggregate (RewardAccount's base). It is never loaded or
+# saved, so a command handler for it would have nothing to act on. The rule does not
+# skip abstract aggregates, unlike its sibling rules.
 AGGREGATE_WITHOUT_COMMAND_HANDLER = 1
 # MembershipCardIssued records the card issue on the account's stream. No read model
 # shows membership cards yet, so nothing handles the event.

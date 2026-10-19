@@ -35,7 +35,8 @@ messages_per_tick = 50
 tick_interval = 0.01
 
 # `protean check` findings waived for this context. Each entry silences the first N
-# findings of that code, so a new finding of the same code fails the check again.
+# findings of that code in sorted order, not the element named below. When the named
+# finding goes away, lower the count, or it will waive the next finding of that code.
 [lint.suppressions]
 # Price.tier_prices is a dict. Price is never changed in place: Product.set_tier_price
 # builds a new Price from a copy of the dict. Protean has no immutable mapping field,

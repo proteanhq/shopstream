@@ -15,7 +15,8 @@ set -euo pipefail
 # exit code alone can hide a test failure. A context fails the gate when init, check or
 # tests does not pass, or when its tests stage ran zero tests. The check stage applies
 # the `[lint]` table in the context's domain.toml (its level and suppressions), so it
-# fails on any error or warning that table does not waive.
+# fails on any finding at or above the table's `level` (default `warn`) that its
+# suppressions do not waive.
 #
 # On a full run (no context arguments) the cross-domain tests in tests/integration/ run
 # once more at the end, as plain pytest, since they belong to no single context. That

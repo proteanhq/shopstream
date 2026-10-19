@@ -206,13 +206,13 @@ def test_lint_table_in_domain_toml_is_loaded(tmp_path, monkeypatch):
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
-    reason="AGGREGATE_WITHOUT_COMMAND_HANDLER flags abstract aggregates, which cannot have a handler",
+    reason="AGGREGATE_WITHOUT_COMMAND_HANDLER flags abstract aggregates, which are never loaded or saved",
 )
 def test_abstract_aggregate_is_not_flagged_without_command_handler():
     """Protean finding (not yet filed upstream): `protean check` flags an abstract aggregate.
 
-    An aggregate declared with `abstract=True` is a base for concrete aggregates and
-    cannot have a command handler of its own. `IRBuilder._diagnose_aggregate_without_command_handler`
+    An aggregate declared with `abstract=True` is a base for concrete aggregates. It is
+    never loaded or saved, so a command handler for it would have nothing to act on. `IRBuilder._diagnose_aggregate_without_command_handler`
     walks every cluster and skips only `protean.adapters.*`, so it reports the base as
     an aggregate with no write path. Its sibling cluster rules filter abstract
     aggregates out through `_abstract_aggregate_fqns()`. Loyalty's `Auditable` base
