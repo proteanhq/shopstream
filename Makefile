@@ -9,7 +9,7 @@ help: ## Show this help message
 
 # Installation and Setup
 install: ## Install dependencies
-	uv sync
+	uv sync --frozen --all-extras --all-groups
 
 install-pre-commit: ## Install pre-commit hooks
 	uv run pre-commit install
@@ -591,7 +591,7 @@ sync-async-verify: ## Run the sync==async read-model equivalence check (needs Do
 # Load Testing
 # ──────────────────────────────────────────────
 loadtest-install: ## Install load testing dependencies
-	uv sync --group loadtest
+	uv sync --frozen --all-extras --all-groups
 
 loadtest: ## Start Locust web UI for interactive load testing (all scenarios)
 	uv run locust -f loadtests/locustfile.py --host http://localhost:8000
