@@ -10,7 +10,7 @@ from protean.fields import DateTime, Identifier, String
 from ordering.domain import ordering
 
 
-@ordering.projection
+@ordering.projection(externally_populated=True)
 class SuspendedAccount:
     customer_id = Identifier(identifier=True, required=True)
     reason = String()

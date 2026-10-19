@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:b214d267dbdb43db6e683fbfae5e7693c5bbdd3ae978d0510048611334875411",
+  "checksum": "sha256:49b997b74141d571e6aa79774029ae317c380c48acdd4651e46a26af69d38bee",
   "clusters": {
     "reviews.review.review.Review": {
       "aggregate": {
@@ -1431,22 +1431,6 @@
     },
     {
       "category": "handler_completeness",
-      "code": "PROJECTION_WITHOUT_PROJECTOR",
-      "element": "reviews.projections.verified_purchases.VerifiedPurchases",
-      "level": "warning",
-      "message": "Projection `VerifiedPurchases` has no projector to populate it",
-      "rule": {
-        "fix": "Add a projector for the projection, or set `externally_populated=True` if it is filled by a subscriber.",
-        "rationale": "A projection with no projector is never populated, so queries against it will always return empty."
-      },
-      "suggestion": "Add a projector for the projection, or set `externally_populated=True` if it is filled by a subscriber.",
-      "teaching_skills": [
-        "add-read-model",
-        "projection"
-      ]
-    },
-    {
-      "category": "handler_completeness",
       "code": "UNSOURCED_PROJECTION_FIELD",
       "element": "reviews.projections.product_rating.ProductRating",
       "field": "average_rating",
@@ -2473,7 +2457,7 @@
         "name": "VerifiedPurchases",
         "options": {
           "cache": null,
-          "externally_populated": false,
+          "externally_populated": true,
           "limit": 100,
           "order_by": [],
           "provider": "default",

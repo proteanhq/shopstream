@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:e697796bbc3661f42e980b93a1a2bc0ee2b05382e219d99e4fe1ee2a252192a4",
+  "checksum": "sha256:c7dde43b6cb47ee716023ebe34acce464b4cbf7c64115cb91fac875a68a1b70d",
   "clusters": {
     "inventory.stock.stock.InventoryItem": {
       "aggregate": {
@@ -2498,22 +2498,6 @@
     },
     {
       "category": "handler_completeness",
-      "code": "PROJECTION_WITHOUT_PROJECTOR",
-      "element": "inventory.projections.event_audit.EventAudit",
-      "level": "warning",
-      "message": "Projection `EventAudit` has no projector to populate it",
-      "rule": {
-        "fix": "Add a projector for the projection, or set `externally_populated=True` if it is filled by a subscriber.",
-        "rationale": "A projection with no projector is never populated, so queries against it will always return empty."
-      },
-      "suggestion": "Add a projector for the projection, or set `externally_populated=True` if it is filled by a subscriber.",
-      "teaching_skills": [
-        "add-read-model",
-        "projection"
-      ]
-    },
-    {
-      "category": "handler_completeness",
       "code": "UNSOURCED_PROJECTION_FIELD",
       "element": "inventory.projections.low_stock_report.LowStockReport",
       "field": "detected_at",
@@ -2924,7 +2908,7 @@
         "name": "EventAudit",
         "options": {
           "cache": null,
-          "externally_populated": false,
+          "externally_populated": true,
           "limit": 100,
           "order_by": [],
           "provider": "default",

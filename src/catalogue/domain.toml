@@ -34,6 +34,15 @@ external_brokers = ["global"]
 messages_per_tick = 50
 tick_interval = 0.01
 
+# `protean check` findings waived for this context. Each entry silences the first N
+# findings of that code in sorted order, not the element named below. When the named
+# finding goes away, lower the count, or it will waive the next finding of that code.
+[lint.suppressions]
+# Price.tier_prices is a dict. Price is never changed in place: Product.set_tier_price
+# builds a new Price from a copy of the dict. Protean has no immutable mapping field,
+# and another field type would change how every stored Price is laid out.
+VALUE_OBJECT_MUTABLE_FIELD = 1
+
 # Default Database Configuration (used in development / PROTEAN_ENV unset)
 [databases.default]
 provider = "postgresql"

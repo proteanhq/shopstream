@@ -16,7 +16,7 @@ import string
 from datetime import UTC, date, datetime
 from enum import Enum
 
-from protean import invariant
+from protean import Index, invariant
 from protean.exceptions import ValidationError
 from protean.fields import Date, DateTime, HasMany, HasOne, Integer, Reference, String
 from protean.fields.validators import RegexValidator
@@ -148,7 +148,7 @@ class PointsLedgerEntry:
     occurred_at = DateTime(required=True)
 
 
-@loyalty.aggregate
+@loyalty.aggregate(indexes=[Index("status")])
 class RewardAccount(Auditable):
     customer_id = String(required=True, max_length=255)
     status = String(choices=AccountStatus, default=AccountStatus.ACTIVE.value)

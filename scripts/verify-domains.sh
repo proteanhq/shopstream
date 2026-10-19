@@ -12,10 +12,11 @@ set -euo pipefail
 #
 # The gate reads each context's per-stage status from the JSON envelope, not from the
 # exit code: verify exits 4 for a check failure even when the tests failed too, so the
-# exit code alone can hide a test failure. A context fails the gate when init or tests
-# does not pass, or when its tests stage ran zero tests. The check stage is printed on
-# every run but does not gate yet; it becomes a gate once the `protean check` rules are
-# adopted (#56).
+# exit code alone can hide a test failure. A context fails the gate when init, check or
+# tests does not pass, or when its tests stage ran zero tests. The check stage applies
+# the `[lint]` table in the context's domain.toml (its level and suppressions), so it
+# fails on any finding at or above the table's `level` (default `warn`) that its
+# suppressions do not waive.
 #
 # On a full run (no context arguments) the cross-domain tests in tests/integration/ run
 # once more at the end, as plain pytest, since they belong to no single context. That
@@ -89,6 +90,7 @@ import sys
 
 path, context, seconds = sys.argv[1], sys.argv[2], sys.argv[3]
 rerun = f"uv run --no-sync pytest tests/{context}/ --protean-env memory -m 'not engine'"
+recheck = f"PYTHONPATH=src PROTEAN_ENV=memory uv run --no-sync protean check -d {context}.domain"
 
 
 def first_line(text):
@@ -112,7 +114,7 @@ try:
     tests_status = tests.get("status", "missing")
     ran_tests = isinstance(passed, int) and passed > 0
 
-    ok = init_status == "pass" and tests_status == "pass" and ran_tests
+    ok = init_status == "pass" and check_status == "pass" and tests_status == "pass" and ran_tests
     line = (
         f"  {context:<14} init={init_status:<7} "
         f"check={check_status:<7} ({errors} errors, {warnings} warnings, {infos} infos)  "
@@ -124,7 +126,7 @@ try:
     if first_line(init.get("error")):
         notes.append(f"init error: {first_line(init['error'])}")
     if check_status == "fail":
-        notes.append("check does not gate yet; the protean check rules are adopted in #56")
+        notes.append(f"see the check findings with: {recheck}")
     if tests_status == "pass" and not ran_tests:
         notes.append("tests stage ran no tests")
     if init_status == "pass" and not (tests_status == "pass" and ran_tests):

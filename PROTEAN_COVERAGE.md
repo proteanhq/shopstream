@@ -107,11 +107,11 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | Observatory (timeline, causation graph, domain visualizer) | ✅ | `make observatory`; `scripts/verify-observatory.sh` (~66 checks); `scripts/verify-domain-visualizer.sh` |
 | message tracing | ✅ | Observatory Trace API (recent, search, causation tree) checked in `scripts/verify-observatory.sh` |
 | Prometheus metrics | ⚠️ | Observatory `/metrics` (`protean_outbox_messages`, `protean_stream_messages`, `protean_stream_processed_total`); scraped in load tests; no unit assertion |
-| `protean check` (typed diagnostics) | ✅ | `make domain-check` / `domain-check-<domain>` |
+| `protean check` (typed diagnostics) | ✅ | `make domain-check` / `domain-check-<domain>`; all nine contexts pass at the default `warn` level. `src/catalogue/domain.toml` and `src/loyalty/domain.toml` waive their remaining findings in a `[lint.suppressions]` table, each with its reason |
 | the IR + baselines + backward-compat gate | ✅ | `.protean/<domain>/ir.json`; `make ir`/`ir-check`/`ir-diff`; `verification/contracts/test_ir_gate.py` + `make ir-gate` |
 | docs generated from the IR | ✅ | `make docs-generate`; committed `docs/<domain>/catalog.md`; `make docs-check` CI gate |
 | fitness functions | 🚧 | absent. Architectural discipline is enforced through `make check-src-clean` and the IR gate; no Protean fitness-function element is used. The follow-up is a fitness-function exerciser |
-| `protean verify` subcommand | ⚠️ | `scripts/verify-domains.sh` runs `protean verify --json` (init + check + tests) per context in memory mode and gates on init and tests; the check stage does not gate until #56, and the Make target and CI wiring land in #57. The `make verify-*` targets are separate stack-level scripts |
+| `protean verify` subcommand | ⚠️ | `scripts/verify-domains.sh` runs `protean verify --json` (init + check + tests) per context in memory mode and gates on init, check and tests. The Make target and CI wiring land in #57. The `make verify-*` targets are separate stack-level scripts |
 
 ## Protean bugs surfaced (filed; milestone 0.16.1)
 
