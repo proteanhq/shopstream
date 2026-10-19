@@ -435,12 +435,8 @@ engine-docker-scaled: ## Start scaled engines in Docker (3 identity, 2 catalogue
 observatory: ## Start Observatory dashboard (port 9000, live message flow + Prometheus metrics)
 	uv run protean observatory --domain ordering.domain --domain identity.domain --domain catalogue.domain --domain inventory.domain --domain payments.domain --domain fulfillment.domain --domain reviews.domain --domain notifications.domain --title "ShopStream Observatory"
 
-# All nine contexts share one Message DB, so one run with any domain checks the whole store.
-eventstore-verify: ## Check the shared Message DB's internal consistency (read-only, one run covers all nine contexts)
-	@out=$$(PROTEAN_LOG_LEVEL=WARNING PYTHONPATH=src uv run protean eventstore verify --domain=ordering.domain --json); rc=$$?; \
-	echo "$$out" | jq -er '"message_count=\(.data.message_count // "?") stream_count=\(.data.stream_count // "?") violations=\(.data.violations // [] | length) status=\(.status // "?")"' 2>/dev/null \
-		|| echo "eventstore verify returned no JSON report (exit $$rc)"; \
-	exit $$rc
+eventstore-verify: ## Check the shared Message DB's internal consistency (read-only, one run covers all nine contexts; stop the engines first)
+	./scripts/eventstore-verify.sh
 
 verify-loyalty: ## Verify Loyalty end-to-end: account/points/transfer/campaign/redemption API checks (requires running stack + engine-loyalty)
 	./scripts/verify-loyalty.sh

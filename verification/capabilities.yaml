@@ -201,8 +201,8 @@ capabilities:
     status: partial   # #51: init and tests gate; the check stage is printed but does not gate until the rules are adopted (#56). The guard test covers the gate on canned envelopes only; the property itself is checked by running the script by hand until #57 wires it into CI
 
   - name: eventstore_integrity
-    taught_by: Makefile   # make eventstore-verify
+    taught_by: scripts/eventstore-verify.sh   # make eventstore-verify; its summary line and exit code are guarded by verification/support/test_eventstore_verify_script.py
     guarded_by: verification/oracles/test_eventstore_integrity.py
-    property: "the shared Message DB passes `verify` after real workloads, with counts equal to SQL; each injected corruption yields exactly one violation of the right kind, stream and position"
+    property: "after a fixed workload driven through the domain, the shared Message DB passes `verify` with counts equal to SQL; each injected corruption yields exactly one violation of the right kind, stream and position"
     source: A
-    status: covered   # position_gap, snapshot_ahead_of_stream, malformed_snapshot on Message DB; the schema rejects the rows the other three kinds need, so Protean's own tests cover those
+    status: partial   # three of verify's six kinds (position_gap, snapshot_ahead_of_stream, malformed_snapshot) are injected on Message DB. The schema rejects the rows the other three need, and Protean's own tests check those on its memory and list-backed stores. Verify on the dev store under load is a hand check

@@ -218,7 +218,8 @@ make test-loyalty
 # Fast tests only (skip slow/integration)
 make test-fast
 
-# Check the shared Message DB's integrity (read-only, dev env)
+# Check the shared Message DB's integrity (read-only; stop the engines first;
+# dev env unless PROTEAN_ENV is set)
 make eventstore-verify
 ```
 
