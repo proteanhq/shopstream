@@ -266,6 +266,17 @@ def _ir_diff(*args: str):
     return CliRunner().invoke(protean.cli.app, ["ir", "diff", *args])
 
 
+def _plain(result) -> str:
+    """Return the CLI output without ANSI styling.
+
+    Rich colours the output on CI even under CliRunner, and it styles each dash-separated
+    part of an option name separately, so a plain substring check fails there.
+    """
+    import click
+
+    return click.unstyle(result.output)
+
+
 def _reviews_ir_without_a_projection(tmp_path) -> str:
     """Write the reviews baseline with one projection removed, and return its path.
 
@@ -319,7 +330,7 @@ def test_ir_diff_usage_error_does_not_share_the_non_breaking_exit_code(tmp_path)
     summary = json.loads(safe.stdout)["summary"]
     if safe.exit_code == 0 or not summary["has_changes"] or summary["has_breaking_changes"]:
         pytest.fail(f"precondition: an added projection is a non-breaking change\n{safe.output}")
-    if usage.exit_code == 0 or "No such option: --no-such-flag" not in usage.output:
+    if usage.exit_code == 0 or "No such option: --no-such-flag" not in _plain(usage):
         pytest.fail(f"precondition: ir diff rejected the unknown option\n{usage.output}")
     assert usage.exit_code != safe.exit_code
 
@@ -345,9 +356,9 @@ def test_ir_diff_load_error_does_not_share_the_breaking_exit_code(tmp_path):
     missing = str(tmp_path / "missing.json")
     load_error = _ir_diff("--left", missing, "--right", REVIEWS_IR, "--dir", str(tmp_path))
 
-    if breaking.exit_code == 0 or "Breaking Changes" not in breaking.output:
+    if breaking.exit_code == 0 or "Breaking Changes" not in _plain(breaking):
         pytest.fail(f"precondition: a removed projection is a breaking change\n{breaking.output}")
-    if load_error.exit_code == 0 or "file not found" not in load_error.output:
+    if load_error.exit_code == 0 or "file not found" not in _plain(load_error):
         pytest.fail(f"precondition: ir diff reported the missing baseline\n{load_error.output}")
     assert load_error.exit_code != breaking.exit_code
 
