@@ -50,7 +50,7 @@ class SetTierPrice:
 @catalogue.command_handler(part_of=Product)
 class ManageVariantsHandler:
     @handle(AddVariant)
-    def add_variant(self, command):
+    def add_variant(self, command: AddVariant) -> None:
         repo = current_domain.repository_for(Product)
         product = repo.get(command.product_id)
 
@@ -85,7 +85,7 @@ class ManageVariantsHandler:
         repo.add(product)
 
     @handle(UpdateVariantPrice)
-    def update_variant_price(self, command):
+    def update_variant_price(self, command: UpdateVariantPrice) -> None:
         repo = current_domain.repository_for(Product)
         product = repo.get(command.product_id)
 
@@ -97,7 +97,7 @@ class ManageVariantsHandler:
         repo.add(product)
 
     @handle(SetTierPrice)
-    def set_tier_price(self, command):
+    def set_tier_price(self, command: SetTierPrice) -> None:
         repo = current_domain.repository_for(Product)
         product = repo.get(command.product_id)
         product.set_tier_price(command.variant_id, command.tier, command.price)

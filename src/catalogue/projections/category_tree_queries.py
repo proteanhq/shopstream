@@ -1,6 +1,7 @@
 """Queries for the CategoryTree projection."""
 
 from protean import read
+from protean.core.queryset import ResultSet
 from protean.utils.globals import current_domain
 
 from catalogue.domain import catalogue
@@ -15,5 +16,5 @@ class ListCategoryTree:
 @catalogue.query_handler(part_of=CategoryTree)
 class CategoryTreeQueryHandler:
     @read(ListCategoryTree)
-    def list_category_tree(self, _query):
+    def list_category_tree(self, _query: ListCategoryTree) -> ResultSet:
         return current_domain.view_for(CategoryTree).query.all()

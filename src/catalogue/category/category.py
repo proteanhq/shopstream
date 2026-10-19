@@ -27,7 +27,13 @@ class Category:
     updated_at: datetime = DateTime(default=datetime.now)
 
     @classmethod
-    def create(cls, name, parent_category_id=None, level=0, attributes=None):
+    def create(
+        cls,
+        name: str,
+        parent_category_id: str | None = None,
+        level: int = 0,
+        attributes: dict[str, Any] | None = None,
+    ) -> "Category":
         from catalogue.category.events import CategoryCreated
 
         now = datetime.now()
@@ -50,7 +56,7 @@ class Category:
         )
         return category
 
-    def update_details(self, name=None, attributes=None):
+    def update_details(self, name: str | None = None, attributes: dict[str, Any] | None = None) -> None:
         from catalogue.category.events import CategoryDetailsUpdated
 
         if name is not None:
@@ -69,7 +75,7 @@ class Category:
             )
         )
 
-    def reorder(self, new_display_order):
+    def reorder(self, new_display_order: int) -> None:
         from catalogue.category.events import CategoryReordered
 
         previous_order = self.display_order
@@ -84,7 +90,7 @@ class Category:
             )
         )
 
-    def deactivate(self):
+    def deactivate(self) -> None:
         from catalogue.category.events import CategoryDeactivated
 
         if not self.is_active:

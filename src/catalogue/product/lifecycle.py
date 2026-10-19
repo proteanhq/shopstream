@@ -32,21 +32,21 @@ class ArchiveProduct:
 @catalogue.command_handler(part_of=Product)
 class ManageLifecycleHandler:
     @handle(ActivateProduct)
-    def activate_product(self, command):
+    def activate_product(self, command: ActivateProduct) -> None:
         repo = current_domain.repository_for(Product)
         product = repo.get(command.product_id)
         product.activate()
         repo.add(product)
 
     @handle(DiscontinueProduct)
-    def discontinue_product(self, command):
+    def discontinue_product(self, command: DiscontinueProduct) -> None:
         repo = current_domain.repository_for(Product)
         product = repo.get(command.product_id)
         product.discontinue()
         repo.add(product)
 
     @handle(ArchiveProduct)
-    def archive_product(self, command):
+    def archive_product(self, command: ArchiveProduct) -> None:
         repo = current_domain.repository_for(Product)
         product = repo.get(command.product_id)
         product.archive()

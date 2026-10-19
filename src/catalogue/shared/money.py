@@ -61,6 +61,6 @@ class Money:
     currency: str = String(max_length=3, default="USD")
 
     @invariant.post
-    def currency_must_be_valid_iso_4217(self):
+    def currency_must_be_valid_iso_4217(self) -> None:
         if self.currency not in VALID_CURRENCIES:
             raise ValidationError({"currency": [f"Unsupported currency: {self.currency}"]})

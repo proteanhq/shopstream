@@ -47,7 +47,7 @@ class ProductDetail:
 @catalogue.projector(projector_for=ProductDetail, aggregates=[Product])
 class ProductDetailProjector:
     @on(ProductCreated)
-    def on_product_created(self, event):
+    def on_product_created(self, event: ProductCreated) -> None:
         current_domain.repository_for(ProductDetail).add(
             ProductDetail(
                 product_id=event.product_id,
@@ -64,7 +64,7 @@ class ProductDetailProjector:
         )
 
     @on(ProductDetailsUpdated)
-    def on_details_updated(self, event):
+    def on_details_updated(self, event: ProductDetailsUpdated) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         detail.title = event.title
@@ -75,7 +75,7 @@ class ProductDetailProjector:
         repo.add(detail)
 
     @on(VariantAdded)
-    def on_variant_added(self, event):
+    def on_variant_added(self, event: VariantAdded) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         variants = list(detail.variants or [])
@@ -91,7 +91,7 @@ class ProductDetailProjector:
         repo.add(detail)
 
     @on(VariantPriceChanged)
-    def on_variant_price_changed(self, event):
+    def on_variant_price_changed(self, event: VariantPriceChanged) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         variants = list(detail.variants or [])
@@ -104,7 +104,7 @@ class ProductDetailProjector:
         repo.add(detail)
 
     @on(TierPriceSet)
-    def on_tier_price_set(self, event):
+    def on_tier_price_set(self, event: TierPriceSet) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         variants = list(detail.variants or [])
@@ -118,7 +118,7 @@ class ProductDetailProjector:
         repo.add(detail)
 
     @on(ProductImageAdded)
-    def on_image_added(self, event):
+    def on_image_added(self, event: ProductImageAdded) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         images = list(detail.images or [])
@@ -133,7 +133,7 @@ class ProductDetailProjector:
         repo.add(detail)
 
     @on(ProductImageRemoved)
-    def on_image_removed(self, event):
+    def on_image_removed(self, event: ProductImageRemoved) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         images = list(detail.images or [])
@@ -142,21 +142,21 @@ class ProductDetailProjector:
         repo.add(detail)
 
     @on(ProductActivated)
-    def on_product_activated(self, event):
+    def on_product_activated(self, event: ProductActivated) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         detail.status = "Active"
         repo.add(detail)
 
     @on(ProductDiscontinued)
-    def on_product_discontinued(self, event):
+    def on_product_discontinued(self, event: ProductDiscontinued) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         detail.status = "Discontinued"
         repo.add(detail)
 
     @on(ProductArchived)
-    def on_product_archived(self, event):
+    def on_product_archived(self, event: ProductArchived) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         detail.status = "Archived"

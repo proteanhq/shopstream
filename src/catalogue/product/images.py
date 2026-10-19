@@ -29,7 +29,7 @@ class RemoveProductImage:
 @catalogue.command_handler(part_of=Product)
 class ManageImagesHandler:
     @handle(AddProductImage)
-    def add_image(self, command):
+    def add_image(self, command: AddProductImage) -> None:
         repo = current_domain.repository_for(Product)
         product = repo.get(command.product_id)
         product.add_image(
@@ -40,7 +40,7 @@ class ManageImagesHandler:
         repo.add(product)
 
     @handle(RemoveProductImage)
-    def remove_image(self, command):
+    def remove_image(self, command: RemoveProductImage) -> None:
         repo = current_domain.repository_for(Product)
         product = repo.get(command.product_id)
         product.remove_image(command.image_id)

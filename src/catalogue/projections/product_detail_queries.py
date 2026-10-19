@@ -1,6 +1,7 @@
 """Queries for the ProductDetail projection."""
 
 from protean import read
+from protean.core.projection import BaseProjection
 from protean.fields import Identifier
 from protean.utils.globals import current_domain
 
@@ -16,5 +17,5 @@ class GetProductDetail:
 @catalogue.query_handler(part_of=ProductDetail)
 class ProductDetailQueryHandler:
     @read(GetProductDetail)
-    def get_product_detail(self, query):
+    def get_product_detail(self, query: GetProductDetail) -> BaseProjection:
         return current_domain.view_for(ProductDetail).get(query.product_id)

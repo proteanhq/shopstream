@@ -27,7 +27,7 @@ class UpdateProductDetails:
 @catalogue.command_handler(part_of=Product)
 class ManageProductDetailsHandler:
     @handle(UpdateProductDetails)
-    def update_details(self, command):
+    def update_details(self, command: UpdateProductDetails) -> None:
         repo = current_domain.repository_for(Product)
         product = repo.get(command.product_id)
 

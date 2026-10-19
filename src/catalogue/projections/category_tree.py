@@ -30,7 +30,7 @@ class CategoryTree:
 
 @catalogue.projector(projector_for=CategoryTree, aggregates=[Category, Product])
 class CategoryTreeProjector:
-    def _build_breadcrumb(self, _category_id, name, parent_category_id):
+    def _build_breadcrumb(self, _category_id: str, name: str, parent_category_id: str | None) -> list[str]:
         """Build a breadcrumb trail by walking the parent chain."""
         repo = current_domain.repository_for(CategoryTree)
         crumbs = [name]
@@ -47,7 +47,7 @@ class CategoryTreeProjector:
         return crumbs
 
     @on(CategoryCreated)
-    def on_category_created(self, event):
+    def on_category_created(self, event: CategoryCreated) -> None:
         breadcrumb = self._build_breadcrumb(event.category_id, event.name, event.parent_category_id)
 
         current_domain.repository_for(CategoryTree).add(
@@ -62,7 +62,7 @@ class CategoryTreeProjector:
         )
 
     @on(CategoryDetailsUpdated)
-    def on_category_details_updated(self, event):
+    def on_category_details_updated(self, event: CategoryDetailsUpdated) -> None:
         repo = current_domain.repository_for(CategoryTree)
         node = repo.get(event.category_id)
         node.name = event.name
@@ -70,21 +70,21 @@ class CategoryTreeProjector:
         repo.add(node)
 
     @on(CategoryReordered)
-    def on_category_reordered(self, event):
+    def on_category_reordered(self, event: CategoryReordered) -> None:
         repo = current_domain.repository_for(CategoryTree)
         node = repo.get(event.category_id)
         node.display_order = event.new_order
         repo.add(node)
 
     @on(CategoryDeactivated)
-    def on_category_deactivated(self, event):
+    def on_category_deactivated(self, event: CategoryDeactivated) -> None:
         repo = current_domain.repository_for(CategoryTree)
         node = repo.get(event.category_id)
         node.is_active = False
         repo.add(node)
 
     @on(ProductCreated)
-    def on_product_created(self, event):
+    def on_product_created(self, event: ProductCreated) -> None:
         if not event.category_id:
             return
         repo = current_domain.repository_for(CategoryTree)

@@ -25,7 +25,7 @@ class PriceHistory:
 @catalogue.projector(projector_for=PriceHistory, aggregates=[Product])
 class PriceHistoryProjector:
     @on(VariantPriceChanged)
-    def on_variant_price_changed(self, event):
+    def on_variant_price_changed(self, event: VariantPriceChanged) -> None:
         import uuid
 
         current_domain.repository_for(PriceHistory).add(

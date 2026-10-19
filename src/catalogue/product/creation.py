@@ -30,7 +30,7 @@ class CreateProduct:
 @catalogue.command_handler(part_of=Product)
 class CreateProductHandler:
     @handle(CreateProduct)
-    def create_product(self, command):
+    def create_product(self, command: CreateProduct) -> str:
         seo = None
         if command.slug:
             seo = SEO(

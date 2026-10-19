@@ -1,6 +1,7 @@
 """Queries for the CategoryProducts projection."""
 
 from protean import read
+from protean.core.projection import BaseProjection
 from protean.fields import Identifier
 from protean.utils.globals import current_domain
 
@@ -16,5 +17,5 @@ class GetCategoryProducts:
 @catalogue.query_handler(part_of=CategoryProducts)
 class CategoryProductsQueryHandler:
     @read(GetCategoryProducts)
-    def get_category_products(self, query):
+    def get_category_products(self, query: GetCategoryProducts) -> BaseProjection:
         return current_domain.view_for(CategoryProducts).get(query.category_id)

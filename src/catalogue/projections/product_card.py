@@ -40,7 +40,7 @@ class ProductCard:
 @catalogue.projector(projector_for=ProductCard, aggregates=[Product])
 class ProductCardProjector:
     @on(ProductCreated)
-    def on_product_created(self, event):
+    def on_product_created(self, event: ProductCreated) -> None:
         current_domain.repository_for(ProductCard).add(
             ProductCard(
                 product_id=event.product_id,
@@ -54,7 +54,7 @@ class ProductCardProjector:
         )
 
     @on(ProductDetailsUpdated)
-    def on_details_updated(self, event):
+    def on_details_updated(self, event: ProductDetailsUpdated) -> None:
         repo = current_domain.repository_for(ProductCard)
         card = repo.get(event.product_id)
         card.title = event.title
@@ -63,7 +63,7 @@ class ProductCardProjector:
         repo.add(card)
 
     @on(VariantAdded)
-    def on_variant_added(self, event):
+    def on_variant_added(self, event: VariantAdded) -> None:
         repo = current_domain.repository_for(ProductCard)
         card = repo.get(event.product_id)
         card.variant_count = (card.variant_count or 0) + 1
@@ -78,7 +78,7 @@ class ProductCardProjector:
         repo.add(card)
 
     @on(VariantPriceChanged)
-    def on_variant_price_changed(self, event):
+    def on_variant_price_changed(self, event: VariantPriceChanged) -> None:
         repo = current_domain.repository_for(ProductCard)
         card = repo.get(event.product_id)
         # Recalculate min/max would require all variant prices
@@ -91,7 +91,7 @@ class ProductCardProjector:
         repo.add(card)
 
     @on(ProductImageAdded)
-    def on_image_added(self, event):
+    def on_image_added(self, event: ProductImageAdded) -> None:
         repo = current_domain.repository_for(ProductCard)
         card = repo.get(event.product_id)
         if event.is_primary:
@@ -99,28 +99,28 @@ class ProductCardProjector:
         repo.add(card)
 
     @on(ProductImageRemoved)
-    def on_image_removed(self, event):
+    def on_image_removed(self, event: ProductImageRemoved) -> None:
         repo = current_domain.repository_for(ProductCard)
         card = repo.get(event.product_id)
         # If primary was removed, clear it (the aggregate will reassign primary)
         repo.add(card)
 
     @on(ProductActivated)
-    def on_product_activated(self, event):
+    def on_product_activated(self, event: ProductActivated) -> None:
         repo = current_domain.repository_for(ProductCard)
         card = repo.get(event.product_id)
         card.status = "Active"
         repo.add(card)
 
     @on(ProductDiscontinued)
-    def on_product_discontinued(self, event):
+    def on_product_discontinued(self, event: ProductDiscontinued) -> None:
         repo = current_domain.repository_for(ProductCard)
         card = repo.get(event.product_id)
         card.status = "Discontinued"
         repo.add(card)
 
     @on(ProductArchived)
-    def on_product_archived(self, event):
+    def on_product_archived(self, event: ProductArchived) -> None:
         repo = current_domain.repository_for(ProductCard)
         card = repo.get(event.product_id)
         card.status = "Archived"

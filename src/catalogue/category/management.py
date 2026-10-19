@@ -46,7 +46,7 @@ class DeactivateCategory:
 @catalogue.command_handler(part_of=Category)
 class ManageCategoryHandler:
     @handle(CreateCategory)
-    def create_category(self, command):
+    def create_category(self, command: CreateCategory) -> str:
         from protean.utils.globals import current_domain
 
         level = 0
@@ -69,7 +69,7 @@ class ManageCategoryHandler:
         return str(category.id)
 
     @handle(UpdateCategory)
-    def update_category(self, command):
+    def update_category(self, command: UpdateCategory) -> None:
         from protean.utils.globals import current_domain
 
         repo = current_domain.repository_for(Category)
@@ -82,7 +82,7 @@ class ManageCategoryHandler:
         repo.add(category)
 
     @handle(ReorderCategory)
-    def reorder_category(self, command):
+    def reorder_category(self, command: ReorderCategory) -> None:
         from protean.utils.globals import current_domain
 
         repo = current_domain.repository_for(Category)
@@ -91,7 +91,7 @@ class ManageCategoryHandler:
         repo.add(category)
 
     @handle(DeactivateCategory)
-    def deactivate_category(self, command):
+    def deactivate_category(self, command: DeactivateCategory) -> None:
         from protean.utils.globals import current_domain
 
         repo = current_domain.repository_for(Category)

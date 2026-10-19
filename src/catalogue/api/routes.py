@@ -93,6 +93,8 @@ async def create_product(body: CreateProductRequest) -> ProductIdResponse:
         slug=body.slug,
     )
     result = current_domain.process(command, asynchronous=False)
+    # A synchronous process returns the handler's value, and CreateProductHandler always returns the new id.
+    assert result is not None
     return ProductIdResponse(product_id=result)
 
 
@@ -225,6 +227,8 @@ async def create_category(body: CreateCategoryRequest) -> CategoryIdResponse:
         attributes=body.attributes or {},
     )
     result = current_domain.process(command, asynchronous=False)
+    # A synchronous process returns the handler's value, and ManageCategoryHandler.create_category always returns the new id.
+    assert result is not None
     return CategoryIdResponse(category_id=result)
 
 

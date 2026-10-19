@@ -36,7 +36,7 @@ class CategoryProducts:
 @catalogue.projector(projector_for=CategoryProducts, aggregates=[Product, Category])
 class CategoryProductsProjector:
     @on(CategoryCreated)
-    def on_category_created(self, event):
+    def on_category_created(self, event: CategoryCreated) -> None:
         current_domain.repository_for(CategoryProducts).add(
             CategoryProducts(
                 category_id=event.category_id,
@@ -47,7 +47,7 @@ class CategoryProductsProjector:
         )
 
     @on(ProductCreated)
-    def on_product_created(self, event):
+    def on_product_created(self, event: ProductCreated) -> None:
         if not event.category_id:
             return
         repo = current_domain.repository_for(CategoryProducts)
@@ -70,7 +70,7 @@ class CategoryProductsProjector:
         repo.add(view)
 
     @on(ProductDetailsUpdated)
-    def on_product_details_updated(self, event):
+    def on_product_details_updated(self, event: ProductDetailsUpdated) -> None:
         # Update the product title in all category views containing it
         all_categories = current_domain.view_for(CategoryProducts).query.all().items
 
@@ -87,18 +87,18 @@ class CategoryProductsProjector:
                 repo.add(view)
 
     @on(ProductActivated)
-    def on_product_activated(self, event):
+    def on_product_activated(self, event: ProductActivated) -> None:
         self._update_product_status(str(event.product_id), "active", event.activated_at)
 
     @on(ProductDiscontinued)
-    def on_product_discontinued(self, event):
+    def on_product_discontinued(self, event: ProductDiscontinued) -> None:
         self._update_product_status(str(event.product_id), "discontinued", event.discontinued_at)
 
     @on(ProductArchived)
-    def on_product_archived(self, event):
+    def on_product_archived(self, event: ProductArchived) -> None:
         self._update_product_status(str(event.product_id), "archived", event.archived_at)
 
-    def _update_product_status(self, product_id, new_status, timestamp):
+    def _update_product_status(self, product_id: str, new_status: str, timestamp: datetime) -> None:
         all_categories = current_domain.view_for(CategoryProducts).query.all().items
         repo = current_domain.repository_for(CategoryProducts)
 

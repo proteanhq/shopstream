@@ -33,7 +33,7 @@ class SellerCatalogue:
 @catalogue.projector(projector_for=SellerCatalogue, aggregates=[Product])
 class SellerCatalogueProjector:
     @on(ProductCreated)
-    def on_product_created(self, event):
+    def on_product_created(self, event: ProductCreated) -> None:
         current_domain.repository_for(SellerCatalogue).add(
             SellerCatalogue(
                 product_id=event.product_id,
@@ -48,35 +48,35 @@ class SellerCatalogueProjector:
         )
 
     @on(ProductDetailsUpdated)
-    def on_details_updated(self, event):
+    def on_details_updated(self, event: ProductDetailsUpdated) -> None:
         repo = current_domain.repository_for(SellerCatalogue)
         record = repo.get(event.product_id)
         record.title = event.title
         repo.add(record)
 
     @on(VariantAdded)
-    def on_variant_added(self, event):
+    def on_variant_added(self, event: VariantAdded) -> None:
         repo = current_domain.repository_for(SellerCatalogue)
         record = repo.get(event.product_id)
         record.variant_count = (record.variant_count or 0) + 1
         repo.add(record)
 
     @on(ProductActivated)
-    def on_product_activated(self, event):
+    def on_product_activated(self, event: ProductActivated) -> None:
         repo = current_domain.repository_for(SellerCatalogue)
         record = repo.get(event.product_id)
         record.status = "Active"
         repo.add(record)
 
     @on(ProductDiscontinued)
-    def on_product_discontinued(self, event):
+    def on_product_discontinued(self, event: ProductDiscontinued) -> None:
         repo = current_domain.repository_for(SellerCatalogue)
         record = repo.get(event.product_id)
         record.status = "Discontinued"
         repo.add(record)
 
     @on(ProductArchived)
-    def on_product_archived(self, event):
+    def on_product_archived(self, event: ProductArchived) -> None:
         repo = current_domain.repository_for(SellerCatalogue)
         record = repo.get(event.product_id)
         record.status = "Archived"
