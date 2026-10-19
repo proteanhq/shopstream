@@ -318,8 +318,8 @@ class TestExpectedVersionErrorEveryTime:
         assert type(excinfo.value) is ExpectedVersionError
         # The receipt was committed before dispatch, yet the command handler's own
         # version retry runs ReceiveStock again on each attempt, so StockReceived
-        # is dispatched max_retries + 1 times. This is a Protean bug, not yet filed
-        # upstream. The correct behaviour (the command runs once) is pinned as a
+        # is dispatched max_retries + 1 times. This is a Protean bug
+        # (proteanhq/protean#1883). The correct behaviour (the command runs once) is pinned as a
         # strict xfail in verification/regression/test_protean_regressions.py::
         # test_committed_command_is_not_rerun_when_a_sync_handler_raises_expected_version_error.
         # When Protean fixes it, this count drops to 1 and this test fails.
