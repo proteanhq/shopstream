@@ -373,6 +373,7 @@ make observatory            # Observatory dashboard (port 9000)
 make setup-db          # Create all database schemas
 make drop-db           # Drop all database schemas
 make truncate-db       # Delete all data (preserves schema)
+make idempotency-cleanup  # Delete processed-message markers older than retention_hours (run from cron)
 ```
 
 ### Testing

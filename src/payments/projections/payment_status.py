@@ -37,7 +37,7 @@ class PaymentStatusView:
     updated_at: datetime | None = DateTime()
 
 
-@payments.projector(projector_for=PaymentStatusView, aggregates=[Payment])
+@payments.projector(projector_for=PaymentStatusView, aggregates=[Payment], idempotent=True)
 class PaymentStatusProjector:
     @on(PaymentInitiated)
     def on_payment_initiated(self, event: PaymentInitiated) -> None:

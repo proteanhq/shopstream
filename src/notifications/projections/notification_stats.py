@@ -21,7 +21,7 @@ class NotificationStats:
     updated_at: datetime | None = DateTime()
 
 
-@notifications.projector(projector_for=NotificationStats, aggregates=[Notification])
+@notifications.projector(projector_for=NotificationStats, aggregates=[Notification], idempotent=True)
 class NotificationStatsProjector:
     @on(NotificationSent)
     def on_notification_sent(self, event: NotificationSent) -> None:

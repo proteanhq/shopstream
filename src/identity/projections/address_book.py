@@ -22,7 +22,7 @@ class AddressBook:
     addresses: list[dict[str, Any]] = List(Dict())
 
 
-@identity.projector(projector_for=AddressBook, aggregates=[Customer])
+@identity.projector(projector_for=AddressBook, aggregates=[Customer], idempotent=True)
 class AddressBookProjector:
     @on(AddressAdded)
     def on_address_added(self, event: AddressAdded) -> None:

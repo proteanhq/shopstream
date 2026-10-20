@@ -34,7 +34,7 @@ class CartView:
     updated_at: datetime | None = DateTime()
 
 
-@ordering.projector(projector_for=CartView, aggregates=[ShoppingCart])
+@ordering.projector(projector_for=CartView, aggregates=[ShoppingCart], idempotent=True)
 class CartViewProjector:
     @on(CartItemAdded)
     def on_item_added(self, event: CartItemAdded) -> None:

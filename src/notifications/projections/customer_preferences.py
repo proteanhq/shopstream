@@ -32,6 +32,9 @@ class CustomerPreferences:
     updated_at: datetime | None = DateTime()
 
 
+# Not marked idempotent=True: every handler writes values copied from the event,
+# and the unsubscribed_types append and remove check membership first, so a
+# redelivered event leaves the read model unchanged.
 @notifications.projector(projector_for=CustomerPreferences, aggregates=[NotificationPreference])
 class CustomerPreferencesProjector:
     @on(PreferencesCreated)

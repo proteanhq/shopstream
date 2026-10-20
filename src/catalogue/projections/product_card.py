@@ -37,7 +37,7 @@ class ProductCard:
     created_at: datetime | None = DateTime()
 
 
-@catalogue.projector(projector_for=ProductCard, aggregates=[Product])
+@catalogue.projector(projector_for=ProductCard, aggregates=[Product], idempotent=True)
 class ProductCardProjector:
     @on(ProductCreated)
     def on_product_created(self, event: ProductCreated) -> None:

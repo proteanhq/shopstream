@@ -37,7 +37,7 @@ class InventoryLevel:
     updated_at: datetime | None = DateTime()
 
 
-@inventory.projector(projector_for=InventoryLevel, aggregates=[InventoryItem])
+@inventory.projector(projector_for=InventoryLevel, aggregates=[InventoryItem], idempotent=True)
 class InventoryLevelProjector:
     @on(StockInitialized)
     def on_stock_initialized(self, event: StockInitialized) -> None:

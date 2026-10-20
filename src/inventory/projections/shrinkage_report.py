@@ -47,7 +47,7 @@ def _get_or_create(event: StockAdjusted | StockMarkedDamaged | DamagedStockWritt
     )
 
 
-@inventory.projector(projector_for=ShrinkageReport, aggregates=[InventoryItem])
+@inventory.projector(projector_for=ShrinkageReport, aggregates=[InventoryItem], idempotent=True)
 class ShrinkageReportProjector:
     @on(StockAdjusted)
     def on_stock_adjusted(self, event: StockAdjusted) -> None:

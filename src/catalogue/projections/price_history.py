@@ -22,7 +22,7 @@ class PriceHistory:
     changed_at: datetime = DateTime(required=True)
 
 
-@catalogue.projector(projector_for=PriceHistory, aggregates=[Product])
+@catalogue.projector(projector_for=PriceHistory, aggregates=[Product], idempotent=True)
 class PriceHistoryProjector:
     @on(VariantPriceChanged)
     def on_variant_price_changed(self, event: VariantPriceChanged) -> None:

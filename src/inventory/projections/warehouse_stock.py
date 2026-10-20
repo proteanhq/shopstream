@@ -35,7 +35,7 @@ class WarehouseStock:
     updated_at: datetime | None = DateTime()
 
 
-@inventory.projector(projector_for=WarehouseStock, aggregates=[InventoryItem])
+@inventory.projector(projector_for=WarehouseStock, aggregates=[InventoryItem], idempotent=True)
 class WarehouseStockProjector:
     @on(StockInitialized)
     def on_stock_initialized(self, event: StockInitialized) -> None:

@@ -28,6 +28,9 @@ class PointsLeaderboard:
     points_balance: int = Integer(default=0)
 
 
+# Not marked idempotent=True: Protean keeps no processed-message marker for a
+# cache-backed projection, so the option would do nothing. The handlers stay
+# idempotent by writing the absolute balance_after from the event.
 @loyalty.projector(projector_for=PointsLeaderboard, aggregates=[RewardAccount])
 class PointsLeaderboardProjector:
     @on(RewardAccountEnrolled)

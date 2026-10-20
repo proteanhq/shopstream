@@ -66,7 +66,7 @@ def _save(pa: ProductAvailability) -> None:
     current_domain.repository_for(ProductAvailability).add(pa)
 
 
-@inventory.projector(projector_for=ProductAvailability, aggregates=[InventoryItem])
+@inventory.projector(projector_for=ProductAvailability, aggregates=[InventoryItem], idempotent=True)
 class ProductAvailabilityProjector:
     @on(StockInitialized)
     def on_stock_initialized(self, event: StockInitialized) -> None:
