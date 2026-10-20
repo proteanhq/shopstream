@@ -88,9 +88,9 @@ capabilities:
   - name: crash_window_reconciliation
     taught_by: src/inventory/stock/stock.py   # event-sourced; recovery is framework-level (ADR-0015)
     guarded_by: verification/oracles/test_crash_window_reconcile.py
-    property: "a durable event whose relational commit crashed is still published after reconcile (P21)"
+    property: "a durable event whose relational commit crashed is still published after reconcile or the engine's startup sweep, with its external global row; another context's event or a command at the tail of the shared store gets no row (P21)"
     source: A
-    status: covered   # T1.3: window characterized and recovery guarded; proteanhq/protean#1073 fixed
+    status: covered   # T1.3: window characterized and recovery guarded; proteanhq/protean#1073, #1648 and #1653 fixed in the pin
 
   - name: cross_domain_acl_subscriber
     taught_by: src/reviews/review/ordering_subscriber.py

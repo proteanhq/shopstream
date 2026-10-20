@@ -374,6 +374,7 @@ make setup-db          # Create all database schemas
 make drop-db           # Drop all database schemas
 make truncate-db       # Delete all data (preserves schema)
 make idempotency-cleanup  # Delete processed-message markers older than retention_hours (run from cron)
+make outbox-reconcile     # Create outbox rows for events that lost theirs in a crash (all nine contexts)
 ```
 
 Re-run `make setup-db` after pulling a change that marks a projector
