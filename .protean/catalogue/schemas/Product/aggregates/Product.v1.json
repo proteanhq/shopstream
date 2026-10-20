@@ -113,8 +113,10 @@
     "Price": {
       "properties": {
         "base_price": {
-          "minimum": 0.01,
-          "type": "number"
+          "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?$",
+          "type": "string",
+          "x-precision": 19,
+          "x-scale": 4
         },
         "currency": {
           "anyOf": [

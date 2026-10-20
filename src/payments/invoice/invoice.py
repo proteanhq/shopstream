@@ -11,12 +11,13 @@ State Machine:
 """
 
 from datetime import UTC, datetime
+from decimal import Decimal as D
 from enum import Enum
 from typing import Protocol
 from uuid import uuid4
 
 from protean import value_object_from_entity
-from protean.fields import DateTime, Float, HasMany, Identifier, Status, String
+from protean.fields import DateTime, Decimal, Float, HasMany, Identifier, Status, String
 
 from payments.domain import payments
 from payments.invoice.events import (
@@ -25,6 +26,7 @@ from payments.invoice.events import (
     InvoicePaid,
     InvoiceVoided,
 )
+from shared.money import to_money
 
 
 class InvoiceStatus(Enum):
@@ -40,8 +42,8 @@ class InvoiceLineItem:
 
     description: str = String(required=True, max_length=500)
     quantity: float = Float(required=True)
-    unit_price: float = Float(required=True)
-    total: float = Float(required=True)
+    unit_price: D = Decimal(precision=19, scale=4, required=True)
+    total: D = Decimal(precision=19, scale=4, required=True)
 
 
 # Auto-generated input value object mirroring the caller-provided fields of
@@ -58,7 +60,7 @@ class InvoiceLineItemData(Protocol):
     @property
     def quantity(self) -> float: ...
     @property
-    def unit_price(self) -> float: ...
+    def unit_price(self) -> D: ...
 
 
 @payments.aggregate
@@ -67,9 +69,9 @@ class Invoice:
     customer_id: str = Identifier(required=True)
     invoice_number: str = String(required=True, max_length=50)
     line_items: list[InvoiceLineItem] = HasMany(InvoiceLineItem)
-    subtotal: float = Float(default=0.0)
-    tax: float = Float(default=0.0)
-    total: float = Float(default=0.0)
+    subtotal: D = Decimal(precision=19, scale=4, default=D("0"))
+    tax: D = Decimal(precision=19, scale=4, default=D("0"))
+    total: D = Decimal(precision=19, scale=4, default=D("0"))
     status: str = Status(
         InvoiceStatus,
         default=InvoiceStatus.DRAFT.value,
@@ -89,7 +91,7 @@ class Invoice:
         order_id: str,
         customer_id: str,
         line_items_data: list[InvoiceLineItemData],
-        tax: float = 0.0,
+        tax: float | D = 0,
     ) -> "Invoice":
         """Create a new invoice for an order.
 
@@ -102,9 +104,11 @@ class Invoice:
         invoice_number = f"INV-{uuid4().hex[:8].upper()}"
 
         items = []
-        subtotal = 0.0
+        subtotal = to_money(0)
         for item_input in line_items_data:
-            item_total = item_input.quantity * item_input.unit_price
+            # quantity is a Float count; it goes through str so a quantity such
+            # as 0.1 multiplies as written, not as its binary expansion.
+            item_total = to_money(D(str(item_input.quantity)) * to_money(item_input.unit_price))
             items.append(
                 InvoiceLineItem(
                     description=item_input.description,
@@ -115,14 +119,15 @@ class Invoice:
             )
             subtotal += item_total
 
-        total = subtotal + tax
+        tax_amount = to_money(tax)
+        total = subtotal + tax_amount
 
         invoice = cls(
             order_id=order_id,
             customer_id=customer_id,
             invoice_number=invoice_number,
             subtotal=subtotal,
-            tax=tax,
+            tax=tax_amount,
             total=total,
             created_at=now,
             updated_at=now,

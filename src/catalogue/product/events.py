@@ -1,8 +1,15 @@
-"""Domain events for the Product aggregate."""
+"""Domain events for the Product aggregate.
+
+v2 of VariantAdded, VariantPriceChanged and TierPriceSet carries prices as
+``Decimal(precision=19, scale=4)``, written to payloads as strings such as
+``"49.9900"``. v1 carried them as floats; ``catalogue.product.upcasters``
+converts stored v1 events.
+"""
 
 from datetime import datetime
+from decimal import Decimal as D
 
-from protean.fields import Boolean, DateTime, Float, Identifier, String
+from protean.fields import Boolean, DateTime, Decimal, Identifier, String
 
 from catalogue.domain import catalogue
 
@@ -26,10 +33,12 @@ class ProductCreated:
 class VariantAdded:
     """A new purchasable variant was added to a product."""
 
+    __version__ = 2
+
     product_id: str = Identifier(required=True)
     variant_id: str = Identifier(required=True)
     variant_sku: str = String(required=True)
-    price_amount: float = Float(required=True)
+    price_amount: D = Decimal(precision=19, scale=4, required=True)
     price_currency: str = String(required=True)
     created_at: datetime = DateTime(required=True)
 
@@ -38,10 +47,12 @@ class VariantAdded:
 class VariantPriceChanged:
     """A variant's base price was updated."""
 
+    __version__ = 2
+
     product_id: str = Identifier(required=True)
     variant_id: str = Identifier(required=True)
-    previous_price: float = Float(required=True)
-    new_price: float = Float(required=True)
+    previous_price: D = Decimal(precision=19, scale=4, required=True)
+    new_price: D = Decimal(precision=19, scale=4, required=True)
     currency: str = String(required=True)
 
 
@@ -49,10 +60,12 @@ class VariantPriceChanged:
 class TierPriceSet:
     """A loyalty-tier-specific price was set on a variant."""
 
+    __version__ = 2
+
     product_id: str = Identifier(required=True)
     variant_id: str = Identifier(required=True)
     tier: str = String(required=True)
-    price: float = Float(required=True)
+    price: D = Decimal(precision=19, scale=4, required=True)
     currency: str = String(required=True)
 
 

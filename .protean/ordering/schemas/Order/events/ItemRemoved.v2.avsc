@@ -1,0 +1,47 @@
+{
+  "doc": "A line item was removed from an order (only in Created state).",
+  "fields": [
+    {
+      "name": "item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_grand_total",
+      "type": {
+        "logicalType": "decimal",
+        "precision": 19,
+        "scale": 4,
+        "type": "bytes"
+      }
+    },
+    {
+      "name": "new_subtotal",
+      "type": {
+        "logicalType": "decimal",
+        "precision": 19,
+        "scale": 4,
+        "type": "bytes"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "removed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "ItemRemoved",
+  "namespace": "ordering.order.events",
+  "type": "record"
+}

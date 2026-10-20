@@ -1,6 +1,7 @@
 """Tests for all 19 Order events — construction and field completeness."""
 
 from datetime import UTC, datetime
+from decimal import Decimal
 
 from ordering.order.events import (
     CouponApplied,
@@ -42,8 +43,8 @@ class TestOrderCreatedEvent:
         assert event.customer_id == "cust-001"
         assert event.subtotal == 100.0
 
-    def test_version_is_2(self):
-        assert OrderCreated.__version__ == 2
+    def test_version_is_3(self):
+        assert OrderCreated.__version__ == 3
 
     def test_order_source_defaults_to_web(self):
         now = datetime.now(UTC)
@@ -92,7 +93,7 @@ class TestItemAddedEvent:
             added_at=now,
         )
         assert event.sku == "SKU-001"
-        assert event.new_subtotal == 59.98
+        assert event.new_subtotal == Decimal("59.98")
 
 
 class TestItemRemovedEvent:

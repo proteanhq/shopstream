@@ -77,7 +77,7 @@ src/
 ├── shared/                   # Cross-cutting utilities
 │   ├── api/                  # Shared API helpers
 │   ├── enrichment.py         # Event enrichment utilities
-│   └── money.py              # to_money: float amounts to 4-place Decimals
+│   └── money.py              # to_money, parse_money, money_fields_as_text: money as 4-place Decimals
 ├── identity/                 # Identity bounded context
 │   ├── domain.py             # Domain composition root
 │   ├── domain.toml           # Config (DB, broker, event store, env overlays)

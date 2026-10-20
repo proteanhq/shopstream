@@ -55,6 +55,8 @@ class OrderCheckoutSaga:
     failure_reason: str | None = String()
     started_at: datetime | None = DateTime()
     completed_at: datetime | None = DateTime()
+    # Float, not Decimal: Protean's process manager cannot JSON-encode a Decimal
+    # in the transition it stores, so the commit would fail.
     amount: float | None = Float()
 
     @handle(OrderConfirmed, start=True, correlate="order_id")
@@ -85,7 +87,7 @@ class OrderCheckoutSaga:
             return  # Already reached terminal state; skip duplicate
 
         self.payment_id = event.payment_id
-        self.amount = event.amount
+        self.amount = float(event.amount)
         self.status = "completed"
         self.mark_as_complete()
 

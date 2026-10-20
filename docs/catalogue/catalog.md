@@ -200,30 +200,30 @@
 
 #### TierPriceSet
 
-- **Type**: `Catalogue.TierPriceSet.v1`
-- **Version**: 1
+- **Type**: `Catalogue.TierPriceSet.v2`
+- **Version**: 2
 - **Published**: No
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
 | currency | String | Yes | max_length=255, min_length=1 |
-| price | Float | Yes | — |
+| price | Decimal | Yes | — |
 | product_id | Identifier | Yes | min_length=1 |
 | tier | String | Yes | max_length=255, min_length=1 |
 | variant_id | Identifier | Yes | min_length=1 |
 
 #### VariantAdded
 
-- **Type**: `Catalogue.VariantAdded.v1`
-- **Version**: 1
+- **Type**: `Catalogue.VariantAdded.v2`
+- **Version**: 2
 - **Published**: Yes
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
 | created_at | DateTime | Yes | — |
-| price_amount | Float | Yes | — |
+| price_amount | Decimal | Yes | — |
 | price_currency | String | Yes | max_length=255, min_length=1 |
 | product_id | Identifier | Yes | min_length=1 |
 | variant_id | Identifier | Yes | min_length=1 |
@@ -231,16 +231,16 @@
 
 #### VariantPriceChanged
 
-- **Type**: `Catalogue.VariantPriceChanged.v1`
-- **Version**: 1
+- **Type**: `Catalogue.VariantPriceChanged.v2`
+- **Version**: 2
 - **Published**: No
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
 | currency | String | Yes | max_length=255, min_length=1 |
-| new_price | Float | Yes | — |
-| previous_price | Float | Yes | — |
+| new_price | Decimal | Yes | — |
+| previous_price | Decimal | Yes | — |
 | product_id | Identifier | Yes | min_length=1 |
 | variant_id | Identifier | Yes | min_length=1 |
 
@@ -338,7 +338,7 @@
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
 | attributes | Dict | No | — |
-| base_price | Float | Yes | — |
+| base_price | Decimal | Yes | — |
 | currency | String | No | max_length=3 |
 | dimension_unit | String | No | max_length=2 |
 | height | Float | No | — |
@@ -356,7 +356,7 @@
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
-| price | Float | Yes | — |
+| price | Decimal | Yes | — |
 | product_id | Identifier | Yes | min_length=1 |
 | tier | String | Yes | max_length=50, min_length=1 |
 | variant_id | Identifier | Yes | min_length=1 |
@@ -368,7 +368,7 @@
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
-| base_price | Float | Yes | — |
+| base_price | Decimal | Yes | — |
 | currency | String | No | max_length=3 |
 | product_id | Identifier | Yes | min_length=1 |
 | variant_id | Identifier | Yes | min_length=1 |
@@ -381,4 +381,4 @@
 |-------|------|---------|
 | ProductCreated | `Catalogue.ProductCreated.v1` | 1 |
 | ProductDiscontinued | `Catalogue.ProductDiscontinued.v1` | 1 |
-| VariantAdded | `Catalogue.VariantAdded.v1` | 1 |
+| VariantAdded | `Catalogue.VariantAdded.v2` | 2 |

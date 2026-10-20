@@ -13,9 +13,9 @@ classDiagram
         +order_id Identifier~required~
         +paid_at DateTime
         +status Status
-        +subtotal Float
-        +tax Float
-        +total Float
+        +subtotal Decimal
+        +tax Decimal
+        +total Decimal
         +updated_at DateTime
     }
     class payments_invoice_invoice_InvoiceLineItem["InvoiceLineItem"] {
@@ -24,8 +24,8 @@ classDiagram
         +id Auto~identifier~
         +invoice Invoice
         +quantity Float~required~
-        +total Float~required~
-        +unit_price Float~required~
+        +total Decimal~required~
+        +unit_price Decimal~required~
     }
     payments_invoice_invoice_Invoice "1" o-- "*" payments_invoice_invoice_InvoiceLineItem : line_items
 ```
@@ -48,7 +48,7 @@ classDiagram
         +payment_method PaymentMethod
         +refunds Refund[]
         +status Status
-        +total_refunded Float
+        +total_refunded Decimal
         +updated_at DateTime
     }
     class payments_payment_payment_PaymentAttempt["PaymentAttempt"] {
@@ -63,7 +63,7 @@ classDiagram
     payments_payment_payment_Payment "1" o-- "*" payments_payment_payment_PaymentAttempt : attempts
     class payments_payment_payment_Refund["Refund"] {
         <<Entity>>
-        +amount Float~required~
+        +amount Decimal~required~
         +gateway_refund_id String
         +id Auto~identifier~
         +payment Payment

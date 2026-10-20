@@ -58,3 +58,37 @@ def loyalty_ctx(loyalty_bed):
     """Push loyalty domain context for a test, with cleanup."""
     with loyalty_bed.domain_context() as domain:
         yield domain
+
+
+@pytest.fixture(scope="session")
+def ordering_bed():
+    from ordering.domain import ordering
+
+    bed = DomainFixture(ordering)
+    bed.setup()
+    yield bed
+    bed.teardown()
+
+
+@pytest.fixture
+def ordering_ctx(ordering_bed):
+    """Push ordering domain context for a test, with cleanup."""
+    with ordering_bed.domain_context() as domain:
+        yield domain
+
+
+@pytest.fixture(scope="session")
+def payments_bed():
+    from payments.domain import payments
+
+    bed = DomainFixture(payments)
+    bed.setup()
+    yield bed
+    bed.teardown()
+
+
+@pytest.fixture
+def payments_ctx(payments_bed):
+    """Push payments domain context for a test, with cleanup."""
+    with payments_bed.domain_context() as domain:
+        yield domain

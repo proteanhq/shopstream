@@ -5,9 +5,10 @@ Provides aggregate shrinkage data for loss prevention and auditing.
 """
 
 from datetime import datetime
+from decimal import Decimal as D
 
 from protean.core.projector import on
-from protean.fields import DateTime, Float, Identifier, Integer, List, String
+from protean.fields import DateTime, Decimal, Identifier, Integer, List, String
 from protean.utils.globals import current_domain
 
 from inventory.domain import inventory
@@ -24,7 +25,7 @@ class ShrinkageReport:
     total_adjustments: int = Integer(default=0)
     total_damaged: int = Integer(default=0)
     total_written_off: int = Integer(default=0)
-    total_shrinkage_value: float = Float(default=0.0)
+    total_shrinkage_value: D = Decimal(precision=19, scale=4, default=D("0"))
     last_adjustment_at: datetime | None = DateTime()
     adjustment_reasons: list[str] = List(String())
 
@@ -42,7 +43,7 @@ def _get_or_create(event: StockAdjusted | StockMarkedDamaged | DamagedStockWritt
         total_adjustments=0,
         total_damaged=0,
         total_written_off=0,
-        total_shrinkage_value=0.0,
+        total_shrinkage_value=D("0"),
         adjustment_reasons=[],
     )
 

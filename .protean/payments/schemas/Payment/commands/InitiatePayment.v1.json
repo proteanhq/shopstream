@@ -3,7 +3,8 @@
   "description": "Initiate a new payment for an order.",
   "properties": {
     "amount": {
-      "type": "number"
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?$",
+      "type": "string"
     },
     "currency": {
       "anyOf": [

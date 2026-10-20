@@ -1,0 +1,13 @@
+syntax = "proto3";
+package payments.payment.events;
+import "google/protobuf/timestamp.proto";
+
+message RefundCompleted {
+  string amount = 1;
+  google.protobuf.Timestamp completed_at = 2;
+  string customer_id = 3;
+  string gateway_refund_id = 4;
+  string order_id = 5;
+  string payment_id = 6;
+  string refund_id = 7;
+}

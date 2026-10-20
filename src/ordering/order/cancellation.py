@@ -1,7 +1,9 @@
 """Order cancellation and refund — commands and handler."""
 
+from decimal import Decimal as D
+
 from protean import handle
-from protean.fields import Float, Identifier, String
+from protean.fields import Decimal, Identifier, String
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
@@ -22,7 +24,7 @@ class RefundOrder:
     """Issue a refund for a cancelled or returned order."""
 
     order_id: str = Identifier(required=True)
-    refund_amount: float | None = Float()  # Optional — defaults to grand_total
+    refund_amount: D | None = Decimal(precision=19, scale=4)  # Optional — defaults to grand_total
 
 
 @ordering.command_handler(part_of=Order)

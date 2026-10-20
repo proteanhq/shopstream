@@ -1,9 +1,10 @@
 """Customer payments — payment history by customer."""
 
 from datetime import datetime
+from decimal import Decimal as D
 
 from protean.core.projector import on
-from protean.fields import DateTime, Float, Identifier, String
+from protean.fields import DateTime, Decimal, Identifier, String
 from protean.utils.globals import current_domain
 
 from payments.domain import payments
@@ -21,7 +22,7 @@ class CustomerPayment:
     payment_id: str = Identifier(identifier=True, required=True)
     customer_id: str = Identifier(required=True)
     order_id: str = Identifier(required=True)
-    amount: float | None = Float()
+    amount: D | None = Decimal(precision=19, scale=4)
     currency: str = String(default="USD")
     status: str = String(required=True)
     payment_method_type: str | None = String()

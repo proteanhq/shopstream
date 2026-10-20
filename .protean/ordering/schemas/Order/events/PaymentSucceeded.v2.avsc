@@ -1,0 +1,39 @@
+{
+  "doc": "Payment was successfully captured for the order.",
+  "fields": [
+    {
+      "name": "amount",
+      "type": {
+        "logicalType": "decimal",
+        "precision": 19,
+        "scale": 4,
+        "type": "bytes"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "paid_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "payment_id",
+      "type": "string"
+    },
+    {
+      "name": "payment_method",
+      "type": "string"
+    }
+  ],
+  "name": "PaymentSucceeded",
+  "namespace": "ordering.order.events",
+  "type": "record"
+}

@@ -1,0 +1,19 @@
+syntax = "proto3";
+package ordering.order.events;
+import "google/protobuf/timestamp.proto";
+
+message OrderCreated {
+  map<string, string> billing_address = 1;
+  google.protobuf.Timestamp created_at = 2;
+  optional string currency = 3;
+  string customer_id = 4;
+  optional string discount_total = 5;
+  string grand_total = 6;
+  repeated string items = 7;
+  string order_id = 8;
+  optional string order_source = 9;
+  map<string, string> shipping_address = 10;
+  optional string shipping_cost = 11;
+  string subtotal = 12;
+  optional string tax_total = 13;
+}

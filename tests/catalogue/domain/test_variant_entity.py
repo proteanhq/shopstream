@@ -1,5 +1,7 @@
 """Tests for the Variant entity."""
 
+from decimal import Decimal
+
 from protean.utils.reflection import declared_fields
 
 from catalogue.product.product import Price, Variant, Weight
@@ -27,7 +29,7 @@ class TestVariantConstruction:
         variant = Variant(variant_sku=sku, price=price)
 
         assert variant.variant_sku.code == "VAR-001"
-        assert variant.price.base_price == 29.99
+        assert variant.price.base_price == Decimal("29.99")
         assert variant.is_active is True
 
     def test_variant_with_weight(self):

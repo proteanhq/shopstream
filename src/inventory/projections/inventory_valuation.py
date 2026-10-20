@@ -1,14 +1,16 @@
 """Inventory valuation projection — finance reporting of stock value.
 
 Maintains per-item stock valuation based on on-hand quantity and unit cost.
-Unit cost is derived from the most recent StockReceived event.
+Unit cost starts at zero. No inventory event carries a unit cost yet, so
+it is set on the view directly.
 """
 
 from datetime import datetime
+from decimal import Decimal as D
 
 from protean.core.projector import on
 from protean.core.repository import BaseRepository
-from protean.fields import DateTime, Float, Identifier, Integer, String
+from protean.fields import DateTime, Decimal, Identifier, Integer, String
 from protean.utils.globals import current_domain
 
 from inventory.domain import inventory
@@ -21,6 +23,7 @@ from inventory.stock.events import (
     StockReturned,
 )
 from inventory.stock.stock import InventoryItem
+from shared.money import to_money
 
 
 @inventory.projection
@@ -31,8 +34,8 @@ class InventoryValuation:
     sku: str | None = String(max_length=50)
     warehouse_id: str | None = Identifier()
     on_hand: int = Integer(default=0)
-    unit_cost: float = Float(default=0.0)
-    total_value: float = Float(default=0.0)
+    unit_cost: D = Decimal(precision=19, scale=4, default=D("0"))
+    total_value: D = Decimal(precision=19, scale=4, default=D("0"))
     updated_at: datetime | None = DateTime()
 
 
@@ -49,8 +52,8 @@ class InventoryValuationProjector:
                 sku=event.sku,
                 warehouse_id=event.warehouse_id,
                 on_hand=on_hand,
-                unit_cost=0.0,
-                total_value=0.0,
+                unit_cost=D("0"),
+                total_value=D("0"),
                 updated_at=event.initialized_at,
             )
         )
@@ -66,7 +69,7 @@ class InventoryValuationProjector:
         if view is None:
             return
         view.on_hand = event.new_on_hand
-        view.total_value = view.on_hand * (view.unit_cost or 0.0)
+        view.total_value = to_money(view.on_hand * to_money(view.unit_cost))
         view.updated_at = event.received_at
         repo.add(view)
 
@@ -76,7 +79,7 @@ class InventoryValuationProjector:
         if view is None:
             return
         view.on_hand = event.new_on_hand
-        view.total_value = view.on_hand * (view.unit_cost or 0.0)
+        view.total_value = to_money(view.on_hand * to_money(view.unit_cost))
         view.updated_at = event.committed_at
         repo.add(view)
 
@@ -86,7 +89,7 @@ class InventoryValuationProjector:
         if view is None:
             return
         view.on_hand = event.new_on_hand
-        view.total_value = view.on_hand * (view.unit_cost or 0.0)
+        view.total_value = to_money(view.on_hand * to_money(view.unit_cost))
         view.updated_at = event.adjusted_at
         repo.add(view)
 
@@ -96,7 +99,7 @@ class InventoryValuationProjector:
         if view is None:
             return
         view.on_hand = event.new_on_hand
-        view.total_value = view.on_hand * (view.unit_cost or 0.0)
+        view.total_value = to_money(view.on_hand * to_money(view.unit_cost))
         view.updated_at = event.returned_at
         repo.add(view)
 

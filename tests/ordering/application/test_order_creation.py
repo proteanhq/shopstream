@@ -72,7 +72,7 @@ class TestCreateOrderFlow:
         order_created_events = [
             m
             for m in messages
-            if m.metadata and m.metadata.headers and m.metadata.headers.type == "Ordering.OrderCreated.v2"
+            if m.metadata and m.metadata.headers and m.metadata.headers.type == "Ordering.OrderCreated.v3"
         ]
         assert len(order_created_events) >= 1
 

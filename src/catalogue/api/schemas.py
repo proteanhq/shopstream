@@ -6,6 +6,8 @@ from typing import Any
 
 from pydantic import BaseModel, Field
 
+from shared.api.money import MoneyIn, MoneyOut
+
 # --- Product Request Schemas ---
 
 
@@ -89,7 +91,7 @@ class AddVariantRequest(BaseModel):
 
     variant_sku: str = Field(..., max_length=50)
     attributes: dict[str, Any] | None = None
-    base_price: float
+    base_price: MoneyIn
     currency: str = Field("USD", max_length=3)
     weight_value: float | None = None
     weight_unit: str | None = Field(None, max_length=2)
@@ -102,7 +104,7 @@ class AddVariantRequest(BaseModel):
 class UpdateVariantPriceRequest(BaseModel):
     model_config = {"json_schema_extra": {"examples": [{"base_price": 24.99, "currency": "USD"}]}}
 
-    base_price: float
+    base_price: MoneyIn
     currency: str = Field("USD", max_length=3)
 
 
@@ -110,7 +112,7 @@ class SetTierPriceRequest(BaseModel):
     model_config = {"json_schema_extra": {"examples": [{"tier": "Gold", "price": 22.49}]}}
 
     tier: str = Field(..., max_length=50)
-    price: float
+    price: MoneyIn
 
 
 class AddProductImageRequest(BaseModel):
@@ -214,8 +216,8 @@ class ProductCardResponse(BaseModel):
     brand: str | None = None
     category_id: str | None = None
     primary_image_url: str | None = None
-    min_price: float | None = None
-    max_price: float | None = None
+    min_price: MoneyOut | None = None
+    max_price: MoneyOut | None = None
     currency: str | None = None
     status: str
     variant_count: int = 0

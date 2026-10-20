@@ -1,7 +1,7 @@
 """DailyOrderStats keeps exact Decimal money totals.
 
-The order events still carry money as floats, so the projector converts each
-amount to a 4-place Decimal before adding it.
+The order events carry money as 4-place Decimals, and the projector adds
+them with ``to_money`` on both sides.
 """
 
 from datetime import UTC, datetime
@@ -9,6 +9,7 @@ from decimal import Decimal
 
 import pytest
 from protean import current_domain
+from protean.exceptions import ValidationError
 from protean.utils.reflection import fields
 
 from ordering.order.events import OrderCreated, OrderRefunded
@@ -46,11 +47,10 @@ class TestDailyOrderStatsDecimal:
         assert isinstance(record.total_revenue, Decimal)
         assert record.total_revenue == Decimal("0.3")
 
-    def test_float_artifacts_in_a_grand_total_are_rounded(self):
+    def test_the_event_rejects_an_unrounded_float_grand_total(self):
         # 0.1 + 0.2 is 0.30000000000000004, more places than the scale-4 field accepts.
-        DailyOrderStatsProjector().on_order_created(_order_created("ord-dec-3", 0.1 + 0.2))
-
-        assert str(_saved_record().total_revenue) == "0.3000"
+        with pytest.raises(ValidationError, match="no more than 4 decimal places"):
+            _order_created("ord-dec-3", 0.1 + 0.2)
 
     @pytest.mark.parametrize("field_name", ["total_revenue", "total_refunds"])
     def test_money_fields_are_numeric_19_4(self, field_name):

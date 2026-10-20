@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:f46a192e8539b4f5b2bd07c24b7a6f62e4728840e9291e53d2b83fd82fffe401",
+  "checksum": "sha256:85262359a7c2e313d4ef369eb9aea64c4737ff78ca35629e1ce4617451edd4de",
   "clusters": {
     "payments.invoice.invoice.Invoice": {
       "aggregate": {
@@ -69,19 +69,25 @@
             "type": "Status"
           },
           "subtotal": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "tax": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "total": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "updated_at": {
             "kind": "standard",
@@ -213,9 +219,11 @@
               "type": "Identifier"
             },
             "tax": {
-              "default": 0.0,
+              "default": "0",
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             }
           },
           "fqn": "payments.invoice.generation.GenerateInvoice",
@@ -281,13 +289,17 @@
             },
             "total": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "unit_price": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             }
           },
           "fqn": "payments.invoice.invoice.InvoiceLineItem",
@@ -310,8 +322,8 @@
       "event_handlers": {},
       "events": {
         "payments.invoice.events.InvoiceGenerated": {
-          "__type__": "Payments.InvoiceGenerated.v1",
-          "__version__": 1,
+          "__type__": "Payments.InvoiceGenerated.v2",
+          "__version__": 2,
           "description": "A new invoice was generated for an order.",
           "element_type": "EVENT",
           "fields": {
@@ -347,8 +359,10 @@
             },
             "total": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             }
           },
           "fqn": "payments.invoice.events.InvoiceGenerated",
@@ -567,9 +581,11 @@
             "type": "Status"
           },
           "total_refunded": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "updated_at": {
             "kind": "standard",
@@ -776,7 +792,7 @@
             "amount": {
               "kind": "standard",
               "required": true,
-              "type": "Float"
+              "type": "Decimal"
             },
             "currency": {
               "default": "USD",
@@ -861,7 +877,7 @@
             "amount": {
               "kind": "standard",
               "required": true,
-              "type": "Float"
+              "type": "Decimal"
             },
             "payment_id": {
               "kind": "identifier",
@@ -999,8 +1015,10 @@
           "fields": {
             "amount": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "gateway_refund_id": {
               "kind": "standard",
@@ -1122,15 +1140,17 @@
           "published": true
         },
         "payments.payment.events.PaymentInitiated": {
-          "__type__": "Payments.PaymentInitiated.v1",
-          "__version__": 1,
+          "__type__": "Payments.PaymentInitiated.v2",
+          "__version__": 2,
           "description": "A new payment was created for an order.",
           "element_type": "EVENT",
           "fields": {
             "amount": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "attempt_id": {
               "kind": "identifier",
@@ -1273,15 +1293,17 @@
           "part_of": "payments.payment.payment.Payment"
         },
         "payments.payment.events.PaymentSucceeded": {
-          "__type__": "Payments.PaymentSucceeded.v1",
-          "__version__": 1,
+          "__type__": "Payments.PaymentSucceeded.v2",
+          "__version__": 2,
           "description": "Payment was successfully captured by the gateway.",
           "element_type": "EVENT",
           "fields": {
             "amount": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "currency": {
               "kind": "standard",
@@ -1329,15 +1351,17 @@
           "published": true
         },
         "payments.payment.events.RefundCompleted": {
-          "__type__": "Payments.RefundCompleted.v1",
-          "__version__": 1,
+          "__type__": "Payments.RefundCompleted.v2",
+          "__version__": 2,
           "description": "A refund was completed by the gateway.",
           "element_type": "EVENT",
           "fields": {
             "amount": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "completed_at": {
               "kind": "standard",
@@ -1384,15 +1408,17 @@
           "published": true
         },
         "payments.payment.events.RefundRequested": {
-          "__type__": "Payments.RefundRequested.v1",
-          "__version__": 1,
+          "__type__": "Payments.RefundRequested.v2",
+          "__version__": 2,
           "description": "A refund was requested for a successful payment.",
           "element_type": "EVENT",
           "fields": {
             "amount": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "order_id": {
               "kind": "identifier",
@@ -1583,8 +1609,10 @@
         "fields": {
           "amount": {
             "kind": "standard",
+            "precision": 19,
             "required": true,
-            "type": "Float"
+            "scale": 4,
+            "type": "Decimal"
           },
           "currency": {
             "kind": "standard",
@@ -1625,15 +1653,17 @@
           }
         },
         "fqn": "payments.payment.events.PaymentSucceeded",
-        "type": "Payments.PaymentSucceeded.v1",
-        "version": 1
+        "type": "Payments.PaymentSucceeded.v2",
+        "version": 2
       },
       {
         "fields": {
           "amount": {
             "kind": "standard",
+            "precision": 19,
             "required": true,
-            "type": "Float"
+            "scale": 4,
+            "type": "Decimal"
           },
           "completed_at": {
             "kind": "standard",
@@ -1673,8 +1703,8 @@
           }
         },
         "fqn": "payments.payment.events.RefundCompleted",
-        "type": "Payments.RefundCompleted.v1",
-        "version": 1
+        "type": "Payments.RefundCompleted.v2",
+        "version": 2
       }
     ]
   },
@@ -1843,7 +1873,13 @@
     "SUBSCRIBER": [
       "payments.payment.ordering_subscriber.OrderReturnedSubscriber"
     ],
-    "UPCASTER": [],
+    "UPCASTER": [
+      "payments.invoice.upcasters.UpcastInvoiceGeneratedV1ToV2",
+      "payments.payment.upcasters.UpcastPaymentInitiatedV1ToV2",
+      "payments.payment.upcasters.UpcastPaymentSucceededV1ToV2",
+      "payments.payment.upcasters.UpcastRefundCompletedV1ToV2",
+      "payments.payment.upcasters.UpcastRefundRequestedV1ToV2"
+    ],
     "VALUE_OBJECT": [
       "payments.payment.payment.GatewayInfo",
       "payments.payment.payment.Money",
@@ -1881,7 +1917,9 @@
         "fields": {
           "amount": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "created_at": {
             "kind": "standard",
@@ -1952,13 +1990,13 @@
             "Payments.PaymentFailed.v1": [
               "on_payment_failed"
             ],
-            "Payments.PaymentInitiated.v1": [
+            "Payments.PaymentInitiated.v2": [
               "on_payment_initiated"
             ],
-            "Payments.PaymentSucceeded.v1": [
+            "Payments.PaymentSucceeded.v2": [
               "on_payment_succeeded"
             ],
-            "Payments.RefundCompleted.v1": [
+            "Payments.RefundCompleted.v2": [
               "on_refund_completed"
             ]
           },
@@ -2049,10 +2087,10 @@
           "element_type": "PROJECTOR",
           "fqn": "payments.projections.daily_revenue.DailyRevenueProjector",
           "handlers": {
-            "Payments.PaymentSucceeded.v1": [
+            "Payments.PaymentSucceeded.v2": [
               "on_payment_succeeded"
             ],
-            "Payments.RefundCompleted.v1": [
+            "Payments.RefundCompleted.v2": [
               "on_refund_completed"
             ]
           },
@@ -2078,7 +2116,9 @@
         "fields": {
           "amount": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "attempt_number": {
             "kind": "standard",
@@ -2150,7 +2190,7 @@
             "Payments.PaymentRetryInitiated.v1": [
               "on_payment_retry_initiated"
             ],
-            "Payments.PaymentSucceeded.v1": [
+            "Payments.PaymentSucceeded.v2": [
               "on_payment_succeeded"
             ]
           },
@@ -2220,7 +2260,9 @@
           },
           "total": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "updated_at": {
             "kind": "standard",
@@ -2253,7 +2295,7 @@
           "element_type": "PROJECTOR",
           "fqn": "payments.projections.invoice_status.InvoiceStatusProjector",
           "handlers": {
-            "Payments.InvoiceGenerated.v1": [
+            "Payments.InvoiceGenerated.v2": [
               "on_invoice_generated"
             ],
             "Payments.InvoiceIssued.v1": [
@@ -2378,7 +2420,7 @@
             "Payments.PaymentFailed.v1": [
               "on_payment_failed"
             ],
-            "Payments.PaymentInitiated.v1": [
+            "Payments.PaymentInitiated.v2": [
               "on_payment_initiated"
             ],
             "Payments.PaymentProcessing.v1": [
@@ -2387,13 +2429,13 @@
             "Payments.PaymentRetryInitiated.v1": [
               "on_payment_retry_initiated"
             ],
-            "Payments.PaymentSucceeded.v1": [
+            "Payments.PaymentSucceeded.v2": [
               "on_payment_succeeded"
             ],
-            "Payments.RefundCompleted.v1": [
+            "Payments.RefundCompleted.v2": [
               "on_refund_completed"
             ],
-            "Payments.RefundRequested.v1": [
+            "Payments.RefundRequested.v2": [
               "on_refund_requested"
             ]
           },
@@ -2449,8 +2491,10 @@
         "fields": {
           "amount": {
             "kind": "standard",
+            "precision": 19,
             "required": true,
-            "type": "Float"
+            "scale": 4,
+            "type": "Decimal"
           },
           "completed_at": {
             "kind": "standard",
@@ -2517,10 +2561,10 @@
           "element_type": "PROJECTOR",
           "fqn": "payments.projections.refund_report.RefundReportProjector",
           "handlers": {
-            "Payments.RefundCompleted.v1": [
+            "Payments.RefundCompleted.v2": [
               "on_refund_completed"
             ],
-            "Payments.RefundRequested.v1": [
+            "Payments.RefundRequested.v2": [
               "on_refund_requested"
             ]
           },
@@ -2540,5 +2584,37 @@
       "queries": {},
       "query_handlers": {}
     }
+  },
+  "upcasters": {
+    "InvoiceGenerated": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ],
+    "PaymentInitiated": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ],
+    "PaymentSucceeded": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ],
+    "RefundCompleted": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ],
+    "RefundRequested": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ]
   }
 }

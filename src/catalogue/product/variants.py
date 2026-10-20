@@ -1,9 +1,10 @@
 """Variant management — commands and handler."""
 
+from decimal import Decimal as D
 from typing import Any
 
 from protean import handle
-from protean.fields import Dict, Float, Identifier, String
+from protean.fields import Decimal, Dict, Float, Identifier, String
 from protean.utils.globals import current_domain
 
 from catalogue.domain import catalogue
@@ -17,7 +18,7 @@ class AddVariant:
     product_id: str = Identifier(required=True)
     variant_sku: str = String(required=True, max_length=50)
     attributes: dict[str, Any] = Dict()
-    base_price: float = Float(required=True)
+    base_price: D = Decimal(precision=19, scale=4, required=True)
     currency: str = String(max_length=3, default="USD")
     weight_value: float | None = Float()
     weight_unit: str | None = String(max_length=2)
@@ -33,7 +34,7 @@ class UpdateVariantPrice:
 
     product_id: str = Identifier(required=True)
     variant_id: str = Identifier(required=True)
-    base_price: float = Float(required=True)
+    base_price: D = Decimal(precision=19, scale=4, required=True)
     currency: str = String(max_length=3, default="USD")
 
 
@@ -44,7 +45,7 @@ class SetTierPrice:
     product_id: str = Identifier(required=True)
     variant_id: str = Identifier(required=True)
     tier: str = String(required=True, max_length=50)
-    price: float = Float(required=True)
+    price: D = Decimal(precision=19, scale=4, required=True)
 
 
 @catalogue.command_handler(part_of=Product)

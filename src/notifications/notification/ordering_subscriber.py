@@ -14,7 +14,7 @@ from typing import Any
 import structlog
 
 from notifications.domain import notifications
-from notifications.notification.helpers import create_notifications_for_customer
+from notifications.notification.helpers import create_notifications_for_customer, two_places
 from notifications.notification.notification import NotificationType
 
 logger = structlog.get_logger(__name__)
@@ -34,23 +34,23 @@ class OrderingEventsSubscriber:
         data = payload.get("data", {})
 
         if "OrderCreated" in event_type:
-            self._on_order_created(data)
+            self._on_order_created(data, event_type)
         elif "OrderCancelled" in event_type:
             self._on_order_cancelled(data)
         elif "OrderDelivered" in event_type:
             self._on_order_delivered(data)
 
-    def _on_order_created(self, data: dict[str, Any]) -> None:
+    def _on_order_created(self, data: dict[str, Any], event_type: str) -> None:
         """Send order confirmation when an order is placed."""
         create_notifications_for_customer(
             customer_id=str(data["customer_id"]),
             notification_type=NotificationType.ORDER_CONFIRMATION.value,
             context={
                 "order_id": str(data["order_id"]),
-                "grand_total": str(data.get("grand_total", "")),
+                "grand_total": two_places(data.get("grand_total")),
                 "currency": data.get("currency") or "USD",
             },
-            source_event_type="Ordering.OrderCreated.v2",
+            source_event_type=event_type,
         )
 
     def _on_order_cancelled(self, data: dict[str, Any]) -> None:

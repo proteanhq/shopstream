@@ -1,5 +1,7 @@
 """Tests for Order aggregate creation and structure."""
 
+from decimal import Decimal
+
 import pytest
 from protean.exceptions import ValidationError
 
@@ -62,7 +64,7 @@ class TestOrderCreation:
         item = order.items[0]
         assert item.sku == "TSHIRT-BLK-M"
         assert item.quantity == 2
-        assert item.unit_price == 29.99
+        assert item.unit_price == Decimal("29.99")
 
     def test_create_sets_shipping_address(self):
         order = _make_order()
@@ -76,10 +78,10 @@ class TestOrderCreation:
 
     def test_create_sets_pricing(self):
         order = _make_order()
-        assert order.pricing.subtotal == 59.98
-        assert order.pricing.shipping_cost == 5.99
-        assert order.pricing.tax_total == 4.80
-        assert order.pricing.grand_total == 70.77
+        assert order.pricing.subtotal == Decimal("59.98")
+        assert order.pricing.shipping_cost == Decimal("5.99")
+        assert order.pricing.tax_total == Decimal("4.80")
+        assert order.pricing.grand_total == Decimal("70.77")
         assert order.pricing.currency == "USD"
 
     def test_create_sets_timestamps(self):
@@ -143,8 +145,8 @@ class TestOrderCreatedEvent:
     def test_event_contains_pricing(self):
         order = _make_order()
         event = order._events[0]
-        assert event.subtotal == 59.98
-        assert event.grand_total == 70.77
+        assert event.subtotal == Decimal("59.98")
+        assert event.grand_total == Decimal("70.77")
 
     def test_event_contains_items(self):
         order = _make_order()

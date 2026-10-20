@@ -1,5 +1,7 @@
 """Integration tests for product projections."""
 
+from decimal import Decimal
+
 from protean.utils.globals import current_domain
 
 from catalogue.product.creation import CreateProduct
@@ -81,7 +83,7 @@ class TestProductDetailProjection:
 
         detail = current_domain.repository_for(ProductDetail).get(product_id)
         variants = detail.variants
-        assert variants[0]["price_amount"] == 49.99
+        assert variants[0]["price_amount"] == "49.9900"
 
     def test_tier_price_tracked(self):
         product_id = _create_product()
@@ -100,7 +102,7 @@ class TestProductDetailProjection:
 
         detail = current_domain.repository_for(ProductDetail).get(product_id)
         variants = detail.variants
-        assert variants[0]["tier_prices"]["Silver"] == 24.99
+        assert variants[0]["tier_prices"]["Silver"] == "24.9900"
 
     def test_status_transitions_tracked(self):
         product_id = _create_product()
@@ -145,8 +147,8 @@ class TestProductCardProjection:
 
         card = current_domain.repository_for(ProductCard).get(product_id)
         assert card.variant_count == 2
-        assert card.min_price == 29.99
-        assert card.max_price == 49.99
+        assert card.min_price == Decimal("29.99")
+        assert card.max_price == Decimal("49.99")
 
     def test_variant_price_change_updates_card(self):
         product_id = _create_product()
@@ -164,7 +166,7 @@ class TestProductCardProjection:
         )
 
         card = current_domain.repository_for(ProductCard).get(product_id)
-        assert card.min_price == 9.99
+        assert card.min_price == Decimal("9.99")
 
     def test_primary_image_tracked(self):
         product_id = _create_product()
@@ -240,5 +242,5 @@ class TestPriceHistoryProjection:
         results = repo.query.all()
         matching = [r for r in results.items if r.product_id == product_id]
         assert len(matching) == 1
-        assert matching[0].previous_price == 29.99
-        assert matching[0].new_price == 39.99
+        assert matching[0].previous_price == Decimal("29.99")
+        assert matching[0].new_price == Decimal("39.99")

@@ -102,7 +102,7 @@ class OrderTimelineProjector:
 
     @on(PaymentSucceeded)
     def on_payment_succeeded(self, event: PaymentSucceeded) -> None:
-        _add_entry(event.order_id, "PaymentSucceeded", f"Payment of {event.amount} succeeded", datetime.now(UTC))
+        _add_entry(event.order_id, "PaymentSucceeded", f"Payment of {event.amount:.2f} succeeded", datetime.now(UTC))
 
     @on(PaymentFailed)
     def on_payment_failed(self, event: PaymentFailed) -> None:
@@ -153,4 +153,4 @@ class OrderTimelineProjector:
 
     @on(OrderRefunded)
     def on_order_refunded(self, event: OrderRefunded) -> None:
-        _add_entry(event.order_id, "OrderRefunded", f"Refunded {event.refund_amount}", event.refunded_at)
+        _add_entry(event.order_id, "OrderRefunded", f"Refunded {event.refund_amount:.2f}", event.refunded_at)

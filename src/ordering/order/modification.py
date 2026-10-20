@@ -4,8 +4,10 @@ Handles item additions, removals, quantity updates, and coupon application.
 All modifications are only allowed in CREATED state.
 """
 
+from decimal import Decimal as D
+
 from protean import handle
-from protean.fields import Float, Identifier, Integer, String
+from protean.fields import Decimal, Identifier, Integer, String
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
@@ -22,7 +24,7 @@ class AddItem:
     sku: str = String(required=True, max_length=50)
     title: str = String(required=True, max_length=255)
     quantity: int = Integer(required=True, min_value=1)
-    unit_price: float = Float(required=True, min_value=0.0)
+    unit_price: D = Decimal(precision=19, scale=4, required=True, min_value=D("0.0"))
 
 
 @ordering.command(part_of="Order")

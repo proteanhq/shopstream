@@ -1,5 +1,7 @@
 """Application tests for variant management handlers."""
 
+from decimal import Decimal
+
 from protean.utils.globals import current_domain
 
 from catalogue.product.creation import CreateProduct
@@ -34,7 +36,7 @@ class TestAddVariantHandler:
         product = current_domain.repository_for(Product).get(product_id)
         assert len(product.variants) == 1
         assert product.variants[0].variant_sku.code == "VAR-001"
-        assert product.variants[0].price.base_price == 29.99
+        assert product.variants[0].price.base_price == Decimal("29.99")
 
     def test_add_variant_with_weight(self):
         product_id = _create_product()
@@ -85,7 +87,7 @@ class TestUpdateVariantPriceHandler:
         current_domain.process(command, asynchronous=False)
 
         product = current_domain.repository_for(Product).get(product_id)
-        assert product.variants[0].price.base_price == 49.99
+        assert product.variants[0].price.base_price == Decimal("49.99")
 
 
 class TestSetTierPriceHandler:

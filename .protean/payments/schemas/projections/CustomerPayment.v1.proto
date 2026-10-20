@@ -3,7 +3,7 @@ package payments.projections.customer_payments;
 import "google/protobuf/timestamp.proto";
 
 message CustomerPayment {
-  optional double amount = 1;
+  optional string amount = 1;
   optional google.protobuf.Timestamp created_at = 2;
   optional string currency = 3;
   string customer_id = 4;

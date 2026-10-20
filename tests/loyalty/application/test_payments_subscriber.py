@@ -1,5 +1,6 @@
 """Application tests for the loyalty PaymentRefundedSubscriber (pattern-B ACL)."""
 
+import pytest
 from protean import current_domain
 
 from loyalty.projections.reward_account_view import RewardAccountView
@@ -58,3 +59,29 @@ class TestPaymentRefundedSubscriber:
 
     def test_unknown_customer_is_a_noop(self):
         PaymentRefundedSubscriber()(_refund("cust-unknown", 10.0))
+
+
+class TestRefundAmountAsDecimalString:
+    def _refund_v2(self, customer_id, amount):
+        message = _refund(customer_id, amount)
+        message["metadata"]["headers"]["type"] = "Payments.RefundCompleted.v2"
+        return message
+
+    def test_4_place_string_claws_back_whole_points(self):
+        account_id = _enroll_with_points("cust-r4", 200)
+        PaymentRefundedSubscriber()(self._refund_v2("cust-r4", "49.9900"))
+
+        view = current_domain.repository_for(RewardAccountView).get(account_id)
+        assert view.points_balance == 151
+
+    def test_v1_float_amount_truncates_to_whole_points(self):
+        account_id = _enroll_with_points("cust-r6", 200)
+        PaymentRefundedSubscriber()(_refund("cust-r6", 49.99))
+
+        view = current_domain.repository_for(RewardAccountView).get(account_id)
+        assert view.points_balance == 151
+
+    def test_unparsable_amount_raises(self):
+        _enroll_with_points("cust-r5", 200)
+        with pytest.raises(ValueError, match="not a number"):
+            PaymentRefundedSubscriber()(self._refund_v2("cust-r5", "abc"))

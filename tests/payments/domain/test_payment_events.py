@@ -1,6 +1,7 @@
 """Tests for all 6 payment event classes."""
 
 from datetime import UTC, datetime
+from decimal import Decimal
 
 from payments.payment.events import (
     PaymentFailed,
@@ -28,7 +29,7 @@ class TestPaymentInitiated:
             initiated_at=datetime.now(UTC),
         )
         assert event.payment_id == "pay-001"
-        assert event.amount == 59.99
+        assert event.amount == Decimal("59.99")
         assert event.currency == "USD"
         assert event.gateway_name == "FakeGateway"
 
@@ -45,7 +46,7 @@ class TestPaymentSucceeded:
             succeeded_at=datetime.now(UTC),
         )
         assert event.gateway_transaction_id == "txn-123"
-        assert event.amount == 59.99
+        assert event.amount == Decimal("59.99")
 
 
 class TestPaymentFailed:

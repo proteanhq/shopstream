@@ -15,7 +15,7 @@ message Payment {
   optional PaymentMethod payment_method = 10;
   repeated Refund refunds = 11;
   optional string status = 12;
-  optional double total_refunded = 13;
+  optional string total_refunded = 13;
   optional google.protobuf.Timestamp updated_at = 14;
 }
 
@@ -48,7 +48,7 @@ message PaymentMethod {
 }
 
 message Refund {
-  double amount = 1;
+  string amount = 1;
   optional string gateway_refund_id = 2;
   string id = 3;
   optional string payment = 4;

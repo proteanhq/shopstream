@@ -28,12 +28,22 @@
       "name": "discount_total",
       "type": [
         "null",
-        "double"
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
       ]
     },
     {
       "name": "grand_total",
-      "type": "double"
+      "type": {
+        "logicalType": "decimal",
+        "precision": 19,
+        "scale": 4,
+        "type": "bytes"
+      }
     },
     {
       "name": "items",
@@ -62,19 +72,34 @@
       "name": "shipping_cost",
       "type": [
         "null",
-        "double"
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
       ]
     },
     {
       "name": "subtotal",
-      "type": "double"
+      "type": {
+        "logicalType": "decimal",
+        "precision": 19,
+        "scale": 4,
+        "type": "bytes"
+      }
     },
     {
       "default": null,
       "name": "tax_total",
       "type": [
         "null",
-        "double"
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
       ]
     }
   ],

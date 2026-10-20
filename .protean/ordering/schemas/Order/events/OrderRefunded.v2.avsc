@@ -1,0 +1,31 @@
+{
+  "doc": "A refund was issued for a cancelled or returned order.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "refund_amount",
+      "type": {
+        "logicalType": "decimal",
+        "precision": 19,
+        "scale": 4,
+        "type": "bytes"
+      }
+    },
+    {
+      "name": "refunded_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "OrderRefunded",
+  "namespace": "ordering.order.events",
+  "type": "record"
+}

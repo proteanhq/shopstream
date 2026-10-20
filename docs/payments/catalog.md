@@ -6,8 +6,8 @@
 
 #### InvoiceGenerated
 
-- **Type**: `Payments.InvoiceGenerated.v1`
-- **Version**: 1
+- **Type**: `Payments.InvoiceGenerated.v2`
+- **Version**: 2
 - **Published**: No
 - **Fact Event**: No
 
@@ -18,7 +18,7 @@
 | invoice_id | Identifier | Yes | min_length=1 |
 | invoice_number | String | Yes | max_length=255, min_length=1 |
 | order_id | Identifier | Yes | min_length=1 |
-| total | Float | Yes | — |
+| total | Decimal | Yes | — |
 
 #### InvoiceIssued
 
@@ -73,7 +73,7 @@
 | customer_id | Identifier | Yes | min_length=1 |
 | line_items | List[InvoiceLineItemInput] | Yes | — |
 | order_id | Identifier | Yes | min_length=1 |
-| tax | Float | No | — |
+| tax | Decimal | No | — |
 
 #### VoidInvoice
 
@@ -108,14 +108,14 @@
 
 #### PaymentInitiated
 
-- **Type**: `Payments.PaymentInitiated.v1`
-- **Version**: 1
+- **Type**: `Payments.PaymentInitiated.v2`
+- **Version**: 2
 - **Published**: No
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
-| amount | Float | Yes | — |
+| amount | Decimal | Yes | — |
 | attempt_id | Identifier | Yes | min_length=1 |
 | currency | String | Yes | max_length=255, min_length=1 |
 | customer_id | Identifier | Yes | min_length=1 |
@@ -157,14 +157,14 @@
 
 #### PaymentSucceeded
 
-- **Type**: `Payments.PaymentSucceeded.v1`
-- **Version**: 1
+- **Type**: `Payments.PaymentSucceeded.v2`
+- **Version**: 2
 - **Published**: Yes
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
-| amount | Float | Yes | — |
+| amount | Decimal | Yes | — |
 | currency | String | Yes | max_length=255, min_length=1 |
 | customer_id | Identifier | Yes | min_length=1 |
 | gateway_transaction_id | String | Yes | max_length=255, min_length=1 |
@@ -174,14 +174,14 @@
 
 #### RefundCompleted
 
-- **Type**: `Payments.RefundCompleted.v1`
-- **Version**: 1
+- **Type**: `Payments.RefundCompleted.v2`
+- **Version**: 2
 - **Published**: Yes
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
-| amount | Float | Yes | — |
+| amount | Decimal | Yes | — |
 | completed_at | DateTime | Yes | — |
 | customer_id | Identifier | Yes | min_length=1 |
 | gateway_refund_id | String | Yes | max_length=255, min_length=1 |
@@ -191,14 +191,14 @@
 
 #### RefundRequested
 
-- **Type**: `Payments.RefundRequested.v1`
-- **Version**: 1
+- **Type**: `Payments.RefundRequested.v2`
+- **Version**: 2
 - **Published**: No
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
-| amount | Float | Yes | — |
+| amount | Decimal | Yes | — |
 | order_id | Identifier | Yes | min_length=1 |
 | payment_id | Identifier | Yes | min_length=1 |
 | reason | String | Yes | max_length=255, min_length=1 |
@@ -214,7 +214,7 @@
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
-| amount | Float | Yes | — |
+| amount | Decimal | Yes | — |
 | currency | String | No | max_length=3 |
 | customer_id | Identifier | Yes | min_length=1 |
 | idempotency_key | String | Yes | max_length=255, min_length=1 |
@@ -240,7 +240,7 @@
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
-| amount | Float | Yes | — |
+| amount | Decimal | Yes | — |
 | payment_id | Identifier | Yes | min_length=1 |
 | reason | String | Yes | max_length=500, min_length=1 |
 
@@ -272,5 +272,5 @@
 | Event | Type | Version |
 |-------|------|---------|
 | PaymentFailed | `Payments.PaymentFailed.v1` | 1 |
-| PaymentSucceeded | `Payments.PaymentSucceeded.v1` | 1 |
-| RefundCompleted | `Payments.RefundCompleted.v1` | 1 |
+| PaymentSucceeded | `Payments.PaymentSucceeded.v2` | 2 |
+| RefundCompleted | `Payments.RefundCompleted.v2` | 2 |

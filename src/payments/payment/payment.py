@@ -23,7 +23,6 @@ from protean.exceptions import ValidationError
 from protean.fields import (
     DateTime,
     Decimal,
-    Float,
     HasMany,
     Identifier,
     Integer,
@@ -50,14 +49,15 @@ MAX_PAYMENT_ATTEMPTS = 3
 _MONEY_LIMIT = 1e15
 
 
-def _check_money_places(amount: float) -> None:
-    # Money is stored at 4 places, while events carry the float as given.
-    # to_money would round a fifth place away when the aggregate and the
-    # projections convert the event's float, but the event would keep it.
-    if not abs(amount) < _MONEY_LIMIT:
+def _checked_money(amount: float | D) -> D:
+    # A fifth decimal place is rejected rather than rounded, so a caller never
+    # charges or refunds a different amount from the one it asked for. Float
+    # error such as 0.1 + 0.2 is not a fifth place and is rounded off.
+    if not abs(float(amount)) < _MONEY_LIMIT:
         raise ValidationError({"amount": [f"Amount ({amount}) must be less than {_MONEY_LIMIT:.0f}"]})
     if has_more_than_four_places(amount):
         raise ValidationError({"amount": [f"Amount ({amount}) must have no more than 4 decimal places"]})
+    return to_money(amount)
 
 
 # ---------------------------------------------------------------------------
@@ -127,7 +127,7 @@ class PaymentAttempt:
 class Refund:
     """A refund against this payment."""
 
-    amount: float = Float(required=True)
+    amount: D = Decimal(precision=19, scale=4, required=True)
     reason: str = String(max_length=500, required=True)
     status: str = String(
         max_length=50,
@@ -163,7 +163,7 @@ class Payment:
     attempts: list[PaymentAttempt] = HasMany(PaymentAttempt)
     refunds: list[Refund] = HasMany(Refund)
     attempt_count: int = Integer(default=0)
-    total_refunded: float = Float(default=0.0)
+    total_refunded: D = Decimal(precision=19, scale=4, default=D("0"))
     idempotency_key: str = String(max_length=255, required=True)
     created_at: datetime | None = DateTime()
     updated_at: datetime | None = DateTime()
@@ -176,7 +176,7 @@ class Payment:
         cls,
         order_id: str,
         customer_id: str,
-        amount: float,
+        amount: float | D,
         currency: str,
         payment_method_type: str,
         last4: str | None,
@@ -188,7 +188,7 @@ class Payment:
         Uses _create_new() for event-sourced aggregates. All state is set
         via the PaymentInitiated event's @apply handler.
         """
-        _check_money_places(amount)
+        checked_amount = _checked_money(amount)
         now = datetime.now(UTC)
         payment = cls._create_new()
         payment.raise_(
@@ -196,7 +196,7 @@ class Payment:
                 payment_id=str(payment.id),
                 order_id=order_id,
                 customer_id=customer_id,
-                amount=amount,
+                amount=checked_amount,
                 currency=currency,
                 payment_method_type=payment_method_type,
                 last4=last4 or "",
@@ -231,7 +231,7 @@ class Payment:
                 payment_id=str(self.id),
                 order_id=str(self.order_id),
                 customer_id=str(self.customer_id),
-                amount=float(self.amount.value),
+                amount=self.amount.value,
                 currency=self.amount.currency,
                 gateway_transaction_id=gateway_transaction_id,
                 succeeded_at=now,
@@ -279,7 +279,7 @@ class Payment:
     # -------------------------------------------------------------------
     # Refunds
     # -------------------------------------------------------------------
-    def request_refund(self, amount: float, reason: str) -> str:
+    def request_refund(self, amount: float | D, reason: str) -> str:
         """Request a refund for this payment.
 
         Returns the refund_id for tracking.
@@ -294,8 +294,8 @@ class Payment:
 
         # PaymentInitiated, the first event of every payment, always sets amount.
         assert self.amount is not None
-        _check_money_places(amount)
-        refund_total = to_money(self.total_refunded) + to_money(amount)
+        refund_amount = _checked_money(amount)
+        refund_total = to_money(self.total_refunded) + refund_amount
         if refund_total > self.amount.value:
             raise ValidationError(
                 {"amount": [f"Refund total ({refund_total}) would exceed payment amount ({self.amount.value})"]}
@@ -308,7 +308,7 @@ class Payment:
                 payment_id=str(self.id),
                 refund_id=refund_id,
                 order_id=str(self.order_id),
-                amount=amount,
+                amount=refund_amount,
                 reason=reason,
                 requested_at=now,
             )
@@ -353,7 +353,7 @@ class Payment:
         self.gateway_info = GatewayInfo(gateway_name=event.gateway_name)
         self.idempotency_key = event.idempotency_key
         self.attempt_count = 1
-        self.total_refunded = 0.0
+        self.total_refunded = to_money(0)
         self.created_at = event.initiated_at
         self.updated_at = event.initiated_at
 
@@ -437,7 +437,7 @@ class Payment:
         # Each refund is rounded before it is added, as the projections do, so
         # the aggregate and the views reach the same total.
         refund_total = to_money(self.total_refunded) + to_money(event.amount)
-        self.total_refunded = float(refund_total)
+        self.total_refunded = refund_total
         # PaymentInitiated, the first event of every payment, always sets amount.
         assert self.amount is not None
         if refund_total >= self.amount.value:

@@ -6,8 +6,8 @@ message PriceHistory {
   google.protobuf.Timestamp changed_at = 1;
   string currency = 2;
   string entry_id = 3;
-  double new_price = 4;
-  double previous_price = 5;
+  string new_price = 4;
+  string previous_price = 5;
   string product_id = 6;
   string variant_id = 7;
 }

@@ -23,7 +23,7 @@ Root fields: `sku` (SKU VO), `seller_id`, `title`, `description`, `category_id`,
 - `ProductVisibility`: Public, Unlisted, Tier_Restricted
 
 ### Value Objects (part_of="Product")
-- `Price` — base_price, currency (default "USD"), tier_prices (JSON text with validation)
+- `Price` — base_price (`Decimal(precision=19, scale=4)`), currency (default "USD"), tier_prices (JSON text with validation; the tier values stay floats)
 - `SEO` — meta_title, meta_description, slug (URL-safe validation)
 - `Dimensions` — length, width, height, unit (cm/in)
 - `Weight` — value, unit (kg/lb/g/oz)
@@ -70,6 +70,8 @@ Root fields: `name`, `parent_category_id`, `level` (0-4), `attributes` (JSON tex
 ## Events
 
 **Product events** (`product/events.py`): `ProductCreated`, `ProductDetailsUpdated`, `VariantAdded`, `VariantPriceChanged`, `TierPriceSet`, `ProductImageAdded`, `ProductImageRemoved`, `ProductActivated`, `ProductDiscontinued`, `ProductArchived`
+
+`VariantAdded`, `VariantPriceChanged` and `TierPriceSet` are at v2 and carry money as `Decimal(precision=19, scale=4)`. Their v1 versions stored floats; `product/upcasters.py` rewrites those as 4-place strings when an old event is loaded. `ProductDetail` keeps variant prices in a JSON column as 4-place strings.
 
 **Category events** (`category/events.py`): `CategoryCreated`, `CategoryDetailsUpdated`, `CategoryReordered`, `CategoryDeactivated`
 

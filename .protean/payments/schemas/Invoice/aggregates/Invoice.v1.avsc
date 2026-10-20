@@ -67,11 +67,21 @@
               },
               {
                 "name": "total",
-                "type": "double"
+                "type": {
+                  "logicalType": "decimal",
+                  "precision": 19,
+                  "scale": 4,
+                  "type": "bytes"
+                }
               },
               {
                 "name": "unit_price",
-                "type": "double"
+                "type": {
+                  "logicalType": "decimal",
+                  "precision": 19,
+                  "scale": 4,
+                  "type": "bytes"
+                }
               }
             ],
             "name": "InvoiceLineItem",
@@ -113,7 +123,12 @@
       "name": "subtotal",
       "type": [
         "null",
-        "double"
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
       ]
     },
     {
@@ -121,7 +136,12 @@
       "name": "tax",
       "type": [
         "null",
-        "double"
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
       ]
     },
     {
@@ -129,7 +149,12 @@
       "name": "total",
       "type": [
         "null",
-        "double"
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
       ]
     },
     {

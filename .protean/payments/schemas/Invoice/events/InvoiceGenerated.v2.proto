@@ -1,0 +1,12 @@
+syntax = "proto3";
+package payments.invoice.events;
+import "google/protobuf/timestamp.proto";
+
+message InvoiceGenerated {
+  string customer_id = 1;
+  google.protobuf.Timestamp generated_at = 2;
+  string invoice_id = 3;
+  string invoice_number = 4;
+  string order_id = 5;
+  string total = 6;
+}

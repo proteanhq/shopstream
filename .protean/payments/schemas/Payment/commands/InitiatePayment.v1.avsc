@@ -3,7 +3,7 @@
   "fields": [
     {
       "name": "amount",
-      "type": "double"
+      "type": "string"
     },
     {
       "default": null,

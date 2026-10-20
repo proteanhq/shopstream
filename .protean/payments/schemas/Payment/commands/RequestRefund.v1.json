@@ -3,7 +3,8 @@
   "description": "Request a refund for a payment.",
   "properties": {
     "amount": {
-      "type": "number"
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?$",
+      "type": "string"
     },
     "payment_id": {
       "minLength": 1,

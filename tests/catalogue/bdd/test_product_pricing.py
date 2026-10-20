@@ -4,6 +4,7 @@ from protean.exceptions import ValidationError
 from pytest_bdd import parsers, scenarios, then, when
 
 from catalogue.product.product import Price
+from shared.money import to_money
 
 scenarios("features/product_pricing.feature")
 
@@ -31,7 +32,7 @@ def set_tier_price(product, tier, price, error):
 # ---------------------------------------------------------------------------
 @then(parsers.cfparse("the variant base price is {price:f}"))
 def variant_base_price_is(product, price):
-    assert product.variants[0].price.base_price == price
+    assert product.variants[0].price.base_price == to_money(price)
 
 
 @then(parsers.cfparse("the variant has a {tier} tier price of {price:f}"))

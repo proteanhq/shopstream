@@ -1,0 +1,11 @@
+syntax = "proto3";
+package ordering.order.events;
+import "google/protobuf/timestamp.proto";
+
+message PaymentSucceeded {
+  string amount = 1;
+  string order_id = 2;
+  google.protobuf.Timestamp paid_at = 3;
+  string payment_id = 4;
+  string payment_method = 5;
+}

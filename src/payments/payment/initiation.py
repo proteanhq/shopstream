@@ -4,9 +4,10 @@ Creates a new Payment aggregate and initiates a charge via the gateway.
 """
 
 from datetime import timedelta
+from decimal import Decimal as D
 
 from protean import handle
-from protean.fields import Float, Identifier, String
+from protean.fields import Decimal, Identifier, String
 from protean.utils.globals import current_domain
 from protean.utils.logging import bind_event_context
 from protean.utils.processing import Priority, processing_priority
@@ -22,7 +23,9 @@ class InitiatePayment:
 
     order_id: str = Identifier(required=True)
     customer_id: str = Identifier(required=True)
-    amount: float = Float(required=True)
+    # No scale limit here: Payment.create rejects a fifth decimal place with
+    # its own message and rounds float error such as 0.1 + 0.2 away.
+    amount: D = Decimal(required=True)
     currency: str = String(max_length=3, default="USD")
     payment_method_type: str = String(required=True, max_length=50)
     last4: str | None = String(max_length=4)
@@ -48,7 +51,7 @@ class InitiatePaymentHandler:
         # application knows, and they flow through to log aggregators.
         bind_event_context(
             order_id=str(command.order_id),
-            amount=command.amount,
+            amount=str(command.amount),
             currency=command.currency or "USD",
             payment_method=command.payment_method_type,
         )

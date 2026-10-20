@@ -1,6 +1,7 @@
 """Tests for Product domain event structure and fields."""
 
 from datetime import datetime
+from decimal import Decimal
 
 from protean.utils import DomainObjects
 
@@ -55,7 +56,7 @@ class TestVariantAddedEvent:
             created_at=datetime.now(),
         )
         assert event.variant_sku == "VAR-001"
-        assert event.price_amount == 29.99
+        assert event.price_amount == Decimal("29.99")
 
 
 class TestVariantPriceChangedEvent:
@@ -70,8 +71,8 @@ class TestVariantPriceChangedEvent:
             new_price=39.99,
             currency="USD",
         )
-        assert event.previous_price == 29.99
-        assert event.new_price == 39.99
+        assert event.previous_price == Decimal("29.99")
+        assert event.new_price == Decimal("39.99")
 
 
 class TestTierPriceSetEvent:
@@ -81,7 +82,7 @@ class TestTierPriceSetEvent:
     def test_fields(self):
         event = TierPriceSet(product_id="p-1", variant_id="v-1", tier="Silver", price=89.99, currency="USD")
         assert event.tier == "Silver"
-        assert event.price == 89.99
+        assert event.price == Decimal("89.99")
 
 
 class TestProductActivatedEvent:

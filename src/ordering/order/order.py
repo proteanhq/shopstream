@@ -13,6 +13,7 @@ State Machine (14 states):
 """
 
 from datetime import UTC, datetime
+from decimal import Decimal as D
 from enum import Enum
 from typing import Any
 from uuid import uuid4
@@ -21,7 +22,7 @@ from protean import apply
 from protean.exceptions import ValidationError
 from protean.fields import (
     DateTime,
-    Float,
+    Decimal,
     HasMany,
     Identifier,
     Integer,
@@ -52,6 +53,10 @@ from ordering.order.events import (
     ReturnApproved,
     ReturnRequested,
 )
+from ordering.order.upcasters import ORDER_ITEM_MONEY_FIELDS
+from shared.money import money_fields_as_text, parse_money, to_money
+
+_ZERO = D("0.0000")
 
 
 # ---------------------------------------------------------------------------
@@ -114,11 +119,11 @@ class OrderPricing:
     change later. The currency is captured alongside the amounts.
     """
 
-    subtotal: float = Float(default=0.0)
-    shipping_cost: float = Float(default=0.0)
-    tax_total: float = Float(default=0.0)
-    discount_total: float = Float(default=0.0)
-    grand_total: float = Float(default=0.0)
+    subtotal: D = Decimal(precision=19, scale=4, default=_ZERO)
+    shipping_cost: D = Decimal(precision=19, scale=4, default=_ZERO)
+    tax_total: D = Decimal(precision=19, scale=4, default=_ZERO)
+    discount_total: D = Decimal(precision=19, scale=4, default=_ZERO)
+    grand_total: D = Decimal(precision=19, scale=4, default=_ZERO)
     currency: str = String(max_length=3, default="USD")
 
 
@@ -139,9 +144,9 @@ class OrderItem:
     sku: str = String(required=True, max_length=50)
     title: str = String(required=True, max_length=255)
     quantity: int = Integer(required=True, min_value=1)
-    unit_price: float = Float(required=True, min_value=0.0)
-    discount: float = Float(default=0.0)
-    tax_amount: float = Float(default=0.0)
+    unit_price: D = Decimal(precision=19, scale=4, required=True, min_value=_ZERO)
+    discount: D = Decimal(precision=19, scale=4, default=_ZERO)
+    tax_amount: D = Decimal(precision=19, scale=4, default=_ZERO)
     item_status: str = Status(
         ItemStatus,
         default=ItemStatus.PENDING.value,
@@ -239,8 +244,12 @@ class Order:
         """
         now = datetime.now(UTC)
 
-        # Pre-generate item IDs for deterministic replay
-        items_with_ids = [{**item, "id": str(uuid4())} for item in items_data]
+        # Pre-generate item IDs for deterministic replay. Item money goes into
+        # the event as 4-place strings: the items field is a plain dict list,
+        # so a float there would reach the event store unrounded.
+        items_with_ids = [
+            money_fields_as_text({**item, "id": str(uuid4())}, *ORDER_ITEM_MONEY_FIELDS) for item in items_data
+        ]
 
         order = cls._create_new()
         order.raise_(
@@ -250,11 +259,11 @@ class Order:
                 items=items_with_ids,
                 shipping_address=shipping_address,
                 billing_address=billing_address,
-                subtotal=pricing.get("subtotal", 0.0),
-                shipping_cost=pricing.get("shipping_cost", 0.0),
-                tax_total=pricing.get("tax_total", 0.0),
-                discount_total=pricing.get("discount_total", 0.0),
-                grand_total=pricing.get("grand_total", 0.0),
+                subtotal=parse_money(pricing.get("subtotal")),
+                shipping_cost=parse_money(pricing.get("shipping_cost")),
+                tax_total=parse_money(pricing.get("tax_total")),
+                discount_total=parse_money(pricing.get("discount_total")),
+                grand_total=parse_money(pricing.get("grand_total")),
                 currency=pricing.get("currency", "USD"),
                 order_source=order_source,
                 created_at=now,
@@ -265,14 +274,14 @@ class Order:
     @staticmethod
     def _calculate_pricing(
         items: list[OrderItem],
-        shipping_cost: float = 0.0,
-        tax_total: float = 0.0,
-        discount_total: float = 0.0,
+        shipping_cost: D = _ZERO,
+        tax_total: D = _ZERO,
+        discount_total: D = _ZERO,
         currency: str = "USD",
     ) -> OrderPricing:
         """Pure pricing calculation — returns new OrderPricing without side effects."""
-        subtotal = sum(item.unit_price * item.quantity - item.discount for item in items)
-        grand_total = subtotal + shipping_cost + tax_total - discount_total
+        subtotal = to_money(sum((item.unit_price * item.quantity - item.discount for item in items), _ZERO))
+        grand_total = to_money(subtotal + shipping_cost + tax_total - discount_total)
         return OrderPricing(
             subtotal=subtotal,
             shipping_cost=shipping_cost,
@@ -286,7 +295,7 @@ class Order:
     # Order modification (only in CREATED state)
     # -------------------------------------------------------------------
     def add_item(
-        self, product_id: str, variant_id: str, sku: str, title: str, quantity: int, unit_price: float
+        self, product_id: str, variant_id: str, sku: str, title: str, quantity: int, unit_price: float | D
     ) -> None:
         """Add an item to the order. Only allowed in CREATED state."""
         if OrderStatus(self.status) != OrderStatus.CREATED:
@@ -301,14 +310,14 @@ class Order:
             sku=sku,
             title=title,
             quantity=quantity,
-            unit_price=unit_price,
+            unit_price=to_money(unit_price),
         )
         projected_items = list(self.items) + [new_item]
         projected_pricing = self._calculate_pricing(
             projected_items,
-            self.pricing.shipping_cost if self.pricing else 0.0,
-            self.pricing.tax_total if self.pricing else 0.0,
-            self.pricing.discount_total if self.pricing else 0.0,
+            self.pricing.shipping_cost if self.pricing else _ZERO,
+            self.pricing.tax_total if self.pricing else _ZERO,
+            self.pricing.discount_total if self.pricing else _ZERO,
             self.pricing.currency if self.pricing else "USD",
         )
 
@@ -321,7 +330,7 @@ class Order:
                 sku=sku,
                 title=title,
                 quantity=str(quantity),
-                unit_price=str(unit_price),
+                unit_price=str(new_item.unit_price),
                 new_subtotal=projected_pricing.subtotal,
                 new_grand_total=projected_pricing.grand_total,
                 added_at=datetime.now(UTC),
@@ -341,9 +350,9 @@ class Order:
         remaining_items = [i for i in self.items if str(i.id) != str(item_id)]
         projected_pricing = self._calculate_pricing(
             remaining_items,
-            self.pricing.shipping_cost if self.pricing else 0.0,
-            self.pricing.tax_total if self.pricing else 0.0,
-            self.pricing.discount_total if self.pricing else 0.0,
+            self.pricing.shipping_cost if self.pricing else _ZERO,
+            self.pricing.tax_total if self.pricing else _ZERO,
+            self.pricing.discount_total if self.pricing else _ZERO,
             self.pricing.currency if self.pricing else "USD",
         )
 
@@ -393,9 +402,9 @@ class Order:
                 projected_items.append(i)
         projected_pricing = self._calculate_pricing(
             projected_items,
-            self.pricing.shipping_cost if self.pricing else 0.0,
-            self.pricing.tax_total if self.pricing else 0.0,
-            self.pricing.discount_total if self.pricing else 0.0,
+            self.pricing.shipping_cost if self.pricing else _ZERO,
+            self.pricing.tax_total if self.pricing else _ZERO,
+            self.pricing.discount_total if self.pricing else _ZERO,
             self.pricing.currency if self.pricing else "USD",
         )
 
@@ -447,13 +456,13 @@ class Order:
             )
         )
 
-    def record_payment_success(self, payment_id: str, amount: float, payment_method: str) -> None:
+    def record_payment_success(self, payment_id: str, amount: float | D, payment_method: str) -> None:
         """Record successful payment capture."""
         self.raise_(
             PaymentSucceeded(
                 order_id=str(self.id),
                 payment_id=payment_id,
-                amount=amount,
+                amount=to_money(amount),
                 payment_method=payment_method,
                 paid_at=datetime.now(UTC),
             )
@@ -595,7 +604,7 @@ class Order:
             )
         )
 
-    def refund(self, refund_amount: float | None = None) -> None:
+    def refund(self, refund_amount: float | D | None = None) -> None:
         """Refund a cancelled or returned order."""
         amount = refund_amount
         if amount is None:
@@ -605,7 +614,7 @@ class Order:
         self.raise_(
             OrderRefunded(
                 order_id=str(self.id),
-                refund_amount=amount,
+                refund_amount=to_money(amount),
                 refunded_at=datetime.now(UTC),
             )
         )
@@ -624,7 +633,9 @@ class Order:
 
         # Reconstruct items (includes IDs for deterministic replay)
         items_data = event.items or []
-        self.items = [OrderItem(**item_data) for item_data in items_data]
+        self.items = [
+            OrderItem(**money_fields_as_text(dict(item_data), *ORDER_ITEM_MONEY_FIELDS)) for item_data in items_data
+        ]
 
         # Reconstruct addresses
         if event.shipping_address:
@@ -636,9 +647,9 @@ class Order:
         # Reconstruct pricing
         self.pricing = OrderPricing(
             subtotal=event.subtotal,
-            shipping_cost=event.shipping_cost or 0.0,
-            tax_total=event.tax_total or 0.0,
-            discount_total=event.discount_total or 0.0,
+            shipping_cost=event.shipping_cost or _ZERO,
+            tax_total=event.tax_total or _ZERO,
+            discount_total=event.discount_total or _ZERO,
             grand_total=event.grand_total,
             currency=event.currency or "USD",
         )
@@ -653,14 +664,14 @@ class Order:
                 sku=event.sku,
                 title=event.title,
                 quantity=int(event.quantity),
-                unit_price=float(event.unit_price),
+                unit_price=parse_money(event.unit_price),
             )
         )
         self.pricing = OrderPricing(
             subtotal=event.new_subtotal,
-            shipping_cost=self.pricing.shipping_cost if self.pricing else 0.0,
-            tax_total=self.pricing.tax_total if self.pricing else 0.0,
-            discount_total=self.pricing.discount_total if self.pricing else 0.0,
+            shipping_cost=self.pricing.shipping_cost if self.pricing else _ZERO,
+            tax_total=self.pricing.tax_total if self.pricing else _ZERO,
+            discount_total=self.pricing.discount_total if self.pricing else _ZERO,
             grand_total=event.new_grand_total,
             currency=self.pricing.currency if self.pricing else "USD",
         )
@@ -673,9 +684,9 @@ class Order:
             self.remove_items(item)
         self.pricing = OrderPricing(
             subtotal=event.new_subtotal,
-            shipping_cost=self.pricing.shipping_cost if self.pricing else 0.0,
-            tax_total=self.pricing.tax_total if self.pricing else 0.0,
-            discount_total=self.pricing.discount_total if self.pricing else 0.0,
+            shipping_cost=self.pricing.shipping_cost if self.pricing else _ZERO,
+            tax_total=self.pricing.tax_total if self.pricing else _ZERO,
+            discount_total=self.pricing.discount_total if self.pricing else _ZERO,
             grand_total=event.new_grand_total,
             currency=self.pricing.currency if self.pricing else "USD",
         )
@@ -688,9 +699,9 @@ class Order:
             item.quantity = int(event.new_quantity)
         self.pricing = OrderPricing(
             subtotal=event.new_subtotal,
-            shipping_cost=self.pricing.shipping_cost if self.pricing else 0.0,
-            tax_total=self.pricing.tax_total if self.pricing else 0.0,
-            discount_total=self.pricing.discount_total if self.pricing else 0.0,
+            shipping_cost=self.pricing.shipping_cost if self.pricing else _ZERO,
+            tax_total=self.pricing.tax_total if self.pricing else _ZERO,
+            discount_total=self.pricing.discount_total if self.pricing else _ZERO,
             grand_total=event.new_grand_total,
             currency=self.pricing.currency if self.pricing else "USD",
         )

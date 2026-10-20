@@ -1,5 +1,7 @@
 """Integration tests for FastAPI endpoints."""
 
+from decimal import Decimal
+
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
@@ -113,7 +115,7 @@ class TestVariantEndpoints:
         assert response.status_code == 200
 
         product = current_domain.repository_for(Product).get(product_id)
-        assert product.variants[0].price.base_price == 49.99
+        assert product.variants[0].price.base_price == Decimal("49.99")
 
     def test_set_tier_price(self, client):
         product_id = self._create(client)
@@ -285,3 +287,37 @@ class TestReadEndpoints:
         response = client.get(f"/categories/{category_id}/products")
         # Projection may not be populated in sync/memory mode
         assert response.status_code in (200, 404, 500)
+
+
+class TestVariantPriceMoney:
+    def _product_with_variant(self, client, sku, base_price):
+        product_id = client.post("/products", json={"sku": sku, "title": "Money Product"}).json()["product_id"]
+        response = client.post(
+            f"/products/{product_id}/variants", json={"variant_sku": f"V-{sku}", "base_price": base_price}
+        )
+        assert response.status_code == 201
+        return product_id
+
+    @pytest.mark.parametrize(("sku", "base_price"), [("MONEY-N", 29.99), ("MONEY-S", "29.99"), ("MONEY-S4", "29.9900")])
+    def test_number_and_string_prices_store_the_same_decimal(self, client, sku, base_price):
+        product_id = self._product_with_variant(client, sku, base_price)
+
+        product = current_domain.repository_for(Product).get(product_id)
+        assert product.variants[0].price.base_price == Decimal("29.9900")
+
+    def test_price_with_five_places_is_rejected(self, client):
+        product_id = client.post("/products", json={"sku": "MONEY-5DP", "title": "Money"}).json()["product_id"]
+        response = client.post(
+            f"/products/{product_id}/variants", json={"variant_sku": "V-MONEY-5DP", "base_price": "29.99001"}
+        )
+        assert response.status_code == 422
+
+    def test_product_list_sends_prices_as_4_place_strings(self, client):
+        product_id = self._product_with_variant(client, "MONEY-LIST", 29.99)
+
+        response = client.get("/products")
+
+        assert response.status_code == 200
+        cards = [card for card in response.json()["items"] if card["product_id"] == product_id]
+        assert len(cards) == 1
+        assert (cards[0]["min_price"], cards[0]["max_price"]) == ("29.9900", "29.9900")

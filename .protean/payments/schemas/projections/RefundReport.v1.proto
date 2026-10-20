@@ -3,7 +3,7 @@ package payments.projections.refund_report;
 import "google/protobuf/timestamp.proto";
 
 message RefundReport {
-  double amount = 1;
+  string amount = 1;
   optional google.protobuf.Timestamp completed_at = 2;
   optional string gateway_refund_id = 3;
   string order_id = 4;

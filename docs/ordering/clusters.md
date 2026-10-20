@@ -42,6 +42,7 @@ classDiagram
         +estimated_delivery String
         +id Auto~identifier~
         +items OrderItem[]
+        +order_source String
         +payment_id String
         +payment_method String
         +payment_status String
@@ -54,27 +55,27 @@ classDiagram
     }
     class ordering_order_order_OrderItem["OrderItem"] {
         <<Entity>>
-        +discount Float
+        +discount Decimal
         +id Auto~identifier~
         +item_status Status
         +order Order
         +product_id Identifier~required~
         +quantity Integer~required~
         +sku String~required~
-        +tax_amount Float
+        +tax_amount Decimal
         +title String~required~
-        +unit_price Float~required~
+        +unit_price Decimal~required~
         +variant_id Identifier~required~
     }
     ordering_order_order_Order "1" o-- "*" ordering_order_order_OrderItem : items
     class ordering_order_order_OrderPricing["OrderPricing"] {
         <<ValueObject>>
         +currency String
-        +discount_total Float
-        +grand_total Float
-        +shipping_cost Float
-        +subtotal Float
-        +tax_total Float
+        +discount_total Decimal
+        +grand_total Decimal
+        +shipping_cost Decimal
+        +subtotal Decimal
+        +tax_total Decimal
     }
     ordering_order_order_Order *-- ordering_order_order_OrderPricing : pricing
     class ordering_order_order_ShippingAddress["ShippingAddress"] {

@@ -3,7 +3,7 @@ package catalogue.product.variants;
 
 message AddVariant {
   map<string, string> attributes = 1;
-  double base_price = 2;
+  string base_price = 2;
   optional string currency = 3;
   optional string dimension_unit = 4;
   optional double height = 5;

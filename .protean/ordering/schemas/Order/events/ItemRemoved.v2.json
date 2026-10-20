@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A line item was removed from an order (only in Created state).",
+  "properties": {
+    "item_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "new_grand_total": {
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?$",
+      "type": "string",
+      "x-precision": 19,
+      "x-scale": 4
+    },
+    "new_subtotal": {
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?$",
+      "type": "string",
+      "x-precision": 19,
+      "x-scale": 4
+    },
+    "order_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "removed_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "item_id",
+    "new_grand_total",
+    "new_subtotal",
+    "order_id",
+    "removed_at"
+  ],
+  "title": "ItemRemoved",
+  "type": "object",
+  "x-protean-aggregate": "ordering.order.order.Order",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "ordering.order.events.ItemRemoved",
+  "x-protean-type": "Ordering.ItemRemoved.v2",
+  "x-protean-version": 2
+}

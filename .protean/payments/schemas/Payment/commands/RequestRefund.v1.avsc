@@ -3,7 +3,7 @@
   "fields": [
     {
       "name": "amount",
-      "type": "double"
+      "type": "string"
     },
     {
       "name": "payment_id",

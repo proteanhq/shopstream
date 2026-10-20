@@ -1,0 +1,123 @@
+{
+  "doc": "A new order was created from a shopping cart at checkout.\n\nv2: Added order_source to track originating channel (web, mobile, api).\nv3: Money fields became Decimal, including ``unit_price``, ``discount``\nand ``tax_amount`` inside each item, which are 4-place strings.",
+  "fields": [
+    {
+      "name": "billing_address",
+      "type": {
+        "type": "map",
+        "values": "string"
+      }
+    },
+    {
+      "name": "created_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "default": null,
+      "name": "currency",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "discount_total",
+      "type": [
+        "null",
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "grand_total",
+      "type": {
+        "logicalType": "decimal",
+        "precision": 19,
+        "scale": 4,
+        "type": "bytes"
+      }
+    },
+    {
+      "name": "items",
+      "type": {
+        "items": "string",
+        "type": "array"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "order_source",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "shipping_address",
+      "type": {
+        "type": "map",
+        "values": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "shipping_cost",
+      "type": [
+        "null",
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
+      ]
+    },
+    {
+      "name": "subtotal",
+      "type": {
+        "logicalType": "decimal",
+        "precision": 19,
+        "scale": 4,
+        "type": "bytes"
+      }
+    },
+    {
+      "default": null,
+      "name": "tax_total",
+      "type": [
+        "null",
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
+      ]
+    }
+  ],
+  "name": "OrderCreated",
+  "namespace": "ordering.order.events",
+  "type": "record"
+}

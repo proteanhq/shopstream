@@ -1,0 +1,13 @@
+syntax = "proto3";
+package payments.payment.events;
+import "google/protobuf/timestamp.proto";
+
+message PaymentSucceeded {
+  string amount = 1;
+  string currency = 2;
+  string customer_id = 3;
+  string gateway_transaction_id = 4;
+  string order_id = 5;
+  string payment_id = 6;
+  google.protobuf.Timestamp succeeded_at = 7;
+}

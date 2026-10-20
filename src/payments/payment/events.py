@@ -5,11 +5,17 @@ Events are persisted to the event store and used for:
 - Rebuilding aggregate state via @apply (event sourcing)
 - Updating projections via projectors
 - Cross-domain communication via Redis Streams (consumed by OrderCheckoutSaga)
+
+v2 of PaymentInitiated, PaymentSucceeded, RefundRequested and RefundCompleted
+carries ``amount`` as ``Decimal(precision=19, scale=4)``, written to payloads
+as a string such as ``"49.9900"``. v1 carried it as a float; the upcasters in
+``payments.payment.upcasters`` convert stored v1 events.
 """
 
 from datetime import datetime
+from decimal import Decimal as D
 
-from protean.fields import Boolean, DateTime, Float, Identifier, Integer, String
+from protean.fields import Boolean, DateTime, Decimal, Identifier, Integer, String
 
 from payments.domain import payments
 
@@ -18,10 +24,12 @@ from payments.domain import payments
 class PaymentInitiated:
     """A new payment was created for an order."""
 
+    __version__ = 2
+
     payment_id: str = Identifier(required=True)
     order_id: str = Identifier(required=True)
     customer_id: str = Identifier(required=True)
-    amount: float = Float(required=True)
+    amount: D = Decimal(precision=19, scale=4, required=True)
     currency: str = String(required=True)
     payment_method_type: str = String(required=True)
     last4: str | None = String()
@@ -46,10 +54,12 @@ class PaymentProcessing:
 class PaymentSucceeded:
     """Payment was successfully captured by the gateway."""
 
+    __version__ = 2
+
     payment_id: str = Identifier(required=True)
     order_id: str = Identifier(required=True)
     customer_id: str = Identifier(required=True)
-    amount: float = Float(required=True)
+    amount: D = Decimal(precision=19, scale=4, required=True)
     currency: str = String(required=True)
     gateway_transaction_id: str = String(required=True)
     succeeded_at: datetime = DateTime(required=True)
@@ -84,10 +94,12 @@ class PaymentRetryInitiated:
 class RefundRequested:
     """A refund was requested for a successful payment."""
 
+    __version__ = 2
+
     payment_id: str = Identifier(required=True)
     refund_id: str = Identifier(required=True)
     order_id: str = Identifier(required=True)
-    amount: float = Float(required=True)
+    amount: D = Decimal(precision=19, scale=4, required=True)
     reason: str = String(required=True)
     requested_at: datetime = DateTime(required=True)
 
@@ -96,10 +108,12 @@ class RefundRequested:
 class RefundCompleted:
     """A refund was completed by the gateway."""
 
+    __version__ = 2
+
     payment_id: str = Identifier(required=True)
     refund_id: str = Identifier(required=True)
     order_id: str = Identifier(required=True)
     customer_id: str = Identifier(required=True)
-    amount: float = Float(required=True)
+    amount: D = Decimal(precision=19, scale=4, required=True)
     gateway_refund_id: str = String(required=True)
     completed_at: datetime = DateTime(required=True)
