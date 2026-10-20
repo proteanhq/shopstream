@@ -36,7 +36,7 @@ REMOVED  → (terminal)
 - `Rating` — score (Integer, 1-5), invariant enforces range
 
 ### Entities (part_of="Review")
-- `ReviewImage` — url, alt_text, display_order
+- `ReviewImage` — url, alt_text (sanitized), display_order
 - `HelpfulVote` — customer_id, vote_type, voted_at
 - `SellerReply` — seller_id, body, replied_at
 
@@ -45,6 +45,18 @@ REMOVED  → (terminal)
 - `at_most_one_seller_reply` — max 1 reply
 - `body_minimum_length` — body must be at least 20 chars
 - `title_must_not_be_empty` — title cannot be whitespace-only
+
+### Sanitization
+Protean 0.18 turned sanitization off by default: a `String` or `Text` field stores raw input unless it declares `sanitize=True`. Sanitizing means running the value through `bleach.clean()` with bleach's default allowlist. Bare `&` and `<` are escaped (`&amp;`, `&lt;`), and so are tags off the allowlist, such as `<script>`. Tags on the allowlist, such as `<b>`, `<i>` and `<a>`, are kept, with attributes like `onclick` and `javascript:` links dropped. The stored value is cleaned HTML, not plain escaped text.
+
+- These five fields declare `sanitize=True`, because they hold free text a customer or seller types and a storefront shows: `Review.title`, `Review.body`, `Review.moderation_notes`, `SellerReply.body`, `ReviewImage.alt_text`.
+- Protean checks `max_length` on the escaped value. A 195-character title with five `&` is 215 characters once escaped, so it fails the 200 bound.
+- `submit()` and `edit()` check the 20-character minimum on the raw body, before it is cleaned, so escaping cannot lift a short body past it and entities the customer typed (`&amp;`) count as typed. The `body_minimum_length` invariant checks the stored value. Escaping only makes a body longer, so the invariant accepts every body the raw check accepted, on save and on reload.
+- Cleaning is idempotent: saving and reloading an escaped value leaves it unchanged. Protean cleans and checks `max_length` again when it loads a row, so a row saved raw before these fields sanitized, with a title near 200 characters that contains `&` or `<`, fails to load. ShopStream has no such deployed data, so there is no backfill.
+- `ReviewImage.url` stays raw: escaping `&` would break a query string.
+- `pros` and `cons` are `List(String())`, whose items were never sanitized. `HelpfulVote.vote_type` is a `choices` field, which Protean does not sanitize.
+- Events copy the caller's input, so `ReviewSubmitted`, `ReviewRejected.reason` and `SellerReplyAdded.body` carry raw text, and so do `ReviewDetail`, `CustomerReviews` and the first `ModerationQueue` row, which copy those events. `ProductReviews` takes `title` and `body` from the loaded aggregate, so those two hold the escaped value, while its seller reply comes from `SellerReplyAdded` and stays raw. The `ModerationQueue` re-queue path also loads the aggregate and holds the escaped `title` and `body`. `ReviewEdited` carries raw text for the fields the caller passed and leaves the others `None`, so the projectors keep the text they already hold.
+- Free-text fields in the other contexts stay raw. Output encoding belongs to the layer that displays them.
 
 ### Aggregate Methods
 | Method | Behavior |
