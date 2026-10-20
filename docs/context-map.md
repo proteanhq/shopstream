@@ -48,7 +48,7 @@ graph TB
         fulfillment_ctx["<b>Fulfillment</b><br/>Picking, packing, shipping,<br/>tracking, delivery<br/><i>1 aggregate &middot; 11 events</i>"]
         reviews_ctx["<b>Reviews</b><br/>Ratings, moderation, voting,<br/>seller replies<br/><i>1 aggregate &middot; 8 events</i>"]
         notifications_ctx["<b>Notifications</b><br/>Multi-channel delivery,<br/>preferences (event hub)<br/><i>2 aggregates &middot; 13 events</i>"]
-        loyalty_ctx["<b>Loyalty</b><br/>Reward accounts, points, tiers,<br/>promo campaigns, redemptions (saga)<br/><i>3 aggregates &middot; 16 events</i>"]
+        loyalty_ctx["<b>Loyalty</b><br/>Reward accounts, points, tiers,<br/>promo campaigns, redemptions (saga)<br/><i>3 aggregates &middot; 17 events</i>"]
     end
 
     ordering -- "customer_id" --> identity
