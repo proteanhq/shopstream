@@ -39,9 +39,11 @@ tick_interval = 0.01
 # saved, so a command handler for it would have nothing to act on. The rule does not
 # skip abstract aggregates, unlike its sibling rules.
 AGGREGATE_WITHOUT_COMMAND_HANDLER = 1
-# MembershipCardIssued records the card issue on the account's stream. No read model
-# shows membership cards yet, so nothing handles the event.
-UNHANDLED_EVENT = 1
+# MembershipCardIssued and MembershipCardIssuedV2. The first is deprecated and nothing
+# raises it any more; it stays registered so old stored events still load. The second
+# records the card issue on the account's stream, and no read model shows membership
+# cards yet, so nothing handles it. Lower this to 1 when either finding goes away.
+UNHANDLED_EVENT = 2
 # RewardAccount.points_balance in RewardAccountRepository.never_redeemed. The filter
 # compares two columns (points_balance = lifetime_points), which a single-column index
 # would not serve.

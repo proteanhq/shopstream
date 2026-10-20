@@ -6,9 +6,9 @@
 `customer_id` so downstream consumers can address the customer without a loyalty lookup.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 
-from protean.fields import DateTime, Integer, String
+from protean.fields import Date, DateTime, Integer, String
 
 from loyalty.domain import loyalty
 
@@ -26,7 +26,7 @@ class RewardAccountEnrolled:
 class PointsEarned:
     account_id: str = String(required=True)
     customer_id: str | None = String()
-    amount: int = Integer(required=True)
+    points: int = Integer(required=True, renamed_from="amount")
     balance_after: int = Integer(required=True)
     reason: str | None = String()
     occurred_at: datetime = DateTime(required=True)
@@ -36,7 +36,7 @@ class PointsEarned:
 class PointsRedeemed:
     account_id: str = String(required=True)
     customer_id: str | None = String()
-    amount: int = Integer(required=True)
+    points: int = Integer(required=True, renamed_from="amount")
     balance_after: int = Integer(required=True)
     reason: str | None = String()
     occurred_at: datetime = DateTime(required=True)
@@ -52,11 +52,22 @@ class TierUpgraded:
     occurred_at: datetime = DateTime(required=True)
 
 
-@loyalty.event(part_of="RewardAccount")
+@loyalty.event(
+    part_of="RewardAccount",
+    superseded_by="MembershipCardIssuedV2",
+    deprecated={"since": "0.1.0"},
+)
 class MembershipCardIssued:
     account_id: str = String(required=True)
     card_number: str = String(required=True)
     issued_on: str = String(required=True)
+
+
+@loyalty.event(part_of="RewardAccount")
+class MembershipCardIssuedV2:
+    account_id: str = String(required=True)
+    card_number: str = String(required=True)
+    issued_on: date = Date(required=True)
 
 
 @loyalty.event(part_of="RewardAccount")

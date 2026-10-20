@@ -92,6 +92,7 @@ flowchart TD
         cmd_loyalty_reward_points_EarnPoints[/EarnPoints/]
         cmd_loyalty_reward_points_RedeemPoints[/RedeemPoints/]
         evt_loyalty_reward_events_MembershipCardIssued([MembershipCardIssued])
+        evt_loyalty_reward_events_MembershipCardIssuedV2([MembershipCardIssuedV2])
         evt_loyalty_reward_events_PointsEarned([PointsEarned])
         evt_loyalty_reward_events_PointsRedeemed([PointsRedeemed])
         evt_loyalty_reward_events_RewardAccountClosed([RewardAccountClosed])
@@ -106,6 +107,7 @@ flowchart TD
     cmd_loyalty_reward_points_RedeemPoints --> hdlr_loyalty_reward_points_PointsHandler
     hdlr_loyalty_reward_points_PointsHandler --> agg_loyalty_reward_reward_account_RewardAccount
     agg_loyalty_reward_reward_account_RewardAccount --> evt_loyalty_reward_events_MembershipCardIssued
+    agg_loyalty_reward_reward_account_RewardAccount --> evt_loyalty_reward_events_MembershipCardIssuedV2
     agg_loyalty_reward_reward_account_RewardAccount --> evt_loyalty_reward_events_PointsEarned
     agg_loyalty_reward_reward_account_RewardAccount --> evt_loyalty_reward_events_PointsRedeemed
     agg_loyalty_reward_reward_account_RewardAccount --> evt_loyalty_reward_events_RewardAccountClosed

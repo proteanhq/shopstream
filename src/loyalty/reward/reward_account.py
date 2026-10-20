@@ -220,17 +220,17 @@ class RewardAccount(Auditable):
         return account
 
     def issue_card(self, card_number: str) -> None:
-        from loyalty.reward.events import MembershipCardIssued
+        from loyalty.reward.events import MembershipCardIssuedV2
 
         if self.card is not None:
             raise ValidationError({"card": ["Account already has a membership card"]})
         issued_on = date.today()
         self.card = MembershipCard(card_number=card_number, issued_on=issued_on)
         self.raise_(
-            MembershipCardIssued(
+            MembershipCardIssuedV2(
                 account_id=self.id,
                 card_number=card_number,
-                issued_on=issued_on.isoformat(),
+                issued_on=issued_on,
             )
         )
 
@@ -257,7 +257,7 @@ class RewardAccount(Auditable):
             PointsEarned(
                 account_id=self.id,
                 customer_id=self.customer_id,
-                amount=amount,
+                points=amount,
                 balance_after=self.points_balance,
                 reason=reason,
                 occurred_at=datetime.now(UTC),
@@ -312,7 +312,7 @@ class RewardAccount(Auditable):
             PointsRedeemed(
                 account_id=self.id,
                 customer_id=self.customer_id,
-                amount=amount,
+                points=amount,
                 balance_after=self.points_balance,
                 reason=reason,
                 occurred_at=datetime.now(UTC),
@@ -341,7 +341,7 @@ class RewardAccount(Auditable):
             PointsRedeemed(
                 account_id=self.id,
                 customer_id=self.customer_id,
-                amount=clawed,
+                points=clawed,
                 balance_after=self.points_balance,
                 reason=reason,
                 occurred_at=datetime.now(UTC),

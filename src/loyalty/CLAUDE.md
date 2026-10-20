@@ -64,7 +64,7 @@ bronze/silver/gold/platinum), `points_balance` (default 0), `lifetime_points` (d
 | Method | Behavior |
 |--------|----------|
 | `RewardAccount.enroll(customer_id, member_code?, referral_code?)` | Factory; generates a valid `member_code` if absent; raises `RewardAccountEnrolled` |
-| `issue_card(card_number)` | Attaches the 1:1 `MembershipCard` (at most one); raises `MembershipCardIssued` |
+| `issue_card(card_number)` | Attaches the 1:1 `MembershipCard` (at most one); raises `MembershipCardIssuedV2` (`issued_on` as a date) |
 | `earn_points(amount, reason?)` | Increments balance + lifetime; appends ledger entry; raises `PointsEarned`; may promote tier (raises `TierUpgraded`) |
 | `redeem_points(amount, reason?)` | Decrements balance (not lifetime); appends ledger entry; raises `PointsRedeemed` |
 | `close()` | Sets status Closed (terminal); raises `RewardAccountClosed` |
@@ -142,7 +142,14 @@ breadth-first, so the saga completes, and the synchronous end-to-end completion 
 ## Events
 
 **RewardAccount events** (`reward/events.py`): `RewardAccountEnrolled`, `PointsEarned`,
-`PointsRedeemed`, `TierUpgraded`, `MembershipCardIssued`, `RewardAccountClosed`.
+`PointsRedeemed`, `TierUpgraded`, `MembershipCardIssuedV2`, `RewardAccountClosed`.
+
+`PointsEarned` and `PointsRedeemed` carry the count in `points`, declared with
+`renamed_from="amount"`, so stored payloads written under the old name still load. The
+`EarnPoints`/`RedeemPoints` commands and the ledger entry keep `amount`.
+`MembershipCardIssued` (with `issued_on` as a string) is deprecated and superseded by
+`MembershipCardIssuedV2`. Nothing raises it any more, but it stays registered so old stored
+events still load. Raising it emits a `ProteanDeprecationWarning`.
 
 `RewardAccountEnrolled`, `PointsEarned`, `PointsRedeemed`, and `TierUpgraded` are
 **`published=True`** — dual-written to the external bus so other contexts react (loyalty is an

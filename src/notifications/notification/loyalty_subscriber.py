@@ -59,7 +59,7 @@ class LoyaltyEventsSubscriber:
             customer_id=str(customer_id),
             notification_type=NotificationType.POINTS_REDEEMED.value,
             context={
-                "amount": str(data.get("amount", "")),
+                "amount": str(data.get("points", "")),
                 "balance_after": str(data.get("balance_after", "")),
                 "reason": data.get("reason") or "",
             },
