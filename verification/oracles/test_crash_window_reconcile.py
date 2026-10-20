@@ -378,16 +378,25 @@ def test_reconcile_beside_a_live_commit_does_not_fail_it():
             thread = threading.Thread(target=lambda: sweep.update(created=reconcile_outbox(domain)))
             thread.start()
             thread.join(timeout=30)
-            assert not thread.is_alive(), "the sweep blocked on the live transaction"
+            # Recorded, not asserted: the unit of work would wrap an assertion
+            # raised here in the TransactionError this test expects.
+            sweep["blocked"] = thread.is_alive()
         return real_commit(session, *args, **kwargs)
+
+    def assert_the_sweep_finished():
+        assert not sweep["blocked"], "the sweep blocked on the live transaction"
+        assert sweep["created"] is not None, "the sweep did not run to the end"
 
     Session.commit = commit_after_a_sweep
     try:
         domain.process(ReceiveStock(inventory_item_id=item_id, quantity=10), asynchronous=False)
+    except TransactionError:
+        assert_the_sweep_finished()
+        raise
     finally:
         Session.commit = real_commit
 
-    assert sweep["created"] is not None  # precondition: the sweep ran to the end
+    assert_the_sweep_finished()
     assert len(_internal_received_rows(domain, item_id)) == 1
 
 
