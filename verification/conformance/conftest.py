@@ -19,6 +19,10 @@ Run one provider per invocation:
 (or `make conformance`, which runs all three and prints the skip-rate).
 """
 
+import atexit
+import shutil
+import tempfile
+
 import pytest
 from protean import Domain
 from protean.integrations.pytest.adapter_conformance import resolve_db_config
@@ -26,8 +30,11 @@ from protean.integrations.pytest.adapter_conformance import resolve_db_config
 from verification.conformance.elements import CONFORMANCE_ELEMENTS
 
 # ShopStream infra (matches docker-compose): Postgres on :15432, a temp SQLite file.
+# The file is one per run, so two runs on one machine never share its tables.
 _SHOPSTREAM_POSTGRES_URI = "postgresql://postgres:postgres@localhost:15432/postgres"
-_SQLITE_URI = "sqlite:////tmp/shopstream_conformance.db"
+_SQLITE_DIR = tempfile.mkdtemp(prefix="shopstream-conformance-")
+atexit.register(shutil.rmtree, _SQLITE_DIR, ignore_errors=True)
+_SQLITE_URI = f"sqlite:///{_SQLITE_DIR}/conformance.db"
 
 
 @pytest.fixture(scope="session")
