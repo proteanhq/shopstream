@@ -954,7 +954,7 @@ def test_stream_trim_keeps_entries_a_consumer_group_has_not_acknowledged():
     returns those ids with no fields, `_read_blocking` skips them, and the message
     is never retried or dead-lettered. ShopStream turns retention on for every
     subscription through the `shopstream` profile, so a dispatcher that fails
-    during a channel outage can lose its pending dispatch requests this way.
+    during a channel outage can lose its pending sends this way.
     """
     import uuid
 

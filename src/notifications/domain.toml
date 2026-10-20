@@ -34,8 +34,9 @@ retention_maxlen = 50000
 # One breaker covers all four channels: an Email outage pauses SMS, Push and Slack
 # too, and a working channel in between resets the failure count. So does every
 # other Notification event on the stream, which the dispatcher ignores and Protean
-# counts as a success: NotificationCreated comes before each dispatch request, so
-# an outage opens the breaker only when retries pile up between new notifications.
+# counts as a success, and so does the claim before each send: NotificationCreated
+# and NotificationDispatchRequested come before each NotificationDispatchStarted,
+# so an outage opens the breaker only when retries pile up between new notifications.
 [server.subscriptions.NotificationDispatcher]
 circuit_breaker_threshold = 5
 circuit_breaker_reset_seconds = 30

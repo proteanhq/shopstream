@@ -31,7 +31,7 @@ from protean.utils.eventing import Message
 from notifications.channel import get_channel, reset_channels
 from notifications.domain import notifications
 from notifications.notification.dispatch import NotificationDispatcher
-from notifications.notification.events import NotificationDispatchRequested
+from notifications.notification.events import NotificationDispatchRequested, NotificationDispatchStarted
 from notifications.notification.notification import Notification, NotificationChannel, NotificationType
 
 # The values set under [server.subscriptions.NotificationDispatcher] in domain.toml.
@@ -44,30 +44,30 @@ def _broker_is_redis_streams() -> bool:
     return "redis" in provider and "pubsub" not in provider
 
 
-def _dispatch_request_message() -> Message:
-    """Serialize a real NotificationDispatchRequested, raised by the aggregate, as a broker message."""
+def _claimed_notification() -> Notification:
     notification = Notification.create(
         recipient_id="cust-breaker",
         notification_type=NotificationType.WELCOME.value,
         channel=NotificationChannel.EMAIL.value,
         body="Welcome!",
     )
-    requested = [e for e in notification._events if isinstance(e, NotificationDispatchRequested)]
-    assert len(requested) == 1
-    return Message.from_domain_object(requested[0])
+    notification.claim_dispatch(notifications.clock.now())
+    return notification
+
+
+def _dispatch_started_message() -> Message:
+    """Serialize a real NotificationDispatchStarted, raised by the aggregate, as a broker message."""
+    started = [e for e in _claimed_notification()._events if isinstance(e, NotificationDispatchStarted)]
+    assert len(started) == 1
+    return Message.from_domain_object(started[0])
 
 
 def _creation_messages() -> list[Message]:
-    """Serialize every event an immediate ``Notification.create`` raises, in order."""
-    notification = Notification.create(
-        recipient_id="cust-breaker",
-        notification_type=NotificationType.WELCOME.value,
-        channel=NotificationChannel.EMAIL.value,
-        body="Welcome!",
-    )
-    assert any(isinstance(e, NotificationDispatchRequested) for e in notification._events)
-    assert len(notification._events) > 1
-    return [Message.from_domain_object(e) for e in notification._events]
+    """Serialize every event an immediate ``Notification.create`` and its claim raise, in order."""
+    events = _claimed_notification()._events
+    assert [type(e) for e in events[-2:]] == [NotificationDispatchRequested, NotificationDispatchStarted]
+    assert len(events) > 2
+    return [Message.from_domain_object(e) for e in events]
 
 
 @pytest.fixture()
@@ -114,10 +114,11 @@ class TestDispatcherCircuitBreaker:
     def test_outage_opens_the_breaker_when_creation_events_share_the_stream(self, engine, dispatcher_subscription):
         """Protean finding (not filed yet): a no-op for an unhandled event resets the failure count.
 
-        Each created notification puts ``NotificationCreated`` on the stream before
-        ``NotificationDispatchRequested``. The dispatcher has no handler for the first, and
-        `process_batch` records that no-op as a successful outcome, so the count goes back to 0
-        before every failing request. The breaker cannot reach its threshold while every send fails.
+        Each created notification puts ``NotificationCreated`` and ``NotificationDispatchRequested``
+        on the stream before ``NotificationDispatchStarted``. The dispatcher has no handler for the
+        first, and `process_batch` records that no-op as a successful outcome. The claim for the
+        second also succeeds. Either one sets the count back to 0 before every failing send, so the
+        breaker cannot reach its threshold while every send fails.
         """
         _skip_unless_redis_streams()
         engine.loop.run_until_complete(
@@ -183,8 +184,9 @@ class TestDispatcherCircuitBreaker:
                 assert oldest in _pending_ids(sub)
                 assert client.xlen(sub.dlq_stream) == dlq_length_before
 
-        # Retries are spent: the oldest request is in the DLQ and no longer pending, so only a
-        # DLQ replay sends it. The others are still pending behind it.
+        # Retries are spent: the oldest send is in the DLQ and no longer pending, so its
+        # notification stays DISPATCHING until the stale-dispatch sweep marks it FAILED. The
+        # others are still pending behind it.
         pending = _pending_ids(sub)
         assert oldest not in pending
         assert set(failed_ids[1:]) <= pending
@@ -217,7 +219,7 @@ async def _with_scratch_group(sub: StreamSubscription, exercise, publish: bool =
     published: list[str] = []
     try:
         for _ in range(THRESHOLD if publish else 0):
-            published.append(sub.broker.publish(sub.stream_category, _dispatch_request_message().to_dict()))
+            published.append(sub.broker.publish(sub.stream_category, _dispatch_started_message().to_dict()))
         await exercise(sub, published)
     finally:
         client.xgroup_destroy(sub.stream_category, sub.consumer_group)
