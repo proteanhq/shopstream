@@ -1,0 +1,12 @@
+syntax = "proto3";
+package notifications.notification.events;
+import "google/protobuf/timestamp.proto";
+
+message NotificationDispatchRequested {
+  string body = 1;
+  string channel = 2;
+  string notification_id = 3;
+  string recipient_id = 4;
+  google.protobuf.Timestamp requested_at = 5;
+  optional string subject = 6;
+}

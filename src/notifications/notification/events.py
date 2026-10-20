@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from protean.fields import DateTime, Identifier, Integer, String
+from protean.fields import DateTime, Identifier, Integer, String, Text
 
 from notifications.domain import notifications
 
@@ -16,11 +16,27 @@ class NotificationCreated:
     recipient_type: str = String(required=True)
     notification_type: str = String(required=True)
     channel: str = String(required=True)
-    subject: str | None = String()
+    subject: str | None = String(max_length=500)
     template_name: str | None = String()
     source_event_type: str | None = String()
     scheduled_for: datetime | None = DateTime()
     created_at: datetime = DateTime(required=True)
+
+
+@notifications.event(part_of="Notification")
+class NotificationDispatchRequested:
+    """A pending notification is ready to go out through its channel.
+
+    Carries everything the send needs, so the dispatcher can send without
+    loading the notification and opening a database transaction.
+    """
+
+    notification_id: str = Identifier(required=True)
+    recipient_id: str = Identifier(required=True)
+    channel: str = String(required=True)
+    subject: str | None = String(max_length=500)
+    body: str = Text(required=True)
+    requested_at: datetime = DateTime(required=True)
 
 
 @notifications.event(part_of="Notification")
@@ -50,7 +66,7 @@ class NotificationFailed:
     notification_id: str = Identifier(required=True)
     recipient_id: str = Identifier(required=True)
     channel: str = String(required=True)
-    reason: str = String(required=True)
+    reason: str = String(required=True, max_length=500)
     retry_count: int = Integer(required=True)
     max_retries: int = Integer(required=True)
     failed_at: datetime = DateTime(required=True)
@@ -63,7 +79,7 @@ class NotificationBounced:
     notification_id: str = Identifier(required=True)
     recipient_id: str = Identifier(required=True)
     channel: str = String(required=True)
-    reason: str = String(required=True)
+    reason: str = String(required=True, max_length=500)
     bounced_at: datetime = DateTime(required=True)
 
 
@@ -74,7 +90,7 @@ class NotificationCancelled:
     notification_id: str = Identifier(required=True)
     recipient_id: str = Identifier(required=True)
     channel: str = String(required=True)
-    reason: str = String(required=True)
+    reason: str = String(required=True, max_length=500)
     cancelled_at: datetime = DateTime(required=True)
 
 

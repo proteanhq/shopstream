@@ -2,6 +2,9 @@
 
 from datetime import UTC, datetime, timedelta
 
+import pytest
+from protean.exceptions import ValidationError
+
 from notifications.notification.notification import (
     Notification,
     NotificationChannel,
@@ -111,7 +114,6 @@ class TestNotificationOptionalFields:
 class TestNotificationCreatedEvent:
     def test_create_raises_notification_created_event(self):
         n = _make_notification()
-        assert len(n._events) == 1
         event = n._events[0]
         assert event.__class__.__name__ == "NotificationCreated"
 
@@ -160,3 +162,49 @@ class TestNotificationCreatedEvent:
         n = _make_notification()
         event = n._events[0]
         assert event.created_at is not None
+
+
+class TestDispatchRequest:
+    def test_immediate_notification_requests_dispatch_on_create(self):
+        n = _make_notification()
+        assert [e.__class__.__name__ for e in n._events] == [
+            "NotificationCreated",
+            "NotificationDispatchRequested",
+        ]
+
+    def test_scheduled_notification_does_not_request_dispatch_on_create(self):
+        n = _make_notification(scheduled_for=datetime.now(UTC) + timedelta(hours=24))
+        assert [e.__class__.__name__ for e in n._events] == ["NotificationCreated"]
+
+    def test_request_carries_everything_the_send_needs(self):
+        n = _make_notification(
+            recipient_id="cust-77",
+            channel=NotificationChannel.PUSH.value,
+            subject="Shipped",
+            body="Your order is on its way",
+        )
+        event = n._events[1]
+        assert str(event.notification_id) == str(n.id)
+        assert str(event.recipient_id) == "cust-77"
+        assert event.channel == NotificationChannel.PUSH.value
+        assert event.subject == "Shipped"
+        assert event.body == "Your order is on its way"
+        assert event.requested_at is not None
+
+    def test_request_dispatch_on_due_scheduled_notification(self):
+        n = _make_notification(scheduled_for=datetime.now(UTC) - timedelta(hours=1))
+        n.request_dispatch()
+        assert n._events[-1].__class__.__name__ == "NotificationDispatchRequested"
+        assert n.status == NotificationStatus.PENDING.value
+
+    def test_request_dispatch_rejects_non_pending_notification(self):
+        n = _make_notification()
+        n.mark_sent()
+        with pytest.raises(ValidationError) as exc:
+            n.request_dispatch()
+        assert "Only pending notifications can be dispatched" in str(exc.value.messages)
+
+    def test_subject_up_to_the_aggregate_limit_fits_both_events(self):
+        subject = "s" * 500
+        n = _make_notification(subject=subject)
+        assert [e.subject for e in n._events] == [subject, subject]

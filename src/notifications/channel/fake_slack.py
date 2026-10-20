@@ -4,6 +4,7 @@ from typing import Any
 from uuid import uuid4
 
 from notifications.channel.slack_port import SlackPort
+from notifications.channel.transaction_guard import ensure_no_open_transaction
 
 
 class FakeSlackAdapter(SlackPort):
@@ -25,6 +26,7 @@ class FakeSlackAdapter(SlackPort):
         message: str,
         blocks: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
+        ensure_no_open_transaction("Slack")
         if not self.should_succeed:
             return {
                 "message_id": None,

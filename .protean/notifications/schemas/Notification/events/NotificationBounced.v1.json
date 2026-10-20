@@ -16,7 +16,7 @@
       "type": "string"
     },
     "reason": {
-      "maxLength": 255,
+      "maxLength": 500,
       "minLength": 1,
       "type": "string"
     },

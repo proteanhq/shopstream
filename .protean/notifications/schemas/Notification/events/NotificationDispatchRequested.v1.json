@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A pending notification is ready to go out through its channel.\n\nCarries everything the send needs, so the dispatcher can send without\nloading the notification and opening a database transaction.",
+  "properties": {
+    "body": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "channel": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "notification_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "recipient_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "requested_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "subject": {
+      "anyOf": [
+        {
+          "maxLength": 500,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "body",
+    "channel",
+    "notification_id",
+    "recipient_id",
+    "requested_at"
+  ],
+  "title": "NotificationDispatchRequested",
+  "type": "object",
+  "x-protean-aggregate": "notifications.notification.notification.Notification",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "notifications.notification.events.NotificationDispatchRequested",
+  "x-protean-type": "Notifications.NotificationDispatchRequested.v1",
+  "x-protean-version": 1
+}

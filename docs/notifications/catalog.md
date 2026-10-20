@@ -16,7 +16,7 @@
 | bounced_at | DateTime | Yes | — |
 | channel | String | Yes | max_length=255, min_length=1 |
 | notification_id | Identifier | Yes | min_length=1 |
-| reason | String | Yes | max_length=255, min_length=1 |
+| reason | String | Yes | max_length=500, min_length=1 |
 | recipient_id | Identifier | Yes | min_length=1 |
 
 #### NotificationCancelled
@@ -31,7 +31,7 @@
 | cancelled_at | DateTime | Yes | — |
 | channel | String | Yes | max_length=255, min_length=1 |
 | notification_id | Identifier | Yes | min_length=1 |
-| reason | String | Yes | max_length=255, min_length=1 |
+| reason | String | Yes | max_length=500, min_length=1 |
 | recipient_id | Identifier | Yes | min_length=1 |
 
 #### NotificationCreated
@@ -51,7 +51,7 @@
 | recipient_type | String | Yes | max_length=255, min_length=1 |
 | scheduled_for | DateTime | No | — |
 | source_event_type | String | No | max_length=255 |
-| subject | String | No | max_length=255 |
+| subject | String | No | max_length=500 |
 | template_name | String | No | max_length=255 |
 
 #### NotificationDelivered
@@ -68,6 +68,22 @@
 | notification_id | Identifier | Yes | min_length=1 |
 | recipient_id | Identifier | Yes | min_length=1 |
 
+#### NotificationDispatchRequested
+
+- **Type**: `Notifications.NotificationDispatchRequested.v1`
+- **Version**: 1
+- **Published**: No
+- **Fact Event**: No
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| body | Text | Yes | min_length=1 |
+| channel | String | Yes | max_length=255, min_length=1 |
+| notification_id | Identifier | Yes | min_length=1 |
+| recipient_id | Identifier | Yes | min_length=1 |
+| requested_at | DateTime | Yes | — |
+| subject | String | No | max_length=500 |
+
 #### NotificationFailed
 
 - **Type**: `Notifications.NotificationFailed.v1`
@@ -81,7 +97,7 @@
 | failed_at | DateTime | Yes | — |
 | max_retries | Integer | Yes | — |
 | notification_id | Identifier | Yes | min_length=1 |
-| reason | String | Yes | max_length=255, min_length=1 |
+| reason | String | Yes | max_length=500, min_length=1 |
 | recipient_id | Identifier | Yes | min_length=1 |
 | retry_count | Integer | Yes | — |
 
@@ -125,6 +141,16 @@
 |-------|------|----------|-------------|
 | notification_id | Identifier | Yes | min_length=1 |
 | reason | String | Yes | max_length=500, min_length=1 |
+
+#### RecordDispatchResult
+
+- **Type**: `Notifications.RecordDispatchResult.v1`
+- **Version**: 1
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| failure_reason | Text | No | — |
+| notification_id | Identifier | Yes | min_length=1 |
 
 #### RetryNotification
 

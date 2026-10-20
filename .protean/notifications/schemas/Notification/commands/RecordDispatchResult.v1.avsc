@@ -1,0 +1,23 @@
+{
+  "doc": "Record the outcome of one channel send.",
+  "fields": [
+    {
+      "default": null,
+      "name": "failure_reason",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "RecordDispatchResult",
+  "namespace": "notifications.notification.dispatch",
+  "type": "record"
+}

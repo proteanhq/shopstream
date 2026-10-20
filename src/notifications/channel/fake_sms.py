@@ -4,6 +4,7 @@ from typing import Any
 from uuid import uuid4
 
 from notifications.channel.sms_port import SMSPort
+from notifications.channel.transaction_guard import ensure_no_open_transaction
 
 
 class FakeSMSAdapter(SMSPort):
@@ -20,6 +21,7 @@ class FakeSMSAdapter(SMSPort):
         self.failure_reason = failure_reason
 
     def send(self, to: str, body: str) -> dict[str, Any]:
+        ensure_no_open_transaction("SMS")
         if not self.should_succeed:
             return {
                 "message_id": None,

@@ -1,7 +1,8 @@
 """Application tests for ProcessScheduledNotifications command handler."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime, timedelta, timezone
 
+import pytest
 from protean import current_domain
 
 from notifications.channel import get_channel, reset_channels
@@ -11,6 +12,7 @@ from notifications.notification.notification import (
     NotificationStatus,
     NotificationType,
 )
+from notifications.notification.retry import RetryNotification
 from notifications.notification.scheduler import ProcessScheduledNotifications
 
 
@@ -147,6 +149,64 @@ class TestProcessScheduledNotifications:
 
         # Restore
         adapter.send = original_send
+
+    def test_leaves_a_retried_immediate_notification_pending(self):
+        """A PENDING notification with no scheduled_for is not the scheduler's to send."""
+        adapter = get_channel(NotificationChannel.EMAIL.value)
+        adapter.configure(should_succeed=False, failure_reason="SMTP down")
+        n = Notification.create(
+            recipient_id="cust-sched-retried",
+            notification_type=NotificationType.WELCOME.value,
+            channel=NotificationChannel.EMAIL.value,
+            body="Welcome!",
+        )
+        repo = current_domain.repository_for(Notification)
+        repo.add(n)
+        adapter.configure(should_succeed=True)
+        current_domain.process(RetryNotification(notification_id=str(n.id)), asynchronous=False)
+        assert repo.get(str(n.id)).status == NotificationStatus.PENDING.value
+        sends_before = len(adapter.sent_emails)
+
+        current_domain.process(ProcessScheduledNotifications(as_of=datetime.now(UTC)), asynchronous=False)
+
+        assert repo.get(str(n.id)).status == NotificationStatus.PENDING.value
+        assert len(adapter.sent_emails) == sends_before
+
+    @pytest.mark.parametrize(
+        ("as_of", "expected"),
+        [
+            (datetime(2026, 10, 20, 13, 0, tzinfo=timezone(timedelta(hours=2))), NotificationStatus.PENDING),
+            (datetime(2026, 10, 20, 11, 0, tzinfo=timezone(timedelta(hours=-2))), NotificationStatus.SENT),
+            (datetime(2026, 10, 20, 11, 59), NotificationStatus.PENDING),
+            (datetime(2026, 10, 20, 12, 0), NotificationStatus.SENT),
+        ],
+        ids=["plus-two-is-11-utc", "minus-two-is-13-utc", "naive-before", "naive-at"],
+    )
+    def test_compares_as_of_as_an_instant(self, as_of, expected):
+        """An as_of with any offset is compared by instant; a naive one is taken as UTC."""
+        nid = _create_scheduled_notification(
+            scheduled_for=datetime(2026, 10, 20, 12, 0, tzinfo=UTC), recipient_id="cust-sched-offset"
+        )
+
+        current_domain.process(ProcessScheduledNotifications(as_of=as_of), asynchronous=False)
+
+        assert current_domain.repository_for(Notification).get(nid).status == expected.value
+
+    @pytest.mark.slow
+    def test_dispatches_more_than_one_query_page_of_due_notifications(self):
+        """Every due notification is dispatched, past the query's default 100-row limit."""
+        past = datetime.now(UTC) - timedelta(hours=1)
+        nids = [
+            _create_scheduled_notification(scheduled_for=past, recipient_id=f"cust-sched-bulk-{i}") for i in range(105)
+        ]
+
+        current_domain.process(
+            ProcessScheduledNotifications(as_of=datetime.now(UTC)),
+            asynchronous=False,
+        )
+
+        repo = current_domain.repository_for(Notification)
+        assert {repo.get(nid).status for nid in nids} == {NotificationStatus.SENT.value}
 
 
 FROZEN_NOW = datetime(2030, 6, 1, 12, 0, tzinfo=UTC)

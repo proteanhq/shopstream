@@ -8,8 +8,8 @@
 Alice just placed an order on ShopStream. The Ordering domain raises an `OrderCreated`
 event. The Notifications domain consumes this event and creates an order confirmation
 email for Alice. Because the notification is immediate (not scheduled for the future),
-the auto-dispatch handler picks it up, renders the template, sends it via the email
-adapter, and marks it as Sent -- all within the same event processing cycle.
+the notification requests its own dispatch. The dispatcher sends it via the email
+adapter with no database transaction open, then records it as Sent.
 
 Alice receives her confirmation email within seconds.
 
@@ -53,18 +53,24 @@ The helper performs these steps:
 
 ### 4. Auto-Dispatch
 
-When `repo.add(notification)` is called, the `NotificationCreated` event is raised.
-The `NotificationDispatcher` event handler reacts:
+`Notification.create()` raises `NotificationCreated`. Because the notification is not
+scheduled, it also raises `NotificationDispatchRequested`, which carries the channel,
+recipient, subject and body. When the unit of work that saved the notification commits, the
+`NotificationDispatcher` event handler reacts to the request:
 
-1. Checks `scheduled_for` -- if set, skips (scheduled notifications are dispatched later).
-2. Loads the notification from the repository.
-3. Verifies the notification is still in `PENDING` status.
-4. Gets the channel adapter via `get_channel(notification.channel)`.
-5. Calls `_dispatch_via_channel(adapter, notification)`, which routes to the correct
+1. Gets the channel adapter via `get_channel(event.channel)`.
+2. Calls `_dispatch_via_channel(adapter, event)`, which routes to the correct
    adapter method based on channel type (email: `send(to, subject, body)`, SMS: `send(to, body)`, etc.).
-6. If the adapter returns `{status: "sent"}`, calls `notification.mark_sent()`.
-7. If the adapter returns a failure, calls `notification.mark_failed(reason)`.
-8. Persists the updated notification.
+3. Processes `RecordDispatchResult`, with a `failure_reason` when the adapter
+   reported a failure or raised.
+
+The dispatcher reaches no repository before the send. On Postgres the Unit of Work
+opens its transaction at the first repository access, so no transaction or pooled
+connection is held while the channel is called. The fake adapters check this on every
+send.
+
+`RecordDispatchResultHandler` then loads the notification. If it is still `PENDING`,
+it calls `mark_sent()` or `mark_failed(reason)` and persists it.
 
 &rarr; [source](../../src/notifications/notification/dispatch.py)
 
@@ -113,15 +119,19 @@ sequenceDiagram
     Note over Helper,DB: Notification creation
     Helper->>Agg: Notification.create(recipient, type, channel, body, ...)
     Agg->>Agg: raise_(NotificationCreated)
+    Agg->>Agg: raise_(NotificationDispatchRequested)
     Helper->>DB: repository.add(notification)
 
-    Note over Dispatch,Adapter: Auto-dispatch
-    Dispatch->>Dispatch: on_notification_created(event)
-    Dispatch->>DB: Load notification (verify PENDING)
+    Note over Dispatch,Adapter: Auto-dispatch, no transaction open
+    Dispatch->>Dispatch: on_dispatch_requested(event)
     Dispatch->>Adapter: send(to=customer, subject, body)
     Adapter-->>Dispatch: {status: "sent"}
+
+    Note over Dispatch,DB: RecordDispatchResultHandler
+    Dispatch->>DB: Load notification (verify PENDING)
     Dispatch->>Agg: notification.mark_sent()
     Dispatch->>DB: repository.add(notification)
+    Note over Dispatch: The handler runs inside the dispatcher's unit of work
 
     Note over Proj: Async projections
     Proj->>Proj: NotificationLog: create + update to Sent
@@ -138,6 +148,7 @@ sequenceDiagram
 | All channels disabled | No notification created, logs "No enabled channels" | Preference enforcement |
 | Email adapter fails (SMTP error) | Notification marked FAILED, added to FailedNotifications queue | Retry logic available via `RetryNotification` command |
 | Email adapter raises exception | Notification marked FAILED with exception message | Exception safety in dispatch handler |
-| Notification already dispatched (not PENDING) | Dispatcher skips, logs "not in PENDING status" | Idempotency protection |
-| Notification not found in repo | Dispatcher logs error and returns | Safety for eventual consistency |
-| Scheduled notification (e.g., review prompt) | Dispatcher skips, notification stays PENDING | `ProcessScheduledNotifications` handles these later |
+| Dispatch request delivered twice | The adapter is called again; the second result is not recorded and the status stays as first recorded | The send runs without reading the notification, and the channel ports take no notification id to use as an idempotency key |
+| Notification cancelled after its dispatch was requested | It is still sent, because the send reads nothing first; the status stays CANCELLED | `RecordDispatchResult` only records for PENDING notifications |
+| Notification not found when recording the result | Handler logs an error and returns | Safety for eventual consistency |
+| Scheduled notification (e.g., review prompt) | No dispatch request at creation; stays PENDING | `ProcessScheduledNotifications` requests dispatch once it is due |

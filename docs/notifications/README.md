@@ -43,7 +43,7 @@ tracks whether it was delivered.
 | Quiet Hours | A do-not-disturb window (start/end times) during which notifications are held | `quiet_hours_start`/`quiet_hours_end` on `NotificationPreference` |
 | Template | A rendering class that produces subject and body from event context data | Template classes in [`src/notifications/templates/`](../../src/notifications/templates/) |
 | Channel Adapter | A pluggable port/adapter for sending via a specific channel (e.g., SendGrid, Twilio) | [`src/notifications/channel/`](../../src/notifications/channel/) |
-| Auto-Dispatch | The synchronous dispatch of immediate (non-scheduled) notifications when created | `NotificationDispatcher` ([source](../../src/notifications/notification/dispatch.py)) |
+| Auto-Dispatch | Sending a notification once its dispatch is requested: at creation for an immediate notification, or when the scheduler finds it due | `NotificationDispatcher` ([source](../../src/notifications/notification/dispatch.py)) |
 | Scheduled Notification | A notification with a `scheduled_for` timestamp, dispatched later by a background job | `ProcessScheduledNotifications` ([source](../../src/notifications/notification/scheduler.py)) |
 
 Full definitions: [Glossary](../glossary.md)
@@ -76,12 +76,15 @@ via the `NotificationLog` projection.
 **State Machine: Notification Status**
 
 A Notification begins as Pending when created by a cross-domain event handler. If
-it is not scheduled for the future, the `NotificationDispatcher` immediately sends
-it via the appropriate channel adapter, transitioning it to Sent or Failed.
+it is not scheduled for the future, it requests its own dispatch at creation. The
+`NotificationDispatcher` sends it via the appropriate channel adapter, then records
+the result, transitioning it to Sent or Failed.
 
 Sent notifications may be confirmed as Delivered by a delivery webhook, or may Bounce
 (permanent failure) or Fail (transient failure). Failed notifications can be Retried,
-returning them to Pending for another dispatch attempt. Pending notifications can be
+returning them to Pending. A retried scheduled notification goes out on the next
+scheduler run; a retried immediate notification is not dispatched again, because
+`retry()` requests no dispatch. Pending notifications can be
 Cancelled (e.g., customer opted out before dispatch).
 
 ```mermaid
@@ -116,7 +119,8 @@ enabled, SMS/push disabled) when a customer registers.
 
 | Event | Trigger | Consequence |
 |-------|---------|-------------|
-| `NotificationCreated` | Cross-domain event handler creates a notification | NotificationLog, CustomerNotifications projections created; auto-dispatch triggered |
+| `NotificationCreated` | Cross-domain event handler creates a notification | NotificationLog, CustomerNotifications projections created |
+| `NotificationDispatchRequested` | An immediate notification is created, or the scheduler finds a scheduled one due | `NotificationDispatcher` sends it, then records the result |
 | `NotificationSent` | Channel adapter reports successful send | NotificationLog updated, NotificationStats incremented, FailedNotifications removed |
 | `NotificationDelivered` | Delivery webhook confirms delivery | NotificationLog, CustomerNotifications updated |
 | `NotificationFailed` | Channel adapter reports failure | NotificationLog updated, FailedNotifications created/updated, CustomerNotifications updated |
@@ -136,7 +140,8 @@ enabled, SMS/push disabled) when a customer registers.
 |---------|--------------|-------------|---------------|
 | `CancelNotification` | Customer/System | Cancels a pending or scheduled notification. Only from Pending status. | `NotificationCancelled` |
 | `RetryNotification` | Admin/System | Retries a failed notification. Resets to Pending. Must be below max_retries. | `NotificationRetried` |
-| `ProcessScheduledNotifications` | Background job | Dispatches all due scheduled notifications (scheduled_for <= now). | `NotificationSent` or `NotificationFailed` per notification |
+| `ProcessScheduledNotifications` | Background job | Loads the Pending notifications that are due (scheduled_for <= now) and requests their dispatch. The sends happen after it commits. | `NotificationDispatchRequested` per notification |
+| `RecordDispatchResult` | `NotificationDispatcher` | Marks a Pending notification Sent or Failed after its send. Leaves any other status alone. | `NotificationSent` or `NotificationFailed` |
 | `UpdateNotificationPreferences` | Customer | Updates channel settings (email/sms/push enabled/disabled). | `ChannelsUpdated` |
 | `SetQuietHours` | Customer | Sets a do-not-disturb time window. | `QuietHoursSet` |
 | `ClearQuietHours` | Customer | Removes the do-not-disturb window. | `QuietHoursCleared` |
@@ -147,7 +152,7 @@ enabled, SMS/push disabled) when a customer registers.
 
 | Projection | Purpose | Built From |
 |-----------|---------|-----------|
-| `NotificationLog` | Full audit trail of all notifications with status history | All 7 notification events |
+| `NotificationLog` | Full audit trail of all notifications with status history | The 7 lifecycle events (not `NotificationDispatchRequested`) |
 | `CustomerNotifications` | Per-customer notification feed for account page | `NotificationCreated` (create), `NotificationSent`, `NotificationDelivered`, `NotificationFailed` (status updates) |
 | `NotificationStats` | Daily counts by notification type and channel | `NotificationSent` (increment counter) |
 | `FailedNotifications` | Queue of failed notifications for retry/investigation | `NotificationFailed` (add/update), `NotificationRetried`/`NotificationSent` (remove) |
@@ -229,19 +234,28 @@ approach keeps the codebase simple and the rendering logic testable.
 
 **Problem:** How should notifications be dispatched after creation?
 
-**Decision:** A `NotificationDispatcher` event handler reacts to `NotificationCreated`
-events and immediately sends the notification via the appropriate channel adapter.
-Scheduled notifications (those with `scheduled_for` set) are skipped by the auto-dispatcher
-and handled by the `ProcessScheduledNotifications` command.
+**Decision:** A notification that is due raises `NotificationDispatchRequested`, which
+carries the channel, recipient, subject and body. An immediate notification raises it
+at creation. A scheduled one raises it when `ProcessScheduledNotifications` finds it
+due. The `NotificationDispatcher` event handler reacts by calling the channel adapter,
+then processes `RecordDispatchResult`, whose handler marks the notification Sent or
+Failed.
 
-**Rationale:** This leverages Protean's event processing infrastructure. In synchronous
-mode (tests, dev), dispatch happens inline with the aggregate save. In async mode
-(production), dispatch happens via the engine worker. This pattern keeps the notification
-creation logic clean -- the creator doesn't need to know about dispatch.
+**Rationale:** On Postgres a Unit of Work is one real database transaction. It opens
+at the first repository access and holds a pooled connection until it ends. The
+dispatcher reaches no repository before the send, so no transaction is open while the
+channel is called, and a slow channel cannot hold connections or row locks. The fake
+channel adapters check this on every send and raise if a session is open.
 
-**Trade-off:** In synchronous mode, auto-dispatch means the HTTP response waits for
-the email/SMS to be sent. In production (async mode), this is not an issue because
-dispatch happens asynchronously in the engine worker.
+**Trade-off:** The send no longer reads the notification first. A request that is
+delivered twice sends twice, and a notification cancelled after its request but
+before the send still goes out. `RecordDispatchResult` records nothing for a
+notification that is no longer Pending, so a cancelled notification stays Cancelled
+even though it was sent. The channel ports do not take a notification id yet, so a
+real adapter has no idempotency key to give its provider. With synchronous event
+processing (the `test` and `memory` environments) the send runs in the same request,
+right after the commit that requested it. With async processing (dev and
+production) it runs in the engine worker.
 
 ### Port/Adapter Pattern for Channels
 
@@ -265,14 +279,14 @@ deployment.
 | Concern | Location |
 |---------|----------|
 | Aggregate root + enums + state machine | [`src/notifications/notification/notification.py`](../../src/notifications/notification/notification.py) |
-| Domain events (7 notification events) | [`src/notifications/notification/events.py`](../../src/notifications/notification/events.py) |
+| Domain events (8 notification events) | [`src/notifications/notification/events.py`](../../src/notifications/notification/events.py) |
 | Preference aggregate + events | [`src/notifications/preference/preference.py`](../../src/notifications/preference/preference.py), [`events.py`](../../src/notifications/preference/events.py) |
 | Cancel notification command + handler | [`src/notifications/notification/cancellation.py`](../../src/notifications/notification/cancellation.py) |
 | Retry notification command + handler | [`src/notifications/notification/retry.py`](../../src/notifications/notification/retry.py) |
 | Scheduled notifications command + handler | [`src/notifications/notification/scheduler.py`](../../src/notifications/notification/scheduler.py) |
 | Preference management commands + handler | [`src/notifications/preference/management.py`](../../src/notifications/preference/management.py) |
 | Subscription commands + handler | [`src/notifications/preference/subscription.py`](../../src/notifications/preference/subscription.py) |
-| Auto-dispatch event handler | [`src/notifications/notification/dispatch.py`](../../src/notifications/notification/dispatch.py) |
+| Auto-dispatch event handler and `RecordDispatchResult` | [`src/notifications/notification/dispatch.py`](../../src/notifications/notification/dispatch.py) |
 | Notification helpers (create for customer/internal) | [`src/notifications/notification/helpers.py`](../../src/notifications/notification/helpers.py) |
 | Cross-domain: Identity events handler | [`src/notifications/notification/identity_events.py`](../../src/notifications/notification/identity_events.py), [`preference/identity_events.py`](../../src/notifications/preference/identity_events.py) |
 | Cross-domain: Ordering events handler | [`src/notifications/notification/ordering_events.py`](../../src/notifications/notification/ordering_events.py) |

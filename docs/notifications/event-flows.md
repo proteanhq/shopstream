@@ -5,21 +5,26 @@ flowchart TD
     subgraph notifications_notification_notification_Notification[Notification]
         agg_notifications_notification_notification_Notification[Notification]
         cmd_notifications_notification_cancellation_CancelNotification[/CancelNotification/]
+        cmd_notifications_notification_dispatch_RecordDispatchResult[/RecordDispatchResult/]
         cmd_notifications_notification_retry_RetryNotification[/RetryNotification/]
         cmd_notifications_notification_scheduler_ProcessScheduledNotifications[/ProcessScheduledNotifications/]
         evt_notifications_notification_events_NotificationBounced([NotificationBounced])
         evt_notifications_notification_events_NotificationCancelled([NotificationCancelled])
         evt_notifications_notification_events_NotificationCreated([NotificationCreated])
         evt_notifications_notification_events_NotificationDelivered([NotificationDelivered])
+        evt_notifications_notification_events_NotificationDispatchRequested([NotificationDispatchRequested])
         evt_notifications_notification_events_NotificationFailed([NotificationFailed])
         evt_notifications_notification_events_NotificationRetried([NotificationRetried])
         evt_notifications_notification_events_NotificationSent([NotificationSent])
         hdlr_notifications_notification_cancellation_CancelNotificationHandler[CancelNotificationHandler]
+        hdlr_notifications_notification_dispatch_RecordDispatchResultHandler[RecordDispatchResultHandler]
         hdlr_notifications_notification_retry_RetryNotificationHandler[RetryNotificationHandler]
         hdlr_notifications_notification_scheduler_ProcessScheduledNotificationsHandler[ProcessScheduledNotificationsHandler]
     end
     cmd_notifications_notification_cancellation_CancelNotification --> hdlr_notifications_notification_cancellation_CancelNotificationHandler
     hdlr_notifications_notification_cancellation_CancelNotificationHandler --> agg_notifications_notification_notification_Notification
+    cmd_notifications_notification_dispatch_RecordDispatchResult --> hdlr_notifications_notification_dispatch_RecordDispatchResultHandler
+    hdlr_notifications_notification_dispatch_RecordDispatchResultHandler --> agg_notifications_notification_notification_Notification
     cmd_notifications_notification_retry_RetryNotification --> hdlr_notifications_notification_retry_RetryNotificationHandler
     hdlr_notifications_notification_retry_RetryNotificationHandler --> agg_notifications_notification_notification_Notification
     cmd_notifications_notification_scheduler_ProcessScheduledNotifications --> hdlr_notifications_notification_scheduler_ProcessScheduledNotificationsHandler
@@ -28,6 +33,7 @@ flowchart TD
     agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationCancelled
     agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationCreated
     agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationDelivered
+    agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationDispatchRequested
     agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationFailed
     agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationRetried
     agg_notifications_notification_notification_Notification --> evt_notifications_notification_events_NotificationSent
@@ -76,6 +82,7 @@ flowchart LR
     evt_notifications_notification_events_NotificationCancelled([NotificationCancelled])
     evt_notifications_notification_events_NotificationCreated([NotificationCreated])
     evt_notifications_notification_events_NotificationDelivered([NotificationDelivered])
+    evt_notifications_notification_events_NotificationDispatchRequested([NotificationDispatchRequested])
     evt_notifications_notification_events_NotificationFailed([NotificationFailed])
     evt_notifications_notification_events_NotificationRetried([NotificationRetried])
     evt_notifications_notification_events_NotificationSent([NotificationSent])
@@ -95,7 +102,7 @@ flowchart LR
         proj_notifications_projections_notification_log_NotificationLogProjector[NotificationLogProjector → NotificationLog]
         proj_notifications_projections_notification_stats_NotificationStatsProjector[NotificationStatsProjector → NotificationStats]
     end
-    evt_notifications_notification_events_NotificationCreated --> eh_notifications_notification_dispatch_NotificationDispatcher
+    evt_notifications_notification_events_NotificationDispatchRequested --> eh_notifications_notification_dispatch_NotificationDispatcher
     evt_notifications_notification_events_NotificationCreated --> proj_notifications_projections_customer_notifications_CustomerNotificationsProjector
     evt_notifications_notification_events_NotificationDelivered --> proj_notifications_projections_customer_notifications_CustomerNotificationsProjector
     evt_notifications_notification_events_NotificationFailed --> proj_notifications_projections_customer_notifications_CustomerNotificationsProjector

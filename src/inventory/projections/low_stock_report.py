@@ -44,10 +44,10 @@ def _upsert_low_stock(
     """Upsert the single LowStockReport row: update it if present, else create it.
 
     Concurrent movements on the same item can both miss on `get_or_none` and both try to
-    CREATE. The loser's primary-key conflict surfaces when the projector's
-    UnitOfWork commits. The projector's transient retry (see below) runs the
-    handler again in a fresh UnitOfWork; by then the row exists and the lookup
-    takes the update path.
+    CREATE. The loser's primary-key conflict surfaces at the projector's commit,
+    or at `repo.add` when the winner has already committed. The projector's
+    transient retry (see below) runs the handler again in a fresh UnitOfWork;
+    by then the row exists and the lookup takes the update path.
     """
     repo = current_domain.repository_for(LowStockReport)
     report = repo.get_or_none(item_id)
@@ -80,9 +80,11 @@ def _upsert_low_stock(
 # UnitOfWork inside the handler cannot catch it: nesting joins the handler's own
 # UnitOfWork, so the conflict only raises at the handler's commit.
 #
-# `TransactionError` is the conflict on PostgreSQL. `ValidationError` is the same
-# conflict on the memory adapter ("already present"); with `TransactionError`
-# alone the memory-mode race test fails. The cost: a genuine `ValidationError`
+# `TransactionError` is the conflict on PostgreSQL when both writers are still
+# uncommitted; it raises at commit. `ValidationError` ("already present") is the
+# same conflict when the other row is already visible: always on the memory
+# adapter, and on PostgreSQL once the winner has committed, raised at `repo.add`.
+# With `TransactionError` alone the memory-mode race test fails. The cost: a genuine `ValidationError`
 # in any of these handlers is also retried 5 times before it surfaces.
 @inventory.projector(
     projector_for=LowStockReport,

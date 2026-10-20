@@ -4,6 +4,7 @@ from typing import Any
 from uuid import uuid4
 
 from notifications.channel.push_port import PushPort
+from notifications.channel.transaction_guard import ensure_no_open_transaction
 
 
 class FakePushAdapter(PushPort):
@@ -26,6 +27,7 @@ class FakePushAdapter(PushPort):
         body: str,
         data: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
+        ensure_no_open_transaction("Push")
         if not self.should_succeed:
             return {
                 "message_id": None,

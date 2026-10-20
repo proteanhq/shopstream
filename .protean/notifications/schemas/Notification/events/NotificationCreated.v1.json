@@ -54,7 +54,7 @@
     "subject": {
       "anyOf": [
         {
-          "maxLength": 255,
+          "maxLength": 500,
           "type": "string"
         },
         {

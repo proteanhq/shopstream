@@ -44,10 +44,11 @@ PENDING → {SENT, FAILED, CANCELLED}; SENT → {DELIVERED, FAILED, BOUNCED}; FA
 ### Aggregate Methods
 | Method | Behavior |
 |--------|----------|
-| `Notification.create(...)` | Factory; raises `NotificationCreated` |
+| `Notification.create(...)` | Factory; raises `NotificationCreated`, plus `NotificationDispatchRequested` when `scheduled_for` is None |
+| `request_dispatch()` | PENDING only; raises `NotificationDispatchRequested` carrying channel, recipient, subject and body |
 | `mark_sent()` | PENDING → SENT; raises `NotificationSent` |
 | `mark_delivered()` | SENT → DELIVERED; raises `NotificationDelivered` |
-| `mark_failed(reason)` | Increments `retry_count`; raises `NotificationFailed` |
+| `mark_failed(reason)` | Keeps at most 500 characters of `reason`; increments `retry_count`; raises `NotificationFailed` |
 | `mark_bounced()` | SENT → BOUNCED; raises `NotificationBounced` |
 | `cancel()` | PENDING → CANCELLED; raises `NotificationCancelled` |
 | `retry()` | Only FAILED and under `max_retries`; raises `NotificationRetried` |
@@ -74,7 +75,8 @@ Neither aggregate has child entities or value objects; the enums are plain `choi
 
 ## Events
 
-**Notification events** (`notification/events.py`): `NotificationCreated`, `NotificationSent`,
+**Notification events** (`notification/events.py`): `NotificationCreated`,
+`NotificationDispatchRequested`, `NotificationSent`,
 `NotificationDelivered`, `NotificationFailed`, `NotificationBounced`, `NotificationCancelled`,
 `NotificationRetried`.
 
@@ -86,6 +88,7 @@ Neither aggregate has child entities or value objects; the enums are plain `choi
 | File | Commands | Handler |
 |------|---------|---------|
 | `notification/cancellation.py` | `CancelNotification` | `CancelNotificationHandler` |
+| `notification/dispatch.py` | `RecordDispatchResult` | `RecordDispatchResultHandler` |
 | `notification/retry.py` | `RetryNotification` | `RetryNotificationHandler` |
 | `notification/scheduler.py` | `ProcessScheduledNotifications` | `ProcessScheduledNotificationsHandler` |
 | `preference/management.py` | `UpdateNotificationPreferences`, `SetQuietHours`, `ClearQuietHours` | `ManagePreferencesHandler` |
@@ -94,8 +97,11 @@ Neither aggregate has child entities or value objects; the enums are plain `choi
 ## Event Handler (internal)
 
 **File:** `notification/dispatch.py` — `NotificationDispatcher` (`part_of=Notification`). On
-`NotificationCreated`, dispatches immediate (non-scheduled) PENDING notifications via the
-channel adapter, then `mark_sent()` / `mark_failed(...)`.
+`NotificationDispatchRequested` (raised by `create()` for an immediate notification, and by
+`request_dispatch()` from the scheduler), it calls the channel adapter, then processes
+`RecordDispatchResult`, whose handler calls `mark_sent()` / `mark_failed(...)` on a PENDING
+notification. The send reaches no repository first, so no transaction is open during it; the
+fake adapters raise `SendInsideTransactionError` (`channel/transaction_guard.py`) if one is.
 
 ## Cross-Domain Subscribers (the ACL hub)
 
@@ -136,16 +142,17 @@ Nine subscribers across eight streams — `identity::customer` is consumed by tw
 | `customer_notifications.py` | `CustomerNotifications` | Per-customer notification feed |
 | `customer_preferences.py` | `CustomerPreferences` | Per-customer preference view |
 | `failed_notifications.py` | `FailedNotifications` | Retry queue |
-| `notification_log.py` | `NotificationLog` | Full audit trail (all 7 events) |
+| `notification_log.py` | `NotificationLog` | Audit trail of the seven lifecycle events (not `NotificationDispatchRequested`) |
 | `notification_stats.py` | `NotificationStats` | Daily counts by type + channel |
 
 ## Scheduler
 
 There is no resident daemon; scheduling is command-driven. `ProcessScheduledNotifications`
-(triggered via the maintenance endpoint, e.g. by cron) dispatches PENDING notifications whose
-`scheduled_for <= as_of` (`as_of` defaults to the domain clock). Scheduled notifications
-originate from the ordering subscriber (review prompt) and cart subscriber (cart recovery); the
-dispatch handler skips them at creation time.
+(triggered via the maintenance endpoint, e.g. by cron) loads the PENDING notifications whose
+`scheduled_for <= as_of` (`as_of` defaults to the domain clock) and calls `request_dispatch()` on
+each; the dispatcher sends them after the scheduler commits. Scheduled notifications originate from the
+ordering subscriber (review prompt) and cart subscriber (cart recovery); `create()` does not
+request their dispatch.
 
 ## API
 
