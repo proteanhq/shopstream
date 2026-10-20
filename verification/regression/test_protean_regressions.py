@@ -936,3 +936,60 @@ def test_1900_memory_datetime_lookup_compares_instants():
 
         assert repo.query.filter(at__lte=eleven_utc).all().items == []
         assert len(repo.query.filter(at__lte=thirteen_utc).all().items) == 1
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the multi-group stream trim deletes entries still pending in a consumer group",
+)
+@pytest.mark.usefixtures("loyalty_ctx")
+def test_stream_trim_keeps_entries_a_consumer_group_has_not_acknowledged():
+    """Protean finding (not filed yet): retention trims messages a group still has to retry.
+
+    With two or more consumer groups on a stream, `RedisBroker.trim` runs
+    `XTRIM MINID` at the smallest `last-delivered-id`. That id only says which
+    entries a group was handed. A handler that failed leaves its entries in the
+    group's pending list below that id, and the trim deletes them. Redelivery then
+    returns those ids with no fields, `_read_blocking` skips them, and the message
+    is never retried or dead-lettered. ShopStream turns retention on for every
+    subscription through the `shopstream` profile, so a dispatcher that fails
+    during a channel outage can lose its pending dispatch requests this way.
+    """
+    import uuid
+
+    import redis
+    from protean import current_domain
+
+    broker = current_domain.brokers["default"]
+    client = getattr(broker, "redis_instance", None)
+    if client is None:
+        pytest.skip("needs the Redis streams broker (run with --protean-env test)")
+    # The toxiproxy resilience module sets REDIS_URL to its proxy port when it is
+    # collected, so in a whole-suite run this broker can point at a proxy that is down.
+    try:
+        client.ping()
+    except redis.exceptions.ConnectionError:
+        pytest.skip("the default broker's Redis is not reachable")
+
+    stream = f"regression::trim-{uuid.uuid4().hex[:8]}"
+    try:
+        # Enough entries for an approximate trim to drop whole macro-nodes.
+        ids = [client.xadd(stream, {"n": str(i)}) for i in range(300)]
+        client.xgroup_create(stream, "failing", id="0")
+        client.xgroup_create(stream, "healthy", id="0")
+        # Both groups read everything. Only the healthy group acknowledges.
+        client.xreadgroup("failing", "c1", {stream: ">"}, count=1000)
+        client.xreadgroup("healthy", "c1", {stream: ">"}, count=1000)
+        client.xack(stream, "healthy", *ids)
+        if client.xpending(stream, "failing")["pending"] != len(ids):
+            pytest.fail("precondition: the failing group holds every entry as pending")
+
+        broker.trim(stream, 50000)
+
+        redelivered = client.xreadgroup("failing", "c1", {stream: "0"}, count=1000)
+        entries = redelivered[0][1] if redelivered else []
+        assert len(entries) == len(ids)
+        assert all(fields for _, fields in entries), "pending entries came back without their data"
+    finally:
+        client.delete(stream)

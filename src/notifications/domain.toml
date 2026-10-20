@@ -14,18 +14,25 @@ default_subscription_type = "stream"
 default_subscription_profile = "shopstream"
 
 # Every engine subscription starts from this profile: production's batch size,
-# retries, DLQ and circuit breaker, with a smaller stream cap. 50000 entries is
-# half of production's 100000, so the override is visible, and still leaves room
-# for a slow consumer group to catch up. With more than one consumer group on a
-# stream, Protean trims to the slowest group's position instead of this cap.
+# retries, DLQ and circuit breaker, with a stream cap of 50000 entries instead of
+# production's 100000. Protean trims the stream after each batch. With one consumer
+# group it keeps the newest 50000 entries, so a group further behind than that loses
+# its oldest unread entries. With two or more groups it ignores the cap and deletes
+# every entry older than the last one handed to the furthest-behind group. That
+# includes entries a group failed to process and has not acknowledged, which are
+# then never retried (a Protean bug, pinned in verification/regression).
 [server.profiles.shopstream]
 inherits = "production"
 retention_maxlen = 50000
 
-# NotificationDispatcher is the one handler that calls an external channel. A
-# channel outage fails it on every message, so its breaker opens sooner and
-# probes again sooner than the profile's 10 failures and 60 seconds, pausing reads
-# while the provider is down. Unread messages stay in the stream until it recovers.
+# NotificationDispatcher is the one handler that calls an external channel, and
+# a channel outage fails it on every message. Its breaker opens after 5 failures
+# in a row instead of 10 and lets one probe message through after 30 seconds
+# instead of 60. While it is open the subscription reads no new messages, but the
+# batch it was processing when it opened still runs to the end. Each failed probe
+# is another attempt at the oldest message, which goes to the DLQ after 3 attempts.
+# One breaker covers all four channels: an Email outage pauses SMS, Push and Slack
+# too, and a working channel in between resets the failure count.
 [server.subscriptions.NotificationDispatcher]
 circuit_breaker_threshold = 5
 circuit_breaker_reset_seconds = 30

@@ -74,7 +74,10 @@ notification for the stale-dispatch sweep. Otherwise it:
 2. Calls `_dispatch_via_channel(adapter, event)`, which routes to the correct
    adapter method based on channel type (email: `send(to, subject, body)`, SMS: `send(to, body)`, etc.).
 3. Processes `RecordDispatchResult`, with a `failure_reason` when the adapter
-   reported a failure or raised.
+   reported a failure or raised. Two exceptions are re-raised with nothing recorded.
+   `SendInsideTransactionError` means the send ran inside a transaction, a bug in the
+   code. `ChannelUnavailableError` means the provider cannot be reached: the
+   notification stays DISPATCHING and the engine retries the message.
 
 The send step reaches no repository before the send. On Postgres the Unit of Work
 opens its transaction at the first repository access, so no transaction or pooled
@@ -177,6 +180,7 @@ sequenceDiagram
 | A late result from a claim that expired and was retried | Not recorded on the newer claim | Each result carries its claim's `retry_count`, and the record step requires it to match |
 | Version conflict when recording the result | Memory: the whole send step is retried and the adapter is called again. Postgres: the result is lost and the notification stays DISPATCHING | Protean cannot commit the record step on its own (proteanhq/protean#1915, proteanhq/protean#1914) |
 | Send step never records a result (for example, dead-lettered) | After 15 minutes `ExpireStaleDispatches` marks it FAILED with "No dispatch result recorded; outcome unknown"; it is not sent again until retried | The send may already have reached the recipient |
+| Email provider unreachable (`ChannelUnavailableError`) | Nothing is recorded and the notification stays DISPATCHING. The engine tries the `NotificationDispatchStarted` message 3 times in all, then moves it to the DLQ, and the sweep later marks the notification FAILED. 5 failures in a row open the dispatcher's circuit breaker, which pauses reads for 30 seconds | An outage is transient, so the send is retried instead of marked FAILED |
 | Notification not found when recording the result | Handler logs an error and returns | Safety for eventual consistency |
 | Scheduled notification (e.g., review prompt) | No dispatch request at creation; stays PENDING | `ProcessScheduledNotifications` requests dispatch once it is due |
 | Failed notification retried | `RetryNotification` sets it PENDING and requests dispatch again, for scheduled and immediate notifications alike | A retried scheduled notification is claimed once, whichever request comes first |

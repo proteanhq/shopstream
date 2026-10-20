@@ -45,13 +45,19 @@ A redelivered ``NotificationDispatchStarted``, after a crash between the send
 and the record, also sends again within that deadline. Closing that gap needs
 an idempotency key that the channel provider honours.
 
-A channel outage is different from a failed send. When the adapter raises
-``ChannelUnavailableError``, the send step records nothing and lets the error
-propagate: the notification stays DISPATCHING, the engine retries the
-``NotificationDispatchStarted`` message, and repeated outages trip the
-dispatcher subscription's circuit breaker (configured under
-``[server.subscriptions.NotificationDispatcher]`` in ``domain.toml``). A claim
-that is still unsent when its send deadline passes is left to the sweep.
+When the adapter raises ``ChannelUnavailableError`` (the provider cannot be
+reached), the send step records nothing and lets the error propagate. The
+notification stays DISPATCHING. Under the engine, the subscription tries the
+``NotificationDispatchStarted`` message up to ``max_retries`` (3) times in all,
+and repeated failures open its circuit breaker
+(``[server.subscriptions.NotificationDispatcher]`` in ``domain.toml``). A
+message that fails every attempt goes to the dead-letter queue. A retried
+message can also be lost before that: an engine restart leaves it pending under
+the old consumer name, and a stream trim can delete it. Either way the sweep
+marks the notification FAILED once its claim is stale, and a retry sends it
+again. A retry that lands after the send deadline sends nothing. Under sync
+processing (the test and memory overlays) the error reaches whoever created
+the notification, and nothing retries it until the sweep.
 """
 
 from datetime import timedelta
@@ -198,8 +204,8 @@ class NotificationDispatcher:
             raise
         except ChannelUnavailableError:
             # An outage is transient: leave the notification DISPATCHING and fail
-            # the handler, so the engine retries the message and the breaker
-            # counts the failure.
+            # the handler, so the engine retries the message and the failure
+            # counts towards the circuit breaker's threshold.
             logger.warning(
                 "Notification channel unavailable, dispatch will be retried",
                 notification_id=str(event.notification_id),

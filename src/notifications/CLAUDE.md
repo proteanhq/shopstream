@@ -125,11 +125,23 @@ proteanhq/protean#1914); `tests/notifications/application/test_record_step_confl
 strict xfail for it. A redelivered `NotificationDispatchStarted` after a crash between the send
 and the record also sends again, within the send deadline.
 
-A failed send or any other adapter exception is recorded as FAILED. A channel outage
-(`ChannelUnavailableError`, `channel/errors.py`; the fake adapters raise it after
-`set_outage(True)`) records nothing: the error propagates, the notification stays DISPATCHING,
-the engine retries the `NotificationDispatchStarted` message, and repeated outages trip the
+A failed send, and any adapter exception other than `SendInsideTransactionError` and
+`ChannelUnavailableError`, is recorded as FAILED. A channel outage (`ChannelUnavailableError`,
+`channel/errors.py`; the fake adapters raise it after `set_outage(True)`) records nothing: the
+error propagates and the notification stays DISPATCHING. Under the engine the subscription tries
+the `NotificationDispatchStarted` message up to 3 times in all, and repeated failures open the
 dispatcher's circuit breaker (`[server.subscriptions.NotificationDispatcher]` in `domain.toml`).
+Limits of this path:
+- A send that fails all 3 attempts goes to the DLQ (dead-letter queue). Its notification stays
+  DISPATCHING until `ExpireStaleDispatches` marks it FAILED 15 minutes after the claim; then
+  `retry()` can send it again. A DLQ replay (`protean dlq replay`) after the 10-minute send
+  deadline sends nothing.
+- An engine restart leaves a failed message pending under the old consumer name, and a stream
+  trim can delete it (both Protean behaviours), with the same result.
+- Under sync processing (the test and memory overlays) the error reaches the caller that created the
+  notification as `TransactionError`. A multi-channel create stops at the failing channel, after
+  the earlier channels' notifications were saved, and nothing retries it until the sweep.
+- One breaker covers all four channels, and any successful send resets its failure count.
 
 ## Cross-Domain Subscribers (the ACL hub)
 

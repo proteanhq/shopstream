@@ -2,9 +2,11 @@
 
 
 class ChannelUnavailableError(RuntimeError):
-    """The channel provider cannot be reached at all (an outage, not a rejected send).
+    """The channel provider cannot be reached at all, so nothing was sent.
 
-    The dispatcher lets this propagate instead of recording the notification as
-    FAILED, so the notification stays DISPATCHING and the engine retries the message.
-    Repeated failures trip the dispatcher subscription's circuit breaker.
+    A send the provider received and rejected returns ``status: failed`` instead.
+    The dispatcher lets this error propagate instead of recording the
+    notification as FAILED. The notification stays DISPATCHING, the engine
+    retries the message, and repeated failures open the dispatcher
+    subscription's circuit breaker.
     """

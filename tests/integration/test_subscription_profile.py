@@ -10,6 +10,7 @@ and give the same result under `--protean-env memory` and `--protean-env test`.
 """
 
 import importlib
+import pkgutil
 
 import pytest
 from protean.server.subscription.config_resolver import ConfigResolver
@@ -18,28 +19,32 @@ from protean.server.subscription.profiles import PROFILE_DEFAULTS, SubscriptionP
 RETENTION_MAXLEN = 50000
 PRODUCTION = PROFILE_DEFAULTS[SubscriptionProfile.PRODUCTION]
 
-# One handler module per context. Importing it registers at least one handler with the domain,
-# so the registry is never empty, whatever else this session has imported.
-CONTEXTS = {
-    "identity": "identity.projections.customer_card",
-    "catalogue": "catalogue.projections.category_tree",
-    "ordering": "ordering.projections.order_detail",
-    "inventory": "inventory.projections.warehouse_stock",
-    "payments": "payments.projections.daily_revenue",
-    "fulfillment": "fulfillment.projections.fulfillment_status",
-    "reviews": "reviews.projections.customer_reviews",
-    "notifications": "notifications.projections.customer_preferences",
-    "loyalty": "loyalty.projections.redemption_view",
-}
+CONTEXTS = [
+    "identity",
+    "catalogue",
+    "ordering",
+    "inventory",
+    "payments",
+    "fulfillment",
+    "reviews",
+    "notifications",
+    "loyalty",
+]
 
 # Handlers whose `[server.subscriptions.<Handler>]` table overrides the profile.
 OVERRIDDEN = {"NotificationDispatcher"}
 
 
 def _domain(context: str):
-    importlib.import_module(CONTEXTS[context])
-    module = importlib.import_module(f"{context}.domain")
-    return getattr(module, context)
+    """Import every module of the context, as `domain.init()` does, so every handler is registered.
+
+    Importing the modules registers the handlers without `domain.init()`, which would also connect
+    the providers and brokers.
+    """
+    package = importlib.import_module(context)
+    for module in pkgutil.walk_packages(package.__path__, prefix=f"{context}."):
+        importlib.import_module(module.name)
+    return getattr(importlib.import_module(f"{context}.domain"), context)
 
 
 def _subscribed_handlers(domain) -> list[type]:
@@ -49,9 +54,11 @@ def _subscribed_handlers(domain) -> list[type]:
 
 
 @pytest.mark.fast
-@pytest.mark.parametrize("context", list(CONTEXTS))
+@pytest.mark.parametrize("context", CONTEXTS)
 def test_context_handlers_resolve_to_the_shopstream_profile(context):
     domain = _domain(context)
+    # A misspelt key would be ignored and leave every handler on the hardcoded defaults.
+    assert domain.config["server"]["default_subscription_profile"] == "shopstream"
     handlers = [cls for cls in _subscribed_handlers(domain) if cls.__name__ not in OVERRIDDEN]
     assert handlers, f"no event handlers or projectors registered for {context}"
 

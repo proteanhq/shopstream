@@ -287,6 +287,15 @@ class TestDispatcherChannelOutage:
         NotificationDispatcher().on_dispatch_requested(request)
 
         assert current_domain.repository_for(Notification).get(str(n.id)).status == NotificationStatus.SENT.value
+        assert len(_sent_records(get_channel(channel))) == 1
+
+
+def _sent_records(adapter) -> list:
+    """The records a fake adapter keeps of what it sent; each adapter names the list differently."""
+    for name in ("sent_emails", "sent_messages", "sent_pushes"):
+        if hasattr(adapter, name):
+            return getattr(adapter, name)
+    raise AssertionError(f"{type(adapter).__name__} keeps no record of sends")
 
 
 class TestDispatchViaChannel:
