@@ -350,20 +350,10 @@ ir-diff: ## Diff live IR against saved baselines (.protean/<domain>/ir.json)
 		fi; \
 	done
 
-ir-gate: ## CI gate — fail on a BREAKING IR change vs the committed baseline (prints full detail)
+ir-gate: ## CI gate: fail unless each IR diff vs the committed baseline is clean or non-breaking (prints full detail)
 	@echo "--- protean build under test ---"; \
 	PYTHONPATH=src uv run python -c 'import importlib.metadata as m; d=m.distribution("protean"); print(d.version, (d.read_text("direct_url.json") or "").strip())'
-	@fail=0; \
-	for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
-		out=$$(PYTHONPATH=src PROTEAN_ENV=memory uv run protean --log-level ERROR ir diff --domain=$$d.domain --dir=.protean/$$d 2>&1); \
-		code=$$?; \
-		if [ $$code -eq 0 ]; then echo "ok: $$d"; \
-		elif [ $$code -eq 2 ]; then echo "note: non-breaking IR change in $$d (baseline behind; run 'make ir')"; \
-		elif [ $$code -eq 1 ]; then echo ""; echo "=== BREAKING IR change in $$d (exit 1) ==="; echo "$$out"; echo "=== end $$d ==="; fail=1; \
-		else echo ""; echo "=== ir diff ERROR for $$d (exit $$code) ==="; echo "$$out"; echo "=== end $$d ==="; fail=1; fi; \
-	done; \
-	if [ $$fail -ne 0 ]; then echo ""; echo "IR gate FAILED (details above). If a change is intended, run 'make ir' and commit the reviewed baseline."; exit 1; fi; \
-	echo ""; echo "IR gate passed (no breaking changes)"
+	@bash scripts/ir-gate.sh
 
 # ──────────────────────────────────────────────
 # Web Server

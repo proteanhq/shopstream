@@ -7,7 +7,9 @@ and records how it was called, and `uv run --no-sync python ...` runs the real
 interpreter, so the script's own parser and gate run unchanged. `uv run --no-sync
 python -m pytest ...` (the tests/integration/ run) is faked too: it records its args
 and prints a canned summary line. Most cases name one context (`reviews`), which skips
-the tests/integration/ run; the full-run cases name none.
+the tests/integration/ run; the full-run cases name none. The well-formed envelopes
+come from Protean's `build_envelope()`, so their outer envelope keeps the shape
+`protean verify` emits; the `data.stages` contents are still written by hand.
 
 The real nine-context run takes about a minute and nests pytest, so it stays out of
 the suite: run `bash scripts/verify-domains.sh`.
@@ -22,6 +24,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from protean.cli.result import ENVELOPE_VERSION, build_envelope, load_envelope_schema
 
 ROOT = Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / "scripts" / "verify-domains.sh"
@@ -60,13 +63,23 @@ CONTEXTS = [
 ]
 
 
-def _envelope(init="pass", check="pass", tests="pass", passed=5, failed=0, warnings=0) -> str:
+def _envelope_dict(init="pass", check="pass", tests="pass", passed=5, failed=0, warnings=0) -> dict:
     stages = {
         "init": {"status": init, "error": None if init == "pass" else "Domain failed to initialize: boom"},
         "check": {"status": check, "counts": {"errors": 0, "warnings": warnings, "infos": 3}},
         "tests": {"status": tests, "returncode": 0 if tests == "pass" else 1, "passed": passed, "failed": failed},
     }
-    return json.dumps({"status": "pass", "data": {"verdict": "pass", "stages": stages}})
+    verdict = "pass" if init == check == tests == "pass" else "fail"
+    return build_envelope(status=verdict, data={"verdict": verdict, "stages": stages}, diagnostics=[])
+
+
+def _usage_error_envelope_dict() -> dict:
+    stages = {"init": {"status": "skipped"}, "check": {"status": "skipped"}, "tests": {"status": "skipped"}}
+    return build_envelope(status="error", data={"error": "--path is not a directory", "stages": stages}, diagnostics=[])
+
+
+def _envelope(**kwargs) -> str:
+    return json.dumps(_envelope_dict(**kwargs))
 
 
 def _run(
@@ -105,6 +118,21 @@ def _run(
         ["bash", str(SCRIPT), *args], capture_output=True, text=True, env=env, timeout=60, check=False
     )
     return result, calls
+
+
+@pytest.mark.parametrize(
+    "envelope",
+    [_envelope_dict(), _envelope_dict(check="fail", tests="fail", failed=2), _usage_error_envelope_dict()],
+    ids=["pass", "fail", "usage-error"],
+)
+def test_canned_envelopes_carry_the_four_contract_keys(envelope):
+    # The canned envelopes come from Protean's own builder, so a change to the contract
+    # shows up here instead of leaving the gate tested against a shape verify no longer emits.
+    required = load_envelope_schema()["required"]
+
+    assert set(required) == {"version", "status", "data", "diagnostics"}
+    assert set(envelope) == set(required)
+    assert envelope["version"] == ENVELOPE_VERSION
 
 
 def test_unknown_context_is_rejected_before_any_run(tmp_path):
@@ -211,9 +239,7 @@ def test_summary_step_that_cannot_start_fails_each_context_without_stopping(tmp_
 
 
 def test_verify_usage_error_is_printed(tmp_path):
-    stages = {"init": {"status": "skipped"}, "check": {"status": "skipped"}, "tests": {"status": "skipped"}}
-    envelope = json.dumps({"status": "error", "data": {"error": "--path is not a directory", "stages": stages}})
-    result, _ = _run(tmp_path, envelope, 2, "reviews")
+    result, _ = _run(tmp_path, json.dumps(_usage_error_envelope_dict()), 2, "reviews")
 
     assert result.returncode == 1
     assert "verify error: --path is not a directory" in result.stdout

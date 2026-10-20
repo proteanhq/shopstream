@@ -153,7 +153,7 @@ capabilities:
 
   - name: ir_backward_compat
     taught_by: .protean/   # committed IR baselines per domain
-    guarded_by: verification/contracts/test_ir_gate.py   # + `make ir-gate` in CI
+    guarded_by: verification/contracts/test_ir_gate.py   # + make ir-gate in CI; test_ir_gate_script.py for the exit-code reading
     property: "IR diff flags breaking changes correctly (P14)"
     source: A
     status: covered   # T0.2: strict config + make ir-gate + CI + negative test
@@ -196,7 +196,7 @@ capabilities:
   - name: protean_verify
     taught_by: scripts/verify-domains.sh   # protean verify --json per context, memory mode
     guarded_by: verification/support/test_verify_domains_script.py   # the gate on canned envelopes; the real run is `bash scripts/verify-domains.sh`
-    property: "each context inits with traversal, runs Domain.check, and passes its own tests in memory mode, with per-stage status read from the JSON envelope"
+    property: "each context inits with traversal, runs Domain.check, and passes its own tests under `protean verify --env memory`, with per-stage status read from the JSON envelope"
     source: B
     status: partial   # #51, #56: init, check and tests gate. The guard test covers the gate on canned envelopes only; the property itself is checked by running the script by hand until #57 wires it into CI
 
