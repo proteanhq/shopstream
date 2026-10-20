@@ -29,10 +29,12 @@ RUN (needs the running stack, base env):
     make docker-up && make setup-db && make truncate-db
     make api                                   # :8000
     make engine-ordering & make engine-inventory & make engine-payments &
-    PYTHONPATH=src .venv/bin/python -m pytest verification/resilience/ -m engine -q
+    PROTEAN_ENV=development PYTHONPATH=src .venv/bin/python -m pytest verification/resilience/ -m engine -q
 
-    (No `--protean-env`: the in-process reservation/PM reads must use the base
-    env so they hit the same `_local` databases the engines write to.)
+    (Set `PROTEAN_ENV=development` explicitly. Protean's pytest plugin sets an
+    unset `PROTEAN_ENV` to `test`, and these tests skip in `test`. The in-process
+    reservation/PM reads must use the base env so they hit the same `_local`
+    databases the engines write to.)
 """
 
 from __future__ import annotations
@@ -62,7 +64,7 @@ def _stack_ready() -> tuple[bool, str]:
     """The async stack (api + ordering/inventory/payments engines) must be up, and
     we must be in the base (async, `_local`) env so in-process reads match it."""
     if os.environ.get("PROTEAN_ENV") in ("test", "memory"):
-        return False, "needs the base (async) env; run without --protean-env test/memory"
+        return False, "needs the base (async) env; set PROTEAN_ENV=development (pytest defaults it to test)"
     try:
         if requests.get(f"{BASE_URL}/health", timeout=2).status_code != 200:
             return False, "api not healthy on :8000"
