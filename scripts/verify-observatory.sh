@@ -21,9 +21,9 @@ set -euo pipefail
 #   make engine-loyalty         # terminal 9 (optional, for loyalty projections + the RedemptionSaga)
 #
 # Usage:
-#   ./scripts/verify-timeline.sh              # Full run: seed + verify
-#   ./scripts/verify-timeline.sh --skip-seed  # Skip seeding (reuse existing data)
-#   ./scripts/verify-timeline.sh --seed-only  # Seed data only, skip verification
+#   ./scripts/verify-observatory.sh              # Full run: seed + verify
+#   ./scripts/verify-observatory.sh --skip-seed  # Skip seeding (reuse existing data)
+#   ./scripts/verify-observatory.sh --seed-only  # Seed data only, skip verification
 
 API_URL="${API_URL:-http://localhost:8000}"
 OBS_URL="${OBS_URL:-http://localhost:9000}"
