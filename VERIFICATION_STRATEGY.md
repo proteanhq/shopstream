@@ -125,7 +125,7 @@ of value. Each is tagged with where its right answer comes from (A/B/C).
 | 2 | **Contract gate** | A/C | broken upgrades, changed event payloads | IR diff as a real CI failure (today it ends in `\|\| true` and never fails). Plus saved snapshots of every cross-domain event payload. |
 | 3 | **Same-event-twice checks (P20)** | **A** | non-idempotent projectors | The single highest-value new check. Prototype already exists and found a bug. |
 | 4 | **Concurrency checks (P2, P4)** with a hand-written model, on real Postgres | **A** | lost updates, duplicate publishes | The one real "find an unknown bug" investment. Must run on Postgres, not memory. |
-| 5 | **Crash-window check (P21)** | **A** | event-store / outbox divergence | Kill the process between DB commit and event-store append. |
+| 5 | **Crash-window check (P21)** | **A** | event-store / outbox divergence | Crash between the event-store append and the relational commit, then check that reconcile restores the lost outbox row. |
 | 6 | **Metamorphic checks** | B | pipeline bugs that differ between two paths | projection==fold, snapshot==replay, sync==async. Label honestly: these only catch bugs that show up differently on the two paths. |
 | 7 | **Regression set** | A | bugs coming back | Every Protean bug we find becomes one permanent, named test here. This is the part that keeps paying off. |
 | 8 | **Adapter check (conformance)** | A | Postgres vs memory differences | Same behavior run on several adapters, compared. Keep small; push upstream into Protean since it is about Protean's adapters, not ShopStream's domains. Track how many cases are skipped. |

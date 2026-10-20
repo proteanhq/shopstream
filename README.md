@@ -374,7 +374,16 @@ make setup-db          # Create all database schemas
 make drop-db           # Drop all database schemas
 make truncate-db       # Delete all data (preserves schema)
 make idempotency-cleanup  # Delete processed-message markers older than retention_hours (run from cron)
+make outbox-reconcile     # After a crash, restore lost outbox rows (stop the API and engines first)
 ```
+
+`make outbox-reconcile` runs `protean outbox reconcile` for each context. The
+engine runs the same sweep when it starts. A context is repaired only when its
+newest event in the last `LIMIT` messages (default 1000) of the shared event
+store has no outbox row, so an event lost behind a later successful commit is
+not repaired. Events older than the outbox cleanup retention are skipped.
+Stop the API and the engines first: a sweep that runs beside a live request can
+make that request's commit fail.
 
 Re-run `make setup-db` after pulling a change that marks a projector
 `idempotent=True`. It creates the `processed_message` table those projectors
