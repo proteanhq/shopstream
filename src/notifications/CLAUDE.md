@@ -16,6 +16,8 @@ See `docs/notifications/` for the domain narrative + scenarios.
 8088. Priority lanes enabled. Environment overlays for test (`notifications_test` DB),
 production (async + telemetry), and memory (in-memory/inline adapters). No cache section —
 projections are database-backed.
+Engine subscriptions use the shared `shopstream` profile; `[server.subscriptions.NotificationDispatcher]`
+gives the dispatcher its own circuit breaker (5 failures, 30 seconds).
 
 ## Aggregate: Notification (CQRS)
 
@@ -122,6 +124,12 @@ sends again (memory, proteanhq/protean#1915) or loses the result (Postgres,
 proteanhq/protean#1914); `tests/notifications/application/test_record_step_conflict.py` is a
 strict xfail for it. A redelivered `NotificationDispatchStarted` after a crash between the send
 and the record also sends again, within the send deadline.
+
+A failed send or any other adapter exception is recorded as FAILED. A channel outage
+(`ChannelUnavailableError`, `channel/errors.py`; the fake adapters raise it after
+`set_outage(True)`) records nothing: the error propagates, the notification stays DISPATCHING,
+the engine retries the `NotificationDispatchStarted` message, and repeated outages trip the
+dispatcher's circuit breaker (`[server.subscriptions.NotificationDispatcher]` in `domain.toml`).
 
 ## Cross-Domain Subscribers (the ACL hub)
 

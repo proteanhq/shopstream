@@ -11,6 +11,24 @@ message_processing = "sync"
 # Protean defaults to "event_store"; override to "stream" for outbox pattern.
 [server]
 default_subscription_type = "stream"
+default_subscription_profile = "shopstream"
+
+# Every engine subscription starts from this profile: production's batch size,
+# retries, DLQ and circuit breaker, with a smaller stream cap. 50000 entries is
+# half of production's 100000, so the override is visible, and still leaves room
+# for a slow consumer group to catch up. With more than one consumer group on a
+# stream, Protean trims to the slowest group's position instead of this cap.
+[server.profiles.shopstream]
+inherits = "production"
+retention_maxlen = 50000
+
+# NotificationDispatcher is the one handler that calls an external channel. A
+# channel outage fails it on every message, so its breaker opens sooner and
+# probes again sooner than the profile's 10 failures and 60 seconds, pausing reads
+# while the provider is down. Unread messages stay in the stream until it recovers.
+[server.subscriptions.NotificationDispatcher]
+circuit_breaker_threshold = 5
+circuit_breaker_reset_seconds = 30
 
 # Health-check HTTP server (Protean 0.16+). The engine binds 8080 by default;
 # assign a distinct port per domain so all eight engines run side by side locally.

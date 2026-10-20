@@ -6,6 +6,7 @@ import pytest
 from protean import current_domain
 
 from notifications.channel import get_channel, reset_channels
+from notifications.channel.errors import ChannelUnavailableError
 from notifications.notification.dispatch import (
     NotificationDispatcher,
     RecordDispatchResult,
@@ -234,6 +235,58 @@ class TestDispatcherEdgeCases:
         updated = repo.get(str(n.id))
         assert updated.status == NotificationStatus.FAILED.value
         assert updated.failure_reason == "x" * 500
+
+
+class TestDispatcherChannelOutage:
+    def setup_method(self):
+        reset_channels()
+
+    def teardown_method(self):
+        reset_channels()
+
+    @staticmethod
+    def _scheduled_notification(channel: str) -> Notification:
+        """Save a PENDING notification without dispatching it, then return it."""
+        n = Notification.create(
+            recipient_id="cust-outage",
+            notification_type=NotificationType.REVIEW_PROMPT.value,
+            channel=channel,
+            subject="Review?",
+            body="How was it?",
+            scheduled_for=datetime.now(UTC) + timedelta(days=1),
+        )
+        current_domain.repository_for(Notification).add(n)
+        return n
+
+    @pytest.mark.parametrize("channel", [c.value for c in NotificationChannel])
+    def test_outage_propagates_and_leaves_the_notification_pending(self, channel):
+        n = self._scheduled_notification(channel)
+        get_channel(channel).set_outage(True)
+        request = NotificationDispatchRequested(
+            **{**_dispatch_request(str(n.id), "cust-outage").to_dict(), "channel": channel}
+        )
+
+        with pytest.raises(ChannelUnavailableError):
+            NotificationDispatcher().on_dispatch_requested(request)
+
+        stored = current_domain.repository_for(Notification).get(str(n.id))
+        assert stored.status == NotificationStatus.PENDING.value
+        assert stored.failure_reason is None
+
+    @pytest.mark.parametrize("channel", [c.value for c in NotificationChannel])
+    def test_redelivered_request_after_the_outage_marks_it_sent(self, channel):
+        n = self._scheduled_notification(channel)
+        request = NotificationDispatchRequested(
+            **{**_dispatch_request(str(n.id), "cust-outage").to_dict(), "channel": channel}
+        )
+        get_channel(channel).set_outage(True)
+        with pytest.raises(ChannelUnavailableError):
+            NotificationDispatcher().on_dispatch_requested(request)
+
+        get_channel(channel).set_outage(False)
+        NotificationDispatcher().on_dispatch_requested(request)
+
+        assert current_domain.repository_for(Notification).get(str(n.id)).status == NotificationStatus.SENT.value
 
 
 class TestDispatchViaChannel:

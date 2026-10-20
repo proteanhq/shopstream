@@ -236,6 +236,8 @@ Controlled by `PROTEAN_ENV` and `domain.toml` overlays:
 
 Test and dev use separate databases so tests never destroy dev data. Memory mode uses in-memory adapters (no Docker needed) for fast feedback.
 
+Every `domain.toml` sets `default_subscription_profile = "shopstream"`. That custom profile (`[server.profiles.shopstream]`) inherits Protean's `production` profile (100 messages a tick, 3 retries, DLQ, a circuit breaker that opens after 10 failures for 60 seconds) and caps each subscription's Redis stream at 50000 entries (`retention_maxlen`). A `[server.subscriptions.<Handler>]` table overrides it for one handler: notifications gives `NotificationDispatcher` a breaker that opens after 5 failures for 30 seconds. Broker subscribers (`@domain.subscriber`) do not use profiles.
+
 ## Common Commands
 
 ```bash

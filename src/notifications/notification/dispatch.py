@@ -44,6 +44,14 @@ looks past it.
 A redelivered ``NotificationDispatchStarted``, after a crash between the send
 and the record, also sends again within that deadline. Closing that gap needs
 an idempotency key that the channel provider honours.
+
+A channel outage is different from a failed send. When the adapter raises
+``ChannelUnavailableError``, the send step records nothing and lets the error
+propagate: the notification stays DISPATCHING, the engine retries the
+``NotificationDispatchStarted`` message, and repeated outages trip the
+dispatcher subscription's circuit breaker (configured under
+``[server.subscriptions.NotificationDispatcher]`` in ``domain.toml``). A claim
+that is still unsent when its send deadline passes is left to the sweep.
 """
 
 from datetime import timedelta
@@ -56,6 +64,7 @@ from protean.utils.mixins import handle
 
 from notifications.channel import ChannelAdapter, get_channel
 from notifications.channel.email_port import EmailPort
+from notifications.channel.errors import ChannelUnavailableError
 from notifications.channel.push_port import PushPort
 from notifications.channel.slack_port import SlackPort
 from notifications.channel.sms_port import SMSPort
@@ -162,6 +171,10 @@ class NotificationDispatcher:
         during it. ``RecordDispatchResult`` opens the session afterwards. A
         claim older than ``SEND_DEADLINE`` is not sent and records nothing; the
         sweep marks it FAILED.
+
+        A failed send or any other adapter exception is recorded as FAILED.
+        ``ChannelUnavailableError`` and ``SendInsideTransactionError`` propagate
+        and record nothing.
         """
         if clock_now() - as_utc(event.started_at) >= SEND_DEADLINE:
             logger.warning(
@@ -182,6 +195,16 @@ class NotificationDispatcher:
         except SendInsideTransactionError:
             # A wiring bug in this code, not a channel failure: surface it
             # instead of recording the notification as FAILED.
+            raise
+        except ChannelUnavailableError:
+            # An outage is transient: leave the notification DISPATCHING and fail
+            # the handler, so the engine retries the message and the breaker
+            # counts the failure.
+            logger.warning(
+                "Notification channel unavailable, dispatch will be retried",
+                notification_id=str(event.notification_id),
+                channel=event.channel,
+            )
             raise
         except Exception as e:
             failure_reason = str(e) or type(e).__name__
