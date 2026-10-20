@@ -12,6 +12,7 @@ State Machine:
 
 from datetime import UTC, datetime
 from enum import Enum
+from typing import Any
 
 from protean.exceptions import ValidationError
 from protean.fields import (
@@ -193,7 +194,7 @@ class Fulfillment:
         cls,
         order_id: str,
         customer_id: str,
-        items_data: list[dict],
+        items_data: list[dict[str, Any]],
         warehouse_id: str | None = None,
     ) -> "Fulfillment":
         """Create a new fulfillment for a paid order."""
@@ -291,7 +292,7 @@ class Fulfillment:
     # -------------------------------------------------------------------
     # Packing
     # -------------------------------------------------------------------
-    def record_packing(self, packed_by: str, packages_data: list[dict]) -> None:
+    def record_packing(self, packed_by: str, packages_data: list[dict[str, Any]]) -> None:
         """Record that items have been packed into packages."""
         if FulfillmentStatus(self.status) != FulfillmentStatus.PACKING:
             raise ValidationError({"status": ["Packing can only be recorded during PACKING phase"]})
