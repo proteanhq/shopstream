@@ -1,0 +1,6 @@
+syntax = "proto3";
+package inventory.warehouse.management;
+
+message DeactivateWarehouse {
+  string warehouse_id = 1;
+}

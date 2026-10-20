@@ -1,0 +1,15 @@
+syntax = "proto3";
+package identity.projections.customer_card;
+import "google/protobuf/timestamp.proto";
+
+message CustomerCard {
+  string customer_id = 1;
+  string email = 2;
+  string external_id = 3;
+  string first_name = 4;
+  string last_name = 5;
+  optional string phone = 6;
+  optional google.protobuf.Timestamp registered_at = 7;
+  string status = 8;
+  string tier = 9;
+}

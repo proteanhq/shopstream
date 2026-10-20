@@ -1,0 +1,37 @@
+{
+  "doc": "A customer set their do-not-disturb window.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "end",
+      "type": "string"
+    },
+    {
+      "name": "preference_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "start",
+      "type": "string"
+    },
+    {
+      "name": "updated_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "QuietHoursSet",
+  "namespace": "notifications.preference.events",
+  "type": "record"
+}

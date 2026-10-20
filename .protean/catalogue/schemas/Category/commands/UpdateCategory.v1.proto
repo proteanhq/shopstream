@@ -1,0 +1,8 @@
+syntax = "proto3";
+package catalogue.category.management;
+
+message UpdateCategory {
+  map<string, string> attributes = 1;
+  string category_id = 2;
+  optional string name = 3;
+}

@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "account_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "failure_reason": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "points": {
+      "type": "integer"
+    },
+    "requested_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reward_code": {
+      "maxLength": 40,
+      "minLength": 1,
+      "type": "string"
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "compensated",
+            "completed",
+            "points_reserved",
+            "requested",
+            "voucher_issued"
+          ],
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "requested"
+    },
+    "voucher_code": {
+      "anyOf": [
+        {
+          "maxLength": 40,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "account_id",
+    "id",
+    "points",
+    "reward_code"
+  ],
+  "title": "Redemption",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "loyalty.redemption.redemption.Redemption",
+  "x-protean-identity-field": "id"
+}

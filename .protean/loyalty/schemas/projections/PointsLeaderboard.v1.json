@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "account_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "customer_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "points_balance": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "tier": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "account_id",
+    "customer_id"
+  ],
+  "title": "PointsLeaderboard",
+  "type": "object",
+  "x-protean-element-type": "projection",
+  "x-protean-fqn": "loyalty.projections.points_leaderboard.PointsLeaderboard",
+  "x-protean-identity-field": "account_id"
+}

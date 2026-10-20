@@ -1,0 +1,23 @@
+{
+  "doc": "Cancel an order before fulfillment begins (allowed in Created through Paid states).",
+  "fields": [
+    {
+      "name": "cancelled_by",
+      "type": "string"
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "CancelOrder",
+  "namespace": "ordering.order.cancellation",
+  "type": "record"
+}

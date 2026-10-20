@@ -1,0 +1,23 @@
+{
+  "doc": "Record that payment failed, returning the order to Confirmed for retry.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "payment_id",
+      "type": "string"
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "RecordPaymentFailure",
+  "namespace": "ordering.order.payment",
+  "type": "record"
+}

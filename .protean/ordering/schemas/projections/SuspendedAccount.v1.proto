@@ -1,0 +1,9 @@
+syntax = "proto3";
+package ordering.projections.suspended_accounts;
+import "google/protobuf/timestamp.proto";
+
+message SuspendedAccount {
+  string customer_id = 1;
+  optional string reason = 2;
+  optional google.protobuf.Timestamp suspended_at = 3;
+}

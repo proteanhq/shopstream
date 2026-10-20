@@ -1,0 +1,208 @@
+{
+  "doc": "A registered person on the platform, identified by a system ID and an external ID.\n\nThe Customer aggregate groups profile, addresses, account status, and loyalty tier\ninto a single transactional boundary. The \"exactly one default address\" invariant\nrequires these elements to change together consistently.",
+  "fields": [
+    {
+      "default": null,
+      "name": "addresses",
+      "type": [
+        "null",
+        {
+          "items": {
+            "fields": [
+              {
+                "name": "city",
+                "type": "string"
+              },
+              {
+                "name": "country",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "customer",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "default": null,
+                "name": "geo_coordinates",
+                "type": [
+                  "null",
+                  {
+                    "fields": [
+                      {
+                        "default": null,
+                        "name": "latitude",
+                        "type": [
+                          "null",
+                          "double"
+                        ]
+                      },
+                      {
+                        "default": null,
+                        "name": "longitude",
+                        "type": [
+                          "null",
+                          "double"
+                        ]
+                      }
+                    ],
+                    "name": "GeoCoordinates",
+                    "namespace": "identity.customer.customer",
+                    "type": "record"
+                  }
+                ]
+              },
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "is_default",
+                "type": [
+                  "null",
+                  "boolean"
+                ]
+              },
+              {
+                "default": null,
+                "name": "label",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "postal_code",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "state",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "street",
+                "type": "string"
+              }
+            ],
+            "name": "Address",
+            "namespace": "identity.customer.customer",
+            "type": "record"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "email",
+      "type": {
+        "fields": [
+          {
+            "name": "address",
+            "type": "string"
+          }
+        ],
+        "name": "EmailAddress",
+        "namespace": "identity.shared.email",
+        "type": "record"
+      }
+    },
+    {
+      "name": "external_id",
+      "type": "string"
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "last_login_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "profile",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "default": null,
+              "name": "date_of_birth",
+              "type": [
+                "null",
+                {
+                  "logicalType": "date",
+                  "type": "int"
+                }
+              ]
+            },
+            {
+              "name": "first_name",
+              "type": "string"
+            },
+            {
+              "name": "last_name",
+              "type": "string"
+            },
+            {
+              "default": null,
+              "name": "phone",
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          ],
+          "name": "Profile",
+          "namespace": "identity.customer.customer",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "registered_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "status",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "tier",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "Customer",
+  "namespace": "identity.customer.customer",
+  "type": "record"
+}

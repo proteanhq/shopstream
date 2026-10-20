@@ -1,0 +1,12 @@
+syntax = "proto3";
+package payments.projections.daily_revenue;
+
+message DailyRevenue {
+  optional string currency = 1;
+  string date = 2;
+  optional double net_revenue = 3;
+  optional int64 refund_count = 4;
+  optional double total_refunded = 5;
+  optional double total_revenue = 6;
+  optional int64 transaction_count = 7;
+}

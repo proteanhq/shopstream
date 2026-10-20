@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "account_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "amount": {
+      "type": "integer"
+    },
+    "balance_after": {
+      "type": "integer"
+    },
+    "customer_id": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "account_id",
+    "amount",
+    "balance_after",
+    "occurred_at"
+  ],
+  "title": "PointsEarned",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.reward.reward_account.RewardAccount",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "loyalty.reward.events.PointsEarned",
+  "x-protean-published": true,
+  "x-protean-type": "Loyalty.PointsEarned.v1",
+  "x-protean-version": 1
+}

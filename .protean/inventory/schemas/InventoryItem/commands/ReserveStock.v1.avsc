@@ -1,0 +1,37 @@
+{
+  "doc": "Reserve stock for an order.",
+  "fields": [
+    {
+      "default": null,
+      "name": "expires_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    }
+  ],
+  "name": "ReserveStock",
+  "namespace": "inventory.stock.reservation",
+  "type": "record"
+}

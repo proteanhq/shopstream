@@ -1,0 +1,33 @@
+{
+  "doc": "Returned items were received back from the customer.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "returned_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "default": null,
+      "name": "returned_item_ids",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    }
+  ],
+  "name": "OrderReturned",
+  "namespace": "ordering.order.events",
+  "type": "record"
+}

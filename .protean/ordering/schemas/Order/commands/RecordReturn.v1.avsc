@@ -1,0 +1,26 @@
+{
+  "doc": "Record that returned items have been received back from the customer.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "returned_item_ids",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    }
+  ],
+  "name": "RecordReturn",
+  "namespace": "ordering.order.returns",
+  "type": "record"
+}

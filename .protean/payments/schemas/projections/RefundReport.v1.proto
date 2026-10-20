@@ -1,0 +1,15 @@
+syntax = "proto3";
+package payments.projections.refund_report;
+import "google/protobuf/timestamp.proto";
+
+message RefundReport {
+  double amount = 1;
+  optional google.protobuf.Timestamp completed_at = 2;
+  optional string gateway_refund_id = 3;
+  string order_id = 4;
+  string payment_id = 5;
+  optional string reason = 6;
+  string refund_id = 7;
+  optional google.protobuf.Timestamp requested_at = 8;
+  string status = 9;
+}

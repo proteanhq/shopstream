@@ -1,0 +1,324 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "amount",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "default": null,
+              "name": "currency",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "value",
+              "type": [
+                "null",
+                "double"
+              ]
+            }
+          ],
+          "name": "Money",
+          "namespace": "payments.payment.payment",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "attempt_count",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "attempts",
+      "type": [
+        "null",
+        {
+          "items": {
+            "fields": [
+              {
+                "name": "attempted_at",
+                "type": {
+                  "logicalType": "timestamp-millis",
+                  "type": "long"
+                }
+              },
+              {
+                "default": null,
+                "name": "failure_reason",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "default": null,
+                "name": "gateway_transaction_id",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "payment",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "status",
+                "type": "string"
+              }
+            ],
+            "name": "PaymentAttempt",
+            "namespace": "payments.payment.payment",
+            "type": "record"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "created_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "gateway_info",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "default": null,
+              "name": "gateway_name",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "gateway_response",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "gateway_status",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "gateway_transaction_id",
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          ],
+          "name": "GatewayInfo",
+          "namespace": "payments.payment.payment",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "idempotency_key",
+      "type": "string"
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "payment_method",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "default": null,
+              "name": "expiry_month",
+              "type": [
+                "null",
+                "long"
+              ]
+            },
+            {
+              "default": null,
+              "name": "expiry_year",
+              "type": [
+                "null",
+                "long"
+              ]
+            },
+            {
+              "default": null,
+              "name": "last4",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "method_type",
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          ],
+          "name": "PaymentMethod",
+          "namespace": "payments.payment.payment",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "refunds",
+      "type": [
+        "null",
+        {
+          "items": {
+            "fields": [
+              {
+                "name": "amount",
+                "type": "double"
+              },
+              {
+                "default": null,
+                "name": "gateway_refund_id",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "payment",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "default": null,
+                "name": "processed_at",
+                "type": [
+                  "null",
+                  {
+                    "logicalType": "timestamp-millis",
+                    "type": "long"
+                  }
+                ]
+              },
+              {
+                "name": "reason",
+                "type": "string"
+              },
+              {
+                "name": "requested_at",
+                "type": {
+                  "logicalType": "timestamp-millis",
+                  "type": "long"
+                }
+              },
+              {
+                "default": null,
+                "name": "status",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            ],
+            "name": "Refund",
+            "namespace": "payments.payment.payment",
+            "type": "record"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "status",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_refunded",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    }
+  ],
+  "name": "Payment",
+  "namespace": "payments.payment.payment",
+  "type": "record"
+}

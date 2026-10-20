@@ -1,0 +1,13 @@
+syntax = "proto3";
+package fulfillment.fulfillment.events;
+import "google/protobuf/timestamp.proto";
+
+message ShipmentHandedOff {
+  string carrier = 1;
+  optional google.protobuf.Timestamp estimated_delivery = 2;
+  string fulfillment_id = 3;
+  string order_id = 4;
+  google.protobuf.Timestamp shipped_at = 5;
+  repeated string shipped_item_ids = 6;
+  string tracking_number = 7;
+}

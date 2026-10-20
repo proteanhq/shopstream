@@ -1,0 +1,50 @@
+{
+  "doc": "Abstract base contributing audit fields to concrete aggregates.\n\nThe framework stamps both timestamps from the domain clock when the aggregate is\nsaved: ``created_at`` on the first save only, ``updated_at`` on every save. They are\n``None`` until then. The ``stamp_actor`` aggregate enricher fills ``created_by`` and\n``updated_by``.",
+  "fields": [
+    {
+      "default": null,
+      "name": "created_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "created_by",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "updated_by",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "Auditable",
+  "namespace": "loyalty.reward.reward_account",
+  "type": "record"
+}

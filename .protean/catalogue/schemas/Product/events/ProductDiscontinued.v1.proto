@@ -1,0 +1,9 @@
+syntax = "proto3";
+package catalogue.product.events;
+import "google/protobuf/timestamp.proto";
+
+message ProductDiscontinued {
+  google.protobuf.Timestamp discontinued_at = 1;
+  string product_id = 2;
+  string sku = 3;
+}

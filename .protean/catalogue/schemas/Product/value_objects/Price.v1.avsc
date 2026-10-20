@@ -1,0 +1,31 @@
+{
+  "doc": "The monetary cost of a variant, with optional loyalty-tier discounts.\n\nBase price is the standard retail price. Tier prices (stored as JSON) allow\ndifferent pricing for Silver, Gold, and Platinum customers. Tier prices must\nalways be lower than the base price.",
+  "fields": [
+    {
+      "name": "base_price",
+      "type": "double"
+    },
+    {
+      "default": null,
+      "name": "currency",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "tier_prices",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ]
+    }
+  ],
+  "name": "Price",
+  "namespace": "catalogue.product.product",
+  "type": "record"
+}

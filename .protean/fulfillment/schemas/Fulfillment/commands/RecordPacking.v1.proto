@@ -1,0 +1,8 @@
+syntax = "proto3";
+package fulfillment.fulfillment.packing;
+
+message RecordPacking {
+  string fulfillment_id = 1;
+  repeated string packages = 2;
+  string packed_by = 3;
+}

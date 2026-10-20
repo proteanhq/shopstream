@@ -1,0 +1,16 @@
+syntax = "proto3";
+package ordering.order.order;
+
+message OrderItem {
+  optional double discount = 1;
+  string id = 2;
+  optional string item_status = 3;
+  optional string order = 4;
+  string product_id = 5;
+  int64 quantity = 6;
+  string sku = 7;
+  optional double tax_amount = 8;
+  string title = 9;
+  double unit_price = 10;
+  string variant_id = 11;
+}

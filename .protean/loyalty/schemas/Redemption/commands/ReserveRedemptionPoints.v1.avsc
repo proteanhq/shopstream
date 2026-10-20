@@ -1,0 +1,14 @@
+{
+  "fields": [
+    {
+      "name": "redemption_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ReserveRedemptionPoints",
+  "namespace": "loyalty.redemption.commands",
+  "type": "record"
+}

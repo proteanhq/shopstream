@@ -1,0 +1,11 @@
+syntax = "proto3";
+package loyalty.redemption.events;
+import "google/protobuf/timestamp.proto";
+
+message RedemptionRequested {
+  string account_id = 1;
+  int64 points = 2;
+  string redemption_id = 3;
+  google.protobuf.Timestamp requested_at = 4;
+  string reward_code = 5;
+}

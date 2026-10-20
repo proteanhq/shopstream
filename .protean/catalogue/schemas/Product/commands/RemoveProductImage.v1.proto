@@ -1,0 +1,7 @@
+syntax = "proto3";
+package catalogue.product.images;
+
+message RemoveProductImage {
+  string image_id = 1;
+  string product_id = 2;
+}

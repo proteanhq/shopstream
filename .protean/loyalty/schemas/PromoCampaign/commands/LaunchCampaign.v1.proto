@@ -1,0 +1,12 @@
+syntax = "proto3";
+package loyalty.campaign.management;
+import "google/protobuf/timestamp.proto";
+
+message LaunchCampaign {
+  string campaign_code = 1;
+  string discount_type = 2;
+  int64 discount_value = 3;
+  optional google.protobuf.Timestamp ends_on = 4;
+  string name = 5;
+  optional google.protobuf.Timestamp starts_on = 6;
+}

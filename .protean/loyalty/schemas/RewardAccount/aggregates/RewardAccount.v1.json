@@ -1,0 +1,291 @@
+{
+  "$defs": {
+    "MembershipCard": {
+      "properties": {
+        "card_number": {
+          "maxLength": 20,
+          "minLength": 1,
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "issued_on": {
+          "format": "date",
+          "type": "string"
+        },
+        "reward_account": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "status": {
+          "anyOf": [
+            {
+              "enum": [
+                "active",
+                "expired",
+                "suspended"
+              ],
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": "active"
+        }
+      },
+      "required": [
+        "card_number",
+        "id",
+        "issued_on"
+      ],
+      "type": "object"
+    },
+    "PointsLedgerEntry": {
+      "properties": {
+        "amount": {
+          "type": "integer"
+        },
+        "balance_after": {
+          "type": "integer"
+        },
+        "entry_type": {
+          "enum": [
+            "adjust",
+            "earn",
+            "redeem",
+            "transfer_in",
+            "transfer_out"
+          ],
+          "maxLength": 255,
+          "minLength": 1,
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "occurred_at": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "reason": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reward_account": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "amount",
+        "balance_after",
+        "entry_type",
+        "id",
+        "occurred_at"
+      ],
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "card": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/MembershipCard"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created_by": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "customer_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "entries": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/PointsLedgerEntry"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "lifetime_points": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "member_code": {
+      "maxLength": 12,
+      "minLength": 1,
+      "type": "string"
+    },
+    "membership_since": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "points_balance": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": 0
+    },
+    "referral_code": {
+      "anyOf": [
+        {
+          "maxLength": 12,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "Active",
+            "Closed",
+            "Frozen"
+          ],
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "Active"
+    },
+    "tier": {
+      "anyOf": [
+        {
+          "enum": [
+            "bronze",
+            "gold",
+            "platinum",
+            "silver"
+          ],
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "bronze"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_by": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "customer_id",
+    "id",
+    "member_code"
+  ],
+  "title": "RewardAccount",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "loyalty.reward.reward_account.RewardAccount",
+  "x-protean-identity-field": "id",
+  "x-protean-indexes": [
+    {
+      "fields": [
+        "status"
+      ],
+      "unique": false
+    }
+  ]
+}

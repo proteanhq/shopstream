@@ -1,0 +1,16 @@
+syntax = "proto3";
+package inventory.projections.warehouse_stock;
+import "google/protobuf/timestamp.proto";
+
+message WarehouseStock {
+  optional int64 available = 1;
+  optional int64 damaged = 2;
+  string entry_id = 3;
+  optional int64 on_hand = 4;
+  string product_id = 5;
+  optional int64 reserved = 6;
+  string sku = 7;
+  optional google.protobuf.Timestamp updated_at = 8;
+  string variant_id = 9;
+  string warehouse_id = 10;
+}

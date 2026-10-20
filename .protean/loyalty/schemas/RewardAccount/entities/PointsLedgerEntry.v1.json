@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "An append-only points movement \u2014 a 1:N (HasMany) child of the account.\n\nDeclares the parent link explicitly via `Reference` (rather than relying on the\nimplicit reference HasMany would auto-create) to exercise the Reference field.",
+  "properties": {
+    "amount": {
+      "type": "integer"
+    },
+    "balance_after": {
+      "type": "integer"
+    },
+    "entry_type": {
+      "enum": [
+        "adjust",
+        "earn",
+        "redeem",
+        "transfer_in",
+        "transfer_out"
+      ],
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reward_account": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "amount",
+    "balance_after",
+    "entry_type",
+    "id",
+    "occurred_at"
+  ],
+  "title": "PointsLedgerEntry",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.reward.reward_account.RewardAccount",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "loyalty.reward.reward_account.PointsLedgerEntry",
+  "x-protean-identity-field": "id"
+}

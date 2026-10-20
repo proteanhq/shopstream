@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "A star rating from 1 to 5.",
+  "description": "A star rating from 1 to 5.\n\nExamples:\n    >>> Rating(score=5).score\n    5\n    >>> try:\n    ...     Rating(score=0)\n    ... except ValidationError:\n    ...     print(\"below range rejected\")\n    below range rejected\n    >>> try:\n    ...     Rating(score=6)\n    ... except ValidationError:\n    ...     print(\"above range rejected\")\n    above range rejected",
   "properties": {
     "score": {
       "type": "integer"

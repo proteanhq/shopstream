@@ -1,0 +1,26 @@
+{
+  "doc": "A coupon code was applied to an order.",
+  "fields": [
+    {
+      "name": "applied_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "coupon_code",
+      "type": "string"
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "CouponApplied",
+  "namespace": "ordering.order.events",
+  "type": "record"
+}

@@ -1,0 +1,10 @@
+syntax = "proto3";
+package inventory.warehouse.warehouse;
+
+message WarehouseAddress {
+  string city = 1;
+  string country = 2;
+  string postal_code = 3;
+  optional string state = 4;
+  string street = 5;
+}

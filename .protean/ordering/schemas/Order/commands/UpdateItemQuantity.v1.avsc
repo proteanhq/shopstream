@@ -1,0 +1,26 @@
+{
+  "doc": "Change the quantity of an existing order line item.",
+  "fields": [
+    {
+      "name": "item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_quantity",
+      "type": "long"
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "UpdateItemQuantity",
+  "namespace": "ordering.order.modification",
+  "type": "record"
+}

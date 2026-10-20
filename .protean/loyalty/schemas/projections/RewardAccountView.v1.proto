@@ -1,0 +1,14 @@
+syntax = "proto3";
+package loyalty.projections.reward_account_view;
+import "google/protobuf/timestamp.proto";
+
+message RewardAccountView {
+  string account_id = 1;
+  string customer_id = 2;
+  optional int64 lifetime_points = 3;
+  optional string member_code = 4;
+  optional int64 points_balance = 5;
+  optional string status = 6;
+  optional string tier = 7;
+  optional google.protobuf.Timestamp updated_at = 8;
+}

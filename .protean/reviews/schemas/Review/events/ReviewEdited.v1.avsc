@@ -1,0 +1,46 @@
+{
+  "doc": "A customer edited their review content.",
+  "fields": [
+    {
+      "default": null,
+      "name": "body",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "edited_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "default": null,
+      "name": "rating",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "review_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "title",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "ReviewEdited",
+  "namespace": "reviews.review.events",
+  "type": "record"
+}

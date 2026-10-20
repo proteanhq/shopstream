@@ -1,0 +1,14 @@
+{
+  "fields": [
+    {
+      "name": "campaign_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ExpireCampaign",
+  "namespace": "loyalty.campaign.management",
+  "type": "record"
+}

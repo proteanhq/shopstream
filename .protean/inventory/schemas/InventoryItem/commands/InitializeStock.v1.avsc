@@ -1,0 +1,57 @@
+{
+  "doc": "Create a new inventory record for a product variant at a warehouse.",
+  "fields": [
+    {
+      "default": null,
+      "name": "initial_quantity",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "reorder_point",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "reorder_quantity",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "sku",
+      "type": "string"
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "warehouse_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "InitializeStock",
+  "namespace": "inventory.stock.initialization",
+  "type": "record"
+}

@@ -1,0 +1,15 @@
+syntax = "proto3";
+package payments.projections.failed_payments;
+import "google/protobuf/timestamp.proto";
+
+message FailedPayment {
+  optional double amount = 1;
+  optional int64 attempt_number = 2;
+  string customer_id = 3;
+  optional google.protobuf.Timestamp failed_at = 4;
+  string order_id = 5;
+  string payment_id = 6;
+  optional string reason = 7;
+  string status = 8;
+  optional google.protobuf.Timestamp updated_at = 9;
+}

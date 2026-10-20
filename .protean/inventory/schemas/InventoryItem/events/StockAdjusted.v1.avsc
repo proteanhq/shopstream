@@ -1,0 +1,57 @@
+{
+  "doc": "Stock was manually adjusted (count, shrinkage, correction).",
+  "fields": [
+    {
+      "name": "adjusted_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "adjusted_by",
+      "type": "string"
+    },
+    {
+      "name": "adjustment_type",
+      "type": "string"
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_available",
+      "type": "long"
+    },
+    {
+      "name": "new_on_hand",
+      "type": "long"
+    },
+    {
+      "name": "previous_on_hand",
+      "type": "long"
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity_change",
+      "type": "long"
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "StockAdjusted",
+  "namespace": "inventory.stock.events",
+  "type": "record"
+}

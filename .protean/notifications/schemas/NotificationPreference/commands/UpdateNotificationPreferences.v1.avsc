@@ -1,0 +1,39 @@
+{
+  "doc": "Update a customer's notification channel preferences.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "email_enabled",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    {
+      "default": null,
+      "name": "push_enabled",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    {
+      "default": null,
+      "name": "sms_enabled",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    }
+  ],
+  "name": "UpdateNotificationPreferences",
+  "namespace": "notifications.preference.management",
+  "type": "record"
+}

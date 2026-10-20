@@ -1,0 +1,13 @@
+syntax = "proto3";
+package fulfillment.fulfillment.events;
+import "google/protobuf/timestamp.proto";
+
+message FulfillmentCreated {
+  google.protobuf.Timestamp created_at = 1;
+  string customer_id = 2;
+  string fulfillment_id = 3;
+  int64 item_count = 4;
+  repeated string items = 5;
+  string order_id = 6;
+  optional string warehouse_id = 7;
+}

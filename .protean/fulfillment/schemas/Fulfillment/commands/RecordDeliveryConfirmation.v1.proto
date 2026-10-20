@@ -1,0 +1,6 @@
+syntax = "proto3";
+package fulfillment.fulfillment.delivery;
+
+message RecordDeliveryConfirmation {
+  string fulfillment_id = 1;
+}

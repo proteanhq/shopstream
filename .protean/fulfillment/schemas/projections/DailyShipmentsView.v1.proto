@@ -1,0 +1,13 @@
+syntax = "proto3";
+package fulfillment.projections.daily_shipments;
+import "google/protobuf/timestamp.proto";
+
+message DailyShipmentsView {
+  string date = 1;
+  string id = 2;
+  optional int64 total_created = 3;
+  optional int64 total_delivered = 4;
+  optional int64 total_exceptions = 5;
+  optional int64 total_shipped = 6;
+  optional google.protobuf.Timestamp updated_at = 7;
+}

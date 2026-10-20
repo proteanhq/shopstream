@@ -1,0 +1,36 @@
+{
+  "doc": "A line item on an invoice.",
+  "fields": [
+    {
+      "name": "description",
+      "type": "string"
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "invoice",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "quantity",
+      "type": "double"
+    },
+    {
+      "name": "total",
+      "type": "double"
+    },
+    {
+      "name": "unit_price",
+      "type": "double"
+    }
+  ],
+  "name": "InvoiceLineItem",
+  "namespace": "payments.invoice.invoice",
+  "type": "record"
+}

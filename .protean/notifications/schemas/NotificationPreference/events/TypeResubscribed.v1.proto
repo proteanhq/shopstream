@@ -1,0 +1,10 @@
+syntax = "proto3";
+package notifications.preference.events;
+import "google/protobuf/timestamp.proto";
+
+message TypeResubscribed {
+  string customer_id = 1;
+  string notification_type = 2;
+  string preference_id = 3;
+  google.protobuf.Timestamp resubscribed_at = 4;
+}

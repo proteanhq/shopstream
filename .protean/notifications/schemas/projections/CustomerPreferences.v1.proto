@@ -1,0 +1,16 @@
+syntax = "proto3";
+package notifications.projections.customer_preferences;
+import "google/protobuf/timestamp.proto";
+
+message CustomerPreferences {
+  optional google.protobuf.Timestamp created_at = 1;
+  string customer_id = 2;
+  optional bool email_enabled = 3;
+  string preference_id = 4;
+  optional bool push_enabled = 5;
+  optional string quiet_hours_end = 6;
+  optional string quiet_hours_start = 7;
+  optional bool sms_enabled = 8;
+  repeated string unsubscribed_types = 9;
+  optional google.protobuf.Timestamp updated_at = 10;
+}

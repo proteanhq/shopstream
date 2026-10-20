@@ -1,0 +1,8 @@
+syntax = "proto3";
+package inventory.warehouse.management;
+
+message UpdateWarehouse {
+  optional int64 capacity = 1;
+  optional string name = 2;
+  string warehouse_id = 3;
+}

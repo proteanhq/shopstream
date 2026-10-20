@@ -1,0 +1,14 @@
+syntax = "proto3";
+package notifications.projections.failed_notifications;
+import "google/protobuf/timestamp.proto";
+
+message FailedNotifications {
+  string channel = 1;
+  optional google.protobuf.Timestamp failed_at = 2;
+  optional string failure_reason = 3;
+  optional int64 max_retries = 4;
+  string notification_id = 5;
+  string notification_type = 6;
+  string recipient_id = 7;
+  optional int64 retry_count = 8;
+}

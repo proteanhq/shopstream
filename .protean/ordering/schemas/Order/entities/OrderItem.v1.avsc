@@ -1,0 +1,74 @@
+{
+  "doc": "A line item in an order, representing a specific product variant and quantity.\n\nEach item tracks its own status through the fulfillment lifecycle\n(Pending -> Shipped -> Delivered -> optionally Returned), enabling partial\nshipments where some items ship before others.",
+  "fields": [
+    {
+      "default": null,
+      "name": "discount",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "item_status",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "order",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    },
+    {
+      "name": "sku",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "tax_amount",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "name": "title",
+      "type": "string"
+    },
+    {
+      "name": "unit_price",
+      "type": "double"
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "OrderItem",
+  "namespace": "ordering.order.order",
+  "type": "record"
+}

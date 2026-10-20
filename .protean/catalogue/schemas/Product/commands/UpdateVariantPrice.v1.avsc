@@ -1,0 +1,34 @@
+{
+  "doc": "Change the base price of an existing variant.",
+  "fields": [
+    {
+      "name": "base_price",
+      "type": "double"
+    },
+    {
+      "default": null,
+      "name": "currency",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "UpdateVariantPrice",
+  "namespace": "catalogue.product.variants",
+  "type": "record"
+}

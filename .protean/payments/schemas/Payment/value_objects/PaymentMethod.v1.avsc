@@ -1,0 +1,40 @@
+{
+  "doc": "Payment method details captured at initiation time.",
+  "fields": [
+    {
+      "default": null,
+      "name": "expiry_month",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "expiry_year",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "last4",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "method_type",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "PaymentMethod",
+  "namespace": "payments.payment.payment",
+  "type": "record"
+}

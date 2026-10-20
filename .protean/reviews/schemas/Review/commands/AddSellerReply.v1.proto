@@ -1,0 +1,8 @@
+syntax = "proto3";
+package reviews.review.reply;
+
+message AddSellerReply {
+  string body = 1;
+  string review_id = 2;
+  string seller_id = 3;
+}

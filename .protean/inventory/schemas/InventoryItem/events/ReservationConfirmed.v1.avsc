@@ -1,0 +1,40 @@
+{
+  "doc": "A stock reservation was confirmed after order payment.",
+  "fields": [
+    {
+      "name": "confirmed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    },
+    {
+      "name": "reservation_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ReservationConfirmed",
+  "namespace": "inventory.stock.events",
+  "type": "record"
+}

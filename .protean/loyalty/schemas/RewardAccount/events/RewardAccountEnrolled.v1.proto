@@ -1,0 +1,11 @@
+syntax = "proto3";
+package loyalty.reward.events;
+import "google/protobuf/timestamp.proto";
+
+message RewardAccountEnrolled {
+  string account_id = 1;
+  string customer_id = 2;
+  google.protobuf.Timestamp enrolled_at = 3;
+  string member_code = 4;
+  string tier = 5;
+}

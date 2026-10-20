@@ -1,0 +1,20 @@
+syntax = "proto3";
+package identity.customer.customer;
+
+message Address {
+  string city = 1;
+  string country = 2;
+  optional string customer = 3;
+  optional GeoCoordinates geo_coordinates = 4;
+  string id = 5;
+  optional bool is_default = 6;
+  optional string label = 7;
+  string postal_code = 8;
+  optional string state = 9;
+  string street = 10;
+}
+
+message GeoCoordinates {
+  optional double latitude = 1;
+  optional double longitude = 2;
+}

@@ -1,0 +1,38 @@
+{
+  "doc": "A physical stock count was recorded.",
+  "fields": [
+    {
+      "name": "checked_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "checked_by",
+      "type": "string"
+    },
+    {
+      "name": "counted_quantity",
+      "type": "long"
+    },
+    {
+      "name": "discrepancy",
+      "type": "long"
+    },
+    {
+      "name": "expected_quantity",
+      "type": "long"
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "StockCheckRecorded",
+  "namespace": "inventory.stock.events",
+  "type": "record"
+}

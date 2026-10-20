@@ -1,0 +1,9 @@
+syntax = "proto3";
+package notifications.preference.events;
+import "google/protobuf/timestamp.proto";
+
+message QuietHoursCleared {
+  google.protobuf.Timestamp cleared_at = 1;
+  string customer_id = 2;
+  string preference_id = 3;
+}

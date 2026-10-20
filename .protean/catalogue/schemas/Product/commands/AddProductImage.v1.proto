@@ -1,0 +1,9 @@
+syntax = "proto3";
+package catalogue.product.images;
+
+message AddProductImage {
+  optional string alt_text = 1;
+  optional bool is_primary = 2;
+  string product_id = 3;
+  string url = 4;
+}

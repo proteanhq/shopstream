@@ -1,0 +1,37 @@
+{
+  "doc": "A failed notification was retried.",
+  "fields": [
+    {
+      "name": "channel",
+      "type": "string"
+    },
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "recipient_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "retried_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "retry_count",
+      "type": "long"
+    }
+  ],
+  "name": "NotificationRetried",
+  "namespace": "notifications.notification.events",
+  "type": "record"
+}

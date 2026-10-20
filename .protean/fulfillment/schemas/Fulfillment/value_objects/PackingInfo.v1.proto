@@ -1,0 +1,9 @@
+syntax = "proto3";
+package fulfillment.fulfillment.fulfillment;
+import "google/protobuf/timestamp.proto";
+
+message PackingInfo {
+  optional google.protobuf.Timestamp packed_at = 1;
+  optional string packed_by = 2;
+  optional string shipping_label_url = 3;
+}

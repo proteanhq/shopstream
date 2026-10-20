@@ -1,0 +1,23 @@
+{
+  "doc": "Record a physical stock count.",
+  "fields": [
+    {
+      "name": "checked_by",
+      "type": "string"
+    },
+    {
+      "name": "counted_quantity",
+      "type": "long"
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "RecordStockCheck",
+  "namespace": "inventory.stock.adjustment",
+  "type": "record"
+}

@@ -5,6 +5,10 @@
     "amount": {
       "type": "number"
     },
+    "attempt_id": {
+      "minLength": 1,
+      "type": "string"
+    },
     "currency": {
       "maxLength": 255,
       "minLength": 1,
@@ -55,6 +59,7 @@
   },
   "required": [
     "amount",
+    "attempt_id",
     "currency",
     "customer_id",
     "gateway_name",

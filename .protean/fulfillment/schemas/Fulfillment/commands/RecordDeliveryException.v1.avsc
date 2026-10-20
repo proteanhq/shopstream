@@ -1,0 +1,27 @@
+{
+  "doc": "Record a delivery exception from the carrier.",
+  "fields": [
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "location",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "RecordDeliveryException",
+  "namespace": "fulfillment.fulfillment.delivery",
+  "type": "record"
+}

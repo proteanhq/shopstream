@@ -1,0 +1,82 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "carrier",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "current_location",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "current_status",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "delivered_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "events",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "shipped_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "tracking_number",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "ShipmentTrackingView",
+  "namespace": "fulfillment.projections.shipment_tracking",
+  "type": "record"
+}

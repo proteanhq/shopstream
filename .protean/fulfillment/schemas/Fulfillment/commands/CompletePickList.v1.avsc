@@ -1,0 +1,15 @@
+{
+  "doc": "Complete the pick list \u2014 all items must have been picked.",
+  "fields": [
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "CompletePickList",
+  "namespace": "fulfillment.fulfillment.picking",
+  "type": "record"
+}

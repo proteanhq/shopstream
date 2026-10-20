@@ -1,0 +1,22 @@
+{
+  "doc": "Commit reserved stock when an order ships.",
+  "fields": [
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reservation_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "CommitStock",
+  "namespace": "inventory.stock.shipping",
+  "type": "record"
+}

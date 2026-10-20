@@ -1,0 +1,7 @@
+syntax = "proto3";
+package loyalty.reward.enrollment;
+
+message EnrollRewardAccount {
+  string customer_id = 1;
+  optional string member_code = 2;
+}

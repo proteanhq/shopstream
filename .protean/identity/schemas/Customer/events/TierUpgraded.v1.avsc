@@ -1,0 +1,30 @@
+{
+  "doc": "A customer was promoted to a higher loyalty tier.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_tier",
+      "type": "string"
+    },
+    {
+      "name": "previous_tier",
+      "type": "string"
+    },
+    {
+      "name": "upgraded_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "TierUpgraded",
+  "namespace": "identity.customer.events",
+  "type": "record"
+}

@@ -1,0 +1,11 @@
+syntax = "proto3";
+package payments.payment.events;
+import "google/protobuf/timestamp.proto";
+
+message PaymentRetryInitiated {
+  string attempt_id = 1;
+  int64 attempt_number = 2;
+  string order_id = 3;
+  string payment_id = 4;
+  google.protobuf.Timestamp retried_at = 5;
+}

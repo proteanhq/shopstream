@@ -61,5 +61,13 @@
   "type": "object",
   "x-protean-element-type": "projection",
   "x-protean-fqn": "reviews.projections.customer_reviews.CustomerReviews",
-  "x-protean-identity-field": "review_id"
+  "x-protean-identity-field": "review_id",
+  "x-protean-indexes": [
+    {
+      "fields": [
+        "customer_id"
+      ],
+      "unique": false
+    }
+  ]
 }

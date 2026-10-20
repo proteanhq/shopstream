@@ -1,0 +1,45 @@
+{
+  "doc": "Damaged stock was written off (removed from inventory).",
+  "fields": [
+    {
+      "name": "approved_by",
+      "type": "string"
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_damaged",
+      "type": "long"
+    },
+    {
+      "name": "previous_damaged",
+      "type": "long"
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    },
+    {
+      "name": "written_off_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "DamagedStockWrittenOff",
+  "namespace": "inventory.stock.events",
+  "type": "record"
+}

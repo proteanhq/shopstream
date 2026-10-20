@@ -1,0 +1,8 @@
+syntax = "proto3";
+package fulfillment.fulfillment.events;
+import "google/protobuf/timestamp.proto";
+
+message PickingCompleted {
+  google.protobuf.Timestamp completed_at = 1;
+  string fulfillment_id = 2;
+}

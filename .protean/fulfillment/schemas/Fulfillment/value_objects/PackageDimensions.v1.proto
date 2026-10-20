@@ -1,0 +1,9 @@
+syntax = "proto3";
+package fulfillment.fulfillment.fulfillment;
+
+message PackageDimensions {
+  optional double height = 1;
+  optional double length = 2;
+  optional double weight = 3;
+  optional double width = 4;
+}

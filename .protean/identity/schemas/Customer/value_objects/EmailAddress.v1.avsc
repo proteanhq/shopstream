@@ -1,0 +1,12 @@
+{
+  "doc": "A validated email address conforming to standard format rules.\n\nEnforces structural validity: exactly one @, valid local and domain parts,\nno consecutive dots, no forbidden characters. Used across contexts wherever\nan email is required.",
+  "fields": [
+    {
+      "name": "address",
+      "type": "string"
+    }
+  ],
+  "name": "EmailAddress",
+  "namespace": "identity.shared.email",
+  "type": "record"
+}

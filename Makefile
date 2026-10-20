@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas docs-generate docs-catalog docs-check doctest ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-loyalty eventstore-verify verify-observatory verify-observatory-skip-seed verify-domain-visualizer verify-domain-visualizer-skip-seed verify-domains
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas events-catalog docs-generate docs-catalog docs-check doctest ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-loyalty eventstore-verify verify-observatory verify-observatory-skip-seed verify-domain-visualizer verify-domain-visualizer-skip-seed verify-domains
 
 # Default target
 help: ## Show this help message
@@ -298,10 +298,21 @@ ir-summary: ## Show IR summary for all domains
 		echo ""; \
 	done
 
-schemas: ## Generate JSON Schemas for all domains
+schemas: ## Generate JSON, Avro and Protobuf schemas for all domains
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
-		PYTHONPATH=src uv run protean schema generate --domain=$$d.domain --output=.protean/$$d; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean schema generate --domain=$$d.domain --format=all --output=.protean/$$d || exit 1; \
+		echo "✓ $$d"; \
 	done
+
+events-catalog: ## List every event with its version, upcasters and consumers, read from the committed IR (no database needed)
+	@fail=0; for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
+		echo "=== $$d ==="; \
+		out=$$(PYTHONPATH=src uv run protean events catalog --ir .protean/$$d/ir.json) || fail=1; \
+		echo "$$out"; \
+		case "$$out" in *"No events found"*) fail=1;; esac; \
+		echo ""; \
+	done; \
+	exit $$fail
 
 docs-generate: ## Generate domain documentation (diagrams + event catalog)
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \

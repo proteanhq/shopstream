@@ -1,0 +1,13 @@
+syntax = "proto3";
+package inventory.stock.stock;
+import "google/protobuf/timestamp.proto";
+
+message Reservation {
+  google.protobuf.Timestamp expires_at = 1;
+  string id = 2;
+  optional string inventory_item = 3;
+  string order_id = 4;
+  int64 quantity = 5;
+  google.protobuf.Timestamp reserved_at = 6;
+  optional string status = 7;
+}

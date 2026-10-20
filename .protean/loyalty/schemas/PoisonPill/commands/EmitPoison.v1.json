@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "note": {
+      "anyOf": [
+        {
+          "maxLength": 120,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "intentional DLQ demo failure"
+    }
+  },
+  "title": "EmitPoison",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.dlq.poison.PoisonPill",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "loyalty.dlq.poison.EmitPoison",
+  "x-protean-type": "Loyalty.EmitPoison.v1",
+  "x-protean-version": 1
+}

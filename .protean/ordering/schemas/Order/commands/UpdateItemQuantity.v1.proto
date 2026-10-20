@@ -1,0 +1,8 @@
+syntax = "proto3";
+package ordering.order.modification;
+
+message UpdateItemQuantity {
+  string item_id = 1;
+  int64 new_quantity = 2;
+  string order_id = 3;
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+package ordering.projections.orders_by_status;
+import "google/protobuf/timestamp.proto";
+
+message OrdersByStatus {
+  optional google.protobuf.Timestamp created_at = 1;
+  string customer_id = 2;
+  optional double grand_total = 3;
+  string order_id = 4;
+  string status = 5;
+  optional google.protobuf.Timestamp updated_at = 6;
+}

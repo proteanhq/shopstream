@@ -1,0 +1,7 @@
+syntax = "proto3";
+package ordering.cart.management;
+
+message MergeGuestCart {
+  string cart_id = 1;
+  repeated string guest_cart_items = 2;
+}

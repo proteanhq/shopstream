@@ -1,0 +1,38 @@
+{
+  "doc": "A reply from the product seller to the review.",
+  "fields": [
+    {
+      "name": "body",
+      "type": "string"
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "replied_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "default": null,
+      "name": "review",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "seller_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "SellerReply",
+  "namespace": "reviews.review.review",
+  "type": "record"
+}

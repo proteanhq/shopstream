@@ -1,0 +1,11 @@
+syntax = "proto3";
+package fulfillment.fulfillment.events;
+import "google/protobuf/timestamp.proto";
+
+message TrackingEventReceived {
+  optional string description = 1;
+  string fulfillment_id = 2;
+  optional string location = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+  string status = 5;
+}

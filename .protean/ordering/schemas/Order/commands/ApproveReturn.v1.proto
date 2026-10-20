@@ -1,0 +1,6 @@
+syntax = "proto3";
+package ordering.order.returns;
+
+message ApproveReturn {
+  string order_id = 1;
+}

@@ -1,0 +1,59 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "currency",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "date",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "net_revenue",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "refund_count",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_refunded",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_revenue",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "transaction_count",
+      "type": [
+        "null",
+        "long"
+      ]
+    }
+  ],
+  "name": "DailyRevenue",
+  "namespace": "payments.projections.daily_revenue",
+  "type": "record"
+}

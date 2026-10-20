@@ -1,0 +1,39 @@
+{
+  "doc": "The physical/virtual loyalty card \u2014 a 1:1 (HasOne) child of the account.",
+  "fields": [
+    {
+      "name": "card_number",
+      "type": "string"
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "issued_on",
+      "type": {
+        "logicalType": "date",
+        "type": "int"
+      }
+    },
+    {
+      "default": null,
+      "name": "reward_account",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "status",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "MembershipCard",
+  "namespace": "loyalty.reward.reward_account",
+  "type": "record"
+}

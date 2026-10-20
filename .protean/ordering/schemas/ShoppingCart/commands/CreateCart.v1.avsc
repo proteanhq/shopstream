@@ -1,0 +1,27 @@
+{
+  "doc": "Create a new shopping cart for a registered customer or guest session.",
+  "fields": [
+    {
+      "default": null,
+      "name": "customer_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "session_id",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "CreateCart",
+  "namespace": "ordering.cart.management",
+  "type": "record"
+}

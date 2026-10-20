@@ -1,0 +1,69 @@
+syntax = "proto3";
+package catalogue.product.product;
+import "google/protobuf/timestamp.proto";
+
+message Product {
+  map<string, string> attributes = 1;
+  optional string brand = 2;
+  optional string category_id = 3;
+  optional google.protobuf.Timestamp created_at = 4;
+  optional string description = 5;
+  string id = 6;
+  repeated Image images = 7;
+  optional string seller_id = 8;
+  optional SEO seo = 9;
+  SKU sku = 10;
+  optional string status = 11;
+  string title = 12;
+  optional google.protobuf.Timestamp updated_at = 13;
+  repeated Variant variants = 14;
+  optional string visibility = 15;
+}
+
+message Image {
+  optional string alt_text = 1;
+  optional int64 display_order = 2;
+  string id = 3;
+  optional bool is_primary = 4;
+  optional string product = 5;
+  string url = 6;
+}
+
+message SEO {
+  optional string meta_description = 1;
+  optional string meta_title = 2;
+  optional string slug = 3;
+}
+
+message Variant {
+  map<string, string> attributes = 1;
+  optional Dimensions dimensions = 2;
+  string id = 3;
+  optional bool is_active = 4;
+  Price price = 5;
+  optional string product = 6;
+  SKU variant_sku = 7;
+  optional Weight weight = 8;
+}
+
+message SKU {
+  string code = 1;
+}
+
+message Dimensions {
+  optional double height = 1;
+  optional double length = 2;
+  optional string unit = 3;
+  optional double width = 4;
+}
+
+message Price {
+  double base_price = 1;
+  optional string currency = 2;
+  map<string, string> tier_prices = 3;
+}
+
+message Weight {
+  optional string unit = 1;
+  optional double value = 2;
+}

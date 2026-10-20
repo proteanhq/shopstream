@@ -1,0 +1,16 @@
+syntax = "proto3";
+package ordering.order.creation;
+
+message CreateOrder {
+  map<string, string> billing_address = 1;
+  optional string currency = 2;
+  string customer_id = 3;
+  optional double discount_total = 4;
+  double grand_total = 5;
+  repeated string items = 6;
+  optional string order_source = 7;
+  map<string, string> shipping_address = 8;
+  optional double shipping_cost = 9;
+  double subtotal = 10;
+  optional double tax_total = 11;
+}

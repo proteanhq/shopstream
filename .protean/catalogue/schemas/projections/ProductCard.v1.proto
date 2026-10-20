@@ -1,0 +1,18 @@
+syntax = "proto3";
+package catalogue.projections.product_card;
+import "google/protobuf/timestamp.proto";
+
+message ProductCard {
+  optional string brand = 1;
+  optional string category_id = 2;
+  optional google.protobuf.Timestamp created_at = 3;
+  optional string currency = 4;
+  optional double max_price = 5;
+  optional double min_price = 6;
+  optional string primary_image_url = 7;
+  string product_id = 8;
+  string sku = 9;
+  string status = 10;
+  string title = 11;
+  optional int64 variant_count = 12;
+}

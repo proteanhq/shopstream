@@ -1,0 +1,56 @@
+{
+  "fields": [
+    {
+      "name": "campaign_code",
+      "type": "string"
+    },
+    {
+      "name": "campaign_id",
+      "type": "string"
+    },
+    {
+      "name": "discount_type",
+      "type": "string"
+    },
+    {
+      "name": "discount_value",
+      "type": "long"
+    },
+    {
+      "default": null,
+      "name": "ends_on",
+      "type": [
+        "null",
+        {
+          "logicalType": "date",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "name": "launched_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "starts_on",
+      "type": [
+        "null",
+        {
+          "logicalType": "date",
+          "type": "int"
+        }
+      ]
+    }
+  ],
+  "name": "CampaignLaunched",
+  "namespace": "loyalty.campaign.events",
+  "type": "record"
+}

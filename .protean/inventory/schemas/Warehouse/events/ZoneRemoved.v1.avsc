@@ -1,0 +1,29 @@
+{
+  "doc": "A zone was removed from a warehouse.",
+  "fields": [
+    {
+      "name": "removed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "warehouse_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "zone_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ZoneRemoved",
+  "namespace": "inventory.warehouse.events",
+  "type": "record"
+}

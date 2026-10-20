@@ -1,0 +1,15 @@
+{
+  "doc": "Mark a cart as abandoned due to inactivity.",
+  "fields": [
+    {
+      "name": "cart_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "AbandonCart",
+  "namespace": "ordering.cart.management",
+  "type": "record"
+}

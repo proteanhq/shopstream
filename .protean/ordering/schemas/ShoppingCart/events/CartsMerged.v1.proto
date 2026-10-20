@@ -1,0 +1,8 @@
+syntax = "proto3";
+package ordering.cart.events;
+
+message CartsMerged {
+  string cart_id = 1;
+  int64 items_merged_count = 2;
+  optional string source_session_id = 3;
+}

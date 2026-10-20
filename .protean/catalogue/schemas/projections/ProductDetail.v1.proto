@@ -1,0 +1,23 @@
+syntax = "proto3";
+package catalogue.projections.product_detail;
+import "google/protobuf/timestamp.proto";
+
+message ProductDetail {
+  map<string, string> attributes = 1;
+  optional string brand = 2;
+  optional string category_id = 3;
+  optional google.protobuf.Timestamp created_at = 4;
+  optional string description = 5;
+  repeated string images = 6;
+  optional string meta_description = 7;
+  optional string meta_title = 8;
+  string product_id = 9;
+  optional string seller_id = 10;
+  string sku = 11;
+  optional string slug = 12;
+  string status = 13;
+  string title = 14;
+  optional google.protobuf.Timestamp updated_at = 15;
+  repeated string variants = 16;
+  optional string visibility = 17;
+}

@@ -1,0 +1,8 @@
+syntax = "proto3";
+package ordering.order.payment;
+
+message RecordPaymentFailure {
+  string order_id = 1;
+  string payment_id = 2;
+  string reason = 3;
+}

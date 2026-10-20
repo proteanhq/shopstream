@@ -1,0 +1,79 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "is_in_stock",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "product_variant_key",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "total_available",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_on_hand",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_reserved",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "warehouse_count",
+      "type": [
+        "null",
+        "long"
+      ]
+    }
+  ],
+  "name": "ProductAvailability",
+  "namespace": "inventory.projections.product_availability",
+  "type": "record"
+}

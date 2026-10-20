@@ -1,0 +1,29 @@
+syntax = "proto3";
+package inventory.warehouse.warehouse;
+import "google/protobuf/timestamp.proto";
+
+message Warehouse {
+  optional WarehouseAddress address = 1;
+  optional int64 capacity = 2;
+  optional google.protobuf.Timestamp created_at = 3;
+  string id = 4;
+  optional bool is_active = 5;
+  string name = 6;
+  optional google.protobuf.Timestamp updated_at = 7;
+  repeated Zone zones = 8;
+}
+
+message WarehouseAddress {
+  string city = 1;
+  string country = 2;
+  string postal_code = 3;
+  optional string state = 4;
+  string street = 5;
+}
+
+message Zone {
+  string id = 1;
+  optional string warehouse = 2;
+  string zone_name = 3;
+  optional string zone_type = 4;
+}

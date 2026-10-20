@@ -1,0 +1,23 @@
+{
+  "doc": "Issue a refund for a cancelled or returned order.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "refund_amount",
+      "type": [
+        "null",
+        "double"
+      ]
+    }
+  ],
+  "name": "RefundOrder",
+  "namespace": "ordering.order.cancellation",
+  "type": "record"
+}

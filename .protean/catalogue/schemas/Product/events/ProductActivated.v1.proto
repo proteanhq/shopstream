@@ -1,0 +1,9 @@
+syntax = "proto3";
+package catalogue.product.events;
+import "google/protobuf/timestamp.proto";
+
+message ProductActivated {
+  google.protobuf.Timestamp activated_at = 1;
+  string product_id = 2;
+  string sku = 3;
+}

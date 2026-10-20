@@ -1,0 +1,373 @@
+{
+  "doc": "A sellable item in the catalogue, identified by a unique SKU.\n\nThe Product aggregate groups variants, images, pricing, and SEO metadata\ninto a single transactional boundary. Its lifecycle follows a forward-only\nstate machine: Draft -> Active -> Discontinued -> Archived. A product must\nhave at least one variant before activation.",
+  "fields": [
+    {
+      "default": null,
+      "name": "attributes",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "brand",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "category_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "created_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "description",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "images",
+      "type": [
+        "null",
+        {
+          "items": {
+            "fields": [
+              {
+                "default": null,
+                "name": "alt_text",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "default": null,
+                "name": "display_order",
+                "type": [
+                  "null",
+                  "long"
+                ]
+              },
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "is_primary",
+                "type": [
+                  "null",
+                  "boolean"
+                ]
+              },
+              {
+                "default": null,
+                "name": "product",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "url",
+                "type": "string"
+              }
+            ],
+            "name": "Image",
+            "namespace": "catalogue.product.product",
+            "type": "record"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "seller_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "seo",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "default": null,
+              "name": "meta_description",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "meta_title",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "slug",
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          ],
+          "name": "SEO",
+          "namespace": "catalogue.product.product",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "name": "sku",
+      "type": {
+        "fields": [
+          {
+            "name": "code",
+            "type": "string"
+          }
+        ],
+        "name": "SKU",
+        "namespace": "catalogue.shared.sku",
+        "type": "record"
+      }
+    },
+    {
+      "default": null,
+      "name": "status",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "title",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "variants",
+      "type": [
+        "null",
+        {
+          "items": {
+            "fields": [
+              {
+                "default": null,
+                "name": "attributes",
+                "type": [
+                  "null",
+                  {
+                    "type": "map",
+                    "values": "string"
+                  }
+                ]
+              },
+              {
+                "default": null,
+                "name": "dimensions",
+                "type": [
+                  "null",
+                  {
+                    "fields": [
+                      {
+                        "default": null,
+                        "name": "height",
+                        "type": [
+                          "null",
+                          "double"
+                        ]
+                      },
+                      {
+                        "default": null,
+                        "name": "length",
+                        "type": [
+                          "null",
+                          "double"
+                        ]
+                      },
+                      {
+                        "default": null,
+                        "name": "unit",
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      {
+                        "default": null,
+                        "name": "width",
+                        "type": [
+                          "null",
+                          "double"
+                        ]
+                      }
+                    ],
+                    "name": "Dimensions",
+                    "namespace": "catalogue.product.product",
+                    "type": "record"
+                  }
+                ]
+              },
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "is_active",
+                "type": [
+                  "null",
+                  "boolean"
+                ]
+              },
+              {
+                "name": "price",
+                "type": {
+                  "fields": [
+                    {
+                      "name": "base_price",
+                      "type": "double"
+                    },
+                    {
+                      "default": null,
+                      "name": "currency",
+                      "type": [
+                        "null",
+                        "string"
+                      ]
+                    },
+                    {
+                      "default": null,
+                      "name": "tier_prices",
+                      "type": [
+                        "null",
+                        {
+                          "type": "map",
+                          "values": "string"
+                        }
+                      ]
+                    }
+                  ],
+                  "name": "Price",
+                  "namespace": "catalogue.product.product",
+                  "type": "record"
+                }
+              },
+              {
+                "default": null,
+                "name": "product",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "variant_sku",
+                "type": "catalogue.shared.sku.SKU"
+              },
+              {
+                "default": null,
+                "name": "weight",
+                "type": [
+                  "null",
+                  {
+                    "fields": [
+                      {
+                        "default": null,
+                        "name": "unit",
+                        "type": [
+                          "null",
+                          "string"
+                        ]
+                      },
+                      {
+                        "default": null,
+                        "name": "value",
+                        "type": [
+                          "null",
+                          "double"
+                        ]
+                      }
+                    ],
+                    "name": "Weight",
+                    "namespace": "catalogue.product.product",
+                    "type": "record"
+                  }
+                ]
+              }
+            ],
+            "name": "Variant",
+            "namespace": "catalogue.product.product",
+            "type": "record"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "visibility",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "Product",
+  "namespace": "catalogue.product.product",
+  "type": "record"
+}

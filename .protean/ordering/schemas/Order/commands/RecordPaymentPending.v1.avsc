@@ -1,0 +1,23 @@
+{
+  "doc": "Record that payment processing has been initiated.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "payment_id",
+      "type": "string"
+    },
+    {
+      "name": "payment_method",
+      "type": "string"
+    }
+  ],
+  "name": "RecordPaymentPending",
+  "namespace": "ordering.order.payment",
+  "type": "record"
+}

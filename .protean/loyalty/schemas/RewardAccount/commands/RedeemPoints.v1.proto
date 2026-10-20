@@ -1,0 +1,8 @@
+syntax = "proto3";
+package loyalty.reward.points;
+
+message RedeemPoints {
+  string account_id = 1;
+  int64 amount = 2;
+  optional string reason = 3;
+}

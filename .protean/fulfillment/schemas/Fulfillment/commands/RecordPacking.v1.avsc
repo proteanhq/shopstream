@@ -1,0 +1,26 @@
+{
+  "doc": "Record that items have been packed into shipping packages.",
+  "fields": [
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "packages",
+      "type": {
+        "items": "string",
+        "type": "array"
+      }
+    },
+    {
+      "name": "packed_by",
+      "type": "string"
+    }
+  ],
+  "name": "RecordPacking",
+  "namespace": "fulfillment.fulfillment.packing",
+  "type": "record"
+}

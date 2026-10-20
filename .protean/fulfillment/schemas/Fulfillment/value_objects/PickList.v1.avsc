@@ -1,0 +1,38 @@
+{
+  "doc": "Picking assignment details.",
+  "fields": [
+    {
+      "default": null,
+      "name": "assigned_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "assigned_to",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "completed_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    }
+  ],
+  "name": "PickList",
+  "namespace": "fulfillment.fulfillment.fulfillment",
+  "type": "record"
+}

@@ -1,0 +1,26 @@
+syntax = "proto3";
+package notifications.notification.notification;
+import "google/protobuf/timestamp.proto";
+
+message Notification {
+  string body = 1;
+  string channel = 2;
+  map<string, string> context_data = 3;
+  optional google.protobuf.Timestamp created_at = 4;
+  optional google.protobuf.Timestamp delivered_at = 5;
+  optional string failure_reason = 6;
+  string id = 7;
+  optional int64 max_retries = 8;
+  string notification_type = 9;
+  string recipient_id = 10;
+  optional string recipient_type = 11;
+  optional int64 retry_count = 12;
+  optional google.protobuf.Timestamp scheduled_for = 13;
+  optional google.protobuf.Timestamp sent_at = 14;
+  optional string source_event_id = 15;
+  optional string source_event_type = 16;
+  optional string status = 17;
+  optional string subject = 18;
+  optional string template_name = 19;
+  optional google.protobuf.Timestamp updated_at = 20;
+}

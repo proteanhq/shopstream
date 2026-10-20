@@ -1,0 +1,11 @@
+syntax = "proto3";
+package fulfillment.fulfillment.fulfillment;
+import "google/protobuf/timestamp.proto";
+
+message ShipmentInfo {
+  optional google.protobuf.Timestamp actual_delivery = 1;
+  optional string carrier = 2;
+  optional google.protobuf.Timestamp estimated_delivery = 3;
+  optional string service_level = 4;
+  optional string tracking_number = 5;
+}

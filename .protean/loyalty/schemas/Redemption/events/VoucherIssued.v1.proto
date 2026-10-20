@@ -1,0 +1,9 @@
+syntax = "proto3";
+package loyalty.redemption.events;
+import "google/protobuf/timestamp.proto";
+
+message VoucherIssued {
+  google.protobuf.Timestamp issued_at = 1;
+  string redemption_id = 2;
+  string voucher_code = 3;
+}

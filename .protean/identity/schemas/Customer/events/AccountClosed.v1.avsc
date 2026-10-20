@@ -1,0 +1,22 @@
+{
+  "doc": "A customer account was permanently closed.",
+  "fields": [
+    {
+      "name": "closed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "AccountClosed",
+  "namespace": "identity.customer.events",
+  "type": "record"
+}

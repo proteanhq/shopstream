@@ -1,0 +1,12 @@
+syntax = "proto3";
+package inventory.stock.events;
+import "google/protobuf/timestamp.proto";
+
+message StockCheckRecorded {
+  google.protobuf.Timestamp checked_at = 1;
+  string checked_by = 2;
+  int64 counted_quantity = 3;
+  int64 discrepancy = 4;
+  int64 expected_quantity = 5;
+  string inventory_item_id = 6;
+}

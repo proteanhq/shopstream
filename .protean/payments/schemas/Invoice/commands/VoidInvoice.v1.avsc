@@ -1,0 +1,19 @@
+{
+  "doc": "Void an existing invoice.",
+  "fields": [
+    {
+      "name": "invoice_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "VoidInvoice",
+  "namespace": "payments.invoice.voiding",
+  "type": "record"
+}

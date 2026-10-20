@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "account_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "customer_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "lifetime_points": {
+      "type": "integer"
+    },
+    "new_tier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "old_tier": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_id",
+    "customer_id",
+    "lifetime_points",
+    "new_tier",
+    "occurred_at",
+    "old_tier"
+  ],
+  "title": "TierUpgraded",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.reward.reward_account.RewardAccount",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "loyalty.reward.events.TierUpgraded",
+  "x-protean-published": true,
+  "x-protean-type": "Loyalty.TierUpgraded.v1",
+  "x-protean-version": 1
+}

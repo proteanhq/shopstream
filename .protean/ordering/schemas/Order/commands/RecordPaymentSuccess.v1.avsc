@@ -1,0 +1,27 @@
+{
+  "doc": "Record that payment was successfully captured.",
+  "fields": [
+    {
+      "name": "amount",
+      "type": "double"
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "payment_id",
+      "type": "string"
+    },
+    {
+      "name": "payment_method",
+      "type": "string"
+    }
+  ],
+  "name": "RecordPaymentSuccess",
+  "namespace": "ordering.order.payment",
+  "type": "record"
+}

@@ -1,0 +1,54 @@
+{
+  "doc": "A new address was added to a customer's address book.",
+  "fields": [
+    {
+      "name": "address_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "city",
+      "type": "string"
+    },
+    {
+      "name": "country",
+      "type": "string"
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "is_default",
+      "type": "boolean"
+    },
+    {
+      "name": "label",
+      "type": "string"
+    },
+    {
+      "name": "postal_code",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "state",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "street",
+      "type": "string"
+    }
+  ],
+  "name": "AddressAdded",
+  "namespace": "identity.customer.events",
+  "type": "record"
+}

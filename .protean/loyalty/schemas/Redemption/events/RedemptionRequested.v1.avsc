@@ -1,0 +1,30 @@
+{
+  "fields": [
+    {
+      "name": "account_id",
+      "type": "string"
+    },
+    {
+      "name": "points",
+      "type": "long"
+    },
+    {
+      "name": "redemption_id",
+      "type": "string"
+    },
+    {
+      "name": "requested_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "reward_code",
+      "type": "string"
+    }
+  ],
+  "name": "RedemptionRequested",
+  "namespace": "loyalty.redemption.events",
+  "type": "record"
+}

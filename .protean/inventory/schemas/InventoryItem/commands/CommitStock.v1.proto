@@ -1,0 +1,7 @@
+syntax = "proto3";
+package inventory.stock.shipping;
+
+message CommitStock {
+  string inventory_item_id = 1;
+  string reservation_id = 2;
+}

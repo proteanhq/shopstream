@@ -1,0 +1,19 @@
+{
+  "doc": "Apply a coupon code to an order for a discount.",
+  "fields": [
+    {
+      "name": "coupon_code",
+      "type": "string"
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ApplyCoupon",
+  "namespace": "ordering.order.modification",
+  "type": "record"
+}

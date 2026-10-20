@@ -1,0 +1,32 @@
+{
+  "doc": "Physical address of a warehouse.",
+  "fields": [
+    {
+      "name": "city",
+      "type": "string"
+    },
+    {
+      "name": "country",
+      "type": "string"
+    },
+    {
+      "name": "postal_code",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "state",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "street",
+      "type": "string"
+    }
+  ],
+  "name": "WarehouseAddress",
+  "namespace": "inventory.warehouse.warehouse",
+  "type": "record"
+}

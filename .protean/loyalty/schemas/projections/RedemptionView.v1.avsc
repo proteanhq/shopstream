@@ -1,0 +1,72 @@
+{
+  "fields": [
+    {
+      "name": "account_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "failure_reason",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "points",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "redemption_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "reward_code",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "status",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "voucher_code",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "RedemptionView",
+  "namespace": "loyalty.projections.redemption_view",
+  "type": "record"
+}

@@ -1,0 +1,7 @@
+syntax = "proto3";
+package identity.projections.address_book;
+
+message AddressBook {
+  repeated string addresses = 1;
+  string customer_id = 2;
+}

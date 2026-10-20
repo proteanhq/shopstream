@@ -1,0 +1,23 @@
+{
+  "doc": "Request a refund for a payment.",
+  "fields": [
+    {
+      "name": "amount",
+      "type": "double"
+    },
+    {
+      "name": "payment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "RequestRefund",
+  "namespace": "payments.payment.refund",
+  "type": "record"
+}

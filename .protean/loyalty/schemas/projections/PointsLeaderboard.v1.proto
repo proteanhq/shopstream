@@ -1,0 +1,9 @@
+syntax = "proto3";
+package loyalty.projections.points_leaderboard;
+
+message PointsLeaderboard {
+  string account_id = 1;
+  string customer_id = 2;
+  optional int64 points_balance = 3;
+  optional string tier = 4;
+}

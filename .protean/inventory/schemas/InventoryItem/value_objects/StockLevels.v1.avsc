@@ -1,0 +1,48 @@
+{
+  "doc": "Tracks all stock quantities.\n\nAvailable is always equal to on_hand - reserved. It is denormalized\nhere for query convenience.",
+  "fields": [
+    {
+      "default": null,
+      "name": "available",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "damaged",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "in_transit",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "on_hand",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "reserved",
+      "type": [
+        "null",
+        "long"
+      ]
+    }
+  ],
+  "name": "StockLevels",
+  "namespace": "inventory.stock.stock",
+  "type": "record"
+}

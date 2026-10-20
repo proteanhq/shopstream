@@ -1,0 +1,17 @@
+syntax = "proto3";
+package fulfillment.projections.fulfillment_status;
+import "google/protobuf/timestamp.proto";
+
+message FulfillmentStatusView {
+  optional string assigned_to = 1;
+  optional string carrier = 2;
+  optional google.protobuf.Timestamp created_at = 3;
+  string customer_id = 4;
+  string fulfillment_id = 5;
+  optional int64 item_count = 6;
+  string order_id = 7;
+  string status = 8;
+  optional string tracking_number = 9;
+  optional google.protobuf.Timestamp updated_at = 10;
+  optional string warehouse_id = 11;
+}

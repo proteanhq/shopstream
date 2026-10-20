@@ -1,0 +1,35 @@
+{
+  "doc": "A product's title, description, brand, or attributes were changed.",
+  "fields": [
+    {
+      "default": null,
+      "name": "brand",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "description",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "title",
+      "type": "string"
+    }
+  ],
+  "name": "ProductDetailsUpdated",
+  "namespace": "catalogue.product.events",
+  "type": "record"
+}

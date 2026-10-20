@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Abstract base contributing audit fields to concrete aggregates.\n\nThe framework stamps both timestamps from the domain clock when the aggregate is\nsaved: ``created_at`` on the first save only, ``updated_at`` on every save. They are\n``None`` until then. The ``stamp_actor`` aggregate enricher fills ``created_by`` and\n``updated_by``.",
+  "properties": {
+    "created_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created_by": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "updated_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "updated_by": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "title": "Auditable",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "loyalty.reward.reward_account.Auditable",
+  "x-protean-identity-field": "id"
+}

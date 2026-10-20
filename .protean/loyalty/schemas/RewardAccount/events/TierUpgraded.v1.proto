@@ -1,0 +1,12 @@
+syntax = "proto3";
+package loyalty.reward.events;
+import "google/protobuf/timestamp.proto";
+
+message TierUpgraded {
+  string account_id = 1;
+  string customer_id = 2;
+  int64 lifetime_points = 3;
+  string new_tier = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+  string old_tier = 6;
+}

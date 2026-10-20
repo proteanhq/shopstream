@@ -1,0 +1,22 @@
+{
+  "fields": [
+    {
+      "name": "campaign_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "reason",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "PauseCampaign",
+  "namespace": "loyalty.campaign.management",
+  "type": "record"
+}

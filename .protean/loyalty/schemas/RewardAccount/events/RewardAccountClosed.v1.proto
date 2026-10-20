@@ -1,0 +1,8 @@
+syntax = "proto3";
+package loyalty.reward.events;
+import "google/protobuf/timestamp.proto";
+
+message RewardAccountClosed {
+  string account_id = 1;
+  google.protobuf.Timestamp closed_at = 2;
+}

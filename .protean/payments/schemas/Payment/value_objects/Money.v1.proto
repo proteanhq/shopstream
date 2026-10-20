@@ -1,0 +1,7 @@
+syntax = "proto3";
+package payments.payment.payment;
+
+message Money {
+  optional string currency = 1;
+  optional double value = 2;
+}

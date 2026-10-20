@@ -1,0 +1,7 @@
+syntax = "proto3";
+package fulfillment.fulfillment.picking;
+
+message AssignPicker {
+  string fulfillment_id = 1;
+  string picker_name = 2;
+}

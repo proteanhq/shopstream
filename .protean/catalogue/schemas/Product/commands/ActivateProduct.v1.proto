@@ -1,0 +1,6 @@
+syntax = "proto3";
+package catalogue.product.lifecycle;
+
+message ActivateProduct {
+  string product_id = 1;
+}

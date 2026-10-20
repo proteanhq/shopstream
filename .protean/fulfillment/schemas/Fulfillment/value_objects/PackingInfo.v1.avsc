@@ -1,0 +1,35 @@
+{
+  "doc": "Packing completion details.",
+  "fields": [
+    {
+      "default": null,
+      "name": "packed_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "packed_by",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "shipping_label_url",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "PackingInfo",
+  "namespace": "fulfillment.fulfillment.fulfillment",
+  "type": "record"
+}

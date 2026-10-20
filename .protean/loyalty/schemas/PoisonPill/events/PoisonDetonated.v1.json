@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "note": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "occurred_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "poison_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "occurred_at",
+    "poison_id"
+  ],
+  "title": "PoisonDetonated",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.dlq.poison.PoisonPill",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "loyalty.dlq.poison.PoisonDetonated",
+  "x-protean-type": "Loyalty.PoisonDetonated.v1",
+  "x-protean-version": 1
+}

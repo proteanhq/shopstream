@@ -1,0 +1,29 @@
+syntax = "proto3";
+package reviews.projections.review_detail;
+import "google/protobuf/timestamp.proto";
+
+message ReviewDetail {
+  string body = 1;
+  repeated string cons = 2;
+  optional google.protobuf.Timestamp created_at = 3;
+  string customer_id = 4;
+  optional string has_seller_reply = 5;
+  optional int64 helpful_count = 6;
+  optional string images = 7;
+  optional string is_edited = 8;
+  optional string moderation_notes = 9;
+  optional string order_id = 10;
+  string product_id = 11;
+  repeated string pros = 12;
+  int64 rating = 13;
+  optional int64 report_count = 14;
+  string review_id = 15;
+  optional google.protobuf.Timestamp seller_reply_at = 16;
+  optional string seller_reply_body = 17;
+  string status = 18;
+  string title = 19;
+  optional int64 unhelpful_count = 20;
+  optional google.protobuf.Timestamp updated_at = 21;
+  optional string variant_id = 22;
+  optional string verified_purchase = 23;
+}

@@ -1,0 +1,8 @@
+syntax = "proto3";
+package loyalty.redemption.commands;
+
+message CompensateRedemption {
+  optional string reason = 1;
+  string redemption_id = 2;
+  int64 refunded_points = 3;
+}

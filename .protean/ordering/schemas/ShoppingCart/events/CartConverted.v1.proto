@@ -1,0 +1,8 @@
+syntax = "proto3";
+package ordering.cart.events;
+
+message CartConverted {
+  string cart_id = 1;
+  optional string customer_id = 2;
+  repeated string items = 3;
+}

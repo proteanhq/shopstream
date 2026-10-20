@@ -1,0 +1,15 @@
+{
+  "doc": "Request to retry a failed notification.",
+  "fields": [
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "RetryNotification",
+  "namespace": "notifications.notification.retry",
+  "type": "record"
+}

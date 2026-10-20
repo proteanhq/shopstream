@@ -1,0 +1,45 @@
+{
+  "doc": "Some (but not all) order items were shipped.",
+  "fields": [
+    {
+      "name": "carrier",
+      "type": "string"
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "shipment_id",
+      "type": "string"
+    },
+    {
+      "name": "shipped_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "default": null,
+      "name": "shipped_item_ids",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "tracking_number",
+      "type": "string"
+    }
+  ],
+  "name": "OrderPartiallyShipped",
+  "namespace": "ordering.order.events",
+  "type": "record"
+}

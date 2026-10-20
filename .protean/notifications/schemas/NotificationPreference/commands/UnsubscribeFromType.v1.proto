@@ -1,0 +1,7 @@
+syntax = "proto3";
+package notifications.preference.subscription;
+
+message UnsubscribeFromType {
+  string customer_id = 1;
+  string notification_type = 2;
+}

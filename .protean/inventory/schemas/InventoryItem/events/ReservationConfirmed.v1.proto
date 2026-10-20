@@ -1,0 +1,11 @@
+syntax = "proto3";
+package inventory.stock.events;
+import "google/protobuf/timestamp.proto";
+
+message ReservationConfirmed {
+  google.protobuf.Timestamp confirmed_at = 1;
+  string inventory_item_id = 2;
+  string order_id = 3;
+  int64 quantity = 4;
+  string reservation_id = 5;
+}

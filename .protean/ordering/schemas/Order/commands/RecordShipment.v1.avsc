@@ -1,0 +1,46 @@
+{
+  "doc": "Record that all items have been shipped with a carrier.",
+  "fields": [
+    {
+      "name": "carrier",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "estimated_delivery",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "shipment_id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "shipped_item_ids",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "tracking_number",
+      "type": "string"
+    }
+  ],
+  "name": "RecordShipment",
+  "namespace": "ordering.order.fulfillment",
+  "type": "record"
+}

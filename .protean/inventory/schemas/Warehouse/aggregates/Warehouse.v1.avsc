@@ -1,0 +1,133 @@
+{
+  "doc": "A physical location where inventory is stored.",
+  "fields": [
+    {
+      "default": null,
+      "name": "address",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "name": "city",
+              "type": "string"
+            },
+            {
+              "name": "country",
+              "type": "string"
+            },
+            {
+              "name": "postal_code",
+              "type": "string"
+            },
+            {
+              "default": null,
+              "name": "state",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "name": "street",
+              "type": "string"
+            }
+          ],
+          "name": "WarehouseAddress",
+          "namespace": "inventory.warehouse.warehouse",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "capacity",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "created_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "is_active",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "zones",
+      "type": [
+        "null",
+        {
+          "items": {
+            "fields": [
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "warehouse",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "zone_name",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "zone_type",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            ],
+            "name": "Zone",
+            "namespace": "inventory.warehouse.warehouse",
+            "type": "record"
+          },
+          "type": "array"
+        }
+      ]
+    }
+  ],
+  "name": "Warehouse",
+  "namespace": "inventory.warehouse.warehouse",
+  "type": "record"
+}

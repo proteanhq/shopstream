@@ -1,0 +1,12 @@
+syntax = "proto3";
+package ordering.projections.abandoned_checkouts;
+import "google/protobuf/timestamp.proto";
+
+message AbandonedCheckout {
+  optional google.protobuf.Timestamp created_at = 1;
+  optional string currency = 2;
+  string customer_id = 3;
+  optional double grand_total = 4;
+  optional int64 item_count = 5;
+  string order_id = 6;
+}

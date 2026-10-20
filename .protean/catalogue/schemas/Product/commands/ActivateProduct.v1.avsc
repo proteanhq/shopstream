@@ -1,0 +1,15 @@
+{
+  "doc": "Make a draft product available for sale (requires at least one variant).",
+  "fields": [
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ActivateProduct",
+  "namespace": "catalogue.product.lifecycle",
+  "type": "record"
+}

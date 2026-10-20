@@ -1,0 +1,6 @@
+syntax = "proto3";
+package ordering.order.completion;
+
+message CompleteOrder {
+  string order_id = 1;
+}

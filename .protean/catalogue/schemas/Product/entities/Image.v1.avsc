@@ -1,0 +1,48 @@
+{
+  "doc": "A visual representation of a Product, with URL and display ordering.\n\nA product may have up to 10 images, with exactly one marked as primary.\nThe first image added is automatically set as primary.",
+  "fields": [
+    {
+      "default": null,
+      "name": "alt_text",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "display_order",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "is_primary",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    {
+      "default": null,
+      "name": "product",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "url",
+      "type": "string"
+    }
+  ],
+  "name": "Image",
+  "namespace": "catalogue.product.product",
+  "type": "record"
+}

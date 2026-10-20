@@ -1,0 +1,22 @@
+{
+  "doc": "A shopping cart was marked as abandoned due to inactivity.",
+  "fields": [
+    {
+      "name": "abandoned_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "cart_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "CartAbandoned",
+  "namespace": "ordering.cart.events",
+  "type": "record"
+}

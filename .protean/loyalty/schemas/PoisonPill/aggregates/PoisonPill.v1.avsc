@@ -1,0 +1,19 @@
+{
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "note",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "PoisonPill",
+  "namespace": "loyalty.dlq.poison",
+  "type": "record"
+}

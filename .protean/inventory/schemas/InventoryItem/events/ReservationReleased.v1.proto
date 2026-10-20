@@ -1,0 +1,14 @@
+syntax = "proto3";
+package inventory.stock.events;
+import "google/protobuf/timestamp.proto";
+
+message ReservationReleased {
+  string inventory_item_id = 1;
+  int64 new_available = 2;
+  string order_id = 3;
+  int64 previous_available = 4;
+  int64 quantity = 5;
+  string reason = 6;
+  google.protobuf.Timestamp released_at = 7;
+  string reservation_id = 8;
+}

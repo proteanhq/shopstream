@@ -1,0 +1,9 @@
+syntax = "proto3";
+package payments.payment.payment;
+
+message GatewayInfo {
+  optional string gateway_name = 1;
+  optional string gateway_response = 2;
+  optional string gateway_status = 3;
+  optional string gateway_transaction_id = 4;
+}

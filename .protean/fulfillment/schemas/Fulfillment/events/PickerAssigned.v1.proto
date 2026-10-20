@@ -1,0 +1,9 @@
+syntax = "proto3";
+package fulfillment.fulfillment.events;
+import "google/protobuf/timestamp.proto";
+
+message PickerAssigned {
+  google.protobuf.Timestamp assigned_at = 1;
+  string assigned_to = 2;
+  string fulfillment_id = 3;
+}

@@ -1,0 +1,26 @@
+{
+  "doc": "Release a stock reservation.",
+  "fields": [
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "reservation_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ReleaseReservation",
+  "namespace": "inventory.stock.reservation",
+  "type": "record"
+}

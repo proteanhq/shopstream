@@ -1,0 +1,19 @@
+{
+  "doc": "Assign a warehouse picker to begin the picking process.",
+  "fields": [
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "picker_name",
+      "type": "string"
+    }
+  ],
+  "name": "AssignPicker",
+  "namespace": "fulfillment.fulfillment.picking",
+  "type": "record"
+}

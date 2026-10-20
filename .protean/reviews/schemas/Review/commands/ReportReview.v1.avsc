@@ -1,0 +1,33 @@
+{
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "detail",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "review_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ReportReview",
+  "namespace": "reviews.review.reporting",
+  "type": "record"
+}

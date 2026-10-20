@@ -1,0 +1,41 @@
+{
+  "doc": "A customer voted on whether a review was helpful.",
+  "fields": [
+    {
+      "name": "helpful_count",
+      "type": "long"
+    },
+    {
+      "name": "review_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "unhelpful_count",
+      "type": "long"
+    },
+    {
+      "name": "vote_type",
+      "type": "string"
+    },
+    {
+      "name": "voted_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "voter_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "HelpfulVoteRecorded",
+  "namespace": "reviews.review.events",
+  "type": "record"
+}

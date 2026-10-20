@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "account_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "amount": {
+      "type": "integer"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "order"
+    }
+  },
+  "required": [
+    "account_id",
+    "amount"
+  ],
+  "title": "EarnPoints",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.reward.reward_account.RewardAccount",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "loyalty.reward.points.EarnPoints",
+  "x-protean-type": "Loyalty.EarnPoints.v1",
+  "x-protean-version": 1
+}

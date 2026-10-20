@@ -1,0 +1,24 @@
+{
+  "doc": "Latitude/longitude pair for address geolocation.\n\nBoth coordinates are required when provided; partial coordinates are rejected.\nLatitude ranges from -90 to 90, longitude from -180 to 180.",
+  "fields": [
+    {
+      "default": null,
+      "name": "latitude",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "longitude",
+      "type": [
+        "null",
+        "double"
+      ]
+    }
+  ],
+  "name": "GeoCoordinates",
+  "namespace": "identity.customer.customer",
+  "type": "record"
+}

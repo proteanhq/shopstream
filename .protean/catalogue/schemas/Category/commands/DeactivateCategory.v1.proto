@@ -1,0 +1,6 @@
+syntax = "proto3";
+package catalogue.category.management;
+
+message DeactivateCategory {
+  string category_id = 1;
+}

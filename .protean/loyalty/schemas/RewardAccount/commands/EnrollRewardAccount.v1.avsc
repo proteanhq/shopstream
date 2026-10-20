@@ -1,0 +1,19 @@
+{
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "member_code",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "EnrollRewardAccount",
+  "namespace": "loyalty.reward.enrollment",
+  "type": "record"
+}

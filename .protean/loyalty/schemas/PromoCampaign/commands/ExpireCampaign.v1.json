@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "campaign_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "campaign_id"
+  ],
+  "title": "ExpireCampaign",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.campaign.campaign.PromoCampaign",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "loyalty.campaign.management.ExpireCampaign",
+  "x-protean-type": "Loyalty.ExpireCampaign.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,15 @@
+{
+  "doc": "Signal that the warehouse has started picking and packing.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "MarkProcessing",
+  "namespace": "ordering.order.fulfillment",
+  "type": "record"
+}

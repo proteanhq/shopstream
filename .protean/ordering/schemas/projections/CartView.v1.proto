@@ -1,0 +1,15 @@
+syntax = "proto3";
+package ordering.projections.cart_view;
+import "google/protobuf/timestamp.proto";
+
+message CartView {
+  repeated string applied_coupons = 1;
+  string cart_id = 2;
+  optional google.protobuf.Timestamp created_at = 3;
+  optional string customer_id = 4;
+  optional int64 item_count = 5;
+  repeated string items = 6;
+  optional string session_id = 7;
+  string status = 8;
+  optional google.protobuf.Timestamp updated_at = 9;
+}

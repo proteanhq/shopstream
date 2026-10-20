@@ -1,0 +1,58 @@
+{
+  "fields": [
+    {
+      "name": "account_id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "failure_reason",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "points",
+      "type": "long"
+    },
+    {
+      "default": null,
+      "name": "requested_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "reward_code",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "status",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "voucher_code",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "Redemption",
+  "namespace": "loyalty.redemption.redemption",
+  "type": "record"
+}

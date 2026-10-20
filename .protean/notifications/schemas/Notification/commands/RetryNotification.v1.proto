@@ -1,0 +1,6 @@
+syntax = "proto3";
+package notifications.notification.retry;
+
+message RetryNotification {
+  string notification_id = 1;
+}

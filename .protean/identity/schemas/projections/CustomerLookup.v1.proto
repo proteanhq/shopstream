@@ -1,0 +1,7 @@
+syntax = "proto3";
+package identity.projections.customer_lookup;
+
+message CustomerLookup {
+  string customer_id = 1;
+  string email = 2;
+}

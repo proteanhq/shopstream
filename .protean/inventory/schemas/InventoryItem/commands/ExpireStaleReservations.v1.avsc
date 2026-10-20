@@ -1,0 +1,27 @@
+{
+  "doc": "Release reservations older than the specified threshold.",
+  "fields": [
+    {
+      "default": null,
+      "name": "as_of",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "older_than_minutes",
+      "type": [
+        "null",
+        "long"
+      ]
+    }
+  ],
+  "name": "ExpireStaleReservations",
+  "namespace": "inventory.stock.expiry",
+  "type": "record"
+}

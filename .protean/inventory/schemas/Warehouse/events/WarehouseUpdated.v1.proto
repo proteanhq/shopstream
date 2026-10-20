@@ -1,0 +1,10 @@
+syntax = "proto3";
+package inventory.warehouse.events;
+import "google/protobuf/timestamp.proto";
+
+message WarehouseUpdated {
+  int64 capacity = 1;
+  string name = 2;
+  google.protobuf.Timestamp updated_at = 3;
+  string warehouse_id = 4;
+}

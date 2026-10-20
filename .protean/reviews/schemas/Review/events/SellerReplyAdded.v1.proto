@@ -1,0 +1,10 @@
+syntax = "proto3";
+package reviews.review.events;
+import "google/protobuf/timestamp.proto";
+
+message SellerReplyAdded {
+  string body = 1;
+  google.protobuf.Timestamp replied_at = 2;
+  string review_id = 3;
+  string seller_id = 4;
+}

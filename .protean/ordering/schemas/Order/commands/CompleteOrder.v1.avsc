@@ -1,0 +1,15 @@
+{
+  "doc": "Finalize a delivered order after the return window has expired.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "CompleteOrder",
+  "namespace": "ordering.order.completion",
+  "type": "record"
+}

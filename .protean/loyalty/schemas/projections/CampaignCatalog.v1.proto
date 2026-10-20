@@ -1,0 +1,15 @@
+syntax = "proto3";
+package loyalty.projections.campaign_catalog;
+import "google/protobuf/timestamp.proto";
+
+message CampaignCatalog {
+  optional string campaign_code = 1;
+  string campaign_id = 2;
+  optional string discount_type = 3;
+  optional int64 discount_value = 4;
+  optional google.protobuf.Timestamp ends_on = 5;
+  optional string name = 6;
+  optional google.protobuf.Timestamp starts_on = 7;
+  optional string status = 8;
+  optional google.protobuf.Timestamp updated_at = 9;
+}

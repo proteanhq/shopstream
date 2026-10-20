@@ -1,0 +1,11 @@
+syntax = "proto3";
+package payments.invoice.invoice;
+
+message InvoiceLineItem {
+  string description = 1;
+  string id = 2;
+  optional string invoice = 3;
+  double quantity = 4;
+  double total = 5;
+  double unit_price = 6;
+}

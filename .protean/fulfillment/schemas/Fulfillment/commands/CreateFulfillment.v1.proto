@@ -1,0 +1,9 @@
+syntax = "proto3";
+package fulfillment.fulfillment.creation;
+
+message CreateFulfillment {
+  string customer_id = 1;
+  repeated string items = 2;
+  string order_id = 3;
+  optional string warehouse_id = 4;
+}

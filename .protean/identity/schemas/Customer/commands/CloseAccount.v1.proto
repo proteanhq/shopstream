@@ -1,0 +1,6 @@
+syntax = "proto3";
+package identity.customer.account;
+
+message CloseAccount {
+  string customer_id = 1;
+}

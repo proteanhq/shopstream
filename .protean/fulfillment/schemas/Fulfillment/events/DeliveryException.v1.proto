@@ -1,0 +1,11 @@
+syntax = "proto3";
+package fulfillment.fulfillment.events;
+import "google/protobuf/timestamp.proto";
+
+message DeliveryException {
+  string fulfillment_id = 1;
+  optional string location = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+  string order_id = 4;
+  string reason = 5;
+}

@@ -1,0 +1,9 @@
+syntax = "proto3";
+package loyalty.dlq.poison;
+import "google/protobuf/timestamp.proto";
+
+message PoisonDetonated {
+  optional string note = 1;
+  google.protobuf.Timestamp occurred_at = 2;
+  string poison_id = 3;
+}

@@ -1,0 +1,46 @@
+{
+  "doc": "Stock was received into the warehouse, increasing on-hand quantity.",
+  "fields": [
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_available",
+      "type": "long"
+    },
+    {
+      "name": "new_on_hand",
+      "type": "long"
+    },
+    {
+      "name": "previous_on_hand",
+      "type": "long"
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    },
+    {
+      "name": "received_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "default": null,
+      "name": "reference",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "StockReceived",
+  "namespace": "inventory.stock.events",
+  "type": "record"
+}

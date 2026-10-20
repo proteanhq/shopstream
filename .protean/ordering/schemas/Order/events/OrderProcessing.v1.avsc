@@ -1,0 +1,22 @@
+{
+  "doc": "The warehouse began picking and packing the order.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "started_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "OrderProcessing",
+  "namespace": "ordering.order.events",
+  "type": "record"
+}

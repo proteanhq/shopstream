@@ -1,0 +1,33 @@
+{
+  "doc": "A single item was picked from its warehouse location.",
+  "fields": [
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "pick_location",
+      "type": "string"
+    },
+    {
+      "name": "picked_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "ItemPicked",
+  "namespace": "fulfillment.fulfillment.events",
+  "type": "record"
+}

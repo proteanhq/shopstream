@@ -1,0 +1,22 @@
+{
+  "fields": [
+    {
+      "name": "failed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "redemption_id",
+      "type": "string"
+    }
+  ],
+  "name": "VoucherIssuanceFailed",
+  "namespace": "loyalty.redemption.events",
+  "type": "record"
+}

@@ -1,0 +1,54 @@
+{
+  "doc": "Carrier shipment details.",
+  "fields": [
+    {
+      "default": null,
+      "name": "actual_delivery",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "carrier",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "estimated_delivery",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "service_level",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "tracking_number",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "ShipmentInfo",
+  "namespace": "fulfillment.fulfillment.fulfillment",
+  "type": "record"
+}

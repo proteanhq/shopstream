@@ -1,0 +1,9 @@
+syntax = "proto3";
+package payments.invoice.generation;
+
+message GenerateInvoice {
+  string customer_id = 1;
+  repeated string line_items = 2;
+  string order_id = 3;
+  optional double tax = 4;
+}

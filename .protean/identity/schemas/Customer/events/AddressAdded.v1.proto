@@ -1,0 +1,14 @@
+syntax = "proto3";
+package identity.customer.events;
+
+message AddressAdded {
+  string address_id = 1;
+  string city = 2;
+  string country = 3;
+  string customer_id = 4;
+  bool is_default = 5;
+  string label = 6;
+  string postal_code = 7;
+  optional string state = 8;
+  string street = 9;
+}

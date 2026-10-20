@@ -1,0 +1,8 @@
+syntax = "proto3";
+package ordering.order.cancellation;
+
+message CancelOrder {
+  string cancelled_by = 1;
+  string order_id = 2;
+  string reason = 3;
+}

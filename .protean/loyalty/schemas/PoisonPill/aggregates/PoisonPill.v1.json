@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "note": {
+      "anyOf": [
+        {
+          "maxLength": 120,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "intentional DLQ demo failure"
+    }
+  },
+  "required": [
+    "id"
+  ],
+  "title": "PoisonPill",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "loyalty.dlq.poison.PoisonPill",
+  "x-protean-identity-field": "id"
+}

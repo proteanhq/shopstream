@@ -1,0 +1,10 @@
+syntax = "proto3";
+package fulfillment.fulfillment.events;
+import "google/protobuf/timestamp.proto";
+
+message PackingCompleted {
+  string fulfillment_id = 1;
+  int64 package_count = 2;
+  google.protobuf.Timestamp packed_at = 3;
+  string packed_by = 4;
+}

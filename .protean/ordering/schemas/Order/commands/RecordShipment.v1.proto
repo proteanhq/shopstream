@@ -1,0 +1,11 @@
+syntax = "proto3";
+package ordering.order.fulfillment;
+
+message RecordShipment {
+  string carrier = 1;
+  optional string estimated_delivery = 2;
+  string order_id = 3;
+  string shipment_id = 4;
+  repeated string shipped_item_ids = 5;
+  string tracking_number = 6;
+}

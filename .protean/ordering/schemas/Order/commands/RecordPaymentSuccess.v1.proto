@@ -1,0 +1,9 @@
+syntax = "proto3";
+package ordering.order.payment;
+
+message RecordPaymentSuccess {
+  double amount = 1;
+  string order_id = 2;
+  string payment_id = 3;
+  string payment_method = 4;
+}

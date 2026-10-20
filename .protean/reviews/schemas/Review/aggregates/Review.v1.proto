@@ -1,0 +1,58 @@
+syntax = "proto3";
+package reviews.review.review;
+import "google/protobuf/timestamp.proto";
+
+message Review {
+  string body = 1;
+  repeated string cons = 2;
+  optional google.protobuf.Timestamp created_at = 3;
+  string customer_id = 4;
+  optional google.protobuf.Timestamp edited_at = 5;
+  optional int64 helpful_count = 6;
+  string id = 7;
+  repeated ReviewImage images = 8;
+  optional bool is_edited = 9;
+  optional string moderation_notes = 10;
+  optional string order_id = 11;
+  string product_id = 12;
+  repeated string pros = 13;
+  Rating rating = 14;
+  repeated SellerReply reply = 15;
+  optional int64 report_count = 16;
+  repeated string reported_reasons = 17;
+  optional string status = 18;
+  string title = 19;
+  optional int64 unhelpful_count = 20;
+  optional google.protobuf.Timestamp updated_at = 21;
+  optional string variant_id = 22;
+  optional bool verified_purchase = 23;
+  repeated HelpfulVote votes = 24;
+}
+
+message HelpfulVote {
+  string customer_id = 1;
+  string id = 2;
+  optional string review = 3;
+  string vote_type = 4;
+  google.protobuf.Timestamp voted_at = 5;
+}
+
+message Rating {
+  int64 score = 1;
+}
+
+message ReviewImage {
+  optional string alt_text = 1;
+  optional int64 display_order = 2;
+  string id = 3;
+  optional string review = 4;
+  string url = 5;
+}
+
+message SellerReply {
+  string body = 1;
+  string id = 2;
+  google.protobuf.Timestamp replied_at = 3;
+  optional string review = 4;
+  string seller_id = 5;
+}

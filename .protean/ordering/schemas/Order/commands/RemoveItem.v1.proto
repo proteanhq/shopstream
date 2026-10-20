@@ -1,0 +1,7 @@
+syntax = "proto3";
+package ordering.order.modification;
+
+message RemoveItem {
+  string item_id = 1;
+  string order_id = 2;
+}

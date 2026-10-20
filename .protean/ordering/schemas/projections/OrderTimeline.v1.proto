@@ -1,0 +1,12 @@
+syntax = "proto3";
+package ordering.projections.order_timeline;
+import "google/protobuf/timestamp.proto";
+
+message OrderTimeline {
+  string description = 1;
+  string entry_id = 2;
+  map<string, string> event_metadata = 3;
+  string event_type = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+  string order_id = 6;
+}

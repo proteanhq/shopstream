@@ -1,0 +1,10 @@
+syntax = "proto3";
+package fulfillment.fulfillment.events;
+import "google/protobuf/timestamp.proto";
+
+message DeliveryConfirmed {
+  google.protobuf.Timestamp actual_delivery = 1;
+  google.protobuf.Timestamp delivered_at = 2;
+  string fulfillment_id = 3;
+  string order_id = 4;
+}

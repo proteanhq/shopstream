@@ -1,0 +1,11 @@
+syntax = "proto3";
+package fulfillment.fulfillment.events;
+import "google/protobuf/timestamp.proto";
+
+message ShippingLabelGenerated {
+  string carrier = 1;
+  string fulfillment_id = 2;
+  google.protobuf.Timestamp generated_at = 3;
+  string label_url = 4;
+  string service_level = 5;
+}

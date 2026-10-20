@@ -1,0 +1,15 @@
+syntax = "proto3";
+package fulfillment.projections.shipment_tracking;
+import "google/protobuf/timestamp.proto";
+
+message ShipmentTrackingView {
+  optional string carrier = 1;
+  optional string current_location = 2;
+  string current_status = 3;
+  optional google.protobuf.Timestamp delivered_at = 4;
+  repeated string events = 5;
+  string fulfillment_id = 6;
+  string order_id = 7;
+  optional google.protobuf.Timestamp shipped_at = 8;
+  optional string tracking_number = 9;
+}

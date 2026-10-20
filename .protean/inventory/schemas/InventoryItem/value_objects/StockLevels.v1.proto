@@ -1,0 +1,10 @@
+syntax = "proto3";
+package inventory.stock.stock;
+
+message StockLevels {
+  optional int64 available = 1;
+  optional int64 damaged = 2;
+  optional int64 in_transit = 3;
+  optional int64 on_hand = 4;
+  optional int64 reserved = 5;
+}

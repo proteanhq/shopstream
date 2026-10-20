@@ -1,0 +1,23 @@
+{
+  "doc": "Flag stock as damaged.",
+  "fields": [
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "MarkDamaged",
+  "namespace": "inventory.stock.damage",
+  "type": "record"
+}

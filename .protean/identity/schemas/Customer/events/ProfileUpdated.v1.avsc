@@ -1,0 +1,39 @@
+{
+  "doc": "A customer's personal profile information was changed.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "date_of_birth",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "first_name",
+      "type": "string"
+    },
+    {
+      "name": "last_name",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "phone",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "ProfileUpdated",
+  "namespace": "identity.customer.events",
+  "type": "record"
+}

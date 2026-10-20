@@ -1,0 +1,33 @@
+{
+  "doc": "A notification was confirmed delivered to the recipient.",
+  "fields": [
+    {
+      "name": "channel",
+      "type": "string"
+    },
+    {
+      "name": "delivered_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "recipient_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "NotificationDelivered",
+  "namespace": "notifications.notification.events",
+  "type": "record"
+}

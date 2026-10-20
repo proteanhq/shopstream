@@ -1,0 +1,34 @@
+{
+  "doc": "Change a category's name or attributes.",
+  "fields": [
+    {
+      "default": null,
+      "name": "attributes",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ]
+    },
+    {
+      "name": "category_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "name",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "UpdateCategory",
+  "namespace": "catalogue.category.management",
+  "type": "record"
+}

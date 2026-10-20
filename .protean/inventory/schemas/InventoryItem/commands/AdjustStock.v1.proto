@@ -1,0 +1,10 @@
+syntax = "proto3";
+package inventory.stock.adjustment;
+
+message AdjustStock {
+  string adjusted_by = 1;
+  string adjustment_type = 2;
+  string inventory_item_id = 3;
+  int64 quantity_change = 4;
+  string reason = 5;
+}

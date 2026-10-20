@@ -1,0 +1,15 @@
+{
+  "doc": "Remove a customer's do-not-disturb window.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ClearQuietHours",
+  "namespace": "notifications.preference.management",
+  "type": "record"
+}

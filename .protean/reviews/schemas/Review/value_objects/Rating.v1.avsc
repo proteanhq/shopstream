@@ -1,0 +1,12 @@
+{
+  "doc": "A star rating from 1 to 5.\n\nExamples:\n    >>> Rating(score=5).score\n    5\n    >>> try:\n    ...     Rating(score=0)\n    ... except ValidationError:\n    ...     print(\"below range rejected\")\n    below range rejected\n    >>> try:\n    ...     Rating(score=6)\n    ... except ValidationError:\n    ...     print(\"above range rejected\")\n    above range rejected",
+  "fields": [
+    {
+      "name": "score",
+      "type": "long"
+    }
+  ],
+  "name": "Rating",
+  "namespace": "reviews.review.review",
+  "type": "record"
+}

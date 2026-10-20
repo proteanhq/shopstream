@@ -1,0 +1,15 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "note",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "EmitPoison",
+  "namespace": "loyalty.dlq.poison",
+  "type": "record"
+}

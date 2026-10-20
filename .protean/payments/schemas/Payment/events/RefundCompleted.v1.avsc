@@ -1,0 +1,51 @@
+{
+  "doc": "A refund was completed by the gateway.",
+  "fields": [
+    {
+      "name": "amount",
+      "type": "double"
+    },
+    {
+      "name": "completed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "gateway_refund_id",
+      "type": "string"
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "payment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "refund_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "RefundCompleted",
+  "namespace": "payments.payment.events",
+  "type": "record"
+}

@@ -1,0 +1,9 @@
+syntax = "proto3";
+package payments.invoice.events;
+import "google/protobuf/timestamp.proto";
+
+message InvoicePaid {
+  string invoice_id = 1;
+  string order_id = 2;
+  google.protobuf.Timestamp paid_at = 3;
+}

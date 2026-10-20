@@ -1,0 +1,33 @@
+{
+  "doc": "The fulfillment was cancelled before shipment.",
+  "fields": [
+    {
+      "name": "cancelled_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "FulfillmentCancelled",
+  "namespace": "fulfillment.fulfillment.events",
+  "type": "record"
+}

@@ -1,0 +1,37 @@
+{
+  "doc": "Generate a new invoice for an order.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "line_items",
+      "type": {
+        "items": "string",
+        "type": "array"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "tax",
+      "type": [
+        "null",
+        "double"
+      ]
+    }
+  ],
+  "name": "GenerateInvoice",
+  "namespace": "payments.invoice.generation",
+  "type": "record"
+}

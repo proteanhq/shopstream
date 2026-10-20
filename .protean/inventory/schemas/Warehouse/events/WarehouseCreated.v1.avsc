@@ -1,0 +1,37 @@
+{
+  "doc": "A new warehouse was created.",
+  "fields": [
+    {
+      "name": "address",
+      "type": {
+        "type": "map",
+        "values": "string"
+      }
+    },
+    {
+      "name": "capacity",
+      "type": "long"
+    },
+    {
+      "name": "created_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "warehouse_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "WarehouseCreated",
+  "namespace": "inventory.warehouse.events",
+  "type": "record"
+}

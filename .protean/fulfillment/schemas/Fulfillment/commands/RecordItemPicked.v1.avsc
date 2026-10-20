@@ -1,0 +1,26 @@
+{
+  "doc": "Record that a single item has been picked from its location.",
+  "fields": [
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "pick_location",
+      "type": "string"
+    }
+  ],
+  "name": "RecordItemPicked",
+  "namespace": "fulfillment.fulfillment.picking",
+  "type": "record"
+}

@@ -1,0 +1,26 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "reason",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "redemption_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "refunded_points",
+      "type": "long"
+    }
+  ],
+  "name": "CompensateRedemption",
+  "namespace": "loyalty.redemption.commands",
+  "type": "record"
+}

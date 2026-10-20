@@ -1,0 +1,22 @@
+{
+  "doc": "Confirm a stock reservation after order payment.",
+  "fields": [
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reservation_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ConfirmReservation",
+  "namespace": "inventory.stock.reservation",
+  "type": "record"
+}

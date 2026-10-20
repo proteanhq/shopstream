@@ -1,0 +1,6 @@
+syntax = "proto3";
+package ordering.order.confirmation;
+
+message ConfirmOrder {
+  string order_id = 1;
+}

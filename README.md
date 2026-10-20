@@ -397,6 +397,13 @@ make pre-commit        # Run pre-commit hooks
 make verify-domains    # protean verify (init, check, tests) for all nine contexts + tests/integration, memory mode, no running stack needed
 ```
 
+### Contracts & Schemas
+
+```bash
+make schemas           # Write JSON, Avro and Protobuf schemas to .protean/<context>/schemas/ for all nine contexts
+make events-catalog    # List every event with its version, upcasters and consumers, read from the committed IR (no database needed)
+```
+
 ### Docker
 
 ```bash

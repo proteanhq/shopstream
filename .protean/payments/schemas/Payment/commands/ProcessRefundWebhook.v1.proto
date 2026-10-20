@@ -1,0 +1,8 @@
+syntax = "proto3";
+package payments.payment.refund;
+
+message ProcessRefundWebhook {
+  string gateway_refund_id = 1;
+  string payment_id = 2;
+  string refund_id = 3;
+}

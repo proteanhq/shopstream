@@ -1,0 +1,40 @@
+{
+  "doc": "Gateway-specific information about the payment.",
+  "fields": [
+    {
+      "default": null,
+      "name": "gateway_name",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "gateway_response",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "gateway_status",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "gateway_transaction_id",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "GatewayInfo",
+  "namespace": "payments.payment.payment",
+  "type": "record"
+}

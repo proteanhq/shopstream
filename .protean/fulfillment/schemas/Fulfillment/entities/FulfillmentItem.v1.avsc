@@ -1,0 +1,58 @@
+{
+  "doc": "A single line item being fulfilled.",
+  "fields": [
+    {
+      "default": null,
+      "name": "fulfillment",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "order_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "pick_location",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    },
+    {
+      "name": "sku",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "status",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "FulfillmentItem",
+  "namespace": "fulfillment.fulfillment.fulfillment",
+  "type": "record"
+}

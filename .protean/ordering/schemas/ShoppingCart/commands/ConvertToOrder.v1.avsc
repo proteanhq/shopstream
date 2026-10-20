@@ -1,0 +1,15 @@
+{
+  "doc": "Mark a cart as converted after checkout (cart becomes immutable).",
+  "fields": [
+    {
+      "name": "cart_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ConvertToOrder",
+  "namespace": "ordering.cart.conversion",
+  "type": "record"
+}

@@ -1,0 +1,9 @@
+syntax = "proto3";
+package reviews.review.moderation;
+
+message ModerateReview {
+  string action = 1;
+  string moderator_id = 2;
+  optional string reason = 3;
+  string review_id = 4;
+}

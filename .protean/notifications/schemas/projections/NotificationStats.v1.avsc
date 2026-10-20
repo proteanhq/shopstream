@@ -1,0 +1,42 @@
+{
+  "fields": [
+    {
+      "name": "channel",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "count",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "date",
+      "type": "string"
+    },
+    {
+      "name": "notification_type",
+      "type": "string"
+    },
+    {
+      "name": "stat_key",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    }
+  ],
+  "name": "NotificationStats",
+  "namespace": "notifications.projections.notification_stats",
+  "type": "record"
+}

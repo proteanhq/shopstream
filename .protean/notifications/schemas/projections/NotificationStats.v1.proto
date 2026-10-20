@@ -1,0 +1,12 @@
+syntax = "proto3";
+package notifications.projections.notification_stats;
+import "google/protobuf/timestamp.proto";
+
+message NotificationStats {
+  string channel = 1;
+  optional int64 count = 2;
+  string date = 3;
+  string notification_type = 4;
+  string stat_key = 5;
+  optional google.protobuf.Timestamp updated_at = 6;
+}

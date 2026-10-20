@@ -1,0 +1,48 @@
+{
+  "doc": "Payment processing failed at the gateway.",
+  "fields": [
+    {
+      "name": "attempt_number",
+      "type": "long"
+    },
+    {
+      "name": "can_retry",
+      "type": "boolean"
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "failed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "payment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "PaymentFailed",
+  "namespace": "payments.payment.events",
+  "type": "record"
+}

@@ -1,0 +1,8 @@
+syntax = "proto3";
+package catalogue.product.product;
+
+message SEO {
+  optional string meta_description = 1;
+  optional string meta_title = 2;
+  optional string slug = 3;
+}

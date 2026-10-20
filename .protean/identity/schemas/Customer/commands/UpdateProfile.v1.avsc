@@ -1,0 +1,47 @@
+{
+  "doc": "Change a customer's personal profile information (name, phone, date of birth).",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "date_of_birth",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "first_name",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "last_name",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "phone",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "UpdateProfile",
+  "namespace": "identity.customer.profile",
+  "type": "record"
+}

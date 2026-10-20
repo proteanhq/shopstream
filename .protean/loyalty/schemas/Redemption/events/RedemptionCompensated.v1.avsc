@@ -1,0 +1,26 @@
+{
+  "fields": [
+    {
+      "name": "compensated_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "redemption_id",
+      "type": "string"
+    },
+    {
+      "name": "refunded_points",
+      "type": "long"
+    }
+  ],
+  "name": "RedemptionCompensated",
+  "namespace": "loyalty.redemption.events",
+  "type": "record"
+}

@@ -1,0 +1,14 @@
+syntax = "proto3";
+package reviews.projections.customer_reviews;
+import "google/protobuf/timestamp.proto";
+
+message CustomerReviews {
+  optional google.protobuf.Timestamp created_at = 1;
+  string customer_id = 2;
+  string product_id = 3;
+  int64 rating = 4;
+  string review_id = 5;
+  string status = 6;
+  string title = 7;
+  optional google.protobuf.Timestamp updated_at = 8;
+}

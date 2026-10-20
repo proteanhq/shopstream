@@ -1,0 +1,35 @@
+{
+  "doc": "Process a payment gateway webhook callback.",
+  "fields": [
+    {
+      "default": null,
+      "name": "failure_reason",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "gateway_status",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "gateway_transaction_id",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "payment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ProcessPaymentWebhook",
+  "namespace": "payments.payment.webhook",
+  "type": "record"
+}

@@ -1,0 +1,34 @@
+{
+  "doc": "Record that some (but not all) items have been shipped.",
+  "fields": [
+    {
+      "name": "carrier",
+      "type": "string"
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "shipment_id",
+      "type": "string"
+    },
+    {
+      "name": "shipped_item_ids",
+      "type": {
+        "items": "string",
+        "type": "array"
+      }
+    },
+    {
+      "name": "tracking_number",
+      "type": "string"
+    }
+  ],
+  "name": "RecordPartialShipment",
+  "namespace": "ordering.order.fulfillment",
+  "type": "record"
+}

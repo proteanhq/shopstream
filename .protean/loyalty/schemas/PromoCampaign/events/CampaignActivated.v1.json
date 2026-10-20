@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "activated_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "campaign_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "activated_at",
+    "campaign_id"
+  ],
+  "title": "CampaignActivated",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.campaign.campaign.PromoCampaign",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "loyalty.campaign.events.CampaignActivated",
+  "x-protean-type": "Loyalty.CampaignActivated.v1",
+  "x-protean-version": 1
+}

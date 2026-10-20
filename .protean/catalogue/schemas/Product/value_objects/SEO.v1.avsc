@@ -1,0 +1,32 @@
+{
+  "doc": "Search engine optimization metadata for a product page.\n\nContains meta title (max 70 chars), meta description (max 160 chars), and a\nURL-safe slug. The slug must be lowercase alphanumeric with hyphens only.",
+  "fields": [
+    {
+      "default": null,
+      "name": "meta_description",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "meta_title",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "slug",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "SEO",
+  "namespace": "catalogue.product.product",
+  "type": "record"
+}

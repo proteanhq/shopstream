@@ -1,0 +1,22 @@
+{
+  "doc": "Remove a zone from a warehouse.",
+  "fields": [
+    {
+      "name": "warehouse_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "zone_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "RemoveZone",
+  "namespace": "inventory.warehouse.management",
+  "type": "record"
+}

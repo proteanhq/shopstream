@@ -1,0 +1,33 @@
+{
+  "doc": "A shopping cart was converted into an order at checkout.",
+  "fields": [
+    {
+      "name": "cart_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "customer_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "items",
+      "type": {
+        "items": "string",
+        "type": "array"
+      }
+    }
+  ],
+  "name": "CartConverted",
+  "namespace": "ordering.cart.events",
+  "type": "record"
+}

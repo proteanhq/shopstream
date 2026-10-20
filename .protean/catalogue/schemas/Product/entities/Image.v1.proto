@@ -1,0 +1,11 @@
+syntax = "proto3";
+package catalogue.product.product;
+
+message Image {
+  optional string alt_text = 1;
+  optional int64 display_order = 2;
+  string id = 3;
+  optional bool is_primary = 4;
+  optional string product = 5;
+  string url = 6;
+}

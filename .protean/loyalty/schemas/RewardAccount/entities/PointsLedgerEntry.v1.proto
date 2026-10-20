@@ -1,0 +1,13 @@
+syntax = "proto3";
+package loyalty.reward.reward_account;
+import "google/protobuf/timestamp.proto";
+
+message PointsLedgerEntry {
+  int64 amount = 1;
+  int64 balance_after = 2;
+  string entry_type = 3;
+  string id = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+  optional string reason = 6;
+  optional string reward_account = 7;
+}

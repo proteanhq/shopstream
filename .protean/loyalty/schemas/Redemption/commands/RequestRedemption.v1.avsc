@@ -1,0 +1,19 @@
+{
+  "fields": [
+    {
+      "name": "account_id",
+      "type": "string"
+    },
+    {
+      "name": "points",
+      "type": "long"
+    },
+    {
+      "name": "reward_code",
+      "type": "string"
+    }
+  ],
+  "name": "RequestRedemption",
+  "namespace": "loyalty.redemption.commands",
+  "type": "record"
+}

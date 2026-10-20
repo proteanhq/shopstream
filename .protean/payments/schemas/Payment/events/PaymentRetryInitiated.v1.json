@@ -2,6 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "description": "A failed payment is being retried.",
   "properties": {
+    "attempt_id": {
+      "minLength": 1,
+      "type": "string"
+    },
     "attempt_number": {
       "type": "integer"
     },
@@ -19,6 +23,7 @@
     }
   },
   "required": [
+    "attempt_id",
     "attempt_number",
     "order_id",
     "payment_id",

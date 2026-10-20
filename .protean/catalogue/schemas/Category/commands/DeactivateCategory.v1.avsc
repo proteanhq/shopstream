@@ -1,0 +1,15 @@
+{
+  "doc": "Deactivate a category, hiding it from the storefront.",
+  "fields": [
+    {
+      "name": "category_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "DeactivateCategory",
+  "namespace": "catalogue.category.management",
+  "type": "record"
+}
