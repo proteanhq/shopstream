@@ -1,0 +1,7 @@
+syntax = "proto3";
+package catalogue.product.product;
+
+message Weight {
+  optional string unit = 1;
+  optional double value = 2;
+}

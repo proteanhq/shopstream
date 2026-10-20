@@ -1,0 +1,6 @@
+syntax = "proto3";
+package payments.payment.retry;
+
+message RetryPayment {
+  string payment_id = 1;
+}

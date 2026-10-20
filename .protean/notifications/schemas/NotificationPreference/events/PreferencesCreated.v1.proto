@@ -1,0 +1,12 @@
+syntax = "proto3";
+package notifications.preference.events;
+import "google/protobuf/timestamp.proto";
+
+message PreferencesCreated {
+  google.protobuf.Timestamp created_at = 1;
+  string customer_id = 2;
+  bool email_enabled = 3;
+  string preference_id = 4;
+  bool push_enabled = 5;
+  bool sms_enabled = 6;
+}

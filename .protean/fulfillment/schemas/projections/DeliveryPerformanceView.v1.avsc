@@ -1,0 +1,66 @@
+{
+  "doc": "Carrier delivery performance aggregated by carrier and date.",
+  "fields": [
+    {
+      "name": "carrier",
+      "type": "string"
+    },
+    {
+      "name": "date",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "delivered_count",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "exception_count",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "total_delivery_hours",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_shipments",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    }
+  ],
+  "name": "DeliveryPerformanceView",
+  "namespace": "fulfillment.projections.delivery_performance",
+  "type": "record"
+}

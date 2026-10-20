@@ -1,0 +1,22 @@
+{
+  "doc": "Remove an image from a product's gallery.",
+  "fields": [
+    {
+      "name": "image_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "RemoveProductImage",
+  "namespace": "catalogue.product.images",
+  "type": "record"
+}

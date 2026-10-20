@@ -1,0 +1,44 @@
+syntax = "proto3";
+package identity.customer.customer;
+import "google/protobuf/timestamp.proto";
+
+message Customer {
+  repeated Address addresses = 1;
+  EmailAddress email = 2;
+  string external_id = 3;
+  string id = 4;
+  optional google.protobuf.Timestamp last_login_at = 5;
+  optional Profile profile = 6;
+  optional google.protobuf.Timestamp registered_at = 7;
+  optional string status = 8;
+  optional string tier = 9;
+}
+
+message Address {
+  string city = 1;
+  string country = 2;
+  optional string customer = 3;
+  optional GeoCoordinates geo_coordinates = 4;
+  string id = 5;
+  optional bool is_default = 6;
+  optional string label = 7;
+  string postal_code = 8;
+  optional string state = 9;
+  string street = 10;
+}
+
+message Profile {
+  optional google.protobuf.Timestamp date_of_birth = 1;
+  string first_name = 2;
+  string last_name = 3;
+  optional string phone = 4;
+}
+
+message EmailAddress {
+  string address = 1;
+}
+
+message GeoCoordinates {
+  optional double latitude = 1;
+  optional double longitude = 2;
+}

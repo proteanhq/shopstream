@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "reason": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "voucher unavailable"
+    },
+    "redemption_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "refunded_points": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "redemption_id",
+    "refunded_points"
+  ],
+  "title": "CompensateRedemption",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.redemption.redemption.Redemption",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "loyalty.redemption.commands.CompensateRedemption",
+  "x-protean-type": "Loyalty.CompensateRedemption.v1",
+  "x-protean-version": 1
+}

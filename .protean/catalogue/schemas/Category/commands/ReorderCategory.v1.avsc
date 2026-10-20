@@ -1,0 +1,19 @@
+{
+  "doc": "Change a category's display position in the hierarchy.",
+  "fields": [
+    {
+      "name": "category_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_display_order",
+      "type": "long"
+    }
+  ],
+  "name": "ReorderCategory",
+  "namespace": "catalogue.category.management",
+  "type": "record"
+}

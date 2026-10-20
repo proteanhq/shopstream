@@ -1,0 +1,9 @@
+syntax = "proto3";
+package ordering.order.events;
+import "google/protobuf/timestamp.proto";
+
+message OrderDelivered {
+  string customer_id = 1;
+  google.protobuf.Timestamp delivered_at = 2;
+  string order_id = 3;
+}

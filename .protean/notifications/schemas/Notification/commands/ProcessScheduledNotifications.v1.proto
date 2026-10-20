@@ -1,0 +1,7 @@
+syntax = "proto3";
+package notifications.notification.scheduler;
+import "google/protobuf/timestamp.proto";
+
+message ProcessScheduledNotifications {
+  optional google.protobuf.Timestamp as_of = 1;
+}

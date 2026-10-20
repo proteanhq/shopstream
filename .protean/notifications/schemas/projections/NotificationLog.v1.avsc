@@ -1,0 +1,132 @@
+{
+  "fields": [
+    {
+      "name": "channel",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "created_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "delivered_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "failure_reason",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "notification_type",
+      "type": "string"
+    },
+    {
+      "name": "recipient_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "recipient_type",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "retry_count",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "scheduled_for",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "sent_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "source_event_type",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "status",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "subject",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "template_name",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    }
+  ],
+  "name": "NotificationLog",
+  "namespace": "notifications.projections.notification_log",
+  "type": "record"
+}

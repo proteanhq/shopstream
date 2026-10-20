@@ -1,0 +1,8 @@
+syntax = "proto3";
+package catalogue.category.events;
+
+message CategoryReordered {
+  string category_id = 1;
+  int64 new_order = 2;
+  int64 previous_order = 3;
+}

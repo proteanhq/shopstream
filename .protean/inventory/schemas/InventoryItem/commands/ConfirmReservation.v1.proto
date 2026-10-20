@@ -1,0 +1,7 @@
+syntax = "proto3";
+package inventory.stock.reservation;
+
+message ConfirmReservation {
+  string inventory_item_id = 1;
+  string reservation_id = 2;
+}

@@ -1,0 +1,55 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "created_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "grand_total",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "status",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    }
+  ],
+  "name": "OrdersByStatus",
+  "namespace": "ordering.projections.orders_by_status",
+  "type": "record"
+}

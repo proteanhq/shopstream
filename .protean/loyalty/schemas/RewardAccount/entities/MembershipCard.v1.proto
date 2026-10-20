@@ -1,0 +1,11 @@
+syntax = "proto3";
+package loyalty.reward.reward_account;
+import "google/protobuf/timestamp.proto";
+
+message MembershipCard {
+  string card_number = 1;
+  string id = 2;
+  google.protobuf.Timestamp issued_on = 3;
+  optional string reward_account = 4;
+  optional string status = 5;
+}

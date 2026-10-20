@@ -1,0 +1,9 @@
+syntax = "proto3";
+package fulfillment.fulfillment.fulfillment;
+import "google/protobuf/timestamp.proto";
+
+message PickList {
+  optional google.protobuf.Timestamp assigned_at = 1;
+  optional string assigned_to = 2;
+  optional google.protobuf.Timestamp completed_at = 3;
+}

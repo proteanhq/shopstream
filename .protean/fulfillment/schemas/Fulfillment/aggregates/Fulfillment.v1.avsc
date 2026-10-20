@@ -1,0 +1,436 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "cancellation_reason",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "created_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "items",
+      "type": [
+        "null",
+        {
+          "items": {
+            "fields": [
+              {
+                "default": null,
+                "name": "fulfillment",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "name": "order_item_id",
+                "type": {
+                  "logicalType": "uuid",
+                  "type": "string"
+                }
+              },
+              {
+                "default": null,
+                "name": "pick_location",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "product_id",
+                "type": {
+                  "logicalType": "uuid",
+                  "type": "string"
+                }
+              },
+              {
+                "name": "quantity",
+                "type": "long"
+              },
+              {
+                "name": "sku",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "status",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            ],
+            "name": "FulfillmentItem",
+            "namespace": "fulfillment.fulfillment.fulfillment",
+            "type": "record"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "packages",
+      "type": [
+        "null",
+        {
+          "items": {
+            "fields": [
+              {
+                "default": null,
+                "name": "dimensions",
+                "type": [
+                  "null",
+                  {
+                    "fields": [
+                      {
+                        "default": null,
+                        "name": "height",
+                        "type": [
+                          "null",
+                          "double"
+                        ]
+                      },
+                      {
+                        "default": null,
+                        "name": "length",
+                        "type": [
+                          "null",
+                          "double"
+                        ]
+                      },
+                      {
+                        "default": null,
+                        "name": "weight",
+                        "type": [
+                          "null",
+                          "double"
+                        ]
+                      },
+                      {
+                        "default": null,
+                        "name": "width",
+                        "type": [
+                          "null",
+                          "double"
+                        ]
+                      }
+                    ],
+                    "name": "PackageDimensions",
+                    "namespace": "fulfillment.fulfillment.fulfillment",
+                    "type": "record"
+                  }
+                ]
+              },
+              {
+                "default": null,
+                "name": "fulfillment",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "item_ids",
+                "type": [
+                  "null",
+                  {
+                    "items": "string",
+                    "type": "array"
+                  }
+                ]
+              },
+              {
+                "default": null,
+                "name": "weight",
+                "type": [
+                  "null",
+                  "double"
+                ]
+              }
+            ],
+            "name": "Package",
+            "namespace": "fulfillment.fulfillment.fulfillment",
+            "type": "record"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "packing_info",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "default": null,
+              "name": "packed_at",
+              "type": [
+                "null",
+                {
+                  "logicalType": "timestamp-millis",
+                  "type": "long"
+                }
+              ]
+            },
+            {
+              "default": null,
+              "name": "packed_by",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "shipping_label_url",
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          ],
+          "name": "PackingInfo",
+          "namespace": "fulfillment.fulfillment.fulfillment",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "pick_list",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "default": null,
+              "name": "assigned_at",
+              "type": [
+                "null",
+                {
+                  "logicalType": "timestamp-millis",
+                  "type": "long"
+                }
+              ]
+            },
+            {
+              "default": null,
+              "name": "assigned_to",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "completed_at",
+              "type": [
+                "null",
+                {
+                  "logicalType": "timestamp-millis",
+                  "type": "long"
+                }
+              ]
+            }
+          ],
+          "name": "PickList",
+          "namespace": "fulfillment.fulfillment.fulfillment",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "shipment",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "default": null,
+              "name": "actual_delivery",
+              "type": [
+                "null",
+                {
+                  "logicalType": "timestamp-millis",
+                  "type": "long"
+                }
+              ]
+            },
+            {
+              "default": null,
+              "name": "carrier",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "estimated_delivery",
+              "type": [
+                "null",
+                {
+                  "logicalType": "timestamp-millis",
+                  "type": "long"
+                }
+              ]
+            },
+            {
+              "default": null,
+              "name": "service_level",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "tracking_number",
+              "type": [
+                "null",
+                "string"
+              ]
+            }
+          ],
+          "name": "ShipmentInfo",
+          "namespace": "fulfillment.fulfillment.fulfillment",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "status",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "tracking_events",
+      "type": [
+        "null",
+        {
+          "items": {
+            "fields": [
+              {
+                "default": null,
+                "name": "description",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "default": null,
+                "name": "fulfillment",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "location",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "occurred_at",
+                "type": {
+                  "logicalType": "timestamp-millis",
+                  "type": "long"
+                }
+              },
+              {
+                "name": "status",
+                "type": "string"
+              }
+            ],
+            "name": "TrackingEvent",
+            "namespace": "fulfillment.fulfillment.fulfillment",
+            "type": "record"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "warehouse_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "name": "Fulfillment",
+  "namespace": "fulfillment.fulfillment.fulfillment",
+  "type": "record"
+}

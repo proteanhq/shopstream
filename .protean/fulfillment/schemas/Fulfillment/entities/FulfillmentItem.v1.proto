@@ -1,0 +1,13 @@
+syntax = "proto3";
+package fulfillment.fulfillment.fulfillment;
+
+message FulfillmentItem {
+  optional string fulfillment = 1;
+  string id = 2;
+  string order_item_id = 3;
+  optional string pick_location = 4;
+  string product_id = 5;
+  int64 quantity = 6;
+  string sku = 7;
+  optional string status = 8;
+}

@@ -1,0 +1,36 @@
+syntax = "proto3";
+package inventory.stock.stock;
+import "google/protobuf/timestamp.proto";
+
+message InventoryItem {
+  optional google.protobuf.Timestamp created_at = 1;
+  string id = 2;
+  optional google.protobuf.Timestamp last_stock_check = 3;
+  optional StockLevels levels = 4;
+  string product_id = 5;
+  optional int64 reorder_point = 6;
+  optional int64 reorder_quantity = 7;
+  repeated Reservation reservations = 8;
+  string sku = 9;
+  optional google.protobuf.Timestamp updated_at = 10;
+  string variant_id = 11;
+  string warehouse_id = 12;
+}
+
+message Reservation {
+  google.protobuf.Timestamp expires_at = 1;
+  string id = 2;
+  optional string inventory_item = 3;
+  string order_id = 4;
+  int64 quantity = 5;
+  google.protobuf.Timestamp reserved_at = 6;
+  optional string status = 7;
+}
+
+message StockLevels {
+  optional int64 available = 1;
+  optional int64 damaged = 2;
+  optional int64 in_transit = 3;
+  optional int64 on_hand = 4;
+  optional int64 reserved = 5;
+}

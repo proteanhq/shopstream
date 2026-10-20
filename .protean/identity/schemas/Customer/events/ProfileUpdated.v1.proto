@@ -1,0 +1,10 @@
+syntax = "proto3";
+package identity.customer.events;
+
+message ProfileUpdated {
+  string customer_id = 1;
+  optional string date_of_birth = 2;
+  string first_name = 3;
+  string last_name = 4;
+  optional string phone = 5;
+}

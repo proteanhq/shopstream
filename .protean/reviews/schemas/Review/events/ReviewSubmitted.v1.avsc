@@ -1,0 +1,104 @@
+{
+  "doc": "A customer submitted a new product review.",
+  "fields": [
+    {
+      "name": "body",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "cons",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "image_count",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "order_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "pros",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "rating",
+      "type": "long"
+    },
+    {
+      "name": "review_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "submitted_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "title",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "variant_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "verified_purchase",
+      "type": "string"
+    }
+  ],
+  "name": "ReviewSubmitted",
+  "namespace": "reviews.review.events",
+  "type": "record"
+}

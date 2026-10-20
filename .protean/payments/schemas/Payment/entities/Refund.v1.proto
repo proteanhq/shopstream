@@ -1,0 +1,14 @@
+syntax = "proto3";
+package payments.payment.payment;
+import "google/protobuf/timestamp.proto";
+
+message Refund {
+  double amount = 1;
+  optional string gateway_refund_id = 2;
+  string id = 3;
+  optional string payment = 4;
+  optional google.protobuf.Timestamp processed_at = 5;
+  string reason = 6;
+  google.protobuf.Timestamp requested_at = 7;
+  optional string status = 8;
+}

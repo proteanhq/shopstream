@@ -12,6 +12,16 @@
       ],
       "default": 0.0
     },
+    "counted_reviews": {
+      "anyOf": [
+        {
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "product_id": {
       "minLength": 1,
       "type": "string"

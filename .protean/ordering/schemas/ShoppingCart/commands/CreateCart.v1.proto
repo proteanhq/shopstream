@@ -1,0 +1,7 @@
+syntax = "proto3";
+package ordering.cart.management;
+
+message CreateCart {
+  optional string customer_id = 1;
+  optional string session_id = 2;
+}

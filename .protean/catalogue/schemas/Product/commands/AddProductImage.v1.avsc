@@ -1,0 +1,35 @@
+{
+  "doc": "Upload a new image for a product.",
+  "fields": [
+    {
+      "default": null,
+      "name": "alt_text",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "is_primary",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "url",
+      "type": "string"
+    }
+  ],
+  "name": "AddProductImage",
+  "namespace": "catalogue.product.images",
+  "type": "record"
+}

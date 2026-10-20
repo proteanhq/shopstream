@@ -1,0 +1,74 @@
+{
+  "doc": "Change a product's title, description, brand, attributes, or SEO metadata.",
+  "fields": [
+    {
+      "default": null,
+      "name": "attributes",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "brand",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "description",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "meta_description",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "meta_title",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "slug",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "title",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "UpdateProductDetails",
+  "namespace": "catalogue.product.details",
+  "type": "record"
+}

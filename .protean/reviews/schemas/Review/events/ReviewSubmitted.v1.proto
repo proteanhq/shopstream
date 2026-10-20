@@ -1,0 +1,19 @@
+syntax = "proto3";
+package reviews.review.events;
+import "google/protobuf/timestamp.proto";
+
+message ReviewSubmitted {
+  string body = 1;
+  repeated string cons = 2;
+  string customer_id = 3;
+  optional int64 image_count = 4;
+  optional string order_id = 5;
+  string product_id = 6;
+  repeated string pros = 7;
+  int64 rating = 8;
+  string review_id = 9;
+  google.protobuf.Timestamp submitted_at = 10;
+  string title = 11;
+  optional string variant_id = 12;
+  string verified_purchase = 13;
+}

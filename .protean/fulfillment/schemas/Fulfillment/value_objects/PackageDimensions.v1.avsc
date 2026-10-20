@@ -1,0 +1,40 @@
+{
+  "doc": "Physical dimensions and weight of a package.",
+  "fields": [
+    {
+      "default": null,
+      "name": "height",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "length",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "weight",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "width",
+      "type": [
+        "null",
+        "double"
+      ]
+    }
+  ],
+  "name": "PackageDimensions",
+  "namespace": "fulfillment.fulfillment.fulfillment",
+  "type": "record"
+}

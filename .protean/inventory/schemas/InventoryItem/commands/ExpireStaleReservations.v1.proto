@@ -1,0 +1,8 @@
+syntax = "proto3";
+package inventory.stock.expiry;
+import "google/protobuf/timestamp.proto";
+
+message ExpireStaleReservations {
+  optional google.protobuf.Timestamp as_of = 1;
+  optional int64 older_than_minutes = 2;
+}

@@ -1,0 +1,32 @@
+{
+  "doc": "A logical area within a warehouse (e.g., cold storage, hazmat).",
+  "fields": [
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "warehouse",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "zone_name",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "zone_type",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "Zone",
+  "namespace": "inventory.warehouse.warehouse",
+  "type": "record"
+}

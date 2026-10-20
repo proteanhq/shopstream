@@ -1,0 +1,8 @@
+syntax = "proto3";
+package loyalty.reward.events;
+
+message MembershipCardIssued {
+  string account_id = 1;
+  string card_number = 2;
+  string issued_on = 3;
+}

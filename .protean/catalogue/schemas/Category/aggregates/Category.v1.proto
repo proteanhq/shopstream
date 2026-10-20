@@ -1,0 +1,15 @@
+syntax = "proto3";
+package catalogue.category.category;
+import "google/protobuf/timestamp.proto";
+
+message Category {
+  map<string, string> attributes = 1;
+  optional google.protobuf.Timestamp created_at = 2;
+  optional int64 display_order = 3;
+  string id = 4;
+  optional bool is_active = 5;
+  optional int64 level = 6;
+  string name = 7;
+  optional string parent_category_id = 8;
+  optional google.protobuf.Timestamp updated_at = 9;
+}

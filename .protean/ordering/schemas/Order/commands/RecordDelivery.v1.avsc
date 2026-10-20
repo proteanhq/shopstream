@@ -1,0 +1,15 @@
+{
+  "doc": "Record that the carrier has confirmed delivery to the customer.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "RecordDelivery",
+  "namespace": "ordering.order.fulfillment",
+  "type": "record"
+}

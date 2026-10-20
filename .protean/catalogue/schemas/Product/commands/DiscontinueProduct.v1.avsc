@@ -1,0 +1,15 @@
+{
+  "doc": "Remove an active product from sale.",
+  "fields": [
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "DiscontinueProduct",
+  "namespace": "catalogue.product.lifecycle",
+  "type": "record"
+}

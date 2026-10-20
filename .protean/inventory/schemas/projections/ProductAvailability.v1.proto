@@ -1,0 +1,15 @@
+syntax = "proto3";
+package inventory.projections.product_availability;
+import "google/protobuf/timestamp.proto";
+
+message ProductAvailability {
+  optional bool is_in_stock = 1;
+  string product_id = 2;
+  string product_variant_key = 3;
+  optional int64 total_available = 4;
+  optional int64 total_on_hand = 5;
+  optional int64 total_reserved = 6;
+  optional google.protobuf.Timestamp updated_at = 7;
+  string variant_id = 8;
+  optional int64 warehouse_count = 9;
+}

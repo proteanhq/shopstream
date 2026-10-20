@@ -1,0 +1,56 @@
+{
+  "doc": "Financial summary of an order: subtotal, shipping, tax, discounts, and grand total.\n\nPrices are locked at checkout and never change, even if the catalogue prices\nchange later. The currency is captured alongside the amounts.",
+  "fields": [
+    {
+      "default": null,
+      "name": "currency",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "discount_total",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "grand_total",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "shipping_cost",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "subtotal",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "tax_total",
+      "type": [
+        "null",
+        "double"
+      ]
+    }
+  ],
+  "name": "OrderPricing",
+  "namespace": "ordering.order.order",
+  "type": "record"
+}

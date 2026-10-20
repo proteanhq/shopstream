@@ -1,0 +1,19 @@
+{
+  "doc": "Cancel a fulfillment before it has been shipped.",
+  "fields": [
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "CancelFulfillment",
+  "namespace": "fulfillment.fulfillment.cancellation",
+  "type": "record"
+}

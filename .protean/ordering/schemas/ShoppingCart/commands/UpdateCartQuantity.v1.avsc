@@ -1,0 +1,26 @@
+{
+  "doc": "Change the quantity of an item already in the cart.",
+  "fields": [
+    {
+      "name": "cart_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_quantity",
+      "type": "long"
+    }
+  ],
+  "name": "UpdateCartQuantity",
+  "namespace": "ordering.cart.items",
+  "type": "record"
+}

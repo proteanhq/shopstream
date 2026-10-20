@@ -1,0 +1,23 @@
+{
+  "doc": "Write off damaged stock.",
+  "fields": [
+    {
+      "name": "approved_by",
+      "type": "string"
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    }
+  ],
+  "name": "WriteOffDamaged",
+  "namespace": "inventory.stock.damage",
+  "type": "record"
+}

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "campaign_code": {
+      "maxLength": 20,
+      "minLength": 1,
+      "type": "string"
+    },
+    "discount_type": {
+      "enum": [
+        "fixed",
+        "percentage",
+        "points_multiplier"
+      ],
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "discount_value": {
+      "type": "integer"
+    },
+    "ends_on": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "launched_at": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "name": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "starts_on": {
+      "anyOf": [
+        {
+          "format": "date",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "active",
+            "draft",
+            "expired",
+            "paused"
+          ],
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "draft"
+    }
+  },
+  "required": [
+    "campaign_code",
+    "discount_type",
+    "discount_value",
+    "id",
+    "name"
+  ],
+  "title": "PromoCampaign",
+  "type": "object",
+  "x-protean-element-type": "aggregate",
+  "x-protean-fqn": "loyalty.campaign.campaign.PromoCampaign",
+  "x-protean-identity-field": "id",
+  "x-protean-is-event-sourced": true
+}

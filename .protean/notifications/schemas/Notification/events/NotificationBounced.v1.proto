@@ -1,0 +1,11 @@
+syntax = "proto3";
+package notifications.notification.events;
+import "google/protobuf/timestamp.proto";
+
+message NotificationBounced {
+  google.protobuf.Timestamp bounced_at = 1;
+  string channel = 2;
+  string notification_id = 3;
+  string reason = 4;
+  string recipient_id = 5;
+}

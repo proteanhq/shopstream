@@ -1,0 +1,48 @@
+{
+  "doc": "A published review was removed.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "rating",
+      "type": "long"
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "removed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "removed_by",
+      "type": "string"
+    },
+    {
+      "name": "review_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ReviewRemoved",
+  "namespace": "reviews.review.events",
+  "type": "record"
+}

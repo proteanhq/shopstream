@@ -1,0 +1,27 @@
+{
+  "doc": "Flag active carts idle beyond the specified threshold.",
+  "fields": [
+    {
+      "default": null,
+      "name": "as_of",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "idle_threshold_hours",
+      "type": [
+        "null",
+        "long"
+      ]
+    }
+  ],
+  "name": "DetectAbandonedCarts",
+  "namespace": "ordering.cart.abandonment",
+  "type": "record"
+}

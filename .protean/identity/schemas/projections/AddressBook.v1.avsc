@@ -1,0 +1,25 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "addresses",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "AddressBook",
+  "namespace": "identity.projections.address_book",
+  "type": "record"
+}

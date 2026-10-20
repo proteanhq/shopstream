@@ -1,0 +1,18 @@
+{
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": "string"
+    },
+    {
+      "name": "email",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "CustomerLookup",
+  "namespace": "identity.projections.customer_lookup",
+  "type": "record"
+}

@@ -1,0 +1,32 @@
+{
+  "doc": "A delivery or billing address captured at checkout time.\n\nOnce recorded on an Order, the address is immutable \u2014 it represents where\nthe order was shipped, regardless of future address changes on the Customer.",
+  "fields": [
+    {
+      "name": "city",
+      "type": "string"
+    },
+    {
+      "name": "country",
+      "type": "string"
+    },
+    {
+      "name": "postal_code",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "state",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "street",
+      "type": "string"
+    }
+  ],
+  "name": "ShippingAddress",
+  "namespace": "ordering.order.order",
+  "type": "record"
+}

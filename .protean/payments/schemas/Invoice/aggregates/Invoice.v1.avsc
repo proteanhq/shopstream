@@ -1,0 +1,150 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "created_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "invoice_number",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "issued_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "line_items",
+      "type": [
+        "null",
+        {
+          "items": {
+            "fields": [
+              {
+                "name": "description",
+                "type": "string"
+              },
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "invoice",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "quantity",
+                "type": "double"
+              },
+              {
+                "name": "total",
+                "type": "double"
+              },
+              {
+                "name": "unit_price",
+                "type": "double"
+              }
+            ],
+            "name": "InvoiceLineItem",
+            "namespace": "payments.invoice.invoice",
+            "type": "record"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "paid_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "status",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "subtotal",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "tax",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    }
+  ],
+  "name": "Invoice",
+  "namespace": "payments.invoice.invoice",
+  "type": "record"
+}

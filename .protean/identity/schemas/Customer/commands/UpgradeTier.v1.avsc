@@ -1,0 +1,19 @@
+{
+  "doc": "Promote a customer to a higher loyalty tier (upgrades only, no downgrades).",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_tier",
+      "type": "string"
+    }
+  ],
+  "name": "UpgradeTier",
+  "namespace": "identity.customer.tier",
+  "type": "record"
+}

@@ -1,0 +1,9 @@
+syntax = "proto3";
+package fulfillment.fulfillment.shipping;
+import "google/protobuf/timestamp.proto";
+
+message RecordHandoff {
+  optional google.protobuf.Timestamp estimated_delivery = 1;
+  string fulfillment_id = 2;
+  string tracking_number = 3;
+}

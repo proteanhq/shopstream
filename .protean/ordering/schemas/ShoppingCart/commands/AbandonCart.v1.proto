@@ -1,0 +1,6 @@
+syntax = "proto3";
+package ordering.cart.management;
+
+message AbandonCart {
+  string cart_id = 1;
+}

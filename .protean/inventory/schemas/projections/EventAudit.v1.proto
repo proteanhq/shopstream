@@ -1,0 +1,14 @@
+syntax = "proto3";
+package inventory.projections.event_audit;
+import "google/protobuf/timestamp.proto";
+
+message EventAudit {
+  string audit_id = 1;
+  optional string causation_id = 2;
+  optional string correlation_id = 3;
+  string event_type = 4;
+  optional string inventory_item_id = 5;
+  optional string qualified_type = 6;
+  google.protobuf.Timestamp recorded_at = 7;
+  optional string stream = 8;
+}

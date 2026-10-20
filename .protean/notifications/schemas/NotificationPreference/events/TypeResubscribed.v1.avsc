@@ -1,0 +1,33 @@
+{
+  "doc": "A customer resubscribed to a previously unsubscribed notification type.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "notification_type",
+      "type": "string"
+    },
+    {
+      "name": "preference_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "resubscribed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "TypeResubscribed",
+  "namespace": "notifications.preference.events",
+  "type": "record"
+}

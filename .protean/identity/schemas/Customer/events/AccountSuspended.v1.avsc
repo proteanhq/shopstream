@@ -1,0 +1,26 @@
+{
+  "doc": "A customer account was suspended, blocking further activity.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "suspended_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "AccountSuspended",
+  "namespace": "identity.customer.events",
+  "type": "record"
+}

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "description": "Value object for stock keeping unit codes.\n\nFormat: alphanumeric + hyphens, 3-50 chars.\nE.g., \"ELEC-PHN-001\", \"SHOE-RUN-BLK-42\"",
+  "description": "Value object for stock keeping unit codes.\n\nFormat: alphanumeric + hyphens, 3-50 chars.\nE.g., \"ELEC-PHN-001\", \"SHOE-RUN-BLK-42\"\n\nExamples:\n    >>> SKU(code=\"ELEC-PHN-001\").code\n    'ELEC-PHN-001'\n    >>> try:\n    ...     SKU(code=\"bad--code\")  # consecutive hyphens\n    ... except ValidationError:\n    ...     print(\"rejected\")\n    rejected\n    >>> try:\n    ...     SKU(code=\"-leads-with-hyphen\")\n    ... except ValidationError:\n    ...     print(\"rejected\")\n    rejected\n    >>> try:\n    ...     SKU(code=\"ab\")  # shorter than 3 chars\n    ... except ValidationError:\n    ...     print(\"rejected\")\n    rejected",
   "properties": {
     "code": {
       "maxLength": 50,

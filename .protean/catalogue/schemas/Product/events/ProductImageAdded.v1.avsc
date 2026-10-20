@@ -1,0 +1,30 @@
+{
+  "doc": "A new image was uploaded for a product.",
+  "fields": [
+    {
+      "name": "image_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "is_primary",
+      "type": "boolean"
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "url",
+      "type": "string"
+    }
+  ],
+  "name": "ProductImageAdded",
+  "namespace": "catalogue.product.events",
+  "type": "record"
+}

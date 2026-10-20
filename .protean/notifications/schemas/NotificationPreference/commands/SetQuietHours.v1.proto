@@ -1,0 +1,8 @@
+syntax = "proto3";
+package notifications.preference.management;
+
+message SetQuietHours {
+  string customer_id = 1;
+  string end = 2;
+  string start = 3;
+}

@@ -1,0 +1,8 @@
+syntax = "proto3";
+package catalogue.category.events;
+import "google/protobuf/timestamp.proto";
+
+message CategoryDeactivated {
+  string category_id = 1;
+  google.protobuf.Timestamp deactivated_at = 2;
+}

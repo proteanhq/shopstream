@@ -1,0 +1,34 @@
+{
+  "fields": [
+    {
+      "name": "account_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "customer_id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "points_balance",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "tier",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "PointsLeaderboard",
+  "namespace": "loyalty.projections.points_leaderboard",
+  "type": "record"
+}

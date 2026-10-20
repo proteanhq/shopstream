@@ -1,0 +1,41 @@
+{
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": "string"
+    },
+    {
+      "name": "delivered_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": "string"
+    },
+    {
+      "name": "product_id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "variant_id",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "vp_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "VerifiedPurchases",
+  "namespace": "reviews.projections.verified_purchases",
+  "type": "record"
+}

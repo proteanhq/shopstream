@@ -1,0 +1,19 @@
+{
+  "doc": "Request to cancel a pending or scheduled notification.",
+  "fields": [
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "CancelNotification",
+  "namespace": "notifications.notification.cancellation",
+  "type": "record"
+}

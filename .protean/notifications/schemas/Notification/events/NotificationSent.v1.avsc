@@ -1,0 +1,33 @@
+{
+  "doc": "A notification was sent to the channel adapter.",
+  "fields": [
+    {
+      "name": "channel",
+      "type": "string"
+    },
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "recipient_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "sent_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "NotificationSent",
+  "namespace": "notifications.notification.events",
+  "type": "record"
+}

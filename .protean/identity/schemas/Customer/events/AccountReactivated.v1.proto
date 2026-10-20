@@ -1,0 +1,8 @@
+syntax = "proto3";
+package identity.customer.events;
+import "google/protobuf/timestamp.proto";
+
+message AccountReactivated {
+  string customer_id = 1;
+  google.protobuf.Timestamp reactivated_at = 2;
+}

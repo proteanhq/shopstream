@@ -1,0 +1,59 @@
+syntax = "proto3";
+package payments.payment.payment;
+import "google/protobuf/timestamp.proto";
+
+message Payment {
+  optional Money amount = 1;
+  optional int64 attempt_count = 2;
+  repeated PaymentAttempt attempts = 3;
+  optional google.protobuf.Timestamp created_at = 4;
+  string customer_id = 5;
+  optional GatewayInfo gateway_info = 6;
+  string id = 7;
+  string idempotency_key = 8;
+  string order_id = 9;
+  optional PaymentMethod payment_method = 10;
+  repeated Refund refunds = 11;
+  optional string status = 12;
+  optional double total_refunded = 13;
+  optional google.protobuf.Timestamp updated_at = 14;
+}
+
+message GatewayInfo {
+  optional string gateway_name = 1;
+  optional string gateway_response = 2;
+  optional string gateway_status = 3;
+  optional string gateway_transaction_id = 4;
+}
+
+message Money {
+  optional string currency = 1;
+  optional double value = 2;
+}
+
+message PaymentAttempt {
+  google.protobuf.Timestamp attempted_at = 1;
+  optional string failure_reason = 2;
+  optional string gateway_transaction_id = 3;
+  string id = 4;
+  optional string payment = 5;
+  string status = 6;
+}
+
+message PaymentMethod {
+  optional int64 expiry_month = 1;
+  optional int64 expiry_year = 2;
+  optional string last4 = 3;
+  optional string method_type = 4;
+}
+
+message Refund {
+  double amount = 1;
+  optional string gateway_refund_id = 2;
+  string id = 3;
+  optional string payment = 4;
+  optional google.protobuf.Timestamp processed_at = 5;
+  string reason = 6;
+  google.protobuf.Timestamp requested_at = 7;
+  optional string status = 8;
+}

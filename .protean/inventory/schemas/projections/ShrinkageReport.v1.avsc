@@ -1,0 +1,94 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "adjustment_reasons",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "last_adjustment_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "sku",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_adjustments",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_damaged",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_shrinkage_value",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_written_off",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "warehouse_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "name": "ShrinkageReport",
+  "namespace": "inventory.projections.shrinkage_report",
+  "type": "record"
+}

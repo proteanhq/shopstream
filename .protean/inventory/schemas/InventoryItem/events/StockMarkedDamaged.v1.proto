@@ -1,0 +1,16 @@
+syntax = "proto3";
+package inventory.stock.events;
+import "google/protobuf/timestamp.proto";
+
+message StockMarkedDamaged {
+  string inventory_item_id = 1;
+  google.protobuf.Timestamp marked_at = 2;
+  int64 new_available = 3;
+  int64 new_damaged = 4;
+  int64 new_on_hand = 5;
+  int64 previous_damaged = 6;
+  int64 previous_on_hand = 7;
+  string product_id = 8;
+  int64 quantity = 9;
+  string reason = 10;
+}

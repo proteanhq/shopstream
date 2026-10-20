@@ -1,0 +1,7 @@
+syntax = "proto3";
+package catalogue.product.events;
+
+message ProductImageRemoved {
+  string image_id = 1;
+  string product_id = 2;
+}

@@ -1,0 +1,37 @@
+{
+  "doc": "A pending notification was cancelled.",
+  "fields": [
+    {
+      "name": "cancelled_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "channel",
+      "type": "string"
+    },
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "recipient_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "NotificationCancelled",
+  "namespace": "notifications.notification.events",
+  "type": "record"
+}

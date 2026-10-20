@@ -1,0 +1,35 @@
+syntax = "proto3";
+package catalogue.product.product;
+
+message Variant {
+  map<string, string> attributes = 1;
+  optional Dimensions dimensions = 2;
+  string id = 3;
+  optional bool is_active = 4;
+  Price price = 5;
+  optional string product = 6;
+  SKU variant_sku = 7;
+  optional Weight weight = 8;
+}
+
+message Dimensions {
+  optional double height = 1;
+  optional double length = 2;
+  optional string unit = 3;
+  optional double width = 4;
+}
+
+message Price {
+  double base_price = 1;
+  optional string currency = 2;
+  map<string, string> tier_prices = 3;
+}
+
+message Weight {
+  optional string unit = 1;
+  optional double value = 2;
+}
+
+message SKU {
+  string code = 1;
+}

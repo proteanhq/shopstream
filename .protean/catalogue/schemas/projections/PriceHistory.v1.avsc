@@ -1,0 +1,47 @@
+{
+  "fields": [
+    {
+      "name": "changed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "currency",
+      "type": "string"
+    },
+    {
+      "name": "entry_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_price",
+      "type": "double"
+    },
+    {
+      "name": "previous_price",
+      "type": "double"
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "PriceHistory",
+  "namespace": "catalogue.projections.price_history",
+  "type": "record"
+}

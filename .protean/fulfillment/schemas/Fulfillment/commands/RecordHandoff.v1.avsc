@@ -1,0 +1,30 @@
+{
+  "doc": "Record that the shipment has been handed off to the carrier.",
+  "fields": [
+    {
+      "default": null,
+      "name": "estimated_delivery",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "tracking_number",
+      "type": "string"
+    }
+  ],
+  "name": "RecordHandoff",
+  "namespace": "fulfillment.fulfillment.shipping",
+  "type": "record"
+}

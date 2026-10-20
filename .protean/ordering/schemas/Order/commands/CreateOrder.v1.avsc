@@ -1,0 +1,84 @@
+{
+  "doc": "Create a new order from a shopping cart's items, addresses, and pricing.",
+  "fields": [
+    {
+      "name": "billing_address",
+      "type": {
+        "type": "map",
+        "values": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "currency",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "discount_total",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "name": "grand_total",
+      "type": "double"
+    },
+    {
+      "name": "items",
+      "type": {
+        "items": "string",
+        "type": "array"
+      }
+    },
+    {
+      "default": null,
+      "name": "order_source",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "shipping_address",
+      "type": {
+        "type": "map",
+        "values": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "shipping_cost",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "name": "subtotal",
+      "type": "double"
+    },
+    {
+      "default": null,
+      "name": "tax_total",
+      "type": [
+        "null",
+        "double"
+      ]
+    }
+  ],
+  "name": "CreateOrder",
+  "namespace": "ordering.order.creation",
+  "type": "record"
+}

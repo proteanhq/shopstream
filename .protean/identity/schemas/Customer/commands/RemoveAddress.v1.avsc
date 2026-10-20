@@ -1,0 +1,22 @@
+{
+  "doc": "Remove an address from a customer's address book.",
+  "fields": [
+    {
+      "name": "address_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "RemoveAddress",
+  "namespace": "identity.customer.addresses",
+  "type": "record"
+}

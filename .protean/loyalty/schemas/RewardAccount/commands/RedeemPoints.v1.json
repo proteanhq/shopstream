@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "account_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "amount": {
+      "type": "integer"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "redemption"
+    }
+  },
+  "required": [
+    "account_id",
+    "amount"
+  ],
+  "title": "RedeemPoints",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.reward.reward_account.RewardAccount",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "loyalty.reward.points.RedeemPoints",
+  "x-protean-type": "Loyalty.RedeemPoints.v1",
+  "x-protean-version": 1
+}

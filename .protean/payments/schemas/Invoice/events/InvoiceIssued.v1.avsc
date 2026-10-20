@@ -1,0 +1,33 @@
+{
+  "doc": "An invoice was sent/issued to the customer.",
+  "fields": [
+    {
+      "name": "invoice_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "invoice_number",
+      "type": "string"
+    },
+    {
+      "name": "issued_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "InvoiceIssued",
+  "namespace": "payments.invoice.events",
+  "type": "record"
+}

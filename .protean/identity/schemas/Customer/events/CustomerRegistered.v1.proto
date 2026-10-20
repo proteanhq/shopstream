@@ -1,0 +1,12 @@
+syntax = "proto3";
+package identity.customer.events;
+import "google/protobuf/timestamp.proto";
+
+message CustomerRegistered {
+  string customer_id = 1;
+  string email = 2;
+  string external_id = 3;
+  string first_name = 4;
+  string last_name = 5;
+  google.protobuf.Timestamp registered_at = 6;
+}

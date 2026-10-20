@@ -1,0 +1,31 @@
+syntax = "proto3";
+package ordering.projections.order_detail;
+import "google/protobuf/timestamp.proto";
+
+message OrderDetail {
+  map<string, string> billing_address = 1;
+  optional string cancellation_reason = 2;
+  optional string cancelled_by = 3;
+  optional string carrier = 4;
+  optional string coupon_code = 5;
+  optional google.protobuf.Timestamp created_at = 6;
+  optional string currency = 7;
+  string customer_id = 8;
+  optional double discount_total = 9;
+  optional string estimated_delivery = 10;
+  optional double grand_total = 11;
+  repeated string items = 12;
+  string order_id = 13;
+  optional string order_source = 14;
+  optional string payment_id = 15;
+  optional string payment_method = 16;
+  optional string payment_status = 17;
+  optional string shipment_id = 18;
+  map<string, string> shipping_address = 19;
+  optional double shipping_cost = 20;
+  string status = 21;
+  optional double subtotal = 22;
+  optional double tax_total = 23;
+  optional string tracking_number = 24;
+  optional google.protobuf.Timestamp updated_at = 25;
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+package reviews.review.events;
+import "google/protobuf/timestamp.proto";
+
+message HelpfulVoteRecorded {
+  int64 helpful_count = 1;
+  string review_id = 2;
+  int64 unhelpful_count = 3;
+  string vote_type = 4;
+  google.protobuf.Timestamp voted_at = 5;
+  string voter_id = 6;
+}

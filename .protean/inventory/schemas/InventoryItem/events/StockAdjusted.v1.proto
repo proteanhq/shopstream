@@ -1,0 +1,16 @@
+syntax = "proto3";
+package inventory.stock.events;
+import "google/protobuf/timestamp.proto";
+
+message StockAdjusted {
+  google.protobuf.Timestamp adjusted_at = 1;
+  string adjusted_by = 2;
+  string adjustment_type = 3;
+  string inventory_item_id = 4;
+  int64 new_available = 5;
+  int64 new_on_hand = 6;
+  int64 previous_on_hand = 7;
+  string product_id = 8;
+  int64 quantity_change = 9;
+  string reason = 10;
+}

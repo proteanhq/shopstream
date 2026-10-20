@@ -1,0 +1,11 @@
+syntax = "proto3";
+package identity.customer.registration;
+
+message RegisterCustomer {
+  optional string date_of_birth = 1;
+  string email = 2;
+  string external_id = 3;
+  string first_name = 4;
+  string last_name = 5;
+  optional string phone = 6;
+}

@@ -1,0 +1,22 @@
+{
+  "doc": "A warehouse was deactivated.",
+  "fields": [
+    {
+      "name": "deactivated_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "warehouse_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "WarehouseDeactivated",
+  "namespace": "inventory.warehouse.events",
+  "type": "record"
+}

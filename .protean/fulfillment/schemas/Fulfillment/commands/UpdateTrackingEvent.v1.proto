@@ -1,0 +1,9 @@
+syntax = "proto3";
+package fulfillment.fulfillment.tracking;
+
+message UpdateTrackingEvent {
+  optional string description = 1;
+  string fulfillment_id = 2;
+  optional string location = 3;
+  string status = 4;
+}

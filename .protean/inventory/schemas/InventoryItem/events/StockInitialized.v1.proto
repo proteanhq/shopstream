@@ -1,0 +1,15 @@
+syntax = "proto3";
+package inventory.stock.events;
+import "google/protobuf/timestamp.proto";
+
+message StockInitialized {
+  int64 initial_quantity = 1;
+  google.protobuf.Timestamp initialized_at = 2;
+  string inventory_item_id = 3;
+  string product_id = 4;
+  int64 reorder_point = 5;
+  int64 reorder_quantity = 6;
+  string sku = 7;
+  string variant_id = 8;
+  string warehouse_id = 9;
+}

@@ -1,0 +1,7 @@
+syntax = "proto3";
+package inventory.warehouse.management;
+
+message RemoveZone {
+  string warehouse_id = 1;
+  string zone_id = 2;
+}

@@ -1,0 +1,10 @@
+syntax = "proto3";
+package catalogue.product.events;
+
+message TierPriceSet {
+  string currency = 1;
+  double price = 2;
+  string product_id = 3;
+  string tier = 4;
+  string variant_id = 5;
+}

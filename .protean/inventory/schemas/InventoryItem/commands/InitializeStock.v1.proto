@@ -1,0 +1,12 @@
+syntax = "proto3";
+package inventory.stock.initialization;
+
+message InitializeStock {
+  optional int64 initial_quantity = 1;
+  string product_id = 2;
+  optional int64 reorder_point = 3;
+  optional int64 reorder_quantity = 4;
+  string sku = 5;
+  string variant_id = 6;
+  string warehouse_id = 7;
+}

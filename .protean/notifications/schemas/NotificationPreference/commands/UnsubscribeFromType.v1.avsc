@@ -1,0 +1,19 @@
+{
+  "doc": "Unsubscribe a customer from a specific notification type.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "notification_type",
+      "type": "string"
+    }
+  ],
+  "name": "UnsubscribeFromType",
+  "namespace": "notifications.preference.subscription",
+  "type": "record"
+}

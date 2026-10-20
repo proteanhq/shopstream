@@ -1,0 +1,17 @@
+syntax = "proto3";
+package reviews.projections.moderation_queue;
+import "google/protobuf/timestamp.proto";
+
+message ModerationQueue {
+  string body = 1;
+  string customer_id = 2;
+  optional google.protobuf.Timestamp last_reported_at = 3;
+  string product_id = 4;
+  int64 rating = 5;
+  optional int64 report_count = 6;
+  string review_id = 7;
+  string status = 8;
+  optional google.protobuf.Timestamp submitted_at = 9;
+  string title = 10;
+  optional string verified_purchase = 11;
+}

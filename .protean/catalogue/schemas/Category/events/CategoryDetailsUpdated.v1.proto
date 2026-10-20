@@ -1,0 +1,8 @@
+syntax = "proto3";
+package catalogue.category.events;
+
+message CategoryDetailsUpdated {
+  map<string, string> attributes = 1;
+  string category_id = 2;
+  string name = 3;
+}

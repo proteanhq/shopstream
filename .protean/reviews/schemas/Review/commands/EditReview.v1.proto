@@ -1,0 +1,12 @@
+syntax = "proto3";
+package reviews.review.editing;
+
+message EditReview {
+  optional string body = 1;
+  repeated string cons = 2;
+  string customer_id = 3;
+  repeated string pros = 4;
+  optional int64 rating = 5;
+  string review_id = 6;
+  optional string title = 7;
+}

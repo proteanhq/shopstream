@@ -1,0 +1,45 @@
+{
+  "doc": "Returned items were added back to on-hand inventory.",
+  "fields": [
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_available",
+      "type": "long"
+    },
+    {
+      "name": "new_on_hand",
+      "type": "long"
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "previous_on_hand",
+      "type": "long"
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    },
+    {
+      "name": "returned_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "StockReturned",
+  "namespace": "inventory.stock.events",
+  "type": "record"
+}

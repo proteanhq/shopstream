@@ -1,0 +1,16 @@
+syntax = "proto3";
+package catalogue.product.creation;
+
+message CreateProduct {
+  map<string, string> attributes = 1;
+  optional string brand = 2;
+  optional string category_id = 3;
+  optional string description = 4;
+  optional string meta_description = 5;
+  optional string meta_title = 6;
+  optional string seller_id = 7;
+  string sku = 8;
+  optional string slug = 9;
+  string title = 10;
+  optional string visibility = 11;
+}

@@ -1,0 +1,22 @@
+{
+  "fields": [
+    {
+      "name": "issued_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "redemption_id",
+      "type": "string"
+    },
+    {
+      "name": "voucher_code",
+      "type": "string"
+    }
+  ],
+  "name": "VoucherIssued",
+  "namespace": "loyalty.redemption.events",
+  "type": "record"
+}

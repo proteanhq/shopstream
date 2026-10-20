@@ -1,0 +1,30 @@
+{
+  "doc": "Warehouse details were updated.",
+  "fields": [
+    {
+      "name": "capacity",
+      "type": "long"
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "name": "updated_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "warehouse_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "WarehouseUpdated",
+  "namespace": "inventory.warehouse.events",
+  "type": "record"
+}

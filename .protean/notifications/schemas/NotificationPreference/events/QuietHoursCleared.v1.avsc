@@ -1,0 +1,29 @@
+{
+  "doc": "A customer cleared their do-not-disturb window.",
+  "fields": [
+    {
+      "name": "cleared_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "preference_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "QuietHoursCleared",
+  "namespace": "notifications.preference.events",
+  "type": "record"
+}

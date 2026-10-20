@@ -1,0 +1,30 @@
+{
+  "doc": "A category's name or attributes were changed.",
+  "fields": [
+    {
+      "default": null,
+      "name": "attributes",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ]
+    },
+    {
+      "name": "category_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "name",
+      "type": "string"
+    }
+  ],
+  "name": "CategoryDetailsUpdated",
+  "namespace": "catalogue.category.events",
+  "type": "record"
+}

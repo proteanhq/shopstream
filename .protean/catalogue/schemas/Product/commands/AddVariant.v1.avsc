@@ -1,0 +1,90 @@
+{
+  "doc": "Add a new purchasable variant (size, color, etc.) to a product.",
+  "fields": [
+    {
+      "default": null,
+      "name": "attributes",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ]
+    },
+    {
+      "name": "base_price",
+      "type": "double"
+    },
+    {
+      "default": null,
+      "name": "currency",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "dimension_unit",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "height",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "length",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "variant_sku",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "weight_unit",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "weight_value",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "width",
+      "type": [
+        "null",
+        "double"
+      ]
+    }
+  ],
+  "name": "AddVariant",
+  "namespace": "catalogue.product.variants",
+  "type": "record"
+}

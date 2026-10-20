@@ -1,0 +1,45 @@
+{
+  "doc": "Add a new line item to an order (only allowed in Created state).",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    },
+    {
+      "name": "sku",
+      "type": "string"
+    },
+    {
+      "name": "title",
+      "type": "string"
+    },
+    {
+      "name": "unit_price",
+      "type": "double"
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "AddItem",
+  "namespace": "ordering.order.modification",
+  "type": "record"
+}

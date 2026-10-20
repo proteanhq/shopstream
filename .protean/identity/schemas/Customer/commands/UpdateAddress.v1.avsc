@@ -1,0 +1,70 @@
+{
+  "doc": "Modify fields of an existing address.",
+  "fields": [
+    {
+      "name": "address_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "city",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "country",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "label",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "postal_code",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "state",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "street",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "UpdateAddress",
+  "namespace": "identity.customer.addresses",
+  "type": "record"
+}

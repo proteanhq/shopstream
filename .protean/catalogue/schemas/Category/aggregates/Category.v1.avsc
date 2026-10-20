@@ -1,0 +1,84 @@
+{
+  "doc": "A hierarchical grouping for organizing products in the catalogue.\n\nCategories form a tree up to 5 levels deep (0-4). Each category can have a\nparent, custom attributes, and a display order for controlling presentation.",
+  "fields": [
+    {
+      "default": null,
+      "name": "attributes",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "created_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "display_order",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "is_active",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    {
+      "default": null,
+      "name": "level",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "parent_category_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    }
+  ],
+  "name": "Category",
+  "namespace": "catalogue.category.category",
+  "type": "record"
+}

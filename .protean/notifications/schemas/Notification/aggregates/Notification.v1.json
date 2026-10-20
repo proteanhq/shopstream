@@ -83,11 +83,13 @@
         "OrderCancellation",
         "OrderConfirmation",
         "PaymentReceipt",
+        "PointsRedeemed",
         "RefundNotification",
         "ReviewPrompt",
         "ReviewPublished",
         "ReviewRejected",
         "ShippingUpdate",
+        "TierUpgraded",
         "Welcome"
       ],
       "maxLength": 255,

@@ -1,0 +1,6 @@
+syntax = "proto3";
+package loyalty.redemption.commands;
+
+message CompleteRedemption {
+  string redemption_id = 1;
+}

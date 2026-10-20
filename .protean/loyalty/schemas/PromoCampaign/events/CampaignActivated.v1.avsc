@@ -1,0 +1,18 @@
+{
+  "fields": [
+    {
+      "name": "activated_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "campaign_id",
+      "type": "string"
+    }
+  ],
+  "name": "CampaignActivated",
+  "namespace": "loyalty.campaign.events",
+  "type": "record"
+}

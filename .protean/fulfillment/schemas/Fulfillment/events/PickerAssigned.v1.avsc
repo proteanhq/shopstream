@@ -1,0 +1,26 @@
+{
+  "doc": "A warehouse picker was assigned to a fulfillment.",
+  "fields": [
+    {
+      "name": "assigned_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "assigned_to",
+      "type": "string"
+    },
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "PickerAssigned",
+  "namespace": "fulfillment.fulfillment.events",
+  "type": "record"
+}

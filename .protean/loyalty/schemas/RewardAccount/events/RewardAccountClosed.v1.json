@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "account_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "closed_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_id",
+    "closed_at"
+  ],
+  "title": "RewardAccountClosed",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.reward.reward_account.RewardAccount",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "loyalty.reward.events.RewardAccountClosed",
+  "x-protean-type": "Loyalty.RewardAccountClosed.v1",
+  "x-protean-version": 1
+}

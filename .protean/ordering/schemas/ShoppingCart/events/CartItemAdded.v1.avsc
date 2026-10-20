@@ -1,0 +1,40 @@
+{
+  "doc": "A product was added to the shopping cart.",
+  "fields": [
+    {
+      "name": "cart_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "CartItemAdded",
+  "namespace": "ordering.cart.events",
+  "type": "record"
+}

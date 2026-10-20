@@ -1,0 +1,25 @@
+{
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "review_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "vote_type",
+      "type": "string"
+    }
+  ],
+  "name": "VoteOnReview",
+  "namespace": "reviews.review.voting",
+  "type": "record"
+}

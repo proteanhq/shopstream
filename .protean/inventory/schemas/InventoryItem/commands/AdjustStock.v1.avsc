@@ -1,0 +1,31 @@
+{
+  "doc": "Manually adjust stock levels.",
+  "fields": [
+    {
+      "name": "adjusted_by",
+      "type": "string"
+    },
+    {
+      "name": "adjustment_type",
+      "type": "string"
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity_change",
+      "type": "long"
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "AdjustStock",
+  "namespace": "inventory.stock.adjustment",
+  "type": "record"
+}

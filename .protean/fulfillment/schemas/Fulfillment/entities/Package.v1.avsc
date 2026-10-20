@@ -1,0 +1,85 @@
+{
+  "doc": "A physical package in the shipment.",
+  "fields": [
+    {
+      "default": null,
+      "name": "dimensions",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "default": null,
+              "name": "height",
+              "type": [
+                "null",
+                "double"
+              ]
+            },
+            {
+              "default": null,
+              "name": "length",
+              "type": [
+                "null",
+                "double"
+              ]
+            },
+            {
+              "default": null,
+              "name": "weight",
+              "type": [
+                "null",
+                "double"
+              ]
+            },
+            {
+              "default": null,
+              "name": "width",
+              "type": [
+                "null",
+                "double"
+              ]
+            }
+          ],
+          "name": "PackageDimensions",
+          "namespace": "fulfillment.fulfillment.fulfillment",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "fulfillment",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "item_ids",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "weight",
+      "type": [
+        "null",
+        "double"
+      ]
+    }
+  ],
+  "name": "Package",
+  "namespace": "fulfillment.fulfillment.fulfillment",
+  "type": "record"
+}

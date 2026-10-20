@@ -1,0 +1,33 @@
+{
+  "fields": [
+    {
+      "name": "action",
+      "type": "string"
+    },
+    {
+      "name": "moderator_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "reason",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "review_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ModerateReview",
+  "namespace": "reviews.review.moderation",
+  "type": "record"
+}

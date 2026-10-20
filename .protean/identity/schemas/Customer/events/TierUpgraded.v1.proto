@@ -1,0 +1,10 @@
+syntax = "proto3";
+package identity.customer.events;
+import "google/protobuf/timestamp.proto";
+
+message TierUpgraded {
+  string customer_id = 1;
+  string new_tier = 2;
+  string previous_tier = 3;
+  google.protobuf.Timestamp upgraded_at = 4;
+}

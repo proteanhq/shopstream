@@ -1,0 +1,14 @@
+syntax = "proto3";
+package fulfillment.projections.delivery_performance;
+import "google/protobuf/timestamp.proto";
+
+message DeliveryPerformanceView {
+  string carrier = 1;
+  string date = 2;
+  optional int64 delivered_count = 3;
+  optional int64 exception_count = 4;
+  string id = 5;
+  optional double total_delivery_hours = 6;
+  optional int64 total_shipments = 7;
+  optional google.protobuf.Timestamp updated_at = 8;
+}

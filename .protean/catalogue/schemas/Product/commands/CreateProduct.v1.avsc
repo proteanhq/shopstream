@@ -1,0 +1,97 @@
+{
+  "doc": "Add a new product to the catalogue in Draft status.",
+  "fields": [
+    {
+      "default": null,
+      "name": "attributes",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "brand",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "category_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "description",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "meta_description",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "meta_title",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "seller_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "sku",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "slug",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "title",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "visibility",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "CreateProduct",
+  "namespace": "catalogue.product.creation",
+  "type": "record"
+}

@@ -1,0 +1,16 @@
+syntax = "proto3";
+package inventory.projections.shrinkage_report;
+import "google/protobuf/timestamp.proto";
+
+message ShrinkageReport {
+  repeated string adjustment_reasons = 1;
+  string inventory_item_id = 2;
+  optional google.protobuf.Timestamp last_adjustment_at = 3;
+  string product_id = 4;
+  optional string sku = 5;
+  optional int64 total_adjustments = 6;
+  optional int64 total_damaged = 7;
+  optional double total_shrinkage_value = 8;
+  optional int64 total_written_off = 9;
+  optional string warehouse_id = 10;
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+package ordering.order.modification;
+
+message AddItem {
+  string order_id = 1;
+  string product_id = 2;
+  int64 quantity = 3;
+  string sku = 4;
+  string title = 5;
+  double unit_price = 6;
+  string variant_id = 7;
+}

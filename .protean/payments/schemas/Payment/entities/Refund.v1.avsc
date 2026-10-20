@@ -1,0 +1,62 @@
+{
+  "doc": "A refund against this payment.",
+  "fields": [
+    {
+      "name": "amount",
+      "type": "double"
+    },
+    {
+      "default": null,
+      "name": "gateway_refund_id",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "payment",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "processed_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "requested_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "default": null,
+      "name": "status",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "Refund",
+  "namespace": "payments.payment.payment",
+  "type": "record"
+}

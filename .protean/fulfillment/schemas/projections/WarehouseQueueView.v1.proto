@@ -1,0 +1,14 @@
+syntax = "proto3";
+package fulfillment.projections.warehouse_queue;
+import "google/protobuf/timestamp.proto";
+
+message WarehouseQueueView {
+  optional string assigned_to = 1;
+  optional google.protobuf.Timestamp created_at = 2;
+  string fulfillment_id = 3;
+  optional int64 item_count = 4;
+  string order_id = 5;
+  string status = 6;
+  optional google.protobuf.Timestamp updated_at = 7;
+  optional string warehouse_id = 8;
+}

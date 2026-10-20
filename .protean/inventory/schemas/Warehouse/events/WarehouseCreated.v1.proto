@@ -1,0 +1,11 @@
+syntax = "proto3";
+package inventory.warehouse.events;
+import "google/protobuf/timestamp.proto";
+
+message WarehouseCreated {
+  map<string, string> address = 1;
+  int64 capacity = 2;
+  google.protobuf.Timestamp created_at = 3;
+  string name = 4;
+  string warehouse_id = 5;
+}

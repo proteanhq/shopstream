@@ -1,0 +1,56 @@
+{
+  "doc": "Reserved stock was committed (shipped), reducing on-hand quantity.",
+  "fields": [
+    {
+      "name": "committed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_on_hand",
+      "type": "long"
+    },
+    {
+      "name": "new_reserved",
+      "type": "long"
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "previous_on_hand",
+      "type": "long"
+    },
+    {
+      "name": "previous_reserved",
+      "type": "long"
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    },
+    {
+      "name": "reservation_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "StockCommitted",
+  "namespace": "inventory.stock.events",
+  "type": "record"
+}

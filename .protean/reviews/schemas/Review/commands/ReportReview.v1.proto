@@ -1,0 +1,9 @@
+syntax = "proto3";
+package reviews.review.reporting;
+
+message ReportReview {
+  string customer_id = 1;
+  optional string detail = 2;
+  string reason = 3;
+  string review_id = 4;
+}

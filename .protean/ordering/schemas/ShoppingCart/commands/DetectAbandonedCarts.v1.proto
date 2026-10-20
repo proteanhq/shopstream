@@ -1,0 +1,8 @@
+syntax = "proto3";
+package ordering.cart.abandonment;
+import "google/protobuf/timestamp.proto";
+
+message DetectAbandonedCarts {
+  optional google.protobuf.Timestamp as_of = 1;
+  optional int64 idle_threshold_hours = 2;
+}

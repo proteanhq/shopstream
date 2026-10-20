@@ -1,0 +1,7 @@
+syntax = "proto3";
+package ordering.cart.coupons;
+
+message ApplyCouponToCart {
+  string cart_id = 1;
+  string coupon_code = 2;
+}

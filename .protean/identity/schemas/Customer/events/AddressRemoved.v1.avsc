@@ -1,0 +1,22 @@
+{
+  "doc": "An address was removed from a customer's address book.",
+  "fields": [
+    {
+      "name": "address_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "AddressRemoved",
+  "namespace": "identity.customer.events",
+  "type": "record"
+}

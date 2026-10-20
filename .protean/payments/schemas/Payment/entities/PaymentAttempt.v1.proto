@@ -1,0 +1,12 @@
+syntax = "proto3";
+package payments.payment.payment;
+import "google/protobuf/timestamp.proto";
+
+message PaymentAttempt {
+  google.protobuf.Timestamp attempted_at = 1;
+  optional string failure_reason = 2;
+  optional string gateway_transaction_id = 3;
+  string id = 4;
+  optional string payment = 5;
+  string status = 6;
+}

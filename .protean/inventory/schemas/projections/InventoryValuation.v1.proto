@@ -1,0 +1,15 @@
+syntax = "proto3";
+package inventory.projections.inventory_valuation;
+import "google/protobuf/timestamp.proto";
+
+message InventoryValuation {
+  string inventory_item_id = 1;
+  optional int64 on_hand = 2;
+  string product_id = 3;
+  optional string sku = 4;
+  optional double total_value = 5;
+  optional double unit_cost = 6;
+  optional google.protobuf.Timestamp updated_at = 7;
+  string variant_id = 8;
+  optional string warehouse_id = 9;
+}

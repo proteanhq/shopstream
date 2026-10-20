@@ -1,0 +1,10 @@
+syntax = "proto3";
+package fulfillment.fulfillment.events;
+import "google/protobuf/timestamp.proto";
+
+message FulfillmentCancelled {
+  google.protobuf.Timestamp cancelled_at = 1;
+  string fulfillment_id = 2;
+  string order_id = 3;
+  string reason = 4;
+}

@@ -1,0 +1,17 @@
+syntax = "proto3";
+package payments.payment.events;
+import "google/protobuf/timestamp.proto";
+
+message PaymentInitiated {
+  double amount = 1;
+  string attempt_id = 2;
+  string currency = 3;
+  string customer_id = 4;
+  string gateway_name = 5;
+  string idempotency_key = 6;
+  google.protobuf.Timestamp initiated_at = 7;
+  optional string last4 = 8;
+  string order_id = 9;
+  string payment_id = 10;
+  string payment_method_type = 11;
+}

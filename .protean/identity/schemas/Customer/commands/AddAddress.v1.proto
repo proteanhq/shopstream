@@ -1,0 +1,14 @@
+syntax = "proto3";
+package identity.customer.addresses;
+
+message AddAddress {
+  string city = 1;
+  string country = 2;
+  string customer_id = 3;
+  optional string geo_lat = 4;
+  optional string geo_lng = 5;
+  optional string label = 6;
+  string postal_code = 7;
+  optional string state = 8;
+  string street = 9;
+}

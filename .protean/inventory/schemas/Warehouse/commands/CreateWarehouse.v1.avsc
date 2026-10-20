@@ -1,0 +1,27 @@
+{
+  "doc": "Create a new warehouse.",
+  "fields": [
+    {
+      "name": "address",
+      "type": {
+        "type": "map",
+        "values": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "capacity",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "name",
+      "type": "string"
+    }
+  ],
+  "name": "CreateWarehouse",
+  "namespace": "inventory.warehouse.management",
+  "type": "record"
+}

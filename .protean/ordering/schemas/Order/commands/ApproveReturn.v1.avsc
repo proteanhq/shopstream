@@ -1,0 +1,15 @@
+{
+  "doc": "Approve a pending return request.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ApproveReturn",
+  "namespace": "ordering.order.returns",
+  "type": "record"
+}

@@ -1,0 +1,23 @@
+{
+  "doc": "A category's display position was changed.",
+  "fields": [
+    {
+      "name": "category_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_order",
+      "type": "long"
+    },
+    {
+      "name": "previous_order",
+      "type": "long"
+    }
+  ],
+  "name": "CategoryReordered",
+  "namespace": "catalogue.category.events",
+  "type": "record"
+}

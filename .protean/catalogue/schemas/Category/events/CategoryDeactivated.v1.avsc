@@ -1,0 +1,22 @@
+{
+  "doc": "A category was deactivated and hidden from the storefront.",
+  "fields": [
+    {
+      "name": "category_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "deactivated_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "CategoryDeactivated",
+  "namespace": "catalogue.category.events",
+  "type": "record"
+}

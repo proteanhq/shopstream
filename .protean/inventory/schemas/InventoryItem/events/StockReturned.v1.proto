@@ -1,0 +1,13 @@
+syntax = "proto3";
+package inventory.stock.events;
+import "google/protobuf/timestamp.proto";
+
+message StockReturned {
+  string inventory_item_id = 1;
+  int64 new_available = 2;
+  int64 new_on_hand = 3;
+  string order_id = 4;
+  int64 previous_on_hand = 5;
+  int64 quantity = 6;
+  google.protobuf.Timestamp returned_at = 7;
+}

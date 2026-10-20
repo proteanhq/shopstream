@@ -1,0 +1,27 @@
+{
+  "doc": "Record that a shipping label has been generated.",
+  "fields": [
+    {
+      "name": "carrier",
+      "type": "string"
+    },
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "label_url",
+      "type": "string"
+    },
+    {
+      "name": "service_level",
+      "type": "string"
+    }
+  ],
+  "name": "GenerateShippingLabel",
+  "namespace": "fulfillment.fulfillment.packing",
+  "type": "record"
+}

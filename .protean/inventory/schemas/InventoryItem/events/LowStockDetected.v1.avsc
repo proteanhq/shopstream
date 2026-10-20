@@ -1,0 +1,48 @@
+{
+  "doc": "Available stock dropped below the reorder point.",
+  "fields": [
+    {
+      "name": "current_available",
+      "type": "long"
+    },
+    {
+      "name": "detected_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reorder_point",
+      "type": "long"
+    },
+    {
+      "name": "sku",
+      "type": "string"
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "LowStockDetected",
+  "namespace": "inventory.stock.events",
+  "type": "record"
+}

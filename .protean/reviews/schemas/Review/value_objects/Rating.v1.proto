@@ -1,0 +1,6 @@
+syntax = "proto3";
+package reviews.review.review;
+
+message Rating {
+  int64 score = 1;
+}

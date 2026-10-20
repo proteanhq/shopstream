@@ -1,0 +1,59 @@
+{
+  "doc": "A new inventory record was created for a product variant at a warehouse.",
+  "fields": [
+    {
+      "name": "initial_quantity",
+      "type": "long"
+    },
+    {
+      "name": "initialized_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reorder_point",
+      "type": "long"
+    },
+    {
+      "name": "reorder_quantity",
+      "type": "long"
+    },
+    {
+      "name": "sku",
+      "type": "string"
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "warehouse_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "StockInitialized",
+  "namespace": "inventory.stock.events",
+  "type": "record"
+}

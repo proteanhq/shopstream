@@ -1,0 +1,8 @@
+syntax = "proto3";
+package loyalty.campaign.events;
+import "google/protobuf/timestamp.proto";
+
+message CampaignExpired {
+  string campaign_id = 1;
+  google.protobuf.Timestamp expired_at = 2;
+}

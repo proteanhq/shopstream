@@ -1,0 +1,18 @@
+syntax = "proto3";
+package inventory.projections.inventory_level;
+import "google/protobuf/timestamp.proto";
+
+message InventoryLevel {
+  optional int64 available = 1;
+  optional int64 damaged = 2;
+  optional int64 in_transit = 3;
+  string inventory_item_id = 4;
+  optional int64 on_hand = 5;
+  string product_id = 6;
+  optional int64 reorder_point = 7;
+  optional int64 reserved = 8;
+  string sku = 9;
+  optional google.protobuf.Timestamp updated_at = 10;
+  string variant_id = 11;
+  string warehouse_id = 12;
+}

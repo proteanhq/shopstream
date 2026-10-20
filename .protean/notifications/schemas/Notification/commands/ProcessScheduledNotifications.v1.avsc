@@ -1,0 +1,19 @@
+{
+  "doc": "Request to process all due scheduled notifications.",
+  "fields": [
+    {
+      "default": null,
+      "name": "as_of",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    }
+  ],
+  "name": "ProcessScheduledNotifications",
+  "namespace": "notifications.notification.scheduler",
+  "type": "record"
+}

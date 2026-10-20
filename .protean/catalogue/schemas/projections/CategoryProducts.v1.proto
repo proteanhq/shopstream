@@ -1,0 +1,11 @@
+syntax = "proto3";
+package catalogue.projections.category_products;
+import "google/protobuf/timestamp.proto";
+
+message CategoryProducts {
+  string category_id = 1;
+  string category_name = 2;
+  optional int64 product_count = 3;
+  repeated string products = 4;
+  optional google.protobuf.Timestamp updated_at = 5;
+}

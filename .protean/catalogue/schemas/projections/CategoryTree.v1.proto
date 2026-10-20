@@ -1,0 +1,13 @@
+syntax = "proto3";
+package catalogue.projections.category_tree;
+
+message CategoryTree {
+  repeated string breadcrumb = 1;
+  string category_id = 2;
+  optional int64 display_order = 3;
+  optional bool is_active = 4;
+  int64 level = 5;
+  string name = 6;
+  optional string parent_category_id = 7;
+  optional int64 product_count = 8;
+}

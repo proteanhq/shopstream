@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "account_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "points": {
+      "type": "integer"
+    },
+    "reward_code": {
+      "maxLength": 40,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_id",
+    "points",
+    "reward_code"
+  ],
+  "title": "RequestRedemption",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.redemption.redemption.Redemption",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "loyalty.redemption.commands.RequestRedemption",
+  "x-protean-type": "Loyalty.RequestRedemption.v1",
+  "x-protean-version": 1
+}

@@ -1,0 +1,202 @@
+{
+  "doc": "Event-sourced aggregate tracking stock for one product variant at one warehouse.",
+  "fields": [
+    {
+      "default": null,
+      "name": "created_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "last_stock_check",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "levels",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "default": null,
+              "name": "available",
+              "type": [
+                "null",
+                "long"
+              ]
+            },
+            {
+              "default": null,
+              "name": "damaged",
+              "type": [
+                "null",
+                "long"
+              ]
+            },
+            {
+              "default": null,
+              "name": "in_transit",
+              "type": [
+                "null",
+                "long"
+              ]
+            },
+            {
+              "default": null,
+              "name": "on_hand",
+              "type": [
+                "null",
+                "long"
+              ]
+            },
+            {
+              "default": null,
+              "name": "reserved",
+              "type": [
+                "null",
+                "long"
+              ]
+            }
+          ],
+          "name": "StockLevels",
+          "namespace": "inventory.stock.stock",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "reorder_point",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "reorder_quantity",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "reservations",
+      "type": [
+        "null",
+        {
+          "items": {
+            "fields": [
+              {
+                "name": "expires_at",
+                "type": {
+                  "logicalType": "timestamp-millis",
+                  "type": "long"
+                }
+              },
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "inventory_item",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "order_id",
+                "type": {
+                  "logicalType": "uuid",
+                  "type": "string"
+                }
+              },
+              {
+                "name": "quantity",
+                "type": "long"
+              },
+              {
+                "name": "reserved_at",
+                "type": {
+                  "logicalType": "timestamp-millis",
+                  "type": "long"
+                }
+              },
+              {
+                "default": null,
+                "name": "status",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              }
+            ],
+            "name": "Reservation",
+            "namespace": "inventory.stock.stock",
+            "type": "record"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "sku",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "warehouse_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "InventoryItem",
+  "namespace": "inventory.stock.stock",
+  "type": "record"
+}

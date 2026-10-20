@@ -1,0 +1,22 @@
+{
+  "doc": "An image was removed from a product's gallery.",
+  "fields": [
+    {
+      "name": "image_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ProductImageRemoved",
+  "namespace": "catalogue.product.events",
+  "type": "record"
+}

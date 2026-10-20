@@ -1,0 +1,7 @@
+syntax = "proto3";
+package loyalty.campaign.management;
+
+message PauseCampaign {
+  string campaign_id = 1;
+  optional string reason = 2;
+}

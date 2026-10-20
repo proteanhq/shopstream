@@ -1,0 +1,35 @@
+{
+  "doc": "Personal information associated with a Customer \u2014 name, phone, and date of birth.\n\nA Profile has no identity of its own; it exists only as part of a Customer.\nIt is replaced wholesale on update (value object semantics).",
+  "fields": [
+    {
+      "default": null,
+      "name": "date_of_birth",
+      "type": [
+        "null",
+        {
+          "logicalType": "date",
+          "type": "int"
+        }
+      ]
+    },
+    {
+      "name": "first_name",
+      "type": "string"
+    },
+    {
+      "name": "last_name",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "phone",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "Profile",
+  "namespace": "identity.customer.customer",
+  "type": "record"
+}

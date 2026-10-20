@@ -1,0 +1,15 @@
+{
+  "doc": "Permanently close a customer account.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "CloseAccount",
+  "namespace": "identity.customer.account",
+  "type": "record"
+}

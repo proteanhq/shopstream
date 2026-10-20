@@ -1,0 +1,15 @@
+{
+  "doc": "Archive a discontinued product for permanent storage.",
+  "fields": [
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ArchiveProduct",
+  "namespace": "catalogue.product.lifecycle",
+  "type": "record"
+}

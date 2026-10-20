@@ -1,0 +1,27 @@
+{
+  "doc": "A guest cart's items were merged into a registered customer's cart.",
+  "fields": [
+    {
+      "name": "cart_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "items_merged_count",
+      "type": "long"
+    },
+    {
+      "default": null,
+      "name": "source_session_id",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "CartsMerged",
+  "namespace": "ordering.cart.events",
+  "type": "record"
+}

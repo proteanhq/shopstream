@@ -1,0 +1,68 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "breadcrumb",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "category_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "display_order",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "is_active",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    {
+      "name": "level",
+      "type": "long"
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "parent_category_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "product_count",
+      "type": [
+        "null",
+        "long"
+      ]
+    }
+  ],
+  "name": "CategoryTree",
+  "namespace": "catalogue.projections.category_tree",
+  "type": "record"
+}

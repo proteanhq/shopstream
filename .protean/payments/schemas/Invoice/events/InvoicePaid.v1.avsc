@@ -1,0 +1,29 @@
+{
+  "doc": "An invoice was marked as paid.",
+  "fields": [
+    {
+      "name": "invoice_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "paid_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "InvoicePaid",
+  "namespace": "payments.invoice.events",
+  "type": "record"
+}

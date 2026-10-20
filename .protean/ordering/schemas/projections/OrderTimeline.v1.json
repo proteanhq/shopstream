@@ -45,5 +45,14 @@
   "type": "object",
   "x-protean-element-type": "projection",
   "x-protean-fqn": "ordering.projections.order_timeline.OrderTimeline",
-  "x-protean-identity-field": "entry_id"
+  "x-protean-identity-field": "entry_id",
+  "x-protean-indexes": [
+    {
+      "fields": [
+        "order_id",
+        "occurred_at"
+      ],
+      "unique": false
+    }
+  ]
 }

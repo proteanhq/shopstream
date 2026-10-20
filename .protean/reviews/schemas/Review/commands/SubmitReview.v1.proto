@@ -1,0 +1,14 @@
+syntax = "proto3";
+package reviews.review.submission;
+
+message SubmitReview {
+  string body = 1;
+  repeated string cons = 2;
+  string customer_id = 3;
+  repeated string images = 4;
+  string product_id = 5;
+  repeated string pros = 6;
+  int64 rating = 7;
+  string title = 8;
+  optional string variant_id = 9;
+}

@@ -1,0 +1,12 @@
+syntax = "proto3";
+package payments.payment.initiation;
+
+message InitiatePayment {
+  double amount = 1;
+  optional string currency = 2;
+  string customer_id = 3;
+  string idempotency_key = 4;
+  optional string last4 = 5;
+  string order_id = 6;
+  string payment_method_type = 7;
+}

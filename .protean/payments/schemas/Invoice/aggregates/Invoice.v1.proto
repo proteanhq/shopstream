@@ -1,0 +1,28 @@
+syntax = "proto3";
+package payments.invoice.invoice;
+import "google/protobuf/timestamp.proto";
+
+message Invoice {
+  optional google.protobuf.Timestamp created_at = 1;
+  string customer_id = 2;
+  string id = 3;
+  string invoice_number = 4;
+  optional google.protobuf.Timestamp issued_at = 5;
+  repeated InvoiceLineItem line_items = 6;
+  string order_id = 7;
+  optional google.protobuf.Timestamp paid_at = 8;
+  optional string status = 9;
+  optional double subtotal = 10;
+  optional double tax = 11;
+  optional double total = 12;
+  optional google.protobuf.Timestamp updated_at = 13;
+}
+
+message InvoiceLineItem {
+  string description = 1;
+  string id = 2;
+  optional string invoice = 3;
+  double quantity = 4;
+  double total = 5;
+  double unit_price = 6;
+}

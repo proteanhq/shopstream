@@ -1,0 +1,30 @@
+{
+  "doc": "Set a loyalty-tier-specific discount price on a variant.",
+  "fields": [
+    {
+      "name": "price",
+      "type": "double"
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "tier",
+      "type": "string"
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "SetTierPrice",
+  "namespace": "catalogue.product.variants",
+  "type": "record"
+}

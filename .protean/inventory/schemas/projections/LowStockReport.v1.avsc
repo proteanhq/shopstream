@@ -1,0 +1,67 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "current_available",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "detected_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "is_critical",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "reorder_point",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "sku",
+      "type": "string"
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "LowStockReport",
+  "namespace": "inventory.projections.low_stock_report",
+  "type": "record"
+}

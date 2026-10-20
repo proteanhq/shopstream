@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "account_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "points": {
+      "type": "integer"
+    },
+    "redemption_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "reserved_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_id",
+    "points",
+    "redemption_id",
+    "reserved_at"
+  ],
+  "title": "PointsReserved",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.redemption.redemption.Redemption",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "loyalty.redemption.events.PointsReserved",
+  "x-protean-type": "Loyalty.PointsReserved.v1",
+  "x-protean-version": 1
+}

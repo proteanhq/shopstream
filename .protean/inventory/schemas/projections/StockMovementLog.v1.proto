@@ -1,0 +1,15 @@
+syntax = "proto3";
+package inventory.projections.stock_movement_log;
+import "google/protobuf/timestamp.proto";
+
+message StockMovementLog {
+  optional string actor = 1;
+  string description = 2;
+  string entry_id = 3;
+  string event_type = 4;
+  string inventory_item_id = 5;
+  optional int64 new_level = 6;
+  google.protobuf.Timestamp occurred_at = 7;
+  optional int64 previous_level = 8;
+  optional int64 quantity_change = 9;
+}

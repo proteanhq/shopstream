@@ -1,0 +1,10 @@
+syntax = "proto3";
+package ordering.order.fulfillment;
+
+message RecordPartialShipment {
+  string carrier = 1;
+  string order_id = 2;
+  string shipment_id = 3;
+  repeated string shipped_item_ids = 4;
+  string tracking_number = 5;
+}

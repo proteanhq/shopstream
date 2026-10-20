@@ -1,0 +1,27 @@
+{
+  "doc": "Add a zone to a warehouse.",
+  "fields": [
+    {
+      "name": "warehouse_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "zone_name",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "zone_type",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "AddZone",
+  "namespace": "inventory.warehouse.management",
+  "type": "record"
+}

@@ -1,0 +1,57 @@
+{
+  "doc": "Stock was identified as damaged, moving from on-hand to damaged.",
+  "fields": [
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "marked_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "new_available",
+      "type": "long"
+    },
+    {
+      "name": "new_damaged",
+      "type": "long"
+    },
+    {
+      "name": "new_on_hand",
+      "type": "long"
+    },
+    {
+      "name": "previous_damaged",
+      "type": "long"
+    },
+    {
+      "name": "previous_on_hand",
+      "type": "long"
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "StockMarkedDamaged",
+  "namespace": "inventory.stock.events",
+  "type": "record"
+}

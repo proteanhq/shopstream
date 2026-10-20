@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "customer_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "member_code": {
+      "anyOf": [
+        {
+          "maxLength": 12,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "customer_id"
+  ],
+  "title": "EnrollRewardAccount",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.reward.reward_account.RewardAccount",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "loyalty.reward.enrollment.EnrollRewardAccount",
+  "x-protean-type": "Loyalty.EnrollRewardAccount.v1",
+  "x-protean-version": 1
+}

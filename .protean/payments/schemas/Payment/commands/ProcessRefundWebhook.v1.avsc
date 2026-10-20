@@ -1,0 +1,26 @@
+{
+  "doc": "Process a refund confirmation from the gateway.",
+  "fields": [
+    {
+      "name": "gateway_refund_id",
+      "type": "string"
+    },
+    {
+      "name": "payment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "refund_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ProcessRefundWebhook",
+  "namespace": "payments.payment.refund",
+  "type": "record"
+}

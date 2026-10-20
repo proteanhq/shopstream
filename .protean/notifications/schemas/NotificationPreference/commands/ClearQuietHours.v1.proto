@@ -1,0 +1,6 @@
+syntax = "proto3";
+package notifications.preference.management;
+
+message ClearQuietHours {
+  string customer_id = 1;
+}

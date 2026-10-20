@@ -1,0 +1,30 @@
+{
+  "doc": "The quantity of a cart item was changed.",
+  "fields": [
+    {
+      "name": "cart_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "new_quantity",
+      "type": "long"
+    },
+    {
+      "name": "previous_quantity",
+      "type": "long"
+    }
+  ],
+  "name": "CartQuantityUpdated",
+  "namespace": "ordering.cart.events",
+  "type": "record"
+}

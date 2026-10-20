@@ -1,0 +1,26 @@
+{
+  "doc": "Add returned items back to inventory.",
+  "fields": [
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    }
+  ],
+  "name": "ReturnToStock",
+  "namespace": "inventory.stock.returns",
+  "type": "record"
+}

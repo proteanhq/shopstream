@@ -1,0 +1,8 @@
+syntax = "proto3";
+package loyalty.redemption.commands;
+
+message RequestRedemption {
+  string account_id = 1;
+  int64 points = 2;
+  string reward_code = 3;
+}

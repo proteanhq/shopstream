@@ -1,0 +1,22 @@
+{
+  "doc": "All items in the pick list have been picked.",
+  "fields": [
+    {
+      "name": "completed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "PickingCompleted",
+  "namespace": "fulfillment.fulfillment.events",
+  "type": "record"
+}

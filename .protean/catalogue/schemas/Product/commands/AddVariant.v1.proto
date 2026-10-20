@@ -1,0 +1,16 @@
+syntax = "proto3";
+package catalogue.product.variants;
+
+message AddVariant {
+  map<string, string> attributes = 1;
+  double base_price = 2;
+  optional string currency = 3;
+  optional string dimension_unit = 4;
+  optional double height = 5;
+  optional double length = 6;
+  string product_id = 7;
+  string variant_sku = 8;
+  optional string weight_unit = 9;
+  optional double weight_value = 10;
+  optional double width = 11;
+}

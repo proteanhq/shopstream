@@ -1,0 +1,45 @@
+{
+  "doc": "A notification failed to send or deliver.",
+  "fields": [
+    {
+      "name": "channel",
+      "type": "string"
+    },
+    {
+      "name": "failed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "max_retries",
+      "type": "long"
+    },
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "recipient_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "retry_count",
+      "type": "long"
+    }
+  ],
+  "name": "NotificationFailed",
+  "namespace": "notifications.notification.events",
+  "type": "record"
+}

@@ -1,0 +1,90 @@
+{
+  "doc": "A physical location associated with a Customer, such as a home or work address.\n\nEach address carries a label, geo-coordinates, and a default flag. A customer may\nhave up to 10 addresses, with exactly one marked as the default at all times.",
+  "fields": [
+    {
+      "name": "city",
+      "type": "string"
+    },
+    {
+      "name": "country",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "customer",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "geo_coordinates",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "default": null,
+              "name": "latitude",
+              "type": [
+                "null",
+                "double"
+              ]
+            },
+            {
+              "default": null,
+              "name": "longitude",
+              "type": [
+                "null",
+                "double"
+              ]
+            }
+          ],
+          "name": "GeoCoordinates",
+          "namespace": "identity.customer.customer",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "is_default",
+      "type": [
+        "null",
+        "boolean"
+      ]
+    },
+    {
+      "default": null,
+      "name": "label",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "postal_code",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "state",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "street",
+      "type": "string"
+    }
+  ],
+  "name": "Address",
+  "namespace": "identity.customer.customer",
+  "type": "record"
+}

@@ -1,0 +1,9 @@
+syntax = "proto3";
+package ordering.cart.items;
+
+message AddToCart {
+  string cart_id = 1;
+  string product_id = 2;
+  int64 quantity = 3;
+  string variant_id = 4;
+}

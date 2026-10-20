@@ -1,0 +1,19 @@
+{
+  "doc": "Request a return of a delivered order, providing a reason.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "RequestReturn",
+  "namespace": "ordering.order.returns",
+  "type": "record"
+}

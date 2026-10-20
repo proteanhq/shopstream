@@ -1,0 +1,7 @@
+syntax = "proto3";
+package identity.customer.customer;
+
+message GeoCoordinates {
+  optional double latitude = 1;
+  optional double longitude = 2;
+}

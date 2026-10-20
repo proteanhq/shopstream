@@ -1,0 +1,40 @@
+{
+  "doc": "Create a new customer account with profile information.",
+  "fields": [
+    {
+      "default": null,
+      "name": "date_of_birth",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "email",
+      "type": "string"
+    },
+    {
+      "name": "external_id",
+      "type": "string"
+    },
+    {
+      "name": "first_name",
+      "type": "string"
+    },
+    {
+      "name": "last_name",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "phone",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "RegisterCustomer",
+  "namespace": "identity.customer.registration",
+  "type": "record"
+}

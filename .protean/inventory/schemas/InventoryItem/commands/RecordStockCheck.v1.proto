@@ -1,0 +1,8 @@
+syntax = "proto3";
+package inventory.stock.adjustment;
+
+message RecordStockCheck {
+  string checked_by = 1;
+  int64 counted_quantity = 2;
+  string inventory_item_id = 3;
+}

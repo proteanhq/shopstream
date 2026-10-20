@@ -1,0 +1,24 @@
+{
+  "doc": "Monetary amount with currency.",
+  "fields": [
+    {
+      "default": null,
+      "name": "currency",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "value",
+      "type": [
+        "null",
+        "double"
+      ]
+    }
+  ],
+  "name": "Money",
+  "namespace": "payments.payment.payment",
+  "type": "record"
+}

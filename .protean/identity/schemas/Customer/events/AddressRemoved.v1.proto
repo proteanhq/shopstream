@@ -1,0 +1,7 @@
+syntax = "proto3";
+package identity.customer.events;
+
+message AddressRemoved {
+  string address_id = 1;
+  string customer_id = 2;
+}

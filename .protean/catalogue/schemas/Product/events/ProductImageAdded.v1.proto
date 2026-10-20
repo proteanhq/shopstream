@@ -1,0 +1,9 @@
+syntax = "proto3";
+package catalogue.product.events;
+
+message ProductImageAdded {
+  string image_id = 1;
+  bool is_primary = 2;
+  string product_id = 3;
+  string url = 4;
+}

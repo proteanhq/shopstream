@@ -1,0 +1,8 @@
+syntax = "proto3";
+package ordering.order.events;
+import "google/protobuf/timestamp.proto";
+
+message OrderCompleted {
+  google.protobuf.Timestamp completed_at = 1;
+  string order_id = 2;
+}

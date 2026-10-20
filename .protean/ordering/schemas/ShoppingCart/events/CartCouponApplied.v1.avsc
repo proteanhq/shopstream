@@ -1,0 +1,19 @@
+{
+  "doc": "A coupon code was applied to the shopping cart.",
+  "fields": [
+    {
+      "name": "cart_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "coupon_code",
+      "type": "string"
+    }
+  ],
+  "name": "CartCouponApplied",
+  "namespace": "ordering.cart.events",
+  "type": "record"
+}

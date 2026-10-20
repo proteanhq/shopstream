@@ -1,0 +1,22 @@
+{
+  "doc": "Remove a line item from an order (only allowed in Created state).",
+  "fields": [
+    {
+      "name": "item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "RemoveItem",
+  "namespace": "ordering.order.modification",
+  "type": "record"
+}

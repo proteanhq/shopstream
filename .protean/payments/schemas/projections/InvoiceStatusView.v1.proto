@@ -1,0 +1,17 @@
+syntax = "proto3";
+package payments.projections.invoice_status;
+import "google/protobuf/timestamp.proto";
+
+message InvoiceStatusView {
+  optional google.protobuf.Timestamp created_at = 1;
+  string customer_id = 2;
+  string invoice_id = 3;
+  string invoice_number = 4;
+  optional google.protobuf.Timestamp issued_at = 5;
+  string order_id = 6;
+  optional google.protobuf.Timestamp paid_at = 7;
+  string status = 8;
+  optional double total = 9;
+  optional google.protobuf.Timestamp updated_at = 10;
+  optional string voided_reason = 11;
+}

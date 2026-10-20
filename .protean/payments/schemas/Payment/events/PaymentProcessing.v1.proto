@@ -1,0 +1,9 @@
+syntax = "proto3";
+package payments.payment.events;
+import "google/protobuf/timestamp.proto";
+
+message PaymentProcessing {
+  string order_id = 1;
+  string payment_id = 2;
+  google.protobuf.Timestamp processing_at = 3;
+}

@@ -1,0 +1,35 @@
+{
+  "doc": "Record a tracking event from the carrier webhook.",
+  "fields": [
+    {
+      "default": null,
+      "name": "description",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "fulfillment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "location",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "status",
+      "type": "string"
+    }
+  ],
+  "name": "UpdateTrackingEvent",
+  "namespace": "fulfillment.fulfillment.tracking",
+  "type": "record"
+}

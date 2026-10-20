@@ -1,0 +1,37 @@
+{
+  "doc": "A notification bounced (permanent delivery failure).",
+  "fields": [
+    {
+      "name": "bounced_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "channel",
+      "type": "string"
+    },
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "recipient_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "NotificationBounced",
+  "namespace": "notifications.notification.events",
+  "type": "record"
+}

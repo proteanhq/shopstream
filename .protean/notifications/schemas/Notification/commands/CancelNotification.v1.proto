@@ -1,0 +1,7 @@
+syntax = "proto3";
+package notifications.notification.cancellation;
+
+message CancelNotification {
+  string notification_id = 1;
+  string reason = 2;
+}

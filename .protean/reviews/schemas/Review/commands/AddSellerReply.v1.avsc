@@ -1,0 +1,25 @@
+{
+  "fields": [
+    {
+      "name": "body",
+      "type": "string"
+    },
+    {
+      "name": "review_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "seller_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "AddSellerReply",
+  "namespace": "reviews.review.reply",
+  "type": "record"
+}

@@ -79,5 +79,13 @@
   "type": "object",
   "x-protean-element-type": "projection",
   "x-protean-fqn": "ordering.projections.customer_orders.CustomerOrders",
-  "x-protean-identity-field": "order_id"
+  "x-protean-identity-field": "order_id",
+  "x-protean-indexes": [
+    {
+      "fields": [
+        "customer_id"
+      ],
+      "unique": false
+    }
+  ]
 }

@@ -1,0 +1,27 @@
+{
+  "doc": "Record incoming stock received at the warehouse.",
+  "fields": [
+    {
+      "name": "inventory_item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "quantity",
+      "type": "long"
+    },
+    {
+      "default": null,
+      "name": "reference",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "ReceiveStock",
+  "namespace": "inventory.stock.receiving",
+  "type": "record"
+}

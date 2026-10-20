@@ -1,0 +1,10 @@
+syntax = "proto3";
+package identity.customer.profile;
+
+message UpdateProfile {
+  string customer_id = 1;
+  optional string date_of_birth = 2;
+  optional string first_name = 3;
+  optional string last_name = 4;
+  optional string phone = 5;
+}

@@ -1,0 +1,10 @@
+syntax = "proto3";
+package identity.customer.customer;
+import "google/protobuf/timestamp.proto";
+
+message Profile {
+  optional google.protobuf.Timestamp date_of_birth = 1;
+  string first_name = 2;
+  string last_name = 3;
+  optional string phone = 4;
+}

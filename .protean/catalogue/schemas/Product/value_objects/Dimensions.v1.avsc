@@ -1,0 +1,40 @@
+{
+  "doc": "Physical dimensions (length, width, height) of a product or variant.\n\nSupports centimeters (cm) and inches (in) as measurement units.",
+  "fields": [
+    {
+      "default": null,
+      "name": "height",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "length",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "unit",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "width",
+      "type": [
+        "null",
+        "double"
+      ]
+    }
+  ],
+  "name": "Dimensions",
+  "namespace": "catalogue.product.product",
+  "type": "record"
+}

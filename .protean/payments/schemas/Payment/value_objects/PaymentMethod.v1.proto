@@ -1,0 +1,9 @@
+syntax = "proto3";
+package payments.payment.payment;
+
+message PaymentMethod {
+  optional int64 expiry_month = 1;
+  optional int64 expiry_year = 2;
+  optional string last4 = 3;
+  optional string method_type = 4;
+}

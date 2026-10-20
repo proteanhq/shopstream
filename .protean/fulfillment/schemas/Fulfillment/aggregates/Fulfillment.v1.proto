@@ -1,0 +1,75 @@
+syntax = "proto3";
+package fulfillment.fulfillment.fulfillment;
+import "google/protobuf/timestamp.proto";
+
+message Fulfillment {
+  optional string cancellation_reason = 1;
+  optional google.protobuf.Timestamp created_at = 2;
+  string customer_id = 3;
+  string id = 4;
+  repeated FulfillmentItem items = 5;
+  string order_id = 6;
+  repeated Package packages = 7;
+  optional PackingInfo packing_info = 8;
+  optional PickList pick_list = 9;
+  optional ShipmentInfo shipment = 10;
+  optional string status = 11;
+  repeated TrackingEvent tracking_events = 12;
+  optional google.protobuf.Timestamp updated_at = 13;
+  optional string warehouse_id = 14;
+}
+
+message FulfillmentItem {
+  optional string fulfillment = 1;
+  string id = 2;
+  string order_item_id = 3;
+  optional string pick_location = 4;
+  string product_id = 5;
+  int64 quantity = 6;
+  string sku = 7;
+  optional string status = 8;
+}
+
+message Package {
+  optional PackageDimensions dimensions = 1;
+  optional string fulfillment = 2;
+  string id = 3;
+  repeated string item_ids = 4;
+  optional double weight = 5;
+}
+
+message PackingInfo {
+  optional google.protobuf.Timestamp packed_at = 1;
+  optional string packed_by = 2;
+  optional string shipping_label_url = 3;
+}
+
+message PickList {
+  optional google.protobuf.Timestamp assigned_at = 1;
+  optional string assigned_to = 2;
+  optional google.protobuf.Timestamp completed_at = 3;
+}
+
+message ShipmentInfo {
+  optional google.protobuf.Timestamp actual_delivery = 1;
+  optional string carrier = 2;
+  optional google.protobuf.Timestamp estimated_delivery = 3;
+  optional string service_level = 4;
+  optional string tracking_number = 5;
+}
+
+message TrackingEvent {
+  optional string description = 1;
+  optional string fulfillment = 2;
+  string id = 3;
+  optional string location = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+  string status = 6;
+}
+
+message PackageDimensions {
+  optional double height = 1;
+  optional double length = 2;
+  optional double weight = 3;
+  optional double width = 4;
+}

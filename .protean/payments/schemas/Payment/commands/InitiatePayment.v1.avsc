@@ -1,0 +1,50 @@
+{
+  "doc": "Initiate a new payment for an order.",
+  "fields": [
+    {
+      "name": "amount",
+      "type": "double"
+    },
+    {
+      "default": null,
+      "name": "currency",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "idempotency_key",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "last4",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "payment_method_type",
+      "type": "string"
+    }
+  ],
+  "name": "InitiatePayment",
+  "namespace": "payments.payment.initiation",
+  "type": "record"
+}

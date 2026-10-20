@@ -1,0 +1,11 @@
+syntax = "proto3";
+package inventory.warehouse.events;
+import "google/protobuf/timestamp.proto";
+
+message ZoneAdded {
+  google.protobuf.Timestamp added_at = 1;
+  string warehouse_id = 2;
+  string zone_id = 3;
+  string zone_name = 4;
+  string zone_type = 5;
+}

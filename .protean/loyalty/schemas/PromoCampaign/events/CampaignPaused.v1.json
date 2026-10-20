@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "campaign_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "paused_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "reason": {
+      "anyOf": [
+        {
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "campaign_id",
+    "paused_at"
+  ],
+  "title": "CampaignPaused",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.campaign.campaign.PromoCampaign",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "loyalty.campaign.events.CampaignPaused",
+  "x-protean-type": "Loyalty.CampaignPaused.v1",
+  "x-protean-version": 1
+}

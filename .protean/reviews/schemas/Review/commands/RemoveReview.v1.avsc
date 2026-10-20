@@ -1,0 +1,22 @@
+{
+  "fields": [
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "removed_by",
+      "type": "string"
+    },
+    {
+      "name": "review_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "RemoveReview",
+  "namespace": "reviews.review.removal",
+  "type": "record"
+}

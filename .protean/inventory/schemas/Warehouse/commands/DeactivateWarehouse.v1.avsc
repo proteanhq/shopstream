@@ -1,0 +1,15 @@
+{
+  "doc": "Deactivate a warehouse.",
+  "fields": [
+    {
+      "name": "warehouse_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "DeactivateWarehouse",
+  "namespace": "inventory.warehouse.management",
+  "type": "record"
+}

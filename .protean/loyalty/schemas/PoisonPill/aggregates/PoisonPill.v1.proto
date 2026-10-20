@@ -1,0 +1,7 @@
+syntax = "proto3";
+package loyalty.dlq.poison;
+
+message PoisonPill {
+  string id = 1;
+  optional string note = 2;
+}

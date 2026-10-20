@@ -1,0 +1,14 @@
+syntax = "proto3";
+package loyalty.redemption.redemption;
+import "google/protobuf/timestamp.proto";
+
+message Redemption {
+  string account_id = 1;
+  optional string failure_reason = 2;
+  string id = 3;
+  int64 points = 4;
+  optional google.protobuf.Timestamp requested_at = 5;
+  string reward_code = 6;
+  optional string status = 7;
+  optional string voucher_code = 8;
+}

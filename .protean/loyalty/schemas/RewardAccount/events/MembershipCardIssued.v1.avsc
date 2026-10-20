@@ -1,0 +1,19 @@
+{
+  "fields": [
+    {
+      "name": "account_id",
+      "type": "string"
+    },
+    {
+      "name": "card_number",
+      "type": "string"
+    },
+    {
+      "name": "issued_on",
+      "type": "string"
+    }
+  ],
+  "name": "MembershipCardIssued",
+  "namespace": "loyalty.reward.events",
+  "type": "record"
+}

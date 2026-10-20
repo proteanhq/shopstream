@@ -1,0 +1,9 @@
+syntax = "proto3";
+package fulfillment.fulfillment.packing;
+
+message GenerateShippingLabel {
+  string carrier = 1;
+  string fulfillment_id = 2;
+  string label_url = 3;
+  string service_level = 4;
+}

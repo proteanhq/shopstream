@@ -1,0 +1,15 @@
+syntax = "proto3";
+package inventory.projections.warehouse_directory;
+import "google/protobuf/timestamp.proto";
+
+message WarehouseDirectory {
+  optional int64 capacity = 1;
+  optional string city = 2;
+  optional string country = 3;
+  optional google.protobuf.Timestamp created_at = 4;
+  optional bool is_active = 5;
+  string name = 6;
+  optional google.protobuf.Timestamp updated_at = 7;
+  string warehouse_id = 8;
+  optional int64 zone_count = 9;
+}

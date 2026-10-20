@@ -89,5 +89,13 @@
   "type": "object",
   "x-protean-element-type": "projection",
   "x-protean-fqn": "fulfillment.projections.shipment_tracking.ShipmentTrackingView",
-  "x-protean-identity-field": "fulfillment_id"
+  "x-protean-identity-field": "fulfillment_id",
+  "x-protean-indexes": [
+    {
+      "fields": [
+        "order_id"
+      ],
+      "unique": false
+    }
+  ]
 }

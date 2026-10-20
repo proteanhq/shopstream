@@ -1,0 +1,15 @@
+{
+  "doc": "Restore a suspended customer account to active status.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ReactivateAccount",
+  "namespace": "identity.customer.account",
+  "type": "record"
+}

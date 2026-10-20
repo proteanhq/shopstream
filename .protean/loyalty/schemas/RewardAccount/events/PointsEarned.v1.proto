@@ -1,0 +1,12 @@
+syntax = "proto3";
+package loyalty.reward.events;
+import "google/protobuf/timestamp.proto";
+
+message PointsEarned {
+  string account_id = 1;
+  int64 amount = 2;
+  int64 balance_after = 3;
+  optional string customer_id = 4;
+  google.protobuf.Timestamp occurred_at = 5;
+  optional string reason = 6;
+}

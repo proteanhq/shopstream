@@ -1,0 +1,24 @@
+{
+  "doc": "Physical weight of a product or variant, used for shipping calculations.\n\nSupports kilograms (kg), pounds (lb), grams (g), and ounces (oz).",
+  "fields": [
+    {
+      "default": null,
+      "name": "unit",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "value",
+      "type": [
+        "null",
+        "double"
+      ]
+    }
+  ],
+  "name": "Weight",
+  "namespace": "catalogue.product.product",
+  "type": "record"
+}

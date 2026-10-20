@@ -1,0 +1,14 @@
+syntax = "proto3";
+package catalogue.projections.seller_catalogue;
+import "google/protobuf/timestamp.proto";
+
+message SellerCatalogue {
+  optional google.protobuf.Timestamp created_at = 1;
+  string product_id = 2;
+  optional string seller_id = 3;
+  string sku = 4;
+  string status = 5;
+  string title = 6;
+  optional google.protobuf.Timestamp updated_at = 7;
+  optional int64 variant_count = 8;
+}

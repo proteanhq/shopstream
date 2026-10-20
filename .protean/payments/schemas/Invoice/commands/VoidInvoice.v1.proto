@@ -1,0 +1,7 @@
+syntax = "proto3";
+package payments.invoice.voiding;
+
+message VoidInvoice {
+  string invoice_id = 1;
+  string reason = 2;
+}

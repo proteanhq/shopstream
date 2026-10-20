@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "compensated_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "redemption_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "refunded_points": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "compensated_at",
+    "reason",
+    "redemption_id",
+    "refunded_points"
+  ],
+  "title": "RedemptionCompensated",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.redemption.redemption.Redemption",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "loyalty.redemption.events.RedemptionCompensated",
+  "x-protean-type": "Loyalty.RedemptionCompensated.v1",
+  "x-protean-version": 1
+}

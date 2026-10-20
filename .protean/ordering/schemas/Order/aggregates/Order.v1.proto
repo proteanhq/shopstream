@@ -1,0 +1,57 @@
+syntax = "proto3";
+package ordering.order.order;
+import "google/protobuf/timestamp.proto";
+
+message Order {
+  optional ShippingAddress billing_address = 1;
+  optional string cancellation_reason = 2;
+  optional string cancelled_by = 3;
+  optional string carrier = 4;
+  optional string coupon_code = 5;
+  optional google.protobuf.Timestamp created_at = 6;
+  string customer_id = 7;
+  optional string estimated_delivery = 8;
+  string id = 9;
+  repeated OrderItem items = 10;
+  optional string order_source = 11;
+  optional string payment_id = 12;
+  optional string payment_method = 13;
+  optional string payment_status = 14;
+  optional OrderPricing pricing = 15;
+  optional string shipment_id = 16;
+  optional ShippingAddress shipping_address = 17;
+  optional string status = 18;
+  optional string tracking_number = 19;
+  optional google.protobuf.Timestamp updated_at = 20;
+}
+
+message OrderItem {
+  optional double discount = 1;
+  string id = 2;
+  optional string item_status = 3;
+  optional string order = 4;
+  string product_id = 5;
+  int64 quantity = 6;
+  string sku = 7;
+  optional double tax_amount = 8;
+  string title = 9;
+  double unit_price = 10;
+  string variant_id = 11;
+}
+
+message OrderPricing {
+  optional string currency = 1;
+  optional double discount_total = 2;
+  optional double grand_total = 3;
+  optional double shipping_cost = 4;
+  optional double subtotal = 5;
+  optional double tax_total = 6;
+}
+
+message ShippingAddress {
+  string city = 1;
+  string country = 2;
+  string postal_code = 3;
+  optional string state = 4;
+  string street = 5;
+}

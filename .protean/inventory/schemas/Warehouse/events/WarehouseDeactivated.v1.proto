@@ -1,0 +1,8 @@
+syntax = "proto3";
+package inventory.warehouse.events;
+import "google/protobuf/timestamp.proto";
+
+message WarehouseDeactivated {
+  google.protobuf.Timestamp deactivated_at = 1;
+  string warehouse_id = 2;
+}

@@ -1,0 +1,82 @@
+{
+  "fields": [
+    {
+      "name": "body",
+      "type": "string"
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "last_reported_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "rating",
+      "type": "long"
+    },
+    {
+      "default": null,
+      "name": "report_count",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "review_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "status",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "submitted_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "title",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "verified_purchase",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "ModerationQueue",
+  "namespace": "reviews.projections.moderation_queue",
+  "type": "record"
+}

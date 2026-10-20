@@ -1,0 +1,327 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "billing_address",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "name": "city",
+              "type": "string"
+            },
+            {
+              "name": "country",
+              "type": "string"
+            },
+            {
+              "name": "postal_code",
+              "type": "string"
+            },
+            {
+              "default": null,
+              "name": "state",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "name": "street",
+              "type": "string"
+            }
+          ],
+          "name": "ShippingAddress",
+          "namespace": "ordering.order.order",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "cancellation_reason",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "cancelled_by",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "carrier",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "coupon_code",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "created_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "estimated_delivery",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "items",
+      "type": [
+        "null",
+        {
+          "items": {
+            "fields": [
+              {
+                "default": null,
+                "name": "discount",
+                "type": [
+                  "null",
+                  "double"
+                ]
+              },
+              {
+                "name": "id",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "item_status",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "default": null,
+                "name": "order",
+                "type": [
+                  "null",
+                  "string"
+                ]
+              },
+              {
+                "name": "product_id",
+                "type": {
+                  "logicalType": "uuid",
+                  "type": "string"
+                }
+              },
+              {
+                "name": "quantity",
+                "type": "long"
+              },
+              {
+                "name": "sku",
+                "type": "string"
+              },
+              {
+                "default": null,
+                "name": "tax_amount",
+                "type": [
+                  "null",
+                  "double"
+                ]
+              },
+              {
+                "name": "title",
+                "type": "string"
+              },
+              {
+                "name": "unit_price",
+                "type": "double"
+              },
+              {
+                "name": "variant_id",
+                "type": {
+                  "logicalType": "uuid",
+                  "type": "string"
+                }
+              }
+            ],
+            "name": "OrderItem",
+            "namespace": "ordering.order.order",
+            "type": "record"
+          },
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "order_source",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "payment_id",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "payment_method",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "payment_status",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "pricing",
+      "type": [
+        "null",
+        {
+          "fields": [
+            {
+              "default": null,
+              "name": "currency",
+              "type": [
+                "null",
+                "string"
+              ]
+            },
+            {
+              "default": null,
+              "name": "discount_total",
+              "type": [
+                "null",
+                "double"
+              ]
+            },
+            {
+              "default": null,
+              "name": "grand_total",
+              "type": [
+                "null",
+                "double"
+              ]
+            },
+            {
+              "default": null,
+              "name": "shipping_cost",
+              "type": [
+                "null",
+                "double"
+              ]
+            },
+            {
+              "default": null,
+              "name": "subtotal",
+              "type": [
+                "null",
+                "double"
+              ]
+            },
+            {
+              "default": null,
+              "name": "tax_total",
+              "type": [
+                "null",
+                "double"
+              ]
+            }
+          ],
+          "name": "OrderPricing",
+          "namespace": "ordering.order.order",
+          "type": "record"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "shipment_id",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "shipping_address",
+      "type": [
+        "null",
+        "ordering.order.order.ShippingAddress"
+      ]
+    },
+    {
+      "default": null,
+      "name": "status",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "tracking_number",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    }
+  ],
+  "name": "Order",
+  "namespace": "ordering.order.order",
+  "type": "record"
+}

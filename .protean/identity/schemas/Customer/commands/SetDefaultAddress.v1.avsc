@@ -1,0 +1,22 @@
+{
+  "doc": "Designate an existing address as the customer's default.",
+  "fields": [
+    {
+      "name": "address_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "SetDefaultAddress",
+  "namespace": "identity.customer.addresses",
+  "type": "record"
+}

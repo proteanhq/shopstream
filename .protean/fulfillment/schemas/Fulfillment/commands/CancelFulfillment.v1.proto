@@ -1,0 +1,7 @@
+syntax = "proto3";
+package fulfillment.fulfillment.cancellation;
+
+message CancelFulfillment {
+  string fulfillment_id = 1;
+  string reason = 2;
+}

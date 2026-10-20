@@ -1,0 +1,33 @@
+{
+  "doc": "An invoice was voided/cancelled.",
+  "fields": [
+    {
+      "name": "invoice_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "voided_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "InvoiceVoided",
+  "namespace": "payments.invoice.events",
+  "type": "record"
+}

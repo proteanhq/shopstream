@@ -1,0 +1,8 @@
+syntax = "proto3";
+package ordering.cart.events;
+import "google/protobuf/timestamp.proto";
+
+message CartAbandoned {
+  google.protobuf.Timestamp abandoned_at = 1;
+  string cart_id = 2;
+}

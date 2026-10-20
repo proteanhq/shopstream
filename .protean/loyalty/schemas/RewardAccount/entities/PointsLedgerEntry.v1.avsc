@@ -1,0 +1,47 @@
+{
+  "doc": "An append-only points movement \u2014 a 1:N (HasMany) child of the account.\n\nDeclares the parent link explicitly via `Reference` (rather than relying on the\nimplicit reference HasMany would auto-create) to exercise the Reference field.",
+  "fields": [
+    {
+      "name": "amount",
+      "type": "long"
+    },
+    {
+      "name": "balance_after",
+      "type": "long"
+    },
+    {
+      "name": "entry_type",
+      "type": "string"
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "name": "occurred_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "default": null,
+      "name": "reason",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "reward_account",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "PointsLedgerEntry",
+  "namespace": "loyalty.reward.reward_account",
+  "type": "record"
+}

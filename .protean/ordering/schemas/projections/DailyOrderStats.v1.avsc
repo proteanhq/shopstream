@@ -1,0 +1,59 @@
+{
+  "fields": [
+    {
+      "name": "date",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "orders_cancelled",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "orders_completed",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "orders_created",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "orders_refunded",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_refunds",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_revenue",
+      "type": [
+        "null",
+        "double"
+      ]
+    }
+  ],
+  "name": "DailyOrderStats",
+  "namespace": "ordering.projections.daily_order_stats",
+  "type": "record"
+}

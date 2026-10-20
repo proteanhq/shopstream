@@ -1,0 +1,9 @@
+syntax = "proto3";
+package inventory.warehouse.warehouse;
+
+message Zone {
+  string id = 1;
+  optional string warehouse = 2;
+  string zone_name = 3;
+  optional string zone_type = 4;
+}

@@ -1,0 +1,6 @@
+syntax = "proto3";
+package catalogue.shared.sku;
+
+message SKU {
+  string code = 1;
+}

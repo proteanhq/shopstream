@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The physical/virtual loyalty card \u2014 a 1:1 (HasOne) child of the account.",
+  "properties": {
+    "card_number": {
+      "maxLength": 20,
+      "minLength": 1,
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "issued_on": {
+      "format": "date",
+      "type": "string"
+    },
+    "reward_account": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "anyOf": [
+        {
+          "enum": [
+            "active",
+            "expired",
+            "suspended"
+          ],
+          "maxLength": 255,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": "active"
+    }
+  },
+  "required": [
+    "card_number",
+    "id",
+    "issued_on"
+  ],
+  "title": "MembershipCard",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.reward.reward_account.RewardAccount",
+  "x-protean-element-type": "entity",
+  "x-protean-fqn": "loyalty.reward.reward_account.MembershipCard",
+  "x-protean-identity-field": "id"
+}

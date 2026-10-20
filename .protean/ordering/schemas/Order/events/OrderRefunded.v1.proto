@@ -1,0 +1,9 @@
+syntax = "proto3";
+package ordering.order.events;
+import "google/protobuf/timestamp.proto";
+
+message OrderRefunded {
+  string order_id = 1;
+  double refund_amount = 2;
+  google.protobuf.Timestamp refunded_at = 3;
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "failed_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "reason": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "redemption_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "failed_at",
+    "reason",
+    "redemption_id"
+  ],
+  "title": "VoucherIssuanceFailed",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.redemption.redemption.Redemption",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "loyalty.redemption.events.VoucherIssuanceFailed",
+  "x-protean-type": "Loyalty.VoucherIssuanceFailed.v1",
+  "x-protean-version": 1
+}

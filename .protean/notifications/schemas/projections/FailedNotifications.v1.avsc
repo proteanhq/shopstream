@@ -1,0 +1,64 @@
+{
+  "fields": [
+    {
+      "name": "channel",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "failed_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "failure_reason",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "max_retries",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "notification_type",
+      "type": "string"
+    },
+    {
+      "name": "recipient_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "retry_count",
+      "type": [
+        "null",
+        "long"
+      ]
+    }
+  ],
+  "name": "FailedNotifications",
+  "namespace": "notifications.projections.failed_notifications",
+  "type": "record"
+}

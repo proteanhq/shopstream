@@ -1,0 +1,45 @@
+{
+  "doc": "A customer reported a review for moderation.",
+  "fields": [
+    {
+      "default": null,
+      "name": "detail",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "report_count",
+      "type": "long"
+    },
+    {
+      "name": "reported_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "reporter_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "review_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ReviewReported",
+  "namespace": "reviews.review.events",
+  "type": "record"
+}

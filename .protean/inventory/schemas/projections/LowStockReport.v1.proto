@@ -1,0 +1,14 @@
+syntax = "proto3";
+package inventory.projections.low_stock_report;
+import "google/protobuf/timestamp.proto";
+
+message LowStockReport {
+  optional int64 current_available = 1;
+  optional google.protobuf.Timestamp detected_at = 2;
+  string inventory_item_id = 3;
+  optional bool is_critical = 4;
+  string product_id = 5;
+  optional int64 reorder_point = 6;
+  string sku = 7;
+  string variant_id = 8;
+}

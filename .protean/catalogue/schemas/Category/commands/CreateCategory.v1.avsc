@@ -1,0 +1,34 @@
+{
+  "doc": "Add a new category to the product hierarchy.",
+  "fields": [
+    {
+      "default": null,
+      "name": "attributes",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ]
+    },
+    {
+      "name": "name",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "parent_category_id",
+      "type": [
+        "null",
+        {
+          "logicalType": "uuid",
+          "type": "string"
+        }
+      ]
+    }
+  ],
+  "name": "CreateCategory",
+  "namespace": "catalogue.category.management",
+  "type": "record"
+}

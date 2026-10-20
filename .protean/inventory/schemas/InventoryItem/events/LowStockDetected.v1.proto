@@ -1,0 +1,13 @@
+syntax = "proto3";
+package inventory.stock.events;
+import "google/protobuf/timestamp.proto";
+
+message LowStockDetected {
+  int64 current_available = 1;
+  google.protobuf.Timestamp detected_at = 2;
+  string inventory_item_id = 3;
+  string product_id = 4;
+  int64 reorder_point = 5;
+  string sku = 6;
+  string variant_id = 7;
+}

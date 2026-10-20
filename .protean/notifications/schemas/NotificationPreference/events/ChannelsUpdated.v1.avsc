@@ -1,0 +1,41 @@
+{
+  "doc": "A customer's notification channel preferences were changed.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "email_enabled",
+      "type": "boolean"
+    },
+    {
+      "name": "preference_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "push_enabled",
+      "type": "boolean"
+    },
+    {
+      "name": "sms_enabled",
+      "type": "boolean"
+    },
+    {
+      "name": "updated_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "ChannelsUpdated",
+  "namespace": "notifications.preference.events",
+  "type": "record"
+}

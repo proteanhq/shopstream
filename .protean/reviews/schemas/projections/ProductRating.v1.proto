@@ -1,0 +1,13 @@
+syntax = "proto3";
+package reviews.projections.product_rating;
+import "google/protobuf/timestamp.proto";
+
+message ProductRating {
+  optional double average_rating = 1;
+  map<string, string> counted_reviews = 2;
+  string product_id = 3;
+  map<string, string> rating_distribution = 4;
+  optional int64 total_reviews = 5;
+  optional google.protobuf.Timestamp updated_at = 6;
+  optional int64 verified_review_count = 7;
+}

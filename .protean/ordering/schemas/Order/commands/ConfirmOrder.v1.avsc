@@ -1,0 +1,15 @@
+{
+  "doc": "Confirm the order, signaling the customer's commitment to purchase.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ConfirmOrder",
+  "namespace": "ordering.order.confirmation",
+  "type": "record"
+}

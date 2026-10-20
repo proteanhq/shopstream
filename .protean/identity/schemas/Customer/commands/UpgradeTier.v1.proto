@@ -1,0 +1,7 @@
+syntax = "proto3";
+package identity.customer.tier;
+
+message UpgradeTier {
+  string customer_id = 1;
+  string new_tier = 2;
+}

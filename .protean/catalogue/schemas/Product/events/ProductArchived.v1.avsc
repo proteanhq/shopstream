@@ -1,0 +1,22 @@
+{
+  "doc": "A discontinued product was archived for permanent storage.",
+  "fields": [
+    {
+      "name": "archived_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "ProductArchived",
+  "namespace": "catalogue.product.events",
+  "type": "record"
+}

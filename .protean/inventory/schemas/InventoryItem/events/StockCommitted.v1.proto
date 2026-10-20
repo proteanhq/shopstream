@@ -1,0 +1,15 @@
+syntax = "proto3";
+package inventory.stock.events;
+import "google/protobuf/timestamp.proto";
+
+message StockCommitted {
+  google.protobuf.Timestamp committed_at = 1;
+  string inventory_item_id = 2;
+  int64 new_on_hand = 3;
+  int64 new_reserved = 4;
+  string order_id = 5;
+  int64 previous_on_hand = 6;
+  int64 previous_reserved = 7;
+  int64 quantity = 8;
+  string reservation_id = 9;
+}

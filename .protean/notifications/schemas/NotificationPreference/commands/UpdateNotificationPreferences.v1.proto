@@ -1,0 +1,9 @@
+syntax = "proto3";
+package notifications.preference.management;
+
+message UpdateNotificationPreferences {
+  string customer_id = 1;
+  optional bool email_enabled = 2;
+  optional bool push_enabled = 3;
+  optional bool sms_enabled = 4;
+}

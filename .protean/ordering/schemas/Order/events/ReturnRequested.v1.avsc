@@ -1,0 +1,26 @@
+{
+  "doc": "The customer requested a return of a delivered order.",
+  "fields": [
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    },
+    {
+      "name": "requested_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "ReturnRequested",
+  "namespace": "ordering.order.events",
+  "type": "record"
+}

@@ -1,0 +1,67 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "body",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "cons",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "pros",
+      "type": [
+        "null",
+        {
+          "items": "string",
+          "type": "array"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "rating",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "review_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "title",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "EditReview",
+  "namespace": "reviews.review.editing",
+  "type": "record"
+}

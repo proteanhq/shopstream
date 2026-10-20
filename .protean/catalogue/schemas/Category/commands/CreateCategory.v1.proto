@@ -1,0 +1,8 @@
+syntax = "proto3";
+package catalogue.category.management;
+
+message CreateCategory {
+  map<string, string> attributes = 1;
+  string name = 2;
+  optional string parent_category_id = 3;
+}

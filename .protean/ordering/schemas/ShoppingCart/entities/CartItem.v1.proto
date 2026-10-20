@@ -1,0 +1,12 @@
+syntax = "proto3";
+package ordering.cart.cart;
+import "google/protobuf/timestamp.proto";
+
+message CartItem {
+  optional google.protobuf.Timestamp added_at = 1;
+  string id = 2;
+  string product_id = 3;
+  int64 quantity = 4;
+  optional string shopping_cart = 5;
+  string variant_id = 6;
+}

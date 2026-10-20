@@ -1,0 +1,22 @@
+{
+  "doc": "Remove an item from the shopping cart.",
+  "fields": [
+    {
+      "name": "cart_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "item_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "RemoveFromCart",
+  "namespace": "ordering.cart.items",
+  "type": "record"
+}

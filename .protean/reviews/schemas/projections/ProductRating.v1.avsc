@@ -1,0 +1,71 @@
+{
+  "fields": [
+    {
+      "default": null,
+      "name": "average_rating",
+      "type": [
+        "null",
+        "double"
+      ]
+    },
+    {
+      "default": null,
+      "name": "counted_reviews",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ]
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "default": null,
+      "name": "rating_distribution",
+      "type": [
+        "null",
+        {
+          "type": "map",
+          "values": "string"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "total_reviews",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "default": null,
+      "name": "updated_at",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    },
+    {
+      "default": null,
+      "name": "verified_review_count",
+      "type": [
+        "null",
+        "long"
+      ]
+    }
+  ],
+  "name": "ProductRating",
+  "namespace": "reviews.projections.product_rating",
+  "type": "record"
+}

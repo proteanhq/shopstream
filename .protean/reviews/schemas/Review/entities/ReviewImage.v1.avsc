@@ -1,0 +1,40 @@
+{
+  "doc": "A photo attached to a review.",
+  "fields": [
+    {
+      "default": null,
+      "name": "alt_text",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "default": null,
+      "name": "display_order",
+      "type": [
+        "null",
+        "long"
+      ]
+    },
+    {
+      "name": "id",
+      "type": "string"
+    },
+    {
+      "default": null,
+      "name": "review",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "url",
+      "type": "string"
+    }
+  ],
+  "name": "ReviewImage",
+  "namespace": "reviews.review.review",
+  "type": "record"
+}

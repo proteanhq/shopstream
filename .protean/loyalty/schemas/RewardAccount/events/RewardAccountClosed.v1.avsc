@@ -1,0 +1,18 @@
+{
+  "fields": [
+    {
+      "name": "account_id",
+      "type": "string"
+    },
+    {
+      "name": "closed_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "RewardAccountClosed",
+  "namespace": "loyalty.reward.events",
+  "type": "record"
+}

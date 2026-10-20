@@ -1,0 +1,40 @@
+{
+  "doc": "A failed payment is being retried.",
+  "fields": [
+    {
+      "name": "attempt_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "attempt_number",
+      "type": "long"
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "payment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "retried_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "PaymentRetryInitiated",
+  "namespace": "payments.payment.events",
+  "type": "record"
+}

@@ -1,0 +1,13 @@
+syntax = "proto3";
+package reviews.review.events;
+import "google/protobuf/timestamp.proto";
+
+message ReviewRemoved {
+  string customer_id = 1;
+  string product_id = 2;
+  int64 rating = 3;
+  string reason = 4;
+  google.protobuf.Timestamp removed_at = 5;
+  string removed_by = 6;
+  string review_id = 7;
+}

@@ -1,0 +1,19 @@
+{
+  "doc": "Temporarily suspend a customer account, blocking further activity.",
+  "fields": [
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "reason",
+      "type": "string"
+    }
+  ],
+  "name": "SuspendAccount",
+  "namespace": "identity.customer.account",
+  "type": "record"
+}

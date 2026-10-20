@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "redemption_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "redemption_id"
+  ],
+  "title": "CompleteRedemption",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.redemption.redemption.Redemption",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "loyalty.redemption.commands.CompleteRedemption",
+  "x-protean-type": "Loyalty.CompleteRedemption.v1",
+  "x-protean-version": 1
+}

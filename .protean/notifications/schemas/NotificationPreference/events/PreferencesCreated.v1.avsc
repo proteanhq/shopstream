@@ -1,0 +1,41 @@
+{
+  "doc": "Default notification preferences were created for a customer.",
+  "fields": [
+    {
+      "name": "created_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "email_enabled",
+      "type": "boolean"
+    },
+    {
+      "name": "preference_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "push_enabled",
+      "type": "boolean"
+    },
+    {
+      "name": "sms_enabled",
+      "type": "boolean"
+    }
+  ],
+  "name": "PreferencesCreated",
+  "namespace": "notifications.preference.events",
+  "type": "record"
+}

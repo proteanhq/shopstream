@@ -1,0 +1,12 @@
+syntax = "proto3";
+package reviews.projections.verified_purchases;
+import "google/protobuf/timestamp.proto";
+
+message VerifiedPurchases {
+  string customer_id = 1;
+  google.protobuf.Timestamp delivered_at = 2;
+  string order_id = 3;
+  string product_id = 4;
+  optional string variant_id = 5;
+  string vp_id = 6;
+}

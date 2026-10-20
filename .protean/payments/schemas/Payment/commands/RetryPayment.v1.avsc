@@ -1,0 +1,15 @@
+{
+  "doc": "Retry a failed payment.",
+  "fields": [
+    {
+      "name": "payment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "RetryPayment",
+  "namespace": "payments.payment.retry",
+  "type": "record"
+}

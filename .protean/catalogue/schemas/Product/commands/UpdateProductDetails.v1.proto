@@ -1,0 +1,13 @@
+syntax = "proto3";
+package catalogue.product.details;
+
+message UpdateProductDetails {
+  map<string, string> attributes = 1;
+  optional string brand = 2;
+  optional string description = 3;
+  optional string meta_description = 4;
+  optional string meta_title = 5;
+  string product_id = 6;
+  optional string slug = 7;
+  optional string title = 8;
+}
