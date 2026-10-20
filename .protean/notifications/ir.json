@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:7b257bdf4df0d5de5e68ade258352b53617c0abb9adfc4eaabe45f6810272d33",
+  "checksum": "sha256:e2d3d72bb5b295493590edc0b05f52b5f61977a20d29f8fac08f54c27f8cee6b",
   "clusters": {
     "notifications.notification.notification.Notification": {
       "aggregate": {
@@ -198,6 +198,11 @@
               "notifications.notification.events.NotificationSent"
             ]
           },
+          "request_dispatch": {
+            "raises": [
+              "notifications.notification.events.NotificationDispatchRequested"
+            ]
+          },
           "retry": {
             "raises": [
               "notifications.notification.events.NotificationRetried"
@@ -238,6 +243,38 @@
           },
           "module": "notifications.notification.cancellation",
           "name": "CancelNotificationHandler",
+          "part_of": "notifications.notification.notification.Notification",
+          "stream_category": "notifications::notification:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
+        "notifications.notification.dispatch.RecordDispatchResultHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "notifications.notification.dispatch.RecordDispatchResultHandler",
+          "handlers": {
+            "Notifications.RecordDispatchResult.v1": [
+              "record_dispatch_result"
+            ]
+          },
+          "method_edges": {
+            "record_dispatch_result": {
+              "invokes": [
+                {
+                  "element": "notifications.notification.notification.Notification",
+                  "method": "mark_failed"
+                },
+                {
+                  "element": "notifications.notification.notification.Notification",
+                  "method": "mark_sent"
+                }
+              ]
+            }
+          },
+          "module": "notifications.notification.dispatch",
+          "name": "RecordDispatchResultHandler",
           "part_of": "notifications.notification.notification.Notification",
           "stream_category": "notifications::notification:command",
           "subscription": {
@@ -287,11 +324,7 @@
               "invokes": [
                 {
                   "element": "notifications.notification.notification.Notification",
-                  "method": "mark_failed"
-                },
-                {
-                  "element": "notifications.notification.notification.Notification",
-                  "method": "mark_sent"
+                  "method": "request_dispatch"
                 }
               ]
             }
@@ -333,6 +366,28 @@
           "name": "CancelNotification",
           "part_of": "notifications.notification.notification.Notification"
         },
+        "notifications.notification.dispatch.RecordDispatchResult": {
+          "__type__": "Notifications.RecordDispatchResult.v1",
+          "__version__": 1,
+          "description": "Record the outcome of one channel send.",
+          "element_type": "COMMAND",
+          "fields": {
+            "failure_reason": {
+              "kind": "text",
+              "type": "Text"
+            },
+            "notification_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            }
+          },
+          "fqn": "notifications.notification.dispatch.RecordDispatchResult",
+          "module": "notifications.notification.dispatch",
+          "name": "RecordDispatchResult",
+          "part_of": "notifications.notification.notification.Notification"
+        },
         "notifications.notification.retry.RetryNotification": {
           "__type__": "Notifications.RetryNotification.v1",
           "__version__": 1,
@@ -372,27 +427,13 @@
       "entities": {},
       "event_handlers": {
         "notifications.notification.dispatch.NotificationDispatcher": {
-          "description": "Dispatches notifications via channel adapters when they are created.",
+          "description": "Sends a notification through its channel when its dispatch is requested.",
           "element_type": "EVENT_HANDLER",
           "fqn": "notifications.notification.dispatch.NotificationDispatcher",
           "handlers": {
-            "Notifications.NotificationCreated.v1": [
-              "on_notification_created"
+            "Notifications.NotificationDispatchRequested.v1": [
+              "on_dispatch_requested"
             ]
-          },
-          "method_edges": {
-            "on_notification_created": {
-              "invokes": [
-                {
-                  "element": "notifications.notification.notification.Notification",
-                  "method": "mark_failed"
-                },
-                {
-                  "element": "notifications.notification.notification.Notification",
-                  "method": "mark_sent"
-                }
-              ]
-            }
           },
           "module": "notifications.notification.dispatch",
           "name": "NotificationDispatcher",
@@ -433,7 +474,7 @@
             },
             "reason": {
               "kind": "standard",
-              "max_length": 255,
+              "max_length": 500,
               "min_length": 1,
               "required": true,
               "type": "String"
@@ -477,7 +518,7 @@
             },
             "reason": {
               "kind": "standard",
-              "max_length": 255,
+              "max_length": 500,
               "min_length": 1,
               "required": true,
               "type": "String"
@@ -550,7 +591,7 @@
             },
             "subject": {
               "kind": "standard",
-              "max_length": 255,
+              "max_length": 500,
               "type": "String"
             },
             "template_name": {
@@ -602,6 +643,54 @@
           "name": "NotificationDelivered",
           "part_of": "notifications.notification.notification.Notification"
         },
+        "notifications.notification.events.NotificationDispatchRequested": {
+          "__type__": "Notifications.NotificationDispatchRequested.v1",
+          "__version__": 1,
+          "description": "A pending notification is ready to go out through its channel.\n\nCarries everything the send needs, so the dispatcher can send without\nloading the notification and opening a database transaction.",
+          "element_type": "EVENT",
+          "fields": {
+            "body": {
+              "kind": "text",
+              "min_length": 1,
+              "required": true,
+              "type": "Text"
+            },
+            "channel": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "type": "String"
+            },
+            "notification_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "recipient_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "requested_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            },
+            "subject": {
+              "kind": "standard",
+              "max_length": 500,
+              "type": "String"
+            }
+          },
+          "fqn": "notifications.notification.events.NotificationDispatchRequested",
+          "is_fact_event": false,
+          "module": "notifications.notification.events",
+          "name": "NotificationDispatchRequested",
+          "part_of": "notifications.notification.notification.Notification"
+        },
         "notifications.notification.events.NotificationFailed": {
           "__type__": "Notifications.NotificationFailed.v1",
           "__version__": 1,
@@ -633,7 +722,7 @@
             },
             "reason": {
               "kind": "standard",
-              "max_length": 255,
+              "max_length": 500,
               "min_length": 1,
               "required": true,
               "type": "String"
@@ -1506,6 +1595,7 @@
     "APPLICATION_SERVICE": [],
     "COMMAND": [
       "notifications.notification.cancellation.CancelNotification",
+      "notifications.notification.dispatch.RecordDispatchResult",
       "notifications.notification.retry.RetryNotification",
       "notifications.notification.scheduler.ProcessScheduledNotifications",
       "notifications.preference.management.ClearQuietHours",
@@ -1516,6 +1606,7 @@
     ],
     "COMMAND_HANDLER": [
       "notifications.notification.cancellation.CancelNotificationHandler",
+      "notifications.notification.dispatch.RecordDispatchResultHandler",
       "notifications.notification.retry.RetryNotificationHandler",
       "notifications.notification.scheduler.ProcessScheduledNotificationsHandler",
       "notifications.preference.management.ManagePreferencesHandler",
@@ -1529,6 +1620,7 @@
       "notifications.notification.events.NotificationCancelled",
       "notifications.notification.events.NotificationCreated",
       "notifications.notification.events.NotificationDelivered",
+      "notifications.notification.events.NotificationDispatchRequested",
       "notifications.notification.events.NotificationFailed",
       "notifications.notification.events.NotificationRetried",
       "notifications.notification.events.NotificationSent",

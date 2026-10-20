@@ -1,7 +1,10 @@
-"""ProcessScheduledNotifications command + handler — dispatch due notifications.
+"""ProcessScheduledNotifications command + handler — release due notifications.
 
-This handler is invoked by a background job or cron to dispatch
-notifications whose scheduled_for time has passed.
+This handler is invoked by a background job or cron. It selects the PENDING
+notifications whose scheduled_for time has passed and requests their dispatch.
+It never calls a channel itself: each request raises
+``NotificationDispatchRequested``, and ``NotificationDispatcher`` sends it
+after this transaction commits, outside any transaction.
 """
 
 from datetime import datetime
@@ -12,9 +15,7 @@ from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
 from protean.utils.processing import Priority, processing_priority
 
-from notifications.channel import get_channel
 from notifications.domain import notifications
-from notifications.notification.dispatch import _dispatch_via_channel
 from notifications.notification.notification import Notification, NotificationStatus
 
 logger = structlog.get_logger(__name__)
@@ -35,14 +36,15 @@ class ProcessScheduledNotificationsHandler:
             as_of = command.as_of or current_domain.clock.now()
             repo = current_domain.repository_for(Notification)
 
-            # Find pending notifications with scheduled_for <= now
+            # Find pending notifications with scheduled_for <= now. No limit:
+            # the query default of 100 rows would leave due notifications behind.
             try:
-                pending = repo.query.filter(status=NotificationStatus.PENDING.value).all().items
+                pending = repo.query.filter(status=NotificationStatus.PENDING.value).limit(None).all().items
             except Exception:
                 logger.info("No pending notifications found")
                 return
 
-            dispatched_count = 0
+            requested_count = 0
             for notification in pending:
                 # Skip notifications that aren't due yet
                 if notification.scheduled_for is None:
@@ -58,27 +60,12 @@ class ProcessScheduledNotificationsHandler:
                 if sched > as_of:
                     continue
 
-                try:
-                    adapter = get_channel(notification.channel)
-                    result = _dispatch_via_channel(adapter, notification)
-
-                    if result.get("status") == "sent":
-                        notification.mark_sent()
-                    else:
-                        notification.mark_failed(result.get("error", "Unknown dispatch error"))
-                    dispatched_count += 1
-                except Exception as e:
-                    notification.mark_failed(str(e))
-                    logger.error(
-                        "Scheduled notification dispatch failed",
-                        notification_id=str(notification.id),
-                        error=str(e),
-                    )
-
+                notification.request_dispatch()
                 repo.add(notification)
+                requested_count += 1
 
             logger.info(
-                "Scheduled notifications processed",
-                dispatched=dispatched_count,
+                "Scheduled notifications released for dispatch",
+                requested=requested_count,
                 as_of=str(as_of),
             )

@@ -4,11 +4,14 @@
 flowchart LR
     subgraph command_handlers["Command Handlers"]
         ch_notifications_notification_cancellation_CancelNotificationHandler[CancelNotificationHandler]
+        ch_notifications_notification_dispatch_RecordDispatchResultHandler[RecordDispatchResultHandler]
         ch_notifications_notification_retry_RetryNotificationHandler[RetryNotificationHandler]
         ch_notifications_notification_scheduler_ProcessScheduledNotificationsHandler[ProcessScheduledNotificationsHandler]
     end
     cmd_notifications_notification_cancellation_CancelNotification[/CancelNotification/] --> ch_notifications_notification_cancellation_CancelNotificationHandler
     ch_notifications_notification_cancellation_CancelNotificationHandler --> agg_notifications_notification_notification_Notification[Notification]
+    cmd_notifications_notification_dispatch_RecordDispatchResult[/RecordDispatchResult/] --> ch_notifications_notification_dispatch_RecordDispatchResultHandler
+    ch_notifications_notification_dispatch_RecordDispatchResultHandler --> agg_notifications_notification_notification_Notification[Notification]
     cmd_notifications_notification_retry_RetryNotification[/RetryNotification/] --> ch_notifications_notification_retry_RetryNotificationHandler
     ch_notifications_notification_retry_RetryNotificationHandler --> agg_notifications_notification_notification_Notification[Notification]
     cmd_notifications_notification_scheduler_ProcessScheduledNotifications[/ProcessScheduledNotifications/] --> ch_notifications_notification_scheduler_ProcessScheduledNotificationsHandler
@@ -39,7 +42,7 @@ flowchart TD
     subgraph event_handlers["Event Handlers"]
         eh_notifications_notification_dispatch_NotificationDispatcher[NotificationDispatcher]
     end
-    evt_notifications_notification_events_NotificationCreated([NotificationCreated]) --> eh_notifications_notification_dispatch_NotificationDispatcher
+    evt_notifications_notification_events_NotificationDispatchRequested([NotificationDispatchRequested]) --> eh_notifications_notification_dispatch_NotificationDispatcher
 ```
 
 ## Subscribers

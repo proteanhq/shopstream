@@ -25,6 +25,7 @@ from notifications.notification.events import (
     NotificationCancelled,
     NotificationCreated,
     NotificationDelivered,
+    NotificationDispatchRequested,
     NotificationFailed,
     NotificationRetried,
     NotificationSent,
@@ -197,11 +198,32 @@ class Notification:
             )
         )
 
+        # A scheduled notification waits for ProcessScheduledNotifications to
+        # request its dispatch once it is due.
+        if scheduled_for is None:
+            notification.request_dispatch()
+
         return notification
 
     # -------------------------------------------------------------------
     # State transitions
     # -------------------------------------------------------------------
+    def request_dispatch(self) -> None:
+        """Ask the dispatcher to send this pending notification through its channel."""
+        if NotificationStatus(self.status) != NotificationStatus.PENDING:
+            raise ValidationError({"status": ["Only pending notifications can be dispatched"]})
+
+        self.raise_(
+            NotificationDispatchRequested(
+                notification_id=str(self.id),
+                recipient_id=str(self.recipient_id),
+                channel=self.channel,
+                subject=self.subject,
+                body=self.body,
+                requested_at=datetime.now(UTC),
+            )
+        )
+
     def mark_sent(self, sent_at: datetime | None = None) -> None:
         """Mark notification as successfully sent to the channel."""
         now = sent_at or datetime.now(UTC)
@@ -235,7 +257,12 @@ class Notification:
         )
 
     def mark_failed(self, reason: str) -> None:
-        """Mark notification as failed."""
+        """Mark notification as failed, keeping at most 500 characters of the reason.
+
+        The reason often comes from a channel adapter's error text, whose length
+        this domain does not control.
+        """
+        reason = reason[:500]
         now = datetime.now(UTC)
         self.status = NotificationStatus.FAILED.value
         self.failure_reason = reason

@@ -4,6 +4,7 @@ from typing import Any
 from uuid import uuid4
 
 from notifications.channel.email_port import EmailPort
+from notifications.channel.transaction_guard import ensure_no_open_transaction
 
 
 class FakeEmailAdapter(EmailPort):
@@ -26,6 +27,7 @@ class FakeEmailAdapter(EmailPort):
         body: str,
         html_body: str | None = None,
     ) -> dict[str, Any]:
+        ensure_no_open_transaction("Email")
         if not self.should_succeed:
             return {
                 "message_id": None,

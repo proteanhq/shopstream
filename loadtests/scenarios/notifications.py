@@ -376,9 +376,12 @@ class NotificationsUser(HttpUser):
 class NotificationsCancelUser(HttpUser):
     """Specialty scenario: notification cancel after processing.
 
-    WARNING: Generates expected CancelNotificationHandler failures because
-    process-scheduled moves notifications to Sent state, and the subsequent
-    cancel request fails with "Cannot transition from Sent to Cancelled".
+    WARNING: Generates expected CancelNotificationHandler failures when
+    process-scheduled has already moved a notification to Sent, and the
+    subsequent cancel request fails with "Cannot transition from Sent to
+    Cancelled". Under async processing the send happens in the engine after
+    process-scheduled returns, so a cancel can also land first and succeed
+    while the message still goes out.
 
     Run explicitly:
         locust -f loadtests/scenarios/notifications.py NotificationsCancelUser --headless -u 5 -t 60s

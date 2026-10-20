@@ -1,0 +1,45 @@
+{
+  "doc": "A pending notification is ready to go out through its channel.\n\nCarries everything the send needs, so the dispatcher can send without\nloading the notification and opening a database transaction.",
+  "fields": [
+    {
+      "name": "body",
+      "type": "string"
+    },
+    {
+      "name": "channel",
+      "type": "string"
+    },
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "recipient_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "requested_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "default": null,
+      "name": "subject",
+      "type": [
+        "null",
+        "string"
+      ]
+    }
+  ],
+  "name": "NotificationDispatchRequested",
+  "namespace": "notifications.notification.events",
+  "type": "record"
+}
