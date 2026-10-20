@@ -142,14 +142,15 @@ breadth-first, so the saga completes, and the synchronous end-to-end completion 
 ## Events
 
 **RewardAccount events** (`reward/events.py`): `RewardAccountEnrolled`, `PointsEarned`,
-`PointsRedeemed`, `TierUpgraded`, `MembershipCardIssuedV2`, `RewardAccountClosed`.
+`PointsRedeemed`, `TierUpgraded`, `MembershipCardIssuedV2`, `MembershipCardIssued` (deprecated),
+`RewardAccountClosed`.
 
 `PointsEarned` and `PointsRedeemed` carry the count in `points`, declared with
 `renamed_from="amount"`, so stored payloads written under the old name still load. The
 `EarnPoints`/`RedeemPoints` commands and the ledger entry keep `amount`.
 `MembershipCardIssued` (with `issued_on` as a string) is deprecated and superseded by
-`MembershipCardIssuedV2`. Nothing raises it any more, but it stays registered so old stored
-events still load. Raising it emits a `ProteanDeprecationWarning`.
+`MembershipCardIssuedV2`. Nothing raises it any more. It stays registered until it is removed,
+so raising it emits a `ProteanDeprecationWarning` and `protean check` reports `DEPRECATED_ELEMENT`.
 
 `RewardAccountEnrolled`, `PointsEarned`, `PointsRedeemed`, and `TierUpgraded` are
 **`published=True`** — dual-written to the external bus so other contexts react (loyalty is an

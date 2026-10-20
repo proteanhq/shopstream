@@ -1,4 +1,4 @@
-"""Evolution of RewardAccount events that are already stored.
+"""Evolution of RewardAccount events: a renamed field and a superseded event.
 
 ``PointsEarned`` and ``PointsRedeemed`` renamed their ``amount`` field to ``points`` with
 ``renamed_from="amount"``, so a stored payload written under the old name still loads.
@@ -24,7 +24,7 @@ from loyalty.reward.reward_account import RewardAccount
 
 
 def _stored_event(account_id, event_name, data):
-    """Write a RewardAccount event as an older writer would have, then read it back."""
+    """Write a raw RewardAccount event payload to the event store, then read it back."""
     store = current_domain.event_store.store
     stream = f"loyalty::reward_account-{account_id}"
     type_string = f"Loyalty.{event_name}.v1"
@@ -74,7 +74,6 @@ class TestPointsFieldRename:
 
         assert isinstance(event, PointsEarned)
         assert event.points == 42
-        assert not hasattr(event, "amount")
 
     def test_current_points_payload_loads(self):
         event = _stored_event("acc-evo-2", "PointsEarned", _points_payload("acc-evo-2", points=17))

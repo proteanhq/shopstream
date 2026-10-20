@@ -33,8 +33,7 @@ CONTEXTS = [
 ]
 
 
-@pytest.mark.parametrize("context", CONTEXTS)
-def test_context_passes_protean_check(context):
+def _check(context):
     assert PROTEAN, "the protean CLI is not on PATH"
     env = {**os.environ, "PYTHONPATH": str(REPO / "src"), "PROTEAN_ENV": "memory"}
     result = subprocess.run(
@@ -44,10 +43,24 @@ def test_context_passes_protean_check(context):
         capture_output=True,
         text=True,
     )
-    envelope = json.loads(result.stdout)
+    return result, json.loads(result.stdout)
+
+
+@pytest.mark.parametrize("context", CONTEXTS)
+def test_context_passes_protean_check(context):
+    result, envelope = _check(context)
     counts = envelope["data"]["counts"]
     warnings = [d for d in envelope["diagnostics"] if d.get("level") == "warning"]
     findings = [f"{d['code']} {d['element']}: {d['message']}" for d in [*envelope["data"]["errors"], *warnings]]
 
     assert (counts["errors"], counts["warnings"]) == (0, 0), findings
     assert result.returncode == 0, result.stderr
+
+
+def test_loyalty_reports_the_deprecated_membership_card_event():
+    _, envelope = _check("loyalty")
+    deprecated = [d for d in envelope["diagnostics"] if d["code"] == "DEPRECATED_ELEMENT"]
+
+    assert [d["element"] for d in deprecated] == ["loyalty.reward.events.MembershipCardIssued"]
+    assert "since v0.1.0" in deprecated[0]["message"]
+    assert "MembershipCardIssuedV2" in deprecated[0]["message"]

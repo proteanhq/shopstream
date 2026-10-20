@@ -151,11 +151,11 @@ stateDiagram-v2
 | Event | Trigger | Consequence |
 |-------|---------|-------------|
 | `RewardAccountEnrolled` 📢 | Customer enrols into the program | RewardAccountView + PointsLeaderboard projections created |
-| `PointsEarned` 📢 | Account earns points; the count is in `points` (was `amount`) (order, delivery bonus, review bonus, transfer in) | Balance + lifetime updated on RewardAccountView; PointsLeaderboard balance updated; ledger entry appended |
+| `PointsEarned` 📢 | Account earns points from an order, a delivery bonus, a review bonus or a transfer in. The count is in `points` (was `amount`) | Balance + lifetime updated on RewardAccountView; PointsLeaderboard balance updated; ledger entry appended |
 | `PointsRedeemed` 📢 | Account redeems points (or transfer out); the count is in `points` (was `amount`) | Balance updated on both projections; ledger entry appended; Notifications sends a redemption notice |
 | `TierUpgraded` 📢 | Lifetime points cross a tier threshold while earning | RewardAccountView tier updated; Notifications sends a congratulatory notice |
 | `MembershipCardIssuedV2` | A membership card is attached to the account | (read models unchanged; informational). `issued_on` is a date |
-| `MembershipCardIssued` | Nothing raises it any more: deprecated, superseded by `MembershipCardIssuedV2` | Stays registered so stored events still load. Raising it emits a `ProteanDeprecationWarning` |
+| `MembershipCardIssued` | Nothing raises it any more: deprecated, superseded by `MembershipCardIssuedV2` | Stays registered until it is removed, so raising it emits a `ProteanDeprecationWarning` and `protean check` reports `DEPRECATED_ELEMENT` |
 | `RewardAccountClosed` | Account is closed | RewardAccountView status set to Closed |
 | `CampaignLaunched` (v3) | A promo campaign is launched | Campaign created in `draft` (see upcasters for schema history) |
 | `CampaignActivated` | A draft/paused campaign is activated | Campaign status &rarr; active |

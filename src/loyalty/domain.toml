@@ -40,7 +40,8 @@ tick_interval = 0.01
 # skip abstract aggregates, unlike its sibling rules.
 AGGREGATE_WITHOUT_COMMAND_HANDLER = 1
 # MembershipCardIssued and MembershipCardIssuedV2. The first is deprecated and nothing
-# raises it any more; it stays registered so old stored events still load. The second
+# raises it any more; it stays registered until its removal so the deprecation warning
+# and the DEPRECATED_ELEMENT diagnostic keep pointing callers at V2. The second
 # records the card issue on the account's stream, and no read model shows membership
 # cards yet, so nothing handles it. Lower this to 1 when either finding goes away.
 UNHANDLED_EVENT = 2
