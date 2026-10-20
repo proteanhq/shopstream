@@ -117,11 +117,11 @@ tests/
 - Auto-marked `@pytest.mark.application`
 
 ### Integration Tests (`tests/<domain>/integration/`)
-- **Requires full infrastructure** — DB, event store, broker
+- Uses the DB, event store and broker (real ones under `test`, in-memory ones under `--protean-env memory`)
 - Test API endpoints via `TestClient(app)`
 - Test persistence round-trips
 - Test projections updated correctly after events
-- Auto-marked `@pytest.mark.integration` and `@pytest.mark.slow`
+- Auto-marked `@pytest.mark.integration`, plus `@pytest.mark.slow` unless the test carries `@pytest.mark.fast`
 
 ## Configuration
 
@@ -142,7 +142,7 @@ Two fixtures built on Protean's `DomainFixture`:
 1. **`<domain>_bed`** (session scope): imports the domain, wraps it in a `DomainFixture`, calls `setup()` once (init plus schema) and `teardown()` at the end
 2. **`_ctx`** (function scope, auto-used): enters `bed.domain_context()` for each test. On exit it resets the fixture's own domain's providers, brokers and event store
 
-All nine domains share one pytest session. That is why each test enters its own domain's context through `_ctx`, and why the reset on exit touches only that domain's providers, brokers and event store. The other domains' stores are left alone.
+In a full run, all nine domains share one pytest session. Each test enters its own domain's context through `_ctx`, so `current_domain` resolves to that domain. Each `DomainFixture` owns one domain, so the reset on exit touches only that domain's providers, brokers and event store. The other domains' stores are left alone.
 
 ```python
 @pytest.fixture(scope="session")
@@ -218,12 +218,12 @@ def test_register_customer_api(client):
 | `fast` | Keeps an integration test from getting the automatic `slow` marker |
 | `engine` | Drives a full Protean Engine. Runs locally only: CI deselects it with `-m "not engine"` because it is unreliable against CI's Redis |
 
-Protean's pytest plugin registers `domain`, `application`, `integration`, `slow` and `bdd`. `pyproject.toml` registers `fast`, `bdd` and `engine`. The suite runs with `--strict-markers`, so pytest rejects any other marker.
+Protean's pytest plugin registers `domain`, `application`, `integration`, `slow` and `bdd`. `pyproject.toml` registers `fast`, `bdd` and `engine`. The suite runs with `--strict-markers`, so pytest rejects any marker that is not registered.
 
 ## Key Notes
 
-- Tests use `PROTEAN_ENV=test` which keeps `event_processing = "sync"` — projectors fire during UoW commit for deterministic assertions. `--protean-env memory` runs the same tests on in-memory adapters
-- Each test gets a clean slate — the `_ctx` fixture resets its domain's stores after each test
+- Tests use `PROTEAN_ENV=test` which keeps `event_processing = "sync"`. Projectors fire during the UoW commit, so assertions are deterministic. `--protean-env memory` runs the same tests on in-memory adapters
+- Each test under a domain package gets a clean slate: the autouse `_ctx` fixture resets that domain's stores after the test. In `tests/integration/`, request the `<domain>_ctx` fixture for each domain the test writes to
 - DB schema is created once per session, not per test
 - Integration tests in `tests/integration/` have their own conftest. It sets up identity, catalogue and loyalty, each with its own `<domain>_ctx` fixture (not auto-used) that a test requests by name
 - Coverage minimum: 85% overall (`fail_under = 85` in pyproject.toml)

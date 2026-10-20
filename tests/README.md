@@ -81,7 +81,7 @@ uv run pytest -m "not slow"
 Tests are automatically marked based on their location:
 - Files in `domain/` are marked with `@pytest.mark.domain`
 - Files in `application/` are marked with `@pytest.mark.application`
-- Files in `integration/` are marked with `@pytest.mark.integration`
+- Files in `integration/` are marked with `@pytest.mark.integration`, plus `@pytest.mark.slow` unless the test carries `@pytest.mark.fast`
 
 Files in `bdd/` are also marked with `@pytest.mark.bdd`.
 
