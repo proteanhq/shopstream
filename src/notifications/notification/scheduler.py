@@ -36,30 +36,21 @@ class ProcessScheduledNotificationsHandler:
             as_of = command.as_of or current_domain.clock.now()
             repo = current_domain.repository_for(Notification)
 
-            # Find pending notifications with scheduled_for <= now. No limit:
-            # the query default of 100 rows would leave due notifications behind.
+            # Load only the due notifications, with no row limit: the query
+            # default of 100 rows would leave due notifications behind.
             try:
-                pending = repo.query.filter(status=NotificationStatus.PENDING.value).limit(None).all().items
+                pending = (
+                    repo.query.filter(status=NotificationStatus.PENDING.value, scheduled_for__lte=as_of)
+                    .limit(None)
+                    .all()
+                    .items
+                )
             except Exception:
                 logger.info("No pending notifications found")
                 return
 
             requested_count = 0
             for notification in pending:
-                # Skip notifications that aren't due yet
-                if notification.scheduled_for is None:
-                    continue
-
-                # Normalize timezone awareness for comparison
-                sched = notification.scheduled_for
-                if sched.tzinfo is not None and as_of.tzinfo is None:
-                    sched = sched.replace(tzinfo=None)
-                elif sched.tzinfo is None and as_of.tzinfo is not None:
-                    sched = sched.replace(tzinfo=as_of.tzinfo)
-
-                if sched > as_of:
-                    continue
-
                 notification.request_dispatch()
                 repo.add(notification)
                 requested_count += 1

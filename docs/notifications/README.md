@@ -140,7 +140,7 @@ enabled, SMS/push disabled) when a customer registers.
 |---------|--------------|-------------|---------------|
 | `CancelNotification` | Customer/System | Cancels a pending or scheduled notification. Only from Pending status. | `NotificationCancelled` |
 | `RetryNotification` | Admin/System | Retries a failed notification. Resets to Pending. Must be below max_retries. | `NotificationRetried` |
-| `ProcessScheduledNotifications` | Background job | Loads every Pending notification and requests dispatch of those that are scheduled and due (scheduled_for <= now). The sends happen after it commits. | `NotificationDispatchRequested` per notification |
+| `ProcessScheduledNotifications` | Background job | Loads the Pending notifications that are due (scheduled_for <= now) and requests their dispatch. The sends happen after it commits. | `NotificationDispatchRequested` per notification |
 | `RecordDispatchResult` | `NotificationDispatcher` | Marks a Pending notification Sent or Failed after its send. Leaves any other status alone. | `NotificationSent` or `NotificationFailed` |
 | `UpdateNotificationPreferences` | Customer | Updates channel settings (email/sms/push enabled/disabled). | `ChannelsUpdated` |
 | `SetQuietHours` | Customer | Sets a do-not-disturb time window. | `QuietHoursSet` |
