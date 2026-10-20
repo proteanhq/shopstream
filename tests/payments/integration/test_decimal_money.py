@@ -13,6 +13,7 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from protean import current_domain
+from protean.integrations.fastapi import register_exception_handlers
 from sqlalchemy import text
 
 from payments.api.routes import payment_router
@@ -94,7 +95,56 @@ def _column_types(provider, table_name, columns):
 def client():
     app = FastAPI()
     app.include_router(payment_router)
+    register_exception_handlers(app)
     return TestClient(app)
+
+
+_WEBHOOK_HEADERS = {"X-Gateway-Signature": "test-signature"}
+
+
+def _post_payment(client, order_id, amount):
+    return client.post(
+        "/payments",
+        json={
+            "order_id": order_id,
+            "customer_id": "cust-decimal-http",
+            "amount": amount,
+            "payment_method_type": "credit_card",
+            "idempotency_key": f"decimal-http-{order_id}",
+        },
+    )
+
+
+def _post_succeeded_payment(client, order_id, amount):
+    resp = _post_payment(client, order_id, amount)
+    assert resp.status_code == 201
+    payment_id = resp.json()["payment_id"]
+    resp = client.post(
+        "/payments/webhook",
+        json={
+            "payment_id": payment_id,
+            "gateway_transaction_id": f"txn-{order_id}",
+            "gateway_status": "succeeded",
+        },
+        headers=_WEBHOOK_HEADERS,
+    )
+    assert resp.status_code == 200
+    return payment_id
+
+
+def _post_completed_refund(client, payment_id, amount):
+    resp = client.post(f"/payments/{payment_id}/refund", json={"amount": amount, "reason": "Partial"})
+    assert resp.status_code == 200
+    resp = client.post(
+        "/payments/refund/webhook",
+        json={
+            "payment_id": payment_id,
+            "refund_id": resp.json()["refund_id"],
+            "gateway_refund_id": f"gw-{payment_id}-{amount}",
+        },
+        headers=_WEBHOOK_HEADERS,
+    )
+    assert resp.status_code == 200
 
 
 class TestPaymentStatusRoundTrip:
@@ -179,6 +229,50 @@ class TestPaymentStatusRoundTrip:
             "amount": ("numeric", 19, 4),
             "total_refunded": ("numeric", 19, 4),
         }
+
+
+class TestFivePlaceAmountsOverHttp:
+    def test_initiate_payment_with_five_decimal_places_returns_400(self, client):
+        resp = _post_payment(client, "ord-decimal-five", 10.12345)
+
+        assert resp.status_code == 400
+        assert "4 decimal places" in str(resp.json())
+        assert current_domain.event_store.store.read("payments::payment") == []
+        assert (
+            current_domain.repository_for(PaymentStatusView).query.filter(order_id="ord-decimal-five").all().items == []
+        )
+
+    def test_refund_with_five_decimal_places_returns_400(self, client):
+        payment_id = _post_succeeded_payment(client, "ord-decimal-five-refund", 20.0)
+
+        resp = client.post(f"/payments/{payment_id}/refund", json={"amount": 10.12345, "reason": "Partial"})
+
+        assert resp.status_code == 400
+        assert "4 decimal places" in str(resp.json())
+        assert current_domain.repository_for(Payment).get(payment_id).refunds == []
+        view = current_domain.repository_for(PaymentStatusView).get(payment_id)
+        assert view.total_refunded == Decimal("0")
+        assert client.get(f"/payments/{payment_id}").json()["total_refunded"] == "0.0000"
+
+    def test_tenth_refunds_over_http_fully_refund_a_payment_of_0_30(self, client):
+        payment_id = _post_succeeded_payment(client, "ord-decimal-tenths-http", 0.3)
+
+        _post_completed_refund(client, payment_id, 0.1)
+        _post_completed_refund(client, payment_id, 0.2)
+
+        body = client.get(f"/payments/{payment_id}").json()
+        assert body["total_refunded"] == "0.3000"
+        assert body["status"] == "Refunded"
+
+    def test_refund_with_float_arithmetic_error_is_accepted(self, client):
+        payment_id = _post_succeeded_payment(client, "ord-decimal-float-sum", 0.3)
+
+        # 0.1 + 0.2 is 0.30000000000000004 as a float: a 4-place amount.
+        _post_completed_refund(client, payment_id, 0.1 + 0.2)
+
+        body = client.get(f"/payments/{payment_id}").json()
+        assert body["total_refunded"] == "0.3000"
+        assert body["status"] == "Refunded"
 
 
 class TestDailyRevenueDecimal:
