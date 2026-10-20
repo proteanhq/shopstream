@@ -1,9 +1,10 @@
 """Guard that Redis reports the PointsLeaderboard cache TTL in seconds.
 
 Protean's `RedisCache.get_ttl()` used to return milliseconds. Under `--protean-env
-test` the loyalty cache is in memory, so this test builds its own Redis cache from
-`REDIS_URL` with the `[caches.loyalty]` TTL and writes a leaderboard entry through
-it, the same `add()` call the projector makes.
+test` the loyalty cache is in memory, so this test builds its own Redis cache with
+the `[caches.loyalty]` URI and TTL and writes a leaderboard entry through it, the
+same `add()` call the projector makes. `REDIS_CACHE_URL`, then `REDIS_URL`, override
+the URI, so CI's real-stores leg points it at the run's Redis.
 """
 
 import os
@@ -15,27 +16,27 @@ from protean.utils.globals import current_domain
 
 from loyalty.projections.points_leaderboard import PointsLeaderboard
 
-LOYALTY_CACHE_TTL = 3600
-
 
 @pytest.fixture
 def redis_cache():
     if os.environ.get("PROTEAN_ENV") == "memory":
         pytest.skip("needs a real Redis; the memory env has none")
 
+    settings = current_domain.config["caches"]["loyalty"]
+    url_from_env = os.environ.get("REDIS_CACHE_URL") or os.environ.get("REDIS_URL")
     cache = RedisCache(
         "loyalty",
         current_domain,
-        {
-            "provider": "redis",
-            "URI": os.environ.get("REDIS_URL", "redis://127.0.0.1:16379/8"),
-            "TTL": LOYALTY_CACHE_TTL,
-        },
+        {"provider": "redis", "URI": url_from_env or settings["URI"], "TTL": settings["TTL"]},
     )
     try:
         cache.ping()
     except Exception as exc:
         cache.close()
+        # A Redis URL set in the environment means this run has a Redis, so an
+        # unreachable one is a broken setup and must not hide the guard as a skip.
+        if url_from_env:
+            raise
         pytest.skip(f"Redis is unreachable: {exc}")
 
     yield cache
@@ -43,6 +44,9 @@ def redis_cache():
 
 
 def test_leaderboard_entry_ttl_is_reported_in_seconds(redis_cache):
+    configured_ttl = redis_cache.conn_info["TTL"]
+    assert configured_ttl == 3600
+
     # A unique key, removed afterwards: in CI `REDIS_URL` is a database other
     # domains use, so the test must never flush it.
     account_id = f"ttl-guard-{uuid.uuid4()}"
@@ -57,4 +61,4 @@ def test_leaderboard_entry_ttl_is_reported_in_seconds(redis_cache):
 
     assert ttl is not None
     # Milliseconds would read about 3,600,000; a wrong scale the other way about 3.6.
-    assert LOYALTY_CACHE_TTL - 100 <= ttl <= LOYALTY_CACHE_TTL
+    assert configured_ttl - 100 <= ttl <= configured_ttl

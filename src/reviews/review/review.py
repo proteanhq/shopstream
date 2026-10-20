@@ -13,6 +13,7 @@ State Machine (4 states):
     REMOVED → (terminal)
 """
 
+import html
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from enum import Enum
@@ -225,7 +226,9 @@ class Review:
 
     @invariant.post
     def body_minimum_length(self) -> None:
-        if self.body and len(self.body.strip()) < 20:
+        # `body` is stored escaped, so count the characters the customer typed:
+        # ten `<` are 40 characters once escaped.
+        if self.body and len(html.unescape(self.body).strip()) < 20:
             raise ValidationError({"body": ["Review body must be at least 20 characters"]})
 
     @invariant.post

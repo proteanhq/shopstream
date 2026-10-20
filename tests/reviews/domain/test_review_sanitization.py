@@ -1,10 +1,11 @@
-"""Tests for HTML escaping on the review free-text fields.
+"""Tests for sanitization on the review free-text fields.
 
 `Review.title`, `Review.body`, `Review.moderation_notes`, `SellerReply.body` and
-`ReviewImage.alt_text` declare `sanitize=True`. Protean checks `max_length` on the
-escaped value, so an input inside the bound can still be rejected once `&`
-becomes `&amp;`. `ReviewImage.url` stays raw, because escaping `&` would break a
-query string.
+`ReviewImage.alt_text` declare `sanitize=True`, so Protean runs them through
+`bleach.clean()`: bare `&` and `<` and tags off bleach's allowlist are escaped, and
+allowlisted tags such as `<b>` are kept. Protean checks `max_length` on the cleaned
+value, so an input inside the bound can still be rejected once `&` becomes `&amp;`.
+`ReviewImage.url` stays raw, because escaping `&` would break a query string.
 """
 
 import pytest
@@ -13,6 +14,10 @@ from protean.exceptions import ValidationError
 from reviews.review.review import Review, ReviewImage
 
 BODY = "I really enjoyed this product, it exceeded expectations."
+
+
+def _length_errors(exc: pytest.ExceptionInfo[ValidationError], field: str) -> list[str]:
+    return [m for m in exc.value.messages.get(field, []) if "after sanitization" in m]
 
 
 def _make_review(**overrides):
@@ -39,13 +44,13 @@ class TestTitleSanitization:
         assert len(self.GROWS_PAST_BOUND) <= 200
         with pytest.raises(ValidationError) as exc:
             _make_review(title=self.GROWS_PAST_BOUND)
-        assert "title" in exc.value.messages
+        assert _length_errors(exc, "title")
 
     def test_title_within_bound_that_grows_past_it_is_rejected_on_edit(self):
         review = _make_review()
         with pytest.raises(ValidationError) as exc:
             review.edit(title=self.GROWS_PAST_BOUND)
-        assert "title" in exc.value.messages
+        assert _length_errors(exc, "title")
 
     def test_escaped_title_survives_reassignment_unchanged(self):
         review = _make_review(title="Salt & pepper grinder")
@@ -61,7 +66,7 @@ class TestAltTextSanitization:
         assert len(self.GROWS_PAST_BOUND) <= 255
         with pytest.raises(ValidationError) as exc:
             _make_review(images=[{"url": "https://cdn.example.com/a.jpg", "alt_text": self.GROWS_PAST_BOUND}])
-        assert "alt_text" in exc.value.messages
+        assert _length_errors(exc, "alt_text")
 
     def test_alt_text_ampersand_is_stored_escaped(self):
         review = _make_review(images=[{"url": "https://cdn.example.com/a.jpg", "alt_text": "Front & back"}])
@@ -91,6 +96,15 @@ class TestTextFieldSanitization:
         review = _make_review(body="<script>alert(1)</script> nice product overall")
         assert review.body == "&lt;script&gt;alert(1)&lt;/script&gt; nice product overall"
 
+    def test_body_on_edit_is_stored_escaped(self):
+        review = _make_review()
+        review.edit(body=self.RAW)
+        assert review.body == self.ESCAPED
+
+    def test_allowlisted_tag_is_kept(self):
+        review = _make_review(body="<b>Sturdy</b> & light, would recommend it.")
+        assert review.body == "<b>Sturdy</b> &amp; light, would recommend it."
+
     def test_moderation_notes_on_approve_are_stored_escaped(self):
         review = _make_review()
         review.approve(moderator_id="mod-001", notes=self.RAW)
@@ -106,3 +120,27 @@ class TestTextFieldSanitization:
         review.approve(moderator_id="mod-001")
         review.add_seller_reply(seller_id="seller-001", body=self.RAW)
         assert review.reply[0].body == self.ESCAPED
+
+    def test_moderation_notes_on_remove_are_stored_escaped(self):
+        review = _make_review()
+        review.approve(moderator_id="mod-001")
+        review.remove(removed_by="mod-001", reason=self.RAW)
+        assert review.moderation_notes == self.ESCAPED
+
+
+class TestBodyMinimumLengthCountsTypedCharacters:
+    def test_short_body_that_grows_past_minimum_once_escaped_is_rejected(self):
+        # Ten characters typed, 40 once escaped.
+        with pytest.raises(ValidationError) as exc:
+            _make_review(body="<" * 10)
+        assert exc.value.messages["body"] == ["Review body must be at least 20 characters"]
+
+    def test_short_body_rejected_on_edit(self):
+        review = _make_review()
+        with pytest.raises(ValidationError) as exc:
+            review.edit(body="&&&&&")
+        assert exc.value.messages["body"] == ["Review body must be at least 20 characters"]
+
+    def test_body_of_twenty_typed_characters_with_escapes_is_accepted(self):
+        review = _make_review(body="Fits < 2 sizes & ok.")
+        assert review.body == "Fits &lt; 2 sizes &amp; ok."

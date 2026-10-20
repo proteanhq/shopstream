@@ -47,13 +47,15 @@ REMOVED  → (terminal)
 - `title_must_not_be_empty` — title cannot be whitespace-only
 
 ### Sanitization
-Protean 0.18 turned sanitization off by default: a `String` or `Text` field stores raw input unless it declares `sanitize=True`. Sanitizing means running the value through `bleach.clean()`, which HTML-escapes it (`&` becomes `&amp;`, `<` becomes `&lt;`).
+Protean 0.18 turned sanitization off by default: a `String` or `Text` field stores raw input unless it declares `sanitize=True`. Sanitizing means running the value through `bleach.clean()` with bleach's default allowlist. Bare `&` and `<` are escaped (`&amp;`, `&lt;`), and so are tags off the allowlist, such as `<script>`. Tags on the allowlist, such as `<b>`, `<i>` and `<a>`, are kept, with attributes like `onclick` and `javascript:` links dropped. The stored value is cleaned HTML, not plain escaped text.
 
-- These five fields declare `sanitize=True`, because they hold free text that a storefront may render as HTML: `Review.title`, `Review.body`, `Review.moderation_notes`, `SellerReply.body`, `ReviewImage.alt_text`.
+- These five fields declare `sanitize=True`, because they hold free text a customer or seller types and a storefront shows: `Review.title`, `Review.body`, `Review.moderation_notes`, `SellerReply.body`, `ReviewImage.alt_text`.
 - Protean checks `max_length` on the escaped value. A 195-character title with five `&` is 215 characters once escaped, so it fails the 200 bound.
+- `body_minimum_length` counts the unescaped body (`html.unescape`), so escaping cannot lift a short body past 20 characters.
+- Cleaning is idempotent: saving and reloading an escaped value leaves it unchanged. Protean cleans and checks `max_length` again when it loads a row, so a row saved raw before these fields sanitized, with a title near 200 characters that contains `&` or `<`, fails to load. ShopStream has no such deployed data, so there is no backfill.
 - `ReviewImage.url` stays raw: escaping `&` would break a query string.
 - `pros` and `cons` are `List(String())`, whose items were never sanitized. `HelpfulVote.vote_type` is a `choices` field, which Protean does not sanitize.
-- Events copy the caller's input, so `ReviewSubmitted`, `ReviewRejected.reason` and `SellerReplyAdded.body` carry raw text, and so do the projections built from them. `ReviewEdited` carries raw text for the fields the caller passed and the stored, escaped value for the ones it left out.
+- Events copy the caller's input, so `ReviewSubmitted`, `ReviewRejected.reason` and `SellerReplyAdded.body` carry raw text, and so do `ReviewDetail`, `CustomerReviews` and the first `ModerationQueue` row, which copy those events. `ProductReviews` takes `title` and `body` from the loaded aggregate, so those two hold the escaped value, while its seller reply comes from `SellerReplyAdded` and stays raw. The `ModerationQueue` re-queue path also loads the aggregate and holds the escaped `title` and `body`. `ReviewEdited` carries raw text for the fields the caller passed and the escaped value for the ones it left out.
 - Free-text fields in the other contexts stay raw. Output encoding belongs to the layer that displays them.
 
 ### Aggregate Methods
