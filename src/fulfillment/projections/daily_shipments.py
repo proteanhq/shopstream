@@ -20,22 +20,22 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 class DailyShipmentsView:
     """Daily aggregate of fulfillment operations."""
 
-    id = Identifier(identifier=True)
-    date = String(required=True)  # ISO date string YYYY-MM-DD
-    total_created = Integer(default=0)
-    total_shipped = Integer(default=0)
-    total_delivered = Integer(default=0)
-    total_exceptions = Integer(default=0)
-    updated_at = DateTime()
+    id: str = Identifier(identifier=True)
+    date: str = String(required=True)  # ISO date string YYYY-MM-DD
+    total_created: int = Integer(default=0)
+    total_shipped: int = Integer(default=0)
+    total_delivered: int = Integer(default=0)
+    total_exceptions: int = Integer(default=0)
+    updated_at: datetime | None = DateTime()
 
 
 def _date_key(dt: datetime) -> str:
     return dt.strftime("%Y-%m-%d") if dt else ""
 
 
-def _get_or_create(date_str: str, timestamp: datetime):
+def _get_or_create(date_str: str, timestamp: datetime) -> DailyShipmentsView:
     repo = current_domain.repository_for(DailyShipmentsView)
-    view = repo.get_or_none(date_str)
+    view: DailyShipmentsView | None = repo.get_or_none(date_str)
     if view is not None:
         return view
     return DailyShipmentsView(
@@ -52,7 +52,7 @@ def _get_or_create(date_str: str, timestamp: datetime):
 @fulfillment.projector(projector_for=DailyShipmentsView, aggregates=[Fulfillment])
 class DailyShipmentsProjector:
     @on(FulfillmentCreated)
-    def on_fulfillment_created(self, event):
+    def on_fulfillment_created(self, event: FulfillmentCreated) -> None:
         date_str = _date_key(event.created_at)
         view = _get_or_create(date_str, event.created_at)
         view.total_created = (view.total_created or 0) + 1
@@ -60,7 +60,7 @@ class DailyShipmentsProjector:
         current_domain.repository_for(DailyShipmentsView).add(view)
 
     @on(ShipmentHandedOff)
-    def on_shipment_handed_off(self, event):
+    def on_shipment_handed_off(self, event: ShipmentHandedOff) -> None:
         date_str = _date_key(event.shipped_at)
         view = _get_or_create(date_str, event.shipped_at)
         view.total_shipped = (view.total_shipped or 0) + 1
@@ -68,7 +68,7 @@ class DailyShipmentsProjector:
         current_domain.repository_for(DailyShipmentsView).add(view)
 
     @on(DeliveryConfirmed)
-    def on_delivery_confirmed(self, event):
+    def on_delivery_confirmed(self, event: DeliveryConfirmed) -> None:
         date_str = _date_key(event.delivered_at)
         view = _get_or_create(date_str, event.delivered_at)
         view.total_delivered = (view.total_delivered or 0) + 1
@@ -76,7 +76,7 @@ class DailyShipmentsProjector:
         current_domain.repository_for(DailyShipmentsView).add(view)
 
     @on(DeliveryException)
-    def on_delivery_exception(self, event):
+    def on_delivery_exception(self, event: DeliveryException) -> None:
         date_str = _date_key(event.occurred_at)
         view = _get_or_create(date_str, event.occurred_at)
         view.total_exceptions = (view.total_exceptions or 0) + 1

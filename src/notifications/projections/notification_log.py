@@ -1,5 +1,8 @@
 """NotificationLog — full audit trail of all notifications."""
 
+from datetime import datetime
+from typing import Any
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -19,28 +22,28 @@ from notifications.notification.notification import Notification
 
 @notifications.projection
 class NotificationLog:
-    notification_id: Identifier(identifier=True, required=True)
-    recipient_id: Identifier(required=True)
-    recipient_type: String(required=True)
-    notification_type: String(required=True)
-    channel: String(required=True)
-    subject: String(max_length=500)
-    status: String(required=True)
-    template_name: String(max_length=200)
-    source_event_type: String(max_length=200)
-    failure_reason: String(max_length=500)
-    retry_count: Integer(default=0)
-    scheduled_for: DateTime()
-    created_at: DateTime()
-    sent_at: DateTime()
-    delivered_at: DateTime()
-    updated_at: DateTime()
+    notification_id: str = Identifier(identifier=True, required=True)
+    recipient_id: str = Identifier(required=True)
+    recipient_type: str = String(required=True)
+    notification_type: str = String(required=True)
+    channel: str = String(required=True)
+    subject: str | None = String(max_length=500)
+    status: str = String(required=True)
+    template_name: str | None = String(max_length=200)
+    source_event_type: str | None = String(max_length=200)
+    failure_reason: str | None = String(max_length=500)
+    retry_count: int = Integer(default=0)
+    scheduled_for: datetime | None = DateTime()
+    created_at: datetime | None = DateTime()
+    sent_at: datetime | None = DateTime()
+    delivered_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @notifications.projector(projector_for=NotificationLog, aggregates=[Notification])
 class NotificationLogProjector:
     @on(NotificationCreated)
-    def on_notification_created(self, event):
+    def on_notification_created(self, event: NotificationCreated) -> None:
         current_domain.repository_for(NotificationLog).add(
             NotificationLog(
                 notification_id=event.notification_id,
@@ -58,7 +61,7 @@ class NotificationLogProjector:
             )
         )
 
-    def _update_log(self, notification_id, **fields):
+    def _update_log(self, notification_id: str, **fields: Any) -> None:
         repo = current_domain.repository_for(NotificationLog)
         log = repo.get_or_none(notification_id)
         if log is None:
@@ -68,7 +71,7 @@ class NotificationLogProjector:
         repo.add(log)
 
     @on(NotificationSent)
-    def on_notification_sent(self, event):
+    def on_notification_sent(self, event: NotificationSent) -> None:
         self._update_log(
             event.notification_id,
             status="Sent",
@@ -77,7 +80,7 @@ class NotificationLogProjector:
         )
 
     @on(NotificationDelivered)
-    def on_notification_delivered(self, event):
+    def on_notification_delivered(self, event: NotificationDelivered) -> None:
         self._update_log(
             event.notification_id,
             status="Delivered",
@@ -86,7 +89,7 @@ class NotificationLogProjector:
         )
 
     @on(NotificationFailed)
-    def on_notification_failed(self, event):
+    def on_notification_failed(self, event: NotificationFailed) -> None:
         self._update_log(
             event.notification_id,
             status="Failed",
@@ -96,7 +99,7 @@ class NotificationLogProjector:
         )
 
     @on(NotificationBounced)
-    def on_notification_bounced(self, event):
+    def on_notification_bounced(self, event: NotificationBounced) -> None:
         self._update_log(
             event.notification_id,
             status="Bounced",
@@ -105,7 +108,7 @@ class NotificationLogProjector:
         )
 
     @on(NotificationCancelled)
-    def on_notification_cancelled(self, event):
+    def on_notification_cancelled(self, event: NotificationCancelled) -> None:
         self._update_log(
             event.notification_id,
             status="Cancelled",
@@ -114,7 +117,7 @@ class NotificationLogProjector:
         )
 
     @on(NotificationRetried)
-    def on_notification_retried(self, event):
+    def on_notification_retried(self, event: NotificationRetried) -> None:
         self._update_log(
             event.notification_id,
             status="Pending",

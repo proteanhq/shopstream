@@ -24,6 +24,7 @@ was deducted, so there is nothing to compensate — the redemption is simply aba
 """
 
 import logging
+from datetime import datetime
 
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -44,14 +45,14 @@ logger = logging.getLogger(__name__)
 class RedemptionSaga:
     """Coordinates reserve → issue → confirm, compensating on voucher failure."""
 
-    redemption_id = Identifier()
-    account_id = Identifier()
-    points = Integer(default=0)
-    reward_code = String()
-    status = String(default="new")
-    voucher_code = String()
-    failure_reason = String()
-    started_at = DateTime()
+    redemption_id: str | None = Identifier()
+    account_id: str | None = Identifier()
+    points: int = Integer(default=0)
+    reward_code: str | None = String()
+    status: str = String(default="new")
+    voucher_code: str | None = String()
+    failure_reason: str | None = String()
+    started_at: datetime | None = DateTime()
 
     @handle(RedemptionRequested, start=True, correlate={"redemption_id": "redemption_id"})
     def on_requested(self, event: RedemptionRequested) -> None:
@@ -128,6 +129,8 @@ class RedemptionSaga:
         self.failure_reason = event.reason
 
         # Compensating action: give back the points reserved in step 1.
+        # on_requested, the start handler, always sets account_id before this step runs.
+        assert self.account_id is not None
         current_domain.process(
             EarnPoints(
                 account_id=self.account_id,

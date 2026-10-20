@@ -7,12 +7,17 @@ present (e.g. background engine processing), enrichers return an empty
 dict (no-op).
 """
 
+from typing import Any
+
 from protean import g
+from protean.core.aggregate import BaseAggregate
+from protean.core.command import BaseCommand
+from protean.core.event import BaseEvent
 
 
-def enrich_command(_command):
+def enrich_command(_command: BaseCommand) -> dict[str, Any]:
     """Add request context to command metadata.extensions."""
-    extensions = {}
+    extensions: dict[str, Any] = {}
     if hasattr(g, "request_correlation_id") and g.request_correlation_id:
         extensions["request_id"] = g.request_correlation_id
     if hasattr(g, "user_id") and g.user_id:
@@ -20,9 +25,9 @@ def enrich_command(_command):
     return extensions
 
 
-def enrich_event(_event, _aggregate):
+def enrich_event(_event: BaseEvent, _aggregate: BaseAggregate) -> dict[str, Any]:
     """Add request context to event metadata.extensions."""
-    extensions = {}
+    extensions: dict[str, Any] = {}
     if hasattr(g, "request_correlation_id") and g.request_correlation_id:
         extensions["request_id"] = g.request_correlation_id
     if hasattr(g, "user_id") and g.user_id:

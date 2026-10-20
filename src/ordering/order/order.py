@@ -14,6 +14,7 @@ State Machine (14 states):
 
 from datetime import UTC, datetime
 from enum import Enum
+from typing import Any
 from uuid import uuid4
 
 from protean import apply
@@ -98,11 +99,11 @@ class ShippingAddress:
     the order was shipped, regardless of future address changes on the Customer.
     """
 
-    street = String(required=True, max_length=255)
-    city = String(required=True, max_length=100)
-    state = String(max_length=100)
-    postal_code = String(required=True, max_length=20)
-    country = String(required=True, max_length=100)
+    street: str = String(required=True, max_length=255)
+    city: str = String(required=True, max_length=100)
+    state: str | None = String(max_length=100)
+    postal_code: str = String(required=True, max_length=20)
+    country: str = String(required=True, max_length=100)
 
 
 @ordering.value_object(part_of="Order")
@@ -113,12 +114,12 @@ class OrderPricing:
     change later. The currency is captured alongside the amounts.
     """
 
-    subtotal = Float(default=0.0)
-    shipping_cost = Float(default=0.0)
-    tax_total = Float(default=0.0)
-    discount_total = Float(default=0.0)
-    grand_total = Float(default=0.0)
-    currency = String(max_length=3, default="USD")
+    subtotal: float = Float(default=0.0)
+    shipping_cost: float = Float(default=0.0)
+    tax_total: float = Float(default=0.0)
+    discount_total: float = Float(default=0.0)
+    grand_total: float = Float(default=0.0)
+    currency: str = String(max_length=3, default="USD")
 
 
 # ---------------------------------------------------------------------------
@@ -133,15 +134,15 @@ class OrderItem:
     shipments where some items ship before others.
     """
 
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    sku = String(required=True, max_length=50)
-    title = String(required=True, max_length=255)
-    quantity = Integer(required=True, min_value=1)
-    unit_price = Float(required=True, min_value=0.0)
-    discount = Float(default=0.0)
-    tax_amount = Float(default=0.0)
-    item_status = Status(
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    sku: str = String(required=True, max_length=50)
+    title: str = String(required=True, max_length=255)
+    quantity: int = Integer(required=True, min_value=1)
+    unit_price: float = Float(required=True, min_value=0.0)
+    discount: float = Float(default=0.0)
+    tax_amount: float = Float(default=0.0)
+    item_status: str = Status(
         ItemStatus,
         default=ItemStatus.PENDING.value,
         transitions={
@@ -158,8 +159,8 @@ class OrderItem:
 # ---------------------------------------------------------------------------
 @ordering.aggregate(event_sourced=True)
 class Order:
-    customer_id = Identifier(required=True)
-    status = Status(
+    customer_id: str = Identifier(required=True)
+    status: str = Status(
         OrderStatus,
         default=OrderStatus.CREATED.value,
         transitions={
@@ -189,23 +190,23 @@ class Order:
             OrderStatus.REFUNDED: [OrderStatus.REFUNDED],  # Idempotent
         },
     )
-    items = HasMany(OrderItem)
-    shipping_address = ValueObject(ShippingAddress)
-    billing_address = ValueObject(ShippingAddress)
-    pricing = ValueObject(OrderPricing)
-    payment_id = String(max_length=255)
-    payment_method = String(max_length=50)
-    payment_status = String(max_length=50)
-    shipment_id = String(max_length=255)
-    carrier = String(max_length=100)
-    tracking_number = String(max_length=255)
-    estimated_delivery = String(max_length=10)  # ISO date string
-    order_source = String(max_length=20, default="web")
-    cancellation_reason = String(max_length=500)
-    cancelled_by = String(max_length=50)
-    coupon_code = String(max_length=100)
-    created_at = DateTime()
-    updated_at = DateTime()
+    items: list[OrderItem] = HasMany(OrderItem)
+    shipping_address: ShippingAddress | None = ValueObject(ShippingAddress)
+    billing_address: ShippingAddress | None = ValueObject(ShippingAddress)
+    pricing: OrderPricing | None = ValueObject(OrderPricing)
+    payment_id: str | None = String(max_length=255)
+    payment_method: str | None = String(max_length=50)
+    payment_status: str | None = String(max_length=50)
+    shipment_id: str | None = String(max_length=255)
+    carrier: str | None = String(max_length=100)
+    tracking_number: str | None = String(max_length=255)
+    estimated_delivery: str | None = String(max_length=10)  # ISO date string
+    order_source: str = String(max_length=20, default="web")
+    cancellation_reason: str | None = String(max_length=500)
+    cancelled_by: str | None = String(max_length=50)
+    coupon_code: str | None = String(max_length=100)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     # -------------------------------------------------------------------
     # Factory method
@@ -213,13 +214,13 @@ class Order:
     @classmethod
     def create(
         cls,
-        customer_id,
-        items_data,
-        shipping_address,
-        billing_address,
-        pricing,
-        order_source="web",
-    ):
+        customer_id: str,
+        items_data: list[dict[str, Any]],
+        shipping_address: dict[str, Any],
+        billing_address: dict[str, Any],
+        pricing: dict[str, Any],
+        order_source: str = "web",
+    ) -> "Order":
         """Create a new order from checkout data.
 
         Uses _create_new() to get a blank aggregate with auto-generated
@@ -262,7 +263,13 @@ class Order:
         return order
 
     @staticmethod
-    def _calculate_pricing(items, shipping_cost=0.0, tax_total=0.0, discount_total=0.0, currency="USD"):
+    def _calculate_pricing(
+        items: list[OrderItem],
+        shipping_cost: float = 0.0,
+        tax_total: float = 0.0,
+        discount_total: float = 0.0,
+        currency: str = "USD",
+    ) -> OrderPricing:
         """Pure pricing calculation — returns new OrderPricing without side effects."""
         subtotal = sum(item.unit_price * item.quantity - item.discount for item in items)
         grand_total = subtotal + shipping_cost + tax_total - discount_total
@@ -278,7 +285,9 @@ class Order:
     # -------------------------------------------------------------------
     # Order modification (only in CREATED state)
     # -------------------------------------------------------------------
-    def add_item(self, product_id, variant_id, sku, title, quantity, unit_price):
+    def add_item(
+        self, product_id: str, variant_id: str, sku: str, title: str, quantity: int, unit_price: float
+    ) -> None:
         """Add an item to the order. Only allowed in CREATED state."""
         if OrderStatus(self.status) != OrderStatus.CREATED:
             raise ValidationError({"status": ["Items can only be added in Created state"]})
@@ -319,7 +328,7 @@ class Order:
             )
         )
 
-    def remove_item(self, item_id):
+    def remove_item(self, item_id: str) -> None:
         """Remove an item from the order. Only allowed in CREATED state."""
         if OrderStatus(self.status) != OrderStatus.CREATED:
             raise ValidationError({"status": ["Items can only be removed in Created state"]})
@@ -348,7 +357,7 @@ class Order:
             )
         )
 
-    def update_item_quantity(self, item_id, new_quantity):
+    def update_item_quantity(self, item_id: str, new_quantity: int) -> None:
         """Update item quantity. Only allowed in CREATED state."""
         if OrderStatus(self.status) != OrderStatus.CREATED:
             raise ValidationError({"status": ["Item quantities can only be updated in Created state"]})
@@ -402,7 +411,7 @@ class Order:
             )
         )
 
-    def apply_coupon(self, coupon_code):
+    def apply_coupon(self, coupon_code: str) -> None:
         """Apply a coupon code. Only allowed in CREATED state."""
         if OrderStatus(self.status) != OrderStatus.CREATED:
             raise ValidationError({"status": ["Coupons can only be applied in Created state"]})
@@ -418,7 +427,7 @@ class Order:
     # -------------------------------------------------------------------
     # Order lifecycle transitions
     # -------------------------------------------------------------------
-    def confirm(self):
+    def confirm(self) -> None:
         """Confirm the order (inventory reserved)."""
         self.raise_(
             OrderConfirmed(
@@ -427,7 +436,7 @@ class Order:
             )
         )
 
-    def record_payment_pending(self, payment_id, payment_method):
+    def record_payment_pending(self, payment_id: str, payment_method: str) -> None:
         """Record that payment has been initiated."""
         self.raise_(
             PaymentPending(
@@ -438,7 +447,7 @@ class Order:
             )
         )
 
-    def record_payment_success(self, payment_id, amount, payment_method):
+    def record_payment_success(self, payment_id: str, amount: float, payment_method: str) -> None:
         """Record successful payment capture."""
         self.raise_(
             PaymentSucceeded(
@@ -450,7 +459,7 @@ class Order:
             )
         )
 
-    def record_payment_failure(self, payment_id, reason):
+    def record_payment_failure(self, payment_id: str, reason: str) -> None:
         """Record payment failure. Returns order to CONFIRMED for retry."""
         self.raise_(
             PaymentFailed(
@@ -461,7 +470,7 @@ class Order:
             )
         )
 
-    def mark_processing(self):
+    def mark_processing(self) -> None:
         """Mark order as being processed (fulfillment started)."""
         self.raise_(
             OrderProcessing(
@@ -472,12 +481,12 @@ class Order:
 
     def record_shipment(
         self,
-        shipment_id,
-        carrier,
-        tracking_number,
-        shipped_item_ids=None,
-        estimated_delivery=None,
-    ):
+        shipment_id: str,
+        carrier: str,
+        tracking_number: str,
+        shipped_item_ids: list[str] | None = None,
+        estimated_delivery: str | None = None,
+    ) -> None:
         """Record that the order has been shipped (all items)."""
         if OrderStatus(self.status) not in (
             OrderStatus.PAID,
@@ -500,11 +509,11 @@ class Order:
 
     def record_partial_shipment(
         self,
-        shipment_id,
-        carrier,
-        tracking_number,
-        shipped_item_ids,
-    ):
+        shipment_id: str,
+        carrier: str,
+        tracking_number: str,
+        shipped_item_ids: list[str],
+    ) -> None:
         """Record partial shipment (some items shipped)."""
         if OrderStatus(self.status) != OrderStatus.PROCESSING:
             raise ValidationError({"status": ["Order must be Processing for partial shipment"]})
@@ -520,7 +529,7 @@ class Order:
             )
         )
 
-    def record_delivery(self):
+    def record_delivery(self) -> None:
         """Record that the order has been delivered."""
         self.raise_(
             OrderDelivered(
@@ -530,7 +539,7 @@ class Order:
             )
         )
 
-    def complete(self):
+    def complete(self) -> None:
         """Complete the order (return window expired)."""
         self.raise_(
             OrderCompleted(
@@ -542,7 +551,7 @@ class Order:
     # -------------------------------------------------------------------
     # Returns
     # -------------------------------------------------------------------
-    def request_return(self, reason):
+    def request_return(self, reason: str) -> None:
         """Request a return (within return window)."""
         self.raise_(
             ReturnRequested(
@@ -552,7 +561,7 @@ class Order:
             )
         )
 
-    def approve_return(self):
+    def approve_return(self) -> None:
         """Approve a return request."""
         self.raise_(
             ReturnApproved(
@@ -561,7 +570,7 @@ class Order:
             )
         )
 
-    def record_return(self, returned_item_ids=None):
+    def record_return(self, returned_item_ids: list[str] | None = None) -> None:
         """Record that returned items have been received."""
         ids_to_return = returned_item_ids or [str(i.id) for i in self.items]
         self.raise_(
@@ -575,7 +584,7 @@ class Order:
     # -------------------------------------------------------------------
     # Cancellation & Refund
     # -------------------------------------------------------------------
-    def cancel(self, reason, cancelled_by):
+    def cancel(self, reason: str, cancelled_by: str) -> None:
         """Cancel the order."""
         self.raise_(
             OrderCancelled(
@@ -586,9 +595,13 @@ class Order:
             )
         )
 
-    def refund(self, refund_amount=None):
+    def refund(self, refund_amount: float | None = None) -> None:
         """Refund a cancelled or returned order."""
-        amount = refund_amount if refund_amount is not None else self.pricing.grand_total
+        amount = refund_amount
+        if amount is None:
+            # OrderCreated always sets pricing, so every persisted order has it.
+            assert self.pricing is not None
+            amount = self.pricing.grand_total
         self.raise_(
             OrderRefunded(
                 order_id=str(self.id),
@@ -601,7 +614,7 @@ class Order:
     # @apply methods — rebuild state during event replay
     # -------------------------------------------------------------------
     @apply
-    def _on_order_created(self, event: OrderCreated):
+    def _on_order_created(self, event: OrderCreated) -> None:
         self.id = event.order_id
         self.customer_id = event.customer_id
         self.status = OrderStatus.CREATED.value
@@ -631,7 +644,7 @@ class Order:
         )
 
     @apply
-    def _on_item_added(self, event: ItemAdded):
+    def _on_item_added(self, event: ItemAdded) -> None:
         self.add_items(
             OrderItem(
                 id=event.item_id,
@@ -654,7 +667,7 @@ class Order:
         self.updated_at = event.added_at
 
     @apply
-    def _on_item_removed(self, event: ItemRemoved):
+    def _on_item_removed(self, event: ItemRemoved) -> None:
         item = next((i for i in self.items if str(i.id) == str(event.item_id)), None)
         if item:
             self.remove_items(item)
@@ -669,7 +682,7 @@ class Order:
         self.updated_at = event.removed_at
 
     @apply
-    def _on_item_quantity_updated(self, event: ItemQuantityUpdated):
+    def _on_item_quantity_updated(self, event: ItemQuantityUpdated) -> None:
         item = next((i for i in self.items if str(i.id) == str(event.item_id)), None)
         if item:
             item.quantity = int(event.new_quantity)
@@ -684,17 +697,17 @@ class Order:
         self.updated_at = event.updated_at
 
     @apply
-    def _on_coupon_applied(self, event: CouponApplied):
+    def _on_coupon_applied(self, event: CouponApplied) -> None:
         self.coupon_code = event.coupon_code
         self.updated_at = event.applied_at
 
     @apply
-    def _on_order_confirmed(self, event: OrderConfirmed):
+    def _on_order_confirmed(self, event: OrderConfirmed) -> None:
         self.status = OrderStatus.CONFIRMED.value
         self.updated_at = event.confirmed_at
 
     @apply
-    def _on_payment_pending(self, event: PaymentPending):
+    def _on_payment_pending(self, event: PaymentPending) -> None:
         self.status = OrderStatus.PAYMENT_PENDING.value
         self.payment_id = event.payment_id
         self.payment_method = event.payment_method
@@ -702,7 +715,7 @@ class Order:
         self.updated_at = event.initiated_at
 
     @apply
-    def _on_payment_succeeded(self, event: PaymentSucceeded):
+    def _on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         self.status = OrderStatus.PAID.value
         self.payment_id = event.payment_id
         self.payment_method = event.payment_method
@@ -710,18 +723,18 @@ class Order:
         self.updated_at = event.paid_at
 
     @apply
-    def _on_payment_failed(self, event: PaymentFailed):
+    def _on_payment_failed(self, event: PaymentFailed) -> None:
         self.status = OrderStatus.CONFIRMED.value
         self.payment_status = "failed"
         self.updated_at = event.failed_at
 
     @apply
-    def _on_order_processing(self, event: OrderProcessing):
+    def _on_order_processing(self, event: OrderProcessing) -> None:
         self.status = OrderStatus.PROCESSING.value
         self.updated_at = event.started_at
 
     @apply
-    def _on_order_shipped(self, event: OrderShipped):
+    def _on_order_shipped(self, event: OrderShipped) -> None:
         self.status = OrderStatus.SHIPPED.value
         self.shipment_id = event.shipment_id
         self.carrier = event.carrier
@@ -733,7 +746,7 @@ class Order:
             item.item_status = ItemStatus.SHIPPED.value
 
     @apply
-    def _on_order_partially_shipped(self, event: OrderPartiallyShipped):
+    def _on_order_partially_shipped(self, event: OrderPartiallyShipped) -> None:
         self.status = OrderStatus.PARTIALLY_SHIPPED.value
         self.shipment_id = event.shipment_id
         self.carrier = event.carrier
@@ -745,29 +758,29 @@ class Order:
                 item.item_status = ItemStatus.SHIPPED.value
 
     @apply
-    def _on_order_delivered(self, event: OrderDelivered):
+    def _on_order_delivered(self, event: OrderDelivered) -> None:
         self.status = OrderStatus.DELIVERED.value
         self.updated_at = event.delivered_at
         for item in self.items:
             item.item_status = ItemStatus.DELIVERED.value
 
     @apply
-    def _on_order_completed(self, event: OrderCompleted):
+    def _on_order_completed(self, event: OrderCompleted) -> None:
         self.status = OrderStatus.COMPLETED.value
         self.updated_at = event.completed_at
 
     @apply
-    def _on_return_requested(self, event: ReturnRequested):
+    def _on_return_requested(self, event: ReturnRequested) -> None:
         self.status = OrderStatus.RETURN_REQUESTED.value
         self.updated_at = event.requested_at
 
     @apply
-    def _on_return_approved(self, event: ReturnApproved):
+    def _on_return_approved(self, event: ReturnApproved) -> None:
         self.status = OrderStatus.RETURN_APPROVED.value
         self.updated_at = event.approved_at
 
     @apply
-    def _on_order_returned(self, event: OrderReturned):
+    def _on_order_returned(self, event: OrderReturned) -> None:
         self.status = OrderStatus.RETURNED.value
         self.updated_at = event.returned_at
         returned_ids = event.returned_item_ids or []
@@ -776,13 +789,13 @@ class Order:
                 item.item_status = ItemStatus.RETURNED.value
 
     @apply
-    def _on_order_cancelled(self, event: OrderCancelled):
+    def _on_order_cancelled(self, event: OrderCancelled) -> None:
         self.status = OrderStatus.CANCELLED.value
         self.cancellation_reason = event.reason
         self.cancelled_by = event.cancelled_by
         self.updated_at = event.cancelled_at
 
     @apply
-    def _on_order_refunded(self, event: OrderRefunded):
+    def _on_order_refunded(self, event: OrderRefunded) -> None:
         self.status = OrderStatus.REFUNDED.value
         self.updated_at = event.refunded_at

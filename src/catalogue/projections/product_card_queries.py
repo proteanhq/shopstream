@@ -1,6 +1,7 @@
 """Queries for the ProductCard projection."""
 
 from protean import read
+from protean.core.queryset import ResultSet
 from protean.fields import Identifier, Integer, String
 from protean.utils.globals import current_domain
 
@@ -10,16 +11,16 @@ from catalogue.projections.product_card import ProductCard
 
 @catalogue.query(part_of=ProductCard)
 class ListProductCards:
-    category_id = Identifier()
-    status = String()
-    page = Integer(default=1)
-    page_size = Integer(default=20)
+    category_id: str | None = Identifier()
+    status: str | None = String()
+    page: int = Integer(default=1)
+    page_size: int = Integer(default=20)
 
 
 @catalogue.query_handler(part_of=ProductCard)
 class ProductCardQueryHandler:
     @read(ListProductCards)
-    def list_product_cards(self, query):
+    def list_product_cards(self, query: ListProductCards) -> ResultSet:
         qs = current_domain.view_for(ProductCard).query
         if query.category_id:
             qs = qs.filter(category_id=query.category_id)

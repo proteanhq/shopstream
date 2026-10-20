@@ -12,23 +12,23 @@ from ordering.order.order import Order
 class CancelOrder:
     """Cancel an order before fulfillment begins (allowed in Created through Paid states)."""
 
-    order_id = Identifier(required=True)
-    reason = String(required=True, max_length=500)
-    cancelled_by = String(required=True, max_length=50)
+    order_id: str = Identifier(required=True)
+    reason: str = String(required=True, max_length=500)
+    cancelled_by: str = String(required=True, max_length=50)
 
 
 @ordering.command(part_of="Order")
 class RefundOrder:
     """Issue a refund for a cancelled or returned order."""
 
-    order_id = Identifier(required=True)
-    refund_amount = Float()  # Optional — defaults to grand_total
+    order_id: str = Identifier(required=True)
+    refund_amount: float | None = Float()  # Optional — defaults to grand_total
 
 
 @ordering.command_handler(part_of=Order)
 class CancelOrderHandler:
     @handle(CancelOrder)
-    def cancel_order(self, command):
+    def cancel_order(self, command: CancelOrder) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.cancel(
@@ -38,7 +38,7 @@ class CancelOrderHandler:
         repo.add(order)
 
     @handle(RefundOrder)
-    def refund_order(self, command):
+    def refund_order(self, command: RefundOrder) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.refund(refund_amount=command.refund_amount)

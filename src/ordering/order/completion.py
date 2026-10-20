@@ -12,13 +12,13 @@ from ordering.order.order import Order
 class CompleteOrder:
     """Finalize a delivered order after the return window has expired."""
 
-    order_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
 
 
 @ordering.command_handler(part_of=Order)
 class CompleteOrderHandler:
     @handle(CompleteOrder)
-    def complete_order(self, command):
+    def complete_order(self, command: CompleteOrder) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.complete()

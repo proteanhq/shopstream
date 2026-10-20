@@ -1,5 +1,7 @@
 """Tier upgraded template — sent when a loyalty account reaches a new tier."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -11,7 +13,7 @@ class TierUpgradedTemplate:
     default_channels = [NotificationChannel.EMAIL.value, NotificationChannel.PUSH.value]
 
     @staticmethod
-    def render(context: dict) -> dict:
+    def render(context: dict[str, Any]) -> dict[str, str]:
         new_tier = str(context.get("new_tier", "a new")).title()
         old_tier = str(context.get("old_tier", "")).title()
         lifetime_points = context.get("lifetime_points", "")

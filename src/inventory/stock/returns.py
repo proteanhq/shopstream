@@ -12,15 +12,15 @@ from inventory.stock.stock import InventoryItem
 class ReturnToStock:
     """Add returned items back to inventory."""
 
-    inventory_item_id = Identifier(required=True)
-    quantity = Integer(required=True)
-    order_id = Identifier(required=True)
+    inventory_item_id: str = Identifier(required=True)
+    quantity: int = Integer(required=True)
+    order_id: str = Identifier(required=True)
 
 
 @inventory.command_handler(part_of=InventoryItem)
 class ReturnToStockHandler:
     @handle(ReturnToStock)
-    def return_to_stock(self, command):
+    def return_to_stock(self, command: ReturnToStock) -> None:
         repo = current_domain.repository_for(InventoryItem)
         item = repo.get(command.inventory_item_id)
         item.return_to_stock(

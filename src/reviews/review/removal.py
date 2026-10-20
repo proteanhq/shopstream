@@ -14,15 +14,15 @@ from reviews.review.review import Review
 
 @reviews.command(part_of="Review")
 class RemoveReview:
-    review_id = Identifier(required=True)
-    removed_by = String(required=True)  # "Customer", "Admin", "System"
-    reason = String(required=True)
+    review_id: str = Identifier(required=True)
+    removed_by: str = String(required=True)  # "Customer", "Admin", "System"
+    reason: str = String(required=True)
 
 
 @reviews.command_handler(part_of=Review)
 class RemoveReviewHandler:
     @handle(RemoveReview)
-    def remove_review(self, command):
+    def remove_review(self, command: RemoveReview) -> None:
         repo = current_domain.repository_for(Review)
         review = repo.get(command.review_id)
 

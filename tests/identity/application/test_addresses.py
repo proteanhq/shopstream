@@ -203,6 +203,27 @@ class TestAddressManagementFlow:
         assert customer.addresses[0].geo_coordinates is not None
         assert customer.addresses[0].geo_coordinates.latitude == 41.8781
 
+    def test_add_address_keeps_zero_coordinates(self):
+        # A value object whose fields are all zero is falsy, so a truthiness
+        # check would drop coordinates at latitude 0, longitude 0.
+        customer_id = self._register_customer()
+
+        command = AddAddress(
+            customer_id=customer_id,
+            street="1 Equator Rd",
+            city="Gulf of Guinea",
+            postal_code="00000",
+            country="GH",
+            geo_lat="0",
+            geo_lng="0",
+        )
+        current_domain.process(command, asynchronous=False)
+
+        customer = current_domain.repository_for(Customer).get(customer_id)
+        geo = customer.addresses[0].geo_coordinates
+        assert geo is not None
+        assert (geo.latitude, geo.longitude) == (0.0, 0.0)
+
     def test_cannot_add_11th_address(self):
         customer_id = self._register_customer()
 

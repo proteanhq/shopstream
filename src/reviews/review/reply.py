@@ -13,15 +13,15 @@ from reviews.review.review import Review
 
 @reviews.command(part_of="Review")
 class AddSellerReply:
-    review_id = Identifier(required=True)
-    seller_id = Identifier(required=True)
-    body = Text(required=True)
+    review_id: str = Identifier(required=True)
+    seller_id: str = Identifier(required=True)
+    body: str = Text(required=True)
 
 
 @reviews.command_handler(part_of=Review)
 class AddSellerReplyHandler:
     @handle(AddSellerReply)
-    def add_seller_reply(self, command):
+    def add_seller_reply(self, command: AddSellerReply) -> None:
         repo = current_domain.repository_for(Review)
         review = repo.get(command.review_id)
 

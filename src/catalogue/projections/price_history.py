@@ -13,19 +13,19 @@ from catalogue.product.product import Product
 
 @catalogue.projection
 class PriceHistory:
-    entry_id: Identifier(identifier=True, required=True)
-    product_id: Identifier(required=True)
-    variant_id: Identifier(required=True)
-    previous_price: Float(required=True)
-    new_price: Float(required=True)
-    currency: String(required=True)
-    changed_at: DateTime(required=True)
+    entry_id: str = Identifier(identifier=True, required=True)
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    previous_price: float = Float(required=True)
+    new_price: float = Float(required=True)
+    currency: str = String(required=True)
+    changed_at: datetime = DateTime(required=True)
 
 
 @catalogue.projector(projector_for=PriceHistory, aggregates=[Product])
 class PriceHistoryProjector:
     @on(VariantPriceChanged)
-    def on_variant_price_changed(self, event):
+    def on_variant_price_changed(self, event: VariantPriceChanged) -> None:
         import uuid
 
         current_domain.repository_for(PriceHistory).add(

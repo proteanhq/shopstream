@@ -20,13 +20,13 @@ from payments.payment.payment import Payment
 class InitiatePayment:
     """Initiate a new payment for an order."""
 
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    amount = Float(required=True)
-    currency = String(max_length=3, default="USD")
-    payment_method_type = String(required=True, max_length=50)
-    last4 = String(max_length=4)
-    idempotency_key = String(required=True, max_length=255)
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    amount: float = Float(required=True)
+    currency: str = String(max_length=3, default="USD")
+    payment_method_type: str = String(required=True, max_length=50)
+    last4: str | None = String(max_length=4)
+    idempotency_key: str = String(required=True, max_length=255)
 
 
 # A payment authorization has a validity window: a stale InitiatePayment that
@@ -42,7 +42,7 @@ class InitiatePayment:
 )
 class InitiatePaymentHandler:
     @handle(InitiatePayment)
-    def initiate_payment(self, command):
+    def initiate_payment(self, command: InitiatePayment) -> str:
         # Enrich this handler's wide event (protean.access) with business
         # dimensions for revenue/fraud observability — these only the
         # application knows, and they flow through to log aggregators.

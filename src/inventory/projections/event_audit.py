@@ -26,6 +26,7 @@ The wildcard handler also runs under ``event_processing="sync"``;
 import uuid
 from datetime import UTC, datetime
 
+from protean.core.event import BaseEvent
 from protean.fields import DateTime, Identifier, String
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
@@ -36,14 +37,14 @@ from inventory.stock.stock import InventoryItem
 
 @inventory.projection(externally_populated=True)
 class EventAudit:
-    audit_id = Identifier(identifier=True, required=True)
-    inventory_item_id = Identifier()
-    event_type = String(required=True)  # short class name, e.g. "StockReserved"
-    qualified_type = String()  # metadata type, e.g. "inventory.StockReserved.v1"
-    stream = String()
-    correlation_id = String()
-    causation_id = String()
-    recorded_at = DateTime(required=True)
+    audit_id: str = Identifier(identifier=True, required=True)
+    inventory_item_id: str | None = Identifier()
+    event_type: str = String(required=True)  # short class name, e.g. "StockReserved"
+    qualified_type: str | None = String()  # metadata type, e.g. "inventory.StockReserved.v1"
+    stream: str | None = String()
+    correlation_id: str | None = String()
+    causation_id: str | None = String()
+    recorded_at: datetime = DateTime(required=True)
 
 
 @inventory.event_handler(part_of=InventoryItem)
@@ -51,7 +52,7 @@ class EventAuditHandler:
     """Records a uniform audit row for every InventoryItem event via the wildcard."""
 
     @handle("$any")
-    def on_any_event(self, event):
+    def on_any_event(self, event: BaseEvent) -> None:
         metadata = getattr(event, "_metadata", None)
         headers = getattr(metadata, "headers", None)
         domain_meta = getattr(metadata, "domain", None)

@@ -1,5 +1,7 @@
 """Customer preferences — read model for notification channel preferences."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import Boolean, DateTime, Identifier, List, String
 from protean.utils.globals import current_domain
@@ -18,22 +20,22 @@ from notifications.preference.preference import NotificationPreference
 
 @notifications.projection
 class CustomerPreferences:
-    preference_id = Identifier(identifier=True, required=True)
-    customer_id = Identifier(required=True)
-    email_enabled = Boolean(default=True)
-    sms_enabled = Boolean(default=False)
-    push_enabled = Boolean(default=False)
-    quiet_hours_start = String()
-    quiet_hours_end = String()
-    unsubscribed_types = List(String())
-    created_at = DateTime()
-    updated_at = DateTime()
+    preference_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = Identifier(required=True)
+    email_enabled: bool = Boolean(default=True)
+    sms_enabled: bool = Boolean(default=False)
+    push_enabled: bool = Boolean(default=False)
+    quiet_hours_start: str | None = String()
+    quiet_hours_end: str | None = String()
+    unsubscribed_types: list[str] = List(String())
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @notifications.projector(projector_for=CustomerPreferences, aggregates=[NotificationPreference])
 class CustomerPreferencesProjector:
     @on(PreferencesCreated)
-    def on_preferences_created(self, event):
+    def on_preferences_created(self, event: PreferencesCreated) -> None:
         current_domain.repository_for(CustomerPreferences).add(
             CustomerPreferences(
                 preference_id=event.preference_id,
@@ -48,7 +50,7 @@ class CustomerPreferencesProjector:
         )
 
     @on(ChannelsUpdated)
-    def on_channels_updated(self, event):
+    def on_channels_updated(self, event: ChannelsUpdated) -> None:
         repo = current_domain.repository_for(CustomerPreferences)
         view = repo.get(event.preference_id)
         view.email_enabled = event.email_enabled
@@ -58,7 +60,7 @@ class CustomerPreferencesProjector:
         repo.add(view)
 
     @on(QuietHoursSet)
-    def on_quiet_hours_set(self, event):
+    def on_quiet_hours_set(self, event: QuietHoursSet) -> None:
         repo = current_domain.repository_for(CustomerPreferences)
         view = repo.get(event.preference_id)
         view.quiet_hours_start = event.start
@@ -67,7 +69,7 @@ class CustomerPreferencesProjector:
         repo.add(view)
 
     @on(QuietHoursCleared)
-    def on_quiet_hours_cleared(self, event):
+    def on_quiet_hours_cleared(self, event: QuietHoursCleared) -> None:
         repo = current_domain.repository_for(CustomerPreferences)
         view = repo.get(event.preference_id)
         view.quiet_hours_start = None
@@ -76,7 +78,7 @@ class CustomerPreferencesProjector:
         repo.add(view)
 
     @on(TypeUnsubscribed)
-    def on_type_unsubscribed(self, event):
+    def on_type_unsubscribed(self, event: TypeUnsubscribed) -> None:
         repo = current_domain.repository_for(CustomerPreferences)
         view = repo.get(event.preference_id)
         types = list(view.unsubscribed_types or [])
@@ -87,7 +89,7 @@ class CustomerPreferencesProjector:
         repo.add(view)
 
     @on(TypeResubscribed)
-    def on_type_resubscribed(self, event):
+    def on_type_resubscribed(self, event: TypeResubscribed) -> None:
         repo = current_domain.repository_for(CustomerPreferences)
         view = repo.get(event.preference_id)
         types = list(view.unsubscribed_types or [])

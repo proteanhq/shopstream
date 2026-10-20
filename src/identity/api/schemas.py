@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 # --- Request Schemas ---
@@ -142,4 +144,4 @@ class CustomerCardResponse(BaseModel):
 
 class AddressBookResponse(BaseModel):
     customer_id: str
-    addresses: list[dict] | None = None
+    addresses: list[dict[str, Any]] | None = None

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 # --- Product Request Schemas ---
@@ -34,7 +36,7 @@ class CreateProductRequest(BaseModel):
     description: str | None = None
     category_id: str | None = None
     brand: str | None = Field(None, max_length=100)
-    attributes: dict | None = None
+    attributes: dict[str, Any] | None = None
     visibility: str | None = Field(None, max_length=20)
     meta_title: str | None = Field(None, max_length=70)
     meta_description: str | None = Field(None, max_length=160)
@@ -59,7 +61,7 @@ class UpdateProductDetailsRequest(BaseModel):
     title: str | None = Field(None, max_length=255)
     description: str | None = None
     brand: str | None = Field(None, max_length=100)
-    attributes: dict | None = None
+    attributes: dict[str, Any] | None = None
     meta_title: str | None = Field(None, max_length=70)
     meta_description: str | None = Field(None, max_length=160)
     slug: str | None = Field(None, max_length=200)
@@ -86,7 +88,7 @@ class AddVariantRequest(BaseModel):
     }
 
     variant_sku: str = Field(..., max_length=50)
-    attributes: dict | None = None
+    attributes: dict[str, Any] | None = None
     base_price: float
     currency: str = Field("USD", max_length=3)
     weight_value: float | None = None
@@ -141,7 +143,7 @@ class CreateCategoryRequest(BaseModel):
 
     name: str = Field(..., max_length=100)
     parent_category_id: str | None = None
-    attributes: dict | None = None
+    attributes: dict[str, Any] | None = None
 
 
 class UpdateCategoryRequest(BaseModel):
@@ -152,7 +154,7 @@ class UpdateCategoryRequest(BaseModel):
     }
 
     name: str | None = Field(None, max_length=100)
-    attributes: dict | None = None
+    attributes: dict[str, Any] | None = None
 
 
 class ReorderCategoryRequest(BaseModel):
@@ -193,9 +195,9 @@ class ProductDetailResponse(BaseModel):
     description: str | None = None
     category_id: str | None = None
     brand: str | None = None
-    attributes: dict | None = None
-    variants: list[dict] | None = None
-    images: list[dict] | None = None
+    attributes: dict[str, Any] | None = None
+    variants: list[dict[str, Any]] | None = None
+    images: list[dict[str, Any]] | None = None
     status: str
     visibility: str | None = None
     meta_title: str | None = None
@@ -235,5 +237,5 @@ class CategoryProductsResponse(BaseModel):
     category_id: str
     category_name: str
     product_count: int = 0
-    products: list[dict] | None = None
+    products: list[dict[str, Any]] | None = None
     updated_at: str | None = None

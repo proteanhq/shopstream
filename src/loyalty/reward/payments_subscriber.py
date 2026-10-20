@@ -11,6 +11,8 @@ Points model: one point clawed back per unit of refunded amount, clamped to the 
 showcase self-contained while exercising a refund→loyalty reversal end-to-end.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -22,7 +24,7 @@ logger = structlog.get_logger(__name__)
 
 @loyalty.subscriber(broker="global", stream="payments::payment")
 class PaymentRefundedSubscriber:
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         if "RefundCompleted" not in event_type:
             return

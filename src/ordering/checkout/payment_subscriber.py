@@ -12,6 +12,8 @@ Flow:
 - PaymentFailed → dispatches RecordPaymentFailure
 """
 
+from typing import Any
+
 import structlog
 from protean.exceptions import ValidationError
 from protean.utils.globals import current_domain
@@ -30,7 +32,7 @@ class PaymentEventsSubscriber:
     event types not relevant to the Ordering domain's checkout flow.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
@@ -39,7 +41,7 @@ class PaymentEventsSubscriber:
         elif "PaymentFailed" in event_type:
             self._on_payment_failed(data)
 
-    def _on_payment_succeeded(self, data: dict) -> None:
+    def _on_payment_succeeded(self, data: dict[str, Any]) -> None:
         """Payment succeeded — record success on the order."""
         order_id = data.get("order_id")
         if not order_id:
@@ -69,7 +71,7 @@ class PaymentEventsSubscriber:
                 order_id,
             )
 
-    def _on_payment_failed(self, data: dict) -> None:
+    def _on_payment_failed(self, data: dict[str, Any]) -> None:
         """Payment failed — record failure on the order.
 
         The order transitions back to Confirmed, allowing the saga to

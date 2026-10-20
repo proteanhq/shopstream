@@ -14,6 +14,7 @@ State Machine (6 states):
 
 from datetime import UTC, datetime
 from enum import Enum
+from typing import Any
 
 from protean.exceptions import ValidationError
 from protean.fields import DateTime, Dict, Identifier, Integer, Status, String, Text
@@ -84,27 +85,27 @@ class Notification:
     """
 
     # Recipient
-    recipient_id: Identifier(required=True)
-    recipient_type: String(choices=RecipientType, default=RecipientType.CUSTOMER.value)
+    recipient_id: str = Identifier(required=True)
+    recipient_type: str = String(choices=RecipientType, default=RecipientType.CUSTOMER.value)
 
     # Notification type and channel
-    notification_type: String(choices=NotificationType, required=True)
-    channel: String(choices=NotificationChannel, required=True)
+    notification_type: str = String(choices=NotificationType, required=True)
+    channel: str = String(choices=NotificationChannel, required=True)
 
     # Content
-    subject: String(max_length=500)
-    body: Text(required=True)
+    subject: str | None = String(max_length=500)
+    body: str = Text(required=True)
 
     # Template
-    template_name: String(max_length=200)
+    template_name: str | None = String(max_length=200)
 
     # Source event correlation
-    source_event_type: String(max_length=200)
-    source_event_id: String(max_length=200)
-    context_data: Dict()  # Data used to render the template
+    source_event_type: str | None = String(max_length=200)
+    source_event_id: str | None = String(max_length=200)
+    context_data: dict[str, Any] = Dict()  # Data used to render the template
 
     # Status
-    status: Status(
+    status: str = Status(
         NotificationStatus,
         default=NotificationStatus.PENDING.value,
         transitions={
@@ -125,20 +126,20 @@ class Notification:
     )
 
     # Scheduling
-    scheduled_for: DateTime()  # Null means immediate
+    scheduled_for: datetime | None = DateTime()  # Null means immediate
 
     # Delivery tracking
-    sent_at: DateTime()
-    delivered_at: DateTime()
-    failure_reason: String(max_length=500)
+    sent_at: datetime | None = DateTime()
+    delivered_at: datetime | None = DateTime()
+    failure_reason: str | None = String(max_length=500)
 
     # Retry
-    retry_count: Integer(default=0)
-    max_retries: Integer(default=3)
+    retry_count: int = Integer(default=0)
+    max_retries: int = Integer(default=3)
 
     # Timestamps
-    created_at: DateTime()
-    updated_at: DateTime()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     # -------------------------------------------------------------------
     # Factory
@@ -146,19 +147,19 @@ class Notification:
     @classmethod
     def create(
         cls,
-        recipient_id,
-        notification_type,
-        channel,
-        body,
-        subject=None,
-        recipient_type=RecipientType.CUSTOMER.value,
-        template_name=None,
-        source_event_type=None,
-        source_event_id=None,
-        context_data=None,
-        scheduled_for=None,
-        max_retries=3,
-    ):
+        recipient_id: str,
+        notification_type: str,
+        channel: str,
+        body: str,
+        subject: str | None = None,
+        recipient_type: str = RecipientType.CUSTOMER.value,
+        template_name: str | None = None,
+        source_event_type: str | None = None,
+        source_event_id: str | None = None,
+        context_data: dict[str, Any] | None = None,
+        scheduled_for: datetime | None = None,
+        max_retries: int = 3,
+    ) -> "Notification":
         """Create a new notification in PENDING status."""
         now = datetime.now(UTC)
 
@@ -201,7 +202,7 @@ class Notification:
     # -------------------------------------------------------------------
     # State transitions
     # -------------------------------------------------------------------
-    def mark_sent(self, sent_at=None):
+    def mark_sent(self, sent_at: datetime | None = None) -> None:
         """Mark notification as successfully sent to the channel."""
         now = sent_at or datetime.now(UTC)
         self.status = NotificationStatus.SENT.value
@@ -217,7 +218,7 @@ class Notification:
             )
         )
 
-    def mark_delivered(self, delivered_at=None):
+    def mark_delivered(self, delivered_at: datetime | None = None) -> None:
         """Mark notification as confirmed delivered."""
         now = delivered_at or datetime.now(UTC)
         self.status = NotificationStatus.DELIVERED.value
@@ -233,7 +234,7 @@ class Notification:
             )
         )
 
-    def mark_failed(self, reason):
+    def mark_failed(self, reason: str) -> None:
         """Mark notification as failed."""
         now = datetime.now(UTC)
         self.status = NotificationStatus.FAILED.value
@@ -253,7 +254,7 @@ class Notification:
             )
         )
 
-    def mark_bounced(self, reason):
+    def mark_bounced(self, reason: str) -> None:
         """Mark notification as bounced (permanent delivery failure)."""
         now = datetime.now(UTC)
         self.status = NotificationStatus.BOUNCED.value
@@ -270,7 +271,7 @@ class Notification:
             )
         )
 
-    def cancel(self, reason):
+    def cancel(self, reason: str) -> None:
         """Cancel a pending notification."""
         now = datetime.now(UTC)
         self.status = NotificationStatus.CANCELLED.value
@@ -287,7 +288,7 @@ class Notification:
             )
         )
 
-    def retry(self):
+    def retry(self) -> None:
         """Retry a failed notification."""
         if NotificationStatus(self.status) != NotificationStatus.FAILED:
             raise ValidationError({"status": ["Only failed notifications can be retried"]})

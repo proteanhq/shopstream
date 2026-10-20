@@ -15,7 +15,7 @@ from loyalty.reward.reward_account import AccountStatus, RewardAccount
 
 @loyalty.domain_service(part_of=[RewardAccount, RewardAccount])
 class TransferPoints:
-    def __init__(self, source, target):
+    def __init__(self, source: RewardAccount, target: RewardAccount) -> None:
         super().__init__(source, target)
         # Underscore-prefixed so the invariant wrapper does not treat them as
         # public service methods.
@@ -24,18 +24,18 @@ class TransferPoints:
         self._total_before = source.points_balance + target.points_balance
 
     @invariant.pre
-    def both_accounts_must_be_active(self):
+    def both_accounts_must_be_active(self) -> None:
         for account in (self._source, self._target):
             if account.status != AccountStatus.ACTIVE.value:
                 raise ValidationError({"_service": ["Both accounts must be active to transfer points"]})
 
     @invariant.post
-    def points_are_conserved(self):
+    def points_are_conserved(self) -> None:
         total_after = self._source.points_balance + self._target.points_balance
         if total_after != self._total_before:
             raise ValidationError({"_service": ["Points must be conserved across a transfer"]})
 
-    def __call__(self, amount):
+    def __call__(self, amount: int) -> None:
         if amount <= 0:
             raise ValidationError({"amount": ["Transfer amount must be positive"]})
         # Over-transfer is caught by RewardAccount's balance_never_negative invariant.

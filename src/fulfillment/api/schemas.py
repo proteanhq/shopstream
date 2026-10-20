@@ -4,6 +4,8 @@ These are the external API contracts — separate from domain commands.
 The API layer translates between these schemas and domain commands.
 """
 
+from typing import Any
+
 from pydantic import BaseModel
 
 
@@ -34,7 +36,7 @@ class RecordItemPickedRequest(BaseModel):
 
 class RecordPackingRequest(BaseModel):
     packed_by: str
-    packages: list[dict]
+    packages: list[dict[str, Any]]
 
 
 class GenerateShippingLabelRequest(BaseModel):
@@ -113,6 +115,6 @@ class ShipmentTrackingResponse(BaseModel):
     tracking_number: str | None = None
     current_status: str
     current_location: str | None = None
-    events: list[dict] | None = None
+    events: list[dict[str, Any]] | None = None
     shipped_at: str | None = None
     delivered_at: str | None = None

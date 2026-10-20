@@ -12,22 +12,22 @@ from notifications.preference.preference import NotificationPreference
 class UnsubscribeFromType:
     """Unsubscribe a customer from a specific notification type."""
 
-    customer_id: Identifier(required=True)
-    notification_type: String(required=True, max_length=100)
+    customer_id: str = Identifier(required=True)
+    notification_type: str = String(required=True, max_length=100)
 
 
 @notifications.command(part_of="NotificationPreference")
 class ResubscribeToType:
     """Resubscribe a customer to a previously unsubscribed notification type."""
 
-    customer_id: Identifier(required=True)
-    notification_type: String(required=True, max_length=100)
+    customer_id: str = Identifier(required=True)
+    notification_type: str = String(required=True, max_length=100)
 
 
 @notifications.command_handler(part_of=NotificationPreference)
 class ManageSubscriptionsHandler:
     @handle(UnsubscribeFromType)
-    def unsubscribe(self, command: UnsubscribeFromType):
+    def unsubscribe(self, command: UnsubscribeFromType) -> None:
         repo = current_domain.repository_for(NotificationPreference)
         prefs = repo.query.filter(customer_id=str(command.customer_id)).all().items
         preference = prefs[0]
@@ -35,7 +35,7 @@ class ManageSubscriptionsHandler:
         repo.add(preference)
 
     @handle(ResubscribeToType)
-    def resubscribe(self, command: ResubscribeToType):
+    def resubscribe(self, command: ResubscribeToType) -> None:
         repo = current_domain.repository_for(NotificationPreference)
         prefs = repo.query.filter(customer_id=str(command.customer_id)).all().items
         preference = prefs[0]

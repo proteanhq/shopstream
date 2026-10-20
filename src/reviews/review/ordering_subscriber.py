@@ -10,6 +10,7 @@ No dependency on shared event classes or register_external_event.
 """
 
 import uuid
+from typing import Any
 
 import structlog
 from protean.utils.globals import current_domain
@@ -29,7 +30,7 @@ class OrderDeliveredSubscriber:
     event data. Ignores all other event types on the stream.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         if "OrderDelivered" not in event_type:
             return

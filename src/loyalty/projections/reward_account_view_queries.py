@@ -10,11 +10,11 @@ from loyalty.projections.reward_account_view import RewardAccountView
 
 @loyalty.query(part_of=RewardAccountView)
 class GetRewardAccount:
-    account_id = Identifier(required=True)
+    account_id: str = Identifier(required=True)
 
 
 @loyalty.query_handler(part_of=RewardAccountView)
 class RewardAccountViewQueryHandler:
     @read(GetRewardAccount)
-    def get_reward_account(self, query):
+    def get_reward_account(self, query: GetRewardAccount) -> RewardAccountView:
         return current_domain.view_for(RewardAccountView).get(query.account_id)

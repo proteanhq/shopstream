@@ -1,5 +1,7 @@
 """Shipping update template — sent when order is handed off to carrier."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -15,7 +17,7 @@ class ShippingUpdateTemplate:
     ]
 
     @staticmethod
-    def render(context: dict) -> dict:
+    def render(context: dict[str, Any]) -> dict[str, str]:
         order_id = context.get("order_id", "N/A")
         carrier = context.get("carrier", "the carrier")
         tracking_number = context.get("tracking_number", "N/A")

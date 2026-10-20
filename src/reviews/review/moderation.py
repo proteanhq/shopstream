@@ -15,16 +15,16 @@ from reviews.review.review import ModerationAction, Review
 
 @reviews.command(part_of="Review")
 class ModerateReview:
-    review_id = Identifier(required=True)
-    moderator_id = Identifier(required=True)
-    action = String(required=True)  # "Approve" or "Reject"
-    reason = String()  # Required for rejection
+    review_id: str = Identifier(required=True)
+    moderator_id: str = Identifier(required=True)
+    action: str = String(required=True)  # "Approve" or "Reject"
+    reason: str | None = String()  # Required for rejection
 
 
 @reviews.command_handler(part_of=Review)
 class ModerateReviewHandler:
     @handle(ModerateReview)
-    def moderate_review(self, command):
+    def moderate_review(self, command: ModerateReview) -> None:
         repo = current_domain.repository_for(Review)
         review = repo.get(command.review_id)
 

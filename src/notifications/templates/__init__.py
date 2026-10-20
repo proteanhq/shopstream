@@ -4,6 +4,8 @@ Each template knows its default channels and how to render content
 from event context data.
 """
 
+from typing import Any, Protocol
+
 from notifications.notification.notification import NotificationType
 from notifications.templates.cart_recovery import CartRecoveryTemplate
 from notifications.templates.delivery_confirmation import (
@@ -23,7 +25,16 @@ from notifications.templates.shipping_update import ShippingUpdateTemplate
 from notifications.templates.tier_upgraded import TierUpgradedTemplate
 from notifications.templates.welcome import WelcomeTemplate
 
-TEMPLATE_REGISTRY: dict[str, type] = {
+
+class NotificationTemplate(Protocol):
+    notification_type: str
+    default_channels: list[str]
+
+    @staticmethod
+    def render(context: dict[str, Any]) -> dict[str, str]: ...
+
+
+TEMPLATE_REGISTRY: dict[str, type[NotificationTemplate]] = {
     NotificationType.WELCOME.value: WelcomeTemplate,
     NotificationType.ORDER_CONFIRMATION.value: OrderConfirmationTemplate,
     NotificationType.PAYMENT_RECEIPT.value: PaymentReceiptTemplate,
@@ -42,7 +53,7 @@ TEMPLATE_REGISTRY: dict[str, type] = {
 }
 
 
-def get_template(notification_type: str):
+def get_template(notification_type: str) -> type[NotificationTemplate]:
     """Look up a template class by notification type string."""
     template_cls = TEMPLATE_REGISTRY.get(notification_type)
     if template_cls is None:

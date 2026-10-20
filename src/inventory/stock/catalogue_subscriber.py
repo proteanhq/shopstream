@@ -8,6 +8,8 @@ filters by event type, and translates into an InitializeStock command.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -28,7 +30,7 @@ class CatalogueVariantSubscriber:
     default warehouse and quantity settings. Ignores all other event types.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         if "VariantAdded" not in event_type:
             return

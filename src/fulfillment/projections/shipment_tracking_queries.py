@@ -10,13 +10,13 @@ from fulfillment.projections.shipment_tracking import ShipmentTrackingView
 
 @fulfillment.query(part_of=ShipmentTrackingView)
 class GetShipmentTracking:
-    order_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
 
 
 @fulfillment.query_handler(part_of=ShipmentTrackingView)
 class ShipmentTrackingQueryHandler:
     @read(GetShipmentTracking)
-    def get_shipment_tracking(self, query):
+    def get_shipment_tracking(self, query: GetShipmentTracking) -> ShipmentTrackingView | None:
         results = current_domain.view_for(ShipmentTrackingView).query.filter(order_id=query.order_id).all()
         if results.items:
             return results.first

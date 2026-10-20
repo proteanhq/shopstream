@@ -12,14 +12,14 @@ from payments.invoice.invoice import Invoice
 class VoidInvoice:
     """Void an existing invoice."""
 
-    invoice_id = Identifier(required=True)
-    reason = String(required=True, max_length=500)
+    invoice_id: str = Identifier(required=True)
+    reason: str = String(required=True, max_length=500)
 
 
 @payments.command_handler(part_of=Invoice)
 class VoidInvoiceHandler:
     @handle(VoidInvoice)
-    def void_invoice(self, command):
+    def void_invoice(self, command: VoidInvoice) -> None:
         repo = current_domain.repository_for(Invoice)
         invoice = repo.get(command.invoice_id)
         invoice.void(reason=command.reason)

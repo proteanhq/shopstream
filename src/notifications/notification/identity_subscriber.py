@@ -7,6 +7,8 @@ broker, filters by event type, and translates into domain-local side effects.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 
 from notifications.domain import notifications
@@ -25,14 +27,14 @@ class IdentityEventsSubscriber:
     types not relevant to the Notifications domain.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
         if "CustomerRegistered" in event_type:
             self._on_customer_registered(data)
 
-    def _on_customer_registered(self, data: dict) -> None:
+    def _on_customer_registered(self, data: dict[str, Any]) -> None:
         """Send welcome email when a new customer registers."""
         create_notifications_for_customer(
             customer_id=str(data["customer_id"]),

@@ -20,18 +20,18 @@ from ordering.order.order import Order
 
 @ordering.projection
 class DailyOrderStats:
-    date = String(identifier=True, required=True, max_length=10)  # YYYY-MM-DD
-    orders_created = Integer(default=0)
-    orders_completed = Integer(default=0)
-    orders_cancelled = Integer(default=0)
-    orders_refunded = Integer(default=0)
-    total_revenue = Float(default=0.0)
-    total_refunds = Float(default=0.0)
+    date: str = String(identifier=True, required=True, max_length=10)  # YYYY-MM-DD
+    orders_created: int = Integer(default=0)
+    orders_completed: int = Integer(default=0)
+    orders_cancelled: int = Integer(default=0)
+    orders_refunded: int = Integer(default=0)
+    total_revenue: float = Float(default=0.0)
+    total_refunds: float = Float(default=0.0)
 
 
-def _get_or_create(date_key):
+def _get_or_create(date_key: str) -> DailyOrderStats:
     repo = current_domain.repository_for(DailyOrderStats)
-    record = repo.get_or_none(date_key)
+    record: DailyOrderStats | None = repo.get_or_none(date_key)
     if record is not None:
         return record
     return DailyOrderStats(
@@ -48,7 +48,7 @@ def _get_or_create(date_key):
 @ordering.projector(projector_for=DailyOrderStats, aggregates=[Order])
 class DailyOrderStatsProjector:
     @on(OrderCreated)
-    def on_order_created(self, event):
+    def on_order_created(self, event: OrderCreated) -> None:
         date_key = event.created_at.date().isoformat()
         record = _get_or_create(date_key)
         record.orders_created = (record.orders_created or 0) + 1
@@ -56,21 +56,21 @@ class DailyOrderStatsProjector:
         current_domain.repository_for(DailyOrderStats).add(record)
 
     @on(OrderCompleted)
-    def on_order_completed(self, event):
+    def on_order_completed(self, event: OrderCompleted) -> None:
         date_key = event.completed_at.date().isoformat()
         record = _get_or_create(date_key)
         record.orders_completed = (record.orders_completed or 0) + 1
         current_domain.repository_for(DailyOrderStats).add(record)
 
     @on(OrderCancelled)
-    def on_order_cancelled(self, event):
+    def on_order_cancelled(self, event: OrderCancelled) -> None:
         date_key = event.cancelled_at.date().isoformat()
         record = _get_or_create(date_key)
         record.orders_cancelled = (record.orders_cancelled or 0) + 1
         current_domain.repository_for(DailyOrderStats).add(record)
 
     @on(OrderRefunded)
-    def on_order_refunded(self, event):
+    def on_order_refunded(self, event: OrderRefunded) -> None:
         date_key = event.refunded_at.date().isoformat()
         record = _get_or_create(date_key)
         record.orders_refunded = (record.orders_refunded or 0) + 1

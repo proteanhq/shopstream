@@ -20,17 +20,17 @@ from loyalty.domain import loyalty
 
 @loyalty.event(part_of="PoisonPill")
 class PoisonDetonated:
-    poison_id = Identifier(required=True)
-    note = String()
-    occurred_at = DateTime(required=True)
+    poison_id: str = Identifier(required=True)
+    note: str | None = String()
+    occurred_at: datetime = DateTime(required=True)
 
 
 @loyalty.aggregate
 class PoisonPill:
-    note = String(max_length=120, default="intentional DLQ demo failure")
+    note: str = String(max_length=120, default="intentional DLQ demo failure")
 
     @classmethod
-    def detonate(cls, note=None):
+    def detonate(cls, note: str | None = None) -> "PoisonPill":
         pill = cls(note=note or "intentional DLQ demo failure")
         pill.raise_(PoisonDetonated(poison_id=pill.id, note=pill.note, occurred_at=datetime.now(UTC)))
         return pill
@@ -38,13 +38,13 @@ class PoisonPill:
 
 @loyalty.command(part_of="PoisonPill")
 class EmitPoison:
-    note = String(max_length=120, default="intentional DLQ demo failure")
+    note: str = String(max_length=120, default="intentional DLQ demo failure")
 
 
 @loyalty.command_handler(part_of="PoisonPill")
 class EmitPoisonHandler:
     @handle(EmitPoison)
-    def emit(self, command: EmitPoison):
+    def emit(self, command: EmitPoison) -> str:
         pill = PoisonPill.detonate(command.note)
         current_domain.repository_for(PoisonPill).add(pill)
         return pill.id
@@ -55,5 +55,5 @@ class PoisonEventHandler:
     """Always fails — every delivery raises, so the message exhausts its retries and is DLQ'd."""
 
     @handle(PoisonDetonated)
-    def always_fail(self, event: PoisonDetonated):
+    def always_fail(self, event: PoisonDetonated) -> None:
         raise RuntimeError(f"poison pill detonated: {event.note}")

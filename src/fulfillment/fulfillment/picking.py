@@ -16,44 +16,44 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 class AssignPicker:
     """Assign a warehouse picker to begin the picking process."""
 
-    fulfillment_id = Identifier(required=True)
-    picker_name = String(required=True, max_length=100)
+    fulfillment_id: str = Identifier(required=True)
+    picker_name: str = String(required=True, max_length=100)
 
 
 @fulfillment.command(part_of="Fulfillment")
 class RecordItemPicked:
     """Record that a single item has been picked from its location."""
 
-    fulfillment_id = Identifier(required=True)
-    item_id = Identifier(required=True)
-    pick_location = String(required=True, max_length=100)
+    fulfillment_id: str = Identifier(required=True)
+    item_id: str = Identifier(required=True)
+    pick_location: str = String(required=True, max_length=100)
 
 
 @fulfillment.command(part_of="Fulfillment")
 class CompletePickList:
     """Complete the pick list — all items must have been picked."""
 
-    fulfillment_id = Identifier(required=True)
+    fulfillment_id: str = Identifier(required=True)
 
 
 @fulfillment.command_handler(part_of=Fulfillment)
 class PickingHandler:
     @handle(AssignPicker)
-    def assign_picker(self, command):
+    def assign_picker(self, command: AssignPicker) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.assign_picker(command.picker_name)
         repo.add(ff)
 
     @handle(RecordItemPicked)
-    def record_item_picked(self, command):
+    def record_item_picked(self, command: RecordItemPicked) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.record_item_picked(command.item_id, command.pick_location)
         repo.add(ff)
 
     @handle(CompletePickList)
-    def complete_pick_list(self, command):
+    def complete_pick_list(self, command: CompletePickList) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.complete_pick_list()

@@ -15,29 +15,29 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 class RecordDeliveryConfirmation:
     """Record confirmed delivery from the carrier."""
 
-    fulfillment_id = Identifier(required=True)
+    fulfillment_id: str = Identifier(required=True)
 
 
 @fulfillment.command(part_of="Fulfillment")
 class RecordDeliveryException:
     """Record a delivery exception from the carrier."""
 
-    fulfillment_id = Identifier(required=True)
-    reason = String(required=True, max_length=500)
-    location = String(max_length=200)
+    fulfillment_id: str = Identifier(required=True)
+    reason: str = String(required=True, max_length=500)
+    location: str | None = String(max_length=200)
 
 
 @fulfillment.command_handler(part_of=Fulfillment)
 class DeliveryHandler:
     @handle(RecordDeliveryConfirmation)
-    def record_delivery(self, command):
+    def record_delivery(self, command: RecordDeliveryConfirmation) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.record_delivery()
         repo.add(ff)
 
     @handle(RecordDeliveryException)
-    def record_exception(self, command):
+    def record_exception(self, command: RecordDeliveryException) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.record_exception(

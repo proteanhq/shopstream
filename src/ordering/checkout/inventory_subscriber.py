@@ -12,6 +12,8 @@ Flow:
 - ReservationReleased → dispatches CancelOrder (reservation expired/failed)
 """
 
+from typing import Any
+
 import structlog
 from protean.exceptions import ValidationError
 from protean.utils.globals import current_domain
@@ -30,7 +32,7 @@ class InventoryEventsSubscriber:
     event types not relevant to the Ordering domain's checkout flow.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
@@ -39,7 +41,7 @@ class InventoryEventsSubscriber:
         elif "ReservationReleased" in event_type:
             self._on_reservation_released(data)
 
-    def _on_stock_reserved(self, data: dict) -> None:
+    def _on_stock_reserved(self, data: dict[str, Any]) -> None:
         """Stock reserved — initiate payment for the order."""
         order_id = data.get("order_id")
         if not order_id:
@@ -68,7 +70,7 @@ class InventoryEventsSubscriber:
                 order_id,
             )
 
-    def _on_reservation_released(self, data: dict) -> None:
+    def _on_reservation_released(self, data: dict[str, Any]) -> None:
         """Reservation released — cancel the order."""
         order_id = data.get("order_id")
         if not order_id:

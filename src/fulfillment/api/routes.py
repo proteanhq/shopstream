@@ -89,6 +89,8 @@ async def create_fulfillment(body: CreateFulfillmentRequest) -> FulfillmentIdRes
         items=[item.model_dump() for item in body.items],
     )
     result = current_domain.process(command, asynchronous=False)
+    # A synchronous process returns the handler's value, and CreateFulfillmentHandler always returns the new id.
+    assert result is not None
     return FulfillmentIdResponse(fulfillment_id=result)
 
 

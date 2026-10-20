@@ -9,6 +9,8 @@ broker, filters by event type, and translates into domain commands.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -27,7 +29,7 @@ class OrderingEventsSubscriber:
     event types not relevant to the Inventory domain.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
@@ -36,7 +38,7 @@ class OrderingEventsSubscriber:
         elif "OrderReturned" in event_type:
             self._on_order_returned(data)
 
-    def _on_order_cancelled(self, data: dict) -> None:
+    def _on_order_cancelled(self, data: dict[str, Any]) -> None:
         """Release active/confirmed reservations when an order is cancelled."""
         order_id = str(data.get("order_id", ""))
         reason = data.get("reason", "")
@@ -77,7 +79,7 @@ class OrderingEventsSubscriber:
                 order_id=order_id,
             )
 
-    def _on_order_returned(self, data: dict) -> None:
+    def _on_order_returned(self, data: dict[str, Any]) -> None:
         """Return items to stock when an order is returned.
 
         Note: OrderReturned carries returned_item_ids (order item UUIDs),

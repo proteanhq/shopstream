@@ -22,16 +22,16 @@ from loyalty.reward.reward_account import RewardAccount
 
 @loyalty.projection(cache="loyalty")
 class PointsLeaderboard:
-    account_id = Identifier(identifier=True, required=True)
-    customer_id = String(required=True)
-    tier = String()
-    points_balance = Integer(default=0)
+    account_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = String(required=True)
+    tier: str | None = String()
+    points_balance: int = Integer(default=0)
 
 
 @loyalty.projector(projector_for=PointsLeaderboard, aggregates=[RewardAccount])
 class PointsLeaderboardProjector:
     @on(RewardAccountEnrolled)
-    def on_enrolled(self, event):
+    def on_enrolled(self, event: RewardAccountEnrolled) -> None:
         current_domain.cache_for(PointsLeaderboard).add(
             PointsLeaderboard(
                 account_id=event.account_id,
@@ -42,14 +42,14 @@ class PointsLeaderboardProjector:
         )
 
     @on(PointsEarned)
-    def on_earned(self, event):
+    def on_earned(self, event: PointsEarned) -> None:
         self._set_balance(event.account_id, event.balance_after)
 
     @on(PointsRedeemed)
-    def on_redeemed(self, event):
+    def on_redeemed(self, event: PointsRedeemed) -> None:
         self._set_balance(event.account_id, event.balance_after)
 
-    def _set_balance(self, account_id, balance):
+    def _set_balance(self, account_id: str, balance: int) -> None:
         # Read the existing entry through view_for (which builds the cache key),
         # then re-write the updated record through the cache provider.
         entry = current_domain.view_for(PointsLeaderboard).get(account_id)

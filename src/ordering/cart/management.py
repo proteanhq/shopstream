@@ -3,6 +3,8 @@
 Handles cart creation, guest cart merging, and abandonment.
 """
 
+from typing import Any
+
 from protean import handle
 from protean.fields import Dict, Identifier, List, String
 from protean.utils.globals import current_domain
@@ -15,29 +17,29 @@ from ordering.domain import ordering
 class CreateCart:
     """Create a new shopping cart for a registered customer or guest session."""
 
-    customer_id = Identifier()  # Optional for guest carts
-    session_id = String(max_length=255)
+    customer_id: str | None = Identifier()  # Optional for guest carts
+    session_id: str | None = String(max_length=255)
 
 
 @ordering.command(part_of="ShoppingCart")
 class MergeGuestCart:
     """Merge items from a guest session cart into a registered customer's cart."""
 
-    cart_id = Identifier(required=True)
-    guest_cart_items = List(Dict(), required=True)
+    cart_id: str = Identifier(required=True)
+    guest_cart_items: list[dict[str, Any]] = List(Dict(), required=True)
 
 
 @ordering.command(part_of="ShoppingCart")
 class AbandonCart:
     """Mark a cart as abandoned due to inactivity."""
 
-    cart_id = Identifier(required=True)
+    cart_id: str = Identifier(required=True)
 
 
 @ordering.command_handler(part_of=ShoppingCart)
 class ManageCartHandler:
     @handle(CreateCart)
-    def create_cart(self, command):
+    def create_cart(self, command: CreateCart) -> str:
         cart = ShoppingCart.create(
             customer_id=command.customer_id,
             session_id=command.session_id,
@@ -46,7 +48,7 @@ class ManageCartHandler:
         return str(cart.id)
 
     @handle(MergeGuestCart)
-    def merge_guest_cart(self, command):
+    def merge_guest_cart(self, command: MergeGuestCart) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
 
@@ -54,7 +56,7 @@ class ManageCartHandler:
         repo.add(cart)
 
     @handle(AbandonCart)
-    def abandon_cart(self, command):
+    def abandon_cart(self, command: AbandonCart) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
         cart.abandon()

@@ -1,5 +1,7 @@
 """CustomerReviews — a customer's review history across all products."""
 
+from datetime import datetime
+
 from protean import Index
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
@@ -19,20 +21,20 @@ from reviews.review.review import Review
 # Read path: list a customer's own reviews (filter by customer_id).
 @reviews.projection(indexes=[Index("customer_id")])
 class CustomerReviews:
-    review_id = Identifier(identifier=True, required=True)
-    customer_id = Identifier(required=True)
-    product_id = Identifier(required=True)
-    rating = Integer(required=True)
-    title = String(required=True)
-    status = String(required=True)
-    created_at = DateTime()
-    updated_at = DateTime()
+    review_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = Identifier(required=True)
+    product_id: str = Identifier(required=True)
+    rating: int = Integer(required=True)
+    title: str = String(required=True)
+    status: str = String(required=True)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @reviews.projector(projector_for=CustomerReviews, aggregates=[Review])
 class CustomerReviewsProjector:
     @on(ReviewSubmitted)
-    def on_review_submitted(self, event):
+    def on_review_submitted(self, event: ReviewSubmitted) -> None:
         current_domain.repository_for(CustomerReviews).add(
             CustomerReviews(
                 review_id=event.review_id,
@@ -46,7 +48,7 @@ class CustomerReviewsProjector:
             )
         )
 
-    def _update_status(self, review_id, status, updated_at):
+    def _update_status(self, review_id: str, status: str, updated_at: datetime) -> None:
         repo = current_domain.repository_for(CustomerReviews)
         cr = repo.get_or_none(review_id)
         if cr is None:
@@ -56,7 +58,7 @@ class CustomerReviewsProjector:
         repo.add(cr)
 
     @on(ReviewEdited)
-    def on_review_edited(self, event):
+    def on_review_edited(self, event: ReviewEdited) -> None:
         repo = current_domain.repository_for(CustomerReviews)
         cr = repo.get_or_none(event.review_id)
         if cr is None:
@@ -70,13 +72,13 @@ class CustomerReviewsProjector:
         repo.add(cr)
 
     @on(ReviewApproved)
-    def on_review_approved(self, event):
+    def on_review_approved(self, event: ReviewApproved) -> None:
         self._update_status(event.review_id, "Published", event.approved_at)
 
     @on(ReviewRejected)
-    def on_review_rejected(self, event):
+    def on_review_rejected(self, event: ReviewRejected) -> None:
         self._update_status(event.review_id, "Rejected", event.rejected_at)
 
     @on(ReviewRemoved)
-    def on_review_removed(self, event):
+    def on_review_removed(self, event: ReviewRemoved) -> None:
         self._update_status(event.review_id, "Removed", event.removed_at)

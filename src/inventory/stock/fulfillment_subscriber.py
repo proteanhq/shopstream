@@ -8,6 +8,8 @@ broker, filters by event type, and translates into domain commands.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -26,14 +28,14 @@ class FulfillmentEventsSubscriber:
     event types not relevant to the Inventory domain.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
         if "ShipmentHandedOff" in event_type:
             self._on_shipment_handed_off(data)
 
-    def _on_shipment_handed_off(self, data: dict) -> None:
+    def _on_shipment_handed_off(self, data: dict[str, Any]) -> None:
         """Commit reserved stock when shipment leaves the warehouse.
 
         Queries the ReservationStatus projection to find confirmed

@@ -8,6 +8,8 @@ broker, filters by event type, and translates into domain commands.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -26,7 +28,7 @@ class FulfillmentEventsSubscriber:
     event types not relevant to the Ordering domain.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
@@ -37,7 +39,7 @@ class FulfillmentEventsSubscriber:
         elif "DeliveryException" in event_type:
             self._on_delivery_exception(data)
 
-    def _on_shipment_handed_off(self, data: dict) -> None:
+    def _on_shipment_handed_off(self, data: dict[str, Any]) -> None:
         """Record shipment on the order when fulfillment hands off to carrier."""
         logger.info(
             "Recording shipment on order from fulfillment handoff",
@@ -56,7 +58,7 @@ class FulfillmentEventsSubscriber:
             asynchronous=False,
         )
 
-    def _on_delivery_confirmed(self, data: dict) -> None:
+    def _on_delivery_confirmed(self, data: dict[str, Any]) -> None:
         """Record delivery on the order when carrier confirms delivery."""
         logger.info(
             "Recording delivery on order from fulfillment confirmation",
@@ -68,7 +70,7 @@ class FulfillmentEventsSubscriber:
             asynchronous=False,
         )
 
-    def _on_delivery_exception(self, data: dict) -> None:
+    def _on_delivery_exception(self, data: dict[str, Any]) -> None:
         """Log delivery exception for customer service visibility.
 
         The Order aggregate stays in its current state (SHIPPED). The exception

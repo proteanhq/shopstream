@@ -14,18 +14,18 @@ from identity.domain import identity
 class RegisterCustomer:
     """Create a new customer account with profile information."""
 
-    external_id: String(required=True, max_length=255)
-    email: String(required=True, max_length=254)
-    first_name: String(required=True, max_length=100)
-    last_name: String(required=True, max_length=100)
-    phone: String(max_length=20)
-    date_of_birth: String(max_length=10)
+    external_id: str = String(required=True, max_length=255)
+    email: str = String(required=True, max_length=254)
+    first_name: str = String(required=True, max_length=100)
+    last_name: str = String(required=True, max_length=100)
+    phone: str | None = String(max_length=20)
+    date_of_birth: str | None = String(max_length=10)
 
 
 @identity.command_handler(part_of=Customer)
 class RegisterCustomerHandler:
     @handle(RegisterCustomer)
-    def register_customer(self, command):
+    def register_customer(self, command: RegisterCustomer) -> str:
         dob = None
         if command.date_of_birth:
             dob = date.fromisoformat(command.date_of_birth)

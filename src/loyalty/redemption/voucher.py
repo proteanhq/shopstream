@@ -13,7 +13,7 @@ class VoucherUnavailable(Exception):
     """Raised when a voucher cannot be issued for a reward code."""
 
 
-def issue_voucher_code(reward_code):
+def issue_voucher_code(reward_code: str | None) -> str:
     """Return a fresh voucher code, or raise ``VoucherUnavailable`` for ``FAIL`` codes."""
     if "FAIL" in (reward_code or "").upper():
         raise VoucherUnavailable(f"No vouchers available for reward '{reward_code}'")

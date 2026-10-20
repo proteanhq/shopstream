@@ -1,5 +1,7 @@
 """Fulfillment creation — command and handler."""
 
+from typing import Any
+
 from protean import handle
 from protean.fields import Dict, Identifier, List
 from protean.utils.globals import current_domain
@@ -12,16 +14,16 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 class CreateFulfillment:
     """Create a new fulfillment for a paid order."""
 
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    warehouse_id = Identifier()
-    items = List(Dict(), required=True)
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    warehouse_id: str | None = Identifier()
+    items: list[dict[str, Any]] = List(Dict(), required=True)
 
 
 @fulfillment.command_handler(part_of=Fulfillment)
 class CreateFulfillmentHandler:
     @handle(CreateFulfillment)
-    def create_fulfillment(self, command):
+    def create_fulfillment(self, command: CreateFulfillment) -> str:
         ff = Fulfillment.create(
             order_id=command.order_id,
             customer_id=command.customer_id,

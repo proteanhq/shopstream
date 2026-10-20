@@ -8,6 +8,8 @@ dispatching it (pattern A, used by the other ShopStream subscribers). It receive
 payloads from the shared `global` broker and never imports Ordering's event classes.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -21,7 +23,7 @@ DELIVERY_BONUS_POINTS = 50
 
 @loyalty.subscriber(broker="global", stream="ordering::order")
 class OrderDeliveredSubscriber:
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         if "OrderDelivered" not in event_type:
             return

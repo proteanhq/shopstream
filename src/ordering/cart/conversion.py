@@ -12,13 +12,13 @@ from ordering.domain import ordering
 class ConvertToOrder:
     """Mark a cart as converted after checkout (cart becomes immutable)."""
 
-    cart_id = Identifier(required=True)
+    cart_id: str = Identifier(required=True)
 
 
 @ordering.command_handler(part_of=ShoppingCart)
 class ConvertCartHandler:
     @handle(ConvertToOrder)
-    def convert_to_order(self, command):
+    def convert_to_order(self, command: ConvertToOrder) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
         cart.convert_to_order()

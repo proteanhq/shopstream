@@ -11,19 +11,19 @@ from payments.payment.payment import Payment
 
 @payments.projection
 class DailyRevenue:
-    date = String(identifier=True, max_length=10, required=True)  # "YYYY-MM-DD"
-    currency = String(default="USD")
-    total_revenue = Float(default=0.0)
-    total_refunded = Float(default=0.0)
-    net_revenue = Float(default=0.0)
-    transaction_count = Integer(default=0)
-    refund_count = Integer(default=0)
+    date: str = String(identifier=True, max_length=10, required=True)  # "YYYY-MM-DD"
+    currency: str = String(default="USD")
+    total_revenue: float = Float(default=0.0)
+    total_refunded: float = Float(default=0.0)
+    net_revenue: float = Float(default=0.0)
+    transaction_count: int = Integer(default=0)
+    refund_count: int = Integer(default=0)
 
 
 @payments.projector(projector_for=DailyRevenue, aggregates=[Payment])
 class DailyRevenueProjector:
     @on(PaymentSucceeded)
-    def on_payment_succeeded(self, event):
+    def on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         repo = current_domain.repository_for(DailyRevenue)
         date_key = event.succeeded_at.date().isoformat()
 
@@ -40,7 +40,7 @@ class DailyRevenueProjector:
         repo.add(record)
 
     @on(RefundCompleted)
-    def on_refund_completed(self, event):
+    def on_refund_completed(self, event: RefundCompleted) -> None:
         repo = current_domain.repository_for(DailyRevenue)
         date_key = event.completed_at.date().isoformat()
 

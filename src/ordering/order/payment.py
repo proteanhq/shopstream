@@ -16,34 +16,34 @@ from ordering.order.order import Order
 class RecordPaymentPending:
     """Record that payment processing has been initiated."""
 
-    order_id = Identifier(required=True)
-    payment_id = String(required=True, max_length=255)
-    payment_method = String(required=True, max_length=50)
+    order_id: str = Identifier(required=True)
+    payment_id: str = String(required=True, max_length=255)
+    payment_method: str = String(required=True, max_length=50)
 
 
 @ordering.command(part_of="Order")
 class RecordPaymentSuccess:
     """Record that payment was successfully captured."""
 
-    order_id = Identifier(required=True)
-    payment_id = String(required=True, max_length=255)
-    amount = Float(required=True)
-    payment_method = String(required=True, max_length=50)
+    order_id: str = Identifier(required=True)
+    payment_id: str = String(required=True, max_length=255)
+    amount: float = Float(required=True)
+    payment_method: str = String(required=True, max_length=50)
 
 
 @ordering.command(part_of="Order")
 class RecordPaymentFailure:
     """Record that payment failed, returning the order to Confirmed for retry."""
 
-    order_id = Identifier(required=True)
-    payment_id = String(required=True, max_length=255)
-    reason = String(required=True, max_length=500)
+    order_id: str = Identifier(required=True)
+    payment_id: str = String(required=True, max_length=255)
+    reason: str = String(required=True, max_length=500)
 
 
 @ordering.command_handler(part_of=Order)
 class RecordPaymentHandler:
     @handle(RecordPaymentPending)
-    def record_payment_pending(self, command):
+    def record_payment_pending(self, command: RecordPaymentPending) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.record_payment_pending(
@@ -53,7 +53,7 @@ class RecordPaymentHandler:
         repo.add(order)
 
     @handle(RecordPaymentSuccess)
-    def record_payment_success(self, command):
+    def record_payment_success(self, command: RecordPaymentSuccess) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.record_payment_success(
@@ -64,7 +64,7 @@ class RecordPaymentHandler:
         repo.add(order)
 
     @handle(RecordPaymentFailure)
-    def record_payment_failure(self, command):
+    def record_payment_failure(self, command: RecordPaymentFailure) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.record_payment_failure(

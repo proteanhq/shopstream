@@ -10,11 +10,11 @@ from payments.projections.payment_status import PaymentStatusView
 
 @payments.query(part_of=PaymentStatusView)
 class GetPaymentStatus:
-    payment_id = Identifier(required=True)
+    payment_id: str = Identifier(required=True)
 
 
 @payments.query_handler(part_of=PaymentStatusView)
 class PaymentStatusQueryHandler:
     @read(GetPaymentStatus)
-    def get_payment_status(self, query):
+    def get_payment_status(self, query: GetPaymentStatus) -> PaymentStatusView:
         return current_domain.view_for(PaymentStatusView).get(query.payment_id)

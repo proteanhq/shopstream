@@ -16,50 +16,50 @@ from ordering.order.order import Order
 class MarkProcessing:
     """Signal that the warehouse has started picking and packing."""
 
-    order_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
 
 
 @ordering.command(part_of="Order")
 class RecordShipment:
     """Record that all items have been shipped with a carrier."""
 
-    order_id = Identifier(required=True)
-    shipment_id = String(required=True, max_length=255)
-    carrier = String(required=True, max_length=100)
-    tracking_number = String(required=True, max_length=255)
-    shipped_item_ids = List(String())
-    estimated_delivery = String(max_length=10)  # ISO date string
+    order_id: str = Identifier(required=True)
+    shipment_id: str = String(required=True, max_length=255)
+    carrier: str = String(required=True, max_length=100)
+    tracking_number: str = String(required=True, max_length=255)
+    shipped_item_ids: list[str] = List(String())
+    estimated_delivery: str | None = String(max_length=10)  # ISO date string
 
 
 @ordering.command(part_of="Order")
 class RecordPartialShipment:
     """Record that some (but not all) items have been shipped."""
 
-    order_id = Identifier(required=True)
-    shipment_id = String(required=True, max_length=255)
-    carrier = String(required=True, max_length=100)
-    tracking_number = String(required=True, max_length=255)
-    shipped_item_ids = List(String(), required=True)
+    order_id: str = Identifier(required=True)
+    shipment_id: str = String(required=True, max_length=255)
+    carrier: str = String(required=True, max_length=100)
+    tracking_number: str = String(required=True, max_length=255)
+    shipped_item_ids: list[str] = List(String(), required=True)
 
 
 @ordering.command(part_of="Order")
 class RecordDelivery:
     """Record that the carrier has confirmed delivery to the customer."""
 
-    order_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
 
 
 @ordering.command_handler(part_of=Order)
 class RecordFulfillmentHandler:
     @handle(MarkProcessing)
-    def mark_processing(self, command):
+    def mark_processing(self, command: MarkProcessing) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.mark_processing()
         repo.add(order)
 
     @handle(RecordShipment)
-    def record_shipment(self, command):
+    def record_shipment(self, command: RecordShipment) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
 
@@ -73,7 +73,7 @@ class RecordFulfillmentHandler:
         repo.add(order)
 
     @handle(RecordPartialShipment)
-    def record_partial_shipment(self, command):
+    def record_partial_shipment(self, command: RecordPartialShipment) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
 
@@ -86,7 +86,7 @@ class RecordFulfillmentHandler:
         repo.add(order)
 
     @handle(RecordDelivery)
-    def record_delivery(self, command):
+    def record_delivery(self, command: RecordDelivery) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.record_delivery()

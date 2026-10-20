@@ -7,6 +7,8 @@ translating the message into a command. It receives raw dict payloads from the s
 `global` broker, filters by event type, and never imports the Reviews event classes.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -20,7 +22,7 @@ REVIEW_BONUS_POINTS = 20
 
 @loyalty.subscriber(broker="global", stream="reviews::review")
 class ReviewApprovedSubscriber:
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         if "ReviewApproved" not in event_type:
             return

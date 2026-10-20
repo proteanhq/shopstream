@@ -11,7 +11,7 @@ import contextlib
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from protean import g
 from protean.integrations.fastapi import (
     DomainContextMiddleware,
@@ -19,6 +19,7 @@ from protean.integrations.fastapi import (
     register_exception_handlers,
 )
 from scalar_fastapi import get_scalar_api_reference
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from api_logging import configure_api_logging
 from catalogue.api import category_router, product_router
@@ -96,10 +97,10 @@ class UserContextMiddleware:
     enricher, which records `"system"` when the header is absent.
     """
 
-    def __init__(self, app):
+    def __init__(self, app: ASGIApp) -> None:
         self.app = app
 
-    async def __call__(self, scope, receive, send):
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
         if scope["type"] == "http":
             headers = dict(scope.get("headers", []))
             # errors="replace": a header that is not valid UTF-8 must not fail the request
@@ -174,7 +175,7 @@ app.include_router(ordering_maintenance_router)
 # API Documentation (Scalar)
 # ---------------------------------------------------------------------------
 @app.get("/docs", include_in_schema=False)
-async def scalar_docs():
+async def scalar_docs() -> HTMLResponse:
     return get_scalar_api_reference(
         openapi_url=app.openapi_url,
         title=app.title,
@@ -185,7 +186,7 @@ async def scalar_docs():
 # Health / root
 # ---------------------------------------------------------------------------
 @app.get("/health")
-async def health():
+async def health() -> JSONResponse:
     return JSONResponse(
         content={
             "status": "ok",

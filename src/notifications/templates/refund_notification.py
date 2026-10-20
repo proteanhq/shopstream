@@ -1,5 +1,7 @@
 """Refund notification template — sent when a refund is processed."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -11,7 +13,7 @@ class RefundNotificationTemplate:
     default_channels = [NotificationChannel.EMAIL.value]
 
     @staticmethod
-    def render(context: dict) -> dict:
+    def render(context: dict[str, Any]) -> dict[str, str]:
         order_id = context.get("order_id", "N/A")
         amount = context.get("amount", "0.00")
         currency = context.get("currency", "USD")

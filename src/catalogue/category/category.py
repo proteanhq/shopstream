@@ -1,6 +1,7 @@
 """Category aggregate root for product categorization."""
 
 from datetime import datetime
+from typing import Any
 
 from protean.exceptions import ValidationError
 from protean.fields import Boolean, DateTime, Dict, Identifier, Integer, String
@@ -16,17 +17,23 @@ class Category:
     parent, custom attributes, and a display order for controlling presentation.
     """
 
-    name: String(required=True, max_length=100)
-    parent_category_id: Identifier()
-    level: Integer(default=0, min_value=0, max_value=4)
-    attributes: Dict()
-    is_active: Boolean(default=True)
-    display_order: Integer(default=0)
-    created_at: DateTime(default=datetime.now)
-    updated_at: DateTime(default=datetime.now)
+    name: str = String(required=True, max_length=100)
+    parent_category_id: str | None = Identifier()
+    level: int = Integer(default=0, min_value=0, max_value=4)
+    attributes: dict[str, Any] = Dict()
+    is_active: bool = Boolean(default=True)
+    display_order: int = Integer(default=0)
+    created_at: datetime = DateTime(default=datetime.now)
+    updated_at: datetime = DateTime(default=datetime.now)
 
     @classmethod
-    def create(cls, name, parent_category_id=None, level=0, attributes=None):
+    def create(
+        cls,
+        name: str,
+        parent_category_id: str | None = None,
+        level: int = 0,
+        attributes: dict[str, Any] | None = None,
+    ) -> "Category":
         from catalogue.category.events import CategoryCreated
 
         now = datetime.now()
@@ -49,7 +56,7 @@ class Category:
         )
         return category
 
-    def update_details(self, name=None, attributes=None):
+    def update_details(self, name: str | None = None, attributes: dict[str, Any] | None = None) -> None:
         from catalogue.category.events import CategoryDetailsUpdated
 
         if name is not None:
@@ -68,7 +75,7 @@ class Category:
             )
         )
 
-    def reorder(self, new_display_order):
+    def reorder(self, new_display_order: int) -> None:
         from catalogue.category.events import CategoryReordered
 
         previous_order = self.display_order
@@ -83,7 +90,7 @@ class Category:
             )
         )
 
-    def deactivate(self):
+    def deactivate(self) -> None:
         from catalogue.category.events import CategoryDeactivated
 
         if not self.is_active:

@@ -13,14 +13,17 @@ test profiles use):
 
 Each test also pins what the caller of ``current_domain.process(...)`` gets back.
 Sync dispatch runs inside the command's ``UnitOfWork.commit()``, after the
-aggregate is saved. The commit sorts a handler failure by type:
+aggregate is saved, so every write of the command is already durable. The
+commit therefore reports a handler failure as a ``TransactionError``, whatever
+its type:
 
-- ``ExpectedVersionError`` and ``ConfigurationError`` reach the caller as
-  themselves.
-- A SQLAlchemy ``StaleDataError`` comes back as a new ``ExpectedVersionError``.
-- Any other ``Exception``, or an ``ExceptionGroup`` of several, is wrapped in a
-  ``TransactionError`` with the original on ``__cause__``. That includes a
-  ``ValueError`` (proteanhq/protean#1682, guarded by
+- Any ``Exception``, or an ``ExceptionGroup`` of several, is wrapped in a
+  ``TransactionError`` with the original on ``__cause__``.
+- That includes ``ExpectedVersionError``. Passed through as itself, it made the
+  command handler's version retry run the committed command again
+  (proteanhq/protean#1883, guarded by
+  ``verification/regression/test_protean_regressions.py::test_1883_committed_command_is_not_rerun_when_a_sync_handler_raises_expected_version_error``).
+- It also includes ``ValueError`` (proteanhq/protean#1682, guarded by
   ``verification/regression/test_protean_regressions.py::test_1682_value_error_from_a_sync_handler_is_not_a_version_conflict``).
 - A ``BaseException`` that is not an ``Exception`` passes through untouched.
 """
@@ -284,21 +287,19 @@ class TestExpectedVersionErrorOnce:
 
 
 class TestExpectedVersionErrorEveryTime:
-    def test_caller_gets_expected_version_error_and_later_projectors_do_not_run(self, monkeypatch):
+    def test_caller_gets_transaction_error_and_later_projectors_still_run(self, monkeypatch):
         item_id = _seed_low_stock_item()
         failing = InventoryValuationProjector
+        failure = ExpectedVersionError("simulated version conflict")
         version_retry = current_domain.config["server"]["version_retry"]
         max_retries = version_retry["max_retries"]
         monkeypatch.setitem(version_retry, "base_delay_seconds", 0.001)
-        calls = _replace_stock_received(
-            monkeypatch, failing, _raise(ExpectedVersionError("simulated version conflict"))
-        )
+        calls = _replace_stock_received(monkeypatch, failing, _raise(failure))
 
         # The failing projector sits in the middle, so some classes are queued
         # before it and some after.
         others = sorted((cls for cls in STOCK_RECEIVED_HANDLERS if cls is not failing), key=lambda cls: cls.__name__)
         order = [*others[:3], failing, *others[3:]]
-        before, after = order[:3], order[4:]
         queued = _queue_stock_received_in_order(monkeypatch, order)
 
         ran: list[type] = []
@@ -312,24 +313,21 @@ class TestExpectedVersionErrorEveryTime:
 
             monkeypatch.setattr(handler_cls, "_handle", classmethod(spy))
 
-        with pytest.raises(ExpectedVersionError) as excinfo:
+        with pytest.raises(TransactionError) as excinfo:
             _receive(item_id)
 
-        assert type(excinfo.value) is ExpectedVersionError
-        # The receipt was committed before dispatch, yet the command handler's own
-        # version retry runs ReceiveStock again on each attempt, so StockReceived
-        # is dispatched max_retries + 1 times. This is a Protean bug
-        # (proteanhq/protean#1883). The correct behaviour (the command runs once) is pinned as a
-        # strict xfail in verification/regression/test_protean_regressions.py::
-        # test_committed_command_is_not_rerun_when_a_sync_handler_raises_expected_version_error.
-        # When Protean fixes it, this count drops to 1 and this test fails.
-        assert len(queued) == max_retries + 1
-        # Each dispatch runs the classes queued before the failing projector, then
-        # the failing one, and stops there.
-        assert ran == [*before, failing] * len(queued)
-        assert not set(after) & set(ran)
-        # Each time, the projector's own version retry used up max_retries.
-        assert len(calls) == (max_retries + 1) * len(queued)
+        assert excinfo.value.__cause__ is failure
+        # The receipt was committed before dispatch, so the command runs once
+        # and StockReceived is dispatched once.
+        assert len(queued) == 1
+        assert ran == order
+        # The projector's own version retry used up max_retries.
+        assert len(calls) == max_retries + 1
+        for projector_cls in STOCK_RECEIVED_PROJECTORS:
+            if projector_cls is not failing:
+                assert _receipt_applied(projector_cls, item_id), f"{projector_cls.__name__} did not run"
+        assert _audited_receipts(item_id) == 1
+        _assert_item_on_hand(item_id, ON_HAND_AFTER)
 
 
 def _parcel_domain(calls: list[str], failures: list[Exception]) -> tuple[Domain, type]:

@@ -4,6 +4,9 @@ Provides the common pattern: look up preferences → filter channels →
 render template → create Notification per channel.
 """
 
+from datetime import datetime
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -21,11 +24,11 @@ logger = structlog.get_logger(__name__)
 def create_notifications_for_customer(
     customer_id: str,
     notification_type: str,
-    context: dict,
+    context: dict[str, Any],
     source_event_type: str | None = None,
     source_event_id: str | None = None,
-    scheduled_for=None,
-):
+    scheduled_for: datetime | None = None,
+) -> list[str]:
     """Create notification(s) for a customer based on their preferences.
 
     Looks up customer preferences, filters channels, renders template,
@@ -72,7 +75,7 @@ def create_notifications_for_customer(
         return []
 
     # Create one notification per channel
-    notification_ids = []
+    notification_ids: list[str] = []
     repo = current_domain.repository_for(Notification)
 
     for channel in channels:
@@ -105,12 +108,12 @@ def create_notifications_for_customer(
 
 def create_internal_notification(
     notification_type: str,
-    context: dict,
+    context: dict[str, Any],
     channel: str = NotificationChannel.SLACK.value,
     recipient_id: str = "operations",
     source_event_type: str | None = None,
     source_event_id: str | None = None,
-):
+) -> str:
     """Create an internal notification (e.g., Slack alert for ops).
 
     Internal notifications skip preference checks.

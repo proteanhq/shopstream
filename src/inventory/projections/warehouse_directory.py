@@ -1,5 +1,7 @@
 """Warehouse directory — a listing of all warehouses with their details."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import Boolean, DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -17,21 +19,21 @@ from inventory.warehouse.warehouse import Warehouse
 
 @inventory.projection
 class WarehouseDirectory:
-    warehouse_id = Identifier(identifier=True, required=True)
-    name = String(required=True)
-    city = String()
-    country = String()
-    capacity = Integer(default=0)
-    zone_count = Integer(default=0)
-    is_active = Boolean(default=True)
-    created_at = DateTime()
-    updated_at = DateTime()
+    warehouse_id: str = Identifier(identifier=True, required=True)
+    name: str = String(required=True)
+    city: str | None = String()
+    country: str | None = String()
+    capacity: int = Integer(default=0)
+    zone_count: int = Integer(default=0)
+    is_active: bool = Boolean(default=True)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @inventory.projector(projector_for=WarehouseDirectory, aggregates=[Warehouse])
 class WarehouseDirectoryProjector:
     @on(WarehouseCreated)
-    def on_warehouse_created(self, event):
+    def on_warehouse_created(self, event: WarehouseCreated) -> None:
         address = event.address or {}
         current_domain.repository_for(WarehouseDirectory).add(
             WarehouseDirectory(
@@ -48,7 +50,7 @@ class WarehouseDirectoryProjector:
         )
 
     @on(WarehouseUpdated)
-    def on_warehouse_updated(self, event):
+    def on_warehouse_updated(self, event: WarehouseUpdated) -> None:
         repo = current_domain.repository_for(WarehouseDirectory)
         view = repo.get(event.warehouse_id)
         view.name = event.name
@@ -57,7 +59,7 @@ class WarehouseDirectoryProjector:
         repo.add(view)
 
     @on(ZoneAdded)
-    def on_zone_added(self, event):
+    def on_zone_added(self, event: ZoneAdded) -> None:
         repo = current_domain.repository_for(WarehouseDirectory)
         view = repo.get(event.warehouse_id)
         view.zone_count = (view.zone_count or 0) + 1
@@ -65,7 +67,7 @@ class WarehouseDirectoryProjector:
         repo.add(view)
 
     @on(ZoneRemoved)
-    def on_zone_removed(self, event):
+    def on_zone_removed(self, event: ZoneRemoved) -> None:
         repo = current_domain.repository_for(WarehouseDirectory)
         view = repo.get(event.warehouse_id)
         view.zone_count = max((view.zone_count or 0) - 1, 0)
@@ -73,7 +75,7 @@ class WarehouseDirectoryProjector:
         repo.add(view)
 
     @on(WarehouseDeactivated)
-    def on_warehouse_deactivated(self, event):
+    def on_warehouse_deactivated(self, event: WarehouseDeactivated) -> None:
         repo = current_domain.repository_for(WarehouseDirectory)
         view = repo.get(event.warehouse_id)
         view.is_active = False

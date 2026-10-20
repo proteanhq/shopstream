@@ -10,11 +10,11 @@ from identity.projections.address_book import AddressBook
 
 @identity.query(part_of=AddressBook)
 class GetAddressBook:
-    customer_id = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
 
 
 @identity.query_handler(part_of=AddressBook)
 class AddressBookQueryHandler:
     @read(GetAddressBook)
-    def get_address_book(self, query):
+    def get_address_book(self, query: GetAddressBook) -> AddressBook:
         return current_domain.view_for(AddressBook).get(query.customer_id)

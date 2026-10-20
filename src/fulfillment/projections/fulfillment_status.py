@@ -1,5 +1,7 @@
 """Fulfillment status — real-time fulfillment state view for order tracking."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -23,23 +25,23 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 
 @fulfillment.projection
 class FulfillmentStatusView:
-    fulfillment_id = Identifier(identifier=True, required=True)
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    warehouse_id = String()
-    status = String(required=True)
-    carrier = String()
-    tracking_number = String()
-    item_count = Integer(default=0)
-    assigned_to = String()
-    created_at = DateTime()
-    updated_at = DateTime()
+    fulfillment_id: str = Identifier(identifier=True, required=True)
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    warehouse_id: str | None = String()
+    status: str = String(required=True)
+    carrier: str | None = String()
+    tracking_number: str | None = String()
+    item_count: int = Integer(default=0)
+    assigned_to: str | None = String()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @fulfillment.projector(projector_for=FulfillmentStatusView, aggregates=[Fulfillment])
 class FulfillmentStatusProjector:
     @on(FulfillmentCreated)
-    def on_fulfillment_created(self, event):
+    def on_fulfillment_created(self, event: FulfillmentCreated) -> None:
         current_domain.repository_for(FulfillmentStatusView).add(
             FulfillmentStatusView(
                 fulfillment_id=event.fulfillment_id,
@@ -54,7 +56,7 @@ class FulfillmentStatusProjector:
         )
 
     @on(PickerAssigned)
-    def on_picker_assigned(self, event):
+    def on_picker_assigned(self, event: PickerAssigned) -> None:
         repo = current_domain.repository_for(FulfillmentStatusView)
         view = repo.get(event.fulfillment_id)
         view.status = "Picking"
@@ -63,14 +65,14 @@ class FulfillmentStatusProjector:
         repo.add(view)
 
     @on(ItemPicked)
-    def on_item_picked(self, event):
+    def on_item_picked(self, event: ItemPicked) -> None:
         repo = current_domain.repository_for(FulfillmentStatusView)
         view = repo.get(event.fulfillment_id)
         view.updated_at = event.picked_at
         repo.add(view)
 
     @on(PickingCompleted)
-    def on_picking_completed(self, event):
+    def on_picking_completed(self, event: PickingCompleted) -> None:
         repo = current_domain.repository_for(FulfillmentStatusView)
         view = repo.get(event.fulfillment_id)
         view.status = "Packing"
@@ -78,14 +80,14 @@ class FulfillmentStatusProjector:
         repo.add(view)
 
     @on(PackingCompleted)
-    def on_packing_completed(self, event):
+    def on_packing_completed(self, event: PackingCompleted) -> None:
         repo = current_domain.repository_for(FulfillmentStatusView)
         view = repo.get(event.fulfillment_id)
         view.updated_at = event.packed_at
         repo.add(view)
 
     @on(ShippingLabelGenerated)
-    def on_shipping_label_generated(self, event):
+    def on_shipping_label_generated(self, event: ShippingLabelGenerated) -> None:
         repo = current_domain.repository_for(FulfillmentStatusView)
         view = repo.get(event.fulfillment_id)
         view.status = "Ready_To_Ship"
@@ -94,7 +96,7 @@ class FulfillmentStatusProjector:
         repo.add(view)
 
     @on(ShipmentHandedOff)
-    def on_shipment_handed_off(self, event):
+    def on_shipment_handed_off(self, event: ShipmentHandedOff) -> None:
         repo = current_domain.repository_for(FulfillmentStatusView)
         view = repo.get(event.fulfillment_id)
         view.status = "Shipped"
@@ -104,7 +106,7 @@ class FulfillmentStatusProjector:
         repo.add(view)
 
     @on(TrackingEventReceived)
-    def on_tracking_event_received(self, event):
+    def on_tracking_event_received(self, event: TrackingEventReceived) -> None:
         repo = current_domain.repository_for(FulfillmentStatusView)
         view = repo.get(event.fulfillment_id)
         view.status = "In_Transit"
@@ -112,7 +114,7 @@ class FulfillmentStatusProjector:
         repo.add(view)
 
     @on(DeliveryConfirmed)
-    def on_delivery_confirmed(self, event):
+    def on_delivery_confirmed(self, event: DeliveryConfirmed) -> None:
         repo = current_domain.repository_for(FulfillmentStatusView)
         view = repo.get(event.fulfillment_id)
         view.status = "Delivered"
@@ -120,7 +122,7 @@ class FulfillmentStatusProjector:
         repo.add(view)
 
     @on(DeliveryException)
-    def on_delivery_exception(self, event):
+    def on_delivery_exception(self, event: DeliveryException) -> None:
         repo = current_domain.repository_for(FulfillmentStatusView)
         view = repo.get(event.fulfillment_id)
         view.status = "Exception"
@@ -128,7 +130,7 @@ class FulfillmentStatusProjector:
         repo.add(view)
 
     @on(FulfillmentCancelled)
-    def on_fulfillment_cancelled(self, event):
+    def on_fulfillment_cancelled(self, event: FulfillmentCancelled) -> None:
         repo = current_domain.repository_for(FulfillmentStatusView)
         view = repo.get(event.fulfillment_id)
         view.status = "Cancelled"

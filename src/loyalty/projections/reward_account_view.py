@@ -1,5 +1,7 @@
 """RewardAccountView — a database-backed read model of each reward account."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -17,20 +19,20 @@ from loyalty.reward.reward_account import RewardAccount
 
 @loyalty.projection
 class RewardAccountView:
-    account_id = Identifier(identifier=True, required=True)
-    customer_id = String(required=True)
-    member_code = String()
-    tier = String()
-    status = String()
-    points_balance = Integer(default=0)
-    lifetime_points = Integer(default=0)
-    updated_at = DateTime()
+    account_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = String(required=True)
+    member_code: str | None = String()
+    tier: str | None = String()
+    status: str | None = String()
+    points_balance: int = Integer(default=0)
+    lifetime_points: int = Integer(default=0)
+    updated_at: datetime | None = DateTime()
 
 
 @loyalty.projector(projector_for=RewardAccountView, aggregates=[RewardAccount])
 class RewardAccountViewProjector:
     @on(RewardAccountEnrolled)
-    def on_enrolled(self, event):
+    def on_enrolled(self, event: RewardAccountEnrolled) -> None:
         current_domain.repository_for(RewardAccountView).add(
             RewardAccountView(
                 account_id=event.account_id,
@@ -45,7 +47,7 @@ class RewardAccountViewProjector:
         )
 
     @on(PointsEarned)
-    def on_earned(self, event):
+    def on_earned(self, event: PointsEarned) -> None:
         repo = current_domain.repository_for(RewardAccountView)
         view = repo.get(event.account_id)
         view.points_balance = event.balance_after
@@ -54,7 +56,7 @@ class RewardAccountViewProjector:
         repo.add(view)
 
     @on(PointsRedeemed)
-    def on_redeemed(self, event):
+    def on_redeemed(self, event: PointsRedeemed) -> None:
         repo = current_domain.repository_for(RewardAccountView)
         view = repo.get(event.account_id)
         view.points_balance = event.balance_after
@@ -62,7 +64,7 @@ class RewardAccountViewProjector:
         repo.add(view)
 
     @on(TierUpgraded)
-    def on_tier_upgraded(self, event):
+    def on_tier_upgraded(self, event: TierUpgraded) -> None:
         repo = current_domain.repository_for(RewardAccountView)
         view = repo.get(event.account_id)
         view.tier = event.new_tier
@@ -70,7 +72,7 @@ class RewardAccountViewProjector:
         repo.add(view)
 
     @on(RewardAccountClosed)
-    def on_closed(self, event):
+    def on_closed(self, event: RewardAccountClosed) -> None:
         repo = current_domain.repository_for(RewardAccountView)
         view = repo.get(event.account_id)
         view.status = "Closed"

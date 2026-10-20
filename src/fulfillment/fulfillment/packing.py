@@ -3,6 +3,8 @@
 Handles the packing phase: recording packed items and generating shipping labels.
 """
 
+from typing import Any
+
 from protean import handle
 from protean.fields import Dict, Identifier, List, String
 from protean.utils.globals import current_domain
@@ -15,32 +17,32 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 class RecordPacking:
     """Record that items have been packed into shipping packages."""
 
-    fulfillment_id = Identifier(required=True)
-    packed_by = String(required=True, max_length=100)
-    packages = List(Dict(), required=True)
+    fulfillment_id: str = Identifier(required=True)
+    packed_by: str = String(required=True, max_length=100)
+    packages: list[dict[str, Any]] = List(Dict(), required=True)
 
 
 @fulfillment.command(part_of="Fulfillment")
 class GenerateShippingLabel:
     """Record that a shipping label has been generated."""
 
-    fulfillment_id = Identifier(required=True)
-    label_url = String(required=True, max_length=500)
-    carrier = String(required=True, max_length=100)
-    service_level = String(required=True, max_length=50)
+    fulfillment_id: str = Identifier(required=True)
+    label_url: str = String(required=True, max_length=500)
+    carrier: str = String(required=True, max_length=100)
+    service_level: str = String(required=True, max_length=50)
 
 
 @fulfillment.command_handler(part_of=Fulfillment)
 class PackingHandler:
     @handle(RecordPacking)
-    def record_packing(self, command):
+    def record_packing(self, command: RecordPacking) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.record_packing(command.packed_by, command.packages)
         repo.add(ff)
 
     @handle(GenerateShippingLabel)
-    def generate_shipping_label(self, command):
+    def generate_shipping_label(self, command: GenerateShippingLabel) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.generate_shipping_label(

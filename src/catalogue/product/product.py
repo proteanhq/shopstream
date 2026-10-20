@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 from protean import atomic_change, invariant
 from protean.exceptions import ValidationError
@@ -52,12 +53,12 @@ class Price:
     always be lower than the base price.
     """
 
-    base_price: Float(required=True, min_value=0.01)
-    currency: String(max_length=3, default="USD")
-    tier_prices: Dict()
+    base_price: float = Float(required=True, min_value=0.01)
+    currency: str = String(max_length=3, default="USD")
+    tier_prices: dict[str, Any] = Dict()
 
     @invariant.post
-    def tier_prices_must_be_valid(self):
+    def tier_prices_must_be_valid(self) -> None:
         if not self.tier_prices:
             return
 
@@ -87,12 +88,12 @@ class SEO:
     URL-safe slug. The slug must be lowercase alphanumeric with hyphens only.
     """
 
-    meta_title: String(max_length=70)
-    meta_description: String(max_length=160)
-    slug: String(max_length=200)
+    meta_title: str | None = String(max_length=70)
+    meta_description: str | None = String(max_length=160)
+    slug: str | None = String(max_length=200)
 
     @invariant.post
-    def slug_must_be_url_safe(self):
+    def slug_must_be_url_safe(self) -> None:
         slug = self.slug
         if not slug:
             return
@@ -116,13 +117,13 @@ class Dimensions:
     Supports centimeters (cm) and inches (in) as measurement units.
     """
 
-    length: Float(min_value=0.0)
-    width: Float(min_value=0.0)
-    height: Float(min_value=0.0)
-    unit: String(max_length=2, default="cm")
+    length: float | None = Float(min_value=0.0)
+    width: float | None = Float(min_value=0.0)
+    height: float | None = Float(min_value=0.0)
+    unit: str = String(max_length=2, default="cm")
 
     @invariant.post
-    def unit_must_be_valid(self):
+    def unit_must_be_valid(self) -> None:
         if self.unit not in ("cm", "in"):
             raise ValidationError({"unit": [f"Dimension unit must be 'cm' or 'in', got '{self.unit}'"]})
 
@@ -134,11 +135,11 @@ class Weight:
     Supports kilograms (kg), pounds (lb), grams (g), and ounces (oz).
     """
 
-    value: Float(min_value=0.0)
-    unit: String(max_length=2, default="kg")
+    value: float | None = Float(min_value=0.0)
+    unit: str = String(max_length=2, default="kg")
 
     @invariant.post
-    def unit_must_be_valid(self):
+    def unit_must_be_valid(self) -> None:
         if self.unit not in ("kg", "lb", "g", "oz"):
             raise ValidationError({"unit": [f"Weight unit must be 'kg', 'lb', 'g', or 'oz', got '{self.unit}'"]})
 
@@ -152,12 +153,12 @@ class Variant:
     variant to be activated for sale.
     """
 
-    variant_sku: ValueObject(SKU, required=True)
-    attributes: Dict()
-    price: ValueObject(Price, required=True)
-    weight: ValueObject(Weight)
-    dimensions: ValueObject(Dimensions)
-    is_active: Boolean(default=True)
+    variant_sku: SKU = ValueObject(SKU, required=True)
+    attributes: dict[str, Any] = Dict()
+    price: Price = ValueObject(Price, required=True)
+    weight: Weight | None = ValueObject(Weight)
+    dimensions: Dimensions | None = ValueObject(Dimensions)
+    is_active: bool = Boolean(default=True)
 
 
 @catalogue.entity(part_of="Product")
@@ -168,10 +169,10 @@ class Image:
     The first image added is automatically set as primary.
     """
 
-    url: String(required=True, max_length=500)
-    alt_text: String(max_length=255)
-    is_primary: Boolean(default=False)
-    display_order: Integer(default=0)
+    url: str = String(required=True, max_length=500)
+    alt_text: str | None = String(max_length=255)
+    is_primary: bool = Boolean(default=False)
+    display_order: int = Integer(default=0)
 
 
 @catalogue.aggregate
@@ -184,16 +185,16 @@ class Product:
     have at least one variant before activation.
     """
 
-    sku: ValueObject(SKU, required=True)
-    seller_id: Identifier()
-    title: String(required=True, max_length=255)
-    description: Text()
-    category_id: Identifier()
-    brand: String(max_length=100)
-    attributes: Dict()
-    variants: HasMany(Variant)
-    images: HasMany(Image)
-    status: Status(
+    sku: SKU = ValueObject(SKU, required=True)
+    seller_id: str | None = Identifier()
+    title: str = String(required=True, max_length=255)
+    description: str | None = Text()
+    category_id: str | None = Identifier()
+    brand: str | None = String(max_length=100)
+    attributes: dict[str, Any] = Dict()
+    variants: list[Variant] = HasMany(Variant)
+    images: list[Image] = HasMany(Image)
+    status: str = Status(
         ProductStatus,
         default=ProductStatus.DRAFT.value,
         transitions={
@@ -202,18 +203,18 @@ class Product:
             ProductStatus.DISCONTINUED: [ProductStatus.ACTIVE, ProductStatus.ARCHIVED],
         },
     )
-    visibility: String(choices=ProductVisibility, default=ProductVisibility.PUBLIC.value)
-    seo: ValueObject(SEO)
-    created_at: DateTime(default=datetime.now)
-    updated_at: DateTime(default=datetime.now)
+    visibility: str = String(choices=ProductVisibility, default=ProductVisibility.PUBLIC.value)
+    seo: SEO | None = ValueObject(SEO)
+    created_at: datetime = DateTime(default=datetime.now)
+    updated_at: datetime = DateTime(default=datetime.now)
 
     @invariant.post
-    def images_cannot_exceed_maximum(self):
+    def images_cannot_exceed_maximum(self) -> None:
         if len(self.images) > 10:
             raise ValidationError({"images": ["Cannot have more than 10 images"]})
 
     @invariant.post
-    def exactly_one_primary_image_when_images_exist(self):
+    def exactly_one_primary_image_when_images_exist(self) -> None:
         if not self.images:
             return
         primaries = [i for i in self.images if i.is_primary]
@@ -223,16 +224,16 @@ class Product:
     @classmethod
     def create(
         cls,
-        sku,
-        title,
-        seller_id=None,
-        category_id=None,
-        description=None,
-        brand=None,
-        attributes=None,
-        visibility=None,
-        seo=None,
-    ):
+        sku: str | SKU,
+        title: str,
+        seller_id: str | None = None,
+        category_id: str | None = None,
+        description: str | None = None,
+        brand: str | None = None,
+        attributes: dict[str, Any] | None = None,
+        visibility: str | None = None,
+        seo: SEO | None = None,
+    ) -> "Product":
         from catalogue.product.events import ProductCreated
 
         sku_vo = SKU(code=sku) if isinstance(sku, str) else sku
@@ -264,7 +265,14 @@ class Product:
         )
         return product
 
-    def update_details(self, title=None, description=None, brand=None, attributes=None, seo=None):
+    def update_details(
+        self,
+        title: str | None = None,
+        description: str | None = None,
+        brand: str | None = None,
+        attributes: dict[str, Any] | None = None,
+        seo: SEO | None = None,
+    ) -> None:
         from catalogue.product.events import ProductDetailsUpdated
 
         if title is not None:
@@ -289,7 +297,14 @@ class Product:
             )
         )
 
-    def add_variant(self, variant_sku, price, attributes=None, weight=None, dimensions=None):
+    def add_variant(
+        self,
+        variant_sku: str | SKU,
+        price: Price,
+        attributes: dict[str, Any] | None = None,
+        weight: Weight | None = None,
+        dimensions: Dimensions | None = None,
+    ) -> Variant:
         from catalogue.product.events import VariantAdded
 
         sku_vo = SKU(code=variant_sku) if isinstance(variant_sku, str) else variant_sku
@@ -316,7 +331,7 @@ class Product:
         )
         return variant
 
-    def update_variant_price(self, variant_id, new_price):
+    def update_variant_price(self, variant_id: str, new_price: Price) -> None:
         from catalogue.product.events import VariantPriceChanged
 
         variant = next((v for v in self.variants if v.id == variant_id), None)
@@ -337,7 +352,7 @@ class Product:
             )
         )
 
-    def set_tier_price(self, variant_id, tier, price):
+    def set_tier_price(self, variant_id: str, tier: str, price: float) -> None:
         from catalogue.product.events import TierPriceSet
 
         variant = next((v for v in self.variants if v.id == variant_id), None)
@@ -365,7 +380,7 @@ class Product:
             )
         )
 
-    def add_image(self, url, alt_text=None, is_primary=False):
+    def add_image(self, url: str, alt_text: str | None = None, is_primary: bool = False) -> Image:
         from catalogue.product.events import ProductImageAdded
 
         with atomic_change(self):
@@ -399,7 +414,7 @@ class Product:
         )
         return image
 
-    def remove_image(self, image_id):
+    def remove_image(self, image_id: str) -> None:
         from catalogue.product.events import ProductImageRemoved
 
         image = next((i for i in self.images if i.id == image_id), None)
@@ -434,7 +449,7 @@ class Product:
             )
         )
 
-    def activate(self):
+    def activate(self) -> None:
         from catalogue.product.events import ProductActivated
 
         if self.status != ProductStatus.DRAFT.value:
@@ -455,7 +470,7 @@ class Product:
             )
         )
 
-    def discontinue(self):
+    def discontinue(self) -> None:
         from catalogue.product.events import ProductDiscontinued
 
         if self.status != ProductStatus.ACTIVE.value:
@@ -473,7 +488,7 @@ class Product:
             )
         )
 
-    def archive(self):
+    def archive(self) -> None:
         from catalogue.product.events import ProductArchived
 
         if self.status != ProductStatus.DISCONTINUED.value:

@@ -1,5 +1,7 @@
 """Cart recovery template — sent 24 hours after cart abandonment."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -11,7 +13,7 @@ class CartRecoveryTemplate:
     default_channels = [NotificationChannel.EMAIL.value]
 
     @staticmethod
-    def render(_context: dict) -> dict:
+    def render(_context: dict[str, Any]) -> dict[str, str]:
         return {
             "subject": "You left items in your cart",
             "body": (

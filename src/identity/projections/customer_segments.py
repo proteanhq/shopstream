@@ -11,17 +11,17 @@ from identity.domain import identity
 
 @identity.projection
 class CustomerSegments:
-    customer_id: Identifier(identifier=True, required=True)
-    email: String(required=True)
-    first_name: String(required=True)
-    last_name: String(required=True)
-    tier: String(required=True)
+    customer_id: str = Identifier(identifier=True, required=True)
+    email: str = String(required=True)
+    first_name: str = String(required=True)
+    last_name: str = String(required=True)
+    tier: str = String(required=True)
 
 
 @identity.projector(projector_for=CustomerSegments, aggregates=[Customer])
 class CustomerSegmentsProjector:
     @on(CustomerRegistered)
-    def on_customer_registered(self, event):
+    def on_customer_registered(self, event: CustomerRegistered) -> None:
         current_domain.repository_for(CustomerSegments).add(
             CustomerSegments(
                 customer_id=event.customer_id,
@@ -33,7 +33,7 @@ class CustomerSegmentsProjector:
         )
 
     @on(ProfileUpdated)
-    def on_profile_updated(self, event):
+    def on_profile_updated(self, event: ProfileUpdated) -> None:
         repo = current_domain.repository_for(CustomerSegments)
         record = repo.get(event.customer_id)
         record.first_name = event.first_name
@@ -41,7 +41,7 @@ class CustomerSegmentsProjector:
         repo.add(record)
 
     @on(TierUpgraded)
-    def on_tier_upgraded(self, event):
+    def on_tier_upgraded(self, event: TierUpgraded) -> None:
         repo = current_domain.repository_for(CustomerSegments)
         record = repo.get(event.customer_id)
         record.tier = event.new_tier

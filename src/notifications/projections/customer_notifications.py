@@ -1,5 +1,7 @@
 """CustomerNotifications — per-customer notification feed (recent history)."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, String
 from protean.utils.globals import current_domain
@@ -16,20 +18,20 @@ from notifications.notification.notification import Notification
 
 @notifications.projection
 class CustomerNotifications:
-    notification_id: Identifier(identifier=True, required=True)
-    customer_id: Identifier(required=True)
-    notification_type: String(required=True)
-    channel: String(required=True)
-    subject: String(max_length=500)
-    status: String(required=True)
-    created_at: DateTime()
-    updated_at: DateTime()
+    notification_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = Identifier(required=True)
+    notification_type: str = String(required=True)
+    channel: str = String(required=True)
+    subject: str | None = String(max_length=500)
+    status: str = String(required=True)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @notifications.projector(projector_for=CustomerNotifications, aggregates=[Notification])
 class CustomerNotificationsProjector:
     @on(NotificationCreated)
-    def on_notification_created(self, event):
+    def on_notification_created(self, event: NotificationCreated) -> None:
         # Only track customer notifications (skip internal)
         if event.recipient_type != "Customer":
             return
@@ -47,7 +49,7 @@ class CustomerNotificationsProjector:
             )
         )
 
-    def _update_status(self, notification_id, status, updated_at):
+    def _update_status(self, notification_id: str, status: str, updated_at: datetime | None) -> None:
         repo = current_domain.repository_for(CustomerNotifications)
         cn = repo.get_or_none(notification_id)
         if cn is None:
@@ -57,13 +59,13 @@ class CustomerNotificationsProjector:
         repo.add(cn)
 
     @on(NotificationSent)
-    def on_notification_sent(self, event):
+    def on_notification_sent(self, event: NotificationSent) -> None:
         self._update_status(event.notification_id, "Sent", event.sent_at)
 
     @on(NotificationDelivered)
-    def on_notification_delivered(self, event):
+    def on_notification_delivered(self, event: NotificationDelivered) -> None:
         self._update_status(event.notification_id, "Delivered", event.delivered_at)
 
     @on(NotificationFailed)
-    def on_notification_failed(self, event):
+    def on_notification_failed(self, event: NotificationFailed) -> None:
         self._update_status(event.notification_id, "Failed", event.failed_at)

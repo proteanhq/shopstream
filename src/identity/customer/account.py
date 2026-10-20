@@ -12,42 +12,42 @@ from identity.domain import identity
 class SuspendAccount:
     """Temporarily suspend a customer account, blocking further activity."""
 
-    customer_id: Identifier(required=True)
-    reason: String(required=True, max_length=500)
+    customer_id: str = Identifier(required=True)
+    reason: str = String(required=True, max_length=500)
 
 
 @identity.command(part_of="Customer")
 class ReactivateAccount:
     """Restore a suspended customer account to active status."""
 
-    customer_id: Identifier(required=True)
+    customer_id: str = Identifier(required=True)
 
 
 @identity.command(part_of="Customer")
 class CloseAccount:
     """Permanently close a customer account."""
 
-    customer_id: Identifier(required=True)
+    customer_id: str = Identifier(required=True)
 
 
 @identity.command_handler(part_of=Customer)
 class ManageAccountHandler:
     @handle(SuspendAccount)
-    def suspend_account(self, command):
+    def suspend_account(self, command: SuspendAccount) -> None:
         repo = current_domain.repository_for(Customer)
         customer = repo.get(command.customer_id)
         customer.suspend(reason=command.reason)
         repo.add(customer)
 
     @handle(ReactivateAccount)
-    def reactivate_account(self, command):
+    def reactivate_account(self, command: ReactivateAccount) -> None:
         repo = current_domain.repository_for(Customer)
         customer = repo.get(command.customer_id)
         customer.reactivate()
         repo.add(customer)
 
     @handle(CloseAccount)
-    def close_account(self, command):
+    def close_account(self, command: CloseAccount) -> None:
         repo = current_domain.repository_for(Customer)
         customer = repo.get(command.customer_id)
         customer.close()

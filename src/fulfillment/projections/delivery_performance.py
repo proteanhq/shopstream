@@ -19,14 +19,14 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 class DeliveryPerformanceView:
     """Carrier delivery performance aggregated by carrier and date."""
 
-    id = Identifier(identifier=True)
-    carrier = String(required=True)
-    date = String(required=True)  # ISO date string YYYY-MM-DD
-    total_shipments = Integer(default=0)
-    delivered_count = Integer(default=0)
-    exception_count = Integer(default=0)
-    total_delivery_hours = Float(default=0.0)
-    updated_at = DateTime()
+    id: str = Identifier(identifier=True)
+    carrier: str = String(required=True)
+    date: str = String(required=True)  # ISO date string YYYY-MM-DD
+    total_shipments: int = Integer(default=0)
+    delivered_count: int = Integer(default=0)
+    exception_count: int = Integer(default=0)
+    total_delivery_hours: float = Float(default=0.0)
+    updated_at: datetime | None = DateTime()
 
 
 def _date_key(dt: datetime) -> str:
@@ -36,7 +36,7 @@ def _date_key(dt: datetime) -> str:
 @fulfillment.projector(projector_for=DeliveryPerformanceView, aggregates=[Fulfillment])
 class DeliveryPerformanceProjector:
     @on(ShipmentHandedOff)
-    def on_shipment_handed_off(self, event):
+    def on_shipment_handed_off(self, event: ShipmentHandedOff) -> None:
         date_str = _date_key(event.shipped_at)
         carrier = event.carrier
         record_id = f"{carrier}-{date_str}"
@@ -60,24 +60,24 @@ class DeliveryPerformanceProjector:
         repo.add(view)
 
     @on(DeliveryConfirmed)
-    def on_delivery_confirmed(self, event):
+    def on_delivery_confirmed(self, event: DeliveryConfirmed) -> None:
         date_str = _date_key(event.delivered_at)
         # We try all carriers for this date — in practice we'd key by fulfillment_id
         repo = current_domain.repository_for(DeliveryPerformanceView)
         results = repo.query.filter(date=date_str).all()
-        if results and results.items:
-            view = results.first
+        view = results.first
+        if view is not None:
             view.delivered_count = (view.delivered_count or 0) + 1
             view.updated_at = event.delivered_at
             repo.add(view)
 
     @on(DeliveryException)
-    def on_delivery_exception(self, event):
+    def on_delivery_exception(self, event: DeliveryException) -> None:
         date_str = _date_key(event.occurred_at)
         repo = current_domain.repository_for(DeliveryPerformanceView)
         results = repo.query.filter(date=date_str).all()
-        if results and results.items:
-            view = results.first
+        view = results.first
+        if view is not None:
             view.exception_count = (view.exception_count or 0) + 1
             view.updated_at = event.occurred_at
             repo.add(view)

@@ -1,5 +1,7 @@
 """Customer payments — payment history by customer."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Float, Identifier, String
 from protean.utils.globals import current_domain
@@ -16,21 +18,21 @@ from payments.payment.payment import Payment
 
 @payments.projection
 class CustomerPayment:
-    payment_id = Identifier(identifier=True, required=True)
-    customer_id = Identifier(required=True)
-    order_id = Identifier(required=True)
-    amount = Float()
-    currency = String(default="USD")
-    status = String(required=True)
-    payment_method_type = String()
-    created_at = DateTime()
-    updated_at = DateTime()
+    payment_id: str = Identifier(identifier=True, required=True)
+    customer_id: str = Identifier(required=True)
+    order_id: str = Identifier(required=True)
+    amount: float | None = Float()
+    currency: str = String(default="USD")
+    status: str = String(required=True)
+    payment_method_type: str | None = String()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @payments.projector(projector_for=CustomerPayment, aggregates=[Payment])
 class CustomerPaymentProjector:
     @on(PaymentInitiated)
-    def on_payment_initiated(self, event):
+    def on_payment_initiated(self, event: PaymentInitiated) -> None:
         current_domain.repository_for(CustomerPayment).add(
             CustomerPayment(
                 payment_id=event.payment_id,
@@ -46,7 +48,7 @@ class CustomerPaymentProjector:
         )
 
     @on(PaymentSucceeded)
-    def on_payment_succeeded(self, event):
+    def on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         repo = current_domain.repository_for(CustomerPayment)
         view = repo.get(event.payment_id)
         view.status = "Succeeded"
@@ -54,7 +56,7 @@ class CustomerPaymentProjector:
         repo.add(view)
 
     @on(PaymentFailed)
-    def on_payment_failed(self, event):
+    def on_payment_failed(self, event: PaymentFailed) -> None:
         repo = current_domain.repository_for(CustomerPayment)
         view = repo.get(event.payment_id)
         view.status = "Failed"
@@ -62,7 +64,7 @@ class CustomerPaymentProjector:
         repo.add(view)
 
     @on(RefundCompleted)
-    def on_refund_completed(self, event):
+    def on_refund_completed(self, event: RefundCompleted) -> None:
         repo = current_domain.repository_for(CustomerPayment)
         view = repo.get(event.payment_id)
         view.status = "Refunded"

@@ -5,6 +5,8 @@ check requires repository query). Checks VerifiedPurchases projection to flag
 verified purchases.
 """
 
+from typing import Any
+
 from protean.fields import Dict, Identifier, Integer, List, String, Text
 from protean.utils.globals import current_domain
 from protean.utils.logging import bind_event_context
@@ -16,21 +18,21 @@ from reviews.review.review import Review, ReviewStatus
 
 @reviews.command(part_of="Review")
 class SubmitReview:
-    product_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    rating = Integer(required=True)
-    title = String(required=True, max_length=200)
-    body = Text(required=True)
-    variant_id = Identifier()
-    pros = List(String())
-    cons = List(String())
-    images = List(Dict())
+    product_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    rating: int = Integer(required=True)
+    title: str = String(required=True, max_length=200)
+    body: str = Text(required=True)
+    variant_id: str | None = Identifier()
+    pros: list[str] = List(String())
+    cons: list[str] = List(String())
+    images: list[dict[str, Any]] = List(Dict())
 
 
 @reviews.command_handler(part_of=Review)
 class SubmitReviewHandler:
     @handle(SubmitReview)
-    def submit_review(self, command):
+    def submit_review(self, command: SubmitReview) -> str:
         repo = current_domain.repository_for(Review)
 
         # Enforce one review per customer per product (exclude removed)

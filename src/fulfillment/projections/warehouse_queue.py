@@ -1,5 +1,7 @@
 """Warehouse queue — picker's work queue view for warehouse operations."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -18,20 +20,20 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 
 @fulfillment.projection
 class WarehouseQueueView:
-    fulfillment_id = Identifier(identifier=True, required=True)
-    order_id = Identifier(required=True)
-    warehouse_id = String()
-    status = String(required=True)
-    assigned_to = String()
-    item_count = Integer(default=0)
-    created_at = DateTime()
-    updated_at = DateTime()
+    fulfillment_id: str = Identifier(identifier=True, required=True)
+    order_id: str = Identifier(required=True)
+    warehouse_id: str | None = String()
+    status: str = String(required=True)
+    assigned_to: str | None = String()
+    item_count: int = Integer(default=0)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @fulfillment.projector(projector_for=WarehouseQueueView, aggregates=[Fulfillment])
 class WarehouseQueueProjector:
     @on(FulfillmentCreated)
-    def on_fulfillment_created(self, event):
+    def on_fulfillment_created(self, event: FulfillmentCreated) -> None:
         current_domain.repository_for(WarehouseQueueView).add(
             WarehouseQueueView(
                 fulfillment_id=event.fulfillment_id,
@@ -45,7 +47,7 @@ class WarehouseQueueProjector:
         )
 
     @on(PickerAssigned)
-    def on_picker_assigned(self, event):
+    def on_picker_assigned(self, event: PickerAssigned) -> None:
         repo = current_domain.repository_for(WarehouseQueueView)
         view = repo.get(event.fulfillment_id)
         view.status = "Picking"
@@ -54,7 +56,7 @@ class WarehouseQueueProjector:
         repo.add(view)
 
     @on(PickingCompleted)
-    def on_picking_completed(self, event):
+    def on_picking_completed(self, event: PickingCompleted) -> None:
         repo = current_domain.repository_for(WarehouseQueueView)
         view = repo.get(event.fulfillment_id)
         view.status = "Packing"
@@ -62,7 +64,7 @@ class WarehouseQueueProjector:
         repo.add(view)
 
     @on(PackingCompleted)
-    def on_packing_completed(self, event):
+    def on_packing_completed(self, event: PackingCompleted) -> None:
         repo = current_domain.repository_for(WarehouseQueueView)
         view = repo.get(event.fulfillment_id)
         view.status = "Packed"
@@ -70,7 +72,7 @@ class WarehouseQueueProjector:
         repo.add(view)
 
     @on(ShipmentHandedOff)
-    def on_shipment_handed_off(self, event):
+    def on_shipment_handed_off(self, event: ShipmentHandedOff) -> None:
         repo = current_domain.repository_for(WarehouseQueueView)
         view = repo.get(event.fulfillment_id)
         view.status = "Shipped"
@@ -78,7 +80,7 @@ class WarehouseQueueProjector:
         repo.add(view)
 
     @on(FulfillmentCancelled)
-    def on_fulfillment_cancelled(self, event):
+    def on_fulfillment_cancelled(self, event: FulfillmentCancelled) -> None:
         repo = current_domain.repository_for(WarehouseQueueView)
         view = repo.get(event.fulfillment_id)
         view.status = "Cancelled"

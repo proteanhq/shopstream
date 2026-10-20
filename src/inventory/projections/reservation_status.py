@@ -1,5 +1,7 @@
 """Reservation status — active reservations view for order status checks."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -16,20 +18,20 @@ from inventory.stock.stock import InventoryItem
 
 @inventory.projection
 class ReservationStatus:
-    reservation_id = Identifier(identifier=True, required=True)
-    inventory_item_id = Identifier(required=True)
-    order_id = Identifier(required=True)
-    quantity = Integer(required=True)
-    status = String(required=True)
-    reserved_at = DateTime()
-    expires_at = DateTime()
-    updated_at = DateTime()
+    reservation_id: str = Identifier(identifier=True, required=True)
+    inventory_item_id: str = Identifier(required=True)
+    order_id: str = Identifier(required=True)
+    quantity: int = Integer(required=True)
+    status: str = String(required=True)
+    reserved_at: datetime | None = DateTime()
+    expires_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @inventory.projector(projector_for=ReservationStatus, aggregates=[InventoryItem])
 class ReservationStatusProjector:
     @on(StockReserved)
-    def on_stock_reserved(self, event):
+    def on_stock_reserved(self, event: StockReserved) -> None:
         current_domain.repository_for(ReservationStatus).add(
             ReservationStatus(
                 reservation_id=event.reservation_id,
@@ -44,7 +46,7 @@ class ReservationStatusProjector:
         )
 
     @on(ReservationReleased)
-    def on_reservation_released(self, event):
+    def on_reservation_released(self, event: ReservationReleased) -> None:
         repo = current_domain.repository_for(ReservationStatus)
         reservation = repo.get(event.reservation_id)
         reservation.status = "Released"
@@ -52,7 +54,7 @@ class ReservationStatusProjector:
         repo.add(reservation)
 
     @on(ReservationConfirmed)
-    def on_reservation_confirmed(self, event):
+    def on_reservation_confirmed(self, event: ReservationConfirmed) -> None:
         repo = current_domain.repository_for(ReservationStatus)
         reservation = repo.get(event.reservation_id)
         reservation.status = "Confirmed"
@@ -60,7 +62,7 @@ class ReservationStatusProjector:
         repo.add(reservation)
 
     @on(StockCommitted)
-    def on_stock_committed(self, event):
+    def on_stock_committed(self, event: StockCommitted) -> None:
         repo = current_domain.repository_for(ReservationStatus)
         reservation = repo.get(event.reservation_id)
         reservation.status = "Committed"

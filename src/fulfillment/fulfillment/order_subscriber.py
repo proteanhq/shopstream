@@ -8,6 +8,8 @@ broker, filters by event type, and translates into domain-local side effects.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -26,14 +28,14 @@ class OrderEventsSubscriber:
     types not relevant to the Fulfillment domain.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
         if "OrderCancelled" in event_type:
             self._on_order_cancelled(data)
 
-    def _on_order_cancelled(self, data: dict) -> None:
+    def _on_order_cancelled(self, data: dict[str, Any]) -> None:
         """Cancel in-progress fulfillment when order is cancelled."""
         order_id = str(data["order_id"])
         repo = current_domain.repository_for(Fulfillment)
@@ -47,6 +49,8 @@ class OrderEventsSubscriber:
             return
 
         ff = results.first
+        # first is None only for an empty result, which returned above.
+        assert ff is not None
         from fulfillment.fulfillment.fulfillment import FulfillmentStatus
 
         if ff.can_transition_to("status", FulfillmentStatus.CANCELLED.value):

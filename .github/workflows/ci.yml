@@ -56,6 +56,29 @@ jobs:
       - name: Run verification checks
         run: uv run pytest verification/ --protean-env memory -m "not engine"
 
+  typecheck:
+    runs-on: ubuntu-latest
+    name: Type Check
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: astral-sh/setup-uv@v5
+
+      # mypy checks against python_version in pyproject.toml, so one
+      # interpreter is enough.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: uv sync --all-extras --all-groups
+
+      - name: Run mypy --strict
+        run: make typecheck
+
   test:
     runs-on: ubuntu-latest
     strategy:

@@ -1,5 +1,7 @@
 """FastAPI routes for the Ordering domain — carts and orders."""
 
+from typing import Any
+
 from fastapi import APIRouter, Query
 from protean.utils.globals import current_domain
 from pydantic import BaseModel as PydanticBaseModel
@@ -77,6 +79,8 @@ async def create_cart(body: CreateCartRequest) -> CartIdResponse:
         session_id=body.session_id,
     )
     result = current_domain.process(command, asynchronous=False)
+    # A synchronous process() returns the handler's result, and this handler returns the new id.
+    assert result is not None
     return CartIdResponse(cart_id=result)
 
 
@@ -166,6 +170,8 @@ async def checkout_cart(cart_id: str, body: CheckoutRequest) -> OrderIdResponse:
         currency="USD",
     )
     order_id = current_domain.process(create_cmd, asynchronous=False)
+    # A synchronous process() returns the handler's result, and this handler returns the new id.
+    assert order_id is not None
 
     # Convert cart
     convert_cmd = ConvertToOrder(cart_id=cart_id)
@@ -189,7 +195,7 @@ async def merge_guest_cart(cart_id: str, body: MergeGuestCartRequest) -> StatusR
     """
 
     # Find guest cart by session_id (simplified — in production, use a query)
-    guest_items = []  # Placeholder: would query for guest cart items by session
+    guest_items: list[dict[str, Any]] = []  # Placeholder: would query for guest cart items by session
     # For now, the client passes the source_session_id and the handler deals with it
 
     command = MergeGuestCart(
@@ -278,6 +284,8 @@ async def create_order(body: CreateOrderRequest) -> OrderIdResponse:
         order_source=body.order_source,
     )
     result = current_domain.process(command, asynchronous=False)
+    # A synchronous process() returns the handler's result, and this handler returns the new id.
+    assert result is not None
     return OrderIdResponse(order_id=result)
 
 

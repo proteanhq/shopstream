@@ -12,6 +12,7 @@ State Machine:
 
 from datetime import UTC, datetime
 from enum import Enum
+from typing import Protocol
 from uuid import uuid4
 
 from protean import value_object_from_entity
@@ -37,10 +38,10 @@ class InvoiceStatus(Enum):
 class InvoiceLineItem:
     """A line item on an invoice."""
 
-    description = String(required=True, max_length=500)
-    quantity = Float(required=True)
-    unit_price = Float(required=True)
-    total = Float(required=True)
+    description: str = String(required=True, max_length=500)
+    quantity: float = Float(required=True)
+    unit_price: float = Float(required=True)
+    total: float = Float(required=True)
 
 
 # Auto-generated input value object mirroring the caller-provided fields of
@@ -50,16 +51,26 @@ class InvoiceLineItem:
 InvoiceLineItemInput = value_object_from_entity(InvoiceLineItem, name="InvoiceLineItemInput", exclude={"total"})
 
 
+# mypy cannot use the runtime-built InvoiceLineItemInput as a type, so this names the fields the code reads.
+class InvoiceLineItemData(Protocol):
+    @property
+    def description(self) -> str: ...
+    @property
+    def quantity(self) -> float: ...
+    @property
+    def unit_price(self) -> float: ...
+
+
 @payments.aggregate
 class Invoice:
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    invoice_number = String(required=True, max_length=50)
-    line_items = HasMany(InvoiceLineItem)
-    subtotal = Float(default=0.0)
-    tax = Float(default=0.0)
-    total = Float(default=0.0)
-    status = Status(
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    invoice_number: str = String(required=True, max_length=50)
+    line_items: list[InvoiceLineItem] = HasMany(InvoiceLineItem)
+    subtotal: float = Float(default=0.0)
+    tax: float = Float(default=0.0)
+    total: float = Float(default=0.0)
+    status: str = Status(
         InvoiceStatus,
         default=InvoiceStatus.DRAFT.value,
         transitions={
@@ -67,19 +78,19 @@ class Invoice:
             InvoiceStatus.ISSUED: [InvoiceStatus.PAID, InvoiceStatus.VOIDED],
         },
     )
-    issued_at = DateTime()
-    paid_at = DateTime()
-    created_at = DateTime()
-    updated_at = DateTime()
+    issued_at: datetime | None = DateTime()
+    paid_at: datetime | None = DateTime()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     @classmethod
     def create(
         cls,
         order_id: str,
         customer_id: str,
-        line_items_data: "list[InvoiceLineItemInput]",
+        line_items_data: list[InvoiceLineItemData],
         tax: float = 0.0,
-    ):
+    ) -> "Invoice":
         """Create a new invoice for an order.
 
         ``line_items_data`` is a list of ``InvoiceLineItemInput`` value objects

@@ -682,34 +682,32 @@ def _sync_dispatch_probe(projector_failure: Exception):
     return domain, Parcel, LabelParcel, handled
 
 
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="version retry re-runs a command whose commit already succeeded when a sync handler raises ExpectedVersionError (proteanhq/protean#1883)",
-)
-def test_committed_command_is_not_rerun_when_a_sync_handler_raises_expected_version_error():
-    """Protean finding (proteanhq/protean#1883): a committed command runs again.
+def test_1883_committed_command_is_not_rerun_when_a_sync_handler_raises_expected_version_error():
+    """proteanhq/protean#1883 (guard): a committed command does not run again.
 
     Under ``event_processing = "sync"``, `UnitOfWork.commit` dispatches events
-    after the relational commit, inside the same `try`. A handler that raises
-    `ExpectedVersionError` ends the drain, and the commit re-raises it as itself.
-    The command handler's version retry then runs the whole command again, though
-    its first attempt is already saved. With the default ``max_retries = 3`` the
-    command body runs 4 times and saves 4 aggregates.
-    `tests/inventory/application/test_handler_failure_isolation.py` shows the same
-    bug on `ReceiveStock`: the 30-unit receipt is applied 4 times.
+    after the relational commit, inside the same `try`. A handler that raised
+    `ExpectedVersionError` ended the drain, and the commit re-raised it as itself.
+    The command handler's version retry then ran the whole command again, though
+    its first attempt was already saved: 4 runs and 4 saved aggregates with the
+    default ``max_retries = 3``. Fixed in proteanhq/protean#1888 (`6aad05f`): the
+    commit now wraps a sync handler's failure in `TransactionError`.
+    `tests/inventory/application/test_handler_failure_isolation.py` checks the
+    same on `ReceiveStock`.
     """
-    from protean.exceptions import ExpectedVersionError
+    from protean.exceptions import ExpectedVersionError, TransactionError
 
-    domain, parcel_cls, label_parcel, handled = _sync_dispatch_probe(ExpectedVersionError("simulated conflict"))
+    failure = ExpectedVersionError("simulated conflict")
+    domain, parcel_cls, label_parcel, handled = _sync_dispatch_probe(failure)
 
     with domain.domain_context():
-        with pytest.raises(ExpectedVersionError):
+        with pytest.raises(TransactionError) as excinfo:
             domain.process(label_parcel(label="fragile"), asynchronous=False)
         saved = domain.repository_for(parcel_cls).query.all().total
 
     if not handled:
         pytest.fail("precondition: the command handler ran")
+    assert excinfo.value.__cause__ is failure
     assert handled == ["fragile"], f"the command body ran {len(handled)} times"
     assert saved == 1
 

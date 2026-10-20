@@ -8,6 +8,9 @@ projector option; this projector keeps its own guard. All aggregate stats are
 derived from ``counted_reviews`` rather than incremented in place.
 """
 
+from datetime import datetime
+from typing import Any
+
 from protean.core.projector import on
 from protean.fields import DateTime, Dict, Float, Identifier, Integer
 from protean.utils.globals import current_domain
@@ -19,22 +22,22 @@ from reviews.review.review import Review
 
 @reviews.projection
 class ProductRating:
-    product_id = Identifier(identifier=True, required=True)
-    average_rating = Float(default=0.0)
-    total_reviews = Integer(default=0)
-    rating_distribution = Dict()
-    verified_review_count = Integer(default=0)
+    product_id: str = Identifier(identifier=True, required=True)
+    average_rating: float = Float(default=0.0)
+    total_reviews: int = Integer(default=0)
+    rating_distribution: dict[str, Any] = Dict()
+    verified_review_count: int = Integer(default=0)
     # review_id -> {"rating": int, "verified": bool}. The set of reviews counted
     # so far; makes the projector idempotent under at-least-once redelivery.
-    counted_reviews = Dict()
-    updated_at = DateTime()
+    counted_reviews: dict[str, Any] = Dict()
+    updated_at: datetime | None = DateTime()
 
 
-def _default_distribution():
+def _default_distribution() -> dict[str, int]:
     return {"1": 0, "2": 0, "3": 0, "4": 0, "5": 0}
 
 
-def _recalculate_average(distribution):
+def _recalculate_average(distribution: dict[str, int]) -> float:
     total = sum(distribution.values())
     if total == 0:
         return 0.0
@@ -42,7 +45,7 @@ def _recalculate_average(distribution):
     return round(weighted_sum / total, 2)
 
 
-def _recompute(pr):
+def _recompute(pr: ProductRating) -> None:
     """Derive all stats from the counted_reviews set (idempotent)."""
     distribution = _default_distribution()
     verified = 0
@@ -57,7 +60,7 @@ def _recompute(pr):
     pr.average_rating = _recalculate_average(distribution)
 
 
-def _is_verified(review_id) -> bool:
+def _is_verified(review_id: str) -> bool:
     review = current_domain.repository_for(Review).get_or_none(review_id)
     if review is None:
         return False
@@ -67,7 +70,7 @@ def _is_verified(review_id) -> bool:
 @reviews.projector(projector_for=ProductRating, aggregates=[Review])
 class ProductRatingProjector:
     @on(ReviewApproved)
-    def on_review_approved(self, event):
+    def on_review_approved(self, event: ReviewApproved) -> None:
         repo = current_domain.repository_for(ProductRating)
         pr = repo.get_or_none(event.product_id)
         if pr is None:
@@ -89,7 +92,7 @@ class ProductRatingProjector:
         repo.add(pr)
 
     @on(ReviewRemoved)
-    def on_review_removed(self, event):
+    def on_review_removed(self, event: ReviewRemoved) -> None:
         repo = current_domain.repository_for(ProductRating)
         pr = repo.get_or_none(event.product_id)
         if pr is None:

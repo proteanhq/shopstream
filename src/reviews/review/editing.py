@@ -4,6 +4,8 @@ Only the original author can edit, only in PENDING or REJECTED status.
 Editing a rejected review re-submits it to moderation (PENDING).
 """
 
+from typing import Any
+
 from protean.exceptions import ValidationError
 from protean.fields import Identifier, Integer, List, String, Text
 from protean.utils.globals import current_domain
@@ -15,19 +17,19 @@ from reviews.review.review import Review
 
 @reviews.command(part_of="Review")
 class EditReview:
-    review_id = Identifier(required=True)
-    customer_id = Identifier(required=True)  # Must match original author
-    title = String(max_length=200)
-    body = Text()
-    rating = Integer()
-    pros = List(String())
-    cons = List(String())
+    review_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)  # Must match original author
+    title: str | None = String(max_length=200)
+    body: str | None = Text()
+    rating: int | None = Integer()
+    pros: list[str] = List(String())
+    cons: list[str] = List(String())
 
 
 @reviews.command_handler(part_of=Review)
 class EditReviewHandler:
     @handle(EditReview)
-    def edit_review(self, command):
+    def edit_review(self, command: EditReview) -> None:
         repo = current_domain.repository_for(Review)
         review = repo.get(command.review_id)
 
@@ -36,7 +38,7 @@ class EditReviewHandler:
             raise ValidationError({"customer_id": ["Only the review author can edit this review"]})
 
         # Build kwargs with sentinel for unset fields
-        kwargs = {}
+        kwargs: dict[str, Any] = {}
         if command.title is not None:
             kwargs["title"] = command.title
         if command.body is not None:

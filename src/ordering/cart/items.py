@@ -12,33 +12,33 @@ from ordering.domain import ordering
 class AddToCart:
     """Add a product variant to the shopping cart (merges if already present)."""
 
-    cart_id = Identifier(required=True)
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    quantity = Integer(required=True, min_value=1)
+    cart_id: str = Identifier(required=True)
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    quantity: int = Integer(required=True, min_value=1)
 
 
 @ordering.command(part_of="ShoppingCart")
 class UpdateCartQuantity:
     """Change the quantity of an item already in the cart."""
 
-    cart_id = Identifier(required=True)
-    item_id = Identifier(required=True)
-    new_quantity = Integer(required=True, min_value=1)
+    cart_id: str = Identifier(required=True)
+    item_id: str = Identifier(required=True)
+    new_quantity: int = Integer(required=True, min_value=1)
 
 
 @ordering.command(part_of="ShoppingCart")
 class RemoveFromCart:
     """Remove an item from the shopping cart."""
 
-    cart_id = Identifier(required=True)
-    item_id = Identifier(required=True)
+    cart_id: str = Identifier(required=True)
+    item_id: str = Identifier(required=True)
 
 
 @ordering.command_handler(part_of=ShoppingCart)
 class ManageCartItemsHandler:
     @handle(AddToCart)
-    def add_to_cart(self, command):
+    def add_to_cart(self, command: AddToCart) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
         cart.add_item(
@@ -49,7 +49,7 @@ class ManageCartItemsHandler:
         repo.add(cart)
 
     @handle(UpdateCartQuantity)
-    def update_cart_quantity(self, command):
+    def update_cart_quantity(self, command: UpdateCartQuantity) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
         cart.update_item_quantity(
@@ -59,7 +59,7 @@ class ManageCartItemsHandler:
         repo.add(cart)
 
     @handle(RemoveFromCart)
-    def remove_from_cart(self, command):
+    def remove_from_cart(self, command: RemoveFromCart) -> None:
         repo = current_domain.repository_for(ShoppingCart)
         cart = repo.get(command.cart_id)
         cart.remove_item(item_id=command.item_id)

@@ -1,6 +1,7 @@
 """Slack channel port — abstract interface for Slack dispatch."""
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 class SlackPort(ABC):
@@ -11,8 +12,8 @@ class SlackPort(ABC):
         self,
         channel: str,
         message: str,
-        blocks: list | None = None,
-    ) -> dict:
+        blocks: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
         """Send a Slack message.
 
         Returns:

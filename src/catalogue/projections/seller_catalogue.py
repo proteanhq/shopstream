@@ -1,5 +1,7 @@
 """Seller catalogue — seller's product management projection."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -18,20 +20,20 @@ from catalogue.product.product import Product
 
 @catalogue.projection
 class SellerCatalogue:
-    product_id: Identifier(identifier=True, required=True)
-    seller_id: Identifier()
-    sku: String(required=True)
-    title: String(required=True)
-    status: String(required=True)
-    variant_count: Integer(default=0)
-    created_at: DateTime()
-    updated_at: DateTime()
+    product_id: str = Identifier(identifier=True, required=True)
+    seller_id: str | None = Identifier()
+    sku: str = String(required=True)
+    title: str = String(required=True)
+    status: str = String(required=True)
+    variant_count: int = Integer(default=0)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @catalogue.projector(projector_for=SellerCatalogue, aggregates=[Product])
 class SellerCatalogueProjector:
     @on(ProductCreated)
-    def on_product_created(self, event):
+    def on_product_created(self, event: ProductCreated) -> None:
         current_domain.repository_for(SellerCatalogue).add(
             SellerCatalogue(
                 product_id=event.product_id,
@@ -46,35 +48,35 @@ class SellerCatalogueProjector:
         )
 
     @on(ProductDetailsUpdated)
-    def on_details_updated(self, event):
+    def on_details_updated(self, event: ProductDetailsUpdated) -> None:
         repo = current_domain.repository_for(SellerCatalogue)
         record = repo.get(event.product_id)
         record.title = event.title
         repo.add(record)
 
     @on(VariantAdded)
-    def on_variant_added(self, event):
+    def on_variant_added(self, event: VariantAdded) -> None:
         repo = current_domain.repository_for(SellerCatalogue)
         record = repo.get(event.product_id)
         record.variant_count = (record.variant_count or 0) + 1
         repo.add(record)
 
     @on(ProductActivated)
-    def on_product_activated(self, event):
+    def on_product_activated(self, event: ProductActivated) -> None:
         repo = current_domain.repository_for(SellerCatalogue)
         record = repo.get(event.product_id)
         record.status = "Active"
         repo.add(record)
 
     @on(ProductDiscontinued)
-    def on_product_discontinued(self, event):
+    def on_product_discontinued(self, event: ProductDiscontinued) -> None:
         repo = current_domain.repository_for(SellerCatalogue)
         record = repo.get(event.product_id)
         record.status = "Discontinued"
         repo.add(record)
 
     @on(ProductArchived)
-    def on_product_archived(self, event):
+    def on_product_archived(self, event: ProductArchived) -> None:
         repo = current_domain.repository_for(SellerCatalogue)
         record = repo.get(event.product_id)
         record.status = "Archived"

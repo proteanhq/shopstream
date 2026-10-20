@@ -57,7 +57,7 @@ async def initiate_payment(body: InitiatePaymentRequest) -> PaymentIdResponse:
         idempotency_key=body.idempotency_key,
     )
     result = current_domain.process(command, asynchronous=False)
-    return PaymentIdResponse(payment_id=result)
+    return PaymentIdResponse(payment_id=str(result))
 
 
 @payment_router.post("/webhook", response_model=StatusResponse)
@@ -160,7 +160,7 @@ async def generate_invoice(body: GenerateInvoiceRequest) -> InvoiceIdResponse:
         tax=body.tax,
     )
     result = current_domain.process(command, asynchronous=False)
-    return InvoiceIdResponse(invoice_id=result)
+    return InvoiceIdResponse(invoice_id=str(result))
 
 
 @invoice_router.put("/{invoice_id}/void", response_model=StatusResponse)

@@ -33,29 +33,29 @@ class NotificationPreference:
     """
 
     # Customer link
-    customer_id: Identifier(required=True, unique=True)
+    customer_id: str = Identifier(required=True, unique=True)
 
     # Channel preferences
-    email_enabled: Boolean(default=True)
-    sms_enabled: Boolean(default=False)
-    push_enabled: Boolean(default=False)
+    email_enabled: bool = Boolean(default=True)
+    sms_enabled: bool = Boolean(default=False)
+    push_enabled: bool = Boolean(default=False)
 
     # Quiet hours (DND)
-    quiet_hours_start: String(max_length=5)  # "22:00" format
-    quiet_hours_end: String(max_length=5)  # "08:00" format
+    quiet_hours_start: str | None = String(max_length=5)  # "22:00" format
+    quiet_hours_end: str | None = String(max_length=5)  # "08:00" format
 
     # Per-type unsubscribe
-    unsubscribed_types: List(String())
+    unsubscribed_types: list[str] = List(String())
 
     # Timestamps
-    created_at: DateTime()
-    updated_at: DateTime()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     # -------------------------------------------------------------------
     # Factory
     # -------------------------------------------------------------------
     @classmethod
-    def create_default(cls, customer_id):
+    def create_default(cls, customer_id: str) -> "NotificationPreference":
         """Create default preferences for a new customer.
 
         Default: email enabled, SMS and push disabled, no quiet hours.
@@ -88,7 +88,7 @@ class NotificationPreference:
     # -------------------------------------------------------------------
     # Channel management
     # -------------------------------------------------------------------
-    def update_channels(self, email=None, sms=None, push=None):
+    def update_channels(self, email: bool | None = None, sms: bool | None = None, push: bool | None = None) -> None:
         """Update channel preferences. Pass None to keep unchanged."""
         if email is None and sms is None and push is None:
             raise ValidationError({"channels": ["At least one channel preference must be provided"]})
@@ -117,7 +117,7 @@ class NotificationPreference:
     # -------------------------------------------------------------------
     # Quiet hours
     # -------------------------------------------------------------------
-    def set_quiet_hours(self, start, end):
+    def set_quiet_hours(self, start: str, end: str) -> None:
         """Set do-not-disturb window. Both start and end required."""
         if not start or not end:
             raise ValidationError({"quiet_hours": ["Both start and end times are required"]})
@@ -149,7 +149,7 @@ class NotificationPreference:
             )
         )
 
-    def clear_quiet_hours(self):
+    def clear_quiet_hours(self) -> None:
         """Remove the quiet hours window."""
         now = datetime.now(UTC)
         self.quiet_hours_start = None
@@ -167,7 +167,7 @@ class NotificationPreference:
     # -------------------------------------------------------------------
     # Per-type unsubscribe
     # -------------------------------------------------------------------
-    def unsubscribe_from(self, notification_type):
+    def unsubscribe_from(self, notification_type: str) -> None:
         """Unsubscribe from a specific notification type."""
         types = list(self.unsubscribed_types or [])
 
@@ -188,7 +188,7 @@ class NotificationPreference:
             )
         )
 
-    def resubscribe_to(self, notification_type):
+    def resubscribe_to(self, notification_type: str) -> None:
         """Resubscribe to a previously unsubscribed notification type."""
         types = list(self.unsubscribed_types or [])
 
@@ -212,14 +212,14 @@ class NotificationPreference:
     # -------------------------------------------------------------------
     # Query helpers
     # -------------------------------------------------------------------
-    def is_subscribed_to(self, notification_type):
+    def is_subscribed_to(self, notification_type: str) -> bool:
         """Check if the customer is subscribed to a notification type."""
         types = self.unsubscribed_types or []
         return notification_type not in types
 
-    def get_enabled_channels(self):
+    def get_enabled_channels(self) -> list[str]:
         """Return list of enabled channel strings."""
-        channels = []
+        channels: list[str] = []
         if self.email_enabled:
             channels.append("Email")
         if self.sms_enabled:

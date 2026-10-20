@@ -28,21 +28,21 @@ REDEMPTION_STATUSES = [
 
 @loyalty.aggregate
 class Redemption:
-    account_id = String(required=True, max_length=255)
-    points = Integer(required=True)
-    reward_code = String(required=True, max_length=40)
-    status = String(choices=REDEMPTION_STATUSES, default="requested")
-    voucher_code = String(max_length=40)
-    failure_reason = String(max_length=255)
-    requested_at = DateTime(default=lambda: datetime.now(UTC))
+    account_id: str = String(required=True, max_length=255)
+    points: int = Integer(required=True)
+    reward_code: str = String(required=True, max_length=40)
+    status: str = String(choices=REDEMPTION_STATUSES, default="requested")
+    voucher_code: str | None = String(max_length=40)
+    failure_reason: str | None = String(max_length=255)
+    requested_at: datetime = DateTime(default=lambda: datetime.now(UTC))
 
     @invariant.post
-    def points_must_be_positive(self):
+    def points_must_be_positive(self) -> None:
         if self.points <= 0:
             raise ValidationError({"points": ["Redemption points must be positive"]})
 
     @classmethod
-    def request(cls, account_id, points, reward_code):
+    def request(cls, account_id: str, points: int, reward_code: str) -> "Redemption":
         from loyalty.redemption.events import RedemptionRequested
 
         redemption = cls(account_id=account_id, points=points, reward_code=reward_code)
@@ -57,7 +57,7 @@ class Redemption:
         )
         return redemption
 
-    def reserve_points(self):
+    def reserve_points(self) -> None:
         from loyalty.redemption.events import PointsReserved
 
         self.status = "points_reserved"
@@ -70,7 +70,7 @@ class Redemption:
             )
         )
 
-    def issue_voucher(self, voucher_code):
+    def issue_voucher(self, voucher_code: str) -> None:
         from loyalty.redemption.events import VoucherIssued
 
         self.status = "voucher_issued"
@@ -83,7 +83,7 @@ class Redemption:
             )
         )
 
-    def fail_voucher(self, reason):
+    def fail_voucher(self, reason: str) -> None:
         from loyalty.redemption.events import VoucherIssuanceFailed
 
         self.failure_reason = reason
@@ -95,9 +95,11 @@ class Redemption:
             )
         )
 
-    def complete(self):
+    def complete(self) -> None:
         from loyalty.redemption.events import RedemptionCompleted
 
+        if self.voucher_code is None:
+            raise ValidationError({"voucher_code": ["A redemption cannot complete before its voucher is issued"]})
         self.status = "completed"
         self.raise_(
             RedemptionCompleted(
@@ -107,7 +109,7 @@ class Redemption:
             )
         )
 
-    def compensate(self, refunded_points, reason):
+    def compensate(self, refunded_points: int, reason: str) -> None:
         from loyalty.redemption.events import RedemptionCompensated
 
         self.status = "compensated"

@@ -1,5 +1,8 @@
 """Product detail — full PDP (Product Detail Page) projection."""
 
+from datetime import datetime
+from typing import Any
+
 from protean.core.projector import on
 from protean.fields import DateTime, Dict, Identifier, List, String, Text
 from protean.utils.globals import current_domain
@@ -22,29 +25,29 @@ from catalogue.product.product import Product
 
 @catalogue.projection
 class ProductDetail:
-    product_id: Identifier(identifier=True, required=True)
-    sku: String(required=True)
-    seller_id: Identifier()
-    title: String(required=True)
-    description: Text()
-    category_id: Identifier()
-    brand: String()
-    attributes: Dict()
-    variants: List(Dict())
-    images: List(Dict())
-    status: String(required=True)
-    visibility: String()
-    meta_title: String()
-    meta_description: String()
-    slug: String()
-    created_at: DateTime()
-    updated_at: DateTime()
+    product_id: str = Identifier(identifier=True, required=True)
+    sku: str = String(required=True)
+    seller_id: str | None = Identifier()
+    title: str = String(required=True)
+    description: str | None = Text()
+    category_id: str | None = Identifier()
+    brand: str | None = String()
+    attributes: dict[str, Any] = Dict()
+    variants: list[dict[str, Any]] = List(Dict())
+    images: list[dict[str, Any]] = List(Dict())
+    status: str = String(required=True)
+    visibility: str | None = String()
+    meta_title: str | None = String()
+    meta_description: str | None = String()
+    slug: str | None = String()
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
 
 @catalogue.projector(projector_for=ProductDetail, aggregates=[Product])
 class ProductDetailProjector:
     @on(ProductCreated)
-    def on_product_created(self, event):
+    def on_product_created(self, event: ProductCreated) -> None:
         current_domain.repository_for(ProductDetail).add(
             ProductDetail(
                 product_id=event.product_id,
@@ -61,7 +64,7 @@ class ProductDetailProjector:
         )
 
     @on(ProductDetailsUpdated)
-    def on_details_updated(self, event):
+    def on_details_updated(self, event: ProductDetailsUpdated) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         detail.title = event.title
@@ -72,7 +75,7 @@ class ProductDetailProjector:
         repo.add(detail)
 
     @on(VariantAdded)
-    def on_variant_added(self, event):
+    def on_variant_added(self, event: VariantAdded) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         variants = list(detail.variants or [])
@@ -88,7 +91,7 @@ class ProductDetailProjector:
         repo.add(detail)
 
     @on(VariantPriceChanged)
-    def on_variant_price_changed(self, event):
+    def on_variant_price_changed(self, event: VariantPriceChanged) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         variants = list(detail.variants or [])
@@ -101,7 +104,7 @@ class ProductDetailProjector:
         repo.add(detail)
 
     @on(TierPriceSet)
-    def on_tier_price_set(self, event):
+    def on_tier_price_set(self, event: TierPriceSet) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         variants = list(detail.variants or [])
@@ -115,7 +118,7 @@ class ProductDetailProjector:
         repo.add(detail)
 
     @on(ProductImageAdded)
-    def on_image_added(self, event):
+    def on_image_added(self, event: ProductImageAdded) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         images = list(detail.images or [])
@@ -130,7 +133,7 @@ class ProductDetailProjector:
         repo.add(detail)
 
     @on(ProductImageRemoved)
-    def on_image_removed(self, event):
+    def on_image_removed(self, event: ProductImageRemoved) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         images = list(detail.images or [])
@@ -139,21 +142,21 @@ class ProductDetailProjector:
         repo.add(detail)
 
     @on(ProductActivated)
-    def on_product_activated(self, event):
+    def on_product_activated(self, event: ProductActivated) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         detail.status = "Active"
         repo.add(detail)
 
     @on(ProductDiscontinued)
-    def on_product_discontinued(self, event):
+    def on_product_discontinued(self, event: ProductDiscontinued) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         detail.status = "Discontinued"
         repo.add(detail)
 
     @on(ProductArchived)
-    def on_product_archived(self, event):
+    def on_product_archived(self, event: ProductArchived) -> None:
         repo = current_domain.repository_for(ProductDetail)
         detail = repo.get(event.product_id)
         detail.status = "Archived"

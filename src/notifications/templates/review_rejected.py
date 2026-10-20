@@ -1,5 +1,7 @@
 """Review rejected template — sent when a review is rejected by moderation."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -11,7 +13,7 @@ class ReviewRejectedTemplate:
     default_channels = [NotificationChannel.EMAIL.value]
 
     @staticmethod
-    def render(context: dict) -> dict:
+    def render(context: dict[str, Any]) -> dict[str, str]:
         reason = context.get("reason", "It did not meet our community guidelines")
         return {
             "subject": "Update on your review",

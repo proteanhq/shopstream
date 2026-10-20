@@ -1,5 +1,7 @@
 """Delivery exception template — sent when there's a delivery issue."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -14,7 +16,7 @@ class DeliveryExceptionTemplate:
     ]
 
     @staticmethod
-    def render(context: dict) -> dict:
+    def render(context: dict[str, Any]) -> dict[str, str]:
         order_id = context.get("order_id", "N/A")
         reason = context.get("reason", "an issue during delivery")
         return {

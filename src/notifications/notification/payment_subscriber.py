@@ -7,6 +7,8 @@ broker, filters by event type, and translates into domain-local side effects.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 
 from notifications.domain import notifications
@@ -25,7 +27,7 @@ class PaymentEventsSubscriber:
     types not relevant to the Notifications domain.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
@@ -34,7 +36,7 @@ class PaymentEventsSubscriber:
         elif "RefundCompleted" in event_type:
             self._on_refund_completed(data)
 
-    def _on_payment_succeeded(self, data: dict) -> None:
+    def _on_payment_succeeded(self, data: dict[str, Any]) -> None:
         """Send payment receipt when payment is captured."""
         create_notifications_for_customer(
             customer_id=str(data["customer_id"]),
@@ -47,7 +49,7 @@ class PaymentEventsSubscriber:
             source_event_type="Payments.PaymentSucceeded.v1",
         )
 
-    def _on_refund_completed(self, data: dict) -> None:
+    def _on_refund_completed(self, data: dict[str, Any]) -> None:
         """Send refund notification when a refund is processed."""
         customer_id = data.get("customer_id")
         if not customer_id:

@@ -12,6 +12,8 @@ single domain; `repository_for(CampaignCatalog)` resolves to the reporting provi
 transparently, so the projector, queries, and the multiplier read need no special handling.
 """
 
+from datetime import date, datetime
+
 from protean.core.projector import on
 from protean.fields import Date, DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -28,21 +30,21 @@ from loyalty.domain import loyalty
 
 @loyalty.projection(provider="reporting")
 class CampaignCatalog:
-    campaign_id = Identifier(identifier=True, required=True)
-    campaign_code = String()
-    name = String()
-    discount_type = String()
-    discount_value = Integer(default=0)
-    status = String()
-    starts_on = Date()
-    ends_on = Date()
-    updated_at = DateTime()
+    campaign_id: str = Identifier(identifier=True, required=True)
+    campaign_code: str | None = String()
+    name: str | None = String()
+    discount_type: str | None = String()
+    discount_value: int = Integer(default=0)
+    status: str | None = String()
+    starts_on: date | None = Date()
+    ends_on: date | None = Date()
+    updated_at: datetime | None = DateTime()
 
 
 @loyalty.projector(projector_for=CampaignCatalog, aggregates=[PromoCampaign])
 class CampaignCatalogProjector:
     @on(CampaignLaunched)
-    def on_launched(self, event):
+    def on_launched(self, event: CampaignLaunched) -> None:
         current_domain.repository_for(CampaignCatalog).add(
             CampaignCatalog(
                 campaign_id=event.campaign_id,
@@ -58,18 +60,18 @@ class CampaignCatalogProjector:
         )
 
     @on(CampaignActivated)
-    def on_activated(self, event):
+    def on_activated(self, event: CampaignActivated) -> None:
         self._set_status(event.campaign_id, "active", event.activated_at)
 
     @on(CampaignPaused)
-    def on_paused(self, event):
+    def on_paused(self, event: CampaignPaused) -> None:
         self._set_status(event.campaign_id, "paused", event.paused_at)
 
     @on(CampaignExpired)
-    def on_expired(self, event):
+    def on_expired(self, event: CampaignExpired) -> None:
         self._set_status(event.campaign_id, "expired", event.expired_at)
 
-    def _set_status(self, campaign_id, status, occurred_at):
+    def _set_status(self, campaign_id: str, status: str, occurred_at: datetime) -> None:
         repo = current_domain.repository_for(CampaignCatalog)
         entry = repo.get(campaign_id)
         entry.status = status

@@ -9,6 +9,8 @@ This is what gives every customer a reward account through the normal event flow
 HTTP enrolment endpoint and no out-of-band seeding required.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -21,7 +23,7 @@ logger = structlog.get_logger(__name__)
 
 @loyalty.subscriber(broker="global", stream="identity::customer")
 class CustomerRegisteredSubscriber:
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         if "CustomerRegistered" not in event_type:
             return

@@ -8,7 +8,7 @@ This is the only event-sourced aggregate in the loyalty domain and the only plac
 ShopStream that uses fact events.
 """
 
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 from protean import apply
 from protean.exceptions import ValidationError
@@ -28,17 +28,25 @@ CAMPAIGN_STATUSES = ["draft", "active", "paused", "expired"]
 
 @loyalty.aggregate(event_sourced=True, fact_events=True)
 class PromoCampaign:
-    campaign_code = String(required=True, max_length=20)
-    name = String(required=True, max_length=255)
-    discount_type = String(choices=DISCOUNT_TYPES, required=True)
-    discount_value = Integer(required=True)
-    status = String(choices=CAMPAIGN_STATUSES, default="draft")
-    starts_on = Date()
-    ends_on = Date()
-    launched_at = DateTime()
+    campaign_code: str = String(required=True, max_length=20)
+    name: str = String(required=True, max_length=255)
+    discount_type: str = String(choices=DISCOUNT_TYPES, required=True)
+    discount_value: int = Integer(required=True)
+    status: str = String(choices=CAMPAIGN_STATUSES, default="draft")
+    starts_on: date | None = Date()
+    ends_on: date | None = Date()
+    launched_at: datetime | None = DateTime()
 
     @classmethod
-    def launch(cls, campaign_code, name, discount_type, discount_value, starts_on=None, ends_on=None):
+    def launch(
+        cls,
+        campaign_code: str,
+        name: str,
+        discount_type: str,
+        discount_value: int,
+        starts_on: date | None = None,
+        ends_on: date | None = None,
+    ) -> "PromoCampaign":
         campaign = cls._create_new()
         campaign.raise_(
             CampaignLaunched(
@@ -54,24 +62,24 @@ class PromoCampaign:
         )
         return campaign
 
-    def activate(self):
+    def activate(self) -> None:
         if self.status not in ("draft", "paused"):
             raise ValidationError({"status": [f"Cannot activate a {self.status} campaign"]})
         self.raise_(CampaignActivated(campaign_id=str(self.id), activated_at=datetime.now(UTC)))
 
-    def pause(self, reason=None):
+    def pause(self, reason: str | None = None) -> None:
         if self.status != "active":
             raise ValidationError({"status": ["Only an active campaign can be paused"]})
         self.raise_(CampaignPaused(campaign_id=str(self.id), reason=reason, paused_at=datetime.now(UTC)))
 
-    def expire(self):
+    def expire(self) -> None:
         if self.status == "expired":
             raise ValidationError({"status": ["Campaign already expired"]})
         self.raise_(CampaignExpired(campaign_id=str(self.id), expired_at=datetime.now(UTC)))
 
     # -- @apply handlers: rebuild state during replay ----------------------
     @apply
-    def _on_launched(self, event: CampaignLaunched):
+    def _on_launched(self, event: CampaignLaunched) -> None:
         self.id = event.campaign_id
         self.campaign_code = event.campaign_code
         self.name = event.name
@@ -83,13 +91,13 @@ class PromoCampaign:
         self.launched_at = event.launched_at
 
     @apply
-    def _on_activated(self, event: CampaignActivated):  # noqa: ARG002
+    def _on_activated(self, event: CampaignActivated) -> None:  # noqa: ARG002
         self.status = "active"
 
     @apply
-    def _on_paused(self, event: CampaignPaused):  # noqa: ARG002
+    def _on_paused(self, event: CampaignPaused) -> None:  # noqa: ARG002
         self.status = "paused"
 
     @apply
-    def _on_expired(self, event: CampaignExpired):  # noqa: ARG002
+    def _on_expired(self, event: CampaignExpired) -> None:  # noqa: ARG002
         self.status = "expired"

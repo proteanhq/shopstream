@@ -15,16 +15,16 @@ from fulfillment.fulfillment.fulfillment import Fulfillment
 class UpdateTrackingEvent:
     """Record a tracking event from the carrier webhook."""
 
-    fulfillment_id = Identifier(required=True)
-    status = String(required=True, max_length=100)
-    location = String(max_length=200)
-    description = String(max_length=500)
+    fulfillment_id: str = Identifier(required=True)
+    status: str = String(required=True, max_length=100)
+    location: str | None = String(max_length=200)
+    description: str | None = String(max_length=500)
 
 
 @fulfillment.command_handler(part_of=Fulfillment)
 class TrackingHandler:
     @handle(UpdateTrackingEvent)
-    def update_tracking(self, command):
+    def update_tracking(self, command: UpdateTrackingEvent) -> None:
         repo = current_domain.repository_for(Fulfillment)
         ff = repo.get(command.fulfillment_id)
         ff.add_tracking_event(

@@ -12,14 +12,14 @@ from identity.domain import identity
 class UpgradeTier:
     """Promote a customer to a higher loyalty tier (upgrades only, no downgrades)."""
 
-    customer_id: Identifier(required=True)
-    new_tier: String(required=True, max_length=20)
+    customer_id: str = Identifier(required=True)
+    new_tier: str = String(required=True, max_length=20)
 
 
 @identity.command_handler(part_of=Customer)
 class ManageTierHandler:
     @handle(UpgradeTier)
-    def upgrade_tier(self, command):
+    def upgrade_tier(self, command: UpgradeTier) -> None:
         repo = current_domain.repository_for(Customer)
         customer = repo.get(command.customer_id)
         customer.upgrade_tier(new_tier=command.new_tier)

@@ -12,19 +12,19 @@ from inventory.stock.stock import InventoryItem
 class InitializeStock:
     """Create a new inventory record for a product variant at a warehouse."""
 
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    warehouse_id = Identifier(required=True)
-    sku = String(required=True, max_length=50)
-    initial_quantity = Integer(default=0)
-    reorder_point = Integer(default=10)
-    reorder_quantity = Integer(default=50)
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    warehouse_id: str = Identifier(required=True)
+    sku: str = String(required=True, max_length=50)
+    initial_quantity: int = Integer(default=0)
+    reorder_point: int = Integer(default=10)
+    reorder_quantity: int = Integer(default=50)
 
 
 @inventory.command_handler(part_of=InventoryItem)
 class InitializeStockHandler:
     @handle(InitializeStock)
-    def initialize_stock(self, command):
+    def initialize_stock(self, command: InitializeStock) -> str:
         item = InventoryItem.create(
             product_id=command.product_id,
             variant_id=command.variant_id,

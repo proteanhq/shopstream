@@ -11,14 +11,14 @@ from identity.domain import identity
 
 @identity.projection
 class CustomerLookup:
-    email: Identifier(identifier=True, required=True)
-    customer_id: String(required=True)
+    email: str = Identifier(identifier=True, required=True)
+    customer_id: str = String(required=True)
 
 
 @identity.projector(projector_for=CustomerLookup, aggregates=[Customer])
 class CustomerLookupProjector:
     @on(CustomerRegistered)
-    def on_customer_registered(self, event):
+    def on_customer_registered(self, event: CustomerRegistered) -> None:
         current_domain.repository_for(CustomerLookup).add(
             CustomerLookup(
                 email=event.email,

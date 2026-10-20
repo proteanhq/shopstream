@@ -1,5 +1,7 @@
 """ModerationQueue — pending and reported reviews awaiting moderator action."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String, Text
 from protean.utils.globals import current_domain
@@ -18,23 +20,23 @@ from reviews.review.review import Review, ReviewStatus
 
 @reviews.projection
 class ModerationQueue:
-    review_id = Identifier(identifier=True, required=True)
-    product_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    rating = Integer(required=True)
-    title = String(required=True)
-    body = Text(required=True)
-    verified_purchase = String()
-    report_count = Integer(default=0)
-    status = String(required=True)
-    submitted_at = DateTime()
-    last_reported_at = DateTime()
+    review_id: str = Identifier(identifier=True, required=True)
+    product_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    rating: int = Integer(required=True)
+    title: str = String(required=True)
+    body: str = Text(required=True)
+    verified_purchase: str | None = String()
+    report_count: int = Integer(default=0)
+    status: str = String(required=True)
+    submitted_at: datetime | None = DateTime()
+    last_reported_at: datetime | None = DateTime()
 
 
 @reviews.projector(projector_for=ModerationQueue, aggregates=[Review])
 class ModerationQueueProjector:
     @on(ReviewSubmitted)
-    def on_review_submitted(self, event):
+    def on_review_submitted(self, event: ReviewSubmitted) -> None:
         current_domain.repository_for(ModerationQueue).add(
             ModerationQueue(
                 review_id=event.review_id,
@@ -51,7 +53,7 @@ class ModerationQueueProjector:
         )
 
     @on(ReviewEdited)
-    def on_review_edited(self, event):
+    def on_review_edited(self, event: ReviewEdited) -> None:
         repo = current_domain.repository_for(ModerationQueue)
         mq = repo.get_or_none(event.review_id)
         if mq is not None:
@@ -85,19 +87,19 @@ class ModerationQueueProjector:
         )
 
     @on(ReviewApproved)
-    def on_review_approved(self, event):
+    def on_review_approved(self, event: ReviewApproved) -> None:
         repo = current_domain.repository_for(ModerationQueue)
         if repo.get_or_none(event.review_id) is not None:
             repo.query.filter(review_id=event.review_id).delete()
 
     @on(ReviewRejected)
-    def on_review_rejected(self, event):
+    def on_review_rejected(self, event: ReviewRejected) -> None:
         repo = current_domain.repository_for(ModerationQueue)
         if repo.get_or_none(event.review_id) is not None:
             repo.query.filter(review_id=event.review_id).delete()
 
     @on(ReviewReported)
-    def on_review_reported(self, event):
+    def on_review_reported(self, event: ReviewReported) -> None:
         repo = current_domain.repository_for(ModerationQueue)
         mq = repo.get_or_none(event.review_id)
         if mq is not None:
@@ -126,7 +128,7 @@ class ModerationQueueProjector:
         )
 
     @on(ReviewRemoved)
-    def on_review_removed(self, event):
+    def on_review_removed(self, event: ReviewRemoved) -> None:
         repo = current_domain.repository_for(ModerationQueue)
         if repo.get_or_none(event.review_id) is not None:
             repo.query.filter(review_id=event.review_id).delete()

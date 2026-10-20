@@ -1,5 +1,7 @@
 """Review published template — sent when a review is approved."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -11,7 +13,7 @@ class ReviewPublishedTemplate:
     default_channels = [NotificationChannel.EMAIL.value]
 
     @staticmethod
-    def render(_context: dict) -> dict:
+    def render(_context: dict[str, Any]) -> dict[str, str]:
         return {
             "subject": "Your review has been published",
             "body": (

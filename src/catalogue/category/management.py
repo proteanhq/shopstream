@@ -1,5 +1,7 @@
 """Category management — commands and handlers."""
 
+from typing import Any
+
 from protean import handle
 from protean.exceptions import ValidationError
 from protean.fields import Dict, Identifier, Integer, String
@@ -12,39 +14,39 @@ from catalogue.domain import catalogue
 class CreateCategory:
     """Add a new category to the product hierarchy."""
 
-    name: String(required=True, max_length=100)
-    parent_category_id: Identifier()
-    attributes: Dict()
+    name: str = String(required=True, max_length=100)
+    parent_category_id: str | None = Identifier()
+    attributes: dict[str, Any] = Dict()
 
 
 @catalogue.command(part_of="Category")
 class UpdateCategory:
     """Change a category's name or attributes."""
 
-    category_id: Identifier(required=True)
-    name: String(max_length=100)
-    attributes: Dict()
+    category_id: str = Identifier(required=True)
+    name: str | None = String(max_length=100)
+    attributes: dict[str, Any] = Dict()
 
 
 @catalogue.command(part_of="Category")
 class ReorderCategory:
     """Change a category's display position in the hierarchy."""
 
-    category_id: Identifier(required=True)
-    new_display_order: Integer(required=True)
+    category_id: str = Identifier(required=True)
+    new_display_order: int = Integer(required=True)
 
 
 @catalogue.command(part_of="Category")
 class DeactivateCategory:
     """Deactivate a category, hiding it from the storefront."""
 
-    category_id: Identifier(required=True)
+    category_id: str = Identifier(required=True)
 
 
 @catalogue.command_handler(part_of=Category)
 class ManageCategoryHandler:
     @handle(CreateCategory)
-    def create_category(self, command):
+    def create_category(self, command: CreateCategory) -> str:
         from protean.utils.globals import current_domain
 
         level = 0
@@ -67,7 +69,7 @@ class ManageCategoryHandler:
         return str(category.id)
 
     @handle(UpdateCategory)
-    def update_category(self, command):
+    def update_category(self, command: UpdateCategory) -> None:
         from protean.utils.globals import current_domain
 
         repo = current_domain.repository_for(Category)
@@ -80,7 +82,7 @@ class ManageCategoryHandler:
         repo.add(category)
 
     @handle(ReorderCategory)
-    def reorder_category(self, command):
+    def reorder_category(self, command: ReorderCategory) -> None:
         from protean.utils.globals import current_domain
 
         repo = current_domain.repository_for(Category)
@@ -89,7 +91,7 @@ class ManageCategoryHandler:
         repo.add(category)
 
     @handle(DeactivateCategory)
-    def deactivate_category(self, command):
+    def deactivate_category(self, command: DeactivateCategory) -> None:
         from protean.utils.globals import current_domain
 
         repo = current_domain.repository_for(Category)

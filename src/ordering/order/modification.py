@@ -16,44 +16,44 @@ from ordering.order.order import Order
 class AddItem:
     """Add a new line item to an order (only allowed in Created state)."""
 
-    order_id = Identifier(required=True)
-    product_id = Identifier(required=True)
-    variant_id = Identifier(required=True)
-    sku = String(required=True, max_length=50)
-    title = String(required=True, max_length=255)
-    quantity = Integer(required=True, min_value=1)
-    unit_price = Float(required=True, min_value=0.0)
+    order_id: str = Identifier(required=True)
+    product_id: str = Identifier(required=True)
+    variant_id: str = Identifier(required=True)
+    sku: str = String(required=True, max_length=50)
+    title: str = String(required=True, max_length=255)
+    quantity: int = Integer(required=True, min_value=1)
+    unit_price: float = Float(required=True, min_value=0.0)
 
 
 @ordering.command(part_of="Order")
 class RemoveItem:
     """Remove a line item from an order (only allowed in Created state)."""
 
-    order_id = Identifier(required=True)
-    item_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
+    item_id: str = Identifier(required=True)
 
 
 @ordering.command(part_of="Order")
 class UpdateItemQuantity:
     """Change the quantity of an existing order line item."""
 
-    order_id = Identifier(required=True)
-    item_id = Identifier(required=True)
-    new_quantity = Integer(required=True, min_value=1)
+    order_id: str = Identifier(required=True)
+    item_id: str = Identifier(required=True)
+    new_quantity: int = Integer(required=True, min_value=1)
 
 
 @ordering.command(part_of="Order")
 class ApplyCoupon:
     """Apply a coupon code to an order for a discount."""
 
-    order_id = Identifier(required=True)
-    coupon_code = String(required=True, max_length=100)
+    order_id: str = Identifier(required=True)
+    coupon_code: str = String(required=True, max_length=100)
 
 
 @ordering.command_handler(part_of=Order)
 class ModifyOrderHandler:
     @handle(AddItem)
-    def add_item(self, command):
+    def add_item(self, command: AddItem) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.add_item(
@@ -67,14 +67,14 @@ class ModifyOrderHandler:
         repo.add(order)
 
     @handle(RemoveItem)
-    def remove_item(self, command):
+    def remove_item(self, command: RemoveItem) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.remove_item(item_id=command.item_id)
         repo.add(order)
 
     @handle(UpdateItemQuantity)
-    def update_item_quantity(self, command):
+    def update_item_quantity(self, command: UpdateItemQuantity) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.update_item_quantity(
@@ -84,7 +84,7 @@ class ModifyOrderHandler:
         repo.add(order)
 
     @handle(ApplyCoupon)
-    def apply_coupon(self, command):
+    def apply_coupon(self, command: ApplyCoupon) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.apply_coupon(coupon_code=command.coupon_code)

@@ -9,6 +9,7 @@ No dependency on shared event classes or register_external_event.
 """
 
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import structlog
 
@@ -28,7 +29,7 @@ class OrderingEventsSubscriber:
     types not relevant to the Notifications domain.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
@@ -39,7 +40,7 @@ class OrderingEventsSubscriber:
         elif "OrderDelivered" in event_type:
             self._on_order_delivered(data)
 
-    def _on_order_created(self, data: dict) -> None:
+    def _on_order_created(self, data: dict[str, Any]) -> None:
         """Send order confirmation when an order is placed."""
         create_notifications_for_customer(
             customer_id=str(data["customer_id"]),
@@ -52,7 +53,7 @@ class OrderingEventsSubscriber:
             source_event_type="Ordering.OrderCreated.v2",
         )
 
-    def _on_order_cancelled(self, data: dict) -> None:
+    def _on_order_cancelled(self, data: dict[str, Any]) -> None:
         """Send cancellation notice when an order is cancelled.
 
         Note: OrderCancelled shared event doesn't carry customer_id.
@@ -70,7 +71,7 @@ class OrderingEventsSubscriber:
             cancelled_by=data.get("cancelled_by"),
         )
 
-    def _on_order_delivered(self, data: dict) -> None:
+    def _on_order_delivered(self, data: dict[str, Any]) -> None:
         """Schedule a review prompt 7 days after delivery."""
         customer_id = data.get("customer_id")
         if not customer_id:

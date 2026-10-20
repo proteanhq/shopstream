@@ -1,5 +1,7 @@
 """Low stock alert template — internal notification to operations."""
 
+from typing import Any
+
 from notifications.notification.notification import (
     NotificationChannel,
     NotificationType,
@@ -13,7 +15,7 @@ class LowStockAlertTemplate:
     recipient_type = RecipientType.INTERNAL.value
 
     @staticmethod
-    def render(context: dict) -> dict:
+    def render(context: dict[str, Any]) -> dict[str, str]:
         sku = context.get("sku", "N/A")
         product_id = context.get("product_id", "N/A")
         warehouse_id = context.get("warehouse_id", "N/A")

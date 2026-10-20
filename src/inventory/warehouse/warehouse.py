@@ -6,6 +6,7 @@ This is a standard CQRS aggregate (not event sourced).
 
 from datetime import UTC, datetime
 from enum import Enum
+from typing import Any
 from uuid import uuid4
 
 from protean.exceptions import ValidationError
@@ -31,19 +32,19 @@ class ZoneType(Enum):
 class WarehouseAddress:
     """Physical address of a warehouse."""
 
-    street = String(required=True, max_length=255)
-    city = String(required=True, max_length=100)
-    state = String(max_length=100)
-    postal_code = String(required=True, max_length=20)
-    country = String(required=True, max_length=100)
+    street: str = String(required=True, max_length=255)
+    city: str = String(required=True, max_length=100)
+    state: str | None = String(max_length=100)
+    postal_code: str = String(required=True, max_length=20)
+    country: str = String(required=True, max_length=100)
 
 
 @inventory.entity(part_of="Warehouse")
 class Zone:
     """A logical area within a warehouse (e.g., cold storage, hazmat)."""
 
-    zone_name = String(required=True, max_length=100)
-    zone_type = String(
+    zone_name: str = String(required=True, max_length=100)
+    zone_type: str = String(
         choices=ZoneType,
         default=ZoneType.REGULAR.value,
     )
@@ -53,16 +54,16 @@ class Zone:
 class Warehouse:
     """A physical location where inventory is stored."""
 
-    name = String(required=True, max_length=255)
-    address = ValueObject(WarehouseAddress)
-    capacity = Integer(default=0)
-    is_active = Boolean(default=True)
-    zones = HasMany(Zone)
-    created_at = DateTime()
-    updated_at = DateTime()
+    name: str = String(required=True, max_length=255)
+    address: WarehouseAddress | None = ValueObject(WarehouseAddress)
+    capacity: int = Integer(default=0)
+    is_active: bool = Boolean(default=True)
+    zones: list[Zone] = HasMany(Zone)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     @classmethod
-    def create(cls, name, address, capacity=0):
+    def create(cls, name: str, address: dict[str, Any] | WarehouseAddress, capacity: int = 0) -> "Warehouse":
         """Create a new warehouse."""
         now = datetime.now(UTC)
         warehouse = cls(
@@ -83,7 +84,7 @@ class Warehouse:
         )
         return warehouse
 
-    def update_details(self, name=None, capacity=None):
+    def update_details(self, name: str | None = None, capacity: int | None = None) -> None:
         """Update warehouse name and/or capacity."""
         if name is not None:
             self.name = name
@@ -99,7 +100,7 @@ class Warehouse:
             )
         )
 
-    def add_zone(self, zone_name, zone_type=ZoneType.REGULAR.value):
+    def add_zone(self, zone_name: str, zone_type: str = ZoneType.REGULAR.value) -> None:
         """Add a zone to the warehouse."""
         zone_id = str(uuid4())
         zone = Zone(id=zone_id, zone_name=zone_name, zone_type=zone_type)
@@ -115,7 +116,7 @@ class Warehouse:
             )
         )
 
-    def remove_zone(self, zone_id):
+    def remove_zone(self, zone_id: str) -> None:
         """Remove a zone from the warehouse."""
         zone = next(
             (z for z in (self.zones or []) if str(z.id) == str(zone_id)),
@@ -133,7 +134,7 @@ class Warehouse:
             )
         )
 
-    def deactivate(self):
+    def deactivate(self) -> None:
         """Deactivate the warehouse."""
         if not self.is_active:
             raise ValidationError({"warehouse": ["Warehouse is already inactive"]})

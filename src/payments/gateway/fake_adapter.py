@@ -10,6 +10,7 @@ Follows the same pattern as Stripe's test mode (test API keys + test card
 numbers) but simplified for a learning/demo platform.
 """
 
+from typing import Any
 from uuid import uuid4
 
 from payments.gateway.port import ChargeResult, PaymentGateway, RefundResult
@@ -21,7 +22,7 @@ class FakeGateway(PaymentGateway):
     def __init__(self) -> None:
         self.should_succeed: bool = True
         self.failure_reason: str = "Card declined"
-        self.calls: list[dict] = []
+        self.calls: list[dict[str, Any]] = []
 
     def configure(self, should_succeed: bool, failure_reason: str = "Card declined") -> None:
         """Configure gateway behavior at runtime."""

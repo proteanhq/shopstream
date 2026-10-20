@@ -36,10 +36,10 @@ class SKU:
         rejected
     """
 
-    code: String(required=True, max_length=50, min_length=3)
+    code: str = String(required=True, max_length=50, min_length=3)
 
     @invariant.post
-    def code_must_be_valid_format(self):
+    def code_must_be_valid_format(self) -> None:
         code = self.code
 
         if not re.match(r"^[A-Za-z0-9-]+$", code):

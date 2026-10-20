@@ -8,6 +8,8 @@ filters by event type, and translates into domain-local notifications. No depend
 shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 
 from notifications.domain import notifications
@@ -21,7 +23,7 @@ logger = structlog.get_logger(__name__)
 class LoyaltyEventsSubscriber:
     """Reacts to Loyalty domain events to send customer notifications."""
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
@@ -30,7 +32,7 @@ class LoyaltyEventsSubscriber:
         elif "PointsRedeemed" in event_type:
             self._on_points_redeemed(data)
 
-    def _on_tier_upgraded(self, data: dict) -> None:
+    def _on_tier_upgraded(self, data: dict[str, Any]) -> None:
         customer_id = data.get("customer_id")
         if not customer_id:
             return
@@ -45,7 +47,7 @@ class LoyaltyEventsSubscriber:
             source_event_type="Loyalty.TierUpgraded.v1",
         )
 
-    def _on_points_redeemed(self, data: dict) -> None:
+    def _on_points_redeemed(self, data: dict[str, Any]) -> None:
         customer_id = data.get("customer_id")
         if not customer_id:
             logger.info(

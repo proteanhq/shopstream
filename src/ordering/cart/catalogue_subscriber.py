@@ -15,6 +15,8 @@ broker, filters by event type, and performs side-effects.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -33,14 +35,14 @@ class CatalogueEventsSubscriber:
     not relevant to the Ordering domain.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
         if "ProductDiscontinued" in event_type:
             self._on_product_discontinued(data)
 
-    def _on_product_discontinued(self, data: dict) -> None:
+    def _on_product_discontinued(self, data: dict[str, Any]) -> None:
         """Log when a product is discontinued that may be in active carts.
 
         Active carts containing the discontinued product will show a warning

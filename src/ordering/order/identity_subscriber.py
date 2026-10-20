@@ -10,6 +10,8 @@ broker, filters by event type, and translates into projection updates.
 No dependency on shared event classes or register_external_event.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 
@@ -28,7 +30,7 @@ class IdentityEventsSubscriber:
     Ignores all event types not relevant to the Ordering domain.
     """
 
-    def __call__(self, payload: dict) -> None:
+    def __call__(self, payload: dict[str, Any]) -> None:
         event_type = payload.get("metadata", {}).get("headers", {}).get("type", "")
         data = payload.get("data", {})
 
@@ -37,7 +39,7 @@ class IdentityEventsSubscriber:
         elif "AccountReactivated" in event_type:
             self._on_account_reactivated(data)
 
-    def _on_account_suspended(self, data: dict) -> None:
+    def _on_account_suspended(self, data: dict[str, Any]) -> None:
         """Record that a customer account is suspended."""
         customer_id = str(data.get("customer_id", ""))
         reason = data.get("reason", "")
@@ -59,7 +61,7 @@ class IdentityEventsSubscriber:
             )
         )
 
-    def _on_account_reactivated(self, data: dict) -> None:
+    def _on_account_reactivated(self, data: dict[str, Any]) -> None:
         """Remove the suspension record when an account is reactivated."""
         customer_id = str(data.get("customer_id", ""))
 

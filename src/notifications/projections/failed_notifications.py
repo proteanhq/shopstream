@@ -1,5 +1,7 @@
 """FailedNotifications — queue of failed notifications for retry/investigation."""
 
+from datetime import datetime
+
 from protean.core.projector import on
 from protean.fields import DateTime, Identifier, Integer, String
 from protean.utils.globals import current_domain
@@ -15,20 +17,20 @@ from notifications.notification.notification import Notification
 
 @notifications.projection
 class FailedNotifications:
-    notification_id: Identifier(identifier=True, required=True)
-    recipient_id: Identifier(required=True)
-    notification_type: String(required=True)
-    channel: String(required=True)
-    failure_reason: String(max_length=500)
-    retry_count: Integer(default=0)
-    max_retries: Integer(default=3)
-    failed_at: DateTime()
+    notification_id: str = Identifier(identifier=True, required=True)
+    recipient_id: str = Identifier(required=True)
+    notification_type: str = String(required=True)
+    channel: str = String(required=True)
+    failure_reason: str | None = String(max_length=500)
+    retry_count: int = Integer(default=0)
+    max_retries: int = Integer(default=3)
+    failed_at: datetime | None = DateTime()
 
 
 @notifications.projector(projector_for=FailedNotifications, aggregates=[Notification])
 class FailedNotificationsProjector:
     @on(NotificationFailed)
-    def on_notification_failed(self, event):
+    def on_notification_failed(self, event: NotificationFailed) -> None:
         repo = current_domain.repository_for(FailedNotifications)
 
         # Look up the notification for type info
@@ -55,14 +57,14 @@ class FailedNotificationsProjector:
         repo.add(failed)
 
     @on(NotificationRetried)
-    def on_notification_retried(self, event):
+    def on_notification_retried(self, event: NotificationRetried) -> None:
         """Remove from failed queue when retried (it goes back to pending)."""
         repo = current_domain.repository_for(FailedNotifications)
         if repo.get_or_none(event.notification_id) is not None:
             repo.query.filter(notification_id=event.notification_id).delete()
 
     @on(NotificationSent)
-    def on_notification_sent(self, event):
+    def on_notification_sent(self, event: NotificationSent) -> None:
         """Remove from failed queue when successfully sent."""
         repo = current_domain.repository_for(FailedNotifications)
         if repo.get_or_none(event.notification_id) is not None:

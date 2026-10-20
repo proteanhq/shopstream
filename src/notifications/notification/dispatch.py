@@ -5,11 +5,17 @@ channel adapter (email, SMS, push, Slack). Updates the notification
 status to SENT or FAILED based on the result.
 """
 
+from typing import Any
+
 import structlog
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
 
-from notifications.channel import get_channel
+from notifications.channel import ChannelAdapter, get_channel
+from notifications.channel.email_port import EmailPort
+from notifications.channel.push_port import PushPort
+from notifications.channel.slack_port import SlackPort
+from notifications.channel.sms_port import SMSPort
 from notifications.domain import notifications
 from notifications.notification.events import NotificationCreated
 from notifications.notification.notification import (
@@ -75,28 +81,36 @@ class NotificationDispatcher:
         repo.add(notification)
 
 
-def _dispatch_via_channel(adapter, notification: Notification) -> dict:
-    """Route dispatch to the correct adapter method based on channel."""
+def _dispatch_via_channel(adapter: ChannelAdapter, notification: Notification) -> dict[str, Any]:
+    """Route dispatch to the correct adapter method based on channel.
+
+    ``get_channel`` builds the adapter for the same channel string, so each
+    branch's adapter is always that channel's port.
+    """
     channel = notification.channel
 
     if channel == NotificationChannel.EMAIL.value:
+        assert isinstance(adapter, EmailPort)
         return adapter.send(
             to=str(notification.recipient_id),
             subject=notification.subject or "",
             body=notification.body,
         )
     elif channel == NotificationChannel.SMS.value:
+        assert isinstance(adapter, SMSPort)
         return adapter.send(
             to=str(notification.recipient_id),
             body=notification.body,
         )
     elif channel == NotificationChannel.PUSH.value:
+        assert isinstance(adapter, PushPort)
         return adapter.send(
             device_token=str(notification.recipient_id),
             title=notification.subject or "",
             body=notification.body,
         )
     elif channel == NotificationChannel.SLACK.value:
+        assert isinstance(adapter, SlackPort)
         return adapter.send(
             channel="#operations",
             message=notification.body,

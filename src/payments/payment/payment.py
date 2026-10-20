@@ -70,28 +70,28 @@ class RefundStatus(Enum):
 class Money:
     """Monetary amount with currency."""
 
-    currency = String(max_length=3, default="USD")
-    value = Float(default=0.0)
+    currency: str = String(max_length=3, default="USD")
+    value: float = Float(default=0.0)
 
 
 @payments.value_object(part_of="Payment")
 class PaymentMethod:
     """Payment method details captured at initiation time."""
 
-    method_type = String(max_length=50)  # credit_card, debit_card, bank_transfer
-    last4 = String(max_length=4)
-    expiry_month = Integer()
-    expiry_year = Integer()
+    method_type: str | None = String(max_length=50)  # credit_card, debit_card, bank_transfer
+    last4: str | None = String(max_length=4)
+    expiry_month: int | None = Integer()
+    expiry_year: int | None = Integer()
 
 
 @payments.value_object(part_of="Payment")
 class GatewayInfo:
     """Gateway-specific information about the payment."""
 
-    gateway_name = String(max_length=50)
-    gateway_transaction_id = String(max_length=255)
-    gateway_status = String(max_length=50)
-    gateway_response = String(max_length=1000)
+    gateway_name: str | None = String(max_length=50)
+    gateway_transaction_id: str | None = String(max_length=255)
+    gateway_status: str | None = String(max_length=50)
+    gateway_response: str | None = String(max_length=1000)
 
 
 # ---------------------------------------------------------------------------
@@ -101,26 +101,26 @@ class GatewayInfo:
 class PaymentAttempt:
     """A record of a single payment processing attempt."""
 
-    attempted_at = DateTime(required=True)
-    status = String(max_length=50, required=True)  # processing, succeeded, failed
-    failure_reason = String(max_length=500)
-    gateway_transaction_id = String(max_length=255)
+    attempted_at: datetime = DateTime(required=True)
+    status: str = String(max_length=50, required=True)  # processing, succeeded, failed
+    failure_reason: str | None = String(max_length=500)
+    gateway_transaction_id: str | None = String(max_length=255)
 
 
 @payments.entity(part_of="Payment")
 class Refund:
     """A refund against this payment."""
 
-    amount = Float(required=True)
-    reason = String(max_length=500, required=True)
-    status = String(
+    amount: float = Float(required=True)
+    reason: str = String(max_length=500, required=True)
+    status: str = String(
         max_length=50,
         choices=RefundStatus,
         default=RefundStatus.REQUESTED.value,
     )
-    requested_at = DateTime(required=True)
-    processed_at = DateTime()
-    gateway_refund_id = String(max_length=255)
+    requested_at: datetime = DateTime(required=True)
+    processed_at: datetime | None = DateTime()
+    gateway_refund_id: str | None = String(max_length=255)
 
 
 # ---------------------------------------------------------------------------
@@ -128,10 +128,10 @@ class Refund:
 # ---------------------------------------------------------------------------
 @payments.aggregate(event_sourced=True)
 class Payment:
-    order_id = Identifier(required=True)
-    customer_id = Identifier(required=True)
-    amount = ValueObject(Money)
-    status = Status(
+    order_id: str = Identifier(required=True)
+    customer_id: str = Identifier(required=True)
+    amount: Money | None = ValueObject(Money)
+    status: str = Status(
         PaymentStatus,
         default=PaymentStatus.PENDING.value,
         transitions={
@@ -142,15 +142,15 @@ class Payment:
             PaymentStatus.PARTIALLY_REFUNDED: [PaymentStatus.REFUNDED],
         },
     )
-    payment_method = ValueObject(PaymentMethod)
-    gateway_info = ValueObject(GatewayInfo)
-    attempts = HasMany(PaymentAttempt)
-    refunds = HasMany(Refund)
-    attempt_count = Integer(default=0)
-    total_refunded = Float(default=0.0)
-    idempotency_key = String(max_length=255, required=True)
-    created_at = DateTime()
-    updated_at = DateTime()
+    payment_method: PaymentMethod | None = ValueObject(PaymentMethod)
+    gateway_info: GatewayInfo | None = ValueObject(GatewayInfo)
+    attempts: list[PaymentAttempt] = HasMany(PaymentAttempt)
+    refunds: list[Refund] = HasMany(Refund)
+    attempt_count: int = Integer(default=0)
+    total_refunded: float = Float(default=0.0)
+    idempotency_key: str = String(max_length=255, required=True)
+    created_at: datetime | None = DateTime()
+    updated_at: datetime | None = DateTime()
 
     # -------------------------------------------------------------------
     # Factory method
@@ -166,7 +166,7 @@ class Payment:
         last4: str | None,
         gateway_name: str,
         idempotency_key: str,
-    ):
+    ) -> "Payment":
         """Create a new payment for an order.
 
         Uses _create_new() for event-sourced aggregates. All state is set
@@ -207,6 +207,8 @@ class Payment:
     def record_success(self, gateway_transaction_id: str) -> None:
         """Record successful payment capture from gateway webhook."""
         now = datetime.now(UTC)
+        # PaymentInitiated, the first event of every payment, always sets amount.
+        assert self.amount is not None
         self.raise_(
             PaymentSucceeded(
                 payment_id=str(self.id),
@@ -273,6 +275,8 @@ class Payment:
                 {"status": ["Refunds can only be requested for succeeded or partially refunded payments"]}
             )
 
+        # PaymentInitiated, the first event of every payment, always sets amount.
+        assert self.amount is not None
         if self.total_refunded + amount > self.amount.value:
             raise ValidationError(
                 {
@@ -321,7 +325,7 @@ class Payment:
     # @apply methods — rebuild state during event replay
     # -------------------------------------------------------------------
     @apply
-    def _on_payment_initiated(self, event: PaymentInitiated):
+    def _on_payment_initiated(self, event: PaymentInitiated) -> None:
         self.id = event.payment_id
         self.order_id = event.order_id
         self.customer_id = event.customer_id
@@ -348,12 +352,12 @@ class Payment:
         )
 
     @apply
-    def _on_payment_processing(self, event: PaymentProcessing):
+    def _on_payment_processing(self, event: PaymentProcessing) -> None:
         self.status = PaymentStatus.PROCESSING.value
         self.updated_at = event.processing_at
 
     @apply
-    def _on_payment_succeeded(self, event: PaymentSucceeded):
+    def _on_payment_succeeded(self, event: PaymentSucceeded) -> None:
         self.status = PaymentStatus.SUCCEEDED.value
         self.gateway_info = GatewayInfo(
             gateway_name=self.gateway_info.gateway_name if self.gateway_info else "",
@@ -369,7 +373,7 @@ class Payment:
             latest.gateway_transaction_id = event.gateway_transaction_id
 
     @apply
-    def _on_payment_failed(self, event: PaymentFailed):
+    def _on_payment_failed(self, event: PaymentFailed) -> None:
         self.status = PaymentStatus.FAILED.value
         self.updated_at = event.failed_at
 
@@ -380,7 +384,7 @@ class Payment:
             latest.failure_reason = event.reason
 
     @apply
-    def _on_payment_retry_initiated(self, event: PaymentRetryInitiated):
+    def _on_payment_retry_initiated(self, event: PaymentRetryInitiated) -> None:
         self.status = PaymentStatus.PENDING.value
         self.attempt_count = event.attempt_number
         self.updated_at = event.retried_at
@@ -395,7 +399,7 @@ class Payment:
         )
 
     @apply
-    def _on_refund_requested(self, event: RefundRequested):
+    def _on_refund_requested(self, event: RefundRequested) -> None:
         self.add_refunds(
             Refund(
                 id=event.refund_id,
@@ -408,7 +412,7 @@ class Payment:
         self.updated_at = event.requested_at
 
     @apply
-    def _on_refund_completed(self, event: RefundCompleted):
+    def _on_refund_completed(self, event: RefundCompleted) -> None:
         refund = next((r for r in (self.refunds or []) if str(r.id) == str(event.refund_id)), None)
         if refund:
             refund.status = RefundStatus.COMPLETED.value
@@ -416,6 +420,8 @@ class Payment:
             refund.processed_at = event.completed_at
 
         self.total_refunded = (self.total_refunded or 0.0) + event.amount
+        # PaymentInitiated, the first event of every payment, always sets amount.
+        assert self.amount is not None
         if self.total_refunded >= self.amount.value:
             self.status = PaymentStatus.REFUNDED.value
         else:

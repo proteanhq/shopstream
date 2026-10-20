@@ -12,14 +12,14 @@ from inventory.stock.stock import InventoryItem
 class CommitStock:
     """Commit reserved stock when an order ships."""
 
-    inventory_item_id = Identifier(required=True)
-    reservation_id = Identifier(required=True)
+    inventory_item_id: str = Identifier(required=True)
+    reservation_id: str = Identifier(required=True)
 
 
 @inventory.command_handler(part_of=InventoryItem)
 class CommitStockHandler:
     @handle(CommitStock)
-    def commit_stock(self, command):
+    def commit_stock(self, command: CommitStock) -> None:
         repo = current_domain.repository_for(InventoryItem)
         item = repo.get(command.inventory_item_id)
         item.commit_stock(reservation_id=command.reservation_id)

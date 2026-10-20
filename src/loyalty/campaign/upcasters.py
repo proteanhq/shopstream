@@ -11,6 +11,8 @@ the string ``"CampaignLaunched"`` (resolved by name when the chain is built) and
 ``CampaignLaunched`` class. A v1 replay runs both, so the replay tests cover each form.
 """
 
+from typing import Any
+
 from protean.core.upcaster import BaseUpcaster
 
 from loyalty.campaign.events import CampaignLaunched
@@ -22,7 +24,7 @@ class UpcastCampaignLaunchedV1ToV2(BaseUpcaster):
     """v1 stored a single ``discount_pct``; v2 renames it to ``discount_value`` and adds an
     explicit ``discount_type`` (every v1 campaign was a percentage discount)."""
 
-    def upcast(self, data: dict) -> dict:
+    def upcast(self, data: dict[str, Any]) -> dict[str, Any]:
         data["discount_value"] = data.pop("discount_pct", 0)
         data.setdefault("discount_type", "percentage")
         return data
@@ -32,7 +34,7 @@ class UpcastCampaignLaunchedV1ToV2(BaseUpcaster):
 class UpcastCampaignLaunchedV2ToV3(BaseUpcaster):
     """v3 introduces optional scheduling fields (``starts_on`` / ``ends_on``)."""
 
-    def upcast(self, data: dict) -> dict:
+    def upcast(self, data: dict[str, Any]) -> dict[str, Any]:
         data.setdefault("starts_on", None)
         data.setdefault("ends_on", None)
         return data

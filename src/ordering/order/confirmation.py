@@ -12,13 +12,13 @@ from ordering.order.order import Order
 class ConfirmOrder:
     """Confirm the order, signaling the customer's commitment to purchase."""
 
-    order_id = Identifier(required=True)
+    order_id: str = Identifier(required=True)
 
 
 @ordering.command_handler(part_of=Order)
 class ConfirmOrderHandler:
     @handle(ConfirmOrder)
-    def confirm_order(self, command):
+    def confirm_order(self, command: ConfirmOrder) -> None:
         repo = current_domain.repository_for(Order)
         order = repo.get(command.order_id)
         order.confirm()
