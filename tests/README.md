@@ -66,11 +66,11 @@ make test-cov-integration
 
 ### By Markers
 ```bash
-# Run only database tests
-uv run pytest -m database
+# Run only domain tests
+uv run pytest -m domain
 
-# Run only broker tests
-uv run pytest -m broker
+# Skip tests that drive a full Protean Engine (CI does this)
+uv run pytest -m "not engine"
 
 # Exclude slow tests
 uv run pytest -m "not slow"
@@ -83,11 +83,14 @@ Tests are automatically marked based on their location:
 - Files in `application/` are marked with `@pytest.mark.application`
 - Files in `integration/` are marked with `@pytest.mark.integration`
 
+Files in `bdd/` are also marked with `@pytest.mark.bdd`.
+
 Additional markers can be added manually:
 - `@pytest.mark.slow` for long-running tests
-- `@pytest.mark.database` for database-specific tests
-- `@pytest.mark.broker` for message broker tests
-- `@pytest.mark.eventstore` for event store tests
+- `@pytest.mark.fast` to keep an integration test from getting the automatic `slow` marker
+- `@pytest.mark.engine` for tests that drive a full Protean Engine (CI deselects them)
+
+The suite runs with `--strict-markers`, so pytest rejects any marker that is not registered.
 
 ## Writing Tests
 
@@ -115,7 +118,6 @@ def test_command_handling():
 ### Integration Tests Example
 ```python
 # tests/shopstream/integration/test_database.py
-@pytest.mark.database
 def test_database_persistence():
     """Test with real database connection."""
     repository = SqlRepository()
