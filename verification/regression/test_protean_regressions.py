@@ -1089,3 +1089,45 @@ def test_process_manager_with_a_decimal_field_persists_its_transition():
         ]
         assert len(transitions) == 1
         assert str(transitions[0].data["state"]["amount"]) in ("49.99", "49.9900")
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="a snapshot that still builds is used as it is, even when it disagrees with replay",
+)
+@pytest.mark.usefixtures("loyalty_ctx")
+def test_snapshot_that_builds_but_disagrees_with_replay_is_not_used():
+    """Protean finding (not filed yet): a stale snapshot that still builds loads its defaults.
+
+    The event store discards a snapshot only when `part_of(**data)` raises
+    `ValidationError`. A snapshot written before a field with a default was
+    added still builds, so the field loads its default. When an `@apply`
+    handler sets that field, replay gives a different value. PromoCampaign's
+    `status` defaults to "draft" and is set by its handlers: a snapshot without
+    `status` loads "draft" where replay gives "active", and no
+    `snapshot_discarded` warning is logged.
+    """
+    from protean import current_domain
+
+    from loyalty.campaign.campaign import PromoCampaign
+
+    campaign = PromoCampaign.launch(
+        campaign_code="DEFAULTED",
+        name="Defaulted Days",
+        discount_type="points_multiplier",
+        discount_value=2,
+    )
+    campaign.activate()
+    repo = current_domain.repository_for(PromoCampaign)
+    repo.add(campaign)
+    full_replay = repo.get(campaign.id)
+    if full_replay.status != "active":
+        pytest.fail("precondition: replay gives an active campaign")
+
+    stale = {k: v for k, v in full_replay.to_dict().items() if k != "status"}
+    current_domain.event_store.store._write(
+        f"{PromoCampaign.meta_.stream_category}:snapshot-{campaign.id}", "SNAPSHOT", stale
+    )
+
+    assert repo.get(campaign.id).to_dict() == full_replay.to_dict()

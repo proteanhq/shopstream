@@ -39,6 +39,13 @@ capabilities:
     source: B
     status: covered   # T2.1: snapshot load == full replay, and snapshot+tail == live (PromoCampaign)
 
+  - name: stale_snapshot_fallback
+    taught_by: src/loyalty/campaign/campaign.py
+    guarded_by: verification/metamorphic/test_stale_snapshot_falls_back_to_replay.py
+    property: "a snapshot that no longer builds is discarded with a warning, and the load equals a full replay"
+    source: B
+    status: covered   # PromoCampaign: removed, renamed and newly required fields, current and at_version loads, below the threshold. A stale snapshot that still builds is used as it is (open Protean finding, verification/regression/)
+
   - name: projector_read_model
     taught_by: src/payments/projections/daily_revenue.py
     guarded_by: verification/oracles/test_p20_projector_idempotency.py
