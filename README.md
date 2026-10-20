@@ -338,6 +338,7 @@ TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/identity_test
 
 MESSAGE_DB_URL=postgresql://message_store:message_store@localhost:5433/message_store
 REDIS_URL=redis://127.0.0.1:6379/0
+REDIS_EXTERNAL_URL=redis://127.0.0.1:6379/15
 SECRET_KEY=change-me-in-production
 ```
 
