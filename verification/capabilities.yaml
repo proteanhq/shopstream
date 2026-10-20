@@ -217,3 +217,10 @@ capabilities:
     property: "after a fixed workload driven through the domain, the shared Message DB passes `verify` with counts equal to SQL; each injected corruption yields exactly one violation of the right kind, stream and position"
     source: A
     status: partial   # three of verify's six kinds (position_gap, snapshot_ahead_of_stream, malformed_snapshot) are injected on Message DB. The schema rejects the rows the other three need, and Protean's own tests check those on its memory and list-backed stores. Verify on the dev store under load is a hand check
+
+  - name: restore_checkpoint_verification
+    taught_by: docs/operations/restore.md
+    guarded_by: verification/oracles/test_restore_checkpoints.py
+    property: "after a simulated restore rolls the store and its global_position sequence back from g5 to g3, `protean recover --verify-checkpoints` reports a checkpoint at g5 as beyond head g3 and a fresh one as consistent; `--reset-beyond-head` moves it to g3, and a third run finds every row consistent"
+    source: A
+    status: partial   # only two inventory projectors, moved to event-store subscriptions in test config; every real handler reads Redis streams, so recover checks nothing in ShopStream as configured. Redis consumer groups and the Postgres outbox are outside recover's scope

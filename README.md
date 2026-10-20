@@ -223,6 +223,11 @@ make test-fast
 make eventstore-verify
 ```
 
+After restoring the shared Message DB from a backup, follow
+[the restore runbook](docs/operations/restore.md). It runs `make eventstore-verify`,
+then `protean recover --verify-checkpoints` and `make outbox-reconcile`, and lists
+the state none of them check: Redis consumer groups, outbox rows and read models.
+
 Tests use `PROTEAN_ENV=test`, which keeps `event_processing = "sync"` so projectors fire during UoW commit for deterministic assertions. Tests run against separate `_test` databases so they never destroy dev data (see [Configuration](#configuration)).
 
 ## Load Testing
