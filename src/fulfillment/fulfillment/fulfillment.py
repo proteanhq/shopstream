@@ -139,7 +139,7 @@ class Package:
     """A physical package in the shipment."""
 
     weight: float | None = Float()
-    dimensions = ValueObject(PackageDimensions)
+    dimensions: PackageDimensions | None = ValueObject(PackageDimensions)
     item_ids: list[str] = List(String())
 
 
@@ -175,12 +175,12 @@ class Fulfillment:
             # DELIVERED and CANCELLED are terminal
         },
     )
-    items = HasMany(FulfillmentItem)
-    pick_list = ValueObject(PickList)
-    packing_info = ValueObject(PackingInfo)
-    packages = HasMany(Package)
-    shipment = ValueObject(ShipmentInfo)
-    tracking_events = HasMany(TrackingEvent)
+    items: list[FulfillmentItem] = HasMany(FulfillmentItem)
+    pick_list: PickList | None = ValueObject(PickList)
+    packing_info: PackingInfo | None = ValueObject(PackingInfo)
+    packages: list[Package] = HasMany(Package)
+    shipment: ShipmentInfo | None = ValueObject(ShipmentInfo)
+    tracking_events: list[TrackingEvent] = HasMany(TrackingEvent)
     cancellation_reason: str | None = String(max_length=500)
     created_at: datetime | None = DateTime()
     updated_at: datetime | None = DateTime()

@@ -130,7 +130,7 @@ class Refund:
 class Payment:
     order_id: str = Identifier(required=True)
     customer_id: str = Identifier(required=True)
-    amount = ValueObject(Money)
+    amount: Money | None = ValueObject(Money)
     status: str = Status(
         PaymentStatus,
         default=PaymentStatus.PENDING.value,
@@ -142,10 +142,10 @@ class Payment:
             PaymentStatus.PARTIALLY_REFUNDED: [PaymentStatus.REFUNDED],
         },
     )
-    payment_method = ValueObject(PaymentMethod)
-    gateway_info = ValueObject(GatewayInfo)
-    attempts = HasMany(PaymentAttempt)
-    refunds = HasMany(Refund)
+    payment_method: PaymentMethod | None = ValueObject(PaymentMethod)
+    gateway_info: GatewayInfo | None = ValueObject(GatewayInfo)
+    attempts: list[PaymentAttempt] = HasMany(PaymentAttempt)
+    refunds: list[Refund] = HasMany(Refund)
     attempt_count: int = Integer(default=0)
     total_refunded: float = Float(default=0.0)
     idempotency_key: str = String(max_length=255, required=True)

@@ -138,7 +138,7 @@ class PointsLedgerEntry:
     implicit reference HasMany would auto-create) to exercise the Reference field.
     """
 
-    reward_account = Reference("RewardAccount")
+    reward_account: "RewardAccount | None" = Reference("RewardAccount")
     entry_type: str = String(
         choices=["earn", "redeem", "transfer_in", "transfer_out", "adjust"],
         required=True,
@@ -181,8 +181,8 @@ class RewardAccount(Auditable):
             )
         ],
     )
-    card = HasOne("MembershipCard")
-    entries = HasMany("PointsLedgerEntry")
+    card: "MembershipCard | None" = HasOne("MembershipCard")
+    entries: list["PointsLedgerEntry"] = HasMany("PointsLedgerEntry")
 
     @invariant.post
     def balance_never_negative(self) -> None:

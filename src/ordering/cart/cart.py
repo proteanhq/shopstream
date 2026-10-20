@@ -49,7 +49,7 @@ class CartItem:
 class ShoppingCart:
     customer_id: str | None = Identifier()  # Nullable for guest carts
     session_id: str | None = String(max_length=255)  # For guest cart identification
-    items = HasMany(CartItem)
+    items: list[CartItem] = HasMany(CartItem)
     applied_coupons: list[str] = List(String())
     status: str = Status(
         CartStatus,

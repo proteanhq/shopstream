@@ -190,10 +190,10 @@ class Order:
             OrderStatus.REFUNDED: [OrderStatus.REFUNDED],  # Idempotent
         },
     )
-    items = HasMany(OrderItem)
-    shipping_address = ValueObject(ShippingAddress)
-    billing_address = ValueObject(ShippingAddress)
-    pricing = ValueObject(OrderPricing)
+    items: list[OrderItem] = HasMany(OrderItem)
+    shipping_address: ShippingAddress | None = ValueObject(ShippingAddress)
+    billing_address: ShippingAddress | None = ValueObject(ShippingAddress)
+    pricing: OrderPricing | None = ValueObject(OrderPricing)
     payment_id: str | None = String(max_length=255)
     payment_method: str | None = String(max_length=50)
     payment_status: str | None = String(max_length=50)

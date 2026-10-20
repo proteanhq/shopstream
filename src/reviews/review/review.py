@@ -166,14 +166,14 @@ class Review:
     order_id: str | None = Identifier()
 
     # Content
-    rating = ValueObject(Rating, required=True)
+    rating: Rating = ValueObject(Rating, required=True)
     title: str = String(required=True, max_length=200)
     body: str = Text(required=True)
     pros: list[str] = List(String())
     cons: list[str] = List(String())
 
     # Media
-    images = HasMany(ReviewImage)
+    images: list[ReviewImage] = HasMany(ReviewImage)
 
     # Verification
     verified_purchase: bool = Boolean(default=False)
@@ -191,7 +191,7 @@ class Review:
     moderation_notes: str | None = Text()
 
     # Voting
-    votes = HasMany(HelpfulVote)
+    votes: list[HelpfulVote] = HasMany(HelpfulVote)
     helpful_count: int = Integer(default=0)
     unhelpful_count: int = Integer(default=0)
 
@@ -200,7 +200,7 @@ class Review:
     reported_reasons: list[dict[str, Any]] = List(Dict())
 
     # Seller engagement
-    reply = HasMany(SellerReply)
+    reply: list[SellerReply] = HasMany(SellerReply)
 
     # Editing
     is_edited: bool = Boolean(default=False)

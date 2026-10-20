@@ -66,7 +66,7 @@ class Invoice:
     order_id: str = Identifier(required=True)
     customer_id: str = Identifier(required=True)
     invoice_number: str = String(required=True, max_length=50)
-    line_items = HasMany(InvoiceLineItem)
+    line_items: list[InvoiceLineItem] = HasMany(InvoiceLineItem)
     subtotal: float = Float(default=0.0)
     tax: float = Float(default=0.0)
     total: float = Float(default=0.0)

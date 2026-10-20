@@ -55,10 +55,10 @@ class Warehouse:
     """A physical location where inventory is stored."""
 
     name: str = String(required=True, max_length=255)
-    address = ValueObject(WarehouseAddress)
+    address: WarehouseAddress | None = ValueObject(WarehouseAddress)
     capacity: int = Integer(default=0)
     is_active: bool = Boolean(default=True)
-    zones = HasMany(Zone)
+    zones: list[Zone] = HasMany(Zone)
     created_at: datetime | None = DateTime()
     updated_at: datetime | None = DateTime()
 

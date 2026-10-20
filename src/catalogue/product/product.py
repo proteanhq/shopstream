@@ -153,11 +153,11 @@ class Variant:
     variant to be activated for sale.
     """
 
-    variant_sku = ValueObject(SKU, required=True)
+    variant_sku: SKU = ValueObject(SKU, required=True)
     attributes: dict[str, Any] = Dict()
-    price = ValueObject(Price, required=True)
-    weight = ValueObject(Weight)
-    dimensions = ValueObject(Dimensions)
+    price: Price = ValueObject(Price, required=True)
+    weight: Weight | None = ValueObject(Weight)
+    dimensions: Dimensions | None = ValueObject(Dimensions)
     is_active: bool = Boolean(default=True)
 
 
@@ -185,15 +185,15 @@ class Product:
     have at least one variant before activation.
     """
 
-    sku = ValueObject(SKU, required=True)
+    sku: SKU = ValueObject(SKU, required=True)
     seller_id: str | None = Identifier()
     title: str = String(required=True, max_length=255)
     description: str | None = Text()
     category_id: str | None = Identifier()
     brand: str | None = String(max_length=100)
     attributes: dict[str, Any] = Dict()
-    variants = HasMany(Variant)
-    images = HasMany(Image)
+    variants: list[Variant] = HasMany(Variant)
+    images: list[Image] = HasMany(Image)
     status: str = Status(
         ProductStatus,
         default=ProductStatus.DRAFT.value,
@@ -204,7 +204,7 @@ class Product:
         },
     )
     visibility: str = String(choices=ProductVisibility, default=ProductVisibility.PUBLIC.value)
-    seo = ValueObject(SEO)
+    seo: SEO | None = ValueObject(SEO)
     created_at: datetime = DateTime(default=datetime.now)
     updated_at: datetime = DateTime(default=datetime.now)
 

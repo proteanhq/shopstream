@@ -81,7 +81,7 @@ class Profile:
 
     first_name: str = String(required=True, max_length=100)
     last_name: str = String(required=True, max_length=100)
-    phone = ValueObject(PhoneNumber)
+    phone: PhoneNumber | None = ValueObject(PhoneNumber)
     date_of_birth: date | None = Date()
 
 
@@ -100,7 +100,7 @@ class Address:
     postal_code: str = String(required=True, max_length=20)
     country: str = String(required=True, max_length=100)
     is_default: bool = Boolean(default=False)
-    geo_coordinates = ValueObject(GeoCoordinates)
+    geo_coordinates: GeoCoordinates | None = ValueObject(GeoCoordinates)
 
 
 @identity.aggregate
@@ -113,9 +113,9 @@ class Customer:
     """
 
     external_id: str = String(required=True, max_length=255, unique=True)
-    email = ValueObject(EmailAddress, required=True)
-    profile = ValueObject(Profile)
-    addresses = HasMany(Address)
+    email: EmailAddress = ValueObject(EmailAddress, required=True)
+    profile: Profile | None = ValueObject(Profile)
+    addresses: list[Address] = HasMany(Address)
     status: str = Status(
         CustomerStatus,
         default=CustomerStatus.ACTIVE.value,
