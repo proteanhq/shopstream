@@ -32,7 +32,10 @@ retention_maxlen = 50000
 # batch it was processing when it opened still runs to the end. Each failed probe
 # is another attempt at the oldest message, which goes to the DLQ after 3 attempts.
 # One breaker covers all four channels: an Email outage pauses SMS, Push and Slack
-# too, and a working channel in between resets the failure count.
+# too, and a working channel in between resets the failure count. So does every
+# other Notification event on the stream, which the dispatcher ignores and Protean
+# counts as a success: NotificationCreated comes before each dispatch request, so
+# an outage opens the breaker only when retries pile up between new notifications.
 [server.subscriptions.NotificationDispatcher]
 circuit_breaker_threshold = 5
 circuit_breaker_reset_seconds = 30

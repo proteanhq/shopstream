@@ -141,7 +141,10 @@ Limits of this path:
 - Under sync processing (the test and memory overlays) the error reaches the caller that created the
   notification as `TransactionError`. A multi-channel create stops at the failing channel, after
   the earlier channels' notifications were saved, and nothing retries it until the sweep.
-- One breaker covers all four channels, and any successful send resets its failure count.
+- One breaker covers all four channels, and any successful send resets its failure count. So does
+  the successful claim before each send, and any other Notification event, such as the
+  `NotificationCreated` before each request, because Protean counts the dispatcher's no-op for it
+  as a success.
 
 ## Cross-Domain Subscribers (the ACL hub)
 

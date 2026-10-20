@@ -57,6 +57,19 @@ def _dispatch_request_message() -> Message:
     return Message.from_domain_object(requested[0])
 
 
+def _creation_messages() -> list[Message]:
+    """Serialize every event an immediate ``Notification.create`` raises, in order."""
+    notification = Notification.create(
+        recipient_id="cust-breaker",
+        notification_type=NotificationType.WELCOME.value,
+        channel=NotificationChannel.EMAIL.value,
+        body="Welcome!",
+    )
+    assert any(isinstance(e, NotificationDispatchRequested) for e in notification._events)
+    assert len(notification._events) > 1
+    return [Message.from_domain_object(e) for e in notification._events]
+
+
 @pytest.fixture()
 def engine():
     engine = Engine(notifications, test_mode=True)
@@ -92,6 +105,37 @@ class TestDispatcherCircuitBreaker:
     def test_failed_probes_reopen_the_breaker_until_the_message_is_dead_lettered(self, engine, dispatcher_subscription):
         _skip_unless_redis_streams()
         engine.loop.run_until_complete(_with_scratch_group(dispatcher_subscription, self._failed_probes))
+
+    @pytest.mark.xfail(
+        strict=True,
+        raises=AssertionError,
+        reason="Protean counts an event the handler does not handle as a success and resets the breaker",
+    )
+    def test_outage_opens_the_breaker_when_creation_events_share_the_stream(self, engine, dispatcher_subscription):
+        """Protean finding (not filed yet): a no-op for an unhandled event resets the failure count.
+
+        Each created notification puts ``NotificationCreated`` on the stream before
+        ``NotificationDispatchRequested``. The dispatcher has no handler for the first, and
+        `process_batch` records that no-op as a successful outcome, so the count goes back to 0
+        before every failing request. The breaker cannot reach its threshold while every send fails.
+        """
+        _skip_unless_redis_streams()
+        engine.loop.run_until_complete(
+            _with_scratch_group(dispatcher_subscription, self._interleaved_outage, publish=False)
+        )
+
+    @staticmethod
+    async def _interleaved_outage(sub: StreamSubscription, published: list[str]) -> None:
+        for _ in range(THRESHOLD):
+            for message in _creation_messages():
+                published.append(sub.broker.publish(sub.stream_category, message.to_dict()))
+        get_channel(NotificationChannel.EMAIL.value).set_outage(True)
+
+        batch = await sub._read_primary_nonblocking()
+        assert [identifier for identifier, _ in batch] == published
+        await sub.process_batch(batch)
+
+        assert sub.circuit_state == CircuitBreakerState.OPEN
 
     @staticmethod
     async def _good_probe(sub: StreamSubscription, published: list[str]) -> None:
@@ -157,8 +201,11 @@ def _pending_ids(sub: StreamSubscription) -> set[str]:
     return {entry["message_id"].decode() for entry in entries}
 
 
-async def _with_scratch_group(sub: StreamSubscription, exercise) -> None:
-    """Run ``exercise(sub, published)`` on a scratch consumer group, then remove the group and entries."""
+async def _with_scratch_group(sub: StreamSubscription, exercise, publish: bool = True) -> None:
+    """Run ``exercise(sub, published)`` on a scratch consumer group, then remove the group and entries.
+
+    With ``publish=False`` the exercise publishes its own messages and appends their ids to ``published``.
+    """
     sub.retry_delay_seconds = 0  # the retry path sleeps this long before each NACK
     sub.consumer_group = f"breaker-test-{uuid.uuid4().hex[:8]}"
     client = notifications.brokers["default"].redis_instance
@@ -169,7 +216,7 @@ async def _with_scratch_group(sub: StreamSubscription, exercise) -> None:
 
     published: list[str] = []
     try:
-        for _ in range(THRESHOLD):
+        for _ in range(THRESHOLD if publish else 0):
             published.append(sub.broker.publish(sub.stream_category, _dispatch_request_message().to_dict()))
         await exercise(sub, published)
     finally:
