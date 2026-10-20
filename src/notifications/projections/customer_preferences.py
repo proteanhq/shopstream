@@ -32,9 +32,11 @@ class CustomerPreferences:
     updated_at: datetime | None = DateTime()
 
 
-# Not marked idempotent=True: every handler writes values copied from the event,
-# and the unsubscribed_types append and remove check membership first, so a
-# redelivered event leaves the read model unchanged.
+# Not marked idempotent=True: no handler adds to a stored value. Each one sets
+# fields from the event or clears them, and the unsubscribed_types append and
+# remove check membership first. So a redelivery that arrives before any newer
+# event leaves the read model unchanged. A late PreferencesCreated would still
+# reset the record.
 @notifications.projector(projector_for=CustomerPreferences, aggregates=[NotificationPreference])
 class CustomerPreferencesProjector:
     @on(PreferencesCreated)

@@ -33,7 +33,10 @@ STATUS
     Two kinds of protection are checked here:
     - The projectors marked `idempotent=True` rely on Protean's processed-message
       marker (proteanhq/protean#1042). Each one has a case below that redelivers
-      to a handler that adds to a stored value.
+      to a handler that adds to a stored value or inserts a new row. Two more
+      cases on DailyRevenueProjector check that the dedup is keyed on the
+      message: a second payment on the same day still counts, and a handler
+      that fails leaves no marker, so its retry applies once.
     - ProductRatingProjector is not marked. It records which reviews it has
       counted (counted_reviews) and treats a redelivered ReviewApproved as a
       no-op (ticket T0.3).
@@ -43,6 +46,7 @@ RUN (no Docker):
         verification/oracles/test_p20_projector_idempotency.py --protean-env memory -q
 """
 
+from collections.abc import Callable
 from typing import Any
 
 import pytest
@@ -67,9 +71,17 @@ def _stored_event(aggregate_cls: Any, aggregate_id: str, event_cls: Any) -> Any:
     return event
 
 
-def _redeliver(projector_cls: Any, event: Any) -> None:
+def _redeliver(projector_cls: Any, event: Any, check: Callable[[], None]) -> None:
+    """Run `check` after the live delivery, then again after REDELIVERIES more.
+
+    The first run shows the live delivery reached the projector. Without it, a
+    projector that never saw the live event would get its one application from
+    the first redelivery and the case would still pass.
+    """
+    check()
     for _ in range(REDELIVERIES):
         projector_cls._handle(event)
+    check()
 
 
 # ---------------------------------------------------------------------------
@@ -104,15 +116,15 @@ def test_product_rating_projector_is_idempotent_under_redelivery():
     )
 
     repo = current_domain.repository_for(ProductRating)
-    assert repo.get(product_id).total_reviews == 1  # baseline: one approved review
 
-    _redeliver(ProductRatingProjector, _stored_event(Review, review_id, ReviewApproved))
+    def check() -> None:
+        # Independent expected value: one review was approved, so the count is 1,
+        # no matter how many times the event was delivered.
+        rating = repo.get(product_id)
+        assert rating.total_reviews == 1
+        assert rating.rating_distribution["5"] == 1
 
-    # Independent expected value: one review was approved, so the count is 1,
-    # no matter how many times the event was delivered.
-    rating = repo.get(product_id)
-    assert rating.total_reviews == 1
-    assert rating.rating_distribution["5"] == 1
+    _redeliver(ProductRatingProjector, _stored_event(Review, review_id, ReviewApproved), check)
 
 
 # ---------------------------------------------------------------------------
@@ -168,12 +180,13 @@ def test_daily_revenue_projector_is_idempotent_under_redelivery():
     payment_id = _succeeded_payment(75.00, "p20-revenue")
     event = _stored_event(Payment, payment_id, PaymentSucceeded)
 
-    _redeliver(DailyRevenueProjector, event)
+    def check() -> None:
+        record = current_domain.repository_for(DailyRevenue).get(event.succeeded_at.date().isoformat())
+        assert record.transaction_count == 1
+        assert record.total_revenue == to_money(75)
+        assert record.net_revenue == to_money(75)
 
-    record = current_domain.repository_for(DailyRevenue).get(event.succeeded_at.date().isoformat())
-    assert record.transaction_count == 1
-    assert record.total_revenue == to_money(75)
-    assert record.net_revenue == to_money(75)
+    _redeliver(DailyRevenueProjector, event, check)
 
 
 @pytest.mark.usefixtures("payments_ctx")
@@ -185,11 +198,88 @@ def test_payment_status_projector_is_idempotent_under_redelivery():
     payment_id = _succeeded_payment(100.00, "p20-status")
     _refund(payment_id, 30.00)
 
-    _redeliver(PaymentStatusProjector, _stored_event(Payment, payment_id, RefundCompleted))
+    def check() -> None:
+        view = current_domain.repository_for(PaymentStatusView).get(payment_id)
+        assert view.total_refunded == to_money(30)
+        assert view.status == "Partially_Refunded"
 
-    view = current_domain.repository_for(PaymentStatusView).get(payment_id)
-    assert view.total_refunded == to_money(30)
-    assert view.status == "Partially_Refunded"
+    _redeliver(PaymentStatusProjector, _stored_event(Payment, payment_id, RefundCompleted), check)
+
+
+@pytest.mark.usefixtures("payments_ctx")
+def test_daily_revenue_projector_counts_a_second_payment_on_the_same_day():
+    # A dedup keyed on the handler or the day, not the message, would pass the
+    # single-event cases above and drop this second payment.
+    from payments.payment.events import PaymentSucceeded
+    from payments.payment.payment import Payment
+    from payments.projections.daily_revenue import DailyRevenue, DailyRevenueProjector
+
+    events = [
+        _stored_event(Payment, _succeeded_payment(amount, key), PaymentSucceeded)
+        for amount, key in [(75.00, "p20-day-1"), (25.00, "p20-day-2")]
+    ]
+    date_key = events[0].succeeded_at.date().isoformat()
+    if events[1].succeeded_at.date().isoformat() != date_key:
+        pytest.skip("the two payments fell on either side of midnight")
+
+    def check() -> None:
+        record = current_domain.repository_for(DailyRevenue).get(date_key)
+        assert record.transaction_count == 2
+        assert record.total_revenue == to_money(100)
+
+    for event in events:
+        _redeliver(DailyRevenueProjector, event, check)
+
+
+@pytest.mark.usefixtures("payments_ctx")
+def test_daily_revenue_projector_failed_delivery_leaves_no_marker(monkeypatch):
+    # The marker and the read-model write must share one transaction. If they
+    # did not, a failed marker write would keep the revenue row, and the retry
+    # would count the payment a second time.
+    from payments.payment.events import PaymentSucceeded
+    from payments.payment.payment import Payment
+    from payments.projections.daily_revenue import DailyRevenue, DailyRevenueProjector
+
+    event = _stored_event(Payment, _succeeded_payment(75.00, "p20-failed"), PaymentSucceeded)
+    message_id = event._metadata.headers.id
+    handler = f"{DailyRevenueProjector.__module__}.DailyRevenueProjector.on_payment_succeeded"
+    date_key = event.succeeded_at.date().isoformat()
+    revenue = current_domain.repository_for(DailyRevenue)
+    markers = current_domain._get_processed_message_repo("default")
+
+    # Undo the live delivery, so the next delivery is the first one.
+    if not markers.is_processed(message_id, handler):
+        pytest.fail(f"precondition: the live delivery marked {message_id} for {handler}")
+    for marker in markers._dao.query.filter(message_id=message_id, handler=handler).all().items:
+        markers._dao.delete(marker)
+    revenue._dao.delete(revenue.get(date_key))
+
+    # Protean builds a marker repository class per database provider, so the seam is
+    # that class, not ProcessedMessageRepository.
+    marker_repo_cls = type(markers)
+    real_mark = marker_repo_cls.mark
+    mark_calls: list[str] = []
+
+    def mark_failing_once(self: Any, message_id: str, handler: str) -> None:
+        mark_calls.append(message_id)
+        if len(mark_calls) == 1:
+            raise RuntimeError("marker write failed")
+        real_mark(self, message_id, handler)
+
+    monkeypatch.setattr(marker_repo_cls, "mark", mark_failing_once)
+
+    with pytest.raises(RuntimeError, match="marker write failed"):
+        DailyRevenueProjector._handle(event)
+
+    assert revenue.get_or_none(date_key) is None
+    assert not markers.is_processed(message_id, handler)
+
+    DailyRevenueProjector._handle(event)  # the retry after the failure
+
+    def check() -> None:
+        assert revenue.get(date_key).transaction_count == 1
+
+    _redeliver(DailyRevenueProjector, event, check)
 
 
 # ---------------------------------------------------------------------------
@@ -233,12 +323,13 @@ def test_product_availability_projector_is_idempotent_under_redelivery():
 
     item_id = _reserved_item(5)
 
-    _redeliver(ProductAvailabilityProjector, _stored_event(InventoryItem, item_id, StockReserved))
+    def check() -> None:
+        pa = current_domain.repository_for(ProductAvailability).get("prod-p20::var-p20")
+        assert pa.total_reserved == 5
+        assert pa.total_available == 95
+        assert pa.total_on_hand == 100
 
-    pa = current_domain.repository_for(ProductAvailability).get("prod-p20::var-p20")
-    assert pa.total_reserved == 5
-    assert pa.total_available == 95
-    assert pa.total_on_hand == 100
+    _redeliver(ProductAvailabilityProjector, _stored_event(InventoryItem, item_id, StockReserved), check)
 
 
 @pytest.mark.usefixtures("inventory_ctx")
@@ -249,9 +340,10 @@ def test_warehouse_stock_projector_is_idempotent_under_redelivery():
 
     item_id = _reserved_item(5)
 
-    _redeliver(WarehouseStockProjector, _stored_event(InventoryItem, item_id, StockReserved))
+    def check() -> None:
+        assert current_domain.repository_for(WarehouseStock).get(item_id).reserved == 5
 
-    assert current_domain.repository_for(WarehouseStock).get(item_id).reserved == 5
+    _redeliver(WarehouseStockProjector, _stored_event(InventoryItem, item_id, StockReserved), check)
 
 
 @pytest.mark.usefixtures("inventory_ctx")
@@ -262,9 +354,10 @@ def test_inventory_level_projector_is_idempotent_under_redelivery():
 
     item_id = _reserved_item(5)
 
-    _redeliver(InventoryLevelProjector, _stored_event(InventoryItem, item_id, StockReserved))
+    def check() -> None:
+        assert current_domain.repository_for(InventoryLevel).get(item_id).reserved == 5
 
-    assert current_domain.repository_for(InventoryLevel).get(item_id).reserved == 5
+    _redeliver(InventoryLevelProjector, _stored_event(InventoryItem, item_id, StockReserved), check)
 
 
 @pytest.mark.usefixtures("inventory_ctx")
@@ -286,11 +379,12 @@ def test_shrinkage_report_projector_is_idempotent_under_redelivery():
         asynchronous=False,
     )
 
-    _redeliver(ShrinkageReportProjector, _stored_event(InventoryItem, item_id, StockAdjusted))
+    def check() -> None:
+        report = current_domain.repository_for(ShrinkageReport).get(item_id)
+        assert report.total_adjustments == 10
+        assert report.adjustment_reasons == [f"{AdjustmentType.SHRINKAGE.value}: P20 shrinkage"]
 
-    report = current_domain.repository_for(ShrinkageReport).get(item_id)
-    assert report.total_adjustments == 10
-    assert report.adjustment_reasons == [f"{AdjustmentType.SHRINKAGE.value}: P20 shrinkage"]
+    _redeliver(ShrinkageReportProjector, _stored_event(InventoryItem, item_id, StockAdjusted), check)
 
 
 @pytest.mark.usefixtures("inventory_ctx")
@@ -301,10 +395,11 @@ def test_stock_movement_log_projector_is_idempotent_under_redelivery():
 
     item_id = _reserved_item(5)
 
-    _redeliver(StockMovementLogProjector, _stored_event(InventoryItem, item_id, StockReserved))
+    def check() -> None:
+        entries = current_domain.repository_for(StockMovementLog).query.filter(inventory_item_id=item_id).all().items
+        assert sorted(e.event_type for e in entries) == ["StockInitialized", "StockReserved"]
 
-    entries = current_domain.repository_for(StockMovementLog).query.filter(inventory_item_id=item_id).all().items
-    assert sorted(e.event_type for e in entries) == ["StockInitialized", "StockReserved"]
+    _redeliver(StockMovementLogProjector, _stored_event(InventoryItem, item_id, StockReserved), check)
 
 
 @pytest.mark.usefixtures("inventory_ctx")
@@ -333,9 +428,10 @@ def test_warehouse_directory_projector_is_idempotent_under_redelivery():
         asynchronous=False,
     )
 
-    _redeliver(WarehouseDirectoryProjector, _stored_event(Warehouse, warehouse_id, ZoneAdded))
+    def check() -> None:
+        assert current_domain.repository_for(WarehouseDirectory).get(warehouse_id).zone_count == 1
 
-    assert current_domain.repository_for(WarehouseDirectory).get(warehouse_id).zone_count == 1
+    _redeliver(WarehouseDirectoryProjector, _stored_event(Warehouse, warehouse_id, ZoneAdded), check)
 
 
 # ---------------------------------------------------------------------------
@@ -398,11 +494,12 @@ def test_daily_order_stats_projector_is_idempotent_under_redelivery():
     order_id = _order()
     event = _stored_event(Order, order_id, OrderCreated)
 
-    _redeliver(DailyOrderStatsProjector, event)
+    def check() -> None:
+        stats = current_domain.repository_for(DailyOrderStats).get(event.created_at.date().isoformat())
+        assert stats.orders_created == 1
+        assert stats.total_revenue == to_money(55)
 
-    stats = current_domain.repository_for(DailyOrderStats).get(event.created_at.date().isoformat())
-    assert stats.orders_created == 1
-    assert stats.total_revenue == to_money(55)
+    _redeliver(DailyOrderStatsProjector, event, check)
 
 
 @pytest.mark.usefixtures("ordering_ctx")
@@ -413,9 +510,10 @@ def test_order_summary_projector_is_idempotent_under_redelivery():
 
     order_id = _order_with_added_item()
 
-    _redeliver(OrderSummaryProjector, _stored_event(Order, order_id, ItemAdded))
+    def check() -> None:
+        assert current_domain.repository_for(OrderSummary).get(order_id).item_count == 2
 
-    assert current_domain.repository_for(OrderSummary).get(order_id).item_count == 2
+    _redeliver(OrderSummaryProjector, _stored_event(Order, order_id, ItemAdded), check)
 
 
 @pytest.mark.usefixtures("ordering_ctx")
@@ -426,10 +524,11 @@ def test_order_detail_projector_is_idempotent_under_redelivery():
 
     order_id = _order_with_added_item()
 
-    _redeliver(OrderDetailProjector, _stored_event(Order, order_id, ItemAdded))
+    def check() -> None:
+        items = current_domain.repository_for(OrderDetail).get(order_id).items
+        assert sorted(i["sku"] for i in items) == ["SKU-001", "SKU-002"]
 
-    items = current_domain.repository_for(OrderDetail).get(order_id).items
-    assert sorted(i["sku"] for i in items) == ["SKU-001", "SKU-002"]
+    _redeliver(OrderDetailProjector, _stored_event(Order, order_id, ItemAdded), check)
 
 
 @pytest.mark.usefixtures("ordering_ctx")
@@ -440,10 +539,11 @@ def test_order_timeline_projector_is_idempotent_under_redelivery():
 
     order_id = _order()
 
-    _redeliver(OrderTimelineProjector, _stored_event(Order, order_id, OrderCreated))
+    def check() -> None:
+        entries = current_domain.repository_for(OrderTimeline).query.filter(order_id=order_id).all().items
+        assert [e.event_type for e in entries] == ["OrderCreated"]
 
-    entries = current_domain.repository_for(OrderTimeline).query.filter(order_id=order_id).all().items
-    assert [e.event_type for e in entries] == ["OrderCreated"]
+    _redeliver(OrderTimelineProjector, _stored_event(Order, order_id, OrderCreated), check)
 
 
 @pytest.mark.usefixtures("ordering_ctx")
@@ -460,11 +560,12 @@ def test_cart_view_projector_is_idempotent_under_redelivery():
         asynchronous=False,
     )
 
-    _redeliver(CartViewProjector, _stored_event(ShoppingCart, cart_id, CartItemAdded))
+    def check() -> None:
+        view = current_domain.repository_for(CartView).get(cart_id)
+        assert view.item_count == 1
+        assert [i["quantity"] for i in view.items] == [2]
 
-    view = current_domain.repository_for(CartView).get(cart_id)
-    assert view.item_count == 1
-    assert [i["quantity"] for i in view.items] == [2]
+    _redeliver(CartViewProjector, _stored_event(ShoppingCart, cart_id, CartItemAdded), check)
 
 
 # ---------------------------------------------------------------------------
@@ -518,11 +619,12 @@ def test_daily_shipments_projector_is_idempotent_under_redelivery():
     ff_id = _shipped_fulfillment()
     event = _stored_event(Fulfillment, ff_id, ShipmentHandedOff)
 
-    _redeliver(DailyShipmentsProjector, event)
+    def check() -> None:
+        view = current_domain.repository_for(DailyShipmentsView).get(event.shipped_at.strftime("%Y-%m-%d"))
+        assert view.total_shipped == 1
+        assert view.total_created == 1
 
-    view = current_domain.repository_for(DailyShipmentsView).get(event.shipped_at.strftime("%Y-%m-%d"))
-    assert view.total_shipped == 1
-    assert view.total_created == 1
+    _redeliver(DailyShipmentsProjector, event, check)
 
 
 @pytest.mark.usefixtures("fulfillment_ctx")
@@ -534,10 +636,11 @@ def test_delivery_performance_projector_is_idempotent_under_redelivery():
     ff_id = _shipped_fulfillment()
     event = _stored_event(Fulfillment, ff_id, ShipmentHandedOff)
 
-    _redeliver(DeliveryPerformanceProjector, event)
+    def check() -> None:
+        record_id = f"{event.carrier}-{event.shipped_at.strftime('%Y-%m-%d')}"
+        assert current_domain.repository_for(DeliveryPerformanceView).get(record_id).total_shipments == 1
 
-    record_id = f"{event.carrier}-{event.shipped_at.strftime('%Y-%m-%d')}"
-    assert current_domain.repository_for(DeliveryPerformanceView).get(record_id).total_shipments == 1
+    _redeliver(DeliveryPerformanceProjector, event, check)
 
 
 @pytest.mark.usefixtures("fulfillment_ctx")
@@ -552,10 +655,11 @@ def test_shipment_tracking_projector_is_idempotent_under_redelivery():
         UpdateTrackingEvent(fulfillment_id=ff_id, status="in_transit", location="Hub"), asynchronous=False
     )
 
-    _redeliver(ShipmentTrackingProjector, _stored_event(Fulfillment, ff_id, TrackingEventReceived))
+    def check() -> None:
+        events = current_domain.repository_for(ShipmentTrackingView).get(ff_id).events
+        assert [(e["status"], e["location"]) for e in events] == [("in_transit", "Hub")]
 
-    events = current_domain.repository_for(ShipmentTrackingView).get(ff_id).events
-    assert [(e["status"], e["location"]) for e in events] == [("in_transit", "Hub")]
+    _redeliver(ShipmentTrackingProjector, _stored_event(Fulfillment, ff_id, TrackingEventReceived), check)
 
 
 # ---------------------------------------------------------------------------
@@ -597,9 +701,10 @@ def test_category_tree_projector_is_idempotent_under_redelivery():
 
     category_id, product_id = _product_in_category()
 
-    _redeliver(CategoryTreeProjector, _stored_event(Product, product_id, ProductCreated))
+    def check() -> None:
+        assert current_domain.repository_for(CategoryTree).get(category_id).product_count == 1
 
-    assert current_domain.repository_for(CategoryTree).get(category_id).product_count == 1
+    _redeliver(CategoryTreeProjector, _stored_event(Product, product_id, ProductCreated), check)
 
 
 @pytest.mark.usefixtures("catalogue_ctx")
@@ -610,11 +715,12 @@ def test_category_products_projector_is_idempotent_under_redelivery():
 
     category_id, product_id = _product_in_category()
 
-    _redeliver(CategoryProductsProjector, _stored_event(Product, product_id, ProductCreated))
+    def check() -> None:
+        view = current_domain.repository_for(CategoryProducts).get(category_id)
+        assert view.product_count == 1
+        assert [p["product_id"] for p in view.products] == [product_id]
 
-    view = current_domain.repository_for(CategoryProducts).get(category_id)
-    assert view.product_count == 1
-    assert [p["product_id"] for p in view.products] == [product_id]
+    _redeliver(CategoryProductsProjector, _stored_event(Product, product_id, ProductCreated), check)
 
 
 @pytest.mark.usefixtures("catalogue_ctx")
@@ -625,9 +731,10 @@ def test_seller_catalogue_projector_is_idempotent_under_redelivery():
 
     product_id = _product_with_variant()
 
-    _redeliver(SellerCatalogueProjector, _stored_event(Product, product_id, VariantAdded))
+    def check() -> None:
+        assert current_domain.repository_for(SellerCatalogue).get(product_id).variant_count == 1
 
-    assert current_domain.repository_for(SellerCatalogue).get(product_id).variant_count == 1
+    _redeliver(SellerCatalogueProjector, _stored_event(Product, product_id, VariantAdded), check)
 
 
 @pytest.mark.usefixtures("catalogue_ctx")
@@ -638,9 +745,10 @@ def test_product_card_projector_is_idempotent_under_redelivery():
 
     product_id = _product_with_variant()
 
-    _redeliver(ProductCardProjector, _stored_event(Product, product_id, VariantAdded))
+    def check() -> None:
+        assert current_domain.repository_for(ProductCard).get(product_id).variant_count == 1
 
-    assert current_domain.repository_for(ProductCard).get(product_id).variant_count == 1
+    _redeliver(ProductCardProjector, _stored_event(Product, product_id, VariantAdded), check)
 
 
 @pytest.mark.usefixtures("catalogue_ctx")
@@ -651,10 +759,11 @@ def test_product_detail_projector_is_idempotent_under_redelivery():
 
     product_id = _product_with_variant()
 
-    _redeliver(ProductDetailProjector, _stored_event(Product, product_id, VariantAdded))
+    def check() -> None:
+        variants = current_domain.repository_for(ProductDetail).get(product_id).variants
+        assert [v["variant_sku"] for v in variants] == ["P20-V1"]
 
-    variants = current_domain.repository_for(ProductDetail).get(product_id).variants
-    assert [v["variant_sku"] for v in variants] == ["P20-V1"]
+    _redeliver(ProductDetailProjector, _stored_event(Product, product_id, VariantAdded), check)
 
 
 @pytest.mark.usefixtures("catalogue_ctx")
@@ -670,10 +779,11 @@ def test_price_history_projector_is_idempotent_under_redelivery():
         UpdateVariantPrice(product_id=product_id, variant_id=variant_id, base_price=49.99), asynchronous=False
     )
 
-    _redeliver(PriceHistoryProjector, _stored_event(Product, product_id, VariantPriceChanged))
+    def check() -> None:
+        entries = current_domain.repository_for(PriceHistory).query.filter(product_id=product_id).all().items
+        assert [e.new_price for e in entries] == [49.99]
 
-    entries = current_domain.repository_for(PriceHistory).query.filter(product_id=product_id).all().items
-    assert [e.new_price for e in entries] == [49.99]
+    _redeliver(PriceHistoryProjector, _stored_event(Product, product_id, VariantPriceChanged), check)
 
 
 # ---------------------------------------------------------------------------
@@ -700,10 +810,11 @@ def test_notification_stats_projector_is_idempotent_under_redelivery():
     current_domain.repository_for(Notification).add(notification)
     event = _stored_event(Notification, str(notification.id), NotificationSent)
 
-    _redeliver(NotificationStatsProjector, event)
+    def check() -> None:
+        stat_key = f"{event.sent_at.strftime('%Y-%m-%d')}:{NotificationType.WELCOME.value}:{event.channel}"
+        assert current_domain.repository_for(NotificationStats).get(stat_key).count == 1
 
-    stat_key = f"{event.sent_at.strftime('%Y-%m-%d')}:{NotificationType.WELCOME.value}:{event.channel}"
-    assert current_domain.repository_for(NotificationStats).get(stat_key).count == 1
+    _redeliver(NotificationStatsProjector, event, check)
 
 
 @pytest.mark.usefixtures("loyalty_ctx")
@@ -717,11 +828,12 @@ def test_reward_account_view_projector_is_idempotent_under_redelivery():
     account_id = current_domain.process(EnrollRewardAccount(customer_id="cust-p20"), asynchronous=False)
     current_domain.process(EarnPoints(account_id=account_id, amount=50), asynchronous=False)
 
-    _redeliver(RewardAccountViewProjector, _stored_event(RewardAccount, account_id, PointsEarned))
+    def check() -> None:
+        view = current_domain.repository_for(RewardAccountView).get(account_id)
+        assert view.lifetime_points == 50
+        assert view.points_balance == 50
 
-    view = current_domain.repository_for(RewardAccountView).get(account_id)
-    assert view.lifetime_points == 50
-    assert view.points_balance == 50
+    _redeliver(RewardAccountViewProjector, _stored_event(RewardAccount, account_id, PointsEarned), check)
 
 
 @pytest.mark.usefixtures("identity_ctx")
@@ -743,7 +855,8 @@ def test_address_book_projector_is_idempotent_under_redelivery():
         asynchronous=False,
     )
 
-    _redeliver(AddressBookProjector, _stored_event(Customer, customer_id, AddressAdded))
+    def check() -> None:
+        addresses = current_domain.repository_for(AddressBook).get(customer_id).addresses
+        assert [a["street"] for a in addresses] == ["123 Main St"]
 
-    addresses = current_domain.repository_for(AddressBook).get(customer_id).addresses
-    assert [a["street"] for a in addresses] == ["123 Main St"]
+    _redeliver(AddressBookProjector, _stored_event(Customer, customer_id, AddressAdded), check)

@@ -481,6 +481,7 @@ drop-db: ## Drop database schemas for all domains
 	uv run protean db drop --domain fulfillment.domain --yes
 	uv run protean db drop --domain reviews.domain --yes
 	uv run protean db drop --domain notifications.domain --yes
+	uv run protean db drop --domain loyalty.domain --yes
 
 truncate-db: ## Delete all data from all tables (preserves schema)
 	uv run protean db truncate --domain identity.domain --yes
@@ -491,6 +492,7 @@ truncate-db: ## Delete all data from all tables (preserves schema)
 	uv run protean db truncate --domain fulfillment.domain --yes
 	uv run protean db truncate --domain reviews.domain --yes
 	uv run protean db truncate --domain notifications.domain --yes
+	uv run protean db truncate --domain loyalty.domain --yes
 
 idempotency-cleanup: ## Delete processed-message markers older than each domain's retention window (run from cron)
 	@failed=0; \

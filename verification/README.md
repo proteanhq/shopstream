@@ -42,7 +42,9 @@ own `counted_reviews` (ticket T0.3). The other accumulating projectors are
 marked `idempotent=True`: Protean records a processed-message marker per
 message id and handler, in the same unit of work as the read-model write, and
 skips a message it has already marked. `test_idempotency_cleanup.py` checks that
-`make idempotency-cleanup` deletes old markers and keeps recent ones.
+`cleanup_processed_messages`, which `make idempotency-cleanup` runs, deletes old
+markers and keeps recent ones. It also runs the target's command for each domain
+the target lists.
 
 ## Adding a check
 

@@ -29,8 +29,10 @@ class PointsLeaderboard:
 
 
 # Not marked idempotent=True: Protean keeps no processed-message marker for a
-# cache-backed projection, so the option would do nothing. The handlers stay
-# idempotent by writing the absolute balance_after from the event.
+# cache-backed projection, so the option would do nothing. No handler adds to a
+# stored value: enrolment writes a zero balance and the points handlers write
+# the absolute balance_after from the event. So a redelivery that arrives before
+# any newer event leaves the entry unchanged. A late one restores an older balance.
 @loyalty.projector(projector_for=PointsLeaderboard, aggregates=[RewardAccount])
 class PointsLeaderboardProjector:
     @on(RewardAccountEnrolled)

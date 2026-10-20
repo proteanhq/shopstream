@@ -376,6 +376,11 @@ make truncate-db       # Delete all data (preserves schema)
 make idempotency-cleanup  # Delete processed-message markers older than retention_hours (run from cron)
 ```
 
+Re-run `make setup-db` after pulling a change that marks a projector
+`idempotent=True`. It creates the `processed_message` table those projectors
+write to, and leaves existing tables alone. Until the table exists, every
+delivery to those projectors fails on the missing table.
+
 ### Testing
 
 ```bash
