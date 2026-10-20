@@ -334,17 +334,18 @@ PROTEAN_ENV=production
 # Per-domain database URLs. Identity uses DATABASE_URL / TEST_DATABASE_URL;
 # every other domain uses <DOMAIN>_DATABASE_URL / TEST_<DOMAIN>_DATABASE_URL,
 # e.g. CATALOGUE_DATABASE_URL, ORDERING_DATABASE_URL, …, LOYALTY_DATABASE_URL.
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/identity_local
-CATALOGUE_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/catalogue_local
+DATABASE_URL=postgresql://postgres:postgres@localhost:15432/identity_local
+CATALOGUE_DATABASE_URL=postgresql://postgres:postgres@localhost:15432/catalogue_local
 # … ORDERING_DATABASE_URL, INVENTORY_DATABASE_URL, PAYMENTS_DATABASE_URL,
 # … FULFILLMENT_DATABASE_URL, REVIEWS_DATABASE_URL, NOTIFICATIONS_DATABASE_URL, LOYALTY_DATABASE_URL
 
 # Test databases (used when PROTEAN_ENV=test): TEST_<DOMAIN>_DATABASE_URL
-TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/identity_test
+TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:15432/identity_test
 
-MESSAGE_DB_URL=postgresql://message_store:message_store@localhost:5433/message_store
-REDIS_URL=redis://127.0.0.1:6379/0
-REDIS_EXTERNAL_URL=redis://127.0.0.1:6379/15
+MESSAGE_DB_URL=postgresql://message_store:message_store@localhost:15433/message_store
+REDIS_URL=redis://127.0.0.1:16379/0
+REDIS_EXTERNAL_URL=redis://127.0.0.1:16379/15
+REDIS_CACHE_URL=redis://127.0.0.1:16379/9
 SECRET_KEY=change-me-in-production
 ```
 
