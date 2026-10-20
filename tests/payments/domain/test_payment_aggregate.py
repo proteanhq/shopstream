@@ -3,6 +3,7 @@
 from decimal import Decimal
 
 import pytest
+from protean.exceptions import ValidationError
 from protean.testing import given
 
 from payments.payment.events import PaymentInitiated
@@ -57,11 +58,28 @@ class TestPaymentCreation:
         assert result.rejected
         assert f"Amount ({amount}) must have no more than 4 decimal places" in result.rejection_messages[0]
 
-    @pytest.mark.parametrize("amount", [1e15, 1e30, float("inf")])
+    @pytest.mark.parametrize("amount", [1e15, 1e30])
     def test_create_rejects_an_amount_of_1e15_or_more(self, amount):
         result = given(Payment).process(_initiate(amount=amount))
         assert result.rejected
         assert f"Amount ({amount}) must be less than 1000000000000000" in result.rejection_messages[0]
+
+    # Called directly, because the Message DB refuses a command holding
+    # Infinity or NaN as JSON before any handler runs.
+    @pytest.mark.parametrize("amount", [float("inf"), float("-inf"), float("nan")])
+    def test_create_rejects_an_amount_that_is_not_finite(self, amount):
+        with pytest.raises(ValidationError) as exc:
+            Payment.create(
+                order_id="ord-001",
+                customer_id="cust-001",
+                amount=amount,
+                currency="USD",
+                payment_method_type="credit_card",
+                last4="4242",
+                gateway_name="FakeGateway",
+                idempotency_key="idem-001",
+            )
+        assert exc.value.messages["amount"] == [f"Amount ({amount}) must be less than 1000000000000000"]
 
     def test_create_sets_status_to_pending(self):
         result = given(Payment).process(_initiate())
