@@ -120,6 +120,10 @@ class TestHasMoreThanFourPlaces:
     def test_a_decimal_with_a_fifth_place_is_caught(self, value):
         assert has_more_than_four_places(value) is True
 
+    @pytest.mark.parametrize("value", [Decimal("1e999999"), Decimal("-9.99999e999999"), Decimal("0E-10")])
+    def test_a_decimal_at_the_edge_of_the_exponent_range_has_no_fifth_place(self, value):
+        assert has_more_than_four_places(value) is False
+
     @pytest.mark.parametrize("value", [49.99000001, 1e-9, 123456789012.12345])
     def test_a_short_or_large_float_with_a_fifth_place_is_caught(self, value):
         assert has_more_than_four_places(value) is True

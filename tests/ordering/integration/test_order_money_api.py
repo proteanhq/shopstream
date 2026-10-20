@@ -55,6 +55,11 @@ class TestOrderMoneyIn:
         response = _post_order(client, unit_price, 5.0)
         assert response.status_code == 422
 
+    @pytest.mark.parametrize("shipping_cost", ["1e999999", "1e30"])
+    def test_an_amount_too_large_for_money_is_rejected(self, client, shipping_cost):
+        response = _post_order(client, 19.99, shipping_cost)
+        assert response.status_code == 422
+
 
 class TestOrderMoneyOut:
     def test_order_detail_sends_money_as_4_place_strings(self, client):

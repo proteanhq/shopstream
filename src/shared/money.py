@@ -114,6 +114,16 @@ def money_fields_as_text(data: dict[str, Any], *keys: str) -> dict[str, Any]:
     return data
 
 
+def _decimal_places(amount: Decimal) -> int:
+    # Read from the digits and exponent, not by scaling: Decimal("1e999999")
+    # scaled by 10**4 overflows the decimal context and raises Overflow.
+    _, digits, exponent = amount.as_tuple()
+    significant = "".join(map(str, digits)).rstrip("0")
+    if not significant:
+        return 0
+    return -(int(exponent) + len(digits) - len(significant))
+
+
 def has_more_than_four_places(value: float | Decimal) -> bool:
     """Tell whether an amount carries a fifth decimal place or beyond.
 
@@ -141,8 +151,7 @@ def has_more_than_four_places(value: float | Decimal) -> bool:
     True
     """
     amount = value if isinstance(value, Decimal) else Decimal(repr(value))
-    scaled = amount.scaleb(4)
-    if scaled.is_finite() and scaled == scaled.to_integral_value():
+    if amount.is_finite() and _decimal_places(amount) <= 4:
         return False
     if len(amount.normalize().as_tuple().digits) < _FLOAT_ERROR_DIGITS:
         return True
