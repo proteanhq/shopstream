@@ -33,7 +33,7 @@ class CategoryProducts:
     updated_at: datetime | None = DateTime()
 
 
-@catalogue.projector(projector_for=CategoryProducts, aggregates=[Product, Category])
+@catalogue.projector(projector_for=CategoryProducts, aggregates=[Product, Category], idempotent=True)
 class CategoryProductsProjector:
     @on(CategoryCreated)
     def on_category_created(self, event: CategoryCreated) -> None:

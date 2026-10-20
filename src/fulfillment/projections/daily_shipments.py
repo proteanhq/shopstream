@@ -49,7 +49,7 @@ def _get_or_create(date_str: str, timestamp: datetime) -> DailyShipmentsView:
     )
 
 
-@fulfillment.projector(projector_for=DailyShipmentsView, aggregates=[Fulfillment])
+@fulfillment.projector(projector_for=DailyShipmentsView, aggregates=[Fulfillment], idempotent=True)
 class DailyShipmentsProjector:
     @on(FulfillmentCreated)
     def on_fulfillment_created(self, event: FulfillmentCreated) -> None:

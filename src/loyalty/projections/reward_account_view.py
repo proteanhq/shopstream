@@ -29,7 +29,7 @@ class RewardAccountView:
     updated_at: datetime | None = DateTime()
 
 
-@loyalty.projector(projector_for=RewardAccountView, aggregates=[RewardAccount])
+@loyalty.projector(projector_for=RewardAccountView, aggregates=[RewardAccount], idempotent=True)
 class RewardAccountViewProjector:
     @on(RewardAccountEnrolled)
     def on_enrolled(self, event: RewardAccountEnrolled) -> None:

@@ -65,7 +65,7 @@ def _add_entry(
     )
 
 
-@ordering.projector(projector_for=OrderTimeline, aggregates=[Order])
+@ordering.projector(projector_for=OrderTimeline, aggregates=[Order], idempotent=True)
 class OrderTimelineProjector:
     @on(OrderCreated)
     def on_order_created(self, event: OrderCreated) -> None:

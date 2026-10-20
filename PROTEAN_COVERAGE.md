@@ -24,6 +24,8 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | in-domain `@event_handler` | ✅ | inventory `EventAuditHandler` (+ notifications) |
 | `@handle("$any")` wildcard | ✅ | inventory `EventAuditHandler` (sync + direct dispatch; **#1023** fixed on main) |
 | `@projection` + `@projector` (DB) | ✅ | ~48; loyalty RewardAccountView, CampaignCatalog (projects the event-sourced PromoCampaign) |
+| `@projector(idempotent=True)` (consume-side dedup) | ✅ | 25 accumulating projectors across eight contexts, such as payments `DailyRevenueProjector` and inventory `ProductAvailabilityProjector`. A redelivered event is applied once (`verification/oracles/test_p20_projector_idempotency.py`). `protean projection rebuild` skips their replayed events, because it keeps the markers (`verification/regression/test_protean_regressions.py::test_rebuild_restores_a_projection_whose_projector_is_idempotent`, not filed yet) |
+| `protean idempotency cleanup` + `[consume_idempotency.cleanup]` | ✅ | `make idempotency-cleanup` prunes markers older than 168 hours in each context with an idempotent projector (`verification/oracles/test_idempotency_cleanup.py`) |
 | `@projection(cache=...)` | ✅ | loyalty PointsLeaderboard (`cache="loyalty"`) — write via `cache_for().add()`, read via `view_for().get()` (runs on Postgres + memory; **#1034** fixed on main) |
 | `@query` + `@query_handler` (`@read`) | ✅ | reviews/ordering/fulfillment/identity + loyalty `*_queries.py` (incl. `campaign_catalog_queries.py` filtered/ordered list) |
 | cross-aggregate read in a write handler | ✅ | loyalty `PointsHandler.earn` reads `CampaignCatalog` (active points-multiplier) via `campaign/multiplier.py` |

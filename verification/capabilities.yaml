@@ -40,11 +40,22 @@ capabilities:
     status: covered   # T2.1: snapshot load == full replay, and snapshot+tail == live (PromoCampaign)
 
   - name: projector_read_model
-    taught_by: src/reviews/projections/product_rating.py
+    taught_by: src/payments/projections/daily_revenue.py
     guarded_by: verification/oracles/test_p20_projector_idempotency.py
     property: "delivering one event N times == delivering it once (P20)"
     source: A
-    status: covered   # T0.3: projector made idempotent; P20 check passes
+    # Two kinds of protection, both guarded by P20. A projector marked
+    # idempotent=True gets a processed-message marker per (message id, handler)
+    # and skips a redelivery. ProductRatingProjector instead tracks which
+    # reviews it has counted.
+    status: covered
+
+  - name: consume_idempotency_cleanup
+    taught_by: src/payments/domain.toml
+    guarded_by: verification/oracles/test_idempotency_cleanup.py
+    property: "cleanup deletes markers older than retention_hours and keeps the rest"
+    source: A
+    status: covered   # make idempotency-cleanup runs it per domain
 
   - name: projection_convergence
     taught_by: src/inventory/projections/inventory_level.py

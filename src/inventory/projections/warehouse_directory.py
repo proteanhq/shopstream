@@ -30,7 +30,7 @@ class WarehouseDirectory:
     updated_at: datetime | None = DateTime()
 
 
-@inventory.projector(projector_for=WarehouseDirectory, aggregates=[Warehouse])
+@inventory.projector(projector_for=WarehouseDirectory, aggregates=[Warehouse], idempotent=True)
 class WarehouseDirectoryProjector:
     @on(WarehouseCreated)
     def on_warehouse_created(self, event: WarehouseCreated) -> None:

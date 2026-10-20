@@ -848,3 +848,54 @@ def test_1682_value_error_from_a_sync_handler_is_not_a_version_conflict():
     assert outcome.__cause__ is failure
     assert handled == ["fragile"], f"the command body ran {len(handled)} times"
     assert saved == 1
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="projection rebuild keeps the processed-message markers, so an idempotent projector skips every replayed event",
+)
+@pytest.mark.usefixtures("payments_ctx")
+def test_rebuild_restores_a_projection_whose_projector_is_idempotent():
+    """Protean finding (not yet filed upstream): a rebuild empties an idempotent projector's read model.
+
+    `rebuild_projection` (`protean/utils/projection_rebuilder.py`) deletes the
+    projection's rows, then replays every stored event through `projector._handle`.
+    It leaves the `processed_message` table alone. For a projector declared with
+    `idempotent=True`, the `@on` wrapper finds the marker the live delivery wrote,
+    and skips the handler. So the rebuilt read model stays empty, and the result
+    still counts each skipped event as dispatched. `DailyRevenueProjector` is one
+    of the projectors this affects.
+    """
+    from protean import current_domain
+    from protean.utils.projection_rebuilder import rebuild_projection
+
+    from payments.payment.initiation import InitiatePayment
+    from payments.payment.webhook import ProcessPaymentWebhook
+    from payments.projections.daily_revenue import DailyRevenue, DailyRevenueProjector
+
+    payment_id = current_domain.process(
+        InitiatePayment(
+            order_id="ord-rebuild",
+            customer_id="cust-rebuild",
+            amount=40.0,
+            currency="USD",
+            payment_method_type="credit_card",
+            last4="4242",
+            idempotency_key="rebuild-1",
+        ),
+        asynchronous=False,
+    )
+    current_domain.process(
+        ProcessPaymentWebhook(payment_id=payment_id, gateway_transaction_id="txn-rebuild", gateway_status="succeeded"),
+        asynchronous=False,
+    )
+    repo = current_domain.repository_for(DailyRevenue)
+    if not DailyRevenueProjector.meta_.idempotent or [r.transaction_count for r in repo.query.all().items] != [1]:
+        pytest.fail("precondition: the idempotent projector counted the payment once")
+
+    result = rebuild_projection(current_domain, DailyRevenue)
+
+    if result.errors:
+        pytest.fail(f"precondition: the rebuild ran without errors: {result.errors}")
+    assert [r.transaction_count for r in repo.query.all().items] == [1]

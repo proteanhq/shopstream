@@ -32,7 +32,7 @@ class ShipmentTrackingView:
     delivered_at: datetime | None = DateTime()
 
 
-@fulfillment.projector(projector_for=ShipmentTrackingView, aggregates=[Fulfillment])
+@fulfillment.projector(projector_for=ShipmentTrackingView, aggregates=[Fulfillment], idempotent=True)
 class ShipmentTrackingProjector:
     @on(ShipmentHandedOff)
     def on_shipment_handed_off(self, event: ShipmentHandedOff) -> None:

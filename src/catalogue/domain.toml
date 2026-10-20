@@ -43,6 +43,14 @@ tick_interval = 0.01
 # and another field type would change how every stored Price is laid out.
 VALUE_OBJECT_MUTABLE_FIELD = 1
 
+# Consume-side idempotency: idempotent projectors record one processed-message
+# marker per event and handler, so a redelivered event is skipped. Markers are
+# only needed while a redelivery can still arrive. `make idempotency-cleanup`
+# deletes markers older than retention_hours (one week), batch_size rows at a time.
+[consume_idempotency.cleanup]
+retention_hours = 168
+batch_size = 5000
+
 # Default Database Configuration (used in development / PROTEAN_ENV unset)
 [databases.default]
 provider = "postgresql"

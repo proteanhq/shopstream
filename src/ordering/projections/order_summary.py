@@ -42,7 +42,7 @@ class OrderSummary:
     updated_at: datetime | None = DateTime()
 
 
-@ordering.projector(projector_for=OrderSummary, aggregates=[Order])
+@ordering.projector(projector_for=OrderSummary, aggregates=[Order], idempotent=True)
 class OrderSummaryProjector:
     @on(OrderCreated)
     def on_order_created(self, event: OrderCreated) -> None:

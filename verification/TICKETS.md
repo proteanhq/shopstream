@@ -43,7 +43,8 @@ whether it gates PRs / nightly / releases.
   (`counted_reviews`) and treats a redelivered event as a no-op; stats are
   derived from that set. The xfail is removed — the check now passes.
 - The framework-level fix (consume-side dedup) is separate: proteanhq/protean#1042.
-- Follow-up: extend the same check to the other accumulating projectors.
+- Extended to the other accumulating projectors, which now use Protean's
+  `idempotent=True` option. `make idempotency-cleanup` prunes old markers.
 
 **T0.4 - Set up the `verification/` tree and the `src/` lint** `[-]` - DONE
 - The `verification/` tree exists (oracles/, contracts/, conftest).

@@ -33,9 +33,18 @@ These are NOT part of the default `make test`. Run them on purpose:
 `test_p20_projector_idempotency.py` is the worked example of the approach: its
 expected value is computed by hand (one approved review -> count 1), independent
 of the event stream, so it catches a real bug (a redelivered event double-counts)
-that a "projection == fold(events)" check cannot. It passes because
-`ProductRatingProjector` dedupes on its own `counted_reviews` (ticket T0.3). It
-does not use Protean's `idempotent` projector option from proteanhq/protean#1042.
+that a "projection == fold(events)" check cannot. Each case reads the stored
+event back from the event store and hands it to the projector several times.
+The stored event carries its message id, which Protean's dedup needs.
+
+The projectors pass in one of two ways. `ProductRatingProjector` dedupes on its
+own `counted_reviews` (ticket T0.3). The other accumulating projectors are
+marked `idempotent=True`: Protean records a processed-message marker per
+message id and handler, in the same unit of work as the read-model write, and
+skips a message it has already marked. `test_idempotency_cleanup.py` checks that
+`cleanup_processed_messages`, which `make idempotency-cleanup` runs, deletes old
+markers and keeps recent ones. It also runs the target's command for each domain
+the target lists.
 
 ## Adding a check
 

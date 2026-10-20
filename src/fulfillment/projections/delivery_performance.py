@@ -33,7 +33,7 @@ def _date_key(dt: datetime) -> str:
     return dt.strftime("%Y-%m-%d") if dt else ""
 
 
-@fulfillment.projector(projector_for=DeliveryPerformanceView, aggregates=[Fulfillment])
+@fulfillment.projector(projector_for=DeliveryPerformanceView, aggregates=[Fulfillment], idempotent=True)
 class DeliveryPerformanceProjector:
     @on(ShipmentHandedOff)
     def on_shipment_handed_off(self, event: ShipmentHandedOff) -> None:

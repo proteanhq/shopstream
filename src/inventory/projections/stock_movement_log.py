@@ -62,7 +62,7 @@ def _add_entry(
     )
 
 
-@inventory.projector(projector_for=StockMovementLog, aggregates=[InventoryItem])
+@inventory.projector(projector_for=StockMovementLog, aggregates=[InventoryItem], idempotent=True)
 class StockMovementLogProjector:
     @on(StockInitialized)
     def on_stock_initialized(self, event: StockInitialized) -> None:

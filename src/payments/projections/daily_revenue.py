@@ -23,7 +23,7 @@ class DailyRevenue:
     refund_count: int = Integer(default=0)
 
 
-@payments.projector(projector_for=DailyRevenue, aggregates=[Payment])
+@payments.projector(projector_for=DailyRevenue, aggregates=[Payment], idempotent=True)
 class DailyRevenueProjector:
     @on(PaymentSucceeded)
     def on_payment_succeeded(self, event: PaymentSucceeded) -> None:

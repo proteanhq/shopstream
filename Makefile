@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas events-catalog docs-generate docs-catalog docs-check doctest ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-loyalty eventstore-verify verify-observatory verify-observatory-skip-seed verify-domain-visualizer verify-domain-visualizer-skip-seed verify-domains
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas events-catalog docs-generate docs-catalog docs-check doctest ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-loyalty eventstore-verify verify-observatory verify-observatory-skip-seed verify-domain-visualizer verify-domain-visualizer-skip-seed verify-domains idempotency-cleanup
 
 # Default target
 help: ## Show this help message
@@ -481,6 +481,7 @@ drop-db: ## Drop database schemas for all domains
 	uv run protean db drop --domain fulfillment.domain --yes
 	uv run protean db drop --domain reviews.domain --yes
 	uv run protean db drop --domain notifications.domain --yes
+	uv run protean db drop --domain loyalty.domain --yes
 
 truncate-db: ## Delete all data from all tables (preserves schema)
 	uv run protean db truncate --domain identity.domain --yes
@@ -491,6 +492,14 @@ truncate-db: ## Delete all data from all tables (preserves schema)
 	uv run protean db truncate --domain fulfillment.domain --yes
 	uv run protean db truncate --domain reviews.domain --yes
 	uv run protean db truncate --domain notifications.domain --yes
+	uv run protean db truncate --domain loyalty.domain --yes
+
+idempotency-cleanup: ## Delete processed-message markers older than each domain's retention window (run from cron)
+	@failed=0; \
+	for d in identity catalogue ordering inventory payments fulfillment notifications loyalty; do \
+		PYTHONPATH=src uv run protean idempotency cleanup --domain=$$d.domain || failed=1; \
+	done; \
+	exit $$failed
 
 # Protean Commands
 shell: ## Start Protean shell

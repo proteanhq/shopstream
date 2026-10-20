@@ -48,7 +48,7 @@ def _get_or_create(date_key: str) -> DailyOrderStats:
     )
 
 
-@ordering.projector(projector_for=DailyOrderStats, aggregates=[Order])
+@ordering.projector(projector_for=DailyOrderStats, aggregates=[Order], idempotent=True)
 class DailyOrderStatsProjector:
     @on(OrderCreated)
     def on_order_created(self, event: OrderCreated) -> None:

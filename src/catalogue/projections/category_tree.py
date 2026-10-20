@@ -28,7 +28,7 @@ class CategoryTree:
     product_count: int = Integer(default=0)
 
 
-@catalogue.projector(projector_for=CategoryTree, aggregates=[Category, Product])
+@catalogue.projector(projector_for=CategoryTree, aggregates=[Category, Product], idempotent=True)
 class CategoryTreeProjector:
     def _build_breadcrumb(self, _category_id: str, name: str, parent_category_id: str | None) -> list[str]:
         """Build a breadcrumb trail by walking the parent chain."""
