@@ -51,7 +51,7 @@ class RewardAccountViewProjector:
         repo = current_domain.repository_for(RewardAccountView)
         view = repo.get(event.account_id)
         view.points_balance = event.balance_after
-        view.lifetime_points = view.lifetime_points + event.amount
+        view.lifetime_points = view.lifetime_points + event.points
         view.updated_at = event.occurred_at
         repo.add(view)
 

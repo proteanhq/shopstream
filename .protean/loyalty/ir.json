@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:78c8bd3bb97145a2ba6ce3a095b15b8d6388bfe4aaceea6183b4a69f45b48018",
+  "checksum": "sha256:b6d1b272e7d4732db955ea9212329b1660cee3bdf8c909983b954293c0e81818",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -1586,6 +1586,9 @@
         "loyalty.reward.events.MembershipCardIssued": {
           "__type__": "Loyalty.MembershipCardIssued.v1",
           "__version__": 1,
+          "deprecated": {
+            "since": "0.1.0"
+          },
           "element_type": "EVENT",
           "fields": {
             "account_id": {
@@ -1614,6 +1617,38 @@
           "is_fact_event": false,
           "module": "loyalty.reward.events",
           "name": "MembershipCardIssued",
+          "part_of": "loyalty.reward.reward_account.RewardAccount",
+          "superseded_by": "MembershipCardIssuedV2"
+        },
+        "loyalty.reward.events.MembershipCardIssuedV2": {
+          "__type__": "Loyalty.MembershipCardIssuedV2.v1",
+          "__version__": 1,
+          "element_type": "EVENT",
+          "fields": {
+            "account_id": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "type": "String"
+            },
+            "card_number": {
+              "kind": "standard",
+              "max_length": 255,
+              "min_length": 1,
+              "required": true,
+              "type": "String"
+            },
+            "issued_on": {
+              "kind": "standard",
+              "required": true,
+              "type": "Date"
+            }
+          },
+          "fqn": "loyalty.reward.events.MembershipCardIssuedV2",
+          "is_fact_event": false,
+          "module": "loyalty.reward.events",
+          "name": "MembershipCardIssuedV2",
           "part_of": "loyalty.reward.reward_account.RewardAccount"
         },
         "loyalty.reward.events.PointsEarned": {
@@ -1627,11 +1662,6 @@
               "min_length": 1,
               "required": true,
               "type": "String"
-            },
-            "amount": {
-              "kind": "standard",
-              "required": true,
-              "type": "Integer"
             },
             "balance_after": {
               "kind": "standard",
@@ -1647,6 +1677,14 @@
               "kind": "standard",
               "required": true,
               "type": "DateTime"
+            },
+            "points": {
+              "kind": "standard",
+              "renamed_from": [
+                "amount"
+              ],
+              "required": true,
+              "type": "Integer"
             },
             "reason": {
               "kind": "standard",
@@ -1673,11 +1711,6 @@
               "required": true,
               "type": "String"
             },
-            "amount": {
-              "kind": "standard",
-              "required": true,
-              "type": "Integer"
-            },
             "balance_after": {
               "kind": "standard",
               "required": true,
@@ -1692,6 +1725,14 @@
               "kind": "standard",
               "required": true,
               "type": "DateTime"
+            },
+            "points": {
+              "kind": "standard",
+              "renamed_from": [
+                "amount"
+              ],
+              "required": true,
+              "type": "Integer"
             },
             "reason": {
               "kind": "standard",
@@ -1851,11 +1892,6 @@
             "required": true,
             "type": "String"
           },
-          "amount": {
-            "kind": "standard",
-            "required": true,
-            "type": "Integer"
-          },
           "balance_after": {
             "kind": "standard",
             "required": true,
@@ -1870,6 +1906,14 @@
             "kind": "standard",
             "required": true,
             "type": "DateTime"
+          },
+          "points": {
+            "kind": "standard",
+            "renamed_from": [
+              "amount"
+            ],
+            "required": true,
+            "type": "Integer"
           },
           "reason": {
             "kind": "standard",
@@ -1890,11 +1934,6 @@
             "required": true,
             "type": "String"
           },
-          "amount": {
-            "kind": "standard",
-            "required": true,
-            "type": "Integer"
-          },
           "balance_after": {
             "kind": "standard",
             "required": true,
@@ -1909,6 +1948,14 @@
             "kind": "standard",
             "required": true,
             "type": "DateTime"
+          },
+          "points": {
+            "kind": "standard",
+            "renamed_from": [
+              "amount"
+            ],
+            "required": true,
+            "type": "Integer"
           },
           "reason": {
             "kind": "standard",
@@ -2182,6 +2229,18 @@
       ]
     },
     {
+      "category": "deprecation",
+      "code": "DEPRECATED_ELEMENT",
+      "element": "loyalty.reward.events.MembershipCardIssued",
+      "level": "info",
+      "message": "`MembershipCardIssued` is deprecated since v0.1.0; superseded by `MembershipCardIssuedV2`",
+      "rule": {
+        "fix": "Migrate to the replacement element before the scheduled removal version.",
+        "rationale": "A deprecated element is scheduled for removal; code depending on it will break at the removal version."
+      },
+      "suggestion": "Migrate to the replacement element before the scheduled removal version."
+    },
+    {
       "category": "handler_completeness",
       "code": "UNRAISED_EVENT",
       "element": "loyalty.redemption.events.PointsReserved",
@@ -2283,6 +2342,22 @@
       "element": "loyalty.reward.events.MembershipCardIssued",
       "level": "info",
       "message": "Event MembershipCardIssued is raised by no aggregate or entity method",
+      "rule": {
+        "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+        "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
+      },
+      "suggestion": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
+      "teaching_skills": [
+        "event",
+        "refactor-introduce-events"
+      ]
+    },
+    {
+      "category": "handler_completeness",
+      "code": "UNRAISED_EVENT",
+      "element": "loyalty.reward.events.MembershipCardIssuedV2",
+      "level": "info",
+      "message": "Event MembershipCardIssuedV2 is raised by no aggregate or entity method",
       "rule": {
         "fix": "Raise the event from the aggregate or entity method that makes the change it records, or remove the event if nothing produces it.",
         "rationale": "An event that no aggregate or entity method raises is declared and wired but produced by none of them. The check reads only aggregate and entity method bodies, so an event raised from a command handler, subscriber, or module-level factory is outside its scope and still shows here."
@@ -2474,6 +2549,7 @@
       "loyalty.redemption.events.VoucherIssuanceFailed",
       "loyalty.redemption.events.VoucherIssued",
       "loyalty.reward.events.MembershipCardIssued",
+      "loyalty.reward.events.MembershipCardIssuedV2",
       "loyalty.reward.events.PointsEarned",
       "loyalty.reward.events.PointsRedeemed",
       "loyalty.reward.events.RewardAccountClosed",

@@ -44,7 +44,7 @@ class TestPointsRedeemedHandler:
                 {
                     "account_id": "acc-2",
                     "customer_id": "cust-redeem-1",
-                    "amount": 200,
+                    "points": 200,
                     "balance_after": 50,
                     "reason": "voucher",
                 },
@@ -52,10 +52,29 @@ class TestPointsRedeemedHandler:
         )
         assert len(_notifications_for("cust-redeem-1", NotificationType.POINTS_REDEEMED.value)) >= 1
 
+    def test_points_go_into_the_amount_context_key(self):
+        LoyaltyEventsSubscriber()(
+            _message("Loyalty.PointsRedeemed.v1", {"customer_id": "cust-redeem-2", "points": 10, "balance_after": 5})
+        )
+        notifications = _notifications_for("cust-redeem-2", NotificationType.POINTS_REDEEMED.value)
+        assert len(notifications) > 0, "Expected a redemption notification"
+        for notification in notifications:
+            assert notification.context_data["amount"] == "10"
+
+    def test_old_amount_field_is_not_read(self):
+        # The subscriber reads only `points`. A payload in the old shape leaves the count blank.
+        LoyaltyEventsSubscriber()(
+            _message("Loyalty.PointsRedeemed.v1", {"customer_id": "cust-redeem-3", "amount": 10, "balance_after": 5})
+        )
+        notifications = _notifications_for("cust-redeem-3", NotificationType.POINTS_REDEEMED.value)
+        assert len(notifications) > 0, "Expected a redemption notification"
+        for notification in notifications:
+            assert notification.context_data["amount"] == ""
+
     def test_missing_customer_id_is_a_noop(self):
         # Should not raise; simply skips notification creation.
-        LoyaltyEventsSubscriber()(_message("Loyalty.PointsRedeemed.v1", {"account_id": "acc-3", "amount": 10}))
+        LoyaltyEventsSubscriber()(_message("Loyalty.PointsRedeemed.v1", {"account_id": "acc-3", "points": 10}))
 
     def test_unrelated_event_type_is_ignored(self):
-        LoyaltyEventsSubscriber()(_message("Loyalty.PointsEarned.v1", {"customer_id": "cust-earn-1", "amount": 5}))
+        LoyaltyEventsSubscriber()(_message("Loyalty.PointsEarned.v1", {"customer_id": "cust-earn-1", "points": 5}))
         assert _notifications_for("cust-earn-1", NotificationType.TIER_UPGRADED.value) == []

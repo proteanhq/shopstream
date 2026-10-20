@@ -21,6 +21,7 @@ from loyalty.redemption.events import (
 from loyalty.redemption.redemption import Redemption
 from loyalty.reward.events import (
     MembershipCardIssued,
+    MembershipCardIssuedV2,
     PointsEarned,
     PointsRedeemed,
     RewardAccountClosed,
@@ -37,6 +38,7 @@ _EVENT_CLASSES = {
         PointsRedeemed,
         TierUpgraded,
         MembershipCardIssued,
+        MembershipCardIssuedV2,
         RewardAccountClosed,
         CampaignLaunched,
         CampaignActivated,

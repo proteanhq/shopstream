@@ -512,6 +512,23 @@ class TestLoyaltyProducerOutbox:
         assert all(r.stream_name.startswith("loyalty::reward_account-") for r in earned)
         assert earned[0].data["customer_id"] == "cust-obx-earn"
 
+    def test_points_redeemed_carries_points_on_external_bus(self, loyalty_ctx):
+        """The global PointsRedeemed row carries the count under the key Notifications reads."""
+        from loyalty.reward.enrollment import EnrollRewardAccount
+        from loyalty.reward.points import EarnPoints, RedeemPoints
+
+        account_id = current_domain.process(EnrollRewardAccount(customer_id="cust-obx-redeem"), asynchronous=False)
+        current_domain.process(EarnPoints(account_id=account_id, amount=100, reason="order"), asynchronous=False)
+        current_domain.process(RedeemPoints(account_id=account_id, amount=10), asynchronous=False)
+
+        records = current_domain._get_outbox_repo("default").find_unprocessed()
+        external = [r for r in records if r.type == "Loyalty.PointsRedeemed.v1" and r.target_broker == "global"]
+
+        # LoyaltyEventsSubscriber in Notifications reads `points`, with no fallback to `amount`.
+        assert len(external) == 1
+        assert external[0].data["points"] == 10
+        assert "amount" not in external[0].data
+
     def test_tier_upgrade_event_published(self, loyalty_ctx):
         """Earning past a tier threshold publishes a TierUpgraded event to the external bus."""
         from loyalty.reward.enrollment import EnrollRewardAccount

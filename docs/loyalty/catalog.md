@@ -306,6 +306,19 @@
 | card_number | String | Yes | max_length=255, min_length=1 |
 | issued_on | String | Yes | max_length=255, min_length=1 |
 
+#### MembershipCardIssuedV2
+
+- **Type**: `Loyalty.MembershipCardIssuedV2.v1`
+- **Version**: 1
+- **Published**: No
+- **Fact Event**: No
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| account_id | String | Yes | max_length=255, min_length=1 |
+| card_number | String | Yes | max_length=255, min_length=1 |
+| issued_on | Date | Yes | — |
+
 #### PointsEarned
 
 - **Type**: `Loyalty.PointsEarned.v1`
@@ -316,10 +329,10 @@
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
 | account_id | String | Yes | max_length=255, min_length=1 |
-| amount | Integer | Yes | — |
 | balance_after | Integer | Yes | — |
 | customer_id | String | No | max_length=255 |
 | occurred_at | DateTime | Yes | — |
+| points | Integer | Yes | — |
 | reason | String | No | max_length=255 |
 
 #### PointsRedeemed
@@ -332,10 +345,10 @@
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
 | account_id | String | Yes | max_length=255, min_length=1 |
-| amount | Integer | Yes | — |
 | balance_after | Integer | Yes | — |
 | customer_id | String | No | max_length=255 |
 | occurred_at | DateTime | Yes | — |
+| points | Integer | Yes | — |
 | reason | String | No | max_length=255 |
 
 #### RewardAccountClosed
