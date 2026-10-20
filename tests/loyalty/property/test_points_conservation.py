@@ -19,8 +19,11 @@ from loyalty.reward.transfer import TransferPoints
 
 # The autouse `_ctx` fixture (domain context) is function-scoped and shared across all
 # Hypothesis examples in a test — intended here, so silence the health check.
+# No deadline: one example can take over 200ms on a loaded CI runner and pass on the
+# retry, which Hypothesis reports as a flaky failure.
 _SETTINGS = settings(
     max_examples=200,
+    deadline=None,
     suppress_health_check=[HealthCheck.function_scoped_fixture],
 )
 
