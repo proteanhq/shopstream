@@ -3,5 +3,5 @@ package payments.payment.payment;
 
 message Money {
   optional string currency = 1;
-  optional double value = 2;
+  optional string value = 2;
 }

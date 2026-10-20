@@ -7,6 +7,6 @@ message DailyOrderStats {
   optional int64 orders_completed = 3;
   optional int64 orders_created = 4;
   optional int64 orders_refunded = 5;
-  optional double total_refunds = 6;
-  optional double total_revenue = 7;
+  optional string total_refunds = 6;
+  optional string total_revenue = 7;
 }

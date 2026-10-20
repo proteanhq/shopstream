@@ -17,7 +17,12 @@
       "name": "net_revenue",
       "type": [
         "null",
-        "double"
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
       ]
     },
     {
@@ -33,7 +38,12 @@
       "name": "total_refunded",
       "type": [
         "null",
-        "double"
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
       ]
     },
     {
@@ -41,7 +51,12 @@
       "name": "total_revenue",
       "type": [
         "null",
-        "double"
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
       ]
     },
     {

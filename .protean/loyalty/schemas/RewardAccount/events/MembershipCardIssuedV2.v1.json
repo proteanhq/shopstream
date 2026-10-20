@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "properties": {
+    "account_id": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "card_number": {
+      "maxLength": 255,
+      "minLength": 1,
+      "type": "string"
+    },
+    "issued_on": {
+      "format": "date",
+      "type": "string"
+    }
+  },
+  "required": [
+    "account_id",
+    "card_number",
+    "issued_on"
+  ],
+  "title": "MembershipCardIssuedV2",
+  "type": "object",
+  "x-protean-aggregate": "loyalty.reward.reward_account.RewardAccount",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "loyalty.reward.events.MembershipCardIssuedV2",
+  "x-protean-type": "Loyalty.MembershipCardIssuedV2.v1",
+  "x-protean-version": 1
+}
