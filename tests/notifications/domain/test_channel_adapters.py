@@ -3,6 +3,7 @@
 import pytest
 
 from notifications.channel import get_channel, reset_channels
+from notifications.channel.errors import ChannelUnavailableError
 from notifications.channel.fake_email import FakeEmailAdapter
 from notifications.channel.fake_push import FakePushAdapter
 from notifications.channel.fake_slack import FakeSlackAdapter
@@ -152,3 +153,44 @@ class TestChannelRegistry:
         reset_channels()
         a2 = get_channel(NotificationChannel.EMAIL.value)
         assert a1 is not a2
+
+
+def _send(adapter) -> dict:
+    if isinstance(adapter, FakeEmailAdapter):
+        return adapter.send(to="a@b.com", subject="Hi", body="Hello")
+    if isinstance(adapter, FakeSMSAdapter):
+        return adapter.send(to="+15551234567", body="Hello")
+    if isinstance(adapter, FakePushAdapter):
+        return adapter.send(device_token="token-1", title="Hi", body="Hello")
+    return adapter.send(channel="#ops", message="Hello")
+
+
+ADAPTERS = [FakeEmailAdapter, FakeSMSAdapter, FakePushAdapter, FakeSlackAdapter]
+
+
+class TestOutageMode:
+    @pytest.mark.parametrize("adapter_cls", ADAPTERS)
+    def test_send_raises_channel_unavailable_during_an_outage(self, adapter_cls):
+        adapter = adapter_cls()
+        adapter.set_outage(True)
+
+        with pytest.raises(ChannelUnavailableError):
+            _send(adapter)
+
+    @pytest.mark.parametrize("adapter_cls", ADAPTERS)
+    def test_send_succeeds_once_the_outage_is_switched_off(self, adapter_cls):
+        adapter = adapter_cls()
+        adapter.set_outage(True)
+        adapter.set_outage(False)
+
+        assert _send(adapter)["status"] == "sent"
+
+    @pytest.mark.parametrize("adapter_cls", ADAPTERS)
+    def test_reset_clears_the_outage(self, adapter_cls):
+        adapter = adapter_cls()
+        adapter.set_outage(True)
+
+        adapter.reset()
+
+        assert adapter.outage is False
+        assert _send(adapter)["status"] == "sent"

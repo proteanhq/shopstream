@@ -97,9 +97,9 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | version-retry (OCC auto-retry) | ✅ | `[server.version_retry]` in ordering/payments; guarded by `verification/oracles/test_no_lost_updates.py` (multi-process Postgres) |
 | external Redis bus (shared, DB 15) | ✅ | `[brokers.global]` per domain.toml; `[outbox] external_brokers = ["global"]` |
 | `sequential_by` partitioned/ordered consumer | 🚧 | absent. ShopStream reproduces per-stream out-of-order delivery under concurrent load (`PROTEAN_v0.16_NOTES.md` item 9) and does not yet adopt `sequential_by` (Protean #830, epic #826). Highest-value gap |
-| circuit breaker | 🚧 | absent. `transient_retry` (payments) and `version_retry` (ordering/payments) are the only resilience knobs wired. The follow-up is a breaker exerciser |
-| stream retention / trimming (MAXLEN) | 🚧 | absent. No stream-trim configuration on any broker; streams grow unbounded in the demo. The follow-up is a retention exerciser |
-| custom subscription profiles | 🚧 | absent. Only `default_subscription_type` and priority-lane routing are configured; no per-subscription profile. The follow-up is a profile exerciser |
+| circuit breaker | ✅ | Protean's hardcoded defaults already turn a breaker on (10 failures, 60 s); the `shopstream` profile inherits the same values from `production`. `[server.subscriptions.NotificationDispatcher]` in `src/notifications/domain.toml` overrides it to 5 failures and 30 s: a channel outage (`ChannelUnavailableError`) fails the dispatcher on every message. `tests/notifications/integration/test_dispatcher_circuit_breaker.py` (real Redis) drives CLOSED → OPEN → HALF_OPEN → CLOSED, and a failed probe back to OPEN until the oldest message is dead-lettered. It reads through the lanes-mode primary read; the backfill lane is not driven |
+| stream retention / trimming (MAXLEN) | ⚠️ | `retention_maxlen = 50000` in the `shopstream` profile, which every engine subscription resolves to; `tests/integration/test_subscription_profile.py` checks the resolved value. No ShopStream test runs a trim through a subscription. The trim with two or more consumer groups deletes entries a group has not acknowledged, pinned by `verification/regression/test_protean_regressions.py::test_stream_trim_keeps_entries_a_consumer_group_has_not_acknowledged`. `retention_maxlen` caps neither the external bus (DB 15), because broker subscriptions never trim, nor the DLQ streams, which Protean's DLQ maintenance trims by age instead. Checking a live stream's length (`XLEN`) stays a by-hand check |
+| custom subscription profiles | ✅ | `[server.profiles.shopstream]` (`inherits = "production"`) and `default_subscription_profile = "shopstream"` in all nine domain.toml files; `tests/integration/test_subscription_profile.py` resolves every context's handlers through `ConfigResolver` |
 | CloudEvents envelope format | 🚧 | absent. Cross-domain events use Protean's native metadata-headers dict payload; the CloudEvents serialization is not exercised. The follow-up is a CloudEvents exerciser |
 
 ## Observability & diagnostics
@@ -149,7 +149,7 @@ is covered by `given()` unit tests and by end-to-end completion tests (now perma
 
 ## Follow-ups (need design or infrastructure)
 
-**Coverage-gap backlog** (the 🚧 rows in the tables above, features that still need a ShopStream example, mapped 2026-08-16): temporal queries, `sequential_by` partitioned consumer, circuit breaker, stream retention/trimming, custom subscription profiles, CloudEvents envelope, fitness functions, plus `Auto(increment=True)`.
+**Coverage-gap backlog** (the 🚧 rows in the tables above, features that still need a ShopStream example, mapped 2026-08-16): temporal queries, `sequential_by` partitioned consumer, CloudEvents envelope, fitness functions, plus `Auto(increment=True)`.
 
 - **`Auto(increment)`**: a loyalty exerciser + regression test (see the table above; the id-reflection wart is fixed on main via #1056).
 - **Infra wiring — done.** loyalty is fully wired: `app.py`, `.protean/config.toml [domains]`,

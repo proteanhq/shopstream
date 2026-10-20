@@ -114,7 +114,7 @@ make engine-ordering   # Terminal 3
 4. HTTP response returns to client
 5. Engine's OutboxProcessor picks up pending outbox records and publishes to Redis Streams
 6. Engine's StreamSubscription reads from Redis, invokes projectors to update read models
-7. On failure, messages are retried with exponential backoff, then moved to a DLQ
+7. On failure, messages are retried after a fixed delay (`retry_delay_seconds`), then moved to a DLQ
 
 ### Process Model
 

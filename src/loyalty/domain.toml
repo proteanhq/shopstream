@@ -14,6 +14,19 @@ snapshot_threshold = 5
 # Engine subscriptions use Redis Streams (outbox → broker → projectors).
 [server]
 default_subscription_type = "stream"
+default_subscription_profile = "shopstream"
+
+# Every engine subscription starts from this profile: production's batch size,
+# retries, DLQ and circuit breaker, with a stream cap of 50000 entries instead of
+# production's 100000. Protean trims the stream after each batch. With one consumer
+# group it keeps the newest 50000 entries, so a group further behind than that loses
+# its oldest unread entries. With two or more groups it ignores the cap and deletes
+# every entry older than the last one handed to the furthest-behind group. That
+# includes entries a group failed to process and has not acknowledged, which are
+# then never retried (a Protean bug, pinned in verification/regression).
+[server.profiles.shopstream]
+inherits = "production"
+retention_maxlen = 50000
 
 # Health-check HTTP server. Per-domain port so all engines run side by side
 # (identity..notifications use 8081-8088; loyalty is the ninth engine).

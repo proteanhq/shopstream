@@ -3,6 +3,7 @@
 from typing import Any
 from uuid import uuid4
 
+from notifications.channel.errors import ChannelUnavailableError
 from notifications.channel.slack_port import SlackPort
 from notifications.channel.transaction_guard import ensure_no_open_transaction
 
@@ -14,11 +15,16 @@ class FakeSlackAdapter(SlackPort):
         self.sent_messages: list[dict[str, Any]] = []
         self.should_succeed = True
         self.failure_reason = "Slack delivery failed"
+        self.outage = False
 
     def configure(self, should_succeed: bool = True, failure_reason: str = "Slack delivery failed") -> None:
         """Configure the fake adapter behavior for testing."""
         self.should_succeed = should_succeed
         self.failure_reason = failure_reason
+
+    def set_outage(self, outage: bool) -> None:
+        """Make every send raise ``ChannelUnavailableError`` until switched off."""
+        self.outage = outage
 
     def send(
         self,
@@ -27,6 +33,8 @@ class FakeSlackAdapter(SlackPort):
         blocks: list[dict[str, Any]] | None = None,
     ) -> dict[str, Any]:
         ensure_no_open_transaction("Slack")
+        if self.outage:
+            raise ChannelUnavailableError("Slack provider unavailable")
         if not self.should_succeed:
             return {
                 "message_id": None,
@@ -50,3 +58,4 @@ class FakeSlackAdapter(SlackPort):
         self.sent_messages.clear()
         self.should_succeed = True
         self.failure_reason = "Slack delivery failed"
+        self.outage = False

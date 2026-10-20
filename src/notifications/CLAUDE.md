@@ -16,6 +16,8 @@ See `docs/notifications/` for the domain narrative + scenarios.
 8088. Priority lanes enabled. Environment overlays for test (`notifications_test` DB),
 production (async + telemetry), and memory (in-memory/inline adapters). No cache section —
 projections are database-backed.
+Engine subscriptions use the shared `shopstream` profile; `[server.subscriptions.NotificationDispatcher]`
+gives the dispatcher its own circuit breaker (5 failures, 30 seconds).
 
 ## Aggregate: Notification (CQRS)
 
@@ -122,6 +124,27 @@ sends again (memory, proteanhq/protean#1915) or loses the result (Postgres,
 proteanhq/protean#1914); `tests/notifications/application/test_record_step_conflict.py` is a
 strict xfail for it. A redelivered `NotificationDispatchStarted` after a crash between the send
 and the record also sends again, within the send deadline.
+
+A failed send, and any adapter exception other than `SendInsideTransactionError` and
+`ChannelUnavailableError`, is recorded as FAILED. A channel outage (`ChannelUnavailableError`,
+`channel/errors.py`; the fake adapters raise it after `set_outage(True)`) records nothing: the
+error propagates and the notification stays DISPATCHING. Under the engine the subscription tries
+the `NotificationDispatchStarted` message up to 3 times in all, and repeated failures open the
+dispatcher's circuit breaker (`[server.subscriptions.NotificationDispatcher]` in `domain.toml`).
+Limits of this path:
+- A send that fails all 3 attempts goes to the DLQ (dead-letter queue). Its notification stays
+  DISPATCHING until `ExpireStaleDispatches` marks it FAILED 15 minutes after the claim; then
+  `retry()` can send it again. A DLQ replay (`protean dlq replay`) after the 10-minute send
+  deadline sends nothing.
+- An engine restart leaves a failed message pending under the old consumer name, and a stream
+  trim can delete it (both Protean behaviours), with the same result.
+- Under sync processing (the test and memory overlays) the error reaches the caller that created the
+  notification as `TransactionError`. A multi-channel create stops at the failing channel, after
+  the earlier channels' notifications were saved, and nothing retries it until the sweep.
+- One breaker covers all four channels, and any successful send resets its failure count. So does
+  the successful claim before each send, and any other Notification event, such as the
+  `NotificationCreated` before each request, because Protean counts the dispatcher's no-op for it
+  as a success.
 
 ## Cross-Domain Subscribers (the ACL hub)
 

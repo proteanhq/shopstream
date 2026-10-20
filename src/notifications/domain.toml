@@ -11,6 +11,35 @@ message_processing = "sync"
 # Protean defaults to "event_store"; override to "stream" for outbox pattern.
 [server]
 default_subscription_type = "stream"
+default_subscription_profile = "shopstream"
+
+# Every engine subscription starts from this profile: production's batch size,
+# retries, DLQ and circuit breaker, with a stream cap of 50000 entries instead of
+# production's 100000. Protean trims the stream after each batch. With one consumer
+# group it keeps the newest 50000 entries, so a group further behind than that loses
+# its oldest unread entries. With two or more groups it ignores the cap and deletes
+# every entry older than the last one handed to the furthest-behind group. That
+# includes entries a group failed to process and has not acknowledged, which are
+# then never retried (a Protean bug, pinned in verification/regression).
+[server.profiles.shopstream]
+inherits = "production"
+retention_maxlen = 50000
+
+# NotificationDispatcher is the one handler that calls an external channel, and
+# a channel outage fails it on every message. Its breaker opens after 5 failures
+# in a row instead of 10 and lets one probe message through after 30 seconds
+# instead of 60. While it is open the subscription reads no new messages, but the
+# batch it was processing when it opened still runs to the end. Each failed probe
+# is another attempt at the oldest message, which goes to the DLQ after 3 attempts.
+# One breaker covers all four channels: an Email outage pauses SMS, Push and Slack
+# too, and a working channel in between resets the failure count. So does every
+# other Notification event on the stream, which the dispatcher ignores and Protean
+# counts as a success, and so does the claim before each send: NotificationCreated
+# and NotificationDispatchRequested come before each NotificationDispatchStarted,
+# so an outage opens the breaker only when retries pile up between new notifications.
+[server.subscriptions.NotificationDispatcher]
+circuit_breaker_threshold = 5
+circuit_breaker_reset_seconds = 30
 
 # Health-check HTTP server (Protean 0.16+). The engine binds 8080 by default;
 # assign a distinct port per domain so all eight engines run side by side locally.
