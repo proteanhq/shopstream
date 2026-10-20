@@ -177,7 +177,9 @@ requested again by the scheduler; only one request can claim it, so it is sent o
 
 `ExpireStaleDispatches` (`notification/dispatch_expiry.py`, run by the same endpoint after the
 scheduler) marks FAILED every notification still DISPATCHING `STALE_DISPATCH_AFTER` (15 minutes)
-after its claim, with `STALE_DISPATCH_REASON`. It does not send: the send may already have
+after its claim, with `STALE_DISPATCH_REASON`. Its `as_of` is capped at the domain clock, which
+the claim time and the send deadline also read, so a future `as_of` cannot expire a claim the
+send step would still send. It does not send: the send may already have
 gone out, so a retry decides. A result recorded after the sweep finds FAILED and is skipped.
 
 ## API

@@ -31,6 +31,11 @@ def as_utc(value: datetime) -> datetime:
     return (value if value.tzinfo else value.replace(tzinfo=UTC)).astimezone(UTC)
 
 
+def clock_now() -> datetime:
+    """Return the domain clock's time in UTC."""
+    return as_utc(current_domain.clock.now())
+
+
 @notifications.command(part_of="Notification")
 class ProcessScheduledNotifications:
     """Request to process all due scheduled notifications."""
@@ -43,7 +48,7 @@ class ProcessScheduledNotificationsHandler:
     @handle(ProcessScheduledNotifications)
     def process_scheduled(self, command: ProcessScheduledNotifications) -> None:
         with processing_priority(Priority.LOW):
-            as_of = as_utc(command.as_of or current_domain.clock.now())
+            as_of = as_utc(command.as_of) if command.as_of else clock_now()
             repo = current_domain.repository_for(Notification)
 
             # Load only the due notifications, with no row limit: the query

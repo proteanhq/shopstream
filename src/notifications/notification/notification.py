@@ -231,17 +231,19 @@ class Notification:
             )
         )
 
-    def claim_dispatch(self) -> None:
+    def claim_dispatch(self, claimed_at: datetime | None = None) -> None:
         """Claim this pending notification for one send through its channel.
 
         The claim commits before the send. A cancel or a second dispatch
         request that arrives afterwards finds the notification DISPATCHING
-        and does not reach the channel.
+        and does not reach the channel. The dispatcher passes the domain
+        clock's time, the clock its send deadline and the stale-dispatch sweep
+        both read.
         """
         if NotificationStatus(self.status) != NotificationStatus.PENDING:
             raise ValidationError({"status": ["Only pending notifications can be claimed for dispatch"]})
 
-        now = datetime.now(UTC)
+        now = claimed_at or datetime.now(UTC)
         self.status = NotificationStatus.DISPATCHING.value
         self.updated_at = now
 

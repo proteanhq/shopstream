@@ -17,7 +17,7 @@ from protean.utils.processing import Priority, processing_priority
 
 from notifications.domain import notifications
 from notifications.notification.notification import Notification, NotificationStatus
-from notifications.notification.scheduler import as_utc
+from notifications.notification.scheduler import as_utc, clock_now
 
 logger = structlog.get_logger(__name__)
 
@@ -34,7 +34,9 @@ STALE_DISPATCH_AFTER = timedelta(minutes=15)
 class ExpireStaleDispatches:
     """Request to fail notifications that have been DISPATCHING for too long."""
 
-    as_of: datetime | None = DateTime()  # Optional: expire as of this time (defaults to the domain clock)
+    as_of: datetime | None = (
+        DateTime()
+    )  # Optional: expire as of this time (defaults to, and is capped at, the domain clock)
 
 
 @notifications.command_handler(part_of=Notification)
@@ -42,7 +44,11 @@ class ExpireStaleDispatchesHandler:
     @handle(ExpireStaleDispatches)
     def expire_stale_dispatches(self, command: ExpireStaleDispatches) -> None:
         with processing_priority(Priority.LOW):
-            cutoff = as_utc(command.as_of or current_domain.clock.now()) - STALE_DISPATCH_AFTER
+            # A later as_of would expire claims the send step still sends, since
+            # its deadline is measured on the domain clock.
+            now = clock_now()
+            as_of = min(as_utc(command.as_of), now) if command.as_of else now
+            cutoff = as_of - STALE_DISPATCH_AFTER
             repo = current_domain.repository_for(Notification)
 
             # The claim sets updated_at, and nothing else writes a DISPATCHING

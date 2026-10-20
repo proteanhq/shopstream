@@ -147,7 +147,7 @@ enabled, SMS/push disabled) when a customer registers.
 | `RetryNotification` | Admin/System | Retries a failed notification. Resets to Pending and requests its dispatch again. Must be below max_retries. | `NotificationRetried`, `NotificationDispatchRequested` |
 | `ProcessScheduledNotifications` | Background job | Loads the Pending notifications that are due (scheduled_for <= now) and requests their dispatch. The sends happen after it commits. | `NotificationDispatchRequested` per notification |
 | `RecordDispatchResult` | `NotificationDispatcher` | Marks a Dispatching notification Sent or Failed after its send. Leaves any other status alone. | `NotificationSent` or `NotificationFailed` |
-| `ExpireStaleDispatches` | Background job (same endpoint, after the scheduler) | Marks Failed every notification still Dispatching 15 minutes after its claim. Never sends. | `NotificationFailed` per notification |
+| `ExpireStaleDispatches` | Background job (same endpoint, after the scheduler) | Marks Failed every notification still Dispatching 15 minutes after its claim. Never sends. A future `as_of` is capped at the domain clock. | `NotificationFailed` per notification |
 | `UpdateNotificationPreferences` | Customer | Updates channel settings (email/sms/push enabled/disabled). | `ChannelsUpdated` |
 | `SetQuietHours` | Customer | Sets a do-not-disturb time window. | `QuietHoursSet` |
 | `ClearQuietHours` | Customer | Removes the do-not-disturb window. | `QuietHoursCleared` |

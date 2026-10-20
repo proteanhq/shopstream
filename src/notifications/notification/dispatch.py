@@ -37,14 +37,16 @@ The send step cannot read the notification without opening a transaction, so
 it cannot see that a claim has expired. Instead it refuses to send a claim
 older than ``SEND_DEADLINE``, which is shorter than the sweep's
 ``STALE_DISPATCH_AFTER``. A claim the sweep can expire, and so one that can
-have been retried, is never sent.
+have been retried, is never sent. This holds only because the claim time, the
+send deadline and the sweep all read the domain clock, and the sweep never
+looks past it.
 
 A redelivered ``NotificationDispatchStarted``, after a crash between the send
 and the record, also sends again within that deadline. Closing that gap needs
 an idempotency key that the channel provider honours.
 """
 
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 from typing import Any
 
 import structlog
@@ -65,7 +67,7 @@ from notifications.notification.notification import (
     NotificationChannel,
     NotificationStatus,
 )
-from notifications.notification.scheduler import as_utc
+from notifications.notification.scheduler import as_utc, clock_now
 
 logger = structlog.get_logger(__name__)
 
@@ -149,7 +151,7 @@ class NotificationDispatcher:
             )
             return
 
-        notification.claim_dispatch()
+        notification.claim_dispatch(clock_now())
         repo.add(notification)
 
     @handle(NotificationDispatchStarted)
@@ -161,7 +163,7 @@ class NotificationDispatcher:
         claim older than ``SEND_DEADLINE`` is not sent and records nothing; the
         sweep marks it FAILED.
         """
-        if datetime.now(UTC) - as_utc(event.started_at) >= SEND_DEADLINE:
+        if clock_now() - as_utc(event.started_at) >= SEND_DEADLINE:
             logger.warning(
                 "Dispatch claim is past its send deadline, not sent",
                 notification_id=str(event.notification_id),
