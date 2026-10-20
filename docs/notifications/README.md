@@ -258,13 +258,16 @@ commits before the send, so a cancel or a second dispatch request that arrives l
 finds the notification Dispatching and cannot cause a send.
 
 **Trade-off:** Three gaps remain. A `NotificationDispatchStarted` redelivered after a
-crash between the send and the record sends again, because the channel ports do not
-take an idempotency key yet. The record step joins the send step's unit of work, since
+crash between the send and the record sends again, within the 10-minute send deadline,
+because the channel ports do not take an idempotency key yet. The record step joins the send step's unit of work, since
 Protean cannot commit one step of a handler on its own: a version conflict there sends
 again on memory (proteanhq/protean#1915) and loses the result on Postgres
 (proteanhq/protean#1914). And a notification whose send never records a result stays
 Dispatching until `ExpireStaleDispatches` marks it Failed after 15 minutes; it is not
-sent again until someone retries it, because the first send may have gone out. With
+sent again until someone retries it, because the first send may have gone out. The
+send step refuses a claim older than 10 minutes, so a claim the sweep can expire is
+never sent late, and each result names its claim by `retry_count`, so a late result
+cannot settle a retried claim. With
 synchronous event processing (the `test` and `memory` environments) the claim and the
 send run in the same request, right after the commit that requested them. With async
 processing (dev and production) they run in the engine worker.

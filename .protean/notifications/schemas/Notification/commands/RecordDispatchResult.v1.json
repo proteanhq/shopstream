@@ -15,10 +15,14 @@
     "notification_id": {
       "minLength": 1,
       "type": "string"
+    },
+    "retry_count": {
+      "type": "integer"
     }
   },
   "required": [
-    "notification_id"
+    "notification_id",
+    "retry_count"
   ],
   "title": "RecordDispatchResult",
   "type": "object",

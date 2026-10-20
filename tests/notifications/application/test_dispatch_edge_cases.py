@@ -46,7 +46,7 @@ class TestDispatcherEdgeCases:
     def test_result_for_unknown_notification_does_not_raise(self):
         """Recording a result for a notification that can't be loaded logs and returns."""
         current_domain.process(
-            RecordDispatchResult(notification_id="non-existent-id-123"),
+            RecordDispatchResult(notification_id="non-existent-id-123", retry_count=0),
             asynchronous=False,
         )
 
@@ -125,7 +125,7 @@ class TestDispatcherEdgeCases:
         assert repo.get(str(n.id)).status == NotificationStatus.SENT.value
 
         current_domain.process(
-            RecordDispatchResult(notification_id=str(n.id), failure_reason="Late failure"),
+            RecordDispatchResult(notification_id=str(n.id), retry_count=0, failure_reason="Late failure"),
             asynchronous=False,
         )
 

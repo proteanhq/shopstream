@@ -15,6 +15,10 @@
         "logicalType": "uuid",
         "type": "string"
       }
+    },
+    {
+      "name": "retry_count",
+      "type": "long"
     }
   ],
   "name": "RecordDispatchResult",

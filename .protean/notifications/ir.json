@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:3b59722c2c9092c2c03e2361b00ec4e32327980c46887a09e4b08211b314a04b",
+  "checksum": "sha256:29d192981f67190cd076a8e395f441116bbf94a8d5c7057a996562e935011630",
   "clusters": {
     "notifications.notification.notification.Notification": {
       "aggregate": {
@@ -418,6 +418,11 @@
               "min_length": 1,
               "required": true,
               "type": "Identifier"
+            },
+            "retry_count": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
             }
           },
           "fqn": "notifications.notification.dispatch.RecordDispatchResult",

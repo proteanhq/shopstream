@@ -29,15 +29,26 @@ sweep (``ExpireStaleDispatches``) write to a DISPATCHING notification, so such
 a conflict means two workers handled the same event, or a result arrived just
 as the sweep expired the notification.
 
+Each result names the claim it belongs to by the claim's ``retry_count``. A
+late result from a claim that expired and was retried is not recorded on the
+newer claim.
+
+The send step cannot read the notification without opening a transaction, so
+it cannot see that a claim has expired. Instead it refuses to send a claim
+older than ``SEND_DEADLINE``, which is shorter than the sweep's
+``STALE_DISPATCH_AFTER``. A claim the sweep can expire, and so one that can
+have been retried, is never sent.
+
 A redelivered ``NotificationDispatchStarted``, after a crash between the send
-and the record, also sends again. Closing that gap needs an idempotency key
-that the channel provider honours.
+and the record, also sends again within that deadline. Closing that gap needs
+an idempotency key that the channel provider honours.
 """
 
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import structlog
-from protean.fields import Identifier, Text
+from protean.fields import Identifier, Integer, Text
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
 
@@ -54,8 +65,13 @@ from notifications.notification.notification import (
     NotificationChannel,
     NotificationStatus,
 )
+from notifications.notification.scheduler import as_utc
 
 logger = structlog.get_logger(__name__)
+
+# Shorter than STALE_DISPATCH_AFTER by more than a send takes, so a send that
+# starts inside the deadline records its result before the sweep can expire it.
+SEND_DEADLINE = timedelta(minutes=10)
 
 
 @notifications.command(part_of="Notification")
@@ -63,6 +79,7 @@ class RecordDispatchResult:
     """Record the outcome of one channel send."""
 
     notification_id: str = Identifier(required=True)
+    retry_count: int = Integer(required=True)  # The claim's retry_count, naming the attempt this result is for
     failure_reason: str | None = Text()  # None means the send succeeded
 
 
@@ -86,6 +103,18 @@ class RecordDispatchResultHandler:
                 "Notification not in DISPATCHING status, dispatch result not recorded",
                 notification_id=str(command.notification_id),
                 status=notification.status,
+            )
+            return
+
+        # A claim that expired and was retried leaves the notification
+        # DISPATCHING again under a higher retry_count. This result belongs to
+        # the earlier claim, so it must not settle the newer one.
+        if notification.retry_count != command.retry_count:
+            logger.info(
+                "Dispatch result belongs to an earlier claim, not recorded",
+                notification_id=str(command.notification_id),
+                result_retry_count=command.retry_count,
+                claim_retry_count=notification.retry_count,
             )
             return
 
@@ -128,8 +157,18 @@ class NotificationDispatcher:
         """Send through the channel adapter, then record the result.
 
         The send runs before any repository access, so no transaction is open
-        during it. ``RecordDispatchResult`` opens the session afterwards.
+        during it. ``RecordDispatchResult`` opens the session afterwards. A
+        claim older than ``SEND_DEADLINE`` is not sent and records nothing; the
+        sweep marks it FAILED.
         """
+        if datetime.now(UTC) - as_utc(event.started_at) >= SEND_DEADLINE:
+            logger.warning(
+                "Dispatch claim is past its send deadline, not sent",
+                notification_id=str(event.notification_id),
+                started_at=str(event.started_at),
+            )
+            return
+
         try:
             adapter = get_channel(event.channel)
             result = _dispatch_via_channel(adapter, event)
@@ -151,7 +190,11 @@ class NotificationDispatcher:
             )
 
         current_domain.process(
-            RecordDispatchResult(notification_id=event.notification_id, failure_reason=failure_reason),
+            RecordDispatchResult(
+                notification_id=event.notification_id,
+                retry_count=event.retry_count,
+                failure_reason=failure_reason,
+            ),
             asynchronous=False,
         )
 

@@ -21,10 +21,12 @@ from notifications.notification.scheduler import as_utc
 
 logger = structlog.get_logger(__name__)
 
-# Much longer than any send takes. A result recorded at the moment the sweep
-# expires the same notification makes one of the two commits fail. If the
-# record step loses, Protean retries the whole send (proteanhq/protean#1915),
-# or on Postgres drops the result (proteanhq/protean#1914).
+# Longer than the send step's SEND_DEADLINE, so the sweep only expires claims
+# that the send step will no longer send. A result recorded at the moment the
+# sweep expires the same notification makes one of the two commits fail. If
+# the record step loses, Protean retries the whole send
+# (proteanhq/protean#1915), or on Postgres drops the result
+# (proteanhq/protean#1914).
 STALE_DISPATCH_AFTER = timedelta(minutes=15)
 
 

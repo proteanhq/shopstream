@@ -110,7 +110,9 @@ methods, each in its own unit of work:
    skipped, so a redelivered or duplicate request sends nothing.
 2. On `NotificationDispatchStarted`, it calls the channel adapter, then processes
    `RecordDispatchResult`, whose handler calls `mark_sent()` / `mark_failed(...)` on a
-   DISPATCHING notification.
+   DISPATCHING notification whose `retry_count` matches the claim's. A claim older than
+   `SEND_DEADLINE` (10 minutes, shorter than the sweep's 15) is not sent and records nothing,
+   so a claim the sweep can expire, and then retry, is never sent.
 
 The send reaches no repository first, so no transaction is open during it; the fake adapters
 raise `SendInsideTransactionError` (`channel/transaction_guard.py`) if one is.
@@ -119,7 +121,7 @@ Known gaps: the record step joins the send's unit of work, so a version conflict
 sends again (memory, proteanhq/protean#1915) or loses the result (Postgres,
 proteanhq/protean#1914); `tests/notifications/application/test_record_step_conflict.py` is a
 strict xfail for it. A redelivered `NotificationDispatchStarted` after a crash between the send
-and the record also sends again.
+and the record also sends again, within the send deadline.
 
 ## Cross-Domain Subscribers (the ACL hub)
 

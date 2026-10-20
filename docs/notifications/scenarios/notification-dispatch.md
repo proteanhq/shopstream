@@ -66,7 +66,9 @@ method and runs in its own unit of work.
 and retry count. If the notification is no longer `PENDING`, because it was cancelled or
 an earlier request already claimed it, the handler skips it and nothing is sent.
 
-**Send.** When the claim commits, `on_dispatch_started` reacts to `NotificationDispatchStarted`:
+**Send.** When the claim commits, `on_dispatch_started` reacts to `NotificationDispatchStarted`.
+If the claim is older than `SEND_DEADLINE` (10 minutes), it sends nothing and leaves the
+notification for the stale-dispatch sweep. Otherwise it:
 
 1. Gets the channel adapter via `get_channel(event.channel)`.
 2. Calls `_dispatch_via_channel(adapter, event)`, which routes to the correct
@@ -79,8 +81,9 @@ opens its transaction at the first repository access, so no transaction or poole
 connection is held while the channel is called. The fake adapters check this on every
 send.
 
-`RecordDispatchResultHandler` then loads the notification. If it is still `DISPATCHING`,
-it calls `mark_sent()` or `mark_failed(reason)` and persists it.
+`RecordDispatchResultHandler` then loads the notification. If it is still `DISPATCHING`
+under the same claim (its `retry_count` matches the result's), it calls `mark_sent()` or
+`mark_failed(reason)` and persists it.
 
 &rarr; [source](../../src/notifications/notification/dispatch.py)
 
@@ -169,7 +172,9 @@ sequenceDiagram
 | Dispatch request delivered twice, or requested twice (a retry and the scheduler) | Sent once: the second request finds the notification no longer PENDING and skips | Only a PENDING notification can be claimed |
 | Notification cancelled before its claim | Not sent; the status stays CANCELLED | The claim skips a notification that is not PENDING |
 | Cancel after the claim | Refused with a validation error; the send goes ahead | DISPATCHING → CANCELLED is not an allowed transition |
-| `NotificationDispatchStarted` redelivered after a crash between the send and the record | The adapter is called again | The send reads nothing first, and the channel ports take no idempotency key |
+| `NotificationDispatchStarted` redelivered after a crash between the send and the record | The adapter is called again, if the claim is still within its 10-minute send deadline | The send reads nothing first, and the channel ports take no idempotency key |
+| `NotificationDispatchStarted` delivered late, after an engine outage | Not sent if the claim is older than 10 minutes; the sweep marks it FAILED | The send step cannot see an expiry, so it refuses any claim the sweep could have expired |
+| A late result from a claim that expired and was retried | Not recorded on the newer claim | Each result carries its claim's `retry_count`, and the record step requires it to match |
 | Version conflict when recording the result | Memory: the whole send step is retried and the adapter is called again. Postgres: the result is lost and the notification stays DISPATCHING | Protean cannot commit the record step on its own (proteanhq/protean#1915, proteanhq/protean#1914) |
 | Send step never records a result (for example, dead-lettered) | After 15 minutes `ExpireStaleDispatches` marks it FAILED with "No dispatch result recorded; outcome unknown"; it is not sent again until retried | The send may already have reached the recipient |
 | Notification not found when recording the result | Handler logs an error and returns | Safety for eventual consistency |

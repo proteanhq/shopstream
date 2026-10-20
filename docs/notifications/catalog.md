@@ -164,6 +164,7 @@
 |-------|------|----------|-------------|
 | failure_reason | Text | No | — |
 | notification_id | Identifier | Yes | min_length=1 |
+| retry_count | Integer | Yes | — |
 
 #### ExpireStaleDispatches
 
