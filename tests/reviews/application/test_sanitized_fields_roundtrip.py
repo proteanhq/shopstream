@@ -28,3 +28,20 @@ def test_escaped_values_are_unchanged_after_save_and_reload():
     assert review.body == "Grinds fine &amp; coarse, size 1 &lt; size 2, it's great."
     assert review.images[0].alt_text == "Front &amp; back"
     assert review.images[0].url == "https://cdn.example.com/a.jpg?w=1&h=2"
+
+
+def test_body_of_typed_entities_survives_save_and_reload():
+    typed = "&amp;" * 4
+    review = Review.submit(
+        product_id="prod-roundtrip",
+        customer_id="cust-roundtrip",
+        rating=4,
+        title="Entities",
+        body=typed,
+    )
+    repo = current_domain.repository_for(Review)
+
+    repo.add(review)
+    review = repo.get(review.id)
+
+    assert review.body == typed

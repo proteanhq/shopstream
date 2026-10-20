@@ -13,7 +13,6 @@ State Machine (4 states):
     REMOVED → (terminal)
 """
 
-import html
 from collections.abc import Mapping, Sequence
 from datetime import UTC, datetime
 from enum import Enum
@@ -59,6 +58,8 @@ class _Unset(Enum):
 
 
 _UNSET: Final = _Unset.UNSET
+
+BODY_MIN_LENGTH: Final = 20
 
 
 # ---------------------------------------------------------------------------
@@ -226,9 +227,16 @@ class Review:
 
     @invariant.post
     def body_minimum_length(self) -> None:
-        # `body` is stored escaped, so count the characters the customer typed:
-        # ten `<` are 40 characters once escaped.
-        if self.body and len(html.unescape(self.body).strip()) < 20:
+        # Escaping only lengthens a body, so this cannot reject what
+        # `_check_body_length` accepted, and it holds again on reload.
+        if self.body and len(self.body.strip()) < BODY_MIN_LENGTH:
+            raise ValidationError({"body": ["Review body must be at least 20 characters"]})
+
+    @staticmethod
+    def _check_body_length(body: str) -> None:
+        # Count the raw input: ten `<` are 40 characters once escaped, and
+        # `html.unescape` would also decode entities the customer typed.
+        if body and len(body.strip()) < BODY_MIN_LENGTH:
             raise ValidationError({"body": ["Review body must be at least 20 characters"]})
 
     @invariant.post
@@ -255,6 +263,7 @@ class Review:
         images: Sequence[Mapping[str, Any]] | None = None,
     ) -> "Review":
         """Submit a new review."""
+        cls._check_body_length(body)
         now = datetime.now(UTC)
 
         review = cls(
@@ -325,10 +334,11 @@ class Review:
         if current not in (ReviewStatus.PENDING, ReviewStatus.REJECTED):
             raise ValidationError({"status": ["Reviews can only be edited in Pending or Rejected status"]})
 
+        if body is not _UNSET:
+            self._check_body_length(body)
+
         now = datetime.now(UTC)
 
-        new_title = title if title is not _UNSET else self.title
-        new_body = body if body is not _UNSET else self.body
         new_rating = rating if rating is not _UNSET else self.rating.score
 
         with atomic_change(self):
@@ -354,8 +364,10 @@ class Review:
         self.raise_(
             ReviewEdited(
                 review_id=str(self.id),
-                title=new_title,
-                body=new_body,
+                # Stored text is escaped while the submitted event was raw, so
+                # an omitted field stays None and projectors keep their copy.
+                title=title if title is not _UNSET else None,
+                body=body if body is not _UNSET else None,
                 rating=new_rating,
                 edited_at=now,
             )

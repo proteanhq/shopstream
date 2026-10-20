@@ -144,3 +144,27 @@ class TestBodyMinimumLengthCountsTypedCharacters:
     def test_body_of_twenty_typed_characters_with_escapes_is_accepted(self):
         review = _make_review(body="Fits < 2 sizes & ok.")
         assert review.body == "Fits &lt; 2 sizes &amp; ok."
+
+    def test_body_of_typed_entities_is_accepted_on_submit_and_edit(self):
+        # 20 characters typed; `html.unescape` would decode them to four `&`.
+        typed = "&amp;" * 4
+        review = _make_review(body=typed)
+        assert review.body == typed
+
+        review.edit(body=typed)
+        assert review.body == typed
+
+
+class TestEditEventOmitsFieldsNotPassed:
+    def test_rating_only_edit_leaves_title_and_body_out_of_the_event(self):
+        # The stored title is escaped while ReviewSubmitted carried it raw, so an
+        # event that fell back to the stored value would overwrite the read models.
+        review = _make_review(title="Salt & pepper", body="Grinds fine & coarse, works great.")
+        review._events.clear()
+
+        review.edit(rating=5)
+
+        event = review._events[0]
+        assert event.title is None
+        assert event.body is None
+        assert event.rating == 5
