@@ -307,7 +307,9 @@ schemas: ## Generate JSON, Avro and Protobuf schemas for all domains
 events-catalog: ## List every event with its version, upcasters and consumers, read from the committed IR (no database needed)
 	@fail=0; for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		echo "=== $$d ==="; \
-		PYTHONPATH=src uv run protean events catalog --ir .protean/$$d/ir.json || fail=1; \
+		out=$$(PYTHONPATH=src uv run protean events catalog --ir .protean/$$d/ir.json) || fail=1; \
+		echo "$$out"; \
+		case "$$out" in *"No events found"*) fail=1;; esac; \
 		echo ""; \
 	done; \
 	exit $$fail
