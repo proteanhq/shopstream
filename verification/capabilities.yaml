@@ -221,6 +221,6 @@ capabilities:
   - name: restore_checkpoint_verification
     taught_by: docs/operations/restore.md
     guarded_by: verification/oracles/test_restore_checkpoints.py
-    property: "after a simulated restore rolls the store and its global_position sequence back from g5 to g3, `protean recover --verify-checkpoints` reports a checkpoint at g5 as beyond head g3 and a fresh one as consistent; `--reset-beyond-head` moves it to g3, and a third run finds every row consistent"
+    property: "after a simulated restore rolls the store and its global_position sequence back from g5 to g3, `protean recover --verify-checkpoints` reports a checkpoint at g5 as beyond head g3, a checkpoint at g2 and a fresh one as consistent, and a recovery-tracking entry at g5 as stale; `--reset-beyond-head` writes the int g3 to that checkpoint and clears only g5 from the tracking, and a third run finds nothing to report; with the shipped config no context has an event-store subscription for `recover` to check"
     source: A
-    status: partial   # only two inventory projectors, moved to event-store subscriptions in test config; every real handler reads Redis streams, so recover checks nothing in ShopStream as configured. Redis consumer groups and the Postgres outbox are outside recover's scope
+    status: partial   # three inventory projectors, moved to event-store subscriptions in test config; every real handler reads Redis streams, so recover checks nothing in ShopStream as configured. A recovery-tracking stream recover cannot read (an unknown finding) is not exercised. Redis consumer groups and the Postgres outbox are outside recover's scope
