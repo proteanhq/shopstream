@@ -264,7 +264,7 @@ make domain-check         # Run protean check on all domains
 make verify-domains       # protean verify (init, check, tests) for all nine contexts + tests/integration, memory mode
 make eventstore-verify    # Check the shared Message DB's integrity (read-only; stop the engines first)
 make idempotency-cleanup  # Delete processed-message markers older than [consume_idempotency.cleanup] retention_hours (run from cron)
-make outbox-reconcile     # Create outbox rows for events in the event store that lost theirs in a crash (all nine contexts)
+make outbox-reconcile     # After a crash, restore lost outbox rows in each context whose newest event lost its row (stop the API and engines first)
 make verify-observatory   # Verify Observatory Timeline + Causation Graph (~66 API checks)
 make verify-loyalty       # Verify Loyalty end-to-end (account/points/transfer/campaign/redemption)
 ```

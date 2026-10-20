@@ -21,29 +21,41 @@ HOW THE CRASH IS SIMULATED (deterministically, in-process)
     relational commit (step 2) while the event-store append (step 1) has already
     landed — exactly the ADR-0015 window, with no real process kill needed.
 
-STATUS - all six tests are guards
-    `test_crash_leaves_event_durable_but_unpublished` characterizes the window
-    (event durable, outbox row missing). `test_reconcile_restores_...` asserts the
-    recovery: `reconcile_outbox` restores the lost row. It was xfail while
-    `reconcile_outbox` was a no-op against Message-DB (`read_last_message("$all")`
-    returned None, proteanhq/protean#1073). That fix is in the pin.
+STATUS
+    Guards (the fix is in the pin):
 
-    The other four pin how the sweep behaves in a store shared by nine contexts.
-    The sweep used to keep every message at the tail of `$all` that had no row
-    here, so another context's event or a command at the tail got a row this
-    context never owns (proteanhq/protean#1648, fixed in proteanhq/protean#1655).
-    It also rebuilt only the internal row, so a published event lost its row for
-    the external `global` broker (proteanhq/protean#1653, fixed in
-    proteanhq/protean#1718). Both fixes are in the pin:
-
+    - `test_crash_leaves_event_durable_but_unpublished` characterizes the window
+      (event durable, outbox row missing).
+    - `test_reconcile_restores_...` asserts the recovery: `reconcile_outbox`
+      restores the lost row. It was xfail while `reconcile_outbox` was a no-op
+      against Message-DB (`read_last_message("$all")` returned None,
+      proteanhq/protean#1073).
     - the engine's own startup sweep (`Engine._reconcile_outbox_on_startup`)
       restores the row. It is called directly on an engine that is never run,
       so the check needs no live engine. The method is private; the startup
       sweep has no public entry point.
     - a lost `published=True` event gets back both its internal row and its
-      `global` row, under the same message id.
-    - another context's event at the tail of the shared store gives 0 rows.
-    - a command at the tail gives 0 rows.
+      `global` row, under the same message id. The sweep used to rebuild only
+      the internal row (proteanhq/protean#1653, fixed in proteanhq/protean#1718).
+    - another context's event, or a command, at the tail of the store shared by
+      nine contexts gets no row, and the lost inventory event behind it still
+      gets its row. The sweep used to give a row to every message at the tail
+      that had none here (proteanhq/protean#1648, fixed in
+      proteanhq/protean#1655).
+
+    Open Protean findings (not filed upstream yet, xfail(strict=True) here):
+
+    - reconcile repairs only when the newest event this context owns is missing
+      its row. If another writer in the same context commits after the crash,
+      the lost event is never repaired.
+    - reconcile run while a command sits between its event-store append and its
+      relational commit sees no row, inserts one, and commits first. The live
+      commit then fails on the `(message_id, target_broker)` unique index, so
+      its caller gets `TransactionError` for an event that will be published.
+      So `make outbox-reconcile` must run with the API and engines stopped.
+    - for a state-based (CQRS) aggregate, the crash rolls back the aggregate
+      row too, and reconcile still publishes its event. Here a
+      `CustomerRegistered` goes out for a customer that was never saved.
 
 WHY POSTGRES + MESSAGE-DB ONLY
     The two-store split and the SQLAlchemy-commit seam only exist with the real
@@ -58,9 +70,11 @@ RUN:
 from __future__ import annotations
 
 import os
+import threading
 import uuid
 
 import pytest
+from protean.exceptions import TransactionError
 
 ENV = os.environ.get("PROTEAN_ENV")
 pytestmark = pytest.mark.skipif(
@@ -70,6 +84,7 @@ pytestmark = pytest.mark.skipif(
 
 RECEIVED = "Inventory.StockReceived.v1"
 RESERVED = "Inventory.StockReserved.v1"
+REGISTERED = "Identity.CustomerRegistered.v1"
 
 
 class _SimulatedCrash(RuntimeError):
@@ -99,7 +114,6 @@ def _seed_item(domain, on_hand):
 
 def _process_crashing_on_commit(domain, command):
     """Process *command* but fail the relational commit AFTER the append."""
-    from protean.exceptions import TransactionError
     from sqlalchemy.orm import Session
 
     real_commit = Session.commit
@@ -172,17 +186,30 @@ def test_reconcile_restores_the_lost_outbox_row():
     assert len(_internal_received_rows(current_domain, item_id)) == 1
 
 
-def _rows_of_type(domain, message_type, stream):
-    """Every outbox row of *message_type* on *stream*, for any broker and status."""
-    return [r for r in domain._get_outbox_repo("default").find_by_message_type(message_type) if r.stream_name == stream]
+def _rows_for(domain, message_id):
+    """Every outbox row of one message, for any broker and status."""
+    return domain._get_outbox_repo("default").find_all_by_message_id(message_id)
 
 
 def _total_rows(domain):
     return sum(domain._get_outbox_repo("default").count_by_status().values())
 
 
-def _newest_type(domain):
-    return domain.event_store.store.read_last_message("$all").metadata.headers.type
+def _newest(domain):
+    return domain.event_store.store.read_last_message("$all")
+
+
+def _stored(domain, stream, message_type):
+    return [m for m in domain.event_store.store.read(stream) if m.metadata.headers.type == message_type]
+
+
+def _lose_a_stock_received(domain):
+    """Seed an item and crash a `ReceiveStock` on it, so its StockReceived has no row."""
+    item_id = _seed_item(domain, on_hand=0)
+    _receive_stock_crashing_on_commit(domain, item_id, 10)
+    (lost,) = _stored(domain, f"inventory::inventory_item-{item_id}", RECEIVED)
+    assert _rows_for(domain, lost.metadata.headers.id) == []  # precondition: row lost
+    return lost
 
 
 @pytest.mark.usefixtures("inventory_ctx")
@@ -203,8 +230,9 @@ def test_engine_startup_sweep_restores_the_lost_outbox_row():
     finally:
         engine.loop.close()
 
-    # The sweep swallows every error and returns 0, so the row is the proof.
-    assert repaired >= 1
+    # The sweep returns 0 on any exception, so the row is the proof.
+    # StockReceived is not published, so the internal row is the only one.
+    assert repaired == 1
     assert len(_internal_received_rows(current_domain, item_id)) == 1
 
 
@@ -212,7 +240,7 @@ def test_engine_startup_sweep_restores_the_lost_outbox_row():
 def test_reconcile_restores_the_external_row_of_a_published_event():
     """A lost published event gets back its internal row and its `global` row."""
     from protean import current_domain
-    from protean.utils.outbox import reconcile_outbox
+    from protean.utils.outbox import OutboxStatus, reconcile_outbox
 
     from inventory.stock.reservation import ReserveStock
 
@@ -220,33 +248,35 @@ def test_reconcile_restores_the_external_row_of_a_published_event():
     # Enough stock that the reservation stays above the reorder point, so no
     # LowStockDetected joins StockReserved in the same commit.
     item_id = _seed_item(current_domain, on_hand=100)
-    stream = f"inventory::inventory_item-{item_id}"
 
     _process_crashing_on_commit(
         current_domain,
         ReserveStock(inventory_item_id=item_id, order_id=f"ord-{uuid.uuid4().hex[:8]}", quantity=5),
     )
-    stored = [m for m in current_domain.event_store.store.read(stream) if m.metadata.headers.type == RESERVED]
-    assert len(stored) == 1  # the append landed
-    assert _rows_of_type(current_domain, RESERVED, stream) == []  # precondition: rows lost
+    (stored,) = _stored(current_domain, f"inventory::inventory_item-{item_id}", RESERVED)  # the append landed
+    message_id = stored.metadata.headers.id
+    assert _rows_for(current_domain, message_id) == []  # precondition: rows lost
+    rows_before = _total_rows(current_domain)
 
-    reconcile_outbox(current_domain)
+    assert reconcile_outbox(current_domain) == 2
 
-    rows = _rows_of_type(current_domain, RESERVED, stream)
+    rows = _rows_for(current_domain, message_id)
     assert sorted(r.target_broker for r in rows) == ["default", "global"]
-    assert {r.message_id for r in rows} == {stored[0].metadata.headers.id}
+    assert {r.type for r in rows} == {RESERVED}
+    assert {r.status for r in rows} == {OutboxStatus.PENDING.value}
+    assert _total_rows(current_domain) == rows_before + 2
 
 
 @pytest.mark.usefixtures("inventory_ctx")
 def test_reconcile_skips_another_contexts_event_at_the_tail(ordering_bed):
-    """An ordering event at the tail of the shared store is not inventory's to repair."""
+    """An ordering event at the tail gets no row, and the lost inventory event behind it does."""
     from protean import current_domain
     from protean.utils.outbox import reconcile_outbox
 
     from ordering.cart.cart import ShoppingCart
 
     _reset_stores(current_domain)
-    _seed_item(current_domain, on_hand=0)  # inventory's newest event, with its row
+    lost = _lose_a_stock_received(current_domain)
 
     # Append only to the shared event store, so ordering's relational stores
     # stay empty and inventory_ctx's event-store reset clears the message.
@@ -256,31 +286,137 @@ def test_reconcile_skips_another_contexts_event_at_the_tail(ordering_bed):
         assert cart._events, "Expected add_item to raise an event"
         ordering_bed.domain.event_store.store.append(cart._events[-1])
 
-    assert _newest_type(current_domain).startswith("Ordering.")  # precondition
+    foreign = _newest(current_domain)
+    assert foreign.metadata.headers.type.startswith("Ordering.")  # precondition
     rows_before = _total_rows(current_domain)
-    assert rows_before > 0
 
-    assert reconcile_outbox(current_domain) == 0
-    assert _total_rows(current_domain) == rows_before
+    assert reconcile_outbox(current_domain) == 1
+
+    assert [r.target_broker for r in _rows_for(current_domain, lost.metadata.headers.id)] == ["default"]
+    assert _rows_for(current_domain, foreign.metadata.headers.id) == []
+    assert _total_rows(current_domain) == rows_before + 1
 
 
 @pytest.mark.usefixtures("inventory_ctx")
 def test_reconcile_skips_a_command_at_the_tail():
-    """A command at the tail never gets an outbox row, so it is not a lost commit."""
+    """A command at the tail gets no row, and the lost event behind it does."""
     from protean import current_domain
     from protean.utils.outbox import reconcile_outbox
 
     from inventory.stock.receiving import ReceiveStock
 
     _reset_stores(current_domain)
-    item_id = _seed_item(current_domain, on_hand=0)
+    lost = _lose_a_stock_received(current_domain)
 
-    command = current_domain._enrich_command(ReceiveStock(inventory_item_id=item_id, quantity=10), asynchronous=True)
+    command = current_domain._enrich_command(
+        ReceiveStock(inventory_item_id=lost.metadata.headers.stream.split("-", 1)[1], quantity=10),
+        asynchronous=True,
+    )
     current_domain.event_store.store.append(command)
 
-    assert _newest_type(current_domain) == ReceiveStock.__type__  # precondition
+    tail = _newest(current_domain)
+    assert tail.metadata.headers.type == ReceiveStock.__type__  # precondition
     rows_before = _total_rows(current_domain)
-    assert rows_before > 0
 
-    assert reconcile_outbox(current_domain) == 0
-    assert _total_rows(current_domain) == rows_before
+    assert reconcile_outbox(current_domain) == 1
+
+    assert [r.target_broker for r in _rows_for(current_domain, lost.metadata.headers.id)] == ["default"]
+    assert _rows_for(current_domain, tail.metadata.headers.id) == []
+    assert _total_rows(current_domain) == rows_before + 1
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Protean bug, not filed yet: reconcile repairs only when the newest event of the context lacks its row",
+)
+@pytest.mark.usefixtures("inventory_ctx")
+def test_reconcile_repairs_a_lost_event_behind_a_later_commit():
+    """A lost event is repaired even when a later commit of the same context succeeded."""
+    from protean import current_domain
+    from protean.utils.outbox import reconcile_outbox
+
+    from inventory.stock.receiving import ReceiveStock
+
+    _reset_stores(current_domain)
+    lost = _lose_a_stock_received(current_domain)
+    # Another writer (an API request, a subscriber, a second engine worker)
+    # commits after the crash, so the newest inventory event has its row.
+    current_domain.process(ReceiveStock(inventory_item_id=_seed_item(current_domain, on_hand=0), quantity=5))
+
+    reconcile_outbox(current_domain)
+
+    assert [r.target_broker for r in _rows_for(current_domain, lost.metadata.headers.id)] == ["default"]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=TransactionError,
+    reason="Protean bug, not filed yet: reconcile inserts the row of a live, uncommitted unit of work, so its commit fails",
+)
+@pytest.mark.usefixtures("inventory_ctx")
+def test_reconcile_beside_a_live_commit_does_not_fail_it():
+    """Reconcile run while a command sits between its append and its commit leaves that commit alone."""
+    from protean import current_domain
+    from protean.utils.outbox import reconcile_outbox
+    from sqlalchemy.orm import Session
+
+    from inventory.stock.receiving import ReceiveStock
+
+    domain = current_domain._get_current_object()
+    _reset_stores(domain)
+    item_id = _seed_item(domain, on_hand=0)
+
+    # Hold the live commit after its append and run one sweep in another
+    # thread, the way `make outbox-reconcile` or a starting worker would.
+    real_commit = Session.commit
+    sweep = {}
+
+    def commit_after_a_sweep(session, *args, **kwargs):
+        if "created" not in sweep:
+            sweep["created"] = None  # the sweep's own commit must go straight through
+            thread = threading.Thread(target=lambda: sweep.update(created=reconcile_outbox(domain)))
+            thread.start()
+            thread.join(timeout=30)
+            assert not thread.is_alive(), "the sweep blocked on the live transaction"
+        return real_commit(session, *args, **kwargs)
+
+    Session.commit = commit_after_a_sweep
+    try:
+        domain.process(ReceiveStock(inventory_item_id=item_id, quantity=10), asynchronous=False)
+    finally:
+        Session.commit = real_commit
+
+    assert sweep["created"] is not None  # precondition: the sweep ran to the end
+    assert len(_internal_received_rows(domain, item_id)) == 1
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="Protean bug, not filed yet: reconcile publishes the event of a state-based aggregate whose row rolled back",
+)
+@pytest.mark.usefixtures("identity_ctx")
+def test_reconcile_does_not_publish_an_event_whose_aggregate_was_never_saved():
+    """For a state-based aggregate, a crash rolls back the row; its event must not go out alone."""
+    from protean import current_domain
+    from protean.utils.outbox import reconcile_outbox
+
+    from identity.customer.customer import Customer
+    from identity.customer.registration import RegisterCustomer
+
+    _reset_stores(current_domain)
+    tag = uuid.uuid4().hex[:8]
+    _process_crashing_on_commit(
+        current_domain,
+        RegisterCustomer(external_id=f"ext-{tag}", email=f"{tag}@example.com", first_name="Ada", last_name="Lovelace"),
+    )
+    stored = _newest(current_domain)
+    assert stored.metadata.headers.type == REGISTERED  # the append landed
+    assert current_domain.repository_for(Customer)._dao.query.all().total == 0  # the row rolled back
+
+    reconcile_outbox(current_domain)
+
+    # Either the customer is restored or its event stays unpublished.
+    customers = current_domain.repository_for(Customer)._dao.query.all().total
+    assert customers == 1 or _rows_for(current_domain, stored.metadata.headers.id) == []

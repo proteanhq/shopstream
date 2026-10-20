@@ -112,11 +112,16 @@ whether it gates PRs / nightly / releases.
   still lands), reproducing the ADR-0015 window with no process kill.
 - `test_crash_leaves_event_durable_but_unpublished` PASSES: characterizes the
   window (StockReceived durable in the event store, its internal outbox row absent).
-- `test_reconcile_restores_the_lost_outbox_row` XFAIL (strict): ADR-0015 promises
-  `reconcile_outbox` repairs this on startup, but it is a **no-op against
-  Message-DB** — `read_last_message("$all")` returns None, so the sweep returns 0
-  and the lost row is never restored. Filed proteanhq/protean#1073; xfail flips
-  when fixed.
+- `test_reconcile_restores_the_lost_outbox_row` PASSES: `reconcile_outbox`
+  restores the lost row. It was a strict xfail while the sweep was a no-op
+  against Message-DB (`read_last_message("$all")` returned None,
+  proteanhq/protean#1073). That fix is in the pin.
+- The file also guards the engine's startup sweep, the external `global` row of a
+  published event, and skipping another context's event or a command at the tail
+  of the shared store. Three strict xfails pin open findings: a lost event behind
+  a later commit of the same context is never repaired, reconcile beside a live
+  commit makes that commit fail, and a state-based aggregate's event is published
+  though its row rolled back.
 - Postgres + Message-DB only (skips under `--protean-env memory`).
 
 **T1.4 - Concurrency model with Hypothesis (P2/P4)** `[A]` `[nightly]` - DONE

@@ -501,10 +501,11 @@ idempotency-cleanup: ## Delete processed-message markers older than each domain'
 	done; \
 	exit $$failed
 
-outbox-reconcile: ## Create outbox rows for events in the event store that lost theirs in a crash (all nine contexts)
+LIMIT ?= 1000
+outbox-reconcile: ## After a crash, restore missing outbox rows in each context whose newest event lost its row (scans the last LIMIT messages; stop the API and engines first)
 	@failed=0; \
 	for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
-		PYTHONPATH=src uv run protean outbox reconcile --domain=$$d.domain || failed=1; \
+		PYTHONPATH=src uv run protean outbox reconcile --domain=$$d.domain --limit=$(LIMIT) || failed=1; \
 	done; \
 	exit $$failed
 
