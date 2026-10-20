@@ -54,8 +54,9 @@ def has_more_than_four_places(value: float) -> bool:
 
     Float error from arithmetic does not count: ``0.1 + 0.2`` and
     ``100 - 99.99`` are 4-place amounts, ``10.00004`` is not. A place that
-    moves the amount by less than 1e-7 counts as float error, so it is rounded
-    off rather than caught.
+    moves the amount by no more than the tolerance counts as float error, so
+    it is rounded off rather than caught. The tolerance is 1e-7, or 4 units in
+    the last place of the float when that is larger (above about 1.3e8).
 
     >>> has_more_than_four_places(0.1 + 0.2)
     False
