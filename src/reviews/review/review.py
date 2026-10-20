@@ -126,7 +126,7 @@ class ReviewImage:
     """A photo attached to a review."""
 
     url: str = String(required=True, max_length=500)
-    alt_text: str | None = String(max_length=255)
+    alt_text: str | None = String(max_length=255, sanitize=True)
     display_order: int = Integer(default=0)
 
 
@@ -144,7 +144,7 @@ class SellerReply:
     """A reply from the product seller to the review."""
 
     seller_id: str = Identifier(required=True)
-    body: str = Text(required=True)
+    body: str = Text(required=True, sanitize=True)
     replied_at: datetime = DateTime(required=True)
 
 
@@ -167,8 +167,8 @@ class Review:
 
     # Content
     rating: Rating = ValueObject(Rating, required=True)
-    title: str = String(required=True, max_length=200)
-    body: str = Text(required=True)
+    title: str = String(required=True, max_length=200, sanitize=True)
+    body: str = Text(required=True, sanitize=True)
     pros: list[str] = List(String())
     cons: list[str] = List(String())
 
@@ -188,7 +188,7 @@ class Review:
             ReviewStatus.REJECTED: [ReviewStatus.PENDING],  # Re-submit after edit
         },
     )
-    moderation_notes: str | None = Text()
+    moderation_notes: str | None = Text(sanitize=True)
 
     # Voting
     votes: list[HelpfulVote] = HasMany(HelpfulVote)

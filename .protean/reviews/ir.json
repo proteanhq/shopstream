@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:49b997b74141d571e6aa79774029ae317c380c48acdd4651e46a26af69d38bee",
+  "checksum": "sha256:bf5a6a7c6e0e9921a23fdb307a2381d07c41b1bb3cb8cc555e501906b952f412",
   "clusters": {
     "reviews.review.review.Review": {
       "aggregate": {
@@ -11,6 +11,7 @@
             "kind": "text",
             "min_length": 1,
             "required": true,
+            "sanitize": true,
             "type": "Text"
           },
           "cons": {
@@ -55,6 +56,7 @@
           },
           "moderation_notes": {
             "kind": "text",
+            "sanitize": true,
             "type": "Text"
           },
           "order_id": {
@@ -121,6 +123,7 @@
             "max_length": 200,
             "min_length": 1,
             "required": true,
+            "sanitize": true,
             "type": "String"
           },
           "unhelpful_count": {
@@ -751,6 +754,7 @@
             "alt_text": {
               "kind": "standard",
               "max_length": 255,
+              "sanitize": true,
               "type": "String"
             },
             "display_order": {
@@ -802,6 +806,7 @@
               "kind": "text",
               "min_length": 1,
               "required": true,
+              "sanitize": true,
               "type": "Text"
             },
             "id": {

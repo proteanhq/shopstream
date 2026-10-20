@@ -36,7 +36,7 @@ REMOVED  → (terminal)
 - `Rating` — score (Integer, 1-5), invariant enforces range
 
 ### Entities (part_of="Review")
-- `ReviewImage` — url, alt_text, display_order
+- `ReviewImage` — url, alt_text (sanitized), display_order
 - `HelpfulVote` — customer_id, vote_type, voted_at
 - `SellerReply` — seller_id, body, replied_at
 
@@ -45,6 +45,16 @@ REMOVED  → (terminal)
 - `at_most_one_seller_reply` — max 1 reply
 - `body_minimum_length` — body must be at least 20 chars
 - `title_must_not_be_empty` — title cannot be whitespace-only
+
+### Sanitization
+Protean 0.18 turned sanitization off by default: a `String` or `Text` field stores raw input unless it declares `sanitize=True`. Sanitizing means running the value through `bleach.clean()`, which HTML-escapes it (`&` becomes `&amp;`, `<` becomes `&lt;`).
+
+- These five fields declare `sanitize=True`, because they hold free text that a storefront may render as HTML: `Review.title`, `Review.body`, `Review.moderation_notes`, `SellerReply.body`, `ReviewImage.alt_text`.
+- Protean checks `max_length` on the escaped value. A 195-character title with five `&` is 215 characters once escaped, so it fails the 200 bound.
+- `ReviewImage.url` stays raw: escaping `&` would break a query string.
+- `pros` and `cons` are `List(String())`, whose items were never sanitized. `HelpfulVote.vote_type` is a `choices` field, which Protean does not sanitize.
+- Events copy the caller's input, so `ReviewSubmitted`, `ReviewRejected.reason` and `SellerReplyAdded.body` carry raw text, and so do the projections built from them. `ReviewEdited` carries raw text for the fields the caller passed and the stored, escaped value for the ones it left out.
+- Free-text fields in the other contexts stay raw. Output encoding belongs to the layer that displays them.
 
 ### Aggregate Methods
 | Method | Behavior |
