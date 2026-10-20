@@ -209,7 +209,7 @@ def test_lint_table_in_domain_toml_is_loaded(tmp_path, monkeypatch):
     reason="AGGREGATE_WITHOUT_COMMAND_HANDLER flags abstract aggregates, which are never loaded or saved",
 )
 def test_abstract_aggregate_is_not_flagged_without_command_handler():
-    """Protean finding (not yet filed upstream): `protean check` flags an abstract aggregate.
+    """proteanhq/protean#1911: `protean check` flags an abstract aggregate.
 
     An aggregate declared with `abstract=True` is a base for concrete aggregates. It is
     never loaded or saved, so a command handler for it would have nothing to act on. `IRBuilder._diagnose_aggregate_without_command_handler`
@@ -301,7 +301,7 @@ def _reviews_ir_without_a_projection(tmp_path) -> str:
     reason="ir diff exits 2 for non-breaking changes, the code Click uses for a usage error",
 )
 def test_ir_diff_usage_error_does_not_share_the_non_breaking_exit_code(tmp_path):
-    """Protean finding (not yet filed upstream): `ir diff` gives two outcomes one exit code.
+    """proteanhq/protean#1912: `ir diff` gives two outcomes one exit code.
 
     `protean ir diff` documents exit 2 as "non-breaking changes only". Click exits 2
     for a usage error, such as an unknown option. A CI gate that reads exit 2 as a safe
@@ -341,7 +341,7 @@ def test_ir_diff_usage_error_does_not_share_the_non_breaking_exit_code(tmp_path)
     reason="ir diff exits 1 both for a breaking change and for a baseline it cannot load",
 )
 def test_ir_diff_load_error_does_not_share_the_breaking_exit_code(tmp_path):
-    """Protean finding (not yet filed upstream): `ir diff` exits 1 for two outcomes too.
+    """proteanhq/protean#1912: `ir diff` exits 1 for two outcomes too.
 
     It exits 1 for a breaking change, and also for an error before any diff runs, such
     as a missing baseline file. Protean's CLI convention keeps exit 2 for an environment error. `ir diff` raises
@@ -857,7 +857,7 @@ def test_1682_value_error_from_a_sync_handler_is_not_a_version_conflict():
 )
 @pytest.mark.usefixtures("payments_ctx")
 def test_rebuild_restores_a_projection_whose_projector_is_idempotent():
-    """Protean finding (not yet filed upstream): a rebuild empties an idempotent projector's read model.
+    """proteanhq/protean#1913: a rebuild empties an idempotent projector's read model.
 
     `rebuild_projection` (`protean/utils/projection_rebuilder.py`) deletes the
     projection's rows, then replays every stored event through `projector._handle`.

@@ -119,12 +119,12 @@ class TestEditRaisesEvent:
         assert event.title == "New title"
         assert event.rating == 5
 
-    def test_edit_event_carries_current_values_for_unset_fields(self):
+    def test_edit_event_omits_unset_text_fields(self):
         review = _make_review()
         review._events.clear()
         review.edit(title="Only title changed")
         event = review._events[0]
-        assert event.body == "I really enjoyed this product, it exceeded expectations."
+        assert event.body is None
         assert event.rating == 4
 
 

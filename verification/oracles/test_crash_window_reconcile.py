@@ -43,19 +43,21 @@ STATUS
       that had none here (proteanhq/protean#1648, fixed in
       proteanhq/protean#1655).
 
-    Open Protean findings (not filed upstream yet, xfail(strict=True) here):
+    Open Protean findings (xfail(strict=True) here):
 
     - reconcile repairs only when the newest event this context owns is missing
       its row. If another writer in the same context commits after the crash,
-      the lost event is never repaired.
+      the lost event is never repaired (proteanhq/protean#1907).
     - reconcile run while a command sits between its event-store append and its
       relational commit sees no row, inserts one, and commits first. The live
       commit then fails on the `(message_id, target_broker)` unique index, so
       its caller gets `TransactionError` for an event that will be published.
-      So `make outbox-reconcile` must run with the API and engines stopped.
+      So `make outbox-reconcile` must run with the API and engines stopped
+      (proteanhq/protean#1906).
     - for a state-based (CQRS) aggregate, the crash rolls back the aggregate
       row too, and reconcile still publishes its event. Here a
-      `CustomerRegistered` goes out for a customer that was never saved.
+      `CustomerRegistered` goes out for a customer that was never saved
+      (proteanhq/protean#1908).
 
 WHY POSTGRES + MESSAGE-DB ONLY
     The two-store split and the SQLAlchemy-commit seam only exist with the real
@@ -328,7 +330,7 @@ def test_reconcile_skips_a_command_at_the_tail():
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
-    reason="Protean bug, not filed yet: reconcile repairs only when the newest event of the context lacks its row",
+    reason="Protean bug proteanhq/protean#1907: reconcile repairs only when the newest event of the context lacks its row",
 )
 @pytest.mark.usefixtures("inventory_ctx")
 def test_reconcile_repairs_a_lost_event_behind_a_later_commit():
@@ -352,7 +354,7 @@ def test_reconcile_repairs_a_lost_event_behind_a_later_commit():
 @pytest.mark.xfail(
     strict=True,
     raises=TransactionError,
-    reason="Protean bug, not filed yet: reconcile inserts the row of a live, uncommitted unit of work, so its commit fails",
+    reason="Protean bug proteanhq/protean#1906: reconcile inserts the row of a live, uncommitted unit of work, so its commit fails",
 )
 @pytest.mark.usefixtures("inventory_ctx")
 def test_reconcile_beside_a_live_commit_does_not_fail_it():
@@ -403,7 +405,7 @@ def test_reconcile_beside_a_live_commit_does_not_fail_it():
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
-    reason="Protean bug, not filed yet: reconcile publishes the event of a state-based aggregate whose row rolled back",
+    reason="Protean bug proteanhq/protean#1908: reconcile publishes the event of a state-based aggregate whose row rolled back",
 )
 @pytest.mark.usefixtures("identity_ctx")
 def test_reconcile_does_not_publish_an_event_whose_aggregate_was_never_saved():
