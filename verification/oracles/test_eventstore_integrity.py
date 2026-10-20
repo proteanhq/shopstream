@@ -39,13 +39,13 @@ KINDS LEFT TO PROTEAN'S OWN TESTS
         so it cannot repeat, and the adapter reads `$all` ordered by it, so a
         read never sees it fall.
 
-PROTEAN FINDINGS (not filed upstream yet, xfail(strict=True) here)
+PROTEAN FINDINGS (xfail(strict=True) here)
     * A row whose `data` is SQL NULL (the column is nullable) makes `verify()`
       raise `TypeError` from the Message DB client's `json.loads`, so no report
-      comes back and the row is never named.
+      comes back and the row is never named (proteanhq/protean#1909).
     * An unreachable Message DB makes the CLI exit 1, the code for "violations
       found", with a traceback and no JSON envelope. The CLI exit-code rule
-      keeps 2 for an environment error.
+      keeps 2 for an environment error (proteanhq/protean#1910).
 
 WHY MESSAGE-DB ONLY
     Under `--protean-env memory` each process starts with an empty memory store,
@@ -419,7 +419,7 @@ def test_non_integer_snapshot_version_reports_malformed_snapshot(beds):
 @pytest.mark.xfail(
     strict=True,
     raises=TypeError,
-    reason="Protean bug, not filed yet: verify() raises TypeError on a row with NULL data instead of reporting it",
+    reason="Protean bug proteanhq/protean#1909: verify() raises TypeError on a row with NULL data instead of reporting it",
 )
 def test_null_message_data_is_reported_not_raised(beds):
     workload = _run_workload(beds)
@@ -459,7 +459,7 @@ def test_cli_exits_0_on_clean_store_and_1_on_corrupted_store(beds):
 
 @pytest.mark.xfail(
     strict=True,
-    reason="Protean bug, not filed yet: an unreachable Message DB makes the CLI exit 1 with no JSON envelope",
+    reason="Protean bug proteanhq/protean#1910: an unreachable Message DB makes the CLI exit 1 with no JSON envelope",
 )
 def test_cli_exits_2_with_an_error_envelope_when_message_db_is_unreachable():
     with socket.socket() as sock:
