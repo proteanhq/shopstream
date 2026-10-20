@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from protean import current_domain
 
 from notifications.channel import get_channel, reset_channels
+from notifications.notification.dispatch_expiry import STALE_DISPATCH_AFTER
 from notifications.notification.notification import (
     Notification,
     NotificationChannel,
@@ -207,6 +208,46 @@ class TestMaintenanceAPI:
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "ok"
+
+    def _claim_without_send(self, monkeypatch, recipient_id: str) -> str:
+        # Async processing leaves the claimed notification DISPATCHING with no send.
+        with monkeypatch.context() as m:
+            m.setitem(current_domain.config, "event_processing", "async")
+            n = Notification.create(
+                recipient_id=recipient_id,
+                notification_type=NotificationType.WELCOME.value,
+                channel=NotificationChannel.EMAIL.value,
+                body="Welcome!",
+            )
+            n.claim_dispatch(current_domain.clock.now())
+            current_domain.repository_for(Notification).add(n)
+        return str(n.id)
+
+    def test_process_scheduled_expires_stale_dispatches(self, monkeypatch, frozen_clock):
+        from notifications.domain import notifications
+
+        clock = frozen_clock(notifications, datetime.now(UTC))
+        nid = self._claim_without_send(monkeypatch, "cust-api-stale")
+        clock.advance(STALE_DISPATCH_AFTER + timedelta(minutes=1))
+
+        resp = _get_test_client().post("/notifications/maintenance/process-scheduled")
+
+        assert resp.status_code == 200
+        assert current_domain.repository_for(Notification).get(nid).status == NotificationStatus.FAILED.value
+
+    def test_process_scheduled_does_not_expire_by_a_future_as_of(self, monkeypatch, frozen_clock):
+        from notifications.domain import notifications
+
+        frozen_clock(notifications, datetime.now(UTC))
+        nid = self._claim_without_send(monkeypatch, "cust-api-future")
+        as_of = datetime.now(UTC) + STALE_DISPATCH_AFTER + timedelta(hours=1)
+
+        resp = _get_test_client().post(
+            "/notifications/maintenance/process-scheduled", json={"as_of": as_of.isoformat()}
+        )
+
+        assert resp.status_code == 200
+        assert current_domain.repository_for(Notification).get(nid).status == NotificationStatus.DISPATCHING.value
 
     def test_process_scheduled_with_body(self):
         client = _get_test_client()

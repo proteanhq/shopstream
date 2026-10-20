@@ -215,7 +215,7 @@ Each journey registers a customer via the Identity API first, waits for the Engi
 
 **`UnsubscribeResubscribeJourney`** — Register → Update Preferences → Unsubscribe → Get History → Resubscribe.
 
-**`NotificationCancelJourney`** ⚠️ — **Specialty scenario** (excluded from defaults). Races `process-scheduled` (which transitions to Sent) against cancel requests, generating expected `CancelNotificationHandler` failures. Run via `NotificationsCancelUser`.
+**`NotificationCancelJourney`** ⚠️ — **Specialty scenario** (excluded from defaults). Races `process-scheduled` (which requests dispatch, so the notification is claimed and sent) against cancel requests, generating expected `CancelNotificationHandler` failures. Run via `NotificationsCancelUser`.
 
 ### Loyalty Domain
 

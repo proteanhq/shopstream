@@ -34,24 +34,27 @@ Root fields: `recipient_id`, `recipient_type` (`RecipientType`), `notification_t
   REVIEW_PUBLISHED, REVIEW_REJECTED, REFUND_NOTIFICATION, ORDER_CANCELLATION, TIER_UPGRADED,
   POINTS_REDEEMED
 - `NotificationChannel`: EMAIL, SMS, PUSH, SLACK
-- `NotificationStatus`: PENDING, SENT, DELIVERED, FAILED, BOUNCED, CANCELLED
+- `NotificationStatus`: PENDING, DISPATCHING, SENT, DELIVERED, FAILED, BOUNCED, CANCELLED
 - `RecipientType`: CUSTOMER, INTERNAL
 
 ### State Machine: Notification Status
-PENDING → {SENT, FAILED, CANCELLED}; SENT → {DELIVERED, FAILED, BOUNCED}; FAILED → {PENDING}
-(via retry).
+PENDING → {DISPATCHING, CANCELLED}; DISPATCHING → {SENT, FAILED}; SENT → {DELIVERED, FAILED,
+BOUNCED}; FAILED → {PENDING} (via retry). DISPATCHING means the dispatcher has claimed the
+notification for a send, so it can no longer be cancelled or claimed again.
 
 ### Aggregate Methods
 | Method | Behavior |
 |--------|----------|
 | `Notification.create(...)` | Factory; raises `NotificationCreated`, plus `NotificationDispatchRequested` when `scheduled_for` is None |
-| `request_dispatch()` | PENDING only; raises `NotificationDispatchRequested` carrying channel, recipient, subject and body |
-| `mark_sent()` | PENDING → SENT; raises `NotificationSent` |
+| `request_dispatch()` | PENDING only; raises `NotificationDispatchRequested` (v2, the notification id only) |
+| `claim_dispatch()` | PENDING → DISPATCHING; raises `NotificationDispatchStarted` carrying channel, recipient, subject, body and `retry_count` |
+| `mark_sent()` | DISPATCHING → SENT; raises `NotificationSent` |
 | `mark_delivered()` | SENT → DELIVERED; raises `NotificationDelivered` |
-| `mark_failed(reason)` | Keeps at most 500 characters of `reason`; increments `retry_count`; raises `NotificationFailed` |
+| `mark_failed(reason)` | DISPATCHING or SENT → FAILED; keeps at most 500 characters of `reason`; increments `retry_count`; raises `NotificationFailed` |
+| `expire_dispatch()` | DISPATCHING → FAILED through `mark_failed(STALE_DISPATCH_REASON)`; never sends |
 | `mark_bounced()` | SENT → BOUNCED; raises `NotificationBounced` |
 | `cancel()` | PENDING → CANCELLED; raises `NotificationCancelled` |
-| `retry()` | Only FAILED and under `max_retries`; raises `NotificationRetried` |
+| `retry()` | Only FAILED and under `max_retries`; raises `NotificationRetried`, then requests dispatch again |
 
 ## Aggregate: NotificationPreference (CQRS)
 
@@ -76,7 +79,8 @@ Neither aggregate has child entities or value objects; the enums are plain `choi
 ## Events
 
 **Notification events** (`notification/events.py`): `NotificationCreated`,
-`NotificationDispatchRequested`, `NotificationSent`,
+`NotificationDispatchRequested` (v2; `notification/upcasters.py` drops the v1 send payload),
+`NotificationDispatchStarted`, `NotificationSent`,
 `NotificationDelivered`, `NotificationFailed`, `NotificationBounced`, `NotificationCancelled`,
 `NotificationRetried`.
 
@@ -89,6 +93,7 @@ Neither aggregate has child entities or value objects; the enums are plain `choi
 |------|---------|---------|
 | `notification/cancellation.py` | `CancelNotification` | `CancelNotificationHandler` |
 | `notification/dispatch.py` | `RecordDispatchResult` | `RecordDispatchResultHandler` |
+| `notification/dispatch_expiry.py` | `ExpireStaleDispatches` | `ExpireStaleDispatchesHandler` |
 | `notification/retry.py` | `RetryNotification` | `RetryNotificationHandler` |
 | `notification/scheduler.py` | `ProcessScheduledNotifications` | `ProcessScheduledNotificationsHandler` |
 | `preference/management.py` | `UpdateNotificationPreferences`, `SetQuietHours`, `ClearQuietHours` | `ManagePreferencesHandler` |
@@ -96,12 +101,27 @@ Neither aggregate has child entities or value objects; the enums are plain `choi
 
 ## Event Handler (internal)
 
-**File:** `notification/dispatch.py` — `NotificationDispatcher` (`part_of=Notification`). On
-`NotificationDispatchRequested` (raised by `create()` for an immediate notification, and by
-`request_dispatch()` from the scheduler), it calls the channel adapter, then processes
-`RecordDispatchResult`, whose handler calls `mark_sent()` / `mark_failed(...)` on a PENDING
-notification. The send reaches no repository first, so no transaction is open during it; the
-fake adapters raise `SendInsideTransactionError` (`channel/transaction_guard.py`) if one is.
+**File:** `notification/dispatch.py` — `NotificationDispatcher` (`part_of=Notification`), two
+methods, each in its own unit of work:
+
+1. On `NotificationDispatchRequested` (raised by `create()` for an immediate notification, by
+   `request_dispatch()` from the scheduler, and by `retry()`), it loads the notification and,
+   while it is PENDING, calls `claim_dispatch()`. A cancelled or already-claimed notification is
+   skipped, so a redelivered or duplicate request sends nothing.
+2. On `NotificationDispatchStarted`, it calls the channel adapter, then processes
+   `RecordDispatchResult`, whose handler calls `mark_sent()` / `mark_failed(...)` on a
+   DISPATCHING notification whose `retry_count` matches the claim's. A claim older than
+   `SEND_DEADLINE` (10 minutes, shorter than the sweep's 15) is not sent and records nothing,
+   so a claim the sweep can expire, and then retry, is never sent.
+
+The send reaches no repository first, so no transaction is open during it; the fake adapters
+raise `SendInsideTransactionError` (`channel/transaction_guard.py`) if one is.
+
+Known gaps: the record step joins the send's unit of work, so a version conflict on it either
+sends again (memory, proteanhq/protean#1915) or loses the result (Postgres,
+proteanhq/protean#1914); `tests/notifications/application/test_record_step_conflict.py` is a
+strict xfail for it. A redelivered `NotificationDispatchStarted` after a crash between the send
+and the record also sends again, within the send deadline.
 
 ## Cross-Domain Subscribers (the ACL hub)
 
@@ -142,7 +162,7 @@ Nine subscribers across eight streams — `identity::customer` is consumed by tw
 | `customer_notifications.py` | `CustomerNotifications` | Per-customer notification feed |
 | `customer_preferences.py` | `CustomerPreferences` | Per-customer preference view |
 | `failed_notifications.py` | `FailedNotifications` | Retry queue |
-| `notification_log.py` | `NotificationLog` | Audit trail of the seven lifecycle events (not `NotificationDispatchRequested`) |
+| `notification_log.py` | `NotificationLog` | Audit trail of the lifecycle events, including `NotificationDispatchStarted` (status `Dispatching`); not `NotificationDispatchRequested` |
 | `notification_stats.py` | `NotificationStats` | Daily counts by type + channel |
 
 ## Scheduler
@@ -150,15 +170,24 @@ Nine subscribers across eight streams — `identity::customer` is consumed by tw
 There is no resident daemon; scheduling is command-driven. `ProcessScheduledNotifications`
 (triggered via the maintenance endpoint, e.g. by cron) loads the PENDING notifications whose
 `scheduled_for <= as_of` (`as_of` defaults to the domain clock) and calls `request_dispatch()` on
-each; the dispatcher sends them after the scheduler commits. Scheduled notifications originate from the
+each; the dispatcher claims and sends them after the scheduler commits. Scheduled notifications originate from the
 ordering subscriber (review prompt) and cart subscriber (cart recovery); `create()` does not
-request their dispatch.
+request their dispatch. A retried scheduled notification is requested by `retry()` and may be
+requested again by the scheduler; only one request can claim it, so it is sent once.
+
+`ExpireStaleDispatches` (`notification/dispatch_expiry.py`, run by the same endpoint after the
+scheduler) marks FAILED every notification still DISPATCHING `STALE_DISPATCH_AFTER` (15 minutes)
+after its claim, with `STALE_DISPATCH_REASON`. Its `as_of` is capped at the domain clock, which
+the claim time and the send deadline also read, so a future `as_of` cannot expire a claim the
+send step would still send. It does not send: the send may already have
+gone out, so a retry decides. A result recorded after the sweep finds FAILED and is skipped.
 
 ## API
 
 **Package:** `api/` — `APIRouter(prefix="/notifications", tags=["notifications"])`. Preference
 CRUD + quiet-hours + (un)subscribe, notification history (via `view_for(CustomerNotifications)`),
-retry/cancel, and a `maintenance/process-scheduled` job endpoint.
+retry/cancel, and a `maintenance/process-scheduled` job endpoint that runs
+`ProcessScheduledNotifications` and then `ExpireStaleDispatches`.
 
 ## Tests
 

@@ -1,0 +1,19 @@
+{
+  "doc": "Request to fail notifications that have been DISPATCHING for too long.",
+  "fields": [
+    {
+      "default": null,
+      "name": "as_of",
+      "type": [
+        "null",
+        {
+          "logicalType": "timestamp-millis",
+          "type": "long"
+        }
+      ]
+    }
+  ],
+  "name": "ExpireStaleDispatches",
+  "namespace": "notifications.notification.dispatch_expiry",
+  "type": "record"
+}

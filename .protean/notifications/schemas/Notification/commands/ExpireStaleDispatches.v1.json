@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Request to fail notifications that have been DISPATCHING for too long.",
+  "properties": {
+    "as_of": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "title": "ExpireStaleDispatches",
+  "type": "object",
+  "x-protean-aggregate": "notifications.notification.notification.Notification",
+  "x-protean-element-type": "command",
+  "x-protean-fqn": "notifications.notification.dispatch_expiry.ExpireStaleDispatches",
+  "x-protean-type": "Notifications.ExpireStaleDispatches.v1",
+  "x-protean-version": 1
+}

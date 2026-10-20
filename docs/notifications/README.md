@@ -68,31 +68,35 @@ via the `NotificationLog` projection.
 
 **Invariants:**
 
-- State transitions follow a strict state machine (6 states, 7 valid transitions).
+- State transitions follow a strict state machine (7 states, 8 valid transitions).
 - Only failed notifications can be retried (`status == FAILED`).
 - Retry count cannot exceed `max_retries`.
-- Cancellation is only allowed from Pending status.
+- Cancellation is only allowed from Pending status, so a notification claimed for dispatch can no longer be cancelled.
+- Only a Pending notification can be claimed for dispatch, so each Pending period ends in at most one send.
 
 **State Machine: Notification Status**
 
 A Notification begins as Pending when created by a cross-domain event handler. If
 it is not scheduled for the future, it requests its own dispatch at creation. The
-`NotificationDispatcher` sends it via the appropriate channel adapter, then records
-the result, transitioning it to Sent or Failed.
+`NotificationDispatcher` first claims it, moving it to Dispatching in a transaction that
+commits before the send. It then sends it via the appropriate channel adapter and records
+the result, transitioning it to Sent or Failed. A notification left Dispatching for 15
+minutes with no result is marked Failed by `ExpireStaleDispatches`.
 
 Sent notifications may be confirmed as Delivered by a delivery webhook, or may Bounce
 (permanent failure) or Fail (transient failure). Failed notifications can be Retried,
-returning them to Pending. A retried scheduled notification goes out on the next
-scheduler run; a retried immediate notification is not dispatched again, because
-`retry()` requests no dispatch. Pending notifications can be
+returning them to Pending and requesting their dispatch again. A retried scheduled
+notification may also be requested by the next scheduler run; only one of the two
+requests can claim it, so it is sent once. Pending notifications can be
 Cancelled (e.g., customer opted out before dispatch).
 
 ```mermaid
 stateDiagram-v2
     [*] --> Pending : create
-    Pending --> Sent : mark_sent (dispatch succeeds)
-    Pending --> Failed : mark_failed (dispatch fails)
+    Pending --> Dispatching : claim_dispatch
     Pending --> Cancelled : cancel
+    Dispatching --> Sent : mark_sent (send succeeds)
+    Dispatching --> Failed : mark_failed (send fails) / expire_dispatch (no result)
     Sent --> Delivered : mark_delivered
     Sent --> Bounced : mark_bounced
     Sent --> Failed : mark_failed
@@ -120,7 +124,8 @@ enabled, SMS/push disabled) when a customer registers.
 | Event | Trigger | Consequence |
 |-------|---------|-------------|
 | `NotificationCreated` | Cross-domain event handler creates a notification | NotificationLog, CustomerNotifications projections created |
-| `NotificationDispatchRequested` | An immediate notification is created, or the scheduler finds a scheduled one due | `NotificationDispatcher` sends it, then records the result |
+| `NotificationDispatchRequested` | An immediate notification is created, the scheduler finds a scheduled one due, or a failed one is retried | `NotificationDispatcher` claims it if it is still Pending |
+| `NotificationDispatchStarted` | The dispatcher claims a Pending notification | `NotificationDispatcher` sends it, then records the result; NotificationLog updated |
 | `NotificationSent` | Channel adapter reports successful send | NotificationLog updated, NotificationStats incremented, FailedNotifications removed |
 | `NotificationDelivered` | Delivery webhook confirms delivery | NotificationLog, CustomerNotifications updated |
 | `NotificationFailed` | Channel adapter reports failure | NotificationLog updated, FailedNotifications created/updated, CustomerNotifications updated |
@@ -139,9 +144,10 @@ enabled, SMS/push disabled) when a customer registers.
 | Command | Who Initiates | What Happens | Events Raised |
 |---------|--------------|-------------|---------------|
 | `CancelNotification` | Customer/System | Cancels a pending or scheduled notification. Only from Pending status. | `NotificationCancelled` |
-| `RetryNotification` | Admin/System | Retries a failed notification. Resets to Pending. Must be below max_retries. | `NotificationRetried` |
+| `RetryNotification` | Admin/System | Retries a failed notification. Resets to Pending and requests its dispatch again. Must be below max_retries. | `NotificationRetried`, `NotificationDispatchRequested` |
 | `ProcessScheduledNotifications` | Background job | Loads the Pending notifications that are due (scheduled_for <= now) and requests their dispatch. The sends happen after it commits. | `NotificationDispatchRequested` per notification |
-| `RecordDispatchResult` | `NotificationDispatcher` | Marks a Pending notification Sent or Failed after its send. Leaves any other status alone. | `NotificationSent` or `NotificationFailed` |
+| `RecordDispatchResult` | `NotificationDispatcher` | Marks a Dispatching notification Sent or Failed after its send. Leaves any other status alone. | `NotificationSent` or `NotificationFailed` |
+| `ExpireStaleDispatches` | Background job (same endpoint, after the scheduler) | Marks Failed every notification still Dispatching 15 minutes after its claim. Never sends. A future `as_of` is capped at the domain clock. | `NotificationFailed` per notification |
 | `UpdateNotificationPreferences` | Customer | Updates channel settings (email/sms/push enabled/disabled). | `ChannelsUpdated` |
 | `SetQuietHours` | Customer | Sets a do-not-disturb time window. | `QuietHoursSet` |
 | `ClearQuietHours` | Customer | Removes the do-not-disturb window. | `QuietHoursCleared` |
@@ -152,7 +158,7 @@ enabled, SMS/push disabled) when a customer registers.
 
 | Projection | Purpose | Built From |
 |-----------|---------|-----------|
-| `NotificationLog` | Full audit trail of all notifications with status history | The 7 lifecycle events (not `NotificationDispatchRequested`) |
+| `NotificationLog` | Full audit trail of all notifications with status history | The lifecycle events, including `NotificationDispatchStarted` (not `NotificationDispatchRequested`) |
 | `CustomerNotifications` | Per-customer notification feed for account page | `NotificationCreated` (create), `NotificationSent`, `NotificationDelivered`, `NotificationFailed` (status updates) |
 | `NotificationStats` | Daily counts by notification type and channel | `NotificationSent` (increment counter) |
 | `FailedNotifications` | Queue of failed notifications for retry/investigation | `NotificationFailed` (add/update), `NotificationRetried`/`NotificationSent` (remove) |
@@ -234,28 +240,37 @@ approach keeps the codebase simple and the rendering logic testable.
 
 **Problem:** How should notifications be dispatched after creation?
 
-**Decision:** A notification that is due raises `NotificationDispatchRequested`, which
-carries the channel, recipient, subject and body. An immediate notification raises it
-at creation. A scheduled one raises it when `ProcessScheduledNotifications` finds it
-due. The `NotificationDispatcher` event handler reacts by calling the channel adapter,
-then processes `RecordDispatchResult`, whose handler marks the notification Sent or
-Failed.
+**Decision:** A notification that is due raises `NotificationDispatchRequested`. An
+immediate notification raises it at creation, a scheduled one when
+`ProcessScheduledNotifications` finds it due, and a failed one when it is retried. The
+`NotificationDispatcher` handles it in two steps, each in its own unit of work. The claim
+step loads the notification and, while it is still Pending, moves it to Dispatching,
+which raises `NotificationDispatchStarted` with the channel, recipient, subject and body.
+The send step reacts to that event by calling the channel adapter, then processes
+`RecordDispatchResult`, whose handler marks the notification Sent or Failed.
 
 **Rationale:** On Postgres a Unit of Work is one real database transaction. It opens
-at the first repository access and holds a pooled connection until it ends. The
-dispatcher reaches no repository before the send, so no transaction is open while the
+at the first repository access and holds a pooled connection until it ends. The send
+step reaches no repository before the send, so no transaction is open while the
 channel is called, and a slow channel cannot hold connections or row locks. The fake
-channel adapters check this on every send and raise if a session is open.
+channel adapters check this on every send and raise if a session is open. The claim
+commits before the send, so a cancel or a second dispatch request that arrives later
+finds the notification Dispatching and cannot cause a send.
 
-**Trade-off:** The send no longer reads the notification first. A request that is
-delivered twice sends twice, and a notification cancelled after its request but
-before the send still goes out. `RecordDispatchResult` records nothing for a
-notification that is no longer Pending, so a cancelled notification stays Cancelled
-even though it was sent. The channel ports do not take a notification id yet, so a
-real adapter has no idempotency key to give its provider. With synchronous event
-processing (the `test` and `memory` environments) the send runs in the same request,
-right after the commit that requested it. With async processing (dev and
-production) it runs in the engine worker.
+**Trade-off:** Three gaps remain. A `NotificationDispatchStarted` redelivered after a
+crash between the send and the record sends again, within the 10-minute send deadline,
+because the channel ports do not take an idempotency key yet. The record step joins the send step's unit of work, since
+Protean cannot commit one step of a handler on its own: a version conflict there sends
+again on memory (proteanhq/protean#1915) and loses the result on Postgres
+(proteanhq/protean#1914). And a notification whose send never records a result stays
+Dispatching until `ExpireStaleDispatches` marks it Failed after 15 minutes; it is not
+sent again until someone retries it, because the first send may have gone out. The
+send step refuses a claim older than 10 minutes, so a claim the sweep can expire is
+never sent late, and each result names its claim by `retry_count`, so a late result
+cannot settle a retried claim. With
+synchronous event processing (the `test` and `memory` environments) the claim and the
+send run in the same request, right after the commit that requested them. With async
+processing (dev and production) they run in the engine worker.
 
 ### Port/Adapter Pattern for Channels
 

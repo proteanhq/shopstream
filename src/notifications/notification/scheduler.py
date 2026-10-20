@@ -3,8 +3,9 @@
 This handler is invoked by a background job or cron. It selects the PENDING
 notifications whose scheduled_for time has passed and requests their dispatch.
 It never calls a channel itself: each request raises
-``NotificationDispatchRequested``, and ``NotificationDispatcher`` sends it
-after this transaction commits, outside any transaction.
+``NotificationDispatchRequested``, and after this transaction commits
+``NotificationDispatcher`` claims the notification and sends it, outside any
+transaction. A notification already claimed by another request is skipped.
 """
 
 from datetime import UTC, datetime
@@ -21,6 +22,20 @@ from notifications.notification.notification import Notification, NotificationSt
 logger = structlog.get_logger(__name__)
 
 
+def as_utc(value: datetime) -> datetime:
+    """Return ``value`` in UTC, taking a naive datetime to be UTC already.
+
+    Stored times are UTC, and the memory provider compares datetimes as
+    strings (proteanhq/protean#1900), so a query cutoff must be in UTC too.
+    """
+    return (value if value.tzinfo else value.replace(tzinfo=UTC)).astimezone(UTC)
+
+
+def clock_now() -> datetime:
+    """Return the domain clock's time in UTC."""
+    return as_utc(current_domain.clock.now())
+
+
 @notifications.command(part_of="Notification")
 class ProcessScheduledNotifications:
     """Request to process all due scheduled notifications."""
@@ -33,11 +48,7 @@ class ProcessScheduledNotificationsHandler:
     @handle(ProcessScheduledNotifications)
     def process_scheduled(self, command: ProcessScheduledNotifications) -> None:
         with processing_priority(Priority.LOW):
-            as_of = command.as_of or current_domain.clock.now()
-            # Stored times are UTC, and the memory provider compares datetimes as
-            # strings (proteanhq/protean#1900), so the cutoff must be in UTC too.
-            # A naive as_of is taken to be UTC.
-            as_of = (as_of if as_of.tzinfo else as_of.replace(tzinfo=UTC)).astimezone(UTC)
+            as_of = as_utc(command.as_of) if command.as_of else clock_now()
             repo = current_domain.repository_for(Notification)
 
             # Load only the due notifications, with no row limit: the query

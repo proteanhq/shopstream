@@ -1,0 +1,7 @@
+syntax = "proto3";
+package notifications.notification.dispatch_expiry;
+import "google/protobuf/timestamp.proto";
+
+message ExpireStaleDispatches {
+  optional google.protobuf.Timestamp as_of = 1;
+}

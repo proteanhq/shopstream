@@ -4,12 +4,15 @@ Each notification represents a single message sent to a recipient via a
 specific channel. Notifications are created reactively from cross-domain
 events and dispatched through channel adapters (email, SMS, push, Slack).
 
-State Machine (6 states):
-    PENDING → SENT → DELIVERED
-    PENDING → SENT → BOUNCED
-    PENDING → SENT → FAILED → (retry) → PENDING
-    PENDING → FAILED → (retry) → PENDING
+State Machine (7 states):
+    PENDING → DISPATCHING → SENT → DELIVERED
+    PENDING → DISPATCHING → SENT → BOUNCED
+    PENDING → DISPATCHING → SENT → FAILED → (retry) → PENDING
+    PENDING → DISPATCHING → FAILED → (retry) → PENDING
     PENDING → CANCELLED
+
+DISPATCHING means the dispatcher has claimed the notification and a send is
+under way, so it can no longer be cancelled or claimed a second time.
 """
 
 from datetime import UTC, datetime
@@ -26,6 +29,7 @@ from notifications.notification.events import (
     NotificationCreated,
     NotificationDelivered,
     NotificationDispatchRequested,
+    NotificationDispatchStarted,
     NotificationFailed,
     NotificationRetried,
     NotificationSent,
@@ -62,11 +66,15 @@ class NotificationChannel(Enum):
 
 class NotificationStatus(Enum):
     PENDING = "Pending"
+    DISPATCHING = "Dispatching"
     SENT = "Sent"
     DELIVERED = "Delivered"
     FAILED = "Failed"
     BOUNCED = "Bounced"
     CANCELLED = "Cancelled"
+
+
+STALE_DISPATCH_REASON = "No dispatch result recorded; outcome unknown"
 
 
 class RecipientType(Enum):
@@ -111,9 +119,12 @@ class Notification:
         default=NotificationStatus.PENDING.value,
         transitions={
             NotificationStatus.PENDING: [
+                NotificationStatus.DISPATCHING,
+                NotificationStatus.CANCELLED,
+            ],
+            NotificationStatus.DISPATCHING: [
                 NotificationStatus.SENT,
                 NotificationStatus.FAILED,
-                NotificationStatus.CANCELLED,
             ],
             NotificationStatus.SENT: [
                 NotificationStatus.DELIVERED,
@@ -216,11 +227,35 @@ class Notification:
         self.raise_(
             NotificationDispatchRequested(
                 notification_id=str(self.id),
+                requested_at=datetime.now(UTC),
+            )
+        )
+
+    def claim_dispatch(self, claimed_at: datetime | None = None) -> None:
+        """Claim this pending notification for one send through its channel.
+
+        The claim commits before the send. A cancel or a second dispatch
+        request that arrives afterwards finds the notification DISPATCHING
+        and does not reach the channel. The dispatcher passes the domain
+        clock's time, the clock its send deadline and the stale-dispatch sweep
+        both read.
+        """
+        if NotificationStatus(self.status) != NotificationStatus.PENDING:
+            raise ValidationError({"status": ["Only pending notifications can be claimed for dispatch"]})
+
+        now = claimed_at or datetime.now(UTC)
+        self.status = NotificationStatus.DISPATCHING.value
+        self.updated_at = now
+
+        self.raise_(
+            NotificationDispatchStarted(
+                notification_id=str(self.id),
                 recipient_id=str(self.recipient_id),
                 channel=self.channel,
                 subject=self.subject,
                 body=self.body,
-                requested_at=datetime.now(UTC),
+                retry_count=self.retry_count,
+                started_at=now,
             )
         )
 
@@ -281,6 +316,16 @@ class Notification:
             )
         )
 
+    def expire_dispatch(self) -> None:
+        """Fail a notification whose send never recorded a result.
+
+        The send may or may not have reached the recipient, so this records
+        a failure instead of sending again. A retry decides what happens next.
+        """
+        if NotificationStatus(self.status) != NotificationStatus.DISPATCHING:
+            raise ValidationError({"status": ["Only dispatching notifications can expire"]})
+        self.mark_failed(STALE_DISPATCH_REASON)
+
     def mark_bounced(self, reason: str) -> None:
         """Mark notification as bounced (permanent delivery failure)."""
         now = datetime.now(UTC)
@@ -316,7 +361,12 @@ class Notification:
         )
 
     def retry(self) -> None:
-        """Retry a failed notification."""
+        """Retry a failed notification and request its dispatch again.
+
+        A scheduled notification is requested here too, even though the next
+        scheduler run would also find it PENDING and due. Only one of the two
+        requests can claim it, so it is sent once.
+        """
         if NotificationStatus(self.status) != NotificationStatus.FAILED:
             raise ValidationError({"status": ["Only failed notifications can be retried"]})
         if self.retry_count >= self.max_retries:
@@ -336,3 +386,4 @@ class Notification:
                 retried_at=now,
             )
         )
+        self.request_dispatch()

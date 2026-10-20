@@ -8,8 +8,9 @@
 Alice just placed an order on ShopStream. The Ordering domain raises an `OrderCreated`
 event. The Notifications domain consumes this event and creates an order confirmation
 email for Alice. Because the notification is immediate (not scheduled for the future),
-the notification requests its own dispatch. The dispatcher sends it via the email
-adapter with no database transaction open, then records it as Sent.
+the notification requests its own dispatch. The dispatcher first claims it, so it can
+no longer be cancelled or sent twice, then sends it via the email adapter with no
+database transaction open, and records it as Sent.
 
 Alice receives her confirmation email within seconds.
 
@@ -54,9 +55,20 @@ The helper performs these steps:
 ### 4. Auto-Dispatch
 
 `Notification.create()` raises `NotificationCreated`. Because the notification is not
-scheduled, it also raises `NotificationDispatchRequested`, which carries the channel,
-recipient, subject and body. When the unit of work that saved the notification commits, the
-`NotificationDispatcher` event handler reacts to the request:
+scheduled, it also raises `NotificationDispatchRequested`, which names the notification.
+`NotificationDispatcher` handles the dispatch in two steps. Each step is its own handler
+method and runs in its own unit of work.
+
+**Claim.** When the unit of work that saved the notification commits,
+`on_dispatch_requested` loads the notification. If it is still `PENDING`, it calls
+`claim_dispatch()`, which moves it to `DISPATCHING` and raises
+`NotificationDispatchStarted`. That event carries the channel, recipient, subject, body
+and retry count. If the notification is no longer `PENDING`, because it was cancelled or
+an earlier request already claimed it, the handler skips it and nothing is sent.
+
+**Send.** When the claim commits, `on_dispatch_started` reacts to `NotificationDispatchStarted`.
+If the claim is older than `SEND_DEADLINE` (10 minutes), it sends nothing and leaves the
+notification for the stale-dispatch sweep. Otherwise it:
 
 1. Gets the channel adapter via `get_channel(event.channel)`.
 2. Calls `_dispatch_via_channel(adapter, event)`, which routes to the correct
@@ -64,13 +76,14 @@ recipient, subject and body. When the unit of work that saved the notification c
 3. Processes `RecordDispatchResult`, with a `failure_reason` when the adapter
    reported a failure or raised.
 
-The dispatcher reaches no repository before the send. On Postgres the Unit of Work
+The send step reaches no repository before the send. On Postgres the Unit of Work
 opens its transaction at the first repository access, so no transaction or pooled
 connection is held while the channel is called. The fake adapters check this on every
 send.
 
-`RecordDispatchResultHandler` then loads the notification. If it is still `PENDING`,
-it calls `mark_sent()` or `mark_failed(reason)` and persists it.
+`RecordDispatchResultHandler` then loads the notification. If it is still `DISPATCHING`
+under the same claim (its `retry_count` matches the result's), it calls `mark_sent()` or
+`mark_failed(reason)` and persists it.
 
 &rarr; [source](../../src/notifications/notification/dispatch.py)
 
@@ -82,6 +95,7 @@ Events raised during the notification lifecycle trigger projectors:
 |-------|-----------|--------|
 | `NotificationCreated` | `NotificationLogProjector` | Creates audit trail entry with status=Pending |
 | `NotificationCreated` | `CustomerNotificationsProjector` | Creates customer feed entry (skips internal notifications) |
+| `NotificationDispatchStarted` | `NotificationLogProjector` | Updates status to Dispatching |
 | `NotificationSent` | `NotificationLogProjector` | Updates status to Sent, records sent_at |
 | `NotificationSent` | `NotificationStatsProjector` | Increments daily count for this type+channel |
 | `NotificationSent` | `CustomerNotificationsProjector` | Updates status to Sent |
@@ -122,16 +136,23 @@ sequenceDiagram
     Agg->>Agg: raise_(NotificationDispatchRequested)
     Helper->>DB: repository.add(notification)
 
-    Note over Dispatch,Adapter: Auto-dispatch, no transaction open
+    Note over Dispatch,DB: Claim, in its own unit of work
     Dispatch->>Dispatch: on_dispatch_requested(event)
+    Dispatch->>DB: Load notification (verify PENDING)
+    Dispatch->>Agg: notification.claim_dispatch()
+    Agg->>Agg: raise_(NotificationDispatchStarted)
+    Dispatch->>DB: repository.add(notification), commit
+
+    Note over Dispatch,Adapter: Send, no transaction open
+    Dispatch->>Dispatch: on_dispatch_started(event)
     Dispatch->>Adapter: send(to=customer, subject, body)
     Adapter-->>Dispatch: {status: "sent"}
 
     Note over Dispatch,DB: RecordDispatchResultHandler
-    Dispatch->>DB: Load notification (verify PENDING)
+    Dispatch->>DB: Load notification (verify DISPATCHING)
     Dispatch->>Agg: notification.mark_sent()
     Dispatch->>DB: repository.add(notification)
-    Note over Dispatch: The handler runs inside the dispatcher's unit of work
+    Note over Dispatch: The record step runs inside the send step's unit of work
 
     Note over Proj: Async projections
     Proj->>Proj: NotificationLog: create + update to Sent
@@ -148,7 +169,14 @@ sequenceDiagram
 | All channels disabled | No notification created, logs "No enabled channels" | Preference enforcement |
 | Email adapter fails (SMTP error) | Notification marked FAILED, added to FailedNotifications queue | Retry logic available via `RetryNotification` command |
 | Email adapter raises exception | Notification marked FAILED with exception message | Exception safety in dispatch handler |
-| Dispatch request delivered twice | The adapter is called again; the second result is not recorded and the status stays as first recorded | The send runs without reading the notification, and the channel ports take no notification id to use as an idempotency key |
-| Notification cancelled after its dispatch was requested | It is still sent, because the send reads nothing first; the status stays CANCELLED | `RecordDispatchResult` only records for PENDING notifications |
+| Dispatch request delivered twice, or requested twice (a retry and the scheduler) | Sent once: the second request finds the notification no longer PENDING and skips | Only a PENDING notification can be claimed |
+| Notification cancelled before its claim | Not sent; the status stays CANCELLED | The claim skips a notification that is not PENDING |
+| Cancel after the claim | Refused with a validation error; the send goes ahead | DISPATCHING → CANCELLED is not an allowed transition |
+| `NotificationDispatchStarted` redelivered after a crash between the send and the record | The adapter is called again, if the claim is still within its 10-minute send deadline | The send reads nothing first, and the channel ports take no idempotency key |
+| `NotificationDispatchStarted` delivered late, after an engine outage | Not sent if the claim is older than 10 minutes; the sweep marks it FAILED | The send step cannot see an expiry, so it refuses any claim the sweep could have expired |
+| A late result from a claim that expired and was retried | Not recorded on the newer claim | Each result carries its claim's `retry_count`, and the record step requires it to match |
+| Version conflict when recording the result | Memory: the whole send step is retried and the adapter is called again. Postgres: the result is lost and the notification stays DISPATCHING | Protean cannot commit the record step on its own (proteanhq/protean#1915, proteanhq/protean#1914) |
+| Send step never records a result (for example, dead-lettered) | After 15 minutes `ExpireStaleDispatches` marks it FAILED with "No dispatch result recorded; outcome unknown"; it is not sent again until retried | The send may already have reached the recipient |
 | Notification not found when recording the result | Handler logs an error and returns | Safety for eventual consistency |
 | Scheduled notification (e.g., review prompt) | No dispatch request at creation; stays PENDING | `ProcessScheduledNotifications` requests dispatch once it is due |
+| Failed notification retried | `RetryNotification` sets it PENDING and requests dispatch again, for scheduled and immediate notifications alike | A retried scheduled notification is claimed once, whichever request comes first |

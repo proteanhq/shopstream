@@ -27,6 +27,20 @@ class NotificationCreated:
 class NotificationDispatchRequested:
     """A pending notification is ready to go out through its channel.
 
+    v2 names only the notification: the claim loads it, and the send payload
+    moved to ``NotificationDispatchStarted``.
+    """
+
+    __version__ = 2
+
+    notification_id: str = Identifier(required=True)
+    requested_at: datetime = DateTime(required=True)
+
+
+@notifications.event(part_of="Notification")
+class NotificationDispatchStarted:
+    """The dispatcher claimed a pending notification for one send.
+
     Carries everything the send needs, so the dispatcher can send without
     loading the notification and opening a database transaction.
     """
@@ -36,7 +50,8 @@ class NotificationDispatchRequested:
     channel: str = String(required=True)
     subject: str | None = String(max_length=500)
     body: str = Text(required=True)
-    requested_at: datetime = DateTime(required=True)
+    retry_count: int = Integer(required=True)
+    started_at: datetime = DateTime(required=True)
 
 
 @notifications.event(part_of="Notification")

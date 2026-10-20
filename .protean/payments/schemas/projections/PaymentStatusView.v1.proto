@@ -3,7 +3,7 @@ package payments.projections.payment_status;
 import "google/protobuf/timestamp.proto";
 
 message PaymentStatusView {
-  optional double amount = 1;
+  optional string amount = 1;
   optional int64 attempt_count = 2;
   optional google.protobuf.Timestamp created_at = 3;
   optional string currency = 4;
@@ -13,6 +13,6 @@ message PaymentStatusView {
   string order_id = 8;
   string payment_id = 9;
   string status = 10;
-  optional double total_refunded = 11;
+  optional string total_refunded = 11;
   optional google.protobuf.Timestamp updated_at = 12;
 }

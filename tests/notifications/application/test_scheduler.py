@@ -150,8 +150,8 @@ class TestProcessScheduledNotifications:
         # Restore
         adapter.send = original_send
 
-    def test_leaves_a_retried_immediate_notification_pending(self):
-        """A PENDING notification with no scheduled_for is not the scheduler's to send."""
+    def test_a_retried_immediate_notification_is_sent_once(self):
+        """The retry sends it, and a later scheduler run does not send it again."""
         adapter = get_channel(NotificationChannel.EMAIL.value)
         adapter.configure(should_succeed=False, failure_reason="SMTP down")
         n = Notification.create(
@@ -163,14 +163,37 @@ class TestProcessScheduledNotifications:
         repo = current_domain.repository_for(Notification)
         repo.add(n)
         adapter.configure(should_succeed=True)
+
         current_domain.process(RetryNotification(notification_id=str(n.id)), asynchronous=False)
-        assert repo.get(str(n.id)).status == NotificationStatus.PENDING.value
-        sends_before = len(adapter.sent_emails)
+        assert repo.get(str(n.id)).status == NotificationStatus.SENT.value
+        assert len(adapter.sent_emails) == 1
 
         current_domain.process(ProcessScheduledNotifications(as_of=datetime.now(UTC)), asynchronous=False)
 
-        assert repo.get(str(n.id)).status == NotificationStatus.PENDING.value
-        assert len(adapter.sent_emails) == sends_before
+        assert len(adapter.sent_emails) == 1
+
+    def test_a_retried_scheduled_notification_is_sent_once(self):
+        """A retried notification with a past scheduled_for is sent by the retry, not again by the scheduler."""
+        adapter = get_channel(NotificationChannel.EMAIL.value)
+        n = Notification.create(
+            recipient_id="cust-sched-retried-due",
+            notification_type=NotificationType.REVIEW_PROMPT.value,
+            channel=NotificationChannel.EMAIL.value,
+            body="Review?",
+            scheduled_for=datetime.now(UTC) - timedelta(hours=1),
+        )
+        repo = current_domain.repository_for(Notification)
+        repo.add(n)
+        adapter.configure(should_succeed=False, failure_reason="SMTP down")
+        current_domain.process(ProcessScheduledNotifications(as_of=datetime.now(UTC)), asynchronous=False)
+        assert repo.get(str(n.id)).status == NotificationStatus.FAILED.value
+        adapter.configure(should_succeed=True)
+
+        current_domain.process(RetryNotification(notification_id=str(n.id)), asynchronous=False)
+        current_domain.process(ProcessScheduledNotifications(as_of=datetime.now(UTC)), asynchronous=False)
+
+        assert repo.get(str(n.id)).status == NotificationStatus.SENT.value
+        assert len(adapter.sent_emails) == 1
 
     @pytest.mark.parametrize(
         ("as_of", "expected"),

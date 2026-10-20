@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:e2d3d72bb5b295493590edc0b05f52b5f61977a20d29f8fac08f54c27f8cee6b",
+  "checksum": "sha256:29d192981f67190cd076a8e395f441116bbf94a8d5c7057a996562e935011630",
   "clusters": {
     "notifications.notification.notification.Notification": {
       "aggregate": {
@@ -123,6 +123,7 @@
               "Bounced",
               "Cancelled",
               "Delivered",
+              "Dispatching",
               "Failed",
               "Pending",
               "Sent"
@@ -130,12 +131,15 @@
             "default": "Pending",
             "kind": "status",
             "transitions": {
+              "Dispatching": [
+                "Sent",
+                "Failed"
+              ],
               "Failed": [
                 "Pending"
               ],
               "Pending": [
-                "Sent",
-                "Failed",
+                "Dispatching",
                 "Cancelled"
               ],
               "Sent": [
@@ -171,6 +175,11 @@
           "cancel": {
             "raises": [
               "notifications.notification.events.NotificationCancelled"
+            ]
+          },
+          "claim_dispatch": {
+            "raises": [
+              "notifications.notification.events.NotificationDispatchStarted"
             ]
           },
           "create": {
@@ -283,6 +292,34 @@
             "type": null
           }
         },
+        "notifications.notification.dispatch_expiry.ExpireStaleDispatchesHandler": {
+          "element_type": "COMMAND_HANDLER",
+          "fqn": "notifications.notification.dispatch_expiry.ExpireStaleDispatchesHandler",
+          "handlers": {
+            "Notifications.ExpireStaleDispatches.v1": [
+              "expire_stale_dispatches"
+            ]
+          },
+          "method_edges": {
+            "expire_stale_dispatches": {
+              "invokes": [
+                {
+                  "element": "notifications.notification.notification.Notification",
+                  "method": "expire_dispatch"
+                }
+              ]
+            }
+          },
+          "module": "notifications.notification.dispatch_expiry",
+          "name": "ExpireStaleDispatchesHandler",
+          "part_of": "notifications.notification.notification.Notification",
+          "stream_category": "notifications::notification:command",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": null
+          }
+        },
         "notifications.notification.retry.RetryNotificationHandler": {
           "element_type": "COMMAND_HANDLER",
           "fqn": "notifications.notification.retry.RetryNotificationHandler",
@@ -381,11 +418,32 @@
               "min_length": 1,
               "required": true,
               "type": "Identifier"
+            },
+            "retry_count": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
             }
           },
           "fqn": "notifications.notification.dispatch.RecordDispatchResult",
           "module": "notifications.notification.dispatch",
           "name": "RecordDispatchResult",
+          "part_of": "notifications.notification.notification.Notification"
+        },
+        "notifications.notification.dispatch_expiry.ExpireStaleDispatches": {
+          "__type__": "Notifications.ExpireStaleDispatches.v1",
+          "__version__": 1,
+          "description": "Request to fail notifications that have been DISPATCHING for too long.",
+          "element_type": "COMMAND",
+          "fields": {
+            "as_of": {
+              "kind": "standard",
+              "type": "DateTime"
+            }
+          },
+          "fqn": "notifications.notification.dispatch_expiry.ExpireStaleDispatches",
+          "module": "notifications.notification.dispatch_expiry",
+          "name": "ExpireStaleDispatches",
           "part_of": "notifications.notification.notification.Notification"
         },
         "notifications.notification.retry.RetryNotification": {
@@ -427,13 +485,26 @@
       "entities": {},
       "event_handlers": {
         "notifications.notification.dispatch.NotificationDispatcher": {
-          "description": "Sends a notification through its channel when its dispatch is requested.",
+          "description": "Claims a notification when its dispatch is requested, then sends it.",
           "element_type": "EVENT_HANDLER",
           "fqn": "notifications.notification.dispatch.NotificationDispatcher",
           "handlers": {
-            "Notifications.NotificationDispatchRequested.v1": [
+            "Notifications.NotificationDispatchRequested.v2": [
               "on_dispatch_requested"
+            ],
+            "Notifications.NotificationDispatchStarted.v1": [
+              "on_dispatch_started"
             ]
+          },
+          "method_edges": {
+            "on_dispatch_requested": {
+              "invokes": [
+                {
+                  "element": "notifications.notification.notification.Notification",
+                  "method": "claim_dispatch"
+                }
+              ]
+            }
           },
           "module": "notifications.notification.dispatch",
           "name": "NotificationDispatcher",
@@ -644,9 +715,33 @@
           "part_of": "notifications.notification.notification.Notification"
         },
         "notifications.notification.events.NotificationDispatchRequested": {
-          "__type__": "Notifications.NotificationDispatchRequested.v1",
+          "__type__": "Notifications.NotificationDispatchRequested.v2",
+          "__version__": 2,
+          "description": "A pending notification is ready to go out through its channel.\n\nv2 names only the notification: the claim loads it, and the send payload\nmoved to ``NotificationDispatchStarted``.",
+          "element_type": "EVENT",
+          "fields": {
+            "notification_id": {
+              "kind": "identifier",
+              "min_length": 1,
+              "required": true,
+              "type": "Identifier"
+            },
+            "requested_at": {
+              "kind": "standard",
+              "required": true,
+              "type": "DateTime"
+            }
+          },
+          "fqn": "notifications.notification.events.NotificationDispatchRequested",
+          "is_fact_event": false,
+          "module": "notifications.notification.events",
+          "name": "NotificationDispatchRequested",
+          "part_of": "notifications.notification.notification.Notification"
+        },
+        "notifications.notification.events.NotificationDispatchStarted": {
+          "__type__": "Notifications.NotificationDispatchStarted.v1",
           "__version__": 1,
-          "description": "A pending notification is ready to go out through its channel.\n\nCarries everything the send needs, so the dispatcher can send without\nloading the notification and opening a database transaction.",
+          "description": "The dispatcher claimed a pending notification for one send.\n\nCarries everything the send needs, so the dispatcher can send without\nloading the notification and opening a database transaction.",
           "element_type": "EVENT",
           "fields": {
             "body": {
@@ -674,7 +769,12 @@
               "required": true,
               "type": "Identifier"
             },
-            "requested_at": {
+            "retry_count": {
+              "kind": "standard",
+              "required": true,
+              "type": "Integer"
+            },
+            "started_at": {
               "kind": "standard",
               "required": true,
               "type": "DateTime"
@@ -685,10 +785,10 @@
               "type": "String"
             }
           },
-          "fqn": "notifications.notification.events.NotificationDispatchRequested",
+          "fqn": "notifications.notification.events.NotificationDispatchStarted",
           "is_fact_event": false,
           "module": "notifications.notification.events",
-          "name": "NotificationDispatchRequested",
+          "name": "NotificationDispatchStarted",
           "part_of": "notifications.notification.notification.Notification"
         },
         "notifications.notification.events.NotificationFailed": {
@@ -1452,6 +1552,21 @@
     {
       "category": "naming_conventions",
       "code": "COMMAND_NOT_IMPERATIVE",
+      "element": "notifications.notification.dispatch_expiry.ExpireStaleDispatches",
+      "level": "info",
+      "message": "Command `ExpireStaleDispatches` does not start with an imperative verb; commands read best as verb-first phrases",
+      "rule": {
+        "fix": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+        "rationale": "A command expresses an intent to act, so a verb-first imperative name (`PlaceOrder`) reads truthfully; a noun-like name (`OrderCreation`) obscures the intent."
+      },
+      "suggestion": "Rename the command to a verb-first imperative phrase (e.g. `PlaceOrder`).",
+      "teaching_skills": [
+        "command"
+      ]
+    },
+    {
+      "category": "naming_conventions",
+      "code": "COMMAND_NOT_IMPERATIVE",
       "element": "notifications.notification.retry.RetryNotification",
       "level": "info",
       "message": "Command `RetryNotification` does not start with an imperative verb; commands read best as verb-first phrases",
@@ -1596,6 +1711,7 @@
     "COMMAND": [
       "notifications.notification.cancellation.CancelNotification",
       "notifications.notification.dispatch.RecordDispatchResult",
+      "notifications.notification.dispatch_expiry.ExpireStaleDispatches",
       "notifications.notification.retry.RetryNotification",
       "notifications.notification.scheduler.ProcessScheduledNotifications",
       "notifications.preference.management.ClearQuietHours",
@@ -1607,6 +1723,7 @@
     "COMMAND_HANDLER": [
       "notifications.notification.cancellation.CancelNotificationHandler",
       "notifications.notification.dispatch.RecordDispatchResultHandler",
+      "notifications.notification.dispatch_expiry.ExpireStaleDispatchesHandler",
       "notifications.notification.retry.RetryNotificationHandler",
       "notifications.notification.scheduler.ProcessScheduledNotificationsHandler",
       "notifications.preference.management.ManagePreferencesHandler",
@@ -1621,6 +1738,7 @@
       "notifications.notification.events.NotificationCreated",
       "notifications.notification.events.NotificationDelivered",
       "notifications.notification.events.NotificationDispatchRequested",
+      "notifications.notification.events.NotificationDispatchStarted",
       "notifications.notification.events.NotificationFailed",
       "notifications.notification.events.NotificationRetried",
       "notifications.notification.events.NotificationSent",
@@ -1663,7 +1781,9 @@
       "notifications.notification.review_subscriber.ReviewEventsSubscriber",
       "notifications.preference.identity_subscriber.PreferenceIdentitySubscriber"
     ],
-    "UPCASTER": [],
+    "UPCASTER": [
+      "notifications.notification.upcasters.UpcastNotificationDispatchRequestedV1ToV2"
+    ],
     "VALUE_OBJECT": []
   },
   "enrichers": {
@@ -2196,6 +2316,9 @@
             "Notifications.NotificationDelivered.v1": [
               "on_notification_delivered"
             ],
+            "Notifications.NotificationDispatchStarted.v1": [
+              "on_dispatch_started"
+            ],
             "Notifications.NotificationFailed.v1": [
               "on_notification_failed"
             ],
@@ -2306,5 +2429,13 @@
       "queries": {},
       "query_handlers": {}
     }
+  },
+  "upcasters": {
+    "NotificationDispatchRequested": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ]
   }
 }

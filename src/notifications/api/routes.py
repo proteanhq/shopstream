@@ -197,13 +197,16 @@ class ProcessScheduledResponse(PydanticBaseModel):
 async def process_scheduled_notifications(
     body: ProcessScheduledRequest | None = None,
 ) -> ProcessScheduledResponse:
-    """Dispatch due scheduled notifications.
+    """Dispatch due scheduled notifications, then fail stale dispatches.
 
     Designed to be called periodically by an external scheduler (e.g., every 15 minutes).
-    Idempotent: already-sent notifications are skipped.
+    Idempotent: already-sent notifications are skipped. A notification left
+    DISPATCHING for longer than ``STALE_DISPATCH_AFTER`` is marked FAILED, not sent again.
     """
+    from notifications.notification.dispatch_expiry import ExpireStaleDispatches
     from notifications.notification.scheduler import ProcessScheduledNotifications
 
-    command = ProcessScheduledNotifications(as_of=body.as_of if body else None)
-    current_domain.process(command, asynchronous=False)
+    as_of = body.as_of if body else None
+    current_domain.process(ProcessScheduledNotifications(as_of=as_of), asynchronous=False)
+    current_domain.process(ExpireStaleDispatches(as_of=as_of), asynchronous=False)
     return ProcessScheduledResponse()

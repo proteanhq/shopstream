@@ -14,7 +14,12 @@
       "name": "value",
       "type": [
         "null",
-        "double"
+        {
+          "logicalType": "decimal",
+          "precision": 19,
+          "scale": 4,
+          "type": "bytes"
+        }
       ]
     }
   ],

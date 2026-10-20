@@ -6,9 +6,6 @@
       "minLength": 1,
       "type": "string"
     },
-    "amount": {
-      "type": "integer"
-    },
     "balance_after": {
       "type": "integer"
     },
@@ -27,6 +24,9 @@
       "format": "date-time",
       "type": "string"
     },
+    "points": {
+      "type": "integer"
+    },
     "reason": {
       "anyOf": [
         {
@@ -41,9 +41,9 @@
   },
   "required": [
     "account_id",
-    "amount",
     "balance_after",
-    "occurred_at"
+    "occurred_at",
+    "points"
   ],
   "title": "PointsRedeemed",
   "type": "object",
