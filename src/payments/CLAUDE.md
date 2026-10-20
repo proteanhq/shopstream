@@ -33,7 +33,7 @@ Refunded             → (terminal)
 ```
 
 ### Value Objects (part_of="Payment")
-- `Money` — currency (default "USD"), value (Float)
+- `Money` — currency (default "USD"), value (`Decimal(precision=19, scale=4)`, default 0)
 - `PaymentMethod` — method_type (credit_card/debit_card/bank_transfer), last4, expiry_month, expiry_year
 - `GatewayInfo` — gateway_name, gateway_transaction_id, gateway_status, gateway_response
 
@@ -130,6 +130,8 @@ Voided → (terminal)
 | `daily_revenue.py` | `DailyRevenue` | `DailyRevenueProjector` | Daily revenue/refund aggregation (keyed by YYYY-MM-DD) |
 | `refund_report.py` | `RefundReport` | `RefundReportProjector` | Individual refund tracking (requested → completed) |
 
+`PaymentStatusView` (`amount`, `total_refunded`) and `DailyRevenue` (`total_revenue`, `total_refunded`, `net_revenue`) store money as `Decimal(precision=19, scale=4)`. The events still carry money as floats, so the projectors convert each amount with `shared.money.to_money`, which goes through `str` and rounds half-even to 4 places. `Payment.create` and `Payment.request_refund` reject an amount with more than 4 decimal places, or of 1e15 or more (`POST /payments` and `POST /payments/{payment_id}/refund` answer 400), so the `Money` value object and the projections hold the same value as the event. Float error from arithmetic, such as `0.1 + 0.2` or `100 - 99.99`, does not count as a fifth place. `Payment.total_refunded` is still a `Float`; it adds each refund after rounding it with `to_money`, as the projections do, so it holds the float of the same 4-place total.
+
 ## Cross-Domain Integration
 
 ### Outbound: Payments → Ordering
@@ -151,15 +153,16 @@ Subscriber `OrderingEventsSubscriber`:
 |------|----------|
 | `api/__init__.py` | Re-exports `payment_router` and `invoice_router` |
 | `api/schemas.py` | Pydantic request/response models (external contract) |
-| `api/routes.py` | 8 endpoints (6 payment + 2 invoice) |
+| `api/routes.py` | 9 endpoints (7 payment + 2 invoice) |
 
 ### Payment Endpoints (`tags=["payments"]`)
 | Method | Path | Request Body | Response |
 |--------|------|-------------|----------|
+| GET | `/payments/{payment_id}` | — | `PaymentStatusResponse` (`amount` and `total_refunded` as strings with 4 places, for example `"0.3000"`) |
 | POST | `/payments` | `InitiatePaymentRequest` | `PaymentIdResponse` (201) |
 | POST | `/payments/webhook` | `ProcessWebhookRequest` + `X-Gateway-Signature` header | `StatusResponse` |
 | POST | `/payments/{payment_id}/retry` | — | `StatusResponse` |
-| POST | `/payments/{payment_id}/refund` | `RequestRefundRequest` | `StatusResponse` |
+| POST | `/payments/{payment_id}/refund` | `RequestRefundRequest` | `RefundIdResponse` |
 | POST | `/payments/refund/webhook` | `ProcessRefundWebhookRequest` + `X-Gateway-Signature` header | `StatusResponse` |
 | POST | `/payments/gateway/configure` | `ConfigureGatewayRequest` | `GatewayConfigResponse` (non-production only) |
 

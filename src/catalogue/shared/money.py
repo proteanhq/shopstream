@@ -1,8 +1,10 @@
 """Money value object for monetary amounts with currency."""
 
+from decimal import Decimal as D
+
 from protean import invariant
 from protean.exceptions import ValidationError
-from protean.fields import Float, String
+from protean.fields import Decimal, String
 
 from catalogue.domain import catalogue
 
@@ -40,9 +42,10 @@ class Money:
     representing prices, totals, and other financial values.
 
     Examples:
-        >>> price = Money(amount=19.99, currency="USD")
+        >>> from decimal import Decimal
+        >>> price = Money(amount=Decimal("19.99"), currency="USD")
         >>> (price.amount, price.currency)
-        (19.99, 'USD')
+        (Decimal('19.99'), 'USD')
         >>> Money(amount=5).currency  # currency defaults to USD
         'USD'
         >>> try:
@@ -57,7 +60,7 @@ class Money:
         unsupported currency rejected
     """
 
-    amount: float = Float(required=True, min_value=0.0)
+    amount: D = Decimal(required=True, min_value=0, precision=19, scale=4)
     currency: str = String(max_length=3, default="USD")
 
     @invariant.post

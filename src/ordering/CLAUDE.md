@@ -188,6 +188,7 @@ Saga flow (max 3 payment retries):
 | `order_timeline.py` | `OrderTimeline` | `OrderTimelineProjector` | Append-only audit trail with human-readable descriptions |
 | `customer_orders.py` | `CustomerOrders` | `CustomerOrdersProjector` | Per-customer order listing |
 | `orders_by_status.py` | `OrdersByStatus` | `OrdersByStatusProjector` | Admin dashboard view for filtering by status |
+| `daily_order_stats.py` | `DailyOrderStats` | `DailyOrderStatsProjector` | Daily order counts and money totals (`total_revenue`, `total_refunds` as `Decimal(precision=19, scale=4)`, converted from event floats with `shared.money.to_money`) |
 
 ## API
 

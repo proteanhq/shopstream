@@ -4,7 +4,11 @@ These are external contracts (anti-corruption layer) — separate from
 internal Protean commands.
 """
 
-from pydantic import BaseModel, Field
+from decimal import Decimal
+
+from pydantic import BaseModel, Field, field_serializer
+
+from shared.money import to_money
 
 
 # ---------------------------------------------------------------------------
@@ -118,12 +122,19 @@ class PaymentStatusResponse(BaseModel):
     payment_id: str
     order_id: str
     customer_id: str
-    amount: float | None = None
+    amount: Decimal | None = None
     currency: str | None = None
     status: str
     gateway_transaction_id: str | None = None
     attempt_count: int | None = None
     failure_reason: str | None = None
-    total_refunded: float | None = None
+    total_refunded: Decimal | None = None
     created_at: str | None = None
     updated_at: str | None = None
+
+    @field_serializer("amount", "total_refunded")
+    def _money_as_string(self, value: Decimal | None) -> str | None:
+        # Protean's Decimal(scale=4) limits the number of places but does not
+        # pad to them, so the memory store returns the Decimal("0") default as
+        # "0". Postgres NUMERIC(19, 4) pads to "0.0000". Both are sent padded.
+        return None if value is None else str(to_money(value))

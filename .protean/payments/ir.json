@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:da17c887043a4d4195b4589fb263ab9c36ee6aaa1c5693e08ccc5f01e5d1a39f",
+  "checksum": "sha256:f46a192e8539b4f5b2bd07c24b7a6f62e4728840e9291e53d2b83fd82fffe401",
   "clusters": {
     "payments.invoice.invoice.Invoice": {
       "aggregate": {
@@ -1479,9 +1479,11 @@
               "type": "String"
             },
             "value": {
-              "default": 0.0,
+              "default": "0",
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             }
           },
           "fqn": "payments.payment.payment.Money",
@@ -1995,9 +1997,11 @@
             "type": "String"
           },
           "net_revenue": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "refund_count": {
             "default": 0,
@@ -2005,14 +2009,18 @@
             "type": "Integer"
           },
           "total_refunded": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "total_revenue": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "transaction_count": {
             "default": 0,
@@ -2280,7 +2288,9 @@
         "fields": {
           "amount": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "attempt_count": {
             "default": 1,
@@ -2333,9 +2343,11 @@
             "type": "String"
           },
           "total_refunded": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "updated_at": {
             "kind": "standard",

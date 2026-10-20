@@ -11,11 +11,11 @@ from payments.payment.retry import RetryPayment
 from payments.payment.webhook import ProcessPaymentWebhook
 
 
-def _initiate():
+def _initiate(amount=100.00):
     return InitiatePayment(
         order_id="ord-001",
         customer_id="cust-001",
-        amount=100.00,
+        amount=amount,
         currency="USD",
         payment_method_type="credit_card",
         last4="4242",
@@ -193,9 +193,72 @@ class TestRefundAmountGuards:
         assert result.rejected
         assert "would exceed" in result.rejection_messages[0]
 
+    @pytest.mark.parametrize("amount", [100.00004, 100.00005, 50.00004])
+    def test_refund_with_a_fifth_decimal_place_is_rejected(self, amount):
+        result = given(Payment).process(_initiate())
+        payment_id = str(result.aggregate.id)
+        result = _succeed(result)
+        result = result.process(RequestRefund(payment_id=payment_id, amount=amount, reason="Test"))
+        assert result.rejected
+        assert f"Amount ({amount}) must have no more than 4 decimal places" in result.rejection_messages[0]
+
     def test_exact_amount_refund_is_allowed(self):
         result = given(Payment).process(_initiate())
         payment_id = str(result.aggregate.id)
         result = _succeed(result)
         result = result.process(RequestRefund(payment_id=payment_id, amount=100.00, reason="Full refund"))
         assert result.accepted
+
+    def test_refunds_of_tenths_can_add_up_to_the_payment_amount(self):
+        # As floats, 0.1 + 0.2 is 0.30000000000000004, which is more than 0.3.
+        result = given(Payment).process(_initiate(amount=0.3))
+        payment_id = str(result.aggregate.id)
+        result = _succeed(result)
+        for index, amount in enumerate((0.1, 0.2)):
+            result = result.process(RequestRefund(payment_id=payment_id, amount=amount, reason="Partial"))
+            assert result.accepted
+            result = result.process(
+                ProcessRefundWebhook(
+                    payment_id=payment_id,
+                    refund_id=str(result.aggregate.refunds[index].id),
+                    gateway_refund_id=f"ref-{index}",
+                )
+            )
+            assert result.accepted
+        assert result.status == PaymentStatus.REFUNDED.value
+
+    def test_refunds_of_0_1_and_0_7_fully_refund_a_0_8_payment(self):
+        # As floats, 0.1 + 0.7 is 0.7999999999999999, which is less than 0.8.
+        result = given(Payment).process(_initiate(amount=0.8))
+        payment_id = str(result.aggregate.id)
+        result = _succeed(result)
+        for index, amount in enumerate((0.1, 0.7)):
+            result = result.process(RequestRefund(payment_id=payment_id, amount=amount, reason="Partial"))
+            result = result.process(
+                ProcessRefundWebhook(
+                    payment_id=payment_id,
+                    refund_id=str(result.aggregate.refunds[index].id),
+                    gateway_refund_id=f"ref-{index}",
+                )
+            )
+            assert result.accepted
+        assert result.status == PaymentStatus.REFUNDED.value
+        assert result.total_refunded == 0.8
+
+    def test_refund_of_the_float_remainder_fully_refunds_the_payment(self):
+        # As floats, 100 - 99.99 is 0.010000000000005116.
+        result = given(Payment).process(_initiate(amount=100.0))
+        payment_id = str(result.aggregate.id)
+        result = _succeed(result)
+        for index, amount in enumerate((99.99, 100.0 - 99.99)):
+            result = result.process(RequestRefund(payment_id=payment_id, amount=amount, reason="Partial"))
+            result = result.process(
+                ProcessRefundWebhook(
+                    payment_id=payment_id,
+                    refund_id=str(result.aggregate.refunds[index].id),
+                    gateway_refund_id=f"ref-{index}",
+                )
+            )
+            assert result.accepted
+        assert result.status == PaymentStatus.REFUNDED.value
+        assert result.total_refunded == 100.0

@@ -331,7 +331,8 @@ docs-check: ## CI gate — fail if any committed catalog.md is stale vs the code
 
 doctest: ## Run doctests on the value objects (executable examples in docstrings)
 	PYTHONPATH=src PROTEAN_ENV=memory uv run pytest --doctest-modules \
-		src/catalogue/shared/money.py src/catalogue/shared/sku.py src/reviews/review/review.py -q
+		src/catalogue/shared/money.py src/catalogue/shared/sku.py src/reviews/review/review.py \
+		src/shared/money.py -q
 
 ir-check: ## Check staleness of materialized IR for all domains
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \

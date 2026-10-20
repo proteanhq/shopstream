@@ -36,7 +36,7 @@ ShopStream reproduction and are noted as such.)
 
 | Issue | State | Bug | Guard |
 |-------|-------|-----|-------|
-| [#1038](https://github.com/proteanhq/protean/issues/1038) | fixed | No `Decimal` field — money as `Float` loses precision | no ShopStream repro (money still modelled as `Float`) |
+| [#1038](https://github.com/proteanhq/protean/issues/1038) | **guard** | No `Decimal` field — money as `Float` loses precision | `../tests/payments/integration/test_decimal_money.py` and `../tests/ordering/application/test_daily_order_stats_decimal.py` (the `DailyRevenue`, `PaymentStatusView` and `DailyOrderStats` projections and the Payment `Money` value object store money as `Decimal(precision=19, scale=4)`) |
 | [#1039](https://github.com/proteanhq/protean/issues/1039) | **guard** | Datetime payloads serialized with `str()`, not ISO/UTC | `regression/test_protean_regressions.py::test_1039_event_datetime_serialized_as_iso_utc` |
 | [#1040](https://github.com/proteanhq/protean/issues/1040) | **guard** | Event-store append happened *after* the DB commit (crash window) | `oracles/test_crash_window_reconcile.py` (append-first durability) |
 | [#1041](https://github.com/proteanhq/protean/issues/1041) | **guard** | `target_broker` nullable → unique-index bypass | `oracles/test_outbox_exactly_once.py` |
