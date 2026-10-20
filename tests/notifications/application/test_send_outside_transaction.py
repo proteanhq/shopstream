@@ -157,4 +157,6 @@ class TestTransactionGuard:
 
         with pytest.raises(TransactionError, match="SendInsideTransactionError"):
             repo.add(notification)
-        assert repo.get(str(notification.id)).status == NotificationStatus.PENDING.value
+        # The claim committed before the send, so the notification waits in
+        # DISPATCHING for the stale-dispatch sweep instead of being recorded FAILED.
+        assert repo.get(str(notification.id)).status == NotificationStatus.DISPATCHING.value

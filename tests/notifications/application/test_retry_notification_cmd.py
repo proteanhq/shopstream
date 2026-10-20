@@ -59,7 +59,7 @@ class TestRetryNotificationCommand:
     def teardown_method(self):
         reset_channels()
 
-    def test_retry_resets_to_pending(self):
+    def test_retry_sends_the_notification_again(self):
         nid = _create_failed_notification()
         # Verify it's failed
         n = current_domain.repository_for(Notification).get(nid)
@@ -67,7 +67,19 @@ class TestRetryNotificationCommand:
 
         current_domain.process(RetryNotification(notification_id=nid), asynchronous=False)
         n = current_domain.repository_for(Notification).get(nid)
-        assert n.status == NotificationStatus.PENDING.value
+        assert n.status == NotificationStatus.SENT.value
+        assert len(get_channel(NotificationChannel.EMAIL.value).sent_emails) == 1
+
+    def test_failed_retry_is_recorded_failed_again(self):
+        nid = _create_failed_notification()
+        get_channel(NotificationChannel.EMAIL.value).configure(should_succeed=False, failure_reason="Still down")
+
+        current_domain.process(RetryNotification(notification_id=nid), asynchronous=False)
+
+        n = current_domain.repository_for(Notification).get(nid)
+        assert n.status == NotificationStatus.FAILED.value
+        assert n.failure_reason == "Still down"
+        assert n.retry_count == 2
 
     def test_retry_clears_failure_reason(self):
         nid = _create_failed_notification()

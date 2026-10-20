@@ -70,7 +70,19 @@
 
 #### NotificationDispatchRequested
 
-- **Type**: `Notifications.NotificationDispatchRequested.v1`
+- **Type**: `Notifications.NotificationDispatchRequested.v2`
+- **Version**: 2
+- **Published**: No
+- **Fact Event**: No
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| notification_id | Identifier | Yes | min_length=1 |
+| requested_at | DateTime | Yes | — |
+
+#### NotificationDispatchStarted
+
+- **Type**: `Notifications.NotificationDispatchStarted.v1`
 - **Version**: 1
 - **Published**: No
 - **Fact Event**: No
@@ -81,7 +93,8 @@
 | channel | String | Yes | max_length=255, min_length=1 |
 | notification_id | Identifier | Yes | min_length=1 |
 | recipient_id | Identifier | Yes | min_length=1 |
-| requested_at | DateTime | Yes | — |
+| retry_count | Integer | Yes | — |
+| started_at | DateTime | Yes | — |
 | subject | String | No | max_length=500 |
 
 #### NotificationFailed
@@ -151,6 +164,15 @@
 |-------|------|----------|-------------|
 | failure_reason | Text | No | — |
 | notification_id | Identifier | Yes | min_length=1 |
+
+#### ExpireStaleDispatches
+
+- **Type**: `Notifications.ExpireStaleDispatches.v1`
+- **Version**: 1
+
+| Field | Type | Required | Constraints |
+|-------|------|----------|-------------|
+| as_of | DateTime | No | — |
 
 #### RetryNotification
 

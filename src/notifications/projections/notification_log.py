@@ -13,6 +13,7 @@ from notifications.notification.events import (
     NotificationCancelled,
     NotificationCreated,
     NotificationDelivered,
+    NotificationDispatchStarted,
     NotificationFailed,
     NotificationRetried,
     NotificationSent,
@@ -69,6 +70,14 @@ class NotificationLogProjector:
         for key, value in fields.items():
             setattr(log, key, value)
         repo.add(log)
+
+    @on(NotificationDispatchStarted)
+    def on_dispatch_started(self, event: NotificationDispatchStarted) -> None:
+        self._update_log(
+            event.notification_id,
+            status="Dispatching",
+            updated_at=event.started_at,
+        )
 
     @on(NotificationSent)
     def on_notification_sent(self, event: NotificationSent) -> None:

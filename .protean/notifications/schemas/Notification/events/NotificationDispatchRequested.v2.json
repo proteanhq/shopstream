@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "A pending notification is ready to go out through its channel.\n\nv2 names only the notification: the claim loads it, and the send payload\nmoved to ``NotificationDispatchStarted``.",
+  "properties": {
+    "notification_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "requested_at": {
+      "format": "date-time",
+      "type": "string"
+    }
+  },
+  "required": [
+    "notification_id",
+    "requested_at"
+  ],
+  "title": "NotificationDispatchRequested",
+  "type": "object",
+  "x-protean-aggregate": "notifications.notification.notification.Notification",
+  "x-protean-element-type": "event",
+  "x-protean-fqn": "notifications.notification.events.NotificationDispatchRequested",
+  "x-protean-type": "Notifications.NotificationDispatchRequested.v2",
+  "x-protean-version": 2
+}

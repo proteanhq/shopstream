@@ -1,4 +1,4 @@
-"""Tests for dispatch edge cases: notification not found, non-PENDING, exception, unknown channel."""
+"""Tests for dispatch edge cases: notification not found, not claimable, exception, unknown channel."""
 
 from datetime import UTC, datetime, timedelta
 
@@ -11,7 +11,7 @@ from notifications.notification.dispatch import (
     RecordDispatchResult,
     _dispatch_via_channel,
 )
-from notifications.notification.events import NotificationDispatchRequested
+from notifications.notification.events import NotificationDispatchRequested, NotificationDispatchStarted
 from notifications.notification.notification import (
     Notification,
     NotificationChannel,
@@ -20,14 +20,19 @@ from notifications.notification.notification import (
 )
 
 
-def _dispatch_request(notification_id: str, recipient_id: str = "cust-x") -> NotificationDispatchRequested:
-    return NotificationDispatchRequested(
+def _dispatch_request(notification_id: str) -> NotificationDispatchRequested:
+    return NotificationDispatchRequested(notification_id=notification_id, requested_at=datetime.now(UTC))
+
+
+def _dispatch_started(notification_id: str, recipient_id: str = "cust-x") -> NotificationDispatchStarted:
+    return NotificationDispatchStarted(
         notification_id=notification_id,
         recipient_id=recipient_id,
         channel=NotificationChannel.EMAIL.value,
         subject="Test",
         body="Hello",
-        requested_at=datetime.now(UTC),
+        retry_count=0,
+        started_at=datetime.now(UTC),
     )
 
 
@@ -45,8 +50,12 @@ class TestDispatcherEdgeCases:
             asynchronous=False,
         )
 
-    def test_redelivered_request_does_not_record_a_second_result(self):
-        """A request redelivered after the notification was sent leaves it SENT."""
+    def test_request_for_unknown_notification_does_not_raise(self):
+        """A dispatch request for a notification that can't be loaded logs and returns."""
+        NotificationDispatcher().on_dispatch_requested(_dispatch_request("non-existent-id-456"))
+
+    def test_redelivered_request_does_not_send_again(self):
+        """A request redelivered after the notification was sent finds it claimed and skips."""
         n = Notification.create(
             recipient_id="cust-disp-nonpend",
             notification_type=NotificationType.WELCOME.value,
@@ -57,15 +66,18 @@ class TestDispatcherEdgeCases:
         repo.add(n)
         sent = repo.get(str(n.id))
         assert sent.status == NotificationStatus.SENT.value
+        adapter = get_channel(NotificationChannel.EMAIL.value)
+        assert len(adapter.sent_emails) == 1
 
-        NotificationDispatcher().on_dispatch_requested(_dispatch_request(str(n.id), "cust-disp-nonpend"))
+        NotificationDispatcher().on_dispatch_requested(_dispatch_request(str(n.id)))
 
         after = repo.get(str(n.id))
         assert after.status == NotificationStatus.SENT.value
         assert after.sent_at == sent.sent_at
+        assert len(adapter.sent_emails) == 1
 
-    def test_request_for_cancelled_notification_leaves_it_cancelled(self):
-        """A notification cancelled before its send is recorded stays CANCELLED."""
+    def test_request_for_cancelled_notification_sends_nothing(self):
+        """A notification cancelled before its claim stays CANCELLED and is never sent."""
         n = Notification.create(
             recipient_id="cust-disp-cancel",
             notification_type=NotificationType.REVIEW_PROMPT.value,
@@ -79,9 +91,47 @@ class TestDispatcherEdgeCases:
         pending.cancel("Customer opted out")
         repo.add(pending)
 
-        NotificationDispatcher().on_dispatch_requested(_dispatch_request(str(n.id), "cust-disp-cancel"))
+        NotificationDispatcher().on_dispatch_requested(_dispatch_request(str(n.id)))
 
         assert repo.get(str(n.id)).status == NotificationStatus.CANCELLED.value
+        assert get_channel(NotificationChannel.EMAIL.value).sent_emails == []
+
+    def test_two_requests_before_the_claim_send_once(self):
+        """Only one of two dispatch requests raised while PENDING can claim the notification."""
+        n = Notification.create(
+            recipient_id="cust-disp-twice",
+            notification_type=NotificationType.WELCOME.value,
+            channel=NotificationChannel.EMAIL.value,
+            body="Welcome!",
+        )
+        n.request_dispatch()
+        assert [e.__class__.__name__ for e in n._events].count("NotificationDispatchRequested") == 2
+        repo = current_domain.repository_for(Notification)
+        repo.add(n)
+
+        assert repo.get(str(n.id)).status == NotificationStatus.SENT.value
+        assert len(get_channel(NotificationChannel.EMAIL.value).sent_emails) == 1
+
+    def test_result_for_a_notification_no_longer_dispatching_is_not_recorded(self):
+        """A result arriving after the notification left DISPATCHING leaves it unchanged."""
+        n = Notification.create(
+            recipient_id="cust-disp-late",
+            notification_type=NotificationType.WELCOME.value,
+            channel=NotificationChannel.EMAIL.value,
+            body="Welcome!",
+        )
+        repo = current_domain.repository_for(Notification)
+        repo.add(n)
+        assert repo.get(str(n.id)).status == NotificationStatus.SENT.value
+
+        current_domain.process(
+            RecordDispatchResult(notification_id=str(n.id), failure_reason="Late failure"),
+            asynchronous=False,
+        )
+
+        after = repo.get(str(n.id))
+        assert after.status == NotificationStatus.SENT.value
+        assert after.failure_reason is None
 
     def test_adapter_exception_marks_failed(self):
         """When the adapter itself raises an exception, notification is marked FAILED."""
@@ -189,7 +239,7 @@ class TestDispatcherEdgeCases:
 class TestDispatchViaChannel:
     def test_email_without_subject_sends_an_empty_subject(self):
         adapter = get_channel(NotificationChannel.EMAIL.value)
-        request = NotificationDispatchRequested(**{**_dispatch_request("nosubj-1").to_dict(), "subject": None})
+        request = NotificationDispatchStarted(**{**_dispatch_started("nosubj-1").to_dict(), "subject": None})
 
         _dispatch_via_channel(adapter, request)
 
@@ -197,8 +247,8 @@ class TestDispatchViaChannel:
 
     def test_push_without_subject_sends_an_empty_title(self):
         adapter = get_channel(NotificationChannel.PUSH.value)
-        request = NotificationDispatchRequested(
-            **{**_dispatch_request("nosubj-2").to_dict(), "channel": NotificationChannel.PUSH.value, "subject": None}
+        request = NotificationDispatchStarted(
+            **{**_dispatch_started("nosubj-2").to_dict(), "channel": NotificationChannel.PUSH.value, "subject": None}
         )
 
         _dispatch_via_channel(adapter, request)
@@ -207,8 +257,8 @@ class TestDispatchViaChannel:
 
     def test_slack_goes_to_the_operations_channel(self):
         adapter = get_channel(NotificationChannel.SLACK.value)
-        request = NotificationDispatchRequested(
-            **{**_dispatch_request("slack-1").to_dict(), "channel": NotificationChannel.SLACK.value}
+        request = NotificationDispatchStarted(
+            **{**_dispatch_started("slack-1").to_dict(), "channel": NotificationChannel.SLACK.value}
         )
 
         _dispatch_via_channel(adapter, request)
@@ -225,8 +275,8 @@ class TestDispatchViaChannel:
     def test_unknown_channel_returns_failed(self):
         """Unknown channel type returns a failed status dict."""
 
-        request = _dispatch_request("unk-1", "cust-unk")
-        request = NotificationDispatchRequested(**{**request.to_dict(), "channel": "Carrier Pigeon"})
+        request = _dispatch_started("unk-1", "cust-unk")
+        request = NotificationDispatchStarted(**{**request.to_dict(), "channel": "Carrier Pigeon"})
 
         result = _dispatch_via_channel(None, request)
         assert result["status"] == "failed"

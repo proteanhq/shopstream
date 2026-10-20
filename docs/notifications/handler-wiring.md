@@ -5,6 +5,7 @@ flowchart LR
     subgraph command_handlers["Command Handlers"]
         ch_notifications_notification_cancellation_CancelNotificationHandler[CancelNotificationHandler]
         ch_notifications_notification_dispatch_RecordDispatchResultHandler[RecordDispatchResultHandler]
+        ch_notifications_notification_dispatch_expiry_ExpireStaleDispatchesHandler[ExpireStaleDispatchesHandler]
         ch_notifications_notification_retry_RetryNotificationHandler[RetryNotificationHandler]
         ch_notifications_notification_scheduler_ProcessScheduledNotificationsHandler[ProcessScheduledNotificationsHandler]
     end
@@ -12,6 +13,8 @@ flowchart LR
     ch_notifications_notification_cancellation_CancelNotificationHandler --> agg_notifications_notification_notification_Notification[Notification]
     cmd_notifications_notification_dispatch_RecordDispatchResult[/RecordDispatchResult/] --> ch_notifications_notification_dispatch_RecordDispatchResultHandler
     ch_notifications_notification_dispatch_RecordDispatchResultHandler --> agg_notifications_notification_notification_Notification[Notification]
+    cmd_notifications_notification_dispatch_expiry_ExpireStaleDispatches[/ExpireStaleDispatches/] --> ch_notifications_notification_dispatch_expiry_ExpireStaleDispatchesHandler
+    ch_notifications_notification_dispatch_expiry_ExpireStaleDispatchesHandler --> agg_notifications_notification_notification_Notification[Notification]
     cmd_notifications_notification_retry_RetryNotification[/RetryNotification/] --> ch_notifications_notification_retry_RetryNotificationHandler
     ch_notifications_notification_retry_RetryNotificationHandler --> agg_notifications_notification_notification_Notification[Notification]
     cmd_notifications_notification_scheduler_ProcessScheduledNotifications[/ProcessScheduledNotifications/] --> ch_notifications_notification_scheduler_ProcessScheduledNotificationsHandler
@@ -43,6 +46,7 @@ flowchart TD
         eh_notifications_notification_dispatch_NotificationDispatcher[NotificationDispatcher]
     end
     evt_notifications_notification_events_NotificationDispatchRequested([NotificationDispatchRequested]) --> eh_notifications_notification_dispatch_NotificationDispatcher
+    evt_notifications_notification_events_NotificationDispatchStarted([NotificationDispatchStarted]) --> eh_notifications_notification_dispatch_NotificationDispatcher
 ```
 
 ## Subscribers
@@ -113,6 +117,7 @@ flowchart LR
     evt_notifications_notification_events_NotificationCancelled([NotificationCancelled]) --> proj_notifications_projections_notification_log_NotificationLogProjector
     evt_notifications_notification_events_NotificationCreated([NotificationCreated]) --> proj_notifications_projections_notification_log_NotificationLogProjector
     evt_notifications_notification_events_NotificationDelivered([NotificationDelivered]) --> proj_notifications_projections_notification_log_NotificationLogProjector
+    evt_notifications_notification_events_NotificationDispatchStarted([NotificationDispatchStarted]) --> proj_notifications_projections_notification_log_NotificationLogProjector
     evt_notifications_notification_events_NotificationFailed([NotificationFailed]) --> proj_notifications_projections_notification_log_NotificationLogProjector
     evt_notifications_notification_events_NotificationRetried([NotificationRetried]) --> proj_notifications_projections_notification_log_NotificationLogProjector
     evt_notifications_notification_events_NotificationSent([NotificationSent]) --> proj_notifications_projections_notification_log_NotificationLogProjector

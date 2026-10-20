@@ -2,7 +2,7 @@
 
 In synchronous test mode, projectors run on events raised during aggregate save.
 The dispatch handler also runs synchronously, which means immediate notifications
-get auto-dispatched (status changes from Pending → Sent). Tests that need to assert
+get auto-dispatched (status changes from Pending → Dispatching → Sent). Tests that need to assert
 on "Pending" status use scheduled notifications to avoid auto-dispatch interference.
 """
 
@@ -13,6 +13,7 @@ from protean import current_domain
 from protean.exceptions import ObjectNotFoundError
 
 from notifications.channel import get_channel, reset_channels
+from notifications.notification.events import NotificationDispatchStarted
 from notifications.notification.notification import (
     Notification,
     NotificationChannel,
@@ -22,7 +23,7 @@ from notifications.notification.notification import (
 )
 from notifications.projections.customer_notifications import CustomerNotifications
 from notifications.projections.failed_notifications import FailedNotifications
-from notifications.projections.notification_log import NotificationLog
+from notifications.projections.notification_log import NotificationLog, NotificationLogProjector
 from notifications.projections.notification_stats import NotificationStats
 
 
@@ -110,6 +111,23 @@ class TestNotificationLogProjection:
         nid = _create_scheduled_notification(recipient_id="cust-log-status")
         log = current_domain.repository_for(NotificationLog).get(nid)
         assert log.status == "Pending"
+
+    def test_log_status_is_dispatching_once_claimed(self):
+        nid = _create_scheduled_notification(recipient_id="cust-log-claim")
+        started = NotificationDispatchStarted(
+            notification_id=nid,
+            recipient_id="cust-log-claim",
+            channel=NotificationChannel.EMAIL.value,
+            subject="Test Subject",
+            body="Test body",
+            retry_count=0,
+            started_at=datetime.now(UTC),
+        )
+
+        NotificationLogProjector().on_dispatch_started(started)
+
+        log = current_domain.repository_for(NotificationLog).get(nid)
+        assert log.status == "Dispatching"
 
     def test_log_status_updates_to_sent_for_immediate(self):
         """Immediate notifications are auto-dispatched, log reflects Sent."""

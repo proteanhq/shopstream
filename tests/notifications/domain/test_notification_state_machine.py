@@ -4,6 +4,7 @@ import pytest
 from protean.exceptions import ValidationError
 
 from notifications.notification.notification import (
+    STALE_DISPATCH_REASON,
     Notification,
     NotificationChannel,
     NotificationStatus,
@@ -30,49 +31,44 @@ def _notification_at_state(target_status):
     if target_status == NotificationStatus.PENDING:
         return n
 
-    if target_status == NotificationStatus.SENT:
-        n.mark_sent()
-        n._events.clear()
-        return n
-
-    if target_status == NotificationStatus.DELIVERED:
-        n.mark_sent()
-        n._events.clear()
-        n.mark_delivered()
-        n._events.clear()
-        return n
-
-    if target_status == NotificationStatus.FAILED:
-        n.mark_failed("Delivery error")
-        n._events.clear()
-        return n
-
-    if target_status == NotificationStatus.BOUNCED:
-        n.mark_sent()
-        n._events.clear()
-        n.mark_bounced("Invalid address")
-        n._events.clear()
-        return n
-
     if target_status == NotificationStatus.CANCELLED:
         n.cancel("No longer needed")
         n._events.clear()
         return n
 
-    raise ValueError(f"Cannot create notification at state {target_status}")
+    n.claim_dispatch()
+    n._events.clear()
+    steps = {
+        NotificationStatus.DISPATCHING: [],
+        NotificationStatus.SENT: [n.mark_sent],
+        NotificationStatus.DELIVERED: [n.mark_sent, n.mark_delivered],
+        NotificationStatus.FAILED: [lambda: n.mark_failed("Delivery error")],
+        NotificationStatus.BOUNCED: [n.mark_sent, lambda: n.mark_bounced("Invalid address")],
+    }
+    if target_status not in steps:
+        raise ValueError(f"Cannot create notification at state {target_status}")
+    for step in steps[target_status]:
+        step()
+        n._events.clear()
+    return n
 
 
 # ---------------------------------------------------------------
 # Happy path transitions
 # ---------------------------------------------------------------
 class TestValidTransitions:
-    def test_pending_to_sent(self):
+    def test_pending_to_dispatching(self):
         n = _notification_at_state(NotificationStatus.PENDING)
+        n.claim_dispatch()
+        assert n.status == NotificationStatus.DISPATCHING.value
+
+    def test_dispatching_to_sent(self):
+        n = _notification_at_state(NotificationStatus.DISPATCHING)
         n.mark_sent()
         assert n.status == NotificationStatus.SENT.value
 
-    def test_pending_to_failed(self):
-        n = _notification_at_state(NotificationStatus.PENDING)
+    def test_dispatching_to_failed(self):
+        n = _notification_at_state(NotificationStatus.DISPATCHING)
         n.mark_failed("Connection timeout")
         assert n.status == NotificationStatus.FAILED.value
 
@@ -106,6 +102,24 @@ class TestValidTransitions:
 # Invalid transitions
 # ---------------------------------------------------------------
 class TestInvalidTransitions:
+    def test_cannot_send_pending_without_a_claim(self):
+        n = _notification_at_state(NotificationStatus.PENDING)
+        with pytest.raises(ValidationError) as exc:
+            n.mark_sent()
+        assert "Invalid status transition" in str(exc.value)
+
+    def test_cannot_fail_pending_without_a_claim(self):
+        n = _notification_at_state(NotificationStatus.PENDING)
+        with pytest.raises(ValidationError) as exc:
+            n.mark_failed("Connection timeout")
+        assert "Invalid status transition" in str(exc.value)
+
+    def test_cannot_cancel_dispatching(self):
+        n = _notification_at_state(NotificationStatus.DISPATCHING)
+        with pytest.raises(ValidationError) as exc:
+            n.cancel("Too late")
+        assert "Invalid status transition" in str(exc.value)
+
     def test_cannot_send_already_sent(self):
         n = _notification_at_state(NotificationStatus.SENT)
         with pytest.raises(ValidationError):
@@ -168,18 +182,18 @@ class TestInvalidTransitions:
 # ---------------------------------------------------------------
 class TestMarkSent:
     def test_sets_sent_at(self):
-        n = _notification_at_state(NotificationStatus.PENDING)
+        n = _notification_at_state(NotificationStatus.DISPATCHING)
         n.mark_sent()
         assert n.sent_at is not None
 
     def test_updates_updated_at(self):
-        n = _notification_at_state(NotificationStatus.PENDING)
+        n = _notification_at_state(NotificationStatus.DISPATCHING)
         old_updated = n.updated_at
         n.mark_sent()
         assert n.updated_at >= old_updated
 
     def test_raises_notification_sent_event(self):
-        n = _notification_at_state(NotificationStatus.PENDING)
+        n = _notification_at_state(NotificationStatus.DISPATCHING)
         n.mark_sent()
         assert len(n._events) == 1
         event = n._events[0]
@@ -211,18 +225,18 @@ class TestMarkDelivered:
 # ---------------------------------------------------------------
 class TestMarkFailed:
     def test_sets_failure_reason(self):
-        n = _notification_at_state(NotificationStatus.PENDING)
+        n = _notification_at_state(NotificationStatus.DISPATCHING)
         n.mark_failed("SMTP error 550")
         assert n.failure_reason == "SMTP error 550"
 
     def test_increments_retry_count(self):
-        n = _notification_at_state(NotificationStatus.PENDING)
+        n = _notification_at_state(NotificationStatus.DISPATCHING)
         assert n.retry_count == 0
         n.mark_failed("First failure")
         assert n.retry_count == 1
 
     def test_raises_notification_failed_event(self):
-        n = _notification_at_state(NotificationStatus.PENDING)
+        n = _notification_at_state(NotificationStatus.DISPATCHING)
         n.mark_failed("Connection refused")
         assert len(n._events) == 1
         event = n._events[0]
@@ -286,10 +300,15 @@ class TestRetry:
     def test_retry_raises_notification_retried_event(self):
         n = _notification_at_state(NotificationStatus.FAILED)
         n.retry()
-        assert len(n._events) == 1
         event = n._events[0]
         assert event.__class__.__name__ == "NotificationRetried"
         assert event.retry_count == 1  # Failed once = retry_count 1
+
+    def test_retry_requests_dispatch_again(self):
+        n = _notification_at_state(NotificationStatus.FAILED)
+        n.retry()
+        assert [e.__class__.__name__ for e in n._events] == ["NotificationRetried", "NotificationDispatchRequested"]
+        assert str(n._events[1].notification_id) == str(n.id)
 
     def test_cannot_retry_non_failed_notification(self):
         n = _notification_at_state(NotificationStatus.PENDING)
@@ -301,10 +320,12 @@ class TestRetry:
         n = _make_notification(max_retries=2)
         n._events.clear()
         # Fail and retry twice
+        n.claim_dispatch()
         n.mark_failed("Attempt 1")
         n._events.clear()
         n.retry()
         n._events.clear()
+        n.claim_dispatch()
         n.mark_failed("Attempt 2")
         n._events.clear()
         # Third retry should fail (retry_count == 2, max_retries == 2)
@@ -315,9 +336,70 @@ class TestRetry:
     def test_retry_preserves_retry_count(self):
         n = _make_notification()
         n._events.clear()
+        n.claim_dispatch()
         n.mark_failed("First failure")
         n._events.clear()
         assert n.retry_count == 1
         n.retry()
         # retry doesn't change retry_count — mark_failed does
         assert n.retry_count == 1
+
+
+# ---------------------------------------------------------------
+# claim_dispatch details
+# ---------------------------------------------------------------
+class TestClaimDispatch:
+    def test_raises_dispatch_started_with_everything_the_send_needs(self):
+        n = _make_notification(
+            recipient_id="cust-77",
+            channel=NotificationChannel.PUSH.value,
+            subject="Shipped",
+            body="Your order is on its way",
+        )
+        n._events.clear()
+        n.claim_dispatch()
+        assert len(n._events) == 1
+        event = n._events[0]
+        assert event.__class__.__name__ == "NotificationDispatchStarted"
+        assert str(event.notification_id) == str(n.id)
+        assert str(event.recipient_id) == "cust-77"
+        assert event.channel == NotificationChannel.PUSH.value
+        assert event.subject == "Shipped"
+        assert event.body == "Your order is on its way"
+        assert event.retry_count == 0
+        assert event.started_at == n.updated_at
+
+    @pytest.mark.parametrize(
+        "status",
+        [
+            NotificationStatus.DISPATCHING,
+            NotificationStatus.SENT,
+            NotificationStatus.CANCELLED,
+            NotificationStatus.FAILED,
+        ],
+    )
+    def test_only_a_pending_notification_can_be_claimed(self, status):
+        n = _notification_at_state(status)
+        with pytest.raises(ValidationError) as exc:
+            n.claim_dispatch()
+        assert "Only pending notifications can be claimed for dispatch" in str(exc.value)
+
+
+# ---------------------------------------------------------------
+# expire_dispatch details
+# ---------------------------------------------------------------
+class TestExpireDispatch:
+    def test_marks_a_dispatching_notification_failed(self):
+        n = _notification_at_state(NotificationStatus.DISPATCHING)
+        n.expire_dispatch()
+        assert n.status == NotificationStatus.FAILED.value
+        assert n.failure_reason == STALE_DISPATCH_REASON
+        assert n.retry_count == 1
+        assert [e.__class__.__name__ for e in n._events] == ["NotificationFailed"]
+
+    @pytest.mark.parametrize("status", [NotificationStatus.PENDING, NotificationStatus.SENT, NotificationStatus.FAILED])
+    def test_only_a_dispatching_notification_can_expire(self, status):
+        n = _notification_at_state(status)
+        with pytest.raises(ValidationError) as exc:
+            n.expire_dispatch()
+        assert "Only dispatching notifications can expire" in str(exc.value)

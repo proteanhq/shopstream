@@ -1,13 +1,20 @@
 Feature: Notification lifecycle
-  Notifications transition through states: Pending -> Sent -> Delivered, or Pending -> Failed -> (retry) -> Pending.
+  Notifications transition through states: Pending -> Dispatching -> Sent -> Delivered,
+  or Pending -> Dispatching -> Failed -> (retry) -> Pending.
 
   Scenario: Notification is created in Pending status
     Given a new notification for customer "cust-bdd-1"
     Then the notification status is "Pending"
     And a NotificationCreated event is raised
 
-  Scenario: Notification can be marked as sent
+  Scenario: Pending notification is claimed for dispatch
     Given a pending notification
+    When the notification is claimed for dispatch
+    Then the notification status is "Dispatching"
+    And a NotificationDispatchStarted event is raised
+
+  Scenario: Notification can be marked as sent
+    Given a dispatching notification
     When the notification is marked as sent
     Then the notification status is "Sent"
     And a NotificationSent event is raised
@@ -28,3 +35,4 @@ Feature: Notification lifecycle
     When the notification is retried
     Then the notification status is "Pending"
     And a NotificationRetried event is raised
+    And a NotificationDispatchRequested event is raised

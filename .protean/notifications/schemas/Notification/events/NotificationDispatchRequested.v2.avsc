@@ -1,0 +1,22 @@
+{
+  "doc": "A pending notification is ready to go out through its channel.\n\nv2 names only the notification: the claim loads it, and the send payload\nmoved to ``NotificationDispatchStarted``.",
+  "fields": [
+    {
+      "name": "notification_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "requested_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    }
+  ],
+  "name": "NotificationDispatchRequested",
+  "namespace": "notifications.notification.events",
+  "type": "record"
+}

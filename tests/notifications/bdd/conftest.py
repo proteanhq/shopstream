@@ -6,6 +6,8 @@ from pytest_bdd import given, parsers, then
 from notifications.notification.events import (
     NotificationCancelled,
     NotificationCreated,
+    NotificationDispatchRequested,
+    NotificationDispatchStarted,
     NotificationRetried,
     NotificationSent,
 )
@@ -18,6 +20,8 @@ from notifications.preference.preference import NotificationPreference
 
 _NOTIFICATION_EVENT_CLASSES = {
     "NotificationCreated": NotificationCreated,
+    "NotificationDispatchRequested": NotificationDispatchRequested,
+    "NotificationDispatchStarted": NotificationDispatchStarted,
     "NotificationSent": NotificationSent,
     "NotificationCancelled": NotificationCancelled,
     "NotificationRetried": NotificationRetried,
@@ -58,6 +62,19 @@ def pending_notification():
     return n
 
 
+@given("a dispatching notification", target_fixture="notification")
+def dispatching_notification():
+    n = Notification.create(
+        recipient_id="cust-bdd",
+        notification_type=NotificationType.WELCOME.value,
+        channel=NotificationChannel.EMAIL.value,
+        body="Welcome!",
+    )
+    n.claim_dispatch()
+    n._events.clear()
+    return n
+
+
 @given("a sent notification", target_fixture="notification")
 def sent_notification():
     n = Notification.create(
@@ -66,7 +83,7 @@ def sent_notification():
         channel=NotificationChannel.EMAIL.value,
         body="Welcome!",
     )
-    n._events.clear()
+    n.claim_dispatch()
     n.mark_sent()
     n._events.clear()
     return n
@@ -80,7 +97,7 @@ def failed_notification():
         channel=NotificationChannel.EMAIL.value,
         body="Welcome!",
     )
-    n._events.clear()
+    n.claim_dispatch()
     n.mark_failed("Delivery error")
     n._events.clear()
     return n

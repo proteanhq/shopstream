@@ -265,9 +265,9 @@ class NotificationCancelJourney(SequentialTaskSet):
 
     WARNING: This is a timing-sensitive scenario that generates expected
     CancelNotificationHandler failures. The process-scheduled endpoint
-    transitions notifications from Scheduled → Sent. A subsequent cancel
-    request may arrive after the notification is already Sent, causing
-    "Cannot transition from Sent to Cancelled" at the handler level.
+    requests dispatch of due notifications, which are then claimed
+    (Dispatching) and sent. A subsequent cancel request may arrive after
+    the claim, causing an invalid-transition error at the handler level.
 
     The HTTP API handles this gracefully (400/409), but the async event
     handler still records a failure trace.

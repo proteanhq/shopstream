@@ -178,6 +178,7 @@
             "Bounced",
             "Cancelled",
             "Delivered",
+            "Dispatching",
             "Failed",
             "Pending",
             "Sent"

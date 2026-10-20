@@ -1,5 +1,5 @@
 {
-  "doc": "A pending notification is ready to go out through its channel.\n\nCarries everything the send needs, so the dispatcher can send without\nloading the notification and opening a database transaction.",
+  "doc": "The dispatcher claimed a pending notification for one send.\n\nCarries everything the send needs, so the dispatcher can send without\nloading the notification and opening a database transaction.",
   "fields": [
     {
       "name": "body",
@@ -24,7 +24,11 @@
       }
     },
     {
-      "name": "requested_at",
+      "name": "retry_count",
+      "type": "long"
+    },
+    {
+      "name": "started_at",
       "type": {
         "logicalType": "timestamp-millis",
         "type": "long"
@@ -39,7 +43,7 @@
       ]
     }
   ],
-  "name": "NotificationDispatchRequested",
+  "name": "NotificationDispatchStarted",
   "namespace": "notifications.notification.events",
   "type": "record"
 }

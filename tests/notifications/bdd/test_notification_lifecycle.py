@@ -6,6 +6,15 @@ scenarios("features/notification_lifecycle.feature")
 
 
 @when(
+    "the notification is claimed for dispatch",
+    target_fixture="notification",
+)
+def claim_dispatch(notification):
+    notification.claim_dispatch()
+    return notification
+
+
+@when(
     "the notification is marked as sent",
     target_fixture="notification",
 )

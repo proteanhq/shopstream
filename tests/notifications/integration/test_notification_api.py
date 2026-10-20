@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from protean import current_domain
 
 from notifications.channel import get_channel, reset_channels
+from notifications.notification.dispatch_expiry import STALE_DISPATCH_AFTER
 from notifications.notification.notification import (
     Notification,
     NotificationChannel,
@@ -207,6 +208,26 @@ class TestMaintenanceAPI:
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "ok"
+
+    def test_process_scheduled_expires_stale_dispatches(self, monkeypatch):
+        # Async processing leaves the claimed notification DISPATCHING with no send.
+        monkeypatch.setitem(current_domain.config, "event_processing", "async")
+        n = Notification.create(
+            recipient_id="cust-api-stale",
+            notification_type=NotificationType.WELCOME.value,
+            channel=NotificationChannel.EMAIL.value,
+            body="Welcome!",
+        )
+        n.claim_dispatch()
+        repo = current_domain.repository_for(Notification)
+        repo.add(n)
+
+        client = _get_test_client()
+        as_of = datetime.now(UTC) + STALE_DISPATCH_AFTER + timedelta(minutes=1)
+        resp = client.post("/notifications/maintenance/process-scheduled", json={"as_of": as_of.isoformat()})
+
+        assert resp.status_code == 200
+        assert repo.get(str(n.id)).status == NotificationStatus.FAILED.value
 
     def test_process_scheduled_with_body(self):
         client = _get_test_client()

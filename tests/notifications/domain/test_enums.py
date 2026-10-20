@@ -76,11 +76,14 @@ class TestNotificationChannel:
 
 
 class TestNotificationStatus:
-    def test_has_6_statuses(self):
-        assert len(NotificationStatus) == 6
+    def test_has_7_statuses(self):
+        assert len(NotificationStatus) == 7
 
     def test_pending(self):
         assert NotificationStatus.PENDING.value == "Pending"
+
+    def test_dispatching(self):
+        assert NotificationStatus.DISPATCHING.value == "Dispatching"
 
     def test_sent(self):
         assert NotificationStatus.SENT.value == "Sent"
