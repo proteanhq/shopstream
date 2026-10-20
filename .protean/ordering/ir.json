@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:15628a30ade76cebcb4271995a7958332b0e861493db5415fa57db15754e1a66",
+  "checksum": "sha256:499882d197112237be743128230a2c3242b4ec8566e41b00391432d56949ce2a",
   "clusters": {
     "ordering.cart.cart.ShoppingCart": {
       "aggregate": {
@@ -4112,14 +4112,18 @@
             "type": "Integer"
           },
           "total_refunds": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "total_revenue": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           }
         },
         "fqn": "ordering.projections.daily_order_stats.DailyOrderStats",
