@@ -7,7 +7,7 @@ It never calls a channel itself: each request raises
 after this transaction commits, outside any transaction.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 
 import structlog
 from protean.fields import DateTime
@@ -34,6 +34,10 @@ class ProcessScheduledNotificationsHandler:
     def process_scheduled(self, command: ProcessScheduledNotifications) -> None:
         with processing_priority(Priority.LOW):
             as_of = command.as_of or current_domain.clock.now()
+            # Stored times are UTC, and the memory provider compares datetimes as
+            # strings (proteanhq/protean#1900), so the cutoff must be in UTC too.
+            # A naive as_of is taken to be UTC.
+            as_of = (as_of if as_of.tzinfo else as_of.replace(tzinfo=UTC)).astimezone(UTC)
             repo = current_domain.repository_for(Notification)
 
             # Load only the due notifications, with no row limit: the query

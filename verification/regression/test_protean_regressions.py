@@ -899,3 +899,40 @@ def test_rebuild_restores_a_projection_whose_projector_is_idempotent():
     if result.errors:
         pytest.fail(f"precondition: the rebuild ran without errors: {result.errors}")
     assert [r.transaction_count for r in repo.query.all().items] == [1]
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the memory provider compares datetimes as strings in lt/lte/gt/gte lookups",
+)
+def test_1900_memory_datetime_lookup_compares_instants():
+    """proteanhq/protean#1900: memory lookups compare datetimes by wall-clock text.
+
+    `MemoryLookup._coerce()` turns a `datetime` into `str(value)` before comparing,
+    so two values with different UTC offsets compare by their wall-clock digits.
+    12:00 UTC is after 13:00+02:00 (11:00 UTC), yet `lte` returns the row.
+    Postgres compares instants. The notification scheduler converts its cutoff
+    to UTC to stay correct on memory.
+    """
+    from datetime import UTC, timedelta, timezone
+
+    from protean import Domain
+    from protean.fields import DateTime
+
+    domain = Domain(name="DatetimeLookupProbe")
+
+    @domain.aggregate
+    class Slot:
+        at = DateTime()
+
+    domain.init(traverse=False)
+
+    with domain.domain_context():
+        repo = domain.repository_for(Slot)
+        repo.add(Slot(at=datetime(2026, 10, 20, 12, 0, tzinfo=UTC)))
+        eleven_utc = datetime(2026, 10, 20, 13, 0, tzinfo=timezone(timedelta(hours=2)))
+        thirteen_utc = datetime(2026, 10, 20, 11, 0, tzinfo=timezone(timedelta(hours=-2)))
+
+        assert repo.query.filter(at__lte=eleven_utc).all().items == []
+        assert len(repo.query.filter(at__lte=thirteen_utc).all().items) == 1
