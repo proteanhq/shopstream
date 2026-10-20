@@ -258,6 +258,7 @@ make ir                   # Regenerate IR baselines for all domains
 make ir-check             # Check IR staleness for all domains
 make ir-diff              # Diff live IR against saved baselines
 make domain-check         # Run protean check on all domains
+make verify-domains       # protean verify (init, check, tests) for all nine contexts + tests/integration, memory mode
 make eventstore-verify    # Check the shared Message DB's integrity (read-only; stop the engines first)
 make verify-observatory   # Verify Observatory Timeline + Causation Graph (~66 API checks)
 make verify-loyalty       # Verify Loyalty end-to-end (account/points/transfer/campaign/redemption)

@@ -56,6 +56,31 @@ jobs:
       - name: Run verification checks
         run: uv run pytest verification/ --protean-env memory -m "not engine"
 
+  # Reruns each context's tests inside `protean verify`, next to its init and
+  # check stages. A separate job runs in parallel and fails as its own check.
+  verify-domains:
+    runs-on: ubuntu-latest
+    name: Verify Domains
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - uses: astral-sh/setup-uv@v5
+
+      # Every context runs on the in-memory adapters, so one interpreter is
+      # enough; test-memory already covers the version matrix.
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: uv sync --all-extras --all-groups
+
+      - name: Run protean verify on every context
+        run: make verify-domains
+
   typecheck:
     runs-on: ubuntu-latest
     name: Type Check
