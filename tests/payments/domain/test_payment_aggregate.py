@@ -55,7 +55,13 @@ class TestPaymentCreation:
     def test_create_rejects_a_fifth_decimal_place(self, amount):
         result = given(Payment).process(_initiate(amount=amount))
         assert result.rejected
-        assert "no more than 4 decimal places" in result.rejection_messages[0]
+        assert f"Amount ({amount}) must have no more than 4 decimal places" in result.rejection_messages[0]
+
+    @pytest.mark.parametrize("amount", [1e15, 1e30, float("inf")])
+    def test_create_rejects_an_amount_of_1e15_or_more(self, amount):
+        result = given(Payment).process(_initiate(amount=amount))
+        assert result.rejected
+        assert f"Amount ({amount}) must be less than 1000000000000000" in result.rejection_messages[0]
 
     def test_create_sets_status_to_pending(self):
         result = given(Payment).process(_initiate())

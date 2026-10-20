@@ -17,6 +17,7 @@ from protean.integrations.fastapi import register_exception_handlers
 from sqlalchemy import text
 
 from payments.api.routes import payment_router
+from payments.api.schemas import PaymentStatusResponse
 from payments.payment.events import PaymentSucceeded, RefundCompleted
 from payments.payment.initiation import InitiatePayment
 from payments.payment.payment import Payment
@@ -170,6 +171,7 @@ class TestPaymentStatusRoundTrip:
         [
             (1.0, (0.3333, 0.3333, 0.3333), "Partially_Refunded"),
             (0.3, (0.1, 0.2), "Refunded"),
+            (0.8, (0.1, 0.7), "Refunded"),
         ],
     )
     def test_aggregate_and_view_agree_on_the_status(self, payment_amount, refunds, status):
@@ -236,11 +238,27 @@ class TestFivePlaceAmountsOverHttp:
         resp = _post_payment(client, "ord-decimal-five", 10.12345)
 
         assert resp.status_code == 400
-        assert "4 decimal places" in str(resp.json())
+        assert "Amount (10.12345) must have no more than 4 decimal places" in str(resp.json())
         assert current_domain.event_store.store.read("payments::payment") == []
         assert (
             current_domain.repository_for(PaymentStatusView).query.filter(order_id="ord-decimal-five").all().items == []
         )
+
+    def test_initiate_payment_of_1e30_returns_400(self, client):
+        resp = _post_payment(client, "ord-decimal-huge", 1e30)
+
+        assert resp.status_code == 400
+        assert "must be less than 1000000000000000" in str(resp.json())
+        assert current_domain.event_store.store.read("payments::payment") == []
+
+    def test_refund_of_1e30_returns_400(self, client):
+        payment_id = _post_succeeded_payment(client, "ord-decimal-huge-refund", 20.0)
+
+        resp = client.post(f"/payments/{payment_id}/refund", json={"amount": 1e30, "reason": "Partial"})
+
+        assert resp.status_code == 400
+        assert "must be less than 1000000000000000" in str(resp.json())
+        assert current_domain.repository_for(Payment).get(payment_id).refunds == []
 
     def test_refund_with_five_decimal_places_returns_400(self, client):
         payment_id = _post_succeeded_payment(client, "ord-decimal-five-refund", 20.0)
@@ -248,7 +266,7 @@ class TestFivePlaceAmountsOverHttp:
         resp = client.post(f"/payments/{payment_id}/refund", json={"amount": 10.12345, "reason": "Partial"})
 
         assert resp.status_code == 400
-        assert "4 decimal places" in str(resp.json())
+        assert "Amount (10.12345) must have no more than 4 decimal places" in str(resp.json())
         assert current_domain.repository_for(Payment).get(payment_id).refunds == []
         view = current_domain.repository_for(PaymentStatusView).get(payment_id)
         assert view.total_refunded == Decimal("0")
@@ -333,3 +351,27 @@ class TestDailyRevenueDecimal:
         assert len(types) == 3, f"Expected three money columns in {table}, got {types}"
         for column, column_type in types.items():
             assert column_type == ("numeric", 19, 4), column
+
+
+class TestPaymentStatusResponseContract:
+    def test_money_keeps_more_digits_than_a_float_holds(self):
+        # As a float, 99999999999999.9999 is 100000000000000.0.
+        response = PaymentStatusResponse(
+            payment_id="pay-1",
+            order_id="ord-1",
+            customer_id="cust-1",
+            status="Succeeded",
+            amount=Decimal("99999999999999.9999"),
+            total_refunded=Decimal("12345678901234.5678"),
+        )
+
+        body = response.model_dump(mode="json")
+
+        assert body["amount"] == "99999999999999.9999"
+        assert body["total_refunded"] == "12345678901234.5678"
+
+    def test_openapi_publishes_money_as_strings(self, client):
+        schema = client.app.openapi()["components"]["schemas"]["PaymentStatusResponse"]["properties"]
+
+        for field in ("amount", "total_refunded"):
+            assert schema[field]["anyOf"] == [{"type": "string"}, {"type": "null"}]

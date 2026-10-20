@@ -200,7 +200,7 @@ class TestRefundAmountGuards:
         result = _succeed(result)
         result = result.process(RequestRefund(payment_id=payment_id, amount=amount, reason="Test"))
         assert result.rejected
-        assert "no more than 4 decimal places" in result.rejection_messages[0]
+        assert f"Amount ({amount}) must have no more than 4 decimal places" in result.rejection_messages[0]
 
     def test_exact_amount_refund_is_allowed(self):
         result = given(Payment).process(_initiate())
@@ -243,3 +243,22 @@ class TestRefundAmountGuards:
             )
             assert result.accepted
         assert result.status == PaymentStatus.REFUNDED.value
+        assert result.total_refunded == 0.8
+
+    def test_refund_of_the_float_remainder_fully_refunds_the_payment(self):
+        # As floats, 100 - 99.99 is 0.010000000000005116.
+        result = given(Payment).process(_initiate(amount=100.0))
+        payment_id = str(result.aggregate.id)
+        result = _succeed(result)
+        for index, amount in enumerate((99.99, 100.0 - 99.99)):
+            result = result.process(RequestRefund(payment_id=payment_id, amount=amount, reason="Partial"))
+            result = result.process(
+                ProcessRefundWebhook(
+                    payment_id=payment_id,
+                    refund_id=str(result.aggregate.refunds[index].id),
+                    gateway_refund_id=f"ref-{index}",
+                )
+            )
+            assert result.accepted
+        assert result.status == PaymentStatus.REFUNDED.value
+        assert result.total_refunded == 100.0

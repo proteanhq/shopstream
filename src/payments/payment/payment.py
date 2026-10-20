@@ -46,11 +46,16 @@ from shared.money import has_more_than_four_places, to_money
 
 MAX_PAYMENT_ATTEMPTS = 3
 
+# Decimal(precision=19, scale=4) leaves 15 digits before the decimal point.
+_MONEY_LIMIT = 1e15
+
 
 def _check_money_places(amount: float) -> None:
-    # Money is stored at 4 places, while events carry the float as given. A
-    # fifth place would be rounded away in storage but kept in the event, so
-    # the refund guard, the aggregate and the projections would disagree.
+    # Money is stored at 4 places, while events carry the float as given.
+    # to_money would round a fifth place away when the aggregate and the
+    # projections convert the event's float, but the event would keep it.
+    if not abs(amount) < _MONEY_LIMIT:
+        raise ValidationError({"amount": [f"Amount ({amount}) must be less than {_MONEY_LIMIT:.0f}"]})
     if has_more_than_four_places(amount):
         raise ValidationError({"amount": [f"Amount ({amount}) must have no more than 4 decimal places"]})
 
@@ -429,10 +434,13 @@ class Payment:
             refund.gateway_refund_id = event.gateway_refund_id
             refund.processed_at = event.completed_at
 
-        self.total_refunded = (self.total_refunded or 0.0) + event.amount
+        # Each refund is rounded before it is added, as the projections do, so
+        # the aggregate and the views reach the same total.
+        refund_total = to_money(self.total_refunded) + to_money(event.amount)
+        self.total_refunded = float(refund_total)
         # PaymentInitiated, the first event of every payment, always sets amount.
         assert self.amount is not None
-        if to_money(self.total_refunded) >= self.amount.value:
+        if refund_total >= self.amount.value:
             self.status = PaymentStatus.REFUNDED.value
         else:
             self.status = PaymentStatus.PARTIALLY_REFUNDED.value
