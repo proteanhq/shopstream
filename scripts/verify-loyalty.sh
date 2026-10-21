@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-set -euo pipefail
+# No -e: a failed `[ ... ]` would end the run before check() could record and print it.
+set -uo pipefail
 
 # Loyalty End-to-End Verification Script
 #
@@ -49,6 +50,19 @@ if ! curl -sf "$API_URL/health" > /dev/null 2>&1; then
 fi
 pass "API server reachable"
 echo "  NOTE: async projections + the RedemptionSaga require 'make engine-loyalty' running."
+
+# The earn checks below expect no multiplier. An active points_multiplier campaign left by an
+# earlier run of this script or by verify-observatory's seed doubles every earn, so expire them.
+# The earn handler reads the multiplier from the CampaignCatalog projection, hence the settle.
+ACTIVE_IDS=$(curl -sf "$API_URL/loyalty/campaigns?status=active" |
+    python3 -c "import json,sys; print(' '.join(c['campaign_id'] for c in json.load(sys.stdin)))")
+for cid in $ACTIVE_IDS; do
+    curl -sf -X POST "$API_URL/loyalty/campaigns/$cid/expire" > /dev/null
+done
+if [ -n "$ACTIVE_IDS" ]; then sleep "$SETTLE"; fi
+LEFT=$(curl -sf "$API_URL/loyalty/campaigns?status=active" |
+    python3 -c "import json,sys; print(len(json.load(sys.stdin)))")
+[ "$LEFT" = "0" ]; check $? "No active campaign before the earn checks (expired $(echo $ACTIVE_IDS | wc -w | tr -d ' '), left $LEFT)"
 
 # ============================================================
 #  Phase 1: Enrol + earn + redeem (RewardAccountView + PointsLeaderboard)
