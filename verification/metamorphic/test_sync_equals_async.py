@@ -21,6 +21,15 @@ WHAT THIS CHECKS
     Otherwise the drain publishes them and the projectors see the sync item's
     events twice.
 
+KNOWN FAILURE: PROTEAN PUBLISHES ONE AGGREGATE'S EVENTS OUT OF ORDER
+    On Postgres the outbox claims rows by priority alone, so rows with the same
+    priority publish in whatever order the database returns them
+    (proteanhq/protean#1893). When the async item's `StockReserved` arrives
+    before its `StockInitialized`, or its reservations arrive out of order,
+    InventoryLevel ends with the wrong `available` and the final comparison
+    fails. Until the pin has the fix, this check passes on some runs only. It
+    gets no xfail, because a strict xfail would fail on the runs that pass.
+
 WHY THIS WAS DEFERRED FROM T2.1, AND IS ENGINE-MARKED
     Both CI envs (memory, test) are `sync`, so a real sync-vs-async comparison
     needs the async engine + Redis + Postgres, which was unreliable in CI
