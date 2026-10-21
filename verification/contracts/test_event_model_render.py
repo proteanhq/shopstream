@@ -7,7 +7,10 @@ annotations file and a temp output path, and check where each note lands.
 
 They also pin `protean ir diff --format=event-model`, which `make ir-diff-model` runs:
 it must name a dropped event and exit with the same code as `--format=text`, so the
-slice view can't hide a breaking change that the text view reports.
+slice view can't hide a change that the text view reports.
+
+The last test runs `make docs-check` on a copy of the tree with one stale
+`event-model.md`, so the gate itself is checked, not only the render it calls.
 """
 
 import copy
@@ -130,29 +133,41 @@ def test_a_note_on_a_fact_event_is_reported_unmatched(tmp_path):
     assert f"`{fact_event}`" in unmatched
 
 
-def test_an_unquoted_dotted_key_aborts_the_render(tmp_path):
-    # TOML reads [annotations.loyalty.reward...] as nested tables, so the entry Protean
-    # sees is keyed "loyalty" and has no note. The render aborts and names that key,
-    # rather than listing the full name under "Unmatched annotations".
+def test_an_unquoted_dotted_key_is_never_dropped_in_silence(tmp_path):
+    # TOML reads [annotations.loyalty.reward...] as nested tables. Protean today aborts
+    # naming only "loyalty" (pinned in verification/regression/test_tooling.py); listing
+    # the full name under "Unmatched annotations" would also be right. Rendering
+    # without a word about the note would not.
     notes = tmp_path / "notes.toml"
     notes.write_text('[annotations.loyalty.reward.reward_account.RewardAccount]\nnote = "NOTE"\n')
     output = tmp_path / "model.md"
 
     result = _render("loyalty", notes, output)
 
-    assert result.returncode != 0
-    assert not output.exists()
-    assert "Annotation for 'loyalty'" in " ".join((result.stdout + result.stderr).split())
+    if result.returncode != 0:
+        assert not output.exists()
+        assert "Annotation for 'loyalty" in " ".join((result.stdout + result.stderr).split())
+    else:
+        _, unmatched = _rendered(result, output).split("## Unmatched annotations", 1)
+        assert "RewardAccount" in unmatched
 
 
 @pytest.mark.parametrize(
-    "content",
+    ("content", "message"),
     [
-        pytest.param('[annotations."loyalty.reward.reward_account.RewardAccount"\nnote = "x"\n', id="invalid-toml"),
-        pytest.param('[annotations."loyalty.reward.reward_account.RewardAccount"]\nnote = 3\n', id="note-not-a-string"),
+        pytest.param(
+            '[annotations."loyalty.reward.reward_account.RewardAccount"\nnote = "x"\n',
+            "Invalid TOML in {path}",
+            id="invalid-toml",
+        ),
+        pytest.param(
+            '[annotations."loyalty.reward.reward_account.RewardAccount"]\nnote = 3\n',
+            "Annotation for 'loyalty.reward.reward_account.RewardAccount' in {path} must have a non-empty string 'note'",
+            id="note-not-a-string",
+        ),
     ],
 )
-def test_a_malformed_annotations_file_aborts_before_writing(tmp_path, content):
+def test_a_malformed_annotations_file_aborts_before_writing(tmp_path, content, message):
     notes = tmp_path / "notes.toml"
     notes.write_text(content)
     output = tmp_path / "model.md"
@@ -161,6 +176,7 @@ def test_a_malformed_annotations_file_aborts_before_writing(tmp_path, content):
 
     assert result.returncode != 0
     assert not output.exists()
+    assert message.format(path=notes) in " ".join((result.stdout + result.stderr).split())
 
 
 def test_the_committed_loyalty_notes_all_render_and_all_match():
@@ -197,9 +213,13 @@ def test_ir_diff_as_event_model_names_the_event_and_exits_like_text(tmp_path, di
     model = _run("ir", "diff", "--left", str(left), "--right", str(right), "--format=event-model")
     text = _run("ir", "diff", "--left", str(left), "--right", str(right), "--format=text")
 
+    # `ir diff` exits 1 for a breaking change and 2 for a non-breaking one. It also exits
+    # 1 when it aborts, so the text run's output is checked too.
+    sign = {"removed": "-", "added": "+"}[direction]
+    assert f"{sign} {event} (EVENT)" in text.stdout, text.stdout + text.stderr
     assert f"event {event} {direction}" in model.stdout, model.stdout + model.stderr
+    assert text.returncode == {"removed": 1, "added": 2}[direction]
     assert model.returncode == text.returncode
-    assert model.returncode != 0
 
 
 def test_ir_diff_as_event_model_reports_no_change_on_identical_files():
@@ -207,3 +227,27 @@ def test_ir_diff_as_event_model_reports_no_change_on_identical_files():
 
     assert result.returncode == 0
     assert "No model changes." in result.stdout
+
+
+MAKE = shutil.which("make")
+
+
+@pytest.mark.slow
+@pytest.mark.skipif(MAKE is None, reason="make not on PATH")
+def test_docs_check_fails_on_a_stale_event_model_and_passes_the_rest(tmp_path):
+    # A copy of the tree, so the committed docs stay untouched. Only docs/ and .protean/
+    # are copied; the rest is linked, and UV_NO_SYNC keeps `uv run` on the linked venv.
+    for name in ("Makefile", "pyproject.toml", "uv.lock", "src", ".venv"):
+        (tmp_path / name).symlink_to(REPO / name)
+    shutil.copytree(REPO / "docs", tmp_path / "docs")
+    shutil.copytree(REPO / ".protean", tmp_path / ".protean")
+    stale = tmp_path / "docs" / "reviews" / "event-model.md"
+    stale.write_text(stale.read_text() + "\nAn edit the render does not make.\n")
+
+    env = {**os.environ, "UV_NO_SYNC": "1"}
+    result = subprocess.run([MAKE, "-s", "docs-check"], cwd=tmp_path, env=env, capture_output=True, text=True)
+
+    output = result.stdout + result.stderr
+    assert result.returncode != 0, output
+    problems = [line for line in output.splitlines() if line.startswith(("STALE:", "FAILED:"))]
+    assert problems == ["STALE: docs/reviews/event-model.md: run 'make docs-event-model' and commit"], output

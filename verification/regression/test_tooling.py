@@ -415,17 +415,31 @@ def test_is_event_sourced_warning_points_at_the_decorator():
 
 _LOYALTY_IR = os.path.join(os.path.dirname(__file__), "..", "..", ".protean", "loyalty", "ir.json")
 _IDENTITY_IR = os.path.join(os.path.dirname(__file__), "..", "..", ".protean", "identity", "ir.json")
+_INVENTORY_IR = os.path.join(os.path.dirname(__file__), "..", "..", ".protean", "inventory", "ir.json")
+_REWARD_ACCOUNT = "loyalty.reward.reward_account.RewardAccount"
+
+
+def _invoke_event_model(*args: str):
+    import protean.cli
+    from typer.testing import CliRunner
+
+    return CliRunner().invoke(protean.cli.app, ["docs", "generate", "--type=event-model", *args])
 
 
 def _render_event_model(*args: str) -> str:
     import click
-    import protean.cli
-    from typer.testing import CliRunner
 
-    result = CliRunner().invoke(protean.cli.app, ["docs", "generate", "--type=event-model", *args])
+    result = _invoke_event_model(*args)
     if result.exit_code != 0:
         pytest.fail(f"precondition: the render succeeded\n{result.output}")
     return click.unstyle(result.output)
+
+
+def _no_notes(tmp_path) -> str:
+    """An empty annotations file, so a notes file at the default path cannot change the render."""
+    path = tmp_path / "no-notes.toml"
+    path.write_text("")
+    return str(path)
 
 
 @pytest.mark.protean_bug(
@@ -437,22 +451,22 @@ def _render_event_model(*args: str) -> str:
     ),
 )
 @pytest.mark.xfail(strict=True, raises=AssertionError, reason="the event model renderer does not index subscribers")
-def test_event_model_draws_subscribers():
+def test_event_model_draws_subscribers(tmp_path):
     """Protean finding (not filed yet): the event model leaves out subscribers.
 
     `_read_model_index` and `_automation_index` in `protean/ir/generators/event_model.py`
     read projectors, event handlers and process managers. Subscribers sit under
     `flows.subscribers` in the IR and are not read. ShopStream routes all cross-context
-    traffic through its 25 subscribers, so none of the nine committed
-    `docs/<ctx>/event-model.md` names one. Loyalty has four, for example
-    `OrderDeliveredSubscriber`, which earns points when Ordering reports a delivery.
+    traffic through subscribers, so no committed `docs/<ctx>/event-model.md` names one.
+    Loyalty's `OrderDeliveredSubscriber`, for example, earns points when Ordering
+    reports a delivery, and the loyalty model does not show it.
     """
     with open(_LOYALTY_IR) as fh:
         subscribers = list(json.load(fh)["flows"]["subscribers"])
     if not subscribers:
         pytest.fail("precondition: the loyalty IR lists subscribers")
 
-    markdown = _render_event_model("--ir", _LOYALTY_IR)
+    markdown = _render_event_model("--ir", _LOYALTY_IR, "--annotations", _no_notes(tmp_path))
 
     missing = [fqn for fqn in subscribers if fqn.rsplit(".", 1)[-1] not in markdown]
     assert not missing, missing
@@ -495,3 +509,105 @@ def test_default_annotations_file_does_not_report_another_domains_notes(tmp_path
     if "## Event Model: Customer" not in markdown:
         pytest.fail(f"precondition: the identity model rendered\n{markdown}")
     assert "Unmatched annotations" not in markdown, markdown
+
+
+@pytest.mark.protean_bug(
+    issue=None,
+    state="open",
+    bug=(
+        "`protean docs generate --type=event-model` draws no wildcard event handler. A handler registered with "
+        '`@handle("$any")` consumes every event of its aggregate, but the model shows it in no slice.'
+    ),
+)
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="the event model renderer skips $any handlers")
+def test_event_model_draws_wildcard_event_handlers(tmp_path):
+    """Protean finding (not filed yet): the event model leaves out `$any` handlers.
+
+    Inventory's `EventAuditHandler` handles `$any` on `InventoryItem` and writes an audit
+    row for every event. The IR lists it under the cluster's `event_handlers` with a
+    `$any` key. `_automation_index` in `protean/ir/generators/event_model.py` keys each
+    handler by the event types it names, so `$any` matches no event and the
+    `InventoryItem` slice does not draw the handler.
+    """
+    with open(_INVENTORY_IR) as fh:
+        clusters = json.load(fh)["clusters"]
+    wildcard = [
+        handler["name"]
+        for cluster in clusters.values()
+        for handler in cluster.get("event_handlers", {}).values()
+        if "$any" in handler["handlers"]
+    ]
+    if not wildcard:
+        pytest.fail("precondition: the inventory IR lists a $any event handler")
+
+    markdown = _render_event_model("--ir", _INVENTORY_IR, "--annotations", _no_notes(tmp_path))
+
+    missing = [name for name in wildcard if name not in markdown]
+    assert not missing, missing
+
+
+@pytest.mark.protean_bug(
+    issue=None,
+    state="open",
+    bug=(
+        "An unquoted dotted key in the event model annotations file, such as `[annotations.a.b.C]`, aborts the "
+        "render with an error that names only the first segment (`'a'`), and does not say the key needs quotes."
+    ),
+)
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="the error names only the first key segment")
+def test_unquoted_annotation_key_is_reported_by_its_full_name(tmp_path):
+    """Protean finding (not filed yet): an unquoted FQN key gives a misleading error.
+
+    TOML reads `[annotations.loyalty.reward.reward_account.RewardAccount]` as nested
+    tables. `protean docs generate` then sees an entry keyed `loyalty` with no note and
+    aborts with "Annotation for 'loyalty' ... must have a non-empty string 'note'". The
+    right result names the full key, either in the error or under "Unmatched
+    annotations", so the author can see which note is wrong.
+    """
+    import click
+
+    notes = tmp_path / "notes.toml"
+    notes.write_text(f'[annotations.{_REWARD_ACCOUNT}]\nnote = "A loyalty note"\n')
+
+    result = _invoke_event_model("--ir", _LOYALTY_IR, "--annotations", str(notes))
+
+    assert _REWARD_ACCOUNT in " ".join(click.unstyle(result.output).split()), result.output
+
+
+@pytest.mark.protean_bug(
+    issue=None,
+    state="open",
+    bug=(
+        "The event model annotations loader reads only the `[annotations]` table and only `note` and `owner` in "
+        "an entry. A note in a top-level table, or a misspelled key inside an entry, is dropped with no error and "
+        'no "Unmatched annotations" line.'
+    ),
+)
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="the annotations loader ignores what it does not read")
+@pytest.mark.parametrize(
+    ("content", "lost"),
+    [
+        pytest.param(f'["{_REWARD_ACCOUNT}"]\nnote = "A loyalty note"\n', _REWARD_ACCOUNT, id="top-level-table"),
+        pytest.param(
+            f'[annotations."{_REWARD_ACCOUNT}"]\nnote = "A loyalty note"\nonwer = "Loyalty"\n',
+            "onwer",
+            id="misspelled-key",
+        ),
+    ],
+)
+def test_annotations_outside_what_the_loader_reads_are_reported(tmp_path, content, lost):
+    """Protean finding (not filed yet): annotations the loader does not read vanish.
+
+    `_load_annotations` in `protean/cli/docs.py` reads `data.get("annotations", {})` and,
+    in each entry, `note` and `owner`. Anything else in the file is ignored. ADR-0032
+    says a note is reported, never dropped in silence, so either the render fails or it
+    names what it skipped.
+    """
+    import click
+
+    notes = tmp_path / "notes.toml"
+    notes.write_text(content)
+
+    result = _invoke_event_model("--ir", _LOYALTY_IR, "--annotations", str(notes))
+
+    assert result.exit_code != 0 or lost in click.unstyle(result.output), result.output

@@ -355,7 +355,7 @@ events-catalog: ## List every event with its version, upcasters and consumers, r
 # Render context $$d's event model to the path $(1). Used inside a `for d in ...` loop.
 # --annotations is passed only when the context has its own notes file: an explicit
 # path that does not exist aborts the render, and the default .protean/annotations.toml
-# would be one file shared by all nine contexts.
+# would be one file shared by every context.
 define render_event_model
 PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=event-model \
 	$$(if [ -f .protean/$$d/annotations.toml ]; then echo --annotations=.protean/$$d/annotations.toml; fi) \
@@ -365,11 +365,11 @@ endef
 docs-generate: ## Generate domain documentation (diagrams, event catalog and event model)
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		echo "Generating docs for $$d..."; \
-		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=clusters --output=docs/$$d/clusters.md; \
-		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=events --output=docs/$$d/event-flows.md; \
-		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=handlers --output=docs/$$d/handler-wiring.md; \
-		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=catalog --output=docs/$$d/catalog.md; \
-		$(call render_event_model,docs/$$d/event-model.md); \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=clusters --output=docs/$$d/clusters.md || exit 1; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=events --output=docs/$$d/event-flows.md || exit 1; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=handlers --output=docs/$$d/handler-wiring.md || exit 1; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=catalog --output=docs/$$d/catalog.md || exit 1; \
+		$(call render_event_model,docs/$$d/event-model.md) || exit 1; \
 	done
 
 docs-catalog: ## Regenerate the event/command catalog docs from the live domains
@@ -388,20 +388,19 @@ docs-event-model: ## Regenerate the event model docs (docs/<domain>/event-model.
 
 docs-check: ## CI gate — fail if any committed catalog.md or event-model.md is stale vs the code
 	@# Docs are generated FROM the domain, so they cannot claim a feature the code
-	@# lacks. This fails the build if a committed catalog drifts — run 'make docs-catalog'.
-	@# The event model renders into a fresh directory and its exit code is checked, so a
-	@# render that fails cannot pass by leaving an old file to diff against.
-	@fail=0; for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
-		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=catalog --output=/tmp/catalog_check_$$d.md >/dev/null 2>&1; \
-		if ! diff -q docs/$$d/catalog.md /tmp/catalog_check_$$d.md >/dev/null 2>&1; then \
+	@# lacks. This fails the build if a committed catalog or event model drifts.
+	@# Each render goes into a fresh directory and its exit code is checked, so a render
+	@# that fails cannot pass by leaving an old file to diff against.
+	@fail=0; tmp=$$(mktemp -d); trap 'rm -rf "$$tmp"' EXIT; \
+	for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
+		if ! PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=catalog --output=$$tmp/$$d-catalog.md >"$$tmp/$$d-catalog.log" 2>&1; then \
+			echo "FAILED: catalog render for $$d:"; cat "$$tmp/$$d-catalog.log"; fail=1; \
+		elif ! diff -q docs/$$d/catalog.md $$tmp/$$d-catalog.md >/dev/null 2>&1; then \
 			echo "STALE: docs/$$d/catalog.md — run 'make docs-catalog' and commit"; fail=1; \
 		fi; \
-	done; \
-	tmp=$$(mktemp -d); trap 'rm -rf "$$tmp"' EXIT; \
-	for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
-		if ! $(call render_event_model,$$tmp/$$d.md) >"$$tmp/$$d.log" 2>&1; then \
-			echo "FAILED: event model render for $$d:"; cat "$$tmp/$$d.log"; fail=1; \
-		elif ! diff -q docs/$$d/event-model.md $$tmp/$$d.md >/dev/null 2>&1; then \
+		if ! $(call render_event_model,$$tmp/$$d-event-model.md) >"$$tmp/$$d-event-model.log" 2>&1; then \
+			echo "FAILED: event model render for $$d:"; cat "$$tmp/$$d-event-model.log"; fail=1; \
+		elif ! diff -q docs/$$d/event-model.md $$tmp/$$d-event-model.md >/dev/null 2>&1; then \
 			echo "STALE: docs/$$d/event-model.md: run 'make docs-event-model' and commit"; fail=1; \
 		fi; \
 	done; \

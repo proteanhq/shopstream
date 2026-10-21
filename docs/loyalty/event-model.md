@@ -38,6 +38,8 @@ flowchart LR
 > **When** EmitPoison
 > **Then** PoisonDetonated
 
+> **Note:** PoisonPill: a test fixture for the dead-letter queue, not a business concept. Its PoisonDetonated handler always fails, so once the retries run out the engine moves the message to the dead-letter queue of the loyalty::poison_pill stream. It is registered in every environment.
+
 ```mermaid
 flowchart LR
     subgraph loyalty_dlq_poison_PoisonPill[PoisonPill]
@@ -57,10 +59,13 @@ flowchart LR
 > **When** CompensateRedemption, CompleteRedemption, IssueRedemptionVoucher, RequestRedemption, ReserveRedemptionPoints
 > **Then** PointsReserved, RedemptionCompensated, RedemptionCompleted, RedemptionRequested, VoucherIssuanceFailed, VoucherIssued
 
-> **Note:** RedemptionSaga: starts on RedemptionRequested. The failure branch ends on
+> **Note:** RedemptionSaga: starts on RedemptionRequested. It ends in one of three ways.
+> If the account cannot cover the redemption (too few points, or closed), the
+> RedemptionRequested handler rejects it and calls mark_as_complete(), so the
+> same event that starts the saga also ends it. The failure branch ends on
 > VoucherIssuanceFailed, after it refunds the reserved points. The success branch
-> ends when the VoucherIssued handler calls mark_as_complete(), which the model
-> cannot see, so VoucherIssued carries no "end" label.
+> ends when the VoucherIssued handler calls mark_as_complete(). The model cannot
+> see mark_as_complete(), so only VoucherIssuanceFailed carries an "end" label.
 >
 > **Owner:** Loyalty
 
