@@ -143,6 +143,17 @@ def _assert_safety(tally: Counter, levels, reservation_count: int):
     return successes
 
 
+@pytest.mark.protean_bug(
+    issue=1628,
+    state="guard",
+    bug=(
+        "A stale write on an event-sourced aggregate that raises a published event failed with an outbox "
+        "`IntegrityError` instead of `ExpectedVersionError`: the UnitOfWork wrote outbox rows before the Message-DB "
+        "append, and the external-broker row's unique check autoflushed the internal row, whose `<stream>-<version>` "
+        "key clashed with the winner's. Version retry never ran. The in-memory outbox had the same clash. Fixed in "
+        "proteanhq/protean#1637 (`68ed330`)."
+    ),
+)
 def test_concurrent_reservations_never_over_reserve(inventory_domain):
     """Safety + liveness: with OCC retry on, all N units sell and none are over-sold."""
     item_id = _seed_item(inventory_domain, ON_HAND)
@@ -159,6 +170,17 @@ def test_concurrent_reservations_never_over_reserve(inventory_domain):
     assert successes == ON_HAND, f"expected all {ON_HAND} units reserved, got {successes} ({dict(tally)})"
 
 
+@pytest.mark.protean_bug(
+    issue=1628,
+    state="guard",
+    bug=(
+        "A stale write on an event-sourced aggregate that raises a published event failed with an outbox "
+        "`IntegrityError` instead of `ExpectedVersionError`: the UnitOfWork wrote outbox rows before the Message-DB "
+        "append, and the external-broker row's unique check autoflushed the internal row, whose `<stream>-<version>` "
+        "key clashed with the winner's. Version retry never ran. The in-memory outbox had the same clash. Fixed in "
+        "proteanhq/protean#1637 (`68ed330`)."
+    ),
+)
 def test_version_retry_is_load_bearing(inventory_domain):
     """Falsification: turn OCC retry off → real conflicts surface, safety still holds.
 

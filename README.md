@@ -201,27 +201,14 @@ make test
 
 # Run everything in-memory (no Docker needed)
 make test-memory
-
-# With coverage report
-make test-cov
-
-# By layer
-make test-domain        # Pure business logic (no DB)
-make test-application   # Command handler tests (with DB)
-make test-integration   # Cross-domain outbox/event tests
-
-# By domain (test-<domain> for any of: identity, catalogue, ordering,
-# inventory, payments, fulfillment, reviews, notifications, loyalty)
-make test-identity
-make test-loyalty
-
-# Fast tests only (skip slow/integration)
-make test-fast
-
-# Check the shared Message DB's integrity (read-only; stop the engines first;
-# dev env unless PROTEAN_ENV is set)
-make eventstore-verify
 ```
+
+`make help` lists the targets that run one layer, one domain, or the suite with
+coverage.
+
+`make eventstore-verify` checks the shared Message DB's integrity. It is
+read-only, so stop the engines first. It uses the dev env unless `PROTEAN_ENV`
+is set.
 
 After restoring the shared Message DB from a backup, follow
 [the restore runbook](docs/operations/restore.md). You run `make eventstore-verify`,
@@ -259,16 +246,7 @@ The suite provides 5 user classes covering 6 journey scenarios:
 | `EventFloodUser` | Rapid aggregate creation | Event pipeline saturation |
 | `SpikeUser` | Burst registration | Sudden traffic handling |
 
-```bash
-# Key commands
-make loadtest-mixed            # Mixed workload (web UI)
-make loadtest-stress           # Event pipeline stress (web UI)
-make loadtest-headless         # CI mode: 50 users, 5 min, CSV + HTML report
-make loadtest-spike            # Burst: 100 users, instant spawn, 2 min
-make loadtest-stack            # Full stack: Docker + Observatory + Locust
-make loadtest-stack-scaled     # Same with 3 identity + 2 catalogue engines
-make loadtest-clean            # Truncate all data for a fresh run
-```
+`make help` lists the other load-test targets (headless, spike, scaled stack and clean-up).
 
 During testing, monitor three dashboards simultaneously: **Locust** (`:8089`) for request metrics, **Observatory** (`:9000`) for event flow and outbox depth, and **Prometheus** (`:9000/metrics`) for raw counters. See [`loadtests/README.md`](loadtests/README.md) for full documentation.
 
@@ -363,27 +341,14 @@ This also works for multi-worker engines, such as `make engine-ordering-scaled`.
 
 ## Available Commands
 
-Run `make help` for the full list.
+Run `make help` to list every target with a one-line description. The
+`Makefile` is the one place targets are listed; this README names only the
+commands needed to get started.
 
-### API & Workers
+### Database maintenance
 
-```bash
-make api                    # FastAPI web server (port 8000)
-make engine-<domain>        # Per-domain engine (identity, catalogue, ordering, inventory,
-                            #   payments, fulfillment, reviews, notifications, loyalty)
-make engine-identity-scaled # Example: identity engine with 4 workers
-make observatory            # Observatory dashboard (port 9000)
-```
-
-### Database
-
-```bash
-make setup-db          # Create all database schemas
-make drop-db           # Drop all database schemas
-make truncate-db       # Delete all data (preserves schema)
-make idempotency-cleanup  # Delete processed-message markers older than retention_hours (run from cron)
-make outbox-reconcile     # After a crash, restore lost outbox rows (stop the API and engines first)
-```
+`make idempotency-cleanup` deletes processed-message markers older than
+`retention_hours`. Run it from cron.
 
 `make outbox-reconcile` runs `protean outbox reconcile` for each context. The
 engine runs the same sweep when it starts. A context is repaired only when its
@@ -397,60 +362,3 @@ Re-run `make setup-db` after pulling a change that marks a projector
 `idempotent=True`. It creates the `processed_message` table those projectors
 write to, and leaves existing tables alone. Until the table exists, every
 delivery to those projectors fails on the missing table.
-
-### Testing
-
-```bash
-make test              # All tests
-make test-cov          # Tests with coverage
-make test-domain       # Domain layer only
-make test-application  # Application layer only
-make test-integration  # Integration tests
-make test-fast         # Skip slow tests
-make upgrade-check     # protean upgrade-check for all nine contexts (needs the dev stack; run on each Protean pin bump)
-make upgrade-opportunities PINNED=<version>  # Shipped Protean features still built by hand, up to <version>
-```
-
-### Code Quality
-
-```bash
-make lint              # Ruff linting
-make format            # Ruff formatting
-make typecheck         # MyPy type checking
-make check             # All checks (lint + typecheck + test)
-make pre-commit        # Run pre-commit hooks
-make verify-domains    # protean verify (init, check, tests) for all nine contexts + tests/integration, memory mode, no running stack needed
-```
-
-### Contracts & Schemas
-
-```bash
-make schemas           # Write JSON, Avro and Protobuf schemas to .protean/<context>/schemas/ for all nine contexts
-make events-catalog    # List every event with its version, upcasters and consumers, read from the committed IR (no database needed)
-```
-
-### Docker
-
-```bash
-make docker-up         # Start infrastructure services
-make docker-dev        # Full stack in Docker (API + engines)
-make docker-dev-scaled # Full stack with scaled engines
-make docker-down       # Stop services
-make docker-logs       # Follow service logs
-make docker-clean      # Stop + remove volumes
-make dev               # docker-up (infrastructure only)
-```
-
-### Load Testing
-
-```bash
-make loadtest-install       # Install Locust dependency
-make loadtest               # Locust web UI (all scenarios)
-make loadtest-mixed         # Mixed workload
-make loadtest-stress        # Event pipeline stress
-make loadtest-headless      # Headless: 50 users, 5 min, reports
-make loadtest-spike         # Spike: 100 users, instant burst
-make loadtest-stack         # Full stack + Locust (one command)
-make loadtest-stack-scaled  # Same with scaled engines
-make loadtest-clean         # Truncate data for fresh run
-```

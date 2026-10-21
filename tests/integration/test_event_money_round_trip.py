@@ -9,7 +9,18 @@ store and on Message DB.
 
 from decimal import Decimal
 
+import pytest
 from protean import current_domain
+
+pytestmark = pytest.mark.protean_bug(
+    issue=1038,
+    state="guard",
+    bug=(
+        "No `Decimal` field — money as `Float` loses precision. Events carry money as 4-place strings that rebuild as "
+        "exact `Decimal`s; the `DailyRevenue`, `PaymentStatusView` and `DailyOrderStats` projections and the Payment "
+        "`Money` value object store money as `Decimal(precision=19, scale=4)`."
+    ),
+)
 
 _ADDRESS = {"street": "1 St", "city": "C", "state": "S", "postal_code": "00000", "country": "US"}
 

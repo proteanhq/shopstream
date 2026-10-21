@@ -45,6 +45,11 @@ class TestRedemptionEndpoints:
         account = client.get(f"/loyalty/accounts/{account_id}").json()
         assert account["points_balance"] == 350
 
+    @pytest.mark.protean_bug(
+        issue=1048,
+        state="guard",
+        bug="Multi-step process managers don't cascade under `sync`.",
+    )
     def test_request_drives_saga_to_completion(self, client):
         account_id = _funded_account(client, customer_id="cust-redeem-api-done", points=500)
         resp = client.post(

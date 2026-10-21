@@ -66,6 +66,14 @@ def async_dlq_config():
     server["stream_subscription"] = saved_stream_sub
 
 
+@pytest.mark.protean_bug(
+    issue=1055,
+    state="fixed",
+    bug=(
+        "`Engine(test_mode).run()` unreliable in CI vs Redis. Closed upstream; CI still deselects `-m engine` until "
+        "the engine job is re-added."
+    ),
+)
 @pytest.mark.slow
 @pytest.mark.engine
 class TestDeadLetterQueue:

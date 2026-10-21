@@ -54,6 +54,15 @@ from protean import current_domain
 
 from shared.money import to_money
 
+pytestmark = pytest.mark.protean_bug(
+    issue=1042,
+    state="fixed",
+    bug=(
+        "No consume-side idempotency → projector double-counts. Guarded by one redelivery case per projector marked "
+        "`idempotent=True`, plus ShopStream's own dedup in `ProductRatingProjector`."
+    ),
+)
+
 REDELIVERIES = 3
 
 

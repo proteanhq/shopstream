@@ -162,6 +162,7 @@ markers = [
     # domain, application, integration, slow, bdd are registered by Protean's pytest plugin
     "fast: Fast tests (excludes slow integration tests)",
     "bdd: behavior-driven tests",
+    "protean_bug(issue, state, bug): guards a Protean bug ShopStream found; `make regression-manifest` lists them. issue is the protean issue number or None if not filed yet; state is guard, open, tripwire or fixed",
     "engine: drives a full Protean Engine; runs locally only — unreliable against CI's Redis (proteanhq/protean#1055), so CI deselects it with -m 'not engine'",
 ]
 filterwarnings = [

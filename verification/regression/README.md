@@ -1,89 +1,75 @@
 # Protean regression set
 
 ShopStream is Protean's proving ground. **Every Protean bug it finds becomes one
-permanent, named test** — so a fixed bug can never quietly come back.
+permanent, named test**, so a fixed bug can never quietly come back.
 
 This is the habit. When you surface a Protean bug:
 
 1. **File it upstream** on [proteanhq/protean](https://github.com/proteanhq/protean/issues).
-2. **Add a named test** that asserts the *correct* (post-fix) behavior — here as
-   `test_<issue>_<slug>`, or as an oracle under `verification/oracles/` when the
-   bug is really a property (cross-reference it in the manifest below).
+2. **Add a named test with a `protean_bug` marker** that asserts the *correct*
+   (post-fix) behavior. Put it here as `test_<issue>_<slug>`, in the file for its
+   Protean area, or as an oracle under `verification/oracles/` when the bug is
+   really a property. The marker names the issue, the state and the bug:
+
+   ```python
+   @pytest.mark.protean_bug(issue=1913, state="open", bug="`protean projection rebuild` keeps ...")
+   ```
+
+   Use `issue=None` for a bug not filed yet, and fill it in once it is.
 3. **`xfail(strict=True)` while the installed Protean still has the bug.** Strict
    means the test flips loudly (xpass → failure) the moment the fix lands, so we
    can't forget to promote it.
-4. **When the fix is in ShopStream's Protean pin, drop the marker.** The test is
-   now a permanent green guard.
+4. **When the fix is in ShopStream's Protean pin, drop the xfail** and set the
+   marker's state to `guard`. The test is now a permanent green guard.
 
-A regression falls into one of three states:
+A regression is in one of four states, the marker's `state`:
 
-- **guard** — fix present in the pin; the test passes and protects against
+- **guard**: fix present in the pin; the test passes and protects against
   regression.
-- **open** — bug still open upstream; `xfail(strict)` documents it and flips when
-  fixed.
-- **tripwire** — fixed upstream but *not yet in ShopStream's Protean pin*;
-  `xfail(strict)` flips when the pin is bumped, prompting the upgrade cleanup.
+- **open**: bug still open upstream; `xfail(strict=True)` documents it and flips
+  when fixed.
+- **tripwire**: fixed upstream but *not yet in ShopStream's Protean pin*;
+  `xfail(strict=True)` flips when the pin is bumped, prompting the upgrade cleanup.
+- **fixed**: fixed in the pin and covered by a test that does more than pin the
+  bug, such as an oracle or a feature test.
 
-`test_manifest_matches_markers.py` checks the manifest below against the tests:
-every **open** row's test must carry an xfail marker, and every **guard** row's
-test must not.
+## Where the tests live
+
+The tests here are split by Protean area. Put a new regression test in the file
+for its area. Add a new file only for an area none of the five covers.
+
+| File | Area |
+|------|------|
+| `test_persistence.py` | Repositories, adapters, value objects and the unit of work |
+| `test_event_sourcing.py` | Event-sourced repositories, version conflicts, sync dispatch and snapshots |
+| `test_messaging.py` | Brokers, streams, engine outbox processors, dead-letter queues and projection rebuilds |
+| `test_ir.py` | `protean ir diff` |
+| `test_tooling.py` | `current_domain`, config loading, `protean check`, `protean server` and `protean verify` |
 
 ## Manifest
 
-Every Protean issue ShopStream has filed, and where it is guarded. (Reproductions
-live either here or in `verification/oracles/`; some framework bugs have no natural
-ShopStream reproduction and are noted as such.)
+Run `make regression-manifest` to list every Protean bug ShopStream guards, with
+its state and test. The table is built from the `protean_bug` markers across
+`verification/` and `tests/`, so a PR that adds a regression edits only its test.
+The table is not committed, because every such PR would then edit the same lines.
 
-| Issue | State | Bug | Guard |
-|-------|-------|-----|-------|
-| [#1038](https://github.com/proteanhq/protean/issues/1038) | **guard** | No `Decimal` field — money as `Float` loses precision | `../tests/payments/integration/test_decimal_money.py`, `../tests/ordering/application/test_daily_order_stats_decimal.py` and `../tests/integration/test_event_money_round_trip.py` (events carry money as 4-place strings that rebuild as exact `Decimal`s; the `DailyRevenue`, `PaymentStatusView` and `DailyOrderStats` projections and the Payment `Money` value object store money as `Decimal(precision=19, scale=4)`) |
-| [#1039](https://github.com/proteanhq/protean/issues/1039) | **guard** | Datetime payloads serialized with `str()`, not ISO/UTC | `regression/test_protean_regressions.py::test_1039_event_datetime_serialized_as_iso_utc` |
-| [#1040](https://github.com/proteanhq/protean/issues/1040) | **guard** | Event-store append happened *after* the DB commit (crash window) | `oracles/test_crash_window_reconcile.py` (append-first durability) |
-| [#1041](https://github.com/proteanhq/protean/issues/1041) | **guard** | `target_broker` nullable → unique-index bypass | `oracles/test_outbox_exactly_once.py` |
-| [#1042](https://github.com/proteanhq/protean/issues/1042) | fixed | No consume-side idempotency → projector double-counts | `oracles/test_p20_projector_idempotency.py`: one redelivery case per projector marked `idempotent=True`, plus ShopStream's own dedup in `ProductRatingProjector` |
+`test_manifest_matches_markers.py` checks the markers against the tests:
+
+- an **open** or **tripwire** test carries `xfail(strict=True)`;
+- a **guard** or **fixed** test carries no xfail;
+- every xfail test in `verification/` and `tests/` has a `protean_bug` marker;
+- every marker names one of the four states, and a bug.
+
+## History
+
+Bugs ShopStream filed that no test guards. This table is frozen: a new bug gets a
+test and a marker instead.
+
+| Issue | State | Bug | Why there is no test |
+|-------|-------|-----|----------------------|
 | [#1046](https://github.com/proteanhq/protean/issues/1046) | fixed | `Date` field on a command/event breaks the message checksum | no ShopStream repro (no `Date` field on commands/events) |
-| [#1048](https://github.com/proteanhq/protean/issues/1048) | **guard** | Multi-step process managers don't cascade under `sync` | `tests/loyalty/**` RedemptionSaga (full-cascade completion tests, xfails flipped) |
-| [#1055](https://github.com/proteanhq/protean/issues/1055) | fixed | `Engine(test_mode).run()` unreliable in CI vs Redis | `tests/loyalty/integration/test_dlq.py` (`-m engine`, local-only). Closed upstream; CI still deselects `-m engine` until the engine job is re-added |
 | [#1056](https://github.com/proteanhq/protean/issues/1056) | fixed | `repository.add()` doesn't reflect `Auto(increment=True)` back onto the aggregate | no ShopStream repro (no `increment=True` in any domain) |
-| [#1065](https://github.com/proteanhq/protean/issues/1065) | fixed | `process_and_wait` belongs in `protean.testing` | adopted: `protean.testing.process_and_wait`/`drain`; local seed removed. CI pin (sync path only): `verification/support/test_processing.py::test_process_and_wait_sync_settles_inline`. `tests/loyalty/integration/test_dlq.py` uses `drain` but is `-m engine`, local-only |
-| [#1071](https://github.com/proteanhq/protean/issues/1071) | **guard** | In-memory adapter ignores `Index(unique=True)` | `regression/test_protean_regressions.py::test_1071_memory_adapter_enforces_unique_index` (+ `oracles/test_outbox_exactly_once.py`, Postgres) |
-| [#1073](https://github.com/proteanhq/protean/issues/1073) | **guard** | `reconcile_outbox` no-op on Message-DB (`read_last_message("$all")` is None) | `oracles/test_crash_window_reconcile.py::test_reconcile_restores_the_lost_outbox_row` |
-| [#1648](https://github.com/proteanhq/protean/issues/1648) | **guard** | `reconcile_outbox` gave a row to every message at the tail of `$all` that had none in this context's outbox, so another context's event or a command at the tail of the shared store got a row this context never owns. Fixed in proteanhq/protean#1655 (`581276a`) | `oracles/test_crash_window_reconcile.py::test_reconcile_skips_another_contexts_event_at_the_tail` and `::test_reconcile_skips_a_command_at_the_tail` |
-| [#1653](https://github.com/proteanhq/protean/issues/1653) | **guard** | `reconcile_outbox` rebuilt only the internal row, so a lost `published=True` event never got back its row for the external broker. Fixed in proteanhq/protean#1718 (`4e82cdc`) | `oracles/test_crash_window_reconcile.py::test_reconcile_restores_the_external_row_of_a_published_event` |
-| [#1076](https://github.com/proteanhq/protean/issues/1076) | fixed | Projectors reject `retries`/`retry_exceptions` options | `src/inventory/projections/low_stock_report.py` uses `retries`/`retry_exceptions` (guarded by `oracles/test_lowstock_projector_concurrency.py`, Postgres) |
-| [#1078](https://github.com/proteanhq/protean/issues/1078) | **guard** | All-default ValueObject round-trips to `None` | `regression/test_protean_regressions.py::test_1078_all_default_value_object_round_trips` |
-| [#1632](https://github.com/proteanhq/protean/issues/1632) | **open** (feature request) | `current_domain` has no warning-free probe: `getattr`/`isinstance` outside a context warn "Working outside of domain context" (pytest collection). Predates the 0.16.0 → main bump | `regression/test_protean_regressions.py::test_current_domain_probe_outside_context_is_silent` |
-| [#1630](https://github.com/proteanhq/protean/issues/1630) | **guard** | The `is_event_sourced` deprecation warning was attributed to `protean/domain/__init__.py` instead of the decorator that used the option (`stacklevel` one frame short). Fixed in proteanhq/protean#1643 (`3dd06a4`) | `regression/test_protean_regressions.py::test_is_event_sourced_warning_points_at_the_decorator` |
-| [#1900](https://github.com/proteanhq/protean/issues/1900) | **open** | The memory provider turns a `datetime` into a string before an `lt`/`lte`/`gt`/`gte` comparison, so two values with different UTC offsets compare by wall-clock text. `src/notifications/notification/scheduler.py` converts its `as_of` cutoff to UTC to stay correct on memory | `regression/test_protean_regressions.py::test_1900_memory_datetime_lookup_compares_instants` |
-| [#1923](https://github.com/proteanhq/protean/issues/1923) | **open** | Protean's default config always defines a `memory` database provider, and the engine runs an outbox processor for every managed provider. Each ShopStream engine therefore runs `memory-to-<broker>` outbox processors for a database it never configured, and they show as rows in `/readyz` and `protean subscriptions status` | `regression/test_protean_regressions.py::test_1923_engine_runs_outbox_processors_only_for_configured_databases` |
-| [#1631](https://github.com/proteanhq/protean/issues/1631) | **open** | The outermost UnitOfWork rolls back a transaction a nested UnitOfWork doomed, then returns without raising, so the caller sees success for writes that were lost | `regression/test_protean_regressions.py::test_outer_commit_of_a_doomed_transaction_raises` |
-| [#1629](https://github.com/proteanhq/protean/issues/1629) | **guard** | A top-level `[lint]` table in `domain.toml` was dropped by the config loader, while an env overlay (`[test.lint]`) loaded. The key filter was applied to one and not the other. Fixed in proteanhq/protean#1646 (`c421861`) | `regression/test_protean_regressions.py::test_lint_table_in_domain_toml_is_loaded` |
-| [#1628](https://github.com/proteanhq/protean/issues/1628) | **guard** | A stale write on an event-sourced aggregate that raises a published event failed with an outbox `IntegrityError` instead of `ExpectedVersionError`: the UnitOfWork wrote outbox rows before the Message-DB append, and the external-broker row's unique check autoflushed the internal row, whose `<stream>-<version>` key clashed with the winner's. Version retry never ran. The in-memory outbox had the same clash. Fixed in proteanhq/protean#1637 (`68ed330`) | `regression/test_protean_regressions.py::test_stale_event_sourced_write_raises_expected_version_error` (memory and Postgres) (+ `oracles/test_no_lost_updates.py`, liveness) |
-| [#1662](https://github.com/proteanhq/protean/issues/1662) | **guard** | `protean verify`'s tests stage removed `PROTEAN_ENV` from the pytest subprocess, so init and check ran under the caller's env while the tests ran under the plugin default (`test`, Postgres). Fixed in proteanhq/protean#1810 (`29e1252`): `--env` now sets the environment for all three stages. `scripts/verify-domains.sh` passes `--env memory` | `regression/test_protean_regressions.py::test_verify_tests_stage_keeps_protean_env` |
-| [#1661](https://github.com/proteanhq/protean/issues/1661) | **guard** | `protean verify` took the failed-test count from the first `<N> failed` anywhere in pytest's output, so a failure message such as psycopg2's "port 15432 failed" was reported as 15432 failures. The pass/fail status was right. Fixed in proteanhq/protean#1801 (`0a5103f`) | `regression/test_protean_regressions.py::test_verify_tests_stage_counts_failures_from_the_summary` |
-| [#1661](https://github.com/proteanhq/protean/issues/1661) | **guard** | `protean verify` took the passed-test count from the first `<N> passed` anywhere in pytest's output. With `-ra` in addopts, a skip reason such as "0 passed on this platform" was read as the count. `scripts/verify-domains.sh` gates on `passed > 0`, so this count feeds its gate. Fixed in proteanhq/protean#1801 (`0a5103f`) | `regression/test_protean_regressions.py::test_verify_tests_stage_counts_passes_from_the_summary` |
-| [#1659](https://github.com/proteanhq/protean/issues/1659) | **guard** | `BaseEventSourcedRepository` had no `get_or_none`. [#1279](https://github.com/proteanhq/protean/issues/1279) added it to `BaseRepository` only, so a lookup on an event-sourced aggregate that may miss had to catch `ObjectNotFoundError`. Fixed in proteanhq/protean#1824 (`9f20ad1`); `src/inventory/stock/expiry.py` now uses it | `regression/test_protean_regressions.py::test_event_sourced_repository_get_or_none_returns_none_on_a_miss` |
-| [#1663](https://github.com/proteanhq/protean/issues/1663) | **guard** | Saving an aggregate ran its `@invariant.pre` checks again when `BaseDAO._apply_pre_persist_hooks` stamped `auto_now` fields and ran aggregate enrichers, because both assign through `setattr`. A pre-invariant that rejects changes in the new state (loyalty's `closed_accounts_are_immutable`) then blocked the save of the transition that reached it: `close()` worked, and saving the closed `RewardAccount` raised `ValidationError`. Fixed in proteanhq/protean#1811 (`3a546f3`) | `regression/test_protean_regressions.py::test_auto_now_stamp_does_not_run_pre_invariants` |
-| [#1682](https://github.com/proteanhq/protean/issues/1682) | **guard** | `UnitOfWork.commit` turned a `ValueError` into `ExpectedVersionError` unless it was raised while saving outbox rows. Sync dispatch runs later in the same `try`, so a `ValueError` from an event handler was reported as a version conflict, whatever the outbox setting, and version retry ran the committed command 4 times. Fixed in proteanhq/protean#1760 (`64c023d`) | `regression/test_protean_regressions.py::test_1682_value_error_from_a_sync_handler_is_not_a_version_conflict` |
-| [#1883](https://github.com/proteanhq/protean/issues/1883) | **guard** | Under sync dispatch, an event handler that raised `ExpectedVersionError` made the command handler's version retry run the command again, though its commit had already succeeded. With `max_retries = 3` the command ran 4 times: in inventory, `ReceiveStock` ran 4 times and `StockReceived` was dispatched 4 times. Fixed in proteanhq/protean#1888 (`6aad05f`): the commit wraps the handler's failure in `TransactionError` | `regression/test_protean_regressions.py::test_1883_committed_command_is_not_rerun_when_a_sync_handler_raises_expected_version_error` |
-| [#1909](https://github.com/proteanhq/protean/issues/1909) | **open** | `BaseEventStore.verify()` raises `TypeError` on a Message DB row whose `data` is SQL NULL (the column is nullable). The Message DB client calls `json.loads(None)` while `verify` reads `$all`, so no report comes back and the row is never named, though `verify`'s docstring says a corrupt row is reported | `oracles/test_eventstore_integrity.py::test_null_message_data_is_reported_not_raised` (Message DB) |
-| [#1910](https://github.com/proteanhq/protean/issues/1910) | **open** | `protean eventstore verify --json` exits 1, its code for "violations found", when Message DB is unreachable, and prints a traceback with no JSON envelope. The connection error is raised inside `store.verify()`, after the domain loaded, so the CLI's handler does not map it to exit 2, which the CLI exit-code rule keeps for an environment error. `scripts/eventstore-verify.sh` prints "returned no JSON report" in this case | `oracles/test_eventstore_integrity.py::test_cli_exits_2_with_an_error_envelope_when_message_db_is_unreachable` (Message DB) |
-| [#1907](https://github.com/proteanhq/protean/issues/1907) | **open** | `reconcile_outbox` repairs only when the newest event the context owns has no outbox row. When another writer in the same context (an API request, a subscriber, a second engine worker) commits after the crash, the lost event is never repaired, whatever `--limit` is | `oracles/test_crash_window_reconcile.py::test_reconcile_repairs_a_lost_event_behind_a_later_commit` (Postgres + Message DB) |
-| [#1906](https://github.com/proteanhq/protean/issues/1906) | **open** | `reconcile_outbox` run while a unit of work sits between its event-store append and its relational commit sees no outbox row, inserts one and commits first. The live commit then fails on the `(message_id, target_broker)` unique index and its caller gets `TransactionError`, though the event is in the store and will be published. The engine docstring calls a race "safe", which holds only for one sweep against another. `make outbox-reconcile` says to stop the API and engines first | `oracles/test_crash_window_reconcile.py::test_reconcile_beside_a_live_commit_does_not_fail_it` (Postgres + Message DB) |
-| [#1908](https://github.com/proteanhq/protean/issues/1908) | **open** | For a state-based (CQRS) aggregate, a crash after the event-store append rolls back the aggregate row with the outbox rows. `reconcile_outbox` then restores the outbox rows, so the event is published for an aggregate that was never saved: identity's `CustomerRegistered` goes out on the internal and `global` brokers with no customer row | `oracles/test_crash_window_reconcile.py::test_reconcile_does_not_publish_an_event_whose_aggregate_was_never_saved` (Postgres + Message DB) |
-| [#1911](https://github.com/proteanhq/protean/issues/1911) | **open** | `protean check` reports `AGGREGATE_WITHOUT_COMMAND_HANDLER` for an aggregate declared with `abstract=True`. Protean accepts a command handler for one, but an abstract aggregate is never loaded or saved, so the handler would have nothing to act on. The rule skips only `protean.adapters.*`, while its sibling cluster rules skip abstract aggregates through `_abstract_aggregate_fqns()`. Loyalty's `Auditable` base trips it; `src/loyalty/domain.toml` suppresses it | `regression/test_protean_regressions.py::test_abstract_aggregate_is_not_flagged_without_command_handler` |
-| [#1912](https://github.com/proteanhq/protean/issues/1912) | **open** | `protean ir diff` exits 2 for "non-breaking changes only", the same code Click uses for a usage error such as an unknown option. A gate that reads exit 2 as a safe change passes when its own command line is broken. `scripts/ir-gate.sh` accepts exit 2 only with a JSON report whose summary has changes and no breaking change. The test compares the two codes, so it flips whichever one Protean moves | `regression/test_protean_regressions.py::test_ir_diff_usage_error_does_not_share_the_non_breaking_exit_code` |
-| [#1912](https://github.com/proteanhq/protean/issues/1912) | **open** | `protean ir diff` exits 1 for a breaking change and also for an error before any diff runs, such as a missing baseline file (`typer.Abort()`). The CLI exit-code rule keeps exit 2 for an environment error. `scripts/ir-gate.sh` reruns the diff in text format on exit 1, so the reason is printed either way | `regression/test_protean_regressions.py::test_ir_diff_load_error_does_not_share_the_breaking_exit_code` |
-| [#1913](https://github.com/proteanhq/protean/issues/1913) | **open** | `protean projection rebuild` deletes a projection's rows and replays its events, but keeps the `processed_message` markers. A projector marked `idempotent=True` finds the marker the live delivery wrote and skips every replayed event, so the rebuilt read model stays empty. The result still counts each skipped event as dispatched. ShopStream runs no rebuild today | `regression/test_protean_regressions.py::test_rebuild_restores_a_projection_whose_projector_is_idempotent` |
-| not filed yet | **open** | With two or more consumer groups on a Redis stream, `RedisBroker.trim` runs `XTRIM MINID` at the smallest `last-delivered-id`. That id marks what each group was handed, not what it acknowledged, so the trim deletes entries a group's failed handler left pending. Redelivery returns them with no data, `_read_blocking` skips them, and they are never retried or dead-lettered. The `shopstream` profile turns retention on for every subscription | `regression/test_protean_regressions.py::test_stream_trim_keeps_entries_a_consumer_group_has_not_acknowledged` (Redis) |
-| not filed yet | **open** | `StreamSubscription.process_batch` passes the result of `engine.handle_message` to the circuit breaker. A handler with no method for an event type returns success for it, which resets `consecutive_handler_failures`. `NotificationCreated` and the claim on `NotificationDispatchRequested` precede each `NotificationDispatchStarted` on the notification stream, so during a channel outage the dispatcher's count drops back to 0 before every failing send and the breaker does not open | `tests/notifications/integration/test_dispatcher_circuit_breaker.py::TestDispatcherCircuitBreaker::test_outage_opens_the_breaker_when_creation_events_share_the_stream` (Redis) |
-| not filed yet | **open** | `protean ir diff --format json` reports `summary.has_breaking_changes: false` for a field type change that it lists under `compatibility.breaking_changes` and exits 1 for. Changing a projection field from `Float` to `Decimal` shows it. A tool that reads only the summary takes the change as safe. `scripts/ir-gate.sh` is not affected, because it trusts the summary only on exit 2 | `regression/test_protean_regressions.py::test_ir_diff_summary_counts_a_breaking_field_type_change` |
-| [#1892](https://github.com/proteanhq/protean/issues/1892) | **open** | A process manager with a `Decimal` field cannot persist a transition. `BaseProcessManager._persist_transition` turns only `datetime` and `date` state values into strings, so `MessageEnvelope.compute_checksum` raises `TypeError` from `json.dumps` at UnitOfWork commit. Under `event_processing = "sync"` the command that raised the event fails. `OrderCheckoutSaga.amount` stays `Float` for this reason, though the event money it copies is `Decimal` | `regression/test_protean_regressions.py::test_process_manager_with_a_decimal_field_persists_its_transition` |
-| not filed yet | **open** | The event store discards a snapshot only when it fails to build (`part_of(**data)` raises `ValidationError`). A snapshot that still builds is used as it is. So a field added with a default, whose value an `@apply` handler sets, loads its default from an older snapshot: PromoCampaign's `status` loads `"draft"` where replay gives `"active"`. `src/loyalty/CLAUDE.md` says to rebuild snapshots after such a change | `regression/test_protean_regressions.py::test_snapshot_that_builds_but_disagrees_with_replay_is_not_used` |
-| not filed yet | **open** | Since ADR-0042 a subscription dead-letters an exhausted message to `{stream}:dlq`, and the InlineBroker never moves an owned group's message to its own `_dead_letter_queue`. But the InlineBroker's `dlq_list` reads only `_dead_letter_queue`, and it has no `dlq_depth`, so the base class returns 0. Under the memory env both report an empty DLQ while `loyalty::poison_pill:dlq` holds the message. The pin runs `dlq_list` and `dlq_depth`. `dlq_inspect`, `dlq_replay` and `dlq_purge` read the same `_dead_letter_queue`; that part was read in the code, not run | `regression/test_protean_regressions.py::test_inline_broker_dlq_api_reads_the_subscription_dlq_stream` (memory) |
-| not filed yet | **open** | `RedisBroker.dlq_replay` strips `_dlq_metadata`, including the failing `consumer_group`, and appends the message to the source stream again. Every consumer group on the stream reads it as new, including groups that already handled it. Replaying a payments failure on the shared `ordering::order` stream would deliver the order event again to every other context subscribed to it: fulfillment, inventory, loyalty, notifications and reviews. `dlq_purge` takes no consumer group and deletes the whole `{stream}:dlq` key, so it would also clear every other group's dead letters on that stream; that part was read in the code (`RedisBroker._dlq_purge`), not run or pinned | `regression/test_protean_regressions.py::test_dlq_replay_reaches_only_the_failing_consumer_group` (Redis) |
 | [#1634](https://github.com/proteanhq/protean/issues/1634) | fixed | `DomainFixture.domain_context()` reset `current_domain`'s providers, brokers and event store instead of its own domain's. Fixed in proteanhq/protean#1644 (`c60a71d`) | no dedicated test. Every per-package `tests/*/conftest.py` enters `DomainFixture.domain_context()` per test, so the full suite exercises it |
-| [#1635](https://github.com/proteanhq/protean/issues/1635) | **guard** | `protean server` with one worker calls `configure_logging(level=PROTEAN_LOG_LEVEL or "INFO")` before `Domain.init()`. Init then found root handlers and skipped all of `Domain.configure_logging`: the `[logging]` level, redaction, the correlation processor and filter, the OpenTelemetry processor and `per_logger`. So engine logs carried no `correlation_id`. `protean observatory` had the same gap. Fixed in proteanhq/protean#1640 (`e79a817`): both commands now call `apply_domain_logging` after the domain loads, which replaces the early setup. `protean observatory` applies only the first `--domain`'s `[logging]` | `regression/test_protean_regressions.py::test_server_single_worker_applies_domain_toml_logging_level` (server path only; checks the level and the correlation filter) |
 | [#1636](https://github.com/proteanhq/protean/issues/1636) | fixed | `Domain.configure_logging` attached `ProteanCorrelationFilter` to the root logger, but Python runs a logger's filters only for records logged on that logger. Records from named loggers such as `logging.getLogger("ordering.x")` got no `correlation_id` attribute. Rendered lines still showed the ids through the formatter's `foreign_pre_chain`. The OpenTelemetry filter had the same limit. Fixed in proteanhq/protean#1665 (`f5690a7`) | no test |
 
 **Run**

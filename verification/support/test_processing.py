@@ -15,6 +15,14 @@ import pytest
 from protean.testing import process_and_wait
 
 
+@pytest.mark.protean_bug(
+    issue=1065,
+    state="fixed",
+    bug=(
+        "`process_and_wait` belongs in `protean.testing`. Adopted: `protean.testing.process_and_wait` and `drain`; the"
+        " local copy is removed. The guard pins the sync path only."
+    ),
+)
 @pytest.mark.usefixtures("reviews_ctx")
 def test_process_and_wait_sync_settles_inline():
     """In a sync domain the read model is up to date the instant we return."""

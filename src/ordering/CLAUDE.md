@@ -171,7 +171,7 @@ Listens on streams: `ordering::order`.
 
 The saga reacts only to internal ordering events: `OrderConfirmed`, `PaymentPending`, `PaymentSucceeded`, `PaymentFailed`, `OrderCancelled`. External events from Inventory and Payments are translated into internal ordering commands by `checkout/inventory_subscriber.py` and `checkout/payment_subscriber.py`.
 
-`OrderCheckoutSaga.amount` stays a `Float`. Protean cannot JSON-encode a `Decimal` in the process manager's stored transition, so a `Decimal` field there makes the commit fail (pinned in `verification/regression/test_protean_regressions.py`).
+`OrderCheckoutSaga.amount` stays a `Float`. Protean cannot JSON-encode a `Decimal` in the process manager's stored transition, so a `Decimal` field there makes the commit fail (pinned in `verification/regression/test_persistence.py`).
 
 Saga flow (max 3 payment retries):
 1. `OrderConfirmed` → status=awaiting_reservation

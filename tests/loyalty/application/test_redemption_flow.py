@@ -13,6 +13,7 @@ proteanhq/protean#1048 was fixed, so the saga runs to a terminal state determini
 
 from datetime import UTC, datetime
 
+import pytest
 from protean import current_domain
 
 from loyalty.projections.redemption_view import RedemptionView, RedemptionViewProjector
@@ -66,6 +67,11 @@ class TestRedemptionStart:
         assert view.status == "completed"
 
 
+@pytest.mark.protean_bug(
+    issue=1048,
+    state="guard",
+    bug="Multi-step process managers don't cascade under `sync`.",
+)
 class TestRedemptionFullFlow:
     """Full saga completion — cascades synchronously (proteanhq/protean#1048 fixed)."""
 

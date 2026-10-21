@@ -25,7 +25,7 @@ SCOPE
     Metamorphic (source B), PromoCampaign only (loyalty's `snapshot_threshold`
     is 5). A stale snapshot that still builds is outside this check: Protean
     uses it as it is. That case is pinned as a Protean finding in
-    `verification/regression/test_protean_regressions.py`.
+    `verification/regression/test_event_sourcing.py`.
 
 RUN (no Docker):
     .venv/bin/python -m pytest \

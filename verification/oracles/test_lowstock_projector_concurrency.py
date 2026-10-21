@@ -66,6 +66,14 @@ def inventory_domain():
     yield inventory
 
 
+@pytest.mark.protean_bug(
+    issue=1076,
+    state="fixed",
+    bug=(
+        "Projectors reject `retries`/`retry_exceptions` options. `src/inventory/projections/low_stock_report.py` uses "
+        "`retries` and `retry_exceptions`."
+    ),
+)
 def test_concurrent_low_stock_detected_yields_one_report(inventory_domain):
     from protean import current_domain
 
