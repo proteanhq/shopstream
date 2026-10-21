@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:70f6120c710abfc786a516e8a0803a290e6323d5531469a27eaf3ea84fe0de03",
+  "checksum": "sha256:c7a1adc2b325b41bb4e5ce89385e26677b0428d235baeaff12b8945d47544ba8",
   "clusters": {
     "catalogue.category.category.Category": {
       "aggregate": {
@@ -1614,7 +1614,7 @@
           "part_of": "catalogue.product.product.Product"
         },
         "catalogue.product.product.Price": {
-          "description": "The monetary cost of a variant, with optional loyalty-tier discounts.\n\nBase price is the standard retail price. Tier prices (stored as JSON) allow\ndifferent pricing for Silver, Gold, and Platinum customers. Tier prices must\nalways be lower than the base price.",
+          "description": "The monetary cost of a variant, with optional loyalty-tier discounts.\n\nBase price is the standard retail price. Tier prices map a tier name to a\n`TierPrice`, allowing different pricing for Silver, Gold, and Platinum\ncustomers. Tier prices must always be lower than the base price.",
           "element_type": "VALUE_OBJECT",
           "fields": {
             "base_price": {
@@ -1632,6 +1632,7 @@
               "type": "String"
             },
             "tier_prices": {
+              "content_type": "TierPrice",
               "default": "<callable>",
               "kind": "dict",
               "type": "Dict"
@@ -1677,6 +1678,29 @@
           },
           "module": "catalogue.product.product",
           "name": "SEO",
+          "part_of": "catalogue.product.product.Product"
+        },
+        "catalogue.product.product.TierPrice": {
+          "description": "The discounted price of a variant for one loyalty tier.",
+          "element_type": "VALUE_OBJECT",
+          "fields": {
+            "amount": {
+              "kind": "standard",
+              "precision": 19,
+              "required": true,
+              "scale": 4,
+              "type": "Decimal"
+            }
+          },
+          "fqn": "catalogue.product.product.TierPrice",
+          "invariants": {
+            "post": [
+              "amount_must_be_positive"
+            ],
+            "pre": []
+          },
+          "module": "catalogue.product.product",
+          "name": "TierPrice",
           "part_of": "catalogue.product.product.Product"
         },
         "catalogue.product.product.Weight": {
@@ -2315,6 +2339,7 @@
       "catalogue.product.product.Dimensions",
       "catalogue.product.product.Price",
       "catalogue.product.product.SEO",
+      "catalogue.product.product.TierPrice",
       "catalogue.product.product.Weight",
       "catalogue.shared.money.Money",
       "catalogue.shared.sku.SKU"

@@ -23,7 +23,7 @@ Root fields: `sku` (SKU VO), `seller_id`, `title`, `description`, `category_id`,
 - `ProductVisibility`: Public, Unlisted, Tier_Restricted
 
 ### Value Objects (part_of="Product")
-- `Price` — base_price (`Decimal(precision=19, scale=4)`), currency (default "USD"), tier_prices (JSON text with validation; the tier values stay floats)
+- `Price` — base_price (`Decimal(precision=19, scale=4)`), currency (default "USD"), tier_prices (`Dict(value_type=ValueObject(TierPrice))`: a map of tier name to `TierPrice`, each below base_price)
 - `SEO` — meta_title, meta_description, slug (URL-safe validation)
 - `Dimensions` — length, width, height, unit (cm/in)
 - `Weight` — value, unit (kg/lb/g/oz)
@@ -46,7 +46,7 @@ Root fields: `sku` (SKU VO), `seller_id`, `title`, `description`, `category_id`,
 | `update_details(...)` | Partial update of title/description/brand/attributes/seo, raises `ProductDetailsUpdated` |
 | `add_variant(...)` | Creates Variant with SKU + Price VOs, raises `VariantAdded` |
 | `update_variant_price(variant_id, new_price)` | Replaces Price VO, raises `VariantPriceChanged` |
-| `set_tier_price(variant_id, tier, price)` | Merges tier into Price.tier_prices JSON, raises `TierPriceSet` |
+| `set_tier_price(variant_id, tier, price)` | Stores `TierPrice(amount=price)` under the tier in a new Price, raises `TierPriceSet` |
 | `add_image(...)` | First image auto-primary, uses `atomic_change`, raises `ProductImageAdded` |
 | `remove_image(image_id)` | Reassigns primary if needed, raises `ProductImageRemoved` |
 | `activate()` | Draft → Active (requires variants), raises `ProductActivated` |

@@ -1,12 +1,15 @@
 """Integration tests for product aggregate persistence round-trip."""
 
+from decimal import Decimal
+
+import pytest
 from protean.utils.globals import current_domain
 
 from catalogue.product.creation import CreateProduct
 from catalogue.product.details import UpdateProductDetails
 from catalogue.product.images import AddProductImage
-from catalogue.product.product import Product
-from catalogue.product.variants import AddVariant
+from catalogue.product.product import Product, TierPrice
+from catalogue.product.variants import AddVariant, SetTierPrice
 
 
 def _create_product(**overrides):
@@ -176,3 +179,29 @@ class TestProductPersistence:
         assert len(product.variants) == 2
         assert len(product.images) == 2
         assert product.seo.slug == "full-product"
+
+
+class TestTierPricePersistence:
+    def test_tier_prices_load_back_as_tier_price_value_objects(self):
+        provider = current_domain.repository_for(Product)._provider
+        if provider.__class__.__database__ != "postgresql":
+            pytest.skip("the JSON round trip is only observable under the Postgres env")
+
+        product_id = _create_product()
+        current_domain.process(
+            AddVariant(product_id=product_id, variant_sku="VAR-001", base_price=19.99),
+            asynchronous=False,
+        )
+        variant_id = current_domain.repository_for(Product).get(product_id).variants[0].id
+        for tier, price in (("Silver", 14.99), ("Gold", 9.99)):
+            current_domain.process(
+                SetTierPrice(product_id=product_id, variant_id=variant_id, tier=tier, price=price),
+                asynchronous=False,
+            )
+
+        tiers = current_domain.repository_for(Product).get(product_id).variants[0].price.tier_prices
+        assert tiers == {
+            "Silver": TierPrice(amount=Decimal("14.9900")),
+            "Gold": TierPrice(amount=Decimal("9.9900")),
+        }
+        assert all(type(t.amount) is Decimal for t in tiers.values())

@@ -39,4 +39,4 @@ def variant_base_price_is(product, price):
 def variant_has_tier_price(product, tier, price):
     variant = product.variants[0]
     tiers = variant.price.tier_prices
-    assert tiers[tier] == price
+    assert tiers[tier].amount == to_money(price)
