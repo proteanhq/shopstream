@@ -259,3 +259,10 @@ capabilities:
     property: "a subscription's exhausted message lands once on {stream}:dlq, never in the broker's native DLQ, and leaves no retry_counts entry, also after a DLQ-publish outage"
     source: A
     status: covered   # Protean ADR-0042; StreamSubscription (loyalty) and BrokerSubscription (tests/payments/integration/test_dlq_ownership.py), InlineBroker and Redis
+
+  - name: protean_install_extras
+    taught_by: pyproject.toml   # the protean[...] requirement
+    guarded_by: verification/support/test_protean_extras.py
+    property: "every extra named on the protean requirement is one Protean defines; every provider and the telemetry table configured in src/*/domain.toml have their extra named; docker/entrypoint.dev.sh names the same set; the server and shell extras' modules import; under the test env a plain postgresql:// URL builds a psycopg (3) engine while psycopg2 is also installed, and loyalty's reporting store runs on SQLite"
+    source: A
+    status: covered   # the driver check skips in memory mode and runs in CI's real-stores job

@@ -341,7 +341,8 @@ make loadtest-clean           # Truncate all data between runs
 ## Dependencies
 
 - Python 3.11+ with uv
-- Protean (git main) with postgresql, message-db, redis extras
+- Protean (git main) with seven extras: `postgresql`, `sqlite`, `message-db`, `redis`, `telemetry`, `server`, `shell`. `verification/support/test_protean_extras.py` fails if Protean drops one of these names, since uv only warns on an unknown extra.
+- A plain `postgresql://` URL runs on psycopg 3. Message DB still uses psycopg2, which `message-db-py` installs, so both drivers are present.
 - FastAPI + Uvicorn
 - scalar-fastapi (API docs at /docs)
 - Ruff (lint/format), MyPy (types), pytest (testing)

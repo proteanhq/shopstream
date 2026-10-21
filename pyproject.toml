@@ -16,7 +16,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "protean[postgresql,message-db,redis,telemetry,server] @ git+https://github.com/proteanhq/protean.git@main",
+    "protean[postgresql,sqlite,message-db,redis,telemetry,server,shell] @ git+https://github.com/proteanhq/protean.git@main",
     "python-dotenv>=1.0.0",
     "structlog>=24.1.0",
     "python-json-logger>=2.0.7",
@@ -46,7 +46,6 @@ packages = [
 [dependency-groups]
 dev = [
     "pre-commit>=3.6.0",
-    "ipython>=8.20.0",
     "ipdb>=0.13.13",
     "nox>=2024.4.15",
 ]
