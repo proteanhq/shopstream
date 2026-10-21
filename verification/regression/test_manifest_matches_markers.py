@@ -17,6 +17,7 @@ import subprocess
 import sys
 from functools import cache
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -78,3 +79,36 @@ def test_is_xfail_reads_the_marker():
     assert not _is_xfail(
         "verification/regression/test_tooling.py::test_server_single_worker_applies_domain_toml_logging_level"
     )
+
+
+def _fake_item(nodeid: str, *marks: pytest.MarkDecorator) -> SimpleNamespace:
+    found = [m.mark for m in marks]
+    return SimpleNamespace(
+        nodeid=nodeid,
+        get_closest_marker=lambda name: next((m for m in found if m.name == name), None),
+        iter_markers=lambda name: (m for m in found if m.name == name),
+    )
+
+
+def test_collector_keeps_each_parametrized_case():
+    sys.path.insert(0, str(ROOT / "scripts"))
+    try:
+        from regression_manifest import _Collector
+    finally:
+        sys.path.remove(str(ROOT / "scripts"))
+
+    bug = pytest.mark.protean_bug(issue=1, state="open", bug="b")
+    collector = _Collector()
+    collector.pytest_collection_modifyitems(
+        [
+            _fake_item("t.py::test_x[a]", bug, pytest.mark.xfail(strict=True)),
+            _fake_item("t.py::test_x[b]", bug, pytest.mark.xfail(strict=False)),
+            _fake_item("t.py::test_x[c]", pytest.mark.xfail(strict=True)),
+        ]
+    )
+
+    assert collector.xfail_tests == {"t.py::test_x[a]", "t.py::test_x[b]", "t.py::test_x[c]"}
+    assert [(r["test"], r["xfail"]) for r in collector.records] == [
+        ("t.py::test_x[a]", {"strict": True}),
+        ("t.py::test_x[b]", {"strict": False}),
+    ]

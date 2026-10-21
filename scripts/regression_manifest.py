@@ -29,6 +29,10 @@ PATHS = ["verification", "tests"]
 ISSUE_URL = "https://github.com/proteanhq/protean/issues/{}"
 
 
+def _without_params(nodeid: str) -> str:
+    return nodeid.split("[", 1)[0]
+
+
 class _Collector:
     def __init__(self) -> None:
         self.records: list[dict] = []
@@ -37,16 +41,17 @@ class _Collector:
 
     def pytest_collection_modifyitems(self, items):
         for item in items:
-            path, _, rest = item.nodeid.partition("::")
-            name = rest.split("[", 1)[0]
-            self.file_tests[path].add(name)
+            # Checks need every parametrized case, since a mark can sit on one case only.
+            # Cases are folded into one test only when rendering.
+            path = item.nodeid.partition("::")[0]
+            self.file_tests[path].add(_without_params(item.nodeid))
             xfail = item.get_closest_marker("xfail")
             if xfail is not None:
-                self.xfail_tests.add(f"{path}::{name}")
+                self.xfail_tests.add(item.nodeid)
             for mark in item.iter_markers("protean_bug"):
                 self.records.append(
                     {
-                        "test": f"{path}::{name}",
+                        "test": item.nodeid,
                         "file": path,
                         "issue": mark.kwargs.get("issue"),
                         "state": mark.kwargs.get("state"),
@@ -79,15 +84,14 @@ def collect() -> dict:
             sys.stderr.write(log.read())
             raise SystemExit(f"pytest collection failed with exit code {code}")
 
-    unique = {(r["test"], r["issue"], r["state"], r["bug"]): r for r in collector.records}
     counts = {path: len(names) for path, names in collector.file_tests.items()}
-    return {"records": list(unique.values()), "counts": counts, "xfail_tests": sorted(collector.xfail_tests)}
+    return {"records": collector.records, "counts": counts, "xfail_tests": sorted(collector.xfail_tests)}
 
 
 def render(records: list[dict], counts: dict[str, int]) -> str:
     rows: dict[tuple, list[str]] = defaultdict(list)
     for r in records:
-        rows[(r["issue"], r["state"], r["bug"])].append(r["test"])
+        rows[(r["issue"], r["state"], r["bug"])].append(_without_params(r["test"]))
 
     def sort_key(row):
         (issue, _, _), tests = row
