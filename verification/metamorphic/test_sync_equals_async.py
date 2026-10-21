@@ -16,6 +16,11 @@ WHAT THIS CHECKS
     `async` (outbox + `Engine.run()` drain) — and assert the two InventoryLevel
     projections match field-for-field (bar the row id / timestamp).
 
+    The outbox is on in both modes, so the sync run also leaves its events as
+    pending outbox rows. The test marks them published before the async run.
+    Otherwise the drain publishes them and the projectors see the sync item's
+    events twice.
+
 WHY THIS WAS DEFERRED FROM T2.1, AND IS ENGINE-MARKED
     Both CI envs (memory, test) are `sync`, so a real sync-vs-async comparison
     needs the async engine + Redis + Postgres, which was unreliable in CI
@@ -98,6 +103,17 @@ def _run_workload(inventory, *, product_id, variant_id, warehouse_id, sku) -> st
     return item_id
 
 
+def _mark_published(inventory, item_id) -> int:
+    """Mark the item's pending outbox rows, for every broker, as published. Returns how many."""
+    stream = f"inventory::inventory_item-{item_id}"
+    repo = inventory._get_outbox_repo("default")
+    rows = [r for r in repo.find_unprocessed() if r.stream_name == stream]
+    for row in rows:
+        row.mark_published()
+        repo.add(row)
+    return len(rows)
+
+
 def _level_view(inventory, item_id) -> dict | None:
     from inventory.projections.inventory_level import InventoryLevel
 
@@ -138,6 +154,10 @@ def test_sync_and_async_yield_the_same_projection(inventory_domain):
     inv.config["event_processing"] = "sync"
     sync_item = _run_workload(inv, **inputs)
     sync_view = _level_view(inv, sync_item)
+    # The outbox is on in sync mode too, so the sync path's events also sit in
+    # the outbox. Left pending, the async drain would publish them and every
+    # projector would see the sync item's events a second time.
+    assert _mark_published(inv, sync_item) > 0, "sync path wrote no outbox rows to keep out of the drain"
 
     # Path 2 — async: events go to the outbox; drain the engine to project them.
     inv.config["event_processing"] = "async"
@@ -146,6 +166,8 @@ def test_sync_and_async_yield_the_same_projection(inventory_domain):
     async_view = _level_view(inv, async_item)
 
     assert sync_view is not None, "sync path did not project inline"
+    assert sync_view["reserved"] == 3 and sync_view["available"] == 17
+    assert _level_view(inv, sync_item) == sync_view, "the async drain changed the sync item's row"
     assert async_view is not None, "async path did not converge after draining"
     # Same inputs, same events, same fold -> identical read model (bar the row id).
     assert sync_view == async_view

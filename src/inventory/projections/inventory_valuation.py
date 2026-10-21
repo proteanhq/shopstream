@@ -39,7 +39,7 @@ class InventoryValuation:
     updated_at: datetime | None = DateTime()
 
 
-@inventory.projector(projector_for=InventoryValuation, aggregates=[InventoryItem])
+@inventory.projector(projector_for=InventoryValuation, aggregates=[InventoryItem], idempotent=True)
 class InventoryValuationProjector:
     @on(StockInitialized)
     def on_stock_initialized(self, event: StockInitialized) -> None:
