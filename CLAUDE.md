@@ -67,7 +67,7 @@ Commands are processed synchronously via FastAPI. Internal events flow asynchron
 | 7 | Notifications |
 | 8 | Loyalty |
 | 9 | Loyalty cache (`[caches.loyalty]`, PointsLeaderboard projection) |
-| 10 | Test env only: every context's internal broker (`[test.brokers.default]`) |
+| 10 | Test env only: every context's internal broker (`[test.brokers.default]`), and the Redis cache the Loyalty cache TTL test builds (`[test.caches.loyalty]`) |
 | 14 | Test env only: the external bus (`[test.brokers.global]`) |
 | 15 | External bus (shared, cross-domain published events) |
 

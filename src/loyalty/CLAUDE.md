@@ -353,7 +353,7 @@ broker holds the message and redelivers it; once the DLQ is back, it lands there
   writer is rejected with `ExpectedVersionError`, no lost updates);
 - **integration** — API tests (TestClient over account / campaign / redemption endpoints), the
   async-command path (`test_async_command.py`), the engine-driven **DLQ** test
-  (`test_dlq.py`, Redis-only — skips on memory), and the DLQ ownership tests
+  (`test_dlq.py`, Redis-only, skips on memory), and the DLQ ownership tests
   (`test_dlq_ownership.py`, both brokers, no engine);
 - **bdd** — `pytest-bdd` scenarios (rewards lifecycle, points transfer, campaign lifecycle,
   redemption) in `features/*.feature`;

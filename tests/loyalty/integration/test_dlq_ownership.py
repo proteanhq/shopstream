@@ -2,8 +2,8 @@
 
 Protean's ADR-0042 makes a `StreamSubscription` the single owner of retries and dead-lettering
 for the stream it consumes. When it initializes, it marks its consumer group as owned on the
-broker. From then on the broker holds and redelivers every nack with no retry limit of its own,
-and the subscription publishes an exhausted message to `{stream}:dlq`, the one dead-letter
+broker. From then on the InlineBroker holds and redelivers every nack with no retry limit of its
+own, and the subscription publishes an exhausted message to `{stream}:dlq`, the one dead-letter
 destination. On the InlineBroker the owned group never reaches the broker's own (native) DLQ.
 
 These tests drive `PoisonEventHandler`, which always raises, through the real subscription read
@@ -39,6 +39,10 @@ DLQ_STREAM = f"{SOURCE_STREAM}:dlq"
 # The outage case runs this many delivery cycles while the DLQ is down. Each one redelivers the
 # held message and fails the DLQ publish again.
 OUTAGE_CYCLES = 3
+# The normal case lets the subscription retry this many times before it dead-letters. The
+# InlineBroker's own limit is set lower, so a broker that ignored ownership would dead-letter the
+# message natively first.
+SUBSCRIPTION_RETRIES = 3
 
 
 @pytest.fixture()
@@ -53,19 +57,19 @@ def broker(monkeypatch: pytest.MonkeyPatch) -> Iterator[BaseBroker]:
     if isinstance(broker, InlineBroker):
         # A nacked message waits `_retry_delay` seconds before the next read can redeliver it.
         monkeypatch.setattr(broker, "_retry_delay", 0)
-        # Below OUTAGE_CYCLES, so a group the broker did not treat as owned would reach the
-        # native DLQ during the outage and the test would catch it.
+        # Below OUTAGE_CYCLES and SUBSCRIPTION_RETRIES, so a group the broker did not treat as
+        # owned would reach the native DLQ first and the test would catch it.
         monkeypatch.setattr(broker, "_max_retries", 1)
     yield broker
 
 
-def _subscription() -> StreamSubscription:
+def _subscription(max_retries: int = 1) -> StreamSubscription:
     return StreamSubscription(
         Engine(current_domain, test_mode=True),
         SOURCE_STREAM,
         PoisonEventHandler,
         blocking_timeout_ms=50,
-        max_retries=1,
+        max_retries=max_retries,
         retry_delay_seconds=0,
         enable_dlq=True,
     )
@@ -98,20 +102,22 @@ def _dlq_entries(broker: BaseBroker) -> list[dict[str, Any]]:
     return [broker._deserialize_message(fields) for _, fields in broker._client.xrange(DLQ_STREAM)]
 
 
-def _assert_native_dlq_empty(broker: BaseBroker, sub: StreamSubscription) -> None:
-    # Redis has no native DLQ: `{stream}:dlq` is the only one it has.
+def _assert_native_dlq_empty(broker: BaseBroker) -> None:
+    # Redis has no native DLQ: `{stream}:dlq` is the only one it has. Every group key is read,
+    # so a message filed under an unexpected key still fails the check.
     if isinstance(broker, InlineBroker):
-        native = broker.get_dlq_messages(sub.consumer_group, SOURCE_STREAM)
-        assert [entry for entries in native.values() for entry in entries] == []
+        assert {key: entries for key, entries in broker._dead_letter_queue.items() if entries} == {}
 
 
-def _is_held(broker: BaseBroker, sub: StreamSubscription, broker_id: str) -> bool:
-    """Whether the broker still holds the message for redelivery to the group."""
+def _held_ids(broker: BaseBroker, sub: StreamSubscription) -> set[str]:
+    """The broker ids the broker still holds for the group: failed, in flight, or pending."""
+    group = sub.consumer_group
     if isinstance(broker, InlineBroker):
-        group_key = f"{SOURCE_STREAM}:{sub.consumer_group}"
-        return broker_id in [entry[0] for entry in broker._failed_messages[group_key]]
-    pending = broker._client.xpending_range(SOURCE_STREAM, sub.consumer_group, min="-", max="+", count=10)
-    return [broker._decode_if_bytes(entry["message_id"]) for entry in pending] == [broker_id]
+        group_key = f"{SOURCE_STREAM}:{group}"
+        failed = {entry[0] for entry in broker._failed_messages[group_key]}
+        return failed | set(broker._in_flight[group_key])
+    pending = broker._client.xpending_range(SOURCE_STREAM, group, min="-", max="+", count=10)
+    return {broker._decode_if_bytes(entry["message_id"]) for entry in pending}
 
 
 def _assert_single_dlq_entry(broker: BaseBroker, broker_id: str, message_id: str) -> None:
@@ -124,17 +130,23 @@ def _assert_single_dlq_entry(broker: BaseBroker, broker_id: str, message_id: str
 
 class TestStreamSubscriptionOwnsTheDLQ:
     def test_exhausted_message_lands_only_in_the_stream_dlq(self, broker):
-        sub = _subscription()
+        sub = _subscription(max_retries=SUBSCRIPTION_RETRIES)
         asyncio.run(sub.initialize())
         broker_id, message_id = _publish_poison(broker)
+
+        # Each failure before the last is nacked, and the broker redelivers it on the next read.
+        assert asyncio.run(_deliver(sub, SUBSCRIPTION_RETRIES - 1)) == SUBSCRIPTION_RETRIES - 1
+        assert _dlq_entries(broker) == []
+        assert list(sub.retry_counts) == [broker_id]
+        _assert_native_dlq_empty(broker)
 
         assert asyncio.run(_deliver(sub, 1)) == 1
 
         _assert_single_dlq_entry(broker, broker_id, message_id)
-        _assert_native_dlq_empty(broker, sub)
+        _assert_native_dlq_empty(broker)
         assert sub.retry_counts == {}
         # The message was acked away, so nothing is held and nothing comes back.
-        assert not _is_held(broker, sub, broker_id)
+        assert _held_ids(broker, sub) == set()
         assert asyncio.run(_deliver(sub, 2)) == 0
 
     def test_dlq_outage_holds_the_message_then_lands_it_once(self, broker, monkeypatch):
@@ -155,15 +167,15 @@ class TestStreamSubscriptionOwnsTheDLQ:
         # by the broker.
         assert asyncio.run(_deliver(sub, OUTAGE_CYCLES)) == OUTAGE_CYCLES
         assert _dlq_entries(broker) == []
-        assert _is_held(broker, sub, broker_id)
-        _assert_native_dlq_empty(broker, sub)
+        assert _held_ids(broker, sub) == {broker_id}
+        _assert_native_dlq_empty(broker)
         assert list(sub.retry_counts) == [broker_id]
 
         monkeypatch.setattr(broker, "publish", real_publish)
         assert asyncio.run(_deliver(sub, 1)) == 1
 
         _assert_single_dlq_entry(broker, broker_id, message_id)
-        _assert_native_dlq_empty(broker, sub)
+        _assert_native_dlq_empty(broker)
         assert sub.retry_counts == {}
-        assert not _is_held(broker, sub, broker_id)
+        assert _held_ids(broker, sub) == set()
         assert asyncio.run(_deliver(sub, 2)) == 0

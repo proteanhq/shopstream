@@ -1149,14 +1149,17 @@ async def _deliver(subscription, cycles: int) -> int:
     reason="the InlineBroker's DLQ API reads only its native DLQ, not the {stream}:dlq stream subscriptions write",
 )
 @pytest.mark.usefixtures("loyalty_ctx")
-def test_inline_broker_dlq_api_reads_the_subscription_dlq_stream(monkeypatch):
+# One case per call, so a Protean fix to one of them alone shows as an XPASS.
+@pytest.mark.parametrize("read", ["dlq_list", "dlq_depth"])
+def test_inline_broker_dlq_api_reads_the_subscription_dlq_stream(monkeypatch, read):
     """Protean finding (not filed yet): the InlineBroker's DLQ API misses what subscriptions dead-letter.
 
     Since ADR-0042 a subscription owns dead-lettering: it publishes an exhausted
     message to `{stream}:dlq`, and the InlineBroker never moves an owned group's
-    message to its own `_dead_letter_queue`. But `dlq_list`, `dlq_inspect`,
-    `dlq_replay` and `dlq_purge` on the InlineBroker read only
-    `_dead_letter_queue`, and it has no `dlq_depth`, so the base class returns 0.
+    message to its own `_dead_letter_queue`. But `dlq_list` on the InlineBroker
+    reads only `_dead_letter_queue`, and it has no `dlq_depth`, so the base
+    class returns 0. `dlq_inspect`, `dlq_replay` and `dlq_purge` read the same
+    `_dead_letter_queue` (read in the code; this pin runs only the first two).
     Under the memory env the DLQ API reports an empty DLQ while
     `loyalty::poison_pill:dlq` holds the message. The Redis broker reads the
     `{stream}:dlq` stream and reports it.
@@ -1191,12 +1194,15 @@ def test_inline_broker_dlq_api_reads_the_subscription_dlq_stream(monkeypatch):
     asyncio.run(subscription.initialize())
     pill = PoisonPill.detonate("dlq api probe")
     broker.publish(stream, Message.from_domain_object(pill._events[0]).to_dict())
-    assert asyncio.run(_deliver(subscription, 1)) == 1
+    if asyncio.run(_deliver(subscription, 1)) != 1:
+        pytest.fail("precondition: the subscription received the message")
     if len(broker._messages.get(dlq_stream, [])) != 1:
         pytest.fail("precondition: the subscription published the message to the DLQ stream")
 
-    assert len(broker.dlq_list([dlq_stream])) == 1
-    assert broker.dlq_depth(dlq_stream) == 1
+    if read == "dlq_list":
+        assert len(broker.dlq_list([dlq_stream])) == 1
+    else:
+        assert broker.dlq_depth(dlq_stream) == 1
 
 
 @pytest.mark.xfail(
@@ -1213,8 +1219,9 @@ def test_dlq_replay_reaches_only_the_failing_consumer_group():
     that metadata and appends the message to the source stream again, so every
     group on the stream reads it as a new message, including groups that
     already handled it. On the shared bus, replaying a payments failure on
-    `ordering::order` would deliver the order event again to fulfillment,
-    loyalty, notifications and reviews.
+    `ordering::order` would deliver the order event again to every other
+    context subscribed to it: fulfillment, inventory, loyalty, notifications
+    and reviews.
     """
     import asyncio
 
@@ -1257,12 +1264,17 @@ def test_dlq_replay_reaches_only_the_failing_consumer_group():
     client.xreadgroup(other_group, "c1", {stream: ">"}, count=10)
     client.xack(stream, other_group, original_id)
 
-    assert asyncio.run(_deliver(subscription, 1)) == 1
+    if asyncio.run(_deliver(subscription, 1)) != 1:
+        pytest.fail("precondition: the subscription received the message")
     dead = broker.dlq_list([dlq_stream])
     if len(dead) != 1:
         pytest.fail("precondition: the subscription dead-lettered the message")
 
-    assert broker.dlq_replay(dlq_stream, dead[0].dlq_id, target_stream=stream)
+    if not broker.dlq_replay(dlq_stream, dead[0].dlq_id, target_stream=stream):
+        pytest.fail("precondition: dlq_replay reported success")
+    # A replay that reached no stream would leave the other group nothing to read and XPASS.
+    if client.xlen(stream) != 2:
+        pytest.fail("precondition: the replay appended the message to the source stream")
 
     replayed_to_other = client.xreadgroup(other_group, "c1", {stream: ">"}, count=10)
     assert replayed_to_other == [], "a group that already handled the message received the replay"

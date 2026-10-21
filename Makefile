@@ -27,7 +27,7 @@ test-application: ## Run application layer tests across all domains
 	uv run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ tests/reviews/application/ tests/notifications/application/ tests/loyalty/application/
 
 test-integration: ## Run integration tests across all domains
-	uv run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/reviews/integration/ tests/notifications/integration/ tests/integration/
+	uv run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/reviews/integration/ tests/notifications/integration/ tests/loyalty/integration/ tests/integration/
 
 test-fast: ## Run fast tests across all domains (domain + application)
 	uv run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ tests/reviews/domain/ tests/reviews/application/ tests/notifications/domain/ tests/notifications/application/ -m "not slow"
@@ -46,7 +46,7 @@ test-memory-application: ## Run application tests with in-memory adapters
 	uv run pytest tests/identity/application/ tests/catalogue/application/ tests/ordering/application/ tests/inventory/application/ tests/payments/application/ tests/fulfillment/application/ tests/reviews/application/ tests/notifications/application/ tests/loyalty/application/ --protean-env memory
 
 test-memory-integration: ## Run integration tests with in-memory adapters
-	uv run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/reviews/integration/ tests/notifications/integration/ tests/integration/ --protean-env memory
+	uv run pytest tests/identity/integration/ tests/catalogue/integration/ tests/ordering/integration/ tests/inventory/integration/ tests/payments/integration/ tests/fulfillment/integration/ tests/reviews/integration/ tests/notifications/integration/ tests/loyalty/integration/ tests/integration/ --protean-env memory
 
 test-memory-fast: ## Run fast memory tests (domain + application, excludes slow)
 	uv run pytest tests/identity/domain/ tests/identity/application/ tests/catalogue/domain/ tests/catalogue/application/ tests/ordering/domain/ tests/ordering/application/ tests/inventory/domain/ tests/inventory/application/ tests/payments/domain/ tests/payments/application/ tests/fulfillment/domain/ tests/fulfillment/application/ tests/reviews/domain/ tests/reviews/application/ tests/notifications/domain/ tests/notifications/application/ tests/loyalty/domain/ tests/loyalty/application/ -m "not slow" --protean-env memory
