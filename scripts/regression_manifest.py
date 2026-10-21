@@ -67,6 +67,8 @@ def collect() -> dict:
     collector = _Collector()
     args = ["--collect-only", "-q", "-p", "no:cacheprovider", "--protean-env", os.environ["PROTEAN_ENV"], *PATHS]
     cwd = os.getcwd()
+    # pytest.main reads PYTEST_ADDOPTS, and a -k, -m or --ignore there would drop marked tests unnoticed.
+    addopts = os.environ.pop("PYTEST_ADDOPTS", None)
     saved = os.dup(1)
     # pytest writes the collected node IDs to fd 1; keep them out of the table.
     with tempfile.TemporaryFile("w+") as log:
@@ -79,6 +81,8 @@ def collect() -> dict:
             os.dup2(saved, 1)
             os.close(saved)
             os.chdir(cwd)
+            if addopts is not None:
+                os.environ["PYTEST_ADDOPTS"] = addopts
         if code != 0:
             log.seek(0)
             sys.stderr.write(log.read())

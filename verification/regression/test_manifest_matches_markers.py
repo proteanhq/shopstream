@@ -13,6 +13,7 @@ same script that prints the manifest (`make regression-manifest`).
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from functools import cache
@@ -25,18 +26,23 @@ ROOT = Path(__file__).resolve().parents[2]
 STATES = {"guard", "open", "tripwire", "fixed"}
 
 
-@cache
-def _collected() -> dict:
+def _run_script(env: dict[str, str] | None = None) -> dict:
     result = subprocess.run(
         [sys.executable, str(ROOT / "scripts" / "regression_manifest.py"), "--json"],
         capture_output=True,
         text=True,
         cwd=ROOT,
+        env=env,
         check=False,
     )
     if result.returncode != 0:
         pytest.fail(f"precondition: collecting the markers failed\n{result.stderr[-4000:]}")
     return json.loads(result.stdout)
+
+
+@cache
+def _collected() -> dict:
+    return _run_script()
 
 
 def _records() -> list[dict]:
@@ -112,3 +118,10 @@ def test_collector_keeps_each_parametrized_case():
         ("t.py::test_x[a]", {"strict": True}),
         ("t.py::test_x[b]", {"strict": False}),
     ]
+
+
+def test_pytest_addopts_does_not_narrow_the_collection():
+    env = {**os.environ, "PYTEST_ADDOPTS": "--ignore=verification/regression/test_messaging.py"}
+    narrowed = _run_script(env)
+    assert any(r["file"] == "verification/regression/test_messaging.py" for r in narrowed["records"])
+    assert narrowed["records"] == _records()
