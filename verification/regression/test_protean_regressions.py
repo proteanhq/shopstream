@@ -999,8 +999,7 @@ def test_stream_trim_keeps_entries_a_consumer_group_has_not_acknowledged():
     client = getattr(broker, "redis_instance", None)
     if client is None:
         pytest.skip("needs the Redis streams broker (run with --protean-env test)")
-    # When the Toxiproxy stack is up, the toxiproxy resilience module sets REDIS_URL
-    # to its proxy port on collection, so this broker can point at the proxy.
+    # A local test-env run may have no Redis at the broker's URL.
     try:
         client.ping()
     except redis.exceptions.ConnectionError:
@@ -1130,3 +1129,151 @@ def test_snapshot_that_builds_but_disagrees_with_replay_is_not_used():
     )
 
     assert repo.get(campaign.id).to_dict() == full_replay.to_dict()
+
+
+async def _deliver(subscription, cycles: int) -> int:
+    """Run read-then-process cycles of a subscription; return how many messages were delivered."""
+    delivered = 0
+    for _ in range(cycles):
+        batch = await subscription.get_next_batch_of_messages()
+        delivered += len(batch)
+        if batch:
+            await subscription.process_batch(batch)
+    return delivered
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the InlineBroker's DLQ API reads only its native DLQ, not the {stream}:dlq stream subscriptions write",
+)
+@pytest.mark.usefixtures("loyalty_ctx")
+# One case per call, so a Protean fix to one of them alone shows as an XPASS.
+@pytest.mark.parametrize("read", ["dlq_list", "dlq_depth"])
+def test_inline_broker_dlq_api_reads_the_subscription_dlq_stream(monkeypatch, read):
+    """Protean finding (not filed yet): the InlineBroker's DLQ API misses what subscriptions dead-letter.
+
+    Since ADR-0042 a subscription owns dead-lettering: it publishes an exhausted
+    message to `{stream}:dlq`, and the InlineBroker never moves an owned group's
+    message to its own `_dead_letter_queue`. But `dlq_list` on the InlineBroker
+    reads only `_dead_letter_queue`, and it has no `dlq_depth`, so the base
+    class returns 0. `dlq_inspect`, `dlq_replay` and `dlq_purge` read the same
+    `_dead_letter_queue` (read in the code; this pin runs only `dlq_list` and `dlq_depth`).
+    Under the memory env the DLQ API reports an empty DLQ while
+    `loyalty::poison_pill:dlq` holds the message. The Redis broker reads the
+    `{stream}:dlq` stream and reports it.
+    """
+    import asyncio
+
+    from protean import current_domain
+    from protean.adapters.broker.inline import InlineBroker
+    from protean.server.engine import Engine
+    from protean.server.subscription.stream_subscription import StreamSubscription
+    from protean.utils.eventing import Message
+
+    from loyalty.dlq.poison import PoisonEventHandler, PoisonPill
+
+    broker = current_domain.brokers["default"]
+    if not isinstance(broker, InlineBroker):
+        pytest.skip("needs the InlineBroker (run with --protean-env memory)")
+    broker._data_reset()
+    monkeypatch.setattr(broker, "_retry_delay", 0)
+
+    stream = "loyalty::poison_pill"
+    dlq_stream = f"{stream}:dlq"
+    subscription = StreamSubscription(
+        Engine(current_domain, test_mode=True),
+        stream,
+        PoisonEventHandler,
+        blocking_timeout_ms=50,
+        max_retries=1,
+        retry_delay_seconds=0,
+        enable_dlq=True,
+    )
+    asyncio.run(subscription.initialize())
+    pill = PoisonPill.detonate("dlq api probe")
+    broker.publish(stream, Message.from_domain_object(pill._events[0]).to_dict())
+    if asyncio.run(_deliver(subscription, 1)) != 1:
+        pytest.fail("precondition: the subscription received the message")
+    if len(broker._messages.get(dlq_stream, [])) != 1:
+        pytest.fail("precondition: the subscription published the message to the DLQ stream")
+
+    if read == "dlq_list":
+        assert len(broker.dlq_list([dlq_stream])) == 1
+    else:
+        assert broker.dlq_depth(dlq_stream) == 1
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="dlq_replay appends the message to the source stream, so every consumer group reads it again",
+)
+@pytest.mark.usefixtures("payments_ctx")
+def test_dlq_replay_reaches_only_the_failing_consumer_group():
+    """Protean finding (not filed yet): replaying a dead letter redelivers it to every consumer group.
+
+    A `BrokerSubscription` dead-letters to `{stream}:dlq` and records its own
+    group in `_dlq_metadata.consumer_group`. `RedisBroker.dlq_replay` strips
+    that metadata and appends the message to the source stream again, so every
+    group on the stream reads it as a new message, including groups that
+    already handled it. On the shared bus, replaying a payments failure on
+    `ordering::order` would deliver the order event again to every other
+    context subscribed to it: fulfillment, inventory, loyalty, notifications
+    and reviews.
+    """
+    import asyncio
+
+    import redis
+    from protean import current_domain
+    from protean.server.engine import Engine
+    from protean.server.subscription.broker_subscription import BrokerSubscription
+
+    from payments.payment.ordering_subscriber import OrderReturnedSubscriber
+
+    broker = current_domain.brokers["global"]
+    client = getattr(broker, "redis_instance", None)
+    if client is None:
+        pytest.skip("needs the Redis streams broker (run with --protean-env test)")
+    try:
+        client.ping()
+    except redis.exceptions.ConnectionError:
+        pytest.skip("the global broker's Redis is not reachable")
+    broker._data_reset()
+
+    stream = "ordering::order"
+    dlq_stream = f"{stream}:dlq"
+    other_group = "fulfillment.order_subscriber"
+    subscription = BrokerSubscription(
+        Engine(current_domain, test_mode=True),
+        broker,
+        stream,
+        OrderReturnedSubscriber,
+        max_retries=1,
+        retry_delay_seconds=0,
+        enable_dlq=True,
+    )
+    payload = {
+        "data": {"reason": "damaged"},
+        "metadata": {"headers": {"id": "replay-probe-1", "type": "Ordering.OrderReturned.v1"}},
+    }
+    # `_publish` stores the message without calling the subscribers inline, like the outbox processor.
+    original_id = broker._publish(stream, payload)
+    client.xgroup_create(stream, other_group, id="0")
+    client.xreadgroup(other_group, "c1", {stream: ">"}, count=10)
+    client.xack(stream, other_group, original_id)
+
+    if asyncio.run(_deliver(subscription, 1)) != 1:
+        pytest.fail("precondition: the subscription received the message")
+    dead = broker.dlq_list([dlq_stream])
+    if len(dead) != 1:
+        pytest.fail("precondition: the subscription dead-lettered the message")
+
+    if not broker.dlq_replay(dlq_stream, dead[0].dlq_id, target_stream=stream):
+        pytest.fail("precondition: dlq_replay reported success")
+    # A replay that the failing group never sees would leave the other group nothing to read and XPASS.
+    if asyncio.run(_deliver(subscription, 1)) != 1:
+        pytest.fail("precondition: the failing subscription received the replay")
+
+    replayed_to_other = client.xreadgroup(other_group, "c1", {stream: ">"}, count=10)
+    assert replayed_to_other == [], "a group that already handled the message received the replay"

@@ -2,7 +2,8 @@
 
 Protean's `RedisCache.get_ttl()` used to return milliseconds. Under `--protean-env
 test` the loyalty cache is in memory, so this test builds its own Redis cache with
-the `[caches.loyalty]` URI and TTL and writes a leaderboard entry through it, the
+the `[test.caches.loyalty]` URI (the test DB 10, not the dev cache DB 9) and the
+`[caches.loyalty]` TTL, and writes a leaderboard entry through it, the
 same `add()` call the projector makes. `REDIS_CACHE_URL`, then `REDIS_URL`, override
 the URI, so CI's real-stores leg points it at the run's Redis.
 """
