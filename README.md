@@ -191,6 +191,8 @@ sleep 5
 docker compose stop engine-inventory
 ```
 
+`make docker-drain` does this for every running engine container, each replica included, then waits 5 seconds (`DRAIN_WAIT=10` to wait longer). `make docker-down` and `scripts/loadtest-stack.sh` drain this way before they stop the engines. Pressing Ctrl-C on `make docker-dev` does not drain, because `docker compose up` in the foreground stops the containers itself. Run `make docker-drain` from another terminal first.
+
 After SIGTERM the engine waits up to `drain_timeout` (20 seconds, `[server]` in each `domain.toml`) for its tasks to end, then cancels them and closes its connections. The window does not run the rest of a batch (proteanhq/protean#1929). The compose engines set `stop_grace_period: 30s`, so Docker does not kill them inside the window or while they close.
 
 | Context | Health port | Context | Health port |

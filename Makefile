@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas events-catalog docs-generate docs-catalog docs-check doctest ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-loyalty eventstore-verify verify-observatory verify-observatory-skip-seed verify-domain-visualizer verify-domain-visualizer-skip-seed verify-domains idempotency-cleanup outbox-reconcile upgrade-check upgrade-opportunities
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-drain docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas events-catalog docs-generate docs-catalog docs-check doctest ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-loyalty eventstore-verify verify-observatory verify-observatory-skip-seed verify-domain-visualizer verify-domain-visualizer-skip-seed verify-domains idempotency-cleanup outbox-reconcile upgrade-check upgrade-opportunities
 
 # Default target
 help: ## Show this help message
@@ -567,7 +567,11 @@ docker-dev: ## Start full stack in Docker (infra + api + engines)
 docker-dev-scaled: ## Full stack in Docker with scaled engines (3 identity, 2 catalogue, 2 ordering)
 	docker compose up --scale engine-identity=3 --scale engine-catalogue=2 --scale engine-ordering=2
 
-docker-down: ## Stop all Docker services
+docker-drain: ## POST /drainz to every running compose engine, then wait for their batches (DRAIN_WAIT=5)
+	./scripts/drain-compose-engines.sh
+
+docker-down: ## Drain the compose engines, then stop all Docker services
+	./scripts/drain-compose-engines.sh
 	docker compose down
 
 docker-logs: ## View Docker service logs
