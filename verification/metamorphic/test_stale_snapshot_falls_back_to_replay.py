@@ -2,19 +2,21 @@
 
 WHAT THIS CHECKS
     A snapshot is a cache of an aggregate's state at version K. When the
-    aggregate's fields change after the snapshot was written (a field renamed,
-    removed or newly required), the stored dict no longer builds the aggregate.
+    aggregate's fields change after the snapshot was written (for example a
+    field renamed, removed, newly required or narrowed), the stored dict can stop
+    building the aggregate.
     Protean then logs a `snapshot_discarded` warning on the `protean.snapshot`
     logger and rebuilds the aggregate from its whole event stream.
 
-    Each test writes such a stale snapshot straight to PromoCampaign's snapshot
-    stream and checks that:
+    The tests write such a stale snapshot straight to PromoCampaign's snapshot
+    stream and check that:
 
       * the load equals a full replay of the same stream,
       * exactly one `snapshot_discarded` record is logged for that load,
       * a current-version load past `snapshot_threshold` writes a fresh
         snapshot, so the next load logs nothing (the repair),
-      * an `at_version` load never writes one, so each load logs again,
+      * an `at_version` load returns the state at the requested version and
+        never writes a snapshot, so each load logs again,
       * a snapshot that still builds is used, and nothing is logged.
 
     Property: stale snapshot load == full replay.
@@ -68,6 +70,14 @@ def _discards(caplog) -> list[logging.LogRecord]:
     return [r for r in caplog.records if r.name == "protean.snapshot" and r.getMessage() == "snapshot_discarded"]
 
 
+def _assert_one_discard(caplog, identifier: str, field: str) -> None:
+    discarded = _discards(caplog)
+    assert len(discarded) == 1
+    assert discarded[0].aggregate == "PromoCampaign"
+    assert str(discarded[0].aggregate_id) == str(identifier)
+    assert field in discarded[0].reason
+
+
 def _extra_key(data: dict) -> dict:
     return {**data, "legacy_code": "OLD-1"}
 
@@ -83,18 +93,21 @@ def _missing_required_field(data: dict) -> dict:
 
 
 STALE_SHAPES = [
-    pytest.param(_extra_key, id="removed-field"),
-    pytest.param(_renamed_field, id="renamed-field"),
-    pytest.param(_missing_required_field, id="newly-required-field"),
+    pytest.param(_extra_key, "legacy_code", id="removed-field"),
+    pytest.param(_renamed_field, "campaign_name", id="renamed-field"),
+    pytest.param(_missing_required_field, "campaign_code", id="newly-required-field"),
 ]
 
 
-@pytest.mark.parametrize("make_stale", STALE_SHAPES)
+@pytest.mark.parametrize("make_stale, field", STALE_SHAPES)
+# 5 events reach the threshold of 5 exactly. The rewrite after a discard and the
+# rewrite of an absent snapshot share that boundary, so both lengths matter.
+@pytest.mark.parametrize("transitions", [4, 5], ids=["5-events", "6-events"])
 @pytest.mark.usefixtures("loyalty_ctx")
-def test_stale_snapshot_is_discarded_and_rewritten(make_stale, caplog):
+def test_stale_snapshot_is_discarded_and_rewritten(make_stale, field, transitions, caplog):
     from loyalty.campaign.campaign import PromoCampaign
 
-    live = _build_campaign()  # 6 events, past the threshold of 5
+    live = _build_campaign(transitions)
     repo = current_domain.repository_for(PromoCampaign)
     repo.add(live)
     full_replay = repo.get(live.id)
@@ -104,11 +117,8 @@ def test_stale_snapshot_is_discarded_and_rewritten(make_stale, caplog):
 
     with caplog.at_level(logging.WARNING, logger="protean.snapshot"):
         first = repo.get(live.id)
-    discarded = _discards(caplog)
     assert first.to_dict() == expected
-    assert len(discarded) == 1
-    assert discarded[0].aggregate == "PromoCampaign"
-    assert str(discarded[0].aggregate_id) == str(live.id)
+    _assert_one_discard(caplog, live.id, field)
 
     caplog.clear()
     with caplog.at_level(logging.WARNING, logger="protean.snapshot"):
@@ -126,17 +136,24 @@ def test_stale_snapshot_at_version_replays_and_writes_nothing(caplog):
     repo.add(live)
     full_replay = repo.get(live.id)
     head = full_replay._version
-    expected = repo.get(live.id, at_version=head).to_dict()
+    earlier = head - 2
+    # The good snapshot sits at `head`, past `earlier`, so this load is a replay.
+    expected_earlier = repo.get(live.id, at_version=earlier).to_dict()
+    if expected_earlier == full_replay.to_dict():
+        pytest.fail("precondition: the state at `earlier` differs from the head state")
 
-    # The snapshot carries `_version == head`, so the at_version path tries it.
-    _write_snapshot(live.id, _extra_key(full_replay.to_dict()))
+    # The stale snapshot sits at `earlier`, so loads at `earlier` and at `head` both try it.
+    _write_snapshot(live.id, _extra_key(expected_earlier))
 
-    for attempt in (1, 2):
-        caplog.clear()
-        with caplog.at_level(logging.WARNING, logger="protean.snapshot"):
-            loaded = repo.get(live.id, at_version=head)
-        assert loaded.to_dict() == expected, f"load {attempt}"
-        assert len(_discards(caplog)) == 1, f"load {attempt}: a temporal load writes no snapshot"
+    for version, expected in ((earlier, expected_earlier), (head, full_replay.to_dict())):
+        for attempt in (1, 2):
+            caplog.clear()
+            with caplog.at_level(logging.WARNING, logger="protean.snapshot"):
+                loaded = repo.get(live.id, at_version=version)
+            assert loaded._version == version, f"version {version}, load {attempt}"
+            assert loaded.to_dict() == expected, f"version {version}, load {attempt}"
+            # Logging on the second load shows the first one wrote no snapshot.
+            _assert_one_discard(caplog, live.id, "legacy_code")
 
 
 @pytest.mark.usefixtures("loyalty_ctx")
@@ -156,7 +173,8 @@ def test_stale_snapshot_below_threshold_is_discarded_until_rebuilt(caplog):
         with caplog.at_level(logging.WARNING, logger="protean.snapshot"):
             loaded = repo.get(live.id)
         assert loaded.to_dict() == expected, f"load {attempt}"
-        assert len(_discards(caplog)) == 1, f"load {attempt}: below the threshold no snapshot is rewritten"
+        # Below the threshold no snapshot is rewritten, so every load logs.
+        _assert_one_discard(caplog, live.id, "legacy_code")
 
     assert current_domain.create_snapshot(PromoCampaign, live.id) is True
 
@@ -175,12 +193,16 @@ def test_snapshot_that_builds_is_used(caplog):
     repo = current_domain.repository_for(PromoCampaign)
     repo.add(live)
     full_replay = repo.get(live.id)
+    head = full_replay._version
 
     # A name no event ever set proves the load came from this snapshot, not a replay.
     _write_snapshot(live.id, {**full_replay.to_dict(), "name": "FROM-SNAPSHOT"})
 
     with caplog.at_level(logging.WARNING, logger="protean.snapshot"):
         loaded = repo.get(live.id)
+        at_head = repo.get(live.id, at_version=head)
     assert loaded.name == "FROM-SNAPSHOT"
     assert loaded.status == full_replay.status
+    assert at_head.name == "FROM-SNAPSHOT"
+    assert at_head._version == head
     assert _discards(caplog) == []

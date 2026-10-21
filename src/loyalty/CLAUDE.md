@@ -99,11 +99,11 @@ All state changes are applied via `@apply` handlers for event-sourcing replay. W
 snapshot-based reconstruction; `domain.create_snapshot(PromoCampaign, id)` /
 `create_snapshots(PromoCampaign)` create them.
 
-A snapshot that no longer builds (a field renamed, removed or newly required) is discarded with a
+A snapshot that no longer builds (for example a field renamed, removed, newly required or narrowed) is discarded with a
 `snapshot_discarded` warning on the `protean.snapshot` logger, and the campaign loads by full
 replay (`verification/metamorphic/test_stale_snapshot_falls_back_to_replay.py`). A snapshot that
 still builds is used as it is. A field added with a default must not get its value from an
-`@apply` handler, or old snapshots load the default without a warning. Rebuild snapshots
+`@apply` handler, or old snapshots load the default. Rebuild snapshots
 (`protean snapshot create`) after such a change.
 
 The lifecycle is driven through CQRS commands (`campaign/management.py`), projected into the

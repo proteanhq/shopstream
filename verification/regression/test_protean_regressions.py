@@ -1105,8 +1105,7 @@ def test_snapshot_that_builds_but_disagrees_with_replay_is_not_used():
     added still builds, so the field loads its default. When an `@apply`
     handler sets that field, replay gives a different value. PromoCampaign's
     `status` defaults to "draft" and is set by its handlers: a snapshot without
-    `status` loads "draft" where replay gives "active", and no
-    `snapshot_discarded` warning is logged.
+    `status` loads "draft" where replay gives "active".
     """
     from protean import current_domain
 
