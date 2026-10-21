@@ -69,6 +69,8 @@ Commands are processed synchronously via FastAPI. Internal events flow asynchron
 | 9 | Loyalty cache (`[caches.loyalty]`, PointsLeaderboard projection) |
 | 15 | External bus (shared, cross-domain published events) |
 
+This map is for the local run. In the Docker Compose stack all nine internal brokers share DB 0 (`REDIS_URL`); DBs 9 and 15 stay as listed.
+
 ## Project Structure
 
 ```
