@@ -1271,9 +1271,9 @@ def test_dlq_replay_reaches_only_the_failing_consumer_group():
 
     if not broker.dlq_replay(dlq_stream, dead[0].dlq_id, target_stream=stream):
         pytest.fail("precondition: dlq_replay reported success")
-    # A replay that reached no stream would leave the other group nothing to read and XPASS.
-    if client.xlen(stream) != 2:
-        pytest.fail("precondition: the replay appended the message to the source stream")
+    # A replay that the failing group never sees would leave the other group nothing to read and XPASS.
+    if asyncio.run(_deliver(subscription, 1)) != 1:
+        pytest.fail("precondition: the failing subscription received the replay")
 
     replayed_to_other = client.xreadgroup(other_group, "c1", {stream: ">"}, count=10)
     assert replayed_to_other == [], "a group that already handled the message received the replay"
