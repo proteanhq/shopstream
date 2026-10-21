@@ -244,6 +244,8 @@ Test and dev use separate databases so tests never destroy dev data. Memory mode
 
 Every `domain.toml` sets `default_subscription_profile = "shopstream"`. That custom profile (`[server.profiles.shopstream]`) inherits Protean's `production` profile (100 messages a tick, 3 attempts per message before it goes to the dead-letter queue, a circuit breaker that opens after 10 failures for 60 seconds) and sets `retention_maxlen = 50000`. Protean trims a stream with one consumer group to the newest 50000 entries. A stream with two or more groups ignores the cap and is trimmed by group progress, which also deletes entries a group failed and has not acknowledged (a Protean bug, pinned in `verification/regression/`). A `[server.subscriptions.<Handler>]` table overrides it for one handler: notifications gives `NotificationDispatcher` a breaker that opens after 5 failures for 30 seconds. Broker subscribers (`@domain.subscriber`) do not use profiles.
 
+Every `domain.toml` also sets `[server] drain_timeout = 20`: after SIGTERM the engine waits up to 20 seconds for its tasks to end, then cancels them. That is 10 seconds under the 30 seconds after which the `--workers` supervisor kills a worker. The window does not run messages left in a batch, so drain an engine with `POST /drainz` and let its batch finish before you stop it. README.md "Draining and stopping an engine" says why (proteanhq/protean#1929).
+
 ## Common Commands
 
 Run `make help` to list every target with a one-line description. These are the ones to know without looking:

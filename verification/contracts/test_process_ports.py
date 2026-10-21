@@ -15,7 +15,12 @@ WHAT THIS CHECKS
     - no two context ranges overlap;
     - no `make engine-*-scaled` target starts more workers than its range holds;
     - each compose engine sets `PROTEAN_HEALTH_HOST` to 0.0.0.0, and its
-      healthcheck probes its context's base port.
+      healthcheck probes its context's base port;
+    - each compose engine's `stop_grace_period` is at least 5 seconds longer
+      than its context's `[server] drain_timeout`, so `docker compose stop` does
+      not send SIGKILL while the engine waits or closes its connections;
+    - each context's `drain_timeout` is under the 30 seconds after which the
+      `--workers` supervisor kills a worker.
 
     Protean walks up to 100 ports when the base is taken, so the ten-port range
     is a ShopStream convention, not a limit Protean enforces.
@@ -44,6 +49,10 @@ WORKERS_PER_CONTEXT = 10
 # Protean's default for `protean observatory`, used when the target passes no --port.
 OBSERVATORY_DEFAULT_PORT = 9000
 HOST_TEMPLATE = "${PROTEAN_HEALTH_HOST|127.0.0.1}"
+# After the drain window the engine still closes its databases and brokers; Docker must not SIGKILL it then.
+MIN_CLOSE_SECONDS = 5
+# Protean's `--workers` supervisor kills a worker that has not stopped 30 seconds after SIGTERM.
+SUPERVISOR_KILL_SECONDS = 30
 
 
 def _read(*parts: str) -> str:
@@ -65,7 +74,8 @@ def _compose_services() -> dict[str, str]:
 
 
 MAKEFILE = _read("Makefile")
-HEALTH = {context: tomllib.loads(_read("src", context, "domain.toml"))["server"]["health"] for context in CONTEXTS}
+SERVER = {context: tomllib.loads(_read("src", context, "domain.toml"))["server"] for context in CONTEXTS}
+HEALTH = {context: server["health"] for context, server in SERVER.items()}
 RANGES = {context: range(h["port"], h["port"] + WORKERS_PER_CONTEXT) for context, h in HEALTH.items()}
 
 
@@ -133,3 +143,21 @@ def test_compose_engines_expose_and_probe_their_health_port():
         r"^x-engine-env:.*\n(?:  .*\n)*  PROTEAN_HEALTH_HOST: 0\.0\.0\.0$", _read("docker-compose.yml"), re.MULTILINE
     )
     assert probed == {context: h["port"] for context, h in HEALTH.items()}
+
+
+def test_compose_engines_outlast_their_drain_window():
+    grace = re.search(
+        r"^x-engine-stop-grace-period: &engine-stop-grace-period (\d+)s$", _read("docker-compose.yml"), re.MULTILINE
+    )
+    assert grace, "docker-compose.yml no longer defines the engine stop grace period"
+
+    services = _compose_services()
+    for context in CONTEXTS:
+        block = services[f"engine-{context}"]
+        assert "    stop_grace_period: *engine-stop-grace-period\n" in block, f"engine-{context} would get Docker's 10s"
+        assert int(grace.group(1)) >= SERVER[context]["drain_timeout"] + MIN_CLOSE_SECONDS, context
+
+
+def test_drain_window_fits_under_the_supervisor_kill_timeout():
+    for context, server in SERVER.items():
+        assert server["drain_timeout"] < SUPERVISOR_KILL_SECONDS, context

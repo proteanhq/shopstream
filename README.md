@@ -173,6 +173,40 @@ make engine-ordering
 # … one per domain: engine-<domain>
 ```
 
+#### Draining and stopping an engine
+
+Drain an engine before you stop it. `POST /drainz` on its health port stops every subscription from reading new messages and keeps the outbox publishing. A subscription finishes the batch it already read. `/readyz` then answers 503 and `/healthz` stays 200. The engine keeps running until it gets SIGTERM, and there is no way to undo a drain. The reply carries the worker's pid:
+
+```bash
+curl -X POST http://127.0.0.1:8130/drainz   # {"status": "draining", "pid": 12345}
+```
+
+The reply comes back at once, before the batch in hand is done, and nothing reports when it is. Wait for the engine log to go quiet before you send SIGTERM. A batch is at most 100 messages, so a few seconds is usually enough.
+
+On SIGTERM, Protean does not run any message left in a batch. It marks each one as failed, and the message stays pending under a consumer name that no restarted engine reads again (proteanhq/protean#1929). Draining first avoids this for messages that succeed. A message that failed and is waiting for its retry is still left behind. `docker compose stop` sends SIGTERM straight away, so drain the compose engines first too, from inside the container (add `--index N` for each replica of a scaled service):
+
+```bash
+docker compose exec engine-inventory curl -fsS -X POST http://127.0.0.1:8130/drainz
+sleep 5
+docker compose stop engine-inventory
+```
+
+After SIGTERM the engine waits up to `drain_timeout` (20 seconds, `[server]` in each `domain.toml`) for its tasks to end, then cancels them and closes its connections. The window does not run the rest of a batch (proteanhq/protean#1929). The compose engines set `stop_grace_period: 30s`, so Docker does not kill them inside the window or while they close.
+
+| Context | Health port | Context | Health port |
+|---|---|---|---|
+| identity | 8100 | fulfillment | 8150 |
+| catalogue | 8110 | reviews | 8160 |
+| ordering | 8120 | notifications | 8170 |
+| inventory | 8130 | loyalty | 8180 |
+| payments | 8140 | | |
+
+A `--workers N` engine gives each worker the next free port above the base, and `/drainz` drains only the worker that answers. POST to each worker's port to drain the whole group. Six contexts have a `make engine-<context>-scaled` target that starts four workers: identity, catalogue, ordering, inventory, payments and fulfillment.
+
+`/drainz` has no authentication. Anyone who can reach the port can take the engine out of service, so the health server binds `127.0.0.1` unless `PROTEAN_HEALTH_HOST` says otherwise. The compose engines bind `0.0.0.0` inside the compose network and publish no health port.
+
+`make verify-drain` checks the single-engine case against a running API (`make api`). The script starts and stops its own Inventory engine. It drains the engine under load, stops it after the load ends, and restarts it. It then checks that InventoryLevel reaches the totals it counted, that no Inventory consumer group has a pending entry, and that no message was dead-lettered. It does not cover compose or `--workers` engines.
+
 ### 4. Observatory
 
 ```bash
