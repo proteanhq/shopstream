@@ -18,8 +18,8 @@ WHAT THIS CHECKS
 
     The outbox is on in both modes, so the sync run also leaves its events as
     pending outbox rows. The test marks them published before the async run.
-    Otherwise the drain publishes them and the projectors see the sync item's
-    events twice.
+    Otherwise the drain publishes them, and every consumer that is not
+    idempotent (EventAudit, for one) sees the sync item's events twice.
 
 KNOWN FAILURE: PROTEAN PUBLISHES ONE AGGREGATE'S EVENTS OUT OF ORDER
     On Postgres the outbox claims rows by priority alone, so rows with the same
@@ -123,6 +123,12 @@ def _mark_published(inventory, item_id) -> int:
     return len(rows)
 
 
+def _audit_count(inventory, item_id) -> int:
+    from inventory.projections.event_audit import EventAudit
+
+    return len(inventory.repository_for(EventAudit).query.filter(inventory_item_id=item_id).all().items)
+
+
 def _level_view(inventory, item_id) -> dict | None:
     from inventory.projections.inventory_level import InventoryLevel
 
@@ -163,9 +169,7 @@ def test_sync_and_async_yield_the_same_projection(inventory_domain):
     inv.config["event_processing"] = "sync"
     sync_item = _run_workload(inv, **inputs)
     sync_view = _level_view(inv, sync_item)
-    # The outbox is on in sync mode too, so the sync path's events also sit in
-    # the outbox. Left pending, the async drain would publish them and every
-    # projector would see the sync item's events a second time.
+    sync_audit_rows = _audit_count(inv, sync_item)
     assert _mark_published(inv, sync_item) > 0, "sync path wrote no outbox rows to keep out of the drain"
 
     # Path 2 — async: events go to the outbox; drain the engine to project them.
@@ -175,8 +179,10 @@ def test_sync_and_async_yield_the_same_projection(inventory_domain):
     async_view = _level_view(inv, async_item)
 
     assert sync_view is not None, "sync path did not project inline"
-    assert sync_view["reserved"] == 3 and sync_view["available"] == 17
-    assert _level_view(inv, sync_item) == sync_view, "the async drain changed the sync item's row"
+    assert (sync_view["reserved"], sync_view["available"]) == (3, 17)
+    # EventAudit adds a row per delivery, so a replay of the sync item's events
+    # would raise this count.
+    assert _audit_count(inv, sync_item) == sync_audit_rows, "the async drain replayed the sync item's events"
     assert async_view is not None, "async path did not converge after draining"
     # Same inputs, same events, same fold -> identical read model (bar the row id).
     assert sync_view == async_view
