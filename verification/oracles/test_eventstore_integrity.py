@@ -52,14 +52,14 @@ WHY MESSAGE-DB ONLY
     and the SQL corruptions need the real table. Skipped there.
 
 SHARED STORE
-    No context has a `[test.event_store]` overlay, so the test env and the dev
-    env share one `message_store` database. Every test resets it at the start
-    and in a `finally`, which also wipes dev events (as the crash-window oracle
-    does). A dev engine writing to the same store during the run would break the
-    exact counts; stop it first.
+    The test env's `[test.event_store]` overlay points all nine contexts at
+    `message_store_test`, apart from the dev stack's `message_store`. Every test
+    resets it at the start and in a `finally`, as the crash-window oracle does.
+    An engine started with `PROTEAN_ENV=test` and writing during the run would
+    break the exact counts; stop it first.
 
 RUN:
-    make docker-up && make setup-db      # once
+    make docker-up && make setup-db && make setup-test-event-store      # once
     .venv/bin/python -m pytest \
         verification/oracles/test_eventstore_integrity.py --protean-env test -q
 """
@@ -486,7 +486,7 @@ def test_cli_exits_2_with_an_error_envelope_when_message_db_is_unreachable():
         closed_port = sock.getsockname()[1]
 
     code, envelope = _run_cli(
-        MESSAGE_DB_URL=f"postgresql://message_store:message_store@127.0.0.1:{closed_port}/message_store"
+        TEST_MESSAGE_DB_URL=f"postgresql://message_store:message_store@127.0.0.1:{closed_port}/message_store_test"
     )
 
     assert code == 2

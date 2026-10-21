@@ -244,7 +244,7 @@ coverage.
 
 `make eventstore-verify` checks the shared Message DB's integrity. It is
 read-only, so stop the engines first. It uses the dev env unless `PROTEAN_ENV`
-is set.
+is set, and checks `message_store_test` under `PROTEAN_ENV=test`.
 
 After restoring the shared Message DB from a backup, follow
 [the restore runbook](docs/operations/restore.md). You run `make eventstore-verify`,
@@ -252,7 +252,15 @@ then `protean recover --verify-checkpoints` and `make outbox-reconcile`. The pag
 also lists the state none of them fully check: Redis consumer groups, outbox rows,
 read models and aggregate tables.
 
-Tests use `PROTEAN_ENV=test`, which keeps `event_processing = "sync"` so projectors fire during UoW commit for deterministic assertions. Tests run against separate `_test` databases so they never destroy dev data (see [Configuration](#configuration)).
+Tests use `PROTEAN_ENV=test`, which keeps `event_processing = "sync"` so projectors fire during UoW commit for deterministic assertions. Tests run against separate `_test` databases so they never destroy dev data (see [Configuration](#configuration)). That includes the event store: under `test` all nine contexts use the `message_store_test` database in the Message DB container, not the dev stack's `message_store`. Protean's test fixtures truncate the event store between tests, so sharing it would wipe the dev events.
+
+The compose file creates `message_store_test` when Message DB starts on an empty `message-db-data` volume. If your Message DB container was started before that, run this once:
+
+```bash
+make setup-test-event-store
+```
+
+It does nothing when the database already exists. Two checks run under the dev env on purpose and still empty the dev event store: `make sync-async-verify` and `make toxiproxy-verify`.
 
 ## Load Testing
 
@@ -336,7 +344,7 @@ Protean applies config sections from `domain.toml` based on `PROTEAN_ENV`:
 | `memory` | in-memory (no Docker) | sync | During UoW commit |
 | `production` | `<domain>` | async | Via Engine workers |
 
-Tests and dev use separate databases so running the test suite never destroys development data. The same holds for Redis: under `test` every internal broker uses DB 10 and the shared bus uses DB 14, unless `REDIS_URL` or `REDIS_EXTERNAL_URL` is set. A test resets its broker by flushing the whole DB, so do not export the dev values below when you run the tests.
+Tests and dev use separate databases so running the test suite never destroys development data. The same holds for the event store (`message_store_test`, set by `TEST_MESSAGE_DB_URL`) and for Redis: under `test` every internal broker uses DB 10 and the shared bus uses DB 14, unless `REDIS_URL` or `REDIS_EXTERNAL_URL` is set. A test resets its broker by flushing the whole DB, so do not export the dev values below when you run the tests.
 
 ### Environment Variables
 
@@ -357,6 +365,7 @@ CATALOGUE_DATABASE_URL=postgresql://postgres:postgres@localhost:15432/catalogue_
 TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:15432/identity_test
 
 MESSAGE_DB_URL=postgresql://message_store:message_store@localhost:15433/message_store
+TEST_MESSAGE_DB_URL=postgresql://message_store:message_store@localhost:15433/message_store_test
 REDIS_URL=redis://127.0.0.1:16379/0
 REDIS_EXTERNAL_URL=redis://127.0.0.1:16379/15
 REDIS_CACHE_URL=redis://127.0.0.1:16379/9

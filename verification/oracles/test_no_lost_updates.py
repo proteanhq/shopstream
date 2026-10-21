@@ -33,7 +33,7 @@ WHY REAL POSTGRES + MESSAGE-DB, MULTI-PROCESS
     processes (not threads) so the database is the only synchronization point.
 
 RUN:
-    make docker-up && make setup-db      # once
+    make docker-up && make setup-db && make setup-test-event-store      # once
     .venv/bin/python -m pytest \
         verification/oracles/test_no_lost_updates.py --protean-env test -q
 """

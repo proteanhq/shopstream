@@ -56,9 +56,14 @@ services:
       POSTGRES_PASSWORD: message_store
       MESSAGE_STORE_POSTGRES_PASSWORD: message_store
     volumes:
-      - message-db-data:/var/lib/postgresql/data
+      # The image sets PGDATA=/data, not the postgres default.
+      - message-db-data:/data
+      # Runs after the image's own install script, when the volume is empty.
+      - ./docker/message-db/create-test-database.sh:/docker-entrypoint-initdb.d/test-database.sh:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U message_store"]
+      # Over TCP: the server that runs the init scripts listens only on the socket,
+      # so this passes once both databases are installed.
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U message_store"]
       interval: 10s
       timeout: 5s
       retries: 5

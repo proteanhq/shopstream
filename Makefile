@@ -536,6 +536,10 @@ truncate-db: ## Delete all data from all tables (preserves schema)
 	uv run protean db truncate --domain notifications.domain --yes
 	uv run protean db truncate --domain loyalty.domain --yes
 
+.PHONY: setup-test-event-store
+setup-test-event-store: ## Create message_store_test, the tests' own Message DB database, if it is missing (needs make docker-up)
+	docker compose exec -T message-db bash -s < docker/message-db/create-test-database.sh
+
 idempotency-cleanup: ## Delete processed-message markers older than each domain's retention window (run from cron)
 	@failed=0; \
 	for d in identity catalogue ordering inventory payments fulfillment notifications loyalty; do \
@@ -649,11 +653,11 @@ toxiproxy-up: ## Start Toxiproxy (API :8474) and create the Redis proxy on :2637
 toxiproxy-down: ## Stop and remove the Toxiproxy container
 	@docker rm -f shopstream-toxiproxy >/dev/null 2>&1 && echo "toxiproxy removed" || true
 
-toxiproxy-verify: ## Run the T2.6 convergence check (needs Docker + toxiproxy-up)
+toxiproxy-verify: ## Run the T2.6 convergence check (needs Docker + toxiproxy-up; runs under the dev env and empties the dev event store)
 	PROTEAN_ENV=development PYTHONPATH=src .venv/bin/python -m pytest \
 		verification/resilience/test_toxiproxy_convergence.py -q
 
-sync-async-verify: ## Run the sync==async read-model equivalence check (needs Docker, base/async env)
+sync-async-verify: ## Run the sync==async read-model equivalence check (needs Docker, base/async env; empties the dev event store)
 	PROTEAN_ENV=development PYTHONPATH=src .venv/bin/python -m pytest \
 		verification/metamorphic/test_sync_equals_async.py -q
 

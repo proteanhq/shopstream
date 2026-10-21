@@ -92,6 +92,11 @@ event_processing = "sync"
 [test.databases.default]
 database_uri = "${TEST_FULFILLMENT_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/fulfillment_test}"
 
+# Tests get their own Message DB database. Protean's test fixtures truncate the
+# event store between tests, which would wipe the dev stack's events.
+[test.event_store]
+database_uri = "${TEST_MESSAGE_DB_URL|postgresql://message_store:message_store@localhost:15433/message_store_test}"
+
 # Test runs get their own Redis DBs (10 internal, 14 shared bus), away from the dev
 # DBs, so a test that writes to or flushes a stream never touches a dev engine's data.
 # CI sets REDIS_URL and REDIS_EXTERNAL_URL, which take precedence.

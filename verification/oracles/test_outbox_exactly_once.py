@@ -31,7 +31,7 @@ WHY THE DUPLICATE CHECK IS POSTGRES-ONLY
     shape check is adapter-independent and runs everywhere.
 
 RUN:
-    make docker-up && make setup-db      # once
+    make docker-up && make setup-db && make setup-test-event-store      # once
     .venv/bin/python -m pytest \
         verification/oracles/test_outbox_exactly_once.py --protean-env test -q
 """

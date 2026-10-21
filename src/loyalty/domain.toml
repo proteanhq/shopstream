@@ -121,6 +121,11 @@ event_processing = "sync"
 [test.databases.default]
 database_uri = "${TEST_LOYALTY_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/loyalty_test}"
 
+# Tests get their own Message DB database. Protean's test fixtures truncate the
+# event store between tests, which would wipe the dev stack's events.
+[test.event_store]
+database_uri = "${TEST_MESSAGE_DB_URL|postgresql://message_store:message_store@localhost:15433/message_store_test}"
+
 # Separate SQLite file for tests so runs never touch the dev reporting store.
 [test.databases.reporting]
 database_uri = "${TEST_LOYALTY_REPORTING_URL|sqlite:////tmp/loyalty_reporting_test.db}"

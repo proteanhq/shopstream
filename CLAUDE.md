@@ -240,7 +240,7 @@ Controlled by `PROTEAN_ENV` and `domain.toml` overlays:
 | `memory` | in-memory | sync |
 | `production` | `<domain>` | async |
 
-Test and dev use separate databases so tests never destroy dev data. Memory mode uses in-memory adapters (no Docker needed) for fast feedback.
+Test and dev use separate databases so tests never destroy dev data. That covers the event store too: `[test.event_store]` in every `domain.toml` points at `message_store_test` (`TEST_MESSAGE_DB_URL`), because Protean's test fixtures truncate the event store between tests. The compose file creates it when Message DB starts on an empty volume. For a container started before that, run `make setup-test-event-store` once. `make sync-async-verify` and `make toxiproxy-verify` run under the dev env and still empty the dev event store. Memory mode uses in-memory adapters (no Docker needed) for fast feedback.
 
 Every `domain.toml` sets `default_subscription_profile = "shopstream"`. That custom profile (`[server.profiles.shopstream]`) inherits Protean's `production` profile (100 messages a tick, 3 attempts per message before it goes to the dead-letter queue, a circuit breaker that opens after 10 failures for 60 seconds) and sets `retention_maxlen = 50000`. Protean trims a stream with one consumer group to the newest 50000 entries. A stream with two or more groups ignores the cap and is trimmed by group progress, which also deletes entries a group failed and has not acknowledged (a Protean bug, pinned in `verification/regression/`). A `[server.subscriptions.<Handler>]` table overrides it for one handler: notifications gives `NotificationDispatcher` a breaker that opens after 5 failures for 30 seconds. Broker subscribers (`@domain.subscriber`) do not use profiles.
 

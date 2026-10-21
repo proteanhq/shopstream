@@ -136,6 +136,12 @@ jobs:
         image: ethangarofolo/message-db:1.2.6
         ports:
           - 5433:5432
+        # Over TCP, so the job waits for the image's own install to finish.
+        options: >-
+          --health-cmd "pg_isready -h 127.0.0.1 -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     # Override domain.toml defaults (ports 15432/15433/16379 for local Docker)
     # with CI service ports (5432/5433/6379).
@@ -159,6 +165,7 @@ jobs:
       LOYALTY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/loyalty_local
       TEST_LOYALTY_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/loyalty_test
       MESSAGE_DB_URL: postgresql://message_store:message_store@localhost:5433/message_store
+      TEST_MESSAGE_DB_URL: postgresql://message_store:message_store@localhost:5433/message_store_test
       REDIS_URL: redis://127.0.0.1:6379/0
       REDIS_EXTERNAL_URL: redis://127.0.0.1:6379/15
 
@@ -202,6 +209,11 @@ jobs:
 
       - name: Set up loyalty database
         run: bash src/loyalty/create_db.sh
+
+      - name: Set up the tests' Message DB database
+        # The same script the compose file runs at first start; it installs
+        # message_store_test beside the image's message_store.
+        run: docker exec -i ${{ job.services.message-db.id }} bash -s < docker/message-db/create-test-database.sh
 
       - name: Run linting
         run: uv run ruff check src/ tests/
