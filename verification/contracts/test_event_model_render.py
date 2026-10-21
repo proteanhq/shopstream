@@ -9,8 +9,9 @@ They also pin `protean ir diff --format=event-model`, which `make ir-diff-model`
 it must name a dropped event and exit with the same code as `--format=text`, so the
 slice view can't hide a change that the text view reports.
 
-The last test runs `make docs-check` on a copy of the tree with one stale
-`event-model.md`, so the gate itself is checked, not only the render it calls.
+The last test runs `make docs-check` on a copy of the tree with two stale
+`event-model.md` files (one edited, one without its final newline), so the gate itself
+is checked, not only the render it calls.
 """
 
 import copy
@@ -229,6 +230,20 @@ def test_ir_diff_as_event_model_reports_no_change_on_identical_files():
     assert "No model changes." in result.stdout
 
 
+def test_every_committed_diagram_doc_ends_with_a_newline():
+    # Protean writes these with no final newline. The Makefile targets add one, as the
+    # end-of-file-fixer hook would, and docs-check compares event-model.md with it added.
+    docs = sorted(
+        path
+        for name in ("clusters", "event-flows", "handler-wiring", "event-model")
+        for path in (REPO / "docs").glob(f"*/{name}.md")
+    )
+    assert len(docs) == 36, docs
+
+    missing = [str(path.relative_to(REPO)) for path in docs if not path.read_bytes().endswith(b"\n")]
+    assert not missing, missing
+
+
 MAKE = shutil.which("make")
 
 
@@ -243,6 +258,10 @@ def test_docs_check_fails_on_a_stale_event_model_and_passes_the_rest(tmp_path):
     shutil.copytree(REPO / ".protean", tmp_path / ".protean")
     stale = tmp_path / "docs" / "reviews" / "event-model.md"
     stale.write_text(stale.read_text() + "\nAn edit the render does not make.\n")
+    # The gate adds the final newline to its render before comparing, so a committed
+    # file without one is stale too.
+    no_newline = tmp_path / "docs" / "payments" / "event-model.md"
+    no_newline.write_text(no_newline.read_text().rstrip("\n"))
 
     env = {**os.environ, "UV_NO_SYNC": "1"}
     result = subprocess.run([MAKE, "-s", "docs-check"], cwd=tmp_path, env=env, capture_output=True, text=True)
@@ -250,4 +269,7 @@ def test_docs_check_fails_on_a_stale_event_model_and_passes_the_rest(tmp_path):
     output = result.stdout + result.stderr
     assert result.returncode != 0, output
     problems = [line for line in output.splitlines() if line.startswith(("STALE:", "FAILED:"))]
-    assert problems == ["STALE: docs/reviews/event-model.md: run 'make docs-event-model' and commit"], output
+    assert problems == [
+        "STALE: docs/payments/event-model.md: run 'make docs-event-model' and commit",
+        "STALE: docs/reviews/event-model.md: run 'make docs-event-model' and commit",
+    ], output

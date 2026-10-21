@@ -6,12 +6,8 @@ repos:
     hooks:
       - id: trailing-whitespace
         exclude: ^uv\.lock$
-      # Protean writes these diagram docs with no final newline. `make docs-check` compares
-      # event-model.md against a fresh render, so an added newline would fail it. The other
-      # three are not checked, but an added newline leaves the tree dirty after every
-      # `make docs-generate`.
       - id: end-of-file-fixer
-        exclude: ^(uv\.lock|docs/[^/]+/(clusters|event-flows|handler-wiring|event-model)\.md)$
+        exclude: ^uv\.lock$
       - id: check-yaml
       - id: check-added-large-files
         exclude: ^uv\.lock$

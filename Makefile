@@ -352,22 +352,30 @@ events-catalog: ## List every event with its version, upcasters and consumers, r
 	done; \
 	exit $$fail
 
+# Append a newline to the file $(1) unless it already ends with one. Protean writes the
+# diagram and event model docs with no final newline, and the end-of-file-fixer hook adds
+# one, so every render goes through this to match what gets committed.
+define add_final_newline
+{ [ -z "$$(tail -c1 "$(1)")" ] || echo >> "$(1)"; }
+endef
+
 # Render context $$d's event model to the path $(1). Used inside a `for d in ...` loop.
 # --annotations is passed only when the context has its own notes file: an explicit
 # path that does not exist aborts the render, and the default .protean/annotations.toml
-# would be one file shared by every context.
+# would be one file shared by every context. The newline is added only after a render
+# that succeeds, so the render's exit code stays the exit code of the whole step.
 define render_event_model
-PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=event-model \
+{ PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=event-model \
 	$$(if [ -f .protean/$$d/annotations.toml ]; then echo --annotations=.protean/$$d/annotations.toml; fi) \
-	--output=$(1)
+	--output="$(1)" && $(call add_final_newline,$(1)); }
 endef
 
 docs-generate: ## Generate domain documentation (diagrams, event catalog and event model)
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		echo "Generating docs for $$d..."; \
-		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=clusters --output=docs/$$d/clusters.md || exit 1; \
-		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=events --output=docs/$$d/event-flows.md || exit 1; \
-		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=handlers --output=docs/$$d/handler-wiring.md || exit 1; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=clusters --output=docs/$$d/clusters.md && $(call add_final_newline,docs/$$d/clusters.md) || exit 1; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=events --output=docs/$$d/event-flows.md && $(call add_final_newline,docs/$$d/event-flows.md) || exit 1; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=handlers --output=docs/$$d/handler-wiring.md && $(call add_final_newline,docs/$$d/handler-wiring.md) || exit 1; \
 		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=catalog --output=docs/$$d/catalog.md || exit 1; \
 		$(call render_event_model,docs/$$d/event-model.md) || exit 1; \
 	done

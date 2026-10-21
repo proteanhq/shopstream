@@ -611,3 +611,37 @@ def test_annotations_outside_what_the_loader_reads_are_reported(tmp_path, conten
     result = _invoke_event_model("--ir", _LOYALTY_IR, "--annotations", str(notes))
 
     assert result.exit_code != 0 or lost in click.unstyle(result.output), result.output
+
+
+@pytest.mark.protean_bug(
+    issue=None,
+    state="open",
+    bug=(
+        "`protean docs generate --output` writes the `event-model`, `clusters`, `events` and `handlers` docs with no "
+        "final newline, while `catalog` ends with one. The end-of-file-fixer pre-commit hook adds the newline, and a "
+        "drift check that compares the committed file with a fresh render then fails."
+    ),
+)
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="the diagram generators write no final newline")
+@pytest.mark.parametrize("doc_type", ["event-model", "clusters", "events", "handlers"])
+def test_generated_diagram_doc_ends_with_a_newline(tmp_path, doc_type):
+    """Protean finding (not filed yet): generated diagram docs have no final newline.
+
+    `make docs-generate`, `make docs-event-model` and `make docs-check` add the newline
+    after each render, so the committed files match what the hook leaves. If Protean
+    starts writing the newline, those targets keep passing, and this pin is what turns
+    red to say the step can go.
+    """
+    import protean.cli
+    from typer.testing import CliRunner
+
+    output = tmp_path / f"{doc_type}.md"
+    args = ["docs", "generate", f"--type={doc_type}", "--ir", _LOYALTY_IR, f"--output={output}"]
+    if doc_type == "event-model":
+        args += ["--annotations", _no_notes(tmp_path)]
+
+    result = CliRunner().invoke(protean.cli.app, args)
+
+    if result.exit_code != 0 or not output.exists() or not output.read_text().strip():
+        pytest.fail(f"precondition: the {doc_type} render wrote a file\n{result.output}")
+    assert output.read_text().endswith("\n"), repr(output.read_text()[-40:])
