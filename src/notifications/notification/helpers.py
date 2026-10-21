@@ -17,8 +17,21 @@ from notifications.notification.notification import (
 )
 from notifications.preference.preference import NotificationPreference
 from notifications.templates import get_template
+from shared.money import parse_money
 
 logger = structlog.get_logger(__name__)
+
+
+def two_places(amount: float | str | None) -> str:
+    """Render a payload amount as ``49.99``, or ``""`` when it is missing.
+
+    Payment and order events carry money as a number in their older versions
+    and as a 4-place string in the newer ones. Notification text shows 2
+    places either way.
+    """
+    if amount is None or amount == "":
+        return ""
+    return f"{parse_money(amount):.2f}"
 
 
 def create_notifications_for_customer(

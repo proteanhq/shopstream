@@ -3,7 +3,7 @@ package payments.payment.payment;
 import "google/protobuf/timestamp.proto";
 
 message Refund {
-  double amount = 1;
+  string amount = 1;
   optional string gateway_refund_id = 2;
   string id = 3;
   optional string payment = 4;

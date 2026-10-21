@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:c7dde43b6cb47ee716023ebe34acce464b4cbf7c64115cb91fac875a68a1b70d",
+  "checksum": "sha256:e131154d8b4173863c5068c0a3d43019226f1aab3ef988000d6a76d899cdaa02",
   "clusters": {
     "inventory.stock.stock.InventoryItem": {
       "aggregate": {
@@ -3081,14 +3081,18 @@
             "type": "String"
           },
           "total_value": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "unit_cost": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "updated_at": {
             "kind": "standard",
@@ -3510,9 +3514,11 @@
             "type": "Integer"
           },
           "total_shrinkage_value": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "total_written_off": {
             "default": 0,

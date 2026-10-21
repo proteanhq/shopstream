@@ -3,8 +3,10 @@
 from decimal import Decimal
 
 import pytest
+from pydantic import BaseModel
 
-from shared.money import has_more_than_four_places, to_money
+from shared.api.money import MoneyOut
+from shared.money import has_more_than_four_places, money_fields_as_text, parse_money, to_money
 
 
 class TestToMoney:
@@ -93,3 +95,85 @@ class TestHasMoreThanFourPlaces:
     )
     def test_a_fifth_decimal_place_is_caught(self, value):
         assert has_more_than_four_places(value) is True
+
+    @pytest.mark.parametrize(
+        "value",
+        [Decimal("49.99"), Decimal("49.9900"), Decimal("0.30000000000000004"), Decimal("0.0500000000001819")],
+    )
+    def test_decimals_with_four_places_or_float_error_pass(self, value):
+        assert has_more_than_four_places(value) is False
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            Decimal("10.00005"),
+            # Within 1e-7 of a 4-place amount, but written with too few digits to be float error.
+            Decimal("49.99000001"),
+            Decimal("0.00000001"),
+            # Above about 3e10, 4 units in the last place of a float exceed 1e-5.
+            Decimal("123456789012.12345"),
+            Decimal("123456789012.00001"),
+            # 15 or more digits, but not the digits of any float.
+            Decimal("0.300000000000000041"),
+        ],
+    )
+    def test_a_decimal_with_a_fifth_place_is_caught(self, value):
+        assert has_more_than_four_places(value) is True
+
+    @pytest.mark.parametrize("value", [Decimal("1e999999"), Decimal("-9.99999e999999"), Decimal("0E-10")])
+    def test_a_decimal_at_the_edge_of_the_exponent_range_has_no_fifth_place(self, value):
+        assert has_more_than_four_places(value) is False
+
+    @pytest.mark.parametrize("value", [49.99000001, 1e-9, 123456789012.12345])
+    def test_a_short_or_large_float_with_a_fifth_place_is_caught(self, value):
+        assert has_more_than_four_places(value) is True
+
+
+class TestParseMoney:
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("49.9900", "49.9900"),
+            ("49.99", "49.9900"),
+            (" 49.99 ", "49.9900"),
+            (49.99, "49.9900"),
+            (0.1 + 0.2, "0.3000"),
+            (50, "50.0000"),
+            (Decimal("10.00005"), "10.0000"),
+            (None, "0.0000"),
+        ],
+    )
+    def test_numbers_and_numeric_strings_parse_to_four_places(self, value, expected):
+        assert str(parse_money(value)) == expected
+
+    @pytest.mark.parametrize("value", ["abc", "", True, [1], "1_000", "１２", "٣"])
+    def test_non_numbers_raise_value_error(self, value):
+        with pytest.raises(ValueError):
+            parse_money(value)
+
+    @pytest.mark.parametrize("value", ["NaN", "Infinity"])
+    def test_non_finite_strings_raise_value_error(self, value):
+        with pytest.raises(ValueError, match="finite"):
+            parse_money(value)
+
+
+class TestMoneyFieldsAsText:
+    def test_named_fields_become_four_place_strings(self):
+        data = {"amount": 3 * 1.1, "tax": "1.5", "note": 0.1}
+
+        result = money_fields_as_text(data, "amount", "tax")
+
+        assert result == {"amount": "3.3000", "tax": "1.5000", "note": 0.1}
+
+    def test_missing_and_none_fields_are_left_alone(self):
+        assert money_fields_as_text({"tax": None}, "amount", "tax") == {"tax": None}
+
+
+class _Response(BaseModel):
+    amount: MoneyOut
+
+
+class TestMoneyOut:
+    @pytest.mark.parametrize("value", [Decimal("49.99"), Decimal("49.9900"), Decimal("49.990000")])
+    def test_amount_is_sent_as_a_4_place_string(self, value):
+        assert _Response(amount=value).model_dump(mode="json") == {"amount": "49.9900"}

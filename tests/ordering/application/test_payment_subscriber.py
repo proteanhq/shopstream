@@ -4,6 +4,9 @@ Tests the subscriber ACL pattern: raw dict payloads are filtered by event type
 and translated into domain commands (RecordPaymentSuccess, RecordPaymentFailure).
 """
 
+from decimal import Decimal
+
+import pytest
 from protean import current_domain
 
 from ordering.checkout.payment_subscriber import PaymentEventsSubscriber
@@ -264,3 +267,35 @@ class TestPaymentSubscriberIgnoresUnrelated:
                 },
             )
         )
+
+
+class TestPaymentSucceededAmountAsDecimalString:
+    def test_4_place_string_amount_is_recorded_as_a_decimal(self):
+        order_id = _create_payment_pending_order()
+
+        PaymentEventsSubscriber()(
+            _build_message(
+                "Payments.PaymentSucceeded.v2",
+                {"order_id": order_id, "payment_id": "pay-001", "amount": "27.5000"},
+            )
+        )
+
+        messages = current_domain.event_store.store.read(f"ordering::order-{order_id}")
+        succeeded = [m for m in messages if m.metadata.headers.type == "Ordering.PaymentSucceeded.v2"]
+        assert len(succeeded) == 1
+        assert succeeded[0].data["amount"] == "27.5000"
+        assert succeeded[0].to_domain_object().amount == Decimal("27.5")
+
+    @pytest.mark.parametrize("amount", [None, "", "abc", True])
+    def test_missing_or_unreadable_amount_leaves_the_order_pending(self, amount):
+        order_id = _create_payment_pending_order()
+
+        PaymentEventsSubscriber()(
+            _build_message(
+                "Payments.PaymentSucceeded.v2",
+                {"order_id": order_id, "payment_id": "pay-001", "amount": amount},
+            )
+        )
+
+        order = current_domain.repository_for(Order).get(order_id)
+        assert order.status == OrderStatus.PAYMENT_PENDING.value

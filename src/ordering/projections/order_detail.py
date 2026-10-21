@@ -1,10 +1,11 @@
 """Order detail — full order view for detail pages."""
 
 from datetime import datetime
+from decimal import Decimal as D
 from typing import Any
 
 from protean.core.projector import on
-from protean.fields import DateTime, Dict, Float, Identifier, List, String
+from protean.fields import DateTime, Decimal, Dict, Identifier, List, String
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
@@ -40,11 +41,11 @@ class OrderDetail:
     items: list[dict[str, Any]] = List(Dict())
     shipping_address: dict[str, Any] = Dict()
     billing_address: dict[str, Any] = Dict()
-    subtotal: float | None = Float()
-    shipping_cost: float | None = Float()
-    tax_total: float | None = Float()
-    discount_total: float | None = Float()
-    grand_total: float | None = Float()
+    subtotal: D | None = Decimal(precision=19, scale=4)
+    shipping_cost: D | None = Decimal(precision=19, scale=4)
+    tax_total: D | None = Decimal(precision=19, scale=4)
+    discount_total: D | None = Decimal(precision=19, scale=4)
+    grand_total: D | None = Decimal(precision=19, scale=4)
     currency: str = String(default="USD")
     order_source: str = String(default="web")
     payment_id: str | None = String()

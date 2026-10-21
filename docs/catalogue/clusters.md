@@ -72,7 +72,7 @@ classDiagram
     note for catalogue_product_product_Dimensions "unit_must_be_valid"
     class catalogue_product_product_Price["Price"] {
         <<ValueObject>>
-        +base_price Float~required~
+        +base_price Decimal~required~
         +currency String
         +tier_prices Dict
     }

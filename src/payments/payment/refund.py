@@ -3,8 +3,10 @@
 Handles refund requests and gateway refund confirmations.
 """
 
+from decimal import Decimal as D
+
 from protean import handle
-from protean.fields import Float, Identifier, String
+from protean.fields import Decimal, Identifier, String
 from protean.utils.globals import current_domain
 
 from payments.domain import payments
@@ -16,7 +18,8 @@ class RequestRefund:
     """Request a refund for a payment."""
 
     payment_id: str = Identifier(required=True)
-    amount: float = Float(required=True)
+    # No scale limit, as on InitiatePayment: Payment.request_refund checks the places.
+    amount: D = Decimal(required=True)
     reason: str = String(required=True, max_length=500)
 
 

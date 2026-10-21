@@ -1,6 +1,7 @@
 """Product detail — full PDP (Product Detail Page) projection."""
 
 from datetime import datetime
+from decimal import Decimal
 from typing import Any
 
 from protean.core.projector import on
@@ -21,6 +22,13 @@ from catalogue.product.events import (
     VariantPriceChanged,
 )
 from catalogue.product.product import Product
+from shared.money import to_money
+
+
+def _money_text(value: Decimal) -> str:
+    # variants is a JSON column, which has no decimal type, so prices are
+    # stored as 4-place strings, the form the API sends money in.
+    return str(to_money(value))
 
 
 @catalogue.projection
@@ -83,7 +91,7 @@ class ProductDetailProjector:
             {
                 "variant_id": event.variant_id,
                 "variant_sku": event.variant_sku,
-                "price_amount": event.price_amount,
+                "price_amount": _money_text(event.price_amount),
                 "price_currency": event.price_currency,
             }
         )
@@ -97,7 +105,7 @@ class ProductDetailProjector:
         variants = list(detail.variants or [])
         for v in variants:
             if v["variant_id"] == event.variant_id:
-                v["price_amount"] = event.new_price
+                v["price_amount"] = _money_text(event.new_price)
                 v["price_currency"] = event.currency
                 break
         detail.variants = variants
@@ -111,7 +119,7 @@ class ProductDetailProjector:
         for v in variants:
             if v["variant_id"] == event.variant_id:
                 tier_prices = v.get("tier_prices", {})
-                tier_prices[event.tier] = event.price
+                tier_prices[event.tier] = _money_text(event.price)
                 v["tier_prices"] = tier_prices
                 break
         detail.variants = variants

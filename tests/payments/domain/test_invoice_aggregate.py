@@ -1,5 +1,7 @@
 """Tests for Invoice aggregate creation and lifecycle."""
 
+from decimal import Decimal
+
 import pytest
 from protean.exceptions import ValidationError
 
@@ -41,11 +43,11 @@ class TestInvoiceCreation:
 
     def test_create_calculates_subtotal(self):
         invoice = _make_invoice()
-        assert invoice.subtotal == pytest.approx(109.97, rel=1e-2)
+        assert invoice.subtotal == Decimal("109.97")
 
     def test_create_calculates_total(self):
         invoice = _make_invoice()
-        assert invoice.total == pytest.approx(118.77, rel=1e-2)
+        assert invoice.total == Decimal("118.77")
 
     def test_create_sets_status_to_draft(self):
         invoice = _make_invoice()

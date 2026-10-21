@@ -781,7 +781,7 @@ def test_price_history_projector_is_idempotent_under_redelivery():
 
     def check() -> None:
         entries = current_domain.repository_for(PriceHistory).query.filter(product_id=product_id).all().items
-        assert [e.new_price for e in entries] == [49.99]
+        assert [e.new_price for e in entries] == [to_money(49.99)]
 
     _redeliver(PriceHistoryProjector, _stored_event(Product, product_id, VariantPriceChanged), check)
 

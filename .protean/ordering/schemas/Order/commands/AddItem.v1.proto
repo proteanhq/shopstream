@@ -7,6 +7,6 @@ message AddItem {
   int64 quantity = 3;
   string sku = 4;
   string title = 5;
-  double unit_price = 6;
+  string unit_price = 6;
   string variant_id = 7;
 }

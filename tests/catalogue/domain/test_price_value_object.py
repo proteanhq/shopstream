@@ -1,5 +1,7 @@
 """Tests for the Price value object."""
 
+from decimal import Decimal
+
 import pytest
 from protean.exceptions import ValidationError
 
@@ -14,19 +16,19 @@ class TestPriceConstruction:
 
     def test_valid_price_with_defaults(self):
         price = Price(base_price=99.99)
-        assert price.base_price == 99.99
+        assert price.base_price == Decimal("99.99")
         assert price.currency == "USD"
         assert price.tier_prices == {}
 
     def test_valid_price_with_explicit_currency(self):
         price = Price(base_price=49.99, currency="EUR")
-        assert price.base_price == 49.99
+        assert price.base_price == Decimal("49.99")
         assert price.currency == "EUR"
 
     def test_valid_price_with_tier_prices(self):
         tiers = {"Silver": 89.99, "Gold": 79.99, "Platinum": 69.99}
         price = Price(base_price=99.99, tier_prices=tiers)
-        assert price.base_price == 99.99
+        assert price.base_price == Decimal("99.99")
         assert price.tier_prices["Silver"] == 89.99
 
 

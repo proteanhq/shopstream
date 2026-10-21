@@ -1,5 +1,7 @@
 """Tests for InvoiceLineItem entity."""
 
+from decimal import Decimal
+
 from payments.invoice.invoice import InvoiceLineItem
 
 
@@ -13,8 +15,8 @@ class TestInvoiceLineItem:
         )
         assert item.description == "Black T-Shirt (M)"
         assert item.quantity == 2
-        assert item.unit_price == 29.99
-        assert item.total == 59.98
+        assert item.unit_price == Decimal("29.99")
+        assert item.total == Decimal("59.98")
 
     def test_total_calculated_in_aggregate(self):
         """Line item totals are calculated by the Invoice factory."""
@@ -29,4 +31,4 @@ class TestInvoiceLineItem:
         )
         assert len(invoice.line_items) == 1
         item = invoice.line_items[0]
-        assert item.total == 30.00
+        assert item.total == Decimal("30.00")

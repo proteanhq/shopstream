@@ -2,7 +2,7 @@ syntax = "proto3";
 package catalogue.product.variants;
 
 message SetTierPrice {
-  double price = 1;
+  string price = 1;
   string product_id = 2;
   string tier = 3;
   string variant_id = 4;

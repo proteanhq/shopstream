@@ -108,6 +108,8 @@ All state changes are applied via `@apply` handlers for event-sourcing replay.
 
 **Order events** (`order/events.py`): `OrderCreated`, `ItemAdded`, `ItemRemoved`, `ItemQuantityUpdated`, `CouponApplied`, `OrderConfirmed`, `PaymentPending`, `PaymentSucceeded`, `PaymentFailed`, `OrderProcessing`, `OrderShipped`, `OrderPartiallyShipped`, `OrderDelivered`, `OrderCompleted`, `ReturnRequested`, `ReturnApproved`, `OrderReturned`, `OrderCancelled`, `OrderRefunded`
 
+Order money is `Decimal(precision=19, scale=4)` in the aggregate, its events and the projections' money fields. The item dicts in `OrderCreated.items` and `OrderDetail.items` hold money as 4-place strings. `OrderCreated` is at v3, and `ItemAdded`, `ItemRemoved`, `ItemQuantityUpdated`, `PaymentSucceeded` and `OrderRefunded` are at v2. Their older versions stored money as floats. `order/upcasters.py` rewrites those amounts as 4-place strings when an old event is loaded, so an order rebuilt from old events holds exact `Decimal` values. `OrderCreated` also stores its `items` dicts with 4-place money strings. `ItemAdded.unit_price` stays a `String` field.
+
 ## Commands & Handlers
 
 ### Cart Commands
@@ -169,6 +171,8 @@ Listens on streams: `ordering::order`.
 
 The saga reacts only to internal ordering events: `OrderConfirmed`, `PaymentPending`, `PaymentSucceeded`, `PaymentFailed`, `OrderCancelled`. External events from Inventory and Payments are translated into internal ordering commands by `checkout/inventory_subscriber.py` and `checkout/payment_subscriber.py`.
 
+`OrderCheckoutSaga.amount` stays a `Float`. Protean cannot JSON-encode a `Decimal` in the process manager's stored transition, so a `Decimal` field there makes the commit fail (pinned in `verification/regression/test_protean_regressions.py`).
+
 Saga flow (max 3 payment retries):
 1. `OrderConfirmed` → status=awaiting_reservation
 2. `StockReserved` (translated to internal command) → status=awaiting_payment, dispatches `RecordPaymentPending`
@@ -188,7 +192,7 @@ Saga flow (max 3 payment retries):
 | `order_timeline.py` | `OrderTimeline` | `OrderTimelineProjector` | Append-only audit trail with human-readable descriptions |
 | `customer_orders.py` | `CustomerOrders` | `CustomerOrdersProjector` | Per-customer order listing |
 | `orders_by_status.py` | `OrdersByStatus` | `OrdersByStatusProjector` | Admin dashboard view for filtering by status |
-| `daily_order_stats.py` | `DailyOrderStats` | `DailyOrderStatsProjector` | Daily order counts and money totals (`total_revenue`, `total_refunds` as `Decimal(precision=19, scale=4)`, converted from event floats with `shared.money.to_money`) |
+| `daily_order_stats.py` | `DailyOrderStats` | `DailyOrderStatsProjector` | Daily order counts and money totals (`total_revenue`, `total_refunds` as `Decimal(precision=19, scale=4)`, added with `shared.money.to_money` on both sides) |
 
 ## API
 

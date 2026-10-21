@@ -3,5 +3,5 @@ package ordering.order.cancellation;
 
 message RefundOrder {
   string order_id = 1;
-  optional double refund_amount = 2;
+  optional string refund_amount = 2;
 }

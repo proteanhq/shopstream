@@ -241,7 +241,7 @@ class TestCatalogueEventOutbox:
         outbox_repo = current_domain._get_outbox_repo("default")
         records = _internal_records(outbox_repo.find_unprocessed())
 
-        variant_events = [r for r in records if r.type == "Catalogue.VariantAdded.v1"]
+        variant_events = [r for r in records if r.type == "Catalogue.VariantAdded.v2"]
         assert len(variant_events) == 1
 
         record = variant_events[0]
@@ -289,7 +289,7 @@ class TestCatalogueEventOutbox:
 
         event_types = {r.type for r in records}
         assert "Catalogue.ProductCreated.v1" in event_types
-        assert "Catalogue.VariantAdded.v1" in event_types
+        assert "Catalogue.VariantAdded.v2" in event_types
         assert "Catalogue.ProductActivated.v1" in event_types
         assert "Catalogue.ProductDiscontinued.v1" in event_types
 
@@ -430,10 +430,10 @@ class TestEventPayloadIntegrity:
         outbox_repo = current_domain._get_outbox_repo("default")
         records = outbox_repo.find_unprocessed()
 
-        price_events = [r for r in records if r.type == "Catalogue.VariantPriceChanged.v1"]
+        price_events = [r for r in records if r.type == "Catalogue.VariantPriceChanged.v2"]
         assert len(price_events) == 1
-        assert price_events[0].data["previous_price"] == 10.0
-        assert price_events[0].data["new_price"] == 15.0
+        assert price_events[0].data["previous_price"] == "10.0000"
+        assert price_events[0].data["new_price"] == "15.0000"
 
 
 # ---------------------------------------------------------------------------

@@ -2,7 +2,7 @@ syntax = "proto3";
 package catalogue.product.variants;
 
 message UpdateVariantPrice {
-  double base_price = 1;
+  string base_price = 1;
   optional string currency = 2;
   string product_id = 3;
   string variant_id = 4;

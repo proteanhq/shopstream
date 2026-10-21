@@ -3,9 +3,9 @@ package ordering.order.order;
 
 message OrderPricing {
   optional string currency = 1;
-  optional double discount_total = 2;
-  optional double grand_total = 3;
-  optional double shipping_cost = 4;
-  optional double subtotal = 5;
-  optional double tax_total = 6;
+  optional string discount_total = 2;
+  optional string grand_total = 3;
+  optional string shipping_cost = 4;
+  optional string subtotal = 5;
+  optional string tax_total = 6;
 }

@@ -1,0 +1,11 @@
+syntax = "proto3";
+package ordering.order.events;
+import "google/protobuf/timestamp.proto";
+
+message ItemRemoved {
+  string item_id = 1;
+  string new_grand_total = 2;
+  string new_subtotal = 3;
+  string order_id = 4;
+  google.protobuf.Timestamp removed_at = 5;
+}

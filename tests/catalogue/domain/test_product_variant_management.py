@@ -1,5 +1,7 @@
 """Tests for Product variant management."""
 
+from decimal import Decimal
+
 import pytest
 from protean.exceptions import ValidationError
 
@@ -23,7 +25,7 @@ class TestAddVariant:
 
         assert len(product.variants) == 1
         assert variant.variant_sku.code == "VAR-001"
-        assert variant.price.base_price == 29.99
+        assert variant.price.base_price == Decimal("29.99")
 
     def test_add_variant_with_string_sku(self):
         product = _make_product()
@@ -68,7 +70,7 @@ class TestAddVariant:
         event = product._events[0]
         assert isinstance(event, VariantAdded)
         assert event.variant_sku == "VAR-005"
-        assert event.price_amount == 29.99
+        assert event.price_amount == Decimal("29.99")
 
     def test_add_multiple_variants(self):
         product = _make_product()
@@ -91,13 +93,13 @@ class TestUpdateVariantPrice:
         new_price = Price(base_price=39.99)
         product.update_variant_price(variant.id, new_price)
 
-        assert product.variants[0].price.base_price == 39.99
+        assert product.variants[0].price.base_price == Decimal("39.99")
         assert len(product._events) == 1
 
         event = product._events[0]
         assert isinstance(event, VariantPriceChanged)
-        assert event.previous_price == 29.99
-        assert event.new_price == 39.99
+        assert event.previous_price == Decimal("29.99")
+        assert event.new_price == Decimal("39.99")
 
     def test_update_nonexistent_variant_raises_error(self):
         product = _make_product()
@@ -123,7 +125,7 @@ class TestSetTierPrice:
         event = product._events[0]
         assert isinstance(event, TierPriceSet)
         assert event.tier == "Silver"
-        assert event.price == 89.99
+        assert event.price == Decimal("89.99")
 
     def test_set_multiple_tier_prices(self):
         product = _make_product()

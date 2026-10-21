@@ -44,7 +44,7 @@ class TestPaymentWideEventEnrichment:
         assert records, "no protean.access wide event emitted for InitiatePaymentHandler"
         rec = records[-1]
         assert getattr(rec, "order_id", None) == "ord-xyz"
-        assert getattr(rec, "amount", None) == 99.5
+        assert getattr(rec, "amount", None) == "99.5"
         assert getattr(rec, "currency", None) == "USD"
         assert getattr(rec, "payment_method", None) == "credit_card"
 

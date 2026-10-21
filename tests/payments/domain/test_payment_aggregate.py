@@ -56,13 +56,16 @@ class TestPaymentCreation:
     def test_create_rejects_a_fifth_decimal_place(self, amount):
         result = given(Payment).process(_initiate(amount=amount))
         assert result.rejected
-        assert f"Amount ({amount}) must have no more than 4 decimal places" in result.rejection_messages[0]
+        # The command field turns the float into a Decimal, which prints 4e-05 as 0.00004.
+        assert (
+            f"Amount ({Decimal(str(amount))}) must have no more than 4 decimal places" in result.rejection_messages[0]
+        )
 
     @pytest.mark.parametrize("amount", [1e15, 1e30])
     def test_create_rejects_an_amount_of_1e15_or_more(self, amount):
         result = given(Payment).process(_initiate(amount=amount))
         assert result.rejected
-        assert f"Amount ({amount}) must be less than 1000000000000000" in result.rejection_messages[0]
+        assert f"Amount ({Decimal(str(amount))}) must be less than 1000000000000000" in result.rejection_messages[0]
 
     # Called directly, because the Message DB refuses a command holding
     # Infinity or NaN as JSON before any handler runs.
@@ -142,7 +145,7 @@ class TestPaymentCreatedEvent:
     def test_event_contains_amount(self):
         result = given(Payment).process(_initiate())
         event = result.events[PaymentInitiated]
-        assert event.amount == 59.99
+        assert event.amount == Decimal("59.99")
         assert event.currency == "USD"
 
     def test_event_contains_gateway_name(self):

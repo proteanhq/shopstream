@@ -207,8 +207,8 @@
 
 #### ItemAdded
 
-- **Type**: `Ordering.ItemAdded.v1`
-- **Version**: 1
+- **Type**: `Ordering.ItemAdded.v2`
+- **Version**: 2
 - **Published**: No
 - **Fact Event**: No
 
@@ -216,8 +216,8 @@
 |-------|------|----------|-------------|
 | added_at | DateTime | Yes | — |
 | item_id | Identifier | Yes | min_length=1 |
-| new_grand_total | Float | Yes | — |
-| new_subtotal | Float | Yes | — |
+| new_grand_total | Decimal | Yes | — |
+| new_subtotal | Decimal | Yes | — |
 | order_id | Identifier | Yes | min_length=1 |
 | product_id | Identifier | Yes | min_length=1 |
 | quantity | String | Yes | max_length=255, min_length=1 |
@@ -228,33 +228,33 @@
 
 #### ItemQuantityUpdated
 
-- **Type**: `Ordering.ItemQuantityUpdated.v1`
-- **Version**: 1
+- **Type**: `Ordering.ItemQuantityUpdated.v2`
+- **Version**: 2
 - **Published**: No
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
 | item_id | Identifier | Yes | min_length=1 |
-| new_grand_total | Float | Yes | — |
+| new_grand_total | Decimal | Yes | — |
 | new_quantity | String | Yes | max_length=255, min_length=1 |
-| new_subtotal | Float | Yes | — |
+| new_subtotal | Decimal | Yes | — |
 | order_id | Identifier | Yes | min_length=1 |
 | previous_quantity | String | Yes | max_length=255, min_length=1 |
 | updated_at | DateTime | Yes | — |
 
 #### ItemRemoved
 
-- **Type**: `Ordering.ItemRemoved.v1`
-- **Version**: 1
+- **Type**: `Ordering.ItemRemoved.v2`
+- **Version**: 2
 - **Published**: No
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
 | item_id | Identifier | Yes | min_length=1 |
-| new_grand_total | Float | Yes | — |
-| new_subtotal | Float | Yes | — |
+| new_grand_total | Decimal | Yes | — |
+| new_subtotal | Decimal | Yes | — |
 | order_id | Identifier | Yes | min_length=1 |
 | removed_at | DateTime | Yes | — |
 
@@ -298,8 +298,8 @@
 
 #### OrderCreated
 
-- **Type**: `Ordering.OrderCreated.v2`
-- **Version**: 2
+- **Type**: `Ordering.OrderCreated.v3`
+- **Version**: 3
 - **Published**: Yes
 - **Fact Event**: No
 
@@ -309,15 +309,15 @@
 | created_at | DateTime | Yes | — |
 | currency | String | No | max_length=255 |
 | customer_id | Identifier | Yes | min_length=1 |
-| discount_total | Float | No | — |
-| grand_total | Float | Yes | — |
+| discount_total | Decimal | No | — |
+| grand_total | Decimal | Yes | — |
 | items | List[dict] | Yes | — |
 | order_id | Identifier | Yes | min_length=1 |
 | order_source | String | No | max_length=255 |
 | shipping_address | Dict | Yes | — |
-| shipping_cost | Float | No | — |
-| subtotal | Float | Yes | — |
-| tax_total | Float | No | — |
+| shipping_cost | Decimal | No | — |
+| subtotal | Decimal | Yes | — |
+| tax_total | Decimal | No | — |
 
 #### OrderDelivered
 
@@ -362,15 +362,15 @@
 
 #### OrderRefunded
 
-- **Type**: `Ordering.OrderRefunded.v1`
-- **Version**: 1
+- **Type**: `Ordering.OrderRefunded.v2`
+- **Version**: 2
 - **Published**: No
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
 | order_id | Identifier | Yes | min_length=1 |
-| refund_amount | Float | Yes | — |
+| refund_amount | Decimal | Yes | — |
 | refunded_at | DateTime | Yes | — |
 
 #### OrderReturned
@@ -433,14 +433,14 @@
 
 #### PaymentSucceeded
 
-- **Type**: `Ordering.PaymentSucceeded.v1`
-- **Version**: 1
+- **Type**: `Ordering.PaymentSucceeded.v2`
+- **Version**: 2
 - **Published**: No
 - **Fact Event**: No
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
-| amount | Float | Yes | — |
+| amount | Decimal | Yes | — |
 | order_id | Identifier | Yes | min_length=1 |
 | paid_at | DateTime | Yes | — |
 | payment_id | String | Yes | max_length=255, min_length=1 |
@@ -492,7 +492,7 @@
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
 | order_id | Identifier | Yes | min_length=1 |
-| refund_amount | Float | No | — |
+| refund_amount | Decimal | No | — |
 
 #### CompleteOrder
 
@@ -522,14 +522,14 @@
 | billing_address | Dict | Yes | — |
 | currency | String | No | max_length=3 |
 | customer_id | Identifier | Yes | min_length=1 |
-| discount_total | Float | No | — |
-| grand_total | Float | Yes | — |
+| discount_total | Decimal | No | — |
+| grand_total | Decimal | Yes | — |
 | items | List[dict] | Yes | — |
 | order_source | String | No | max_length=20 |
 | shipping_address | Dict | Yes | — |
-| shipping_cost | Float | No | — |
-| subtotal | Float | Yes | — |
-| tax_total | Float | No | — |
+| shipping_cost | Decimal | No | — |
+| subtotal | Decimal | Yes | — |
+| tax_total | Decimal | No | — |
 
 #### MarkProcessing
 
@@ -588,7 +588,7 @@
 | quantity | Integer | Yes | min_value=1 |
 | sku | String | Yes | max_length=50, min_length=1 |
 | title | String | Yes | max_length=255, min_length=1 |
-| unit_price | Float | Yes | min_value=0.0 |
+| unit_price | Decimal | Yes | min_value=0.0 |
 | variant_id | Identifier | Yes | min_length=1 |
 
 #### ApplyCoupon
@@ -651,7 +651,7 @@
 
 | Field | Type | Required | Constraints |
 |-------|------|----------|-------------|
-| amount | Float | Yes | — |
+| amount | Decimal | Yes | — |
 | order_id | Identifier | Yes | min_length=1 |
 | payment_id | String | Yes | max_length=255, min_length=1 |
 | payment_method | String | Yes | max_length=50, min_length=1 |
@@ -694,6 +694,6 @@
 | CartAbandoned | `Ordering.CartAbandoned.v1` | 1 |
 | OrderCancelled | `Ordering.OrderCancelled.v1` | 1 |
 | OrderConfirmed | `Ordering.OrderConfirmed.v1` | 1 |
-| OrderCreated | `Ordering.OrderCreated.v2` | 2 |
+| OrderCreated | `Ordering.OrderCreated.v3` | 3 |
 | OrderDelivered | `Ordering.OrderDelivered.v1` | 1 |
 | OrderReturned | `Ordering.OrderReturned.v1` | 1 |

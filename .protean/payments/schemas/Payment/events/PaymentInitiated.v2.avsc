@@ -1,0 +1,76 @@
+{
+  "doc": "A new payment was created for an order.",
+  "fields": [
+    {
+      "name": "amount",
+      "type": {
+        "logicalType": "decimal",
+        "precision": 19,
+        "scale": 4,
+        "type": "bytes"
+      }
+    },
+    {
+      "name": "attempt_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "currency",
+      "type": "string"
+    },
+    {
+      "name": "customer_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "gateway_name",
+      "type": "string"
+    },
+    {
+      "name": "idempotency_key",
+      "type": "string"
+    },
+    {
+      "name": "initiated_at",
+      "type": {
+        "logicalType": "timestamp-millis",
+        "type": "long"
+      }
+    },
+    {
+      "default": null,
+      "name": "last4",
+      "type": [
+        "null",
+        "string"
+      ]
+    },
+    {
+      "name": "order_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "payment_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "payment_method_type",
+      "type": "string"
+    }
+  ],
+  "name": "PaymentInitiated",
+  "namespace": "payments.payment.events",
+  "type": "record"
+}

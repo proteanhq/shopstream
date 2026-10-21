@@ -363,6 +363,40 @@ def test_ir_diff_load_error_does_not_share_the_breaking_exit_code(tmp_path):
     assert load_error.exit_code != breaking.exit_code
 
 
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="ir diff --format json reports has_breaking_changes false for a breaking field type change",
+)
+def test_ir_diff_summary_counts_a_breaking_field_type_change(tmp_path):
+    """Protean finding (not yet filed upstream): the JSON summary misses a breaking change.
+
+    Changing a projection field's type is listed under `compatibility.breaking_changes`
+    and makes `ir diff` exit 1, but `summary.has_breaking_changes` stays false. A tool
+    that reads the summary takes the change as safe. `scripts/ir-gate.sh` is not fooled,
+    because it accepts a summary only on exit 2.
+    """
+    import json
+
+    with open(REVIEWS_IR) as fh:
+        ir = json.load(fh)
+    if not ir["projections"]:
+        pytest.fail("precondition: the reviews baseline has a projection")
+    fields = ir["projections"][next(iter(ir["projections"]))]["projection"]["fields"]
+    name, field = next((n, f) for n, f in fields.items() if f.get("type") == "Integer")
+    field["type"] = "Float"
+    changed = tmp_path / "reviews-ir.json"
+    changed.write_text(json.dumps(ir))
+
+    result = _ir_diff("--left", REVIEWS_IR, "--right", str(changed), "--dir", str(tmp_path), "--format", "json")
+
+    report = json.loads(result.stdout)
+    breaking = report["compatibility"]["breaking_changes"]
+    if result.exit_code != 1 or [c["field_name"] for c in breaking] != [name]:
+        pytest.fail(f"precondition: the type change is reported as breaking\n{result.output}")
+    assert report["summary"]["has_breaking_changes"] is True
+
+
 @pytest.fixture
 def bare_root_logger():
     """Give the test a root logger with no handlers at NOTSET, and restore it afterwards.
@@ -993,3 +1027,65 @@ def test_stream_trim_keeps_entries_a_consumer_group_has_not_acknowledged():
         assert all(fields for _, fields in entries), "pending entries came back without their data"
     finally:
         client.delete(stream)
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=TypeError,
+    reason="a process manager with a Decimal field fails to persist its transition: the state is not JSON-encoded",
+)
+def test_process_manager_with_a_decimal_field_persists_its_transition():
+    """proteanhq/protean#1892 (open): a ``Decimal`` field on a process manager breaks its commit.
+
+    `BaseProcessManager._persist_transition` turns only `datetime` and `date`
+    values in the state into strings. `MessageEnvelope.compute_checksum` then
+    calls `json.dumps` on the transition, which raises `TypeError` for a
+    `Decimal`, so the UnitOfWork that runs the handler fails. Under
+    ``event_processing = "sync"`` the command that raised the event fails with
+    it. ShopStream's `OrderCheckoutSaga.amount` stays a `Float` for this reason.
+    """
+    from decimal import Decimal as D
+
+    from protean import Domain, handle
+    from protean.exceptions import TransactionError
+    from protean.fields import Decimal, Identifier, String
+
+    domain = Domain(name="ProcessManagerDecimalProbe")
+    domain.config["event_processing"] = "sync"
+
+    @domain.aggregate
+    class Till:
+        name = String()
+
+    @domain.event(part_of=Till)
+    class TillCharged:
+        till_id = Identifier(required=True)
+        amount = Decimal(precision=19, scale=4, required=True)
+
+    @domain.process_manager(stream_categories=["processmanagerdecimalprobe::till"])
+    class ChargeTracker:
+        till_id = Identifier()
+        amount = Decimal(precision=19, scale=4)
+
+        @handle(TillCharged, start=True, correlate="till_id")
+        def on_charged(self, event):
+            self.till_id = event.till_id
+            self.amount = event.amount
+
+    domain.init(traverse=False)
+
+    with domain.domain_context():
+        till = Till(name="front")
+        till.raise_(TillCharged(till_id=till.id, amount=D("49.99")))
+        try:
+            domain.repository_for(Till).add(till)
+        except TransactionError as exc:
+            raise exc.__cause__ or exc from None
+
+        transitions = [
+            message
+            for message in domain.event_store.store.read("$all")
+            if "charge_tracker" in message.metadata.headers.stream
+        ]
+        assert len(transitions) == 1
+        assert str(transitions[0].data["state"]["amount"]) in ("49.99", "49.9900")

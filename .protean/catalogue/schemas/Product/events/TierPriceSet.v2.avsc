@@ -1,0 +1,39 @@
+{
+  "doc": "A loyalty-tier-specific price was set on a variant.",
+  "fields": [
+    {
+      "name": "currency",
+      "type": "string"
+    },
+    {
+      "name": "price",
+      "type": {
+        "logicalType": "decimal",
+        "precision": 19,
+        "scale": 4,
+        "type": "bytes"
+      }
+    },
+    {
+      "name": "product_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    },
+    {
+      "name": "tier",
+      "type": "string"
+    },
+    {
+      "name": "variant_id",
+      "type": {
+        "logicalType": "uuid",
+        "type": "string"
+      }
+    }
+  ],
+  "name": "TierPriceSet",
+  "namespace": "catalogue.product.events",
+  "type": "record"
+}

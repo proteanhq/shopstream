@@ -8,6 +8,7 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field, field_serializer
 
+from shared.api.money import MoneyIn
 from shared.money import to_money
 
 
@@ -17,7 +18,7 @@ from shared.money import to_money
 class InvoiceLineItemSchema(BaseModel):
     description: str
     quantity: float = Field(ge=0)
-    unit_price: float = Field(ge=0)
+    unit_price: MoneyIn = Field(ge=0)
 
 
 # ---------------------------------------------------------------------------
@@ -26,7 +27,9 @@ class InvoiceLineItemSchema(BaseModel):
 class InitiatePaymentRequest(BaseModel):
     order_id: str
     customer_id: str
-    amount: float = Field(gt=0)
+    # A plain Decimal, not MoneyIn: the Payment aggregate checks places and
+    # size itself and answers with a 400 that names the amount.
+    amount: Decimal = Field(gt=0)
     currency: str = "USD"
     payment_method_type: str
     last4: str | None = None
@@ -61,7 +64,7 @@ class RetryPaymentRequest(BaseModel):
 
 
 class RequestRefundRequest(BaseModel):
-    amount: float = Field(gt=0)
+    amount: Decimal = Field(gt=0)
     reason: str
 
 
@@ -83,7 +86,7 @@ class GenerateInvoiceRequest(BaseModel):
     order_id: str
     customer_id: str
     line_items: list[InvoiceLineItemSchema]
-    tax: float = 0.0
+    tax: MoneyIn = Decimal("0")
 
 
 class VoidInvoiceRequest(BaseModel):

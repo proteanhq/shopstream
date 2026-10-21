@@ -10,7 +10,7 @@ message ShrinkageReport {
   optional string sku = 5;
   optional int64 total_adjustments = 6;
   optional int64 total_damaged = 7;
-  optional double total_shrinkage_value = 8;
+  optional string total_shrinkage_value = 8;
   optional int64 total_written_off = 9;
   optional string warehouse_id = 10;
 }

@@ -1,9 +1,10 @@
 """Invoice status — real-time invoice state view."""
 
 from datetime import datetime
+from decimal import Decimal as D
 
 from protean.core.projector import on
-from protean.fields import DateTime, Float, Identifier, String
+from protean.fields import DateTime, Decimal, Identifier, String
 from protean.utils.globals import current_domain
 
 from payments.domain import payments
@@ -22,7 +23,7 @@ class InvoiceStatusView:
     order_id: str = Identifier(required=True)
     customer_id: str = Identifier(required=True)
     invoice_number: str = String(required=True)
-    total: float | None = Float()
+    total: D | None = Decimal(precision=19, scale=4)
     status: str = String(required=True)
     issued_at: datetime | None = DateTime()
     paid_at: datetime | None = DateTime()

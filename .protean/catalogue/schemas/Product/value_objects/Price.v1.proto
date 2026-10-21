@@ -2,7 +2,7 @@ syntax = "proto3";
 package catalogue.product.product;
 
 message Price {
-  double base_price = 1;
+  string base_price = 1;
   optional string currency = 2;
   map<string, string> tier_prices = 3;
 }

@@ -6,7 +6,7 @@ message OrderSummary {
   optional google.protobuf.Timestamp created_at = 1;
   optional string currency = 2;
   string customer_id = 3;
-  optional double grand_total = 4;
+  optional string grand_total = 4;
   optional int64 item_count = 5;
   string order_id = 6;
   string status = 7;

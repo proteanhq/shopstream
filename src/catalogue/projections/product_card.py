@@ -1,9 +1,10 @@
 """Product card — lightweight listing/search projection."""
 
 from datetime import datetime
+from decimal import Decimal as D
 
 from protean.core.projector import on
-from protean.fields import DateTime, Float, Identifier, Integer, String
+from protean.fields import DateTime, Decimal, Identifier, Integer, String
 from protean.utils.globals import current_domain
 
 from catalogue.domain import catalogue
@@ -29,8 +30,8 @@ class ProductCard:
     brand: str | None = String()
     category_id: str | None = Identifier()
     primary_image_url: str | None = String()
-    min_price: float | None = Float()
-    max_price: float | None = Float()
+    min_price: D | None = Decimal(precision=19, scale=4)
+    max_price: D | None = Decimal(precision=19, scale=4)
     currency: str | None = String()
     status: str = String(required=True)
     variant_count: int = Integer(default=0)

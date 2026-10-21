@@ -2,7 +2,7 @@
 
 from protean import current_domain
 
-from ordering.order.cancellation import CancelOrder
+from ordering.order.cancellation import CancelOrder, RefundOrder
 from ordering.order.completion import CompleteOrder
 from ordering.order.confirmation import ConfirmOrder
 from ordering.order.creation import CreateOrder
@@ -170,6 +170,20 @@ class TestOrderTimelineProjection:
 
         # OrderCreated + OrderConfirmed + PaymentPending + PaymentSucceeded = 4
         assert len(entries) >= 4
+
+    def test_payment_and_refund_amounts_show_2_places(self):
+        order_id = _create_order()
+        _advance_to_paid(order_id)
+        current_domain.process(
+            CancelOrder(order_id=order_id, reason="Changed mind", cancelled_by="Customer"), asynchronous=False
+        )
+        current_domain.process(RefundOrder(order_id=order_id), asynchronous=False)
+
+        entries = current_domain.repository_for(OrderTimeline).query.filter(order_id=order_id).all().items
+        descriptions = {e.event_type: e.description for e in entries}
+
+        assert descriptions["PaymentSucceeded"] == "Payment of 55.00 succeeded"
+        assert descriptions["OrderRefunded"] == "Refunded 55.00"
 
 
 class TestCustomerOrdersProjection:

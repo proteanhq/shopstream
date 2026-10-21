@@ -5,5 +5,5 @@ message GenerateInvoice {
   string customer_id = 1;
   repeated string line_items = 2;
   string order_id = 3;
-  optional double tax = 4;
+  optional string tax = 4;
 }

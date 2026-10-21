@@ -5,12 +5,19 @@ Events are persisted to the event store and used for:
 - Rebuilding aggregate state via @apply (event sourcing)
 - Updating projections via projectors
 - Cross-domain communication via Redis Streams
+
+Money fields are ``Decimal(precision=19, scale=4)``, written to payloads as
+strings such as ``"49.9900"``. Earlier versions of OrderCreated, ItemAdded,
+ItemRemoved, ItemQuantityUpdated, PaymentSucceeded and OrderRefunded carried
+money as floats; the upcasters in ``ordering.order.upcasters`` convert those
+stored events.
 """
 
 from datetime import datetime
+from decimal import Decimal as D
 from typing import Any
 
-from protean.fields import DateTime, Dict, Float, Identifier, List, String
+from protean.fields import DateTime, Decimal, Dict, Identifier, List, String
 
 from ordering.domain import ordering
 
@@ -20,20 +27,22 @@ class OrderCreated:
     """A new order was created from a shopping cart at checkout.
 
     v2: Added order_source to track originating channel (web, mobile, api).
+    v3: Money fields became Decimal, including ``unit_price``, ``discount``
+    and ``tax_amount`` inside each item, which are 4-place strings.
     """
 
-    __version__ = 2
+    __version__ = 3
 
     order_id: str = Identifier(required=True)
     customer_id: str = Identifier(required=True)
     items: list[dict[str, Any]] = List(Dict(), required=True)
     shipping_address: dict[str, Any] = Dict(required=True)
     billing_address: dict[str, Any] = Dict(required=True)
-    subtotal: float = Float(required=True)
-    shipping_cost: float | None = Float()
-    tax_total: float | None = Float()
-    discount_total: float | None = Float()
-    grand_total: float = Float(required=True)
+    subtotal: D = Decimal(precision=19, scale=4, required=True)
+    shipping_cost: D | None = Decimal(precision=19, scale=4)
+    tax_total: D | None = Decimal(precision=19, scale=4)
+    discount_total: D | None = Decimal(precision=19, scale=4)
+    grand_total: D = Decimal(precision=19, scale=4, required=True)
     currency: str = String(default="USD")
     order_source: str = String(default="web")
     created_at: datetime = DateTime(required=True)
@@ -43,6 +52,8 @@ class OrderCreated:
 class ItemAdded:
     """A new line item was added to an order (only in Created state)."""
 
+    __version__ = 2
+
     order_id: str = Identifier(required=True)
     item_id: str = Identifier(required=True)
     product_id: str = Identifier(required=True)
@@ -50,9 +61,9 @@ class ItemAdded:
     sku: str = String(required=True)
     title: str = String(required=True)
     quantity: str = String(required=True)  # serialized int
-    unit_price: str = String(required=True)  # serialized float
-    new_subtotal: float = Float(required=True)
-    new_grand_total: float = Float(required=True)
+    unit_price: str = String(required=True)  # 4-place decimal string
+    new_subtotal: D = Decimal(precision=19, scale=4, required=True)
+    new_grand_total: D = Decimal(precision=19, scale=4, required=True)
     added_at: datetime = DateTime(required=True)
 
 
@@ -60,10 +71,12 @@ class ItemAdded:
 class ItemRemoved:
     """A line item was removed from an order (only in Created state)."""
 
+    __version__ = 2
+
     order_id: str = Identifier(required=True)
     item_id: str = Identifier(required=True)
-    new_subtotal: float = Float(required=True)
-    new_grand_total: float = Float(required=True)
+    new_subtotal: D = Decimal(precision=19, scale=4, required=True)
+    new_grand_total: D = Decimal(precision=19, scale=4, required=True)
     removed_at: datetime = DateTime(required=True)
 
 
@@ -71,12 +84,14 @@ class ItemRemoved:
 class ItemQuantityUpdated:
     """The quantity of an order line item was changed."""
 
+    __version__ = 2
+
     order_id: str = Identifier(required=True)
     item_id: str = Identifier(required=True)
     previous_quantity: str = String(required=True)
     new_quantity: str = String(required=True)
-    new_subtotal: float = Float(required=True)
-    new_grand_total: float = Float(required=True)
+    new_subtotal: D = Decimal(precision=19, scale=4, required=True)
+    new_grand_total: D = Decimal(precision=19, scale=4, required=True)
     updated_at: datetime = DateTime(required=True)
 
 
@@ -111,9 +126,11 @@ class PaymentPending:
 class PaymentSucceeded:
     """Payment was successfully captured for the order."""
 
+    __version__ = 2
+
     order_id: str = Identifier(required=True)
     payment_id: str = String(required=True)
-    amount: float = Float(required=True)
+    amount: D = Decimal(precision=19, scale=4, required=True)
     payment_method: str = String(required=True)
     paid_at: datetime = DateTime(required=True)
 
@@ -218,6 +235,8 @@ class OrderCancelled:
 class OrderRefunded:
     """A refund was issued for a cancelled or returned order."""
 
+    __version__ = 2
+
     order_id: str = Identifier(required=True)
-    refund_amount: float = Float(required=True)
+    refund_amount: D = Decimal(precision=19, scale=4, required=True)
     refunded_at: datetime = DateTime(required=True)

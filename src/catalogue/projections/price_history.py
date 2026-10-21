@@ -1,9 +1,10 @@
 """Price history — append-only analytics projection."""
 
 from datetime import datetime
+from decimal import Decimal as D
 
 from protean.core.projector import on
-from protean.fields import DateTime, Float, Identifier, String
+from protean.fields import DateTime, Decimal, Identifier, String
 from protean.utils.globals import current_domain
 
 from catalogue.domain import catalogue
@@ -16,8 +17,8 @@ class PriceHistory:
     entry_id: str = Identifier(identifier=True, required=True)
     product_id: str = Identifier(required=True)
     variant_id: str = Identifier(required=True)
-    previous_price: float = Float(required=True)
-    new_price: float = Float(required=True)
+    previous_price: D = Decimal(precision=19, scale=4, required=True)
+    new_price: D = Decimal(precision=19, scale=4, required=True)
     currency: str = String(required=True)
     changed_at: datetime = DateTime(required=True)
 

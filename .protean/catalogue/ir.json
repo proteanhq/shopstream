@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:212bacdd93aba14a520986c5519d85e079e4798a8789ff66307eec0e2f971650",
+  "checksum": "sha256:70f6120c710abfc786a516e8a0803a290e6323d5531469a27eaf3ea84fe0de03",
   "clusters": {
     "catalogue.category.category.Category": {
       "aggregate": {
@@ -937,8 +937,10 @@
             },
             "base_price": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "currency": {
               "default": "USD",
@@ -999,8 +1001,10 @@
           "fields": {
             "price": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "product_id": {
               "kind": "identifier",
@@ -1035,8 +1039,10 @@
           "fields": {
             "base_price": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "currency": {
               "default": "USD",
@@ -1424,8 +1430,8 @@
           "part_of": "catalogue.product.product.Product"
         },
         "catalogue.product.events.TierPriceSet": {
-          "__type__": "Catalogue.TierPriceSet.v1",
-          "__version__": 1,
+          "__type__": "Catalogue.TierPriceSet.v2",
+          "__version__": 2,
           "description": "A loyalty-tier-specific price was set on a variant.",
           "element_type": "EVENT",
           "fields": {
@@ -1438,8 +1444,10 @@
             },
             "price": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "product_id": {
               "kind": "identifier",
@@ -1468,8 +1476,8 @@
           "part_of": "catalogue.product.product.Product"
         },
         "catalogue.product.events.VariantAdded": {
-          "__type__": "Catalogue.VariantAdded.v1",
-          "__version__": 1,
+          "__type__": "Catalogue.VariantAdded.v2",
+          "__version__": 2,
           "description": "A new purchasable variant was added to a product.",
           "element_type": "EVENT",
           "fields": {
@@ -1480,8 +1488,10 @@
             },
             "price_amount": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "price_currency": {
               "kind": "standard",
@@ -1518,8 +1528,8 @@
           "published": true
         },
         "catalogue.product.events.VariantPriceChanged": {
-          "__type__": "Catalogue.VariantPriceChanged.v1",
-          "__version__": 1,
+          "__type__": "Catalogue.VariantPriceChanged.v2",
+          "__version__": 2,
           "description": "A variant's base price was updated.",
           "element_type": "EVENT",
           "fields": {
@@ -1532,13 +1542,17 @@
             },
             "new_price": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "previous_price": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "product_id": {
               "kind": "identifier",
@@ -1605,9 +1619,11 @@
           "fields": {
             "base_price": {
               "kind": "standard",
-              "min_value": 0.01,
+              "min_value": "0.01",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "currency": {
               "default": "USD",
@@ -1799,8 +1815,10 @@
           },
           "price_amount": {
             "kind": "standard",
+            "precision": 19,
             "required": true,
-            "type": "Float"
+            "scale": 4,
+            "type": "Decimal"
           },
           "price_currency": {
             "kind": "standard",
@@ -1830,8 +1848,8 @@
           }
         },
         "fqn": "catalogue.product.events.VariantAdded",
-        "type": "Catalogue.VariantAdded.v1",
-        "version": 1
+        "type": "Catalogue.VariantAdded.v2",
+        "version": 2
       }
     ]
   },
@@ -2288,7 +2306,11 @@
     ],
     "REPOSITORY": [],
     "SUBSCRIBER": [],
-    "UPCASTER": [],
+    "UPCASTER": [
+      "catalogue.product.upcasters.UpcastTierPriceSetV1ToV2",
+      "catalogue.product.upcasters.UpcastVariantAddedV1ToV2",
+      "catalogue.product.upcasters.UpcastVariantPriceChangedV1ToV2"
+    ],
     "VALUE_OBJECT": [
       "catalogue.product.product.Dimensions",
       "catalogue.product.product.Price",
@@ -2584,13 +2606,17 @@
           },
           "new_price": {
             "kind": "standard",
+            "precision": 19,
             "required": true,
-            "type": "Float"
+            "scale": 4,
+            "type": "Decimal"
           },
           "previous_price": {
             "kind": "standard",
+            "precision": 19,
             "required": true,
-            "type": "Float"
+            "scale": 4,
+            "type": "Decimal"
           },
           "product_id": {
             "kind": "identifier",
@@ -2626,7 +2652,7 @@
           "element_type": "PROJECTOR",
           "fqn": "catalogue.projections.price_history.PriceHistoryProjector",
           "handlers": {
-            "Catalogue.VariantPriceChanged.v1": [
+            "Catalogue.VariantPriceChanged.v2": [
               "on_variant_price_changed"
             ]
           },
@@ -2670,11 +2696,15 @@
           },
           "max_price": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "min_price": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "primary_image_url": {
             "kind": "standard",
@@ -2756,10 +2786,10 @@
             "Catalogue.ProductImageRemoved.v1": [
               "on_image_removed"
             ],
-            "Catalogue.VariantAdded.v1": [
+            "Catalogue.VariantAdded.v2": [
               "on_variant_added"
             ],
-            "Catalogue.VariantPriceChanged.v1": [
+            "Catalogue.VariantPriceChanged.v2": [
               "on_variant_price_changed"
             ]
           },
@@ -2958,13 +2988,13 @@
             "Catalogue.ProductImageRemoved.v1": [
               "on_image_removed"
             ],
-            "Catalogue.TierPriceSet.v1": [
+            "Catalogue.TierPriceSet.v2": [
               "on_tier_price_set"
             ],
-            "Catalogue.VariantAdded.v1": [
+            "Catalogue.VariantAdded.v2": [
               "on_variant_added"
             ],
-            "Catalogue.VariantPriceChanged.v1": [
+            "Catalogue.VariantPriceChanged.v2": [
               "on_variant_price_changed"
             ]
           },
@@ -3099,7 +3129,7 @@
             "Catalogue.ProductDiscontinued.v1": [
               "on_product_discontinued"
             ],
-            "Catalogue.VariantAdded.v1": [
+            "Catalogue.VariantAdded.v2": [
               "on_variant_added"
             ]
           },
@@ -3119,5 +3149,25 @@
       "queries": {},
       "query_handlers": {}
     }
+  },
+  "upcasters": {
+    "TierPriceSet": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ],
+    "VariantAdded": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ],
+    "VariantPriceChanged": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ]
   }
 }

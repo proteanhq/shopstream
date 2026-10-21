@@ -3,7 +3,10 @@
   "description": "Set a loyalty-tier-specific discount price on a variant.",
   "properties": {
     "price": {
-      "type": "number"
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?$",
+      "type": "string",
+      "x-precision": 19,
+      "x-scale": 4
     },
     "product_id": {
       "minLength": 1,

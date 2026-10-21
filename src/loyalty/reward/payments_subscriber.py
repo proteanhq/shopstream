@@ -18,6 +18,7 @@ from protean.utils.globals import current_domain
 
 from loyalty.domain import loyalty
 from loyalty.reward.reward_account import RewardAccount
+from shared.money import parse_money
 
 logger = structlog.get_logger(__name__)
 
@@ -35,7 +36,7 @@ class PaymentRefundedSubscriber:
             logger.info("RefundCompleted missing customer_id; skipping clawback")
             return
 
-        points = int(data.get("amount") or 0)
+        points = int(parse_money(data.get("amount")))
         if points <= 0:
             return
 

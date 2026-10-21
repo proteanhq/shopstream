@@ -5,6 +5,7 @@ new ShrinkageReport is built instead. Uses the real repository.
 """
 
 from datetime import UTC, datetime
+from decimal import Decimal
 
 from protean import current_domain
 
@@ -40,7 +41,7 @@ class TestShrinkageReportGetOrCreate:
         assert record.total_adjustments == 0
         assert record.total_damaged == 0
         assert record.total_written_off == 0
-        assert record.total_shrinkage_value == 0.0
+        assert record.total_shrinkage_value == Decimal("0")
         # _get_or_create returns a new record without saving it;
         # the caller's repo.add handles both insert and update
         assert current_domain.repository_for(ShrinkageReport).get_or_none("item-new-001") is None

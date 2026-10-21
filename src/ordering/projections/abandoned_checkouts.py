@@ -5,9 +5,10 @@ are inserted on creation and removed when confirmed or cancelled.
 """
 
 from datetime import datetime
+from decimal import Decimal as D
 
 from protean.core.projector import on
-from protean.fields import DateTime, Float, Identifier, Integer, String
+from protean.fields import DateTime, Decimal, Identifier, Integer, String
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
@@ -20,7 +21,7 @@ class AbandonedCheckout:
     order_id: str = Identifier(identifier=True, required=True)
     customer_id: str = Identifier(required=True)
     item_count: int = Integer(default=0)
-    grand_total: float = Float(default=0.0)
+    grand_total: D = Decimal(precision=19, scale=4, default=D("0"))
     currency: str = String(default="USD")
     created_at: datetime | None = DateTime()
 

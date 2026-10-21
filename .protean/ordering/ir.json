@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:499882d197112237be743128230a2c3242b4ec8566e41b00391432d56949ce2a",
+  "checksum": "sha256:cc01af490f78ef0931e84fb31f935aba50f288e13df849ae5432adb91bbd257d",
   "clusters": {
     "ordering.cart.cart.ShoppingCart": {
       "aggregate": {
@@ -1497,7 +1497,9 @@
             },
             "refund_amount": {
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             }
           },
           "fqn": "ordering.order.cancellation.RefundOrder",
@@ -1565,14 +1567,18 @@
               "type": "Identifier"
             },
             "discount_total": {
-              "default": 0.0,
+              "default": "0",
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             },
             "grand_total": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "items": {
               "content_type": "dict",
@@ -1592,19 +1598,25 @@
               "type": "Dict"
             },
             "shipping_cost": {
-              "default": 0.0,
+              "default": "0",
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             },
             "subtotal": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "tax_total": {
-              "default": 0.0,
+              "default": "0",
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             }
           },
           "fqn": "ordering.order.creation.CreateOrder",
@@ -1783,9 +1795,11 @@
             },
             "unit_price": {
               "kind": "standard",
-              "min_value": 0.0,
+              "min_value": "0.0",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "variant_id": {
               "kind": "identifier",
@@ -1950,8 +1964,10 @@
           "fields": {
             "amount": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "order_id": {
               "kind": "identifier",
@@ -2054,9 +2070,11 @@
           "element_type": "ENTITY",
           "fields": {
             "discount": {
-              "default": 0.0,
+              "default": "0.0000",
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             },
             "id": {
               "auto_generated": true,
@@ -2116,9 +2134,11 @@
               "type": "String"
             },
             "tax_amount": {
-              "default": 0.0,
+              "default": "0.0000",
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             },
             "title": {
               "kind": "standard",
@@ -2129,9 +2149,11 @@
             },
             "unit_price": {
               "kind": "standard",
-              "min_value": 0.0,
+              "min_value": "0.0000",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "variant_id": {
               "kind": "identifier",
@@ -2191,8 +2213,8 @@
           "part_of": "ordering.order.order.Order"
         },
         "ordering.order.events.ItemAdded": {
-          "__type__": "Ordering.ItemAdded.v1",
-          "__version__": 1,
+          "__type__": "Ordering.ItemAdded.v2",
+          "__version__": 2,
           "description": "A new line item was added to an order (only in Created state).",
           "element_type": "EVENT",
           "fields": {
@@ -2209,13 +2231,17 @@
             },
             "new_grand_total": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "new_subtotal": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "order_id": {
               "kind": "identifier",
@@ -2271,8 +2297,8 @@
           "part_of": "ordering.order.order.Order"
         },
         "ordering.order.events.ItemQuantityUpdated": {
-          "__type__": "Ordering.ItemQuantityUpdated.v1",
-          "__version__": 1,
+          "__type__": "Ordering.ItemQuantityUpdated.v2",
+          "__version__": 2,
           "description": "The quantity of an order line item was changed.",
           "element_type": "EVENT",
           "fields": {
@@ -2284,8 +2310,10 @@
             },
             "new_grand_total": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "new_quantity": {
               "kind": "standard",
@@ -2296,8 +2324,10 @@
             },
             "new_subtotal": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "order_id": {
               "kind": "identifier",
@@ -2325,8 +2355,8 @@
           "part_of": "ordering.order.order.Order"
         },
         "ordering.order.events.ItemRemoved": {
-          "__type__": "Ordering.ItemRemoved.v1",
-          "__version__": 1,
+          "__type__": "Ordering.ItemRemoved.v2",
+          "__version__": 2,
           "description": "A line item was removed from an order (only in Created state).",
           "element_type": "EVENT",
           "fields": {
@@ -2338,13 +2368,17 @@
             },
             "new_grand_total": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "new_subtotal": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "order_id": {
               "kind": "identifier",
@@ -2453,9 +2487,9 @@
           "published": true
         },
         "ordering.order.events.OrderCreated": {
-          "__type__": "Ordering.OrderCreated.v2",
-          "__version__": 2,
-          "description": "A new order was created from a shopping cart at checkout.\n\nv2: Added order_source to track originating channel (web, mobile, api).",
+          "__type__": "Ordering.OrderCreated.v3",
+          "__version__": 3,
+          "description": "A new order was created from a shopping cart at checkout.\n\nv2: Added order_source to track originating channel (web, mobile, api).\nv3: Money fields became Decimal, including ``unit_price``, ``discount``\nand ``tax_amount`` inside each item, which are 4-place strings.",
           "element_type": "EVENT",
           "fields": {
             "billing_address": {
@@ -2482,12 +2516,16 @@
             },
             "discount_total": {
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             },
             "grand_total": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "items": {
               "content_type": "dict",
@@ -2514,16 +2552,22 @@
             },
             "shipping_cost": {
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             },
             "subtotal": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "tax_total": {
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             }
           },
           "fqn": "ordering.order.events.OrderCreated",
@@ -2640,8 +2684,8 @@
           "part_of": "ordering.order.order.Order"
         },
         "ordering.order.events.OrderRefunded": {
-          "__type__": "Ordering.OrderRefunded.v1",
-          "__version__": 1,
+          "__type__": "Ordering.OrderRefunded.v2",
+          "__version__": 2,
           "description": "A refund was issued for a cancelled or returned order.",
           "element_type": "EVENT",
           "fields": {
@@ -2653,8 +2697,10 @@
             },
             "refund_amount": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "refunded_at": {
               "kind": "standard",
@@ -2832,15 +2878,17 @@
           "part_of": "ordering.order.order.Order"
         },
         "ordering.order.events.PaymentSucceeded": {
-          "__type__": "Ordering.PaymentSucceeded.v1",
-          "__version__": 1,
+          "__type__": "Ordering.PaymentSucceeded.v2",
+          "__version__": 2,
           "description": "Payment was successfully captured for the order.",
           "element_type": "EVENT",
           "fields": {
             "amount": {
               "kind": "standard",
+              "precision": 19,
               "required": true,
-              "type": "Float"
+              "scale": 4,
+              "type": "Decimal"
             },
             "order_id": {
               "kind": "identifier",
@@ -2943,29 +2991,39 @@
               "type": "String"
             },
             "discount_total": {
-              "default": 0.0,
+              "default": "0.0000",
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             },
             "grand_total": {
-              "default": 0.0,
+              "default": "0.0000",
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             },
             "shipping_cost": {
-              "default": 0.0,
+              "default": "0.0000",
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             },
             "subtotal": {
-              "default": 0.0,
+              "default": "0.0000",
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             },
             "tax_total": {
-              "default": 0.0,
+              "default": "0.0000",
               "kind": "standard",
-              "type": "Float"
+              "precision": 19,
+              "scale": 4,
+              "type": "Decimal"
             }
           },
           "fqn": "ordering.order.order.OrderPricing",
@@ -3123,12 +3181,16 @@
           },
           "discount_total": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "grand_total": {
             "kind": "standard",
+            "precision": 19,
             "required": true,
-            "type": "Float"
+            "scale": 4,
+            "type": "Decimal"
           },
           "items": {
             "content_type": "dict",
@@ -3155,21 +3217,27 @@
           },
           "shipping_cost": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "subtotal": {
             "kind": "standard",
+            "precision": 19,
             "required": true,
-            "type": "Float"
+            "scale": 4,
+            "type": "Decimal"
           },
           "tax_total": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           }
         },
         "fqn": "ordering.order.events.OrderCreated",
-        "type": "Ordering.OrderCreated.v2",
-        "version": 2
+        "type": "Ordering.OrderCreated.v3",
+        "version": 3
       },
       {
         "fields": {
@@ -3495,7 +3563,13 @@
       "ordering.order.identity_subscriber.IdentityEventsSubscriber"
     ],
     "UPCASTER": [
-      "ordering.order.creation.UpcastOrderCreatedV1ToV2"
+      "ordering.order.creation.UpcastOrderCreatedV1ToV2",
+      "ordering.order.upcasters.UpcastItemAddedV1ToV2",
+      "ordering.order.upcasters.UpcastItemQuantityUpdatedV1ToV2",
+      "ordering.order.upcasters.UpcastItemRemovedV1ToV2",
+      "ordering.order.upcasters.UpcastOrderCreatedV2ToV3",
+      "ordering.order.upcasters.UpcastOrderRefundedV1ToV2",
+      "ordering.order.upcasters.UpcastPaymentSucceededV1ToV2"
     ],
     "VALUE_OBJECT": [
       "ordering.order.order.OrderPricing",
@@ -3594,7 +3668,7 @@
             ],
             "start": false
           },
-          "Ordering.PaymentSucceeded.v1": {
+          "Ordering.PaymentSucceeded.v2": {
             "correlate": "order_id",
             "end": false,
             "methods": [
@@ -3692,9 +3766,11 @@
             "type": "Identifier"
           },
           "grand_total": {
-            "default": 0.0,
+            "default": "0",
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "item_count": {
             "default": 0,
@@ -3735,7 +3811,7 @@
             "Ordering.OrderConfirmed.v1": [
               "on_order_confirmed"
             ],
-            "Ordering.OrderCreated.v2": [
+            "Ordering.OrderCreated.v3": [
               "on_order_created"
             ]
           },
@@ -3918,7 +3994,9 @@
           },
           "grand_total": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "item_count": {
             "default": 0,
@@ -3981,7 +4059,7 @@
             "Ordering.OrderConfirmed.v1": [
               "on_order_confirmed"
             ],
-            "Ordering.OrderCreated.v2": [
+            "Ordering.OrderCreated.v3": [
               "on_order_created"
             ],
             "Ordering.OrderDelivered.v1": [
@@ -3993,7 +4071,7 @@
             "Ordering.OrderProcessing.v1": [
               "on_order_processing"
             ],
-            "Ordering.OrderRefunded.v1": [
+            "Ordering.OrderRefunded.v2": [
               "on_order_refunded"
             ],
             "Ordering.OrderReturned.v1": [
@@ -4008,7 +4086,7 @@
             "Ordering.PaymentPending.v1": [
               "on_payment_pending"
             ],
-            "Ordering.PaymentSucceeded.v1": [
+            "Ordering.PaymentSucceeded.v2": [
               "on_payment_succeeded"
             ],
             "Ordering.ReturnApproved.v1": [
@@ -4153,10 +4231,10 @@
             "Ordering.OrderCompleted.v1": [
               "on_order_completed"
             ],
-            "Ordering.OrderCreated.v2": [
+            "Ordering.OrderCreated.v3": [
               "on_order_created"
             ],
-            "Ordering.OrderRefunded.v1": [
+            "Ordering.OrderRefunded.v2": [
               "on_order_refunded"
             ]
           },
@@ -4223,7 +4301,9 @@
           },
           "discount_total": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "estimated_delivery": {
             "kind": "standard",
@@ -4232,7 +4312,9 @@
           },
           "grand_total": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "items": {
             "content_type": "dict",
@@ -4279,7 +4361,9 @@
           },
           "shipping_cost": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "status": {
             "kind": "standard",
@@ -4290,11 +4374,15 @@
           },
           "subtotal": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "tax_total": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "tracking_number": {
             "kind": "standard",
@@ -4330,13 +4418,13 @@
             "Ordering.CouponApplied.v1": [
               "on_coupon_applied"
             ],
-            "Ordering.ItemAdded.v1": [
+            "Ordering.ItemAdded.v2": [
               "on_item_added"
             ],
-            "Ordering.ItemQuantityUpdated.v1": [
+            "Ordering.ItemQuantityUpdated.v2": [
               "on_item_quantity_updated"
             ],
-            "Ordering.ItemRemoved.v1": [
+            "Ordering.ItemRemoved.v2": [
               "on_item_removed"
             ],
             "Ordering.OrderCancelled.v1": [
@@ -4348,7 +4436,7 @@
             "Ordering.OrderConfirmed.v1": [
               "on_order_confirmed"
             ],
-            "Ordering.OrderCreated.v2": [
+            "Ordering.OrderCreated.v3": [
               "on_order_created"
             ],
             "Ordering.OrderDelivered.v1": [
@@ -4360,7 +4448,7 @@
             "Ordering.OrderProcessing.v1": [
               "on_order_processing"
             ],
-            "Ordering.OrderRefunded.v1": [
+            "Ordering.OrderRefunded.v2": [
               "on_order_refunded"
             ],
             "Ordering.OrderReturned.v1": [
@@ -4375,7 +4463,7 @@
             "Ordering.PaymentPending.v1": [
               "on_payment_pending"
             ],
-            "Ordering.PaymentSucceeded.v1": [
+            "Ordering.PaymentSucceeded.v2": [
               "on_payment_succeeded"
             ],
             "Ordering.ReturnApproved.v1": [
@@ -4453,7 +4541,9 @@
           },
           "grand_total": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "item_count": {
             "default": 0,
@@ -4499,13 +4589,13 @@
           "element_type": "PROJECTOR",
           "fqn": "ordering.projections.order_summary.OrderSummaryProjector",
           "handlers": {
-            "Ordering.ItemAdded.v1": [
+            "Ordering.ItemAdded.v2": [
               "on_item_added"
             ],
-            "Ordering.ItemQuantityUpdated.v1": [
+            "Ordering.ItemQuantityUpdated.v2": [
               "on_item_quantity_updated"
             ],
-            "Ordering.ItemRemoved.v1": [
+            "Ordering.ItemRemoved.v2": [
               "on_item_removed"
             ],
             "Ordering.OrderCancelled.v1": [
@@ -4517,7 +4607,7 @@
             "Ordering.OrderConfirmed.v1": [
               "on_order_confirmed"
             ],
-            "Ordering.OrderCreated.v2": [
+            "Ordering.OrderCreated.v3": [
               "on_order_created"
             ],
             "Ordering.OrderDelivered.v1": [
@@ -4529,7 +4619,7 @@
             "Ordering.OrderProcessing.v1": [
               "on_order_processing"
             ],
-            "Ordering.OrderRefunded.v1": [
+            "Ordering.OrderRefunded.v2": [
               "on_order_refunded"
             ],
             "Ordering.OrderReturned.v1": [
@@ -4544,7 +4634,7 @@
             "Ordering.PaymentPending.v1": [
               "on_payment_pending"
             ],
-            "Ordering.PaymentSucceeded.v1": [
+            "Ordering.PaymentSucceeded.v2": [
               "on_payment_succeeded"
             ],
             "Ordering.ReturnApproved.v1": [
@@ -4674,13 +4764,13 @@
             "Ordering.CouponApplied.v1": [
               "on_coupon_applied"
             ],
-            "Ordering.ItemAdded.v1": [
+            "Ordering.ItemAdded.v2": [
               "on_item_added"
             ],
-            "Ordering.ItemQuantityUpdated.v1": [
+            "Ordering.ItemQuantityUpdated.v2": [
               "on_item_quantity_updated"
             ],
-            "Ordering.ItemRemoved.v1": [
+            "Ordering.ItemRemoved.v2": [
               "on_item_removed"
             ],
             "Ordering.OrderCancelled.v1": [
@@ -4692,7 +4782,7 @@
             "Ordering.OrderConfirmed.v1": [
               "on_order_confirmed"
             ],
-            "Ordering.OrderCreated.v2": [
+            "Ordering.OrderCreated.v3": [
               "on_order_created"
             ],
             "Ordering.OrderDelivered.v1": [
@@ -4704,7 +4794,7 @@
             "Ordering.OrderProcessing.v1": [
               "on_order_processing"
             ],
-            "Ordering.OrderRefunded.v1": [
+            "Ordering.OrderRefunded.v2": [
               "on_order_refunded"
             ],
             "Ordering.OrderReturned.v1": [
@@ -4719,7 +4809,7 @@
             "Ordering.PaymentPending.v1": [
               "on_payment_pending"
             ],
-            "Ordering.PaymentSucceeded.v1": [
+            "Ordering.PaymentSucceeded.v2": [
               "on_payment_succeeded"
             ],
             "Ordering.ReturnApproved.v1": [
@@ -4791,7 +4881,9 @@
           },
           "grand_total": {
             "kind": "standard",
-            "type": "Float"
+            "precision": 19,
+            "scale": 4,
+            "type": "Decimal"
           },
           "order_id": {
             "identifier": true,
@@ -4841,7 +4933,7 @@
             "Ordering.OrderConfirmed.v1": [
               "on_order_confirmed"
             ],
-            "Ordering.OrderCreated.v2": [
+            "Ordering.OrderCreated.v3": [
               "on_order_created"
             ],
             "Ordering.OrderDelivered.v1": [
@@ -4853,7 +4945,7 @@
             "Ordering.OrderProcessing.v1": [
               "on_order_processing"
             ],
-            "Ordering.OrderRefunded.v1": [
+            "Ordering.OrderRefunded.v2": [
               "on_order_refunded"
             ],
             "Ordering.OrderReturned.v1": [
@@ -4868,7 +4960,7 @@
             "Ordering.PaymentPending.v1": [
               "on_payment_pending"
             ],
-            "Ordering.PaymentSucceeded.v1": [
+            "Ordering.PaymentSucceeded.v2": [
               "on_payment_succeeded"
             ],
             "Ordering.ReturnApproved.v1": [
@@ -4933,7 +5025,41 @@
     }
   },
   "upcasters": {
+    "ItemAdded": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ],
+    "ItemQuantityUpdated": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ],
+    "ItemRemoved": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ],
     "OrderCreated": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      },
+      {
+        "from_version": 2,
+        "to_version": 3
+      }
+    ],
+    "OrderRefunded": [
+      {
+        "from_version": 1,
+        "to_version": 2
+      }
+    ],
+    "PaymentSucceeded": [
       {
         "from_version": 1,
         "to_version": 2

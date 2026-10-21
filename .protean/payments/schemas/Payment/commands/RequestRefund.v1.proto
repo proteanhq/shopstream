@@ -2,7 +2,7 @@ syntax = "proto3";
 package payments.payment.refund;
 
 message RequestRefund {
-  double amount = 1;
+  string amount = 1;
   string payment_id = 2;
   string reason = 3;
 }

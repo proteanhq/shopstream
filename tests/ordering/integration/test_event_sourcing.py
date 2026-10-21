@@ -42,7 +42,7 @@ class TestEventStorePersistence:
         # Read events from the event store
         messages = current_domain.event_store.store.read(f"ordering::order-{order_id}")
         assert len(messages) >= 1
-        assert messages[0].metadata.headers.type == "Ordering.OrderCreated.v2"
+        assert messages[0].metadata.headers.type == "Ordering.OrderCreated.v3"
 
     def test_multiple_events_stored(self):
         """Verify multiple events accumulate in the event store."""
@@ -57,7 +57,7 @@ class TestEventStorePersistence:
         assert len(messages) >= 3
 
         event_types = [m.metadata.headers.type for m in messages]
-        assert "Ordering.OrderCreated.v2" in event_types
+        assert "Ordering.OrderCreated.v3" in event_types
         assert "Ordering.OrderConfirmed.v1" in event_types
         assert "Ordering.PaymentPending.v1" in event_types
 
@@ -138,7 +138,7 @@ class TestEventReplayRoundTrip:
 
 class TestOrderCreatedV1Upcasting:
     """Verify that v1 OrderCreated events (without order_source) are upcast
-    to v2 during aggregate reconstruction from the event store."""
+    to the current version during aggregate reconstruction from the event store."""
 
     def _write_raw_v1_event(self, store, stream, data, position=0):
         """Write a raw v1 OrderCreated event directly to the event store."""
@@ -270,8 +270,8 @@ class TestEventStoreStreamNaming:
             event_type = msg.metadata.headers.type
             # All events should have a version suffix (e.g., .v1 or .v2)
             assert ".v" in event_type
-            # OrderCreated is v2 (schema evolution); others remain v1
+            # OrderCreated is v3 (schema evolution); others remain v1
             if "OrderCreated" in event_type:
-                assert event_type.endswith(".v2")
+                assert event_type.endswith(".v3")
             else:
                 assert event_type.endswith(".v1")

@@ -49,7 +49,7 @@ class TestInitiatePaymentFlow:
         payment_events = [
             m
             for m in messages
-            if m.metadata and m.metadata.headers and m.metadata.headers.type == "Payments.PaymentInitiated.v1"
+            if m.metadata and m.metadata.headers and m.metadata.headers.type == "Payments.PaymentInitiated.v2"
         ]
         assert len(payment_events) >= 1
 

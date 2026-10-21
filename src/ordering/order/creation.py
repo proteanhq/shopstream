@@ -1,10 +1,11 @@
 """Order creation — command, handler, and v1→v2 upcaster."""
 
+from decimal import Decimal as D
 from typing import Any
 
 from protean import handle
 from protean.core.upcaster import BaseUpcaster
-from protean.fields import Dict, Float, Identifier, List, String
+from protean.fields import Decimal, Dict, Identifier, List, String
 from protean.utils.globals import current_domain
 from protean.utils.processing import Priority, processing_priority
 
@@ -21,11 +22,11 @@ class CreateOrder:
     items: list[dict[str, Any]] = List(Dict(), required=True)
     shipping_address: dict[str, Any] = Dict(required=True)
     billing_address: dict[str, Any] = Dict(required=True)
-    subtotal: float = Float(required=True)
-    shipping_cost: float = Float(default=0.0)
-    tax_total: float = Float(default=0.0)
-    discount_total: float = Float(default=0.0)
-    grand_total: float = Float(required=True)
+    subtotal: D = Decimal(precision=19, scale=4, required=True)
+    shipping_cost: D = Decimal(precision=19, scale=4, default=D("0"))
+    tax_total: D = Decimal(precision=19, scale=4, default=D("0"))
+    discount_total: D = Decimal(precision=19, scale=4, default=D("0"))
+    grand_total: D = Decimal(precision=19, scale=4, required=True)
     currency: str = String(max_length=3, default="USD")
     order_source: str = String(max_length=20, default="web")
 
@@ -41,9 +42,9 @@ class CreateOrderHandler:
 
             pricing = {
                 "subtotal": command.subtotal,
-                "shipping_cost": command.shipping_cost or 0.0,
-                "tax_total": command.tax_total or 0.0,
-                "discount_total": command.discount_total or 0.0,
+                "shipping_cost": command.shipping_cost,
+                "tax_total": command.tax_total,
+                "discount_total": command.discount_total,
                 "grand_total": command.grand_total,
                 "currency": command.currency or "USD",
             }

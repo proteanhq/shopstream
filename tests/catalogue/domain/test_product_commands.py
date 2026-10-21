@@ -1,5 +1,7 @@
 """Tests for Product command structure and fields."""
 
+from decimal import Decimal
+
 from protean.utils import DomainObjects
 
 from catalogue.category.management import CreateCategory, DeactivateCategory, ReorderCategory, UpdateCategory
@@ -44,7 +46,7 @@ class TestAddVariantCommand:
     def test_construction(self):
         cmd = AddVariant(product_id="p-1", variant_sku="VAR-001", base_price=29.99)
         assert cmd.variant_sku == "VAR-001"
-        assert cmd.base_price == 29.99
+        assert cmd.base_price == Decimal("29.99")
 
 
 class TestUpdateVariantPriceCommand:
@@ -53,7 +55,7 @@ class TestUpdateVariantPriceCommand:
 
     def test_construction(self):
         cmd = UpdateVariantPrice(product_id="p-1", variant_id="v-1", base_price=39.99)
-        assert cmd.base_price == 39.99
+        assert cmd.base_price == Decimal("39.99")
 
 
 class TestSetTierPriceCommand:
@@ -63,7 +65,7 @@ class TestSetTierPriceCommand:
     def test_construction(self):
         cmd = SetTierPrice(product_id="p-1", variant_id="v-1", tier="Silver", price=89.99)
         assert cmd.tier == "Silver"
-        assert cmd.price == 89.99
+        assert cmd.price == Decimal("89.99")
 
 
 class TestAddProductImageCommand:

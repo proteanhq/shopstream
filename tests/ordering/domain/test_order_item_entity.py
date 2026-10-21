@@ -1,5 +1,7 @@
 """Tests for OrderItem entity."""
 
+from decimal import Decimal
+
 from ordering.order.order import ItemStatus, OrderItem
 
 
@@ -15,7 +17,7 @@ class TestOrderItemConstruction:
         )
         assert item.sku == "TSHIRT-BLK-M"
         assert item.quantity == 2
-        assert item.unit_price == 29.99
+        assert item.unit_price == Decimal("29.99")
 
     def test_default_item_status(self):
         item = OrderItem(

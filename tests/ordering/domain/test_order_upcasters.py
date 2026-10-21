@@ -46,5 +46,5 @@ class TestUpcastOrderCreatedV1ToV2:
         assert result["grand_total"] == 58.0
         assert result["order_source"] == "web"
 
-    def test_event_class_is_version_2(self):
-        assert OrderCreated.__version__ == 2
+    def test_event_class_is_version_3(self):
+        assert OrderCreated.__version__ == 3

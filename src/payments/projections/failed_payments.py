@@ -1,9 +1,10 @@
 """Failed payments — operations monitoring dashboard."""
 
 from datetime import datetime
+from decimal import Decimal as D
 
 from protean.core.projector import on
-from protean.fields import DateTime, Float, Identifier, Integer, String
+from protean.fields import DateTime, Decimal, Identifier, Integer, String
 from protean.utils.globals import current_domain
 
 from payments.domain import payments
@@ -20,7 +21,7 @@ class FailedPayment:
     payment_id: str = Identifier(identifier=True, required=True)
     order_id: str = Identifier(required=True)
     customer_id: str = Identifier(required=True)
-    amount: float | None = Float()
+    amount: D | None = Decimal(precision=19, scale=4)
     reason: str | None = String()
     attempt_number: int | None = Integer()
     status: str = String(required=True)  # failed, retrying, recovered

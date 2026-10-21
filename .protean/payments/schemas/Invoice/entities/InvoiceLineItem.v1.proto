@@ -6,6 +6,6 @@ message InvoiceLineItem {
   string id = 2;
   optional string invoice = 3;
   double quantity = 4;
-  double total = 5;
-  double unit_price = 6;
+  string total = 5;
+  string unit_price = 6;
 }

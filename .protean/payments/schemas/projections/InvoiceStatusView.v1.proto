@@ -11,7 +11,7 @@ message InvoiceStatusView {
   string order_id = 6;
   optional google.protobuf.Timestamp paid_at = 7;
   string status = 8;
-  optional double total = 9;
+  optional string total = 9;
   optional google.protobuf.Timestamp updated_at = 10;
   optional string voided_reason = 11;
 }

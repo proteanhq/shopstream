@@ -2,6 +2,7 @@
 
 from datetime import UTC, datetime
 
+import pytest
 from protean import current_domain
 
 from notifications.notification.notification import (
@@ -183,3 +184,40 @@ class TestIgnoresUnrelatedOrderingEvents:
         """Events on the ordering stream that aren't handled should be ignored."""
         subscriber = OrderingEventsSubscriber()
         subscriber(_build_message("Ordering.OrderConfirmed.v1", {"order_id": "ord-ignore"}))
+
+
+def _order_created_v3(customer_id, **data):
+    return _build_message(
+        "Ordering.OrderCreated.v3",
+        {"order_id": f"ord-{customer_id}", "customer_id": customer_id, "currency": "USD", **data},
+    )
+
+
+def _confirmation_for(customer_id):
+    notifications = (
+        current_domain.repository_for(Notification)
+        .query.filter(recipient_id=customer_id, notification_type=NotificationType.ORDER_CONFIRMATION.value)
+        .all()
+        .items
+    )
+    assert len(notifications) >= 1
+    return notifications[0]
+
+
+class TestGrandTotalAsDecimalString:
+    def test_4_place_string_renders_with_2_places(self):
+        OrderingEventsSubscriber()(_order_created_v3("cust-ord-s1", grand_total="99.9900"))
+
+        notification = _confirmation_for("cust-ord-s1")
+        assert "Order Total: USD 99.99\n" in notification.body
+        assert notification.source_event_type == "Ordering.OrderCreated.v3"
+
+    def test_missing_grand_total_renders_empty(self):
+        OrderingEventsSubscriber()(_order_created_v3("cust-ord-s2"))
+
+        notification = _confirmation_for("cust-ord-s2")
+        assert "Order Total: USD \n" in notification.body
+
+    def test_unparsable_grand_total_raises(self):
+        with pytest.raises(ValueError, match="not a number"):
+            OrderingEventsSubscriber()(_order_created_v3("cust-ord-s3", grand_total="abc"))

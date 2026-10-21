@@ -4,9 +4,12 @@ These are external contracts (anti-corruption layer) — separate from
 internal Protean commands.
 """
 
+from decimal import Decimal
 from typing import Any
 
 from pydantic import BaseModel, Field
+
+from shared.api.money import MoneyIn, MoneyOut
 
 
 # ---------------------------------------------------------------------------
@@ -26,7 +29,7 @@ class OrderItemSchema(BaseModel):
     sku: str
     title: str
     quantity: int = Field(ge=1)
-    unit_price: float = Field(ge=0)
+    unit_price: MoneyIn = Field(ge=0)
 
 
 # ---------------------------------------------------------------------------
@@ -104,9 +107,9 @@ class CreateOrderRequest(BaseModel):
     items: list[OrderItemSchema]
     shipping_address: AddressSchema
     billing_address: AddressSchema
-    shipping_cost: float = 0.0
-    tax_total: float = 0.0
-    discount_total: float = 0.0
+    shipping_cost: MoneyIn = Decimal("0")
+    tax_total: MoneyIn = Decimal("0")
+    discount_total: MoneyIn = Decimal("0")
     currency: str = "USD"
     order_source: str = "web"
 
@@ -151,7 +154,7 @@ class AddItemRequest(BaseModel):
     sku: str
     title: str
     quantity: int = Field(ge=1)
-    unit_price: float = Field(ge=0)
+    unit_price: MoneyIn = Field(ge=0)
 
 
 class UpdateItemQuantityRequest(BaseModel):
@@ -169,7 +172,7 @@ class RecordPaymentPendingRequest(BaseModel):
 
 class RecordPaymentSuccessRequest(BaseModel):
     payment_id: str
-    amount: float
+    amount: MoneyIn
     payment_method: str
 
 
@@ -207,7 +210,7 @@ class CancelOrderRequest(BaseModel):
 
 
 class RefundOrderRequest(BaseModel):
-    refund_amount: float | None = None
+    refund_amount: MoneyIn | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -247,11 +250,11 @@ class OrderDetailResponse(BaseModel):
     items: list[dict[str, Any]] | None = None
     shipping_address: dict[str, Any] | None = None
     billing_address: dict[str, Any] | None = None
-    subtotal: float | None = None
-    shipping_cost: float | None = None
-    tax_total: float | None = None
-    discount_total: float | None = None
-    grand_total: float | None = None
+    subtotal: MoneyOut | None = None
+    shipping_cost: MoneyOut | None = None
+    tax_total: MoneyOut | None = None
+    discount_total: MoneyOut | None = None
+    grand_total: MoneyOut | None = None
     currency: str = "USD"
     payment_id: str | None = None
     payment_method: str | None = None
@@ -272,7 +275,7 @@ class OrderSummaryResponse(BaseModel):
     customer_id: str
     status: str
     item_count: int = 0
-    grand_total: float | None = None
+    grand_total: MoneyOut | None = None
     currency: str = "USD"
     created_at: str | None = None
     updated_at: str | None = None
@@ -291,7 +294,7 @@ class CustomerOrderResponse(BaseModel):
     order_id: str
     customer_id: str
     status: str
-    grand_total: float | None = None
+    grand_total: MoneyOut | None = None
     currency: str = "USD"
     item_count: int = 0
     created_at: str | None = None

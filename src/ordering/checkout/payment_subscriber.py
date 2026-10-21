@@ -19,6 +19,7 @@ from protean.exceptions import ValidationError
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
+from shared.money import parse_money
 
 logger = structlog.get_logger(__name__)
 
@@ -47,6 +48,20 @@ class PaymentEventsSubscriber:
         if not order_id:
             return
 
+        try:
+            amount = parse_money(data["amount"]) if data.get("amount") is not None else None
+        except ValueError:
+            amount = None
+        if amount is None:
+            # A message without a readable amount is malformed. Recording it
+            # would mark the order paid with an amount nobody charged.
+            logger.warning(
+                "PaymentSucceeded has no readable amount; leaving the order pending",
+                order_id=str(order_id),
+                amount=repr(data.get("amount")),
+            )
+            return
+
         logger.info(
             "Payment succeeded for order — recording success",
             order_id=str(order_id),
@@ -60,7 +75,7 @@ class PaymentEventsSubscriber:
                 RecordPaymentSuccess(
                     order_id=order_id,
                     payment_id=data.get("payment_id", ""),
-                    amount=data.get("amount", 0.0),
+                    amount=amount,
                     payment_method="credit_card",
                 ),
                 asynchronous=False,

@@ -56,6 +56,7 @@ import types
 import typing
 from dataclasses import dataclass
 from datetime import UTC, date, datetime
+from decimal import Decimal
 
 import pytest
 from protean.utils.reflection import declared_fields
@@ -88,6 +89,8 @@ def _dummy(field):
         return 1
     if pt is float:
         return 1.0
+    if pt is Decimal:
+        return Decimal("1.0000")
     if pt is datetime:
         return datetime.now(UTC)
     if pt is date:

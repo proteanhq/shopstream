@@ -3,7 +3,7 @@ package payments.projections.failed_payments;
 import "google/protobuf/timestamp.proto";
 
 message FailedPayment {
-  optional double amount = 1;
+  optional string amount = 1;
   optional int64 attempt_number = 2;
   string customer_id = 3;
   optional google.protobuf.Timestamp failed_at = 4;

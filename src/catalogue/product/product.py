@@ -1,6 +1,7 @@
 """Product aggregate root with Variant entity, Image entity, and value objects."""
 
 from datetime import datetime
+from decimal import Decimal as D
 from enum import Enum
 from typing import Any
 
@@ -9,6 +10,7 @@ from protean.exceptions import ValidationError
 from protean.fields import (
     Boolean,
     DateTime,
+    Decimal,
     Dict,
     Float,
     HasMany,
@@ -22,6 +24,7 @@ from protean.fields import (
 
 from catalogue.domain import catalogue
 from catalogue.shared.sku import SKU
+from shared.money import to_money
 
 # Status transition ordering for state machine
 _STATUS_ORDER = {"Draft": 0, "Active": 1, "Discontinued": 2, "Archived": 3}
@@ -53,7 +56,7 @@ class Price:
     always be lower than the base price.
     """
 
-    base_price: float = Float(required=True, min_value=0.01)
+    base_price: D = Decimal(precision=19, scale=4, required=True, min_value=D("0.01"))
     currency: str = String(max_length=3, default="USD")
     tier_prices: dict[str, Any] = Dict()
 
@@ -70,7 +73,9 @@ class Price:
         for tier_name, price in tiers.items():
             if not isinstance(price, int | float) or price <= 0:
                 raise ValidationError({"tier_prices": [f"Tier price for '{tier_name}' must be a positive number"]})
-            if price >= self.base_price:
+            # The float in the JSON blob is compared at 4 places: 99.99 as a
+            # float is just below Decimal("99.99").
+            if to_money(price) >= self.base_price:
                 raise ValidationError(
                     {
                         "tier_prices": [
@@ -324,7 +329,7 @@ class Product:
                 product_id=self.id,
                 variant_id=variant.id,
                 variant_sku=sku_vo.code,
-                price_amount=price.base_price,
+                price_amount=to_money(price.base_price),
                 price_currency=price.currency,
                 created_at=datetime.now(),
             )
@@ -346,13 +351,13 @@ class Product:
             VariantPriceChanged(
                 product_id=self.id,
                 variant_id=variant_id,
-                previous_price=previous_price,
-                new_price=new_price.base_price,
+                previous_price=to_money(previous_price),
+                new_price=to_money(new_price.base_price),
                 currency=new_price.currency,
             )
         )
 
-    def set_tier_price(self, variant_id: str, tier: str, price: float) -> None:
+    def set_tier_price(self, variant_id: str, tier: str, price: float | D) -> None:
         from catalogue.product.events import TierPriceSet
 
         variant = next((v for v in self.variants if v.id == variant_id), None)
@@ -361,7 +366,10 @@ class Product:
 
         existing_tiers = dict(variant.price.tier_prices) if variant.price.tier_prices else {}
 
-        existing_tiers[tier] = price
+        tier_price = to_money(price)
+        # tier_prices is a JSON blob whose values the invariant above reads as
+        # numbers. A Decimal would come back from the store as a string.
+        existing_tiers[tier] = float(tier_price)
 
         variant.price = Price(
             base_price=variant.price.base_price,
@@ -375,7 +383,7 @@ class Product:
                 product_id=self.id,
                 variant_id=variant_id,
                 tier=tier,
-                price=price,
+                price=tier_price,
                 currency=variant.price.currency,
             )
         )

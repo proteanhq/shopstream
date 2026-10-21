@@ -4,8 +4,10 @@ Handles payment lifecycle: pending, success, and failure.
 Payment failure returns the order to CONFIRMED state for retry.
 """
 
+from decimal import Decimal as D
+
 from protean import handle
-from protean.fields import Float, Identifier, String
+from protean.fields import Decimal, Identifier, String
 from protean.utils.globals import current_domain
 
 from ordering.domain import ordering
@@ -27,7 +29,7 @@ class RecordPaymentSuccess:
 
     order_id: str = Identifier(required=True)
     payment_id: str = String(required=True, max_length=255)
-    amount: float = Float(required=True)
+    amount: D = Decimal(precision=19, scale=4, required=True)
     payment_method: str = String(required=True, max_length=50)
 
 

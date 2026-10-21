@@ -1,6 +1,7 @@
 """Tests for all 4 invoice event classes."""
 
 from datetime import UTC, datetime
+from decimal import Decimal
 
 from payments.invoice.events import (
     InvoiceGenerated,
@@ -21,7 +22,7 @@ class TestInvoiceGenerated:
             generated_at=datetime.now(UTC),
         )
         assert event.invoice_number == "INV-ABC12345"
-        assert event.total == 118.77
+        assert event.total == Decimal("118.77")
 
 
 class TestInvoiceIssued:

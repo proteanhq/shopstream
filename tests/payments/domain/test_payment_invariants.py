@@ -1,5 +1,7 @@
 """Tests for payment state machine and amount guard invariants."""
 
+from decimal import Decimal
+
 import pytest
 from protean.exceptions import ValidationError
 from protean.testing import given
@@ -243,7 +245,7 @@ class TestRefundAmountGuards:
             )
             assert result.accepted
         assert result.status == PaymentStatus.REFUNDED.value
-        assert result.total_refunded == 0.8
+        assert result.total_refunded == Decimal("0.8")
 
     def test_refund_of_the_float_remainder_fully_refunds_the_payment(self):
         # As floats, 100 - 99.99 is 0.010000000000005116.

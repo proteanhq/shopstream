@@ -1,9 +1,10 @@
 """Refund report — finance reconciliation view."""
 
 from datetime import datetime
+from decimal import Decimal as D
 
 from protean.core.projector import on
-from protean.fields import DateTime, Float, Identifier, String
+from protean.fields import DateTime, Decimal, Identifier, String
 from protean.utils.globals import current_domain
 
 from payments.domain import payments
@@ -16,7 +17,7 @@ class RefundReport:
     refund_id: str = Identifier(identifier=True, required=True)
     payment_id: str = Identifier(required=True)
     order_id: str = Identifier(required=True)
-    amount: float = Float(required=True)
+    amount: D = Decimal(precision=19, scale=4, required=True)
     reason: str | None = String()
     status: str = String(required=True)  # requested, completed
     gateway_refund_id: str | None = String()
