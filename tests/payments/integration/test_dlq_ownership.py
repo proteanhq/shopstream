@@ -28,7 +28,7 @@ from payments.payment.ordering_subscriber import OrderReturnedSubscriber
 SOURCE_STREAM = "ordering::order"
 DLQ_STREAM = f"{SOURCE_STREAM}:dlq"
 OUTAGE_CYCLES = 3
-SUBSCRIPTION_RETRIES = 3
+SUBSCRIPTION_ATTEMPTS = 3
 
 
 @pytest.fixture()
@@ -43,7 +43,7 @@ def broker(monkeypatch: pytest.MonkeyPatch) -> Iterator[BaseBroker]:
     if isinstance(broker, InlineBroker):
         # A nacked message waits `_retry_delay` seconds before the next read can redeliver it.
         monkeypatch.setattr(broker, "_retry_delay", 0)
-        # Below OUTAGE_CYCLES and SUBSCRIPTION_RETRIES, so a group the broker did not treat as
+        # Below OUTAGE_CYCLES and SUBSCRIPTION_ATTEMPTS, so a group the broker did not treat as
         # owned would reach the native DLQ first and the test would catch it.
         monkeypatch.setattr(broker, "_max_retries", 1)
     yield broker
@@ -122,11 +122,11 @@ def _assert_single_dlq_entry(broker: BaseBroker, sub: BrokerSubscription, broker
 
 class TestBrokerSubscriptionOwnsTheDLQ:
     def test_exhausted_message_lands_only_in_the_stream_dlq(self, broker):
-        sub = _subscription(broker, max_retries=SUBSCRIPTION_RETRIES)
+        sub = _subscription(broker, max_retries=SUBSCRIPTION_ATTEMPTS)
         broker_id = _publish_bad_order_returned(broker)
 
         # Each failure before the last is nacked, and the broker redelivers it on the next read.
-        assert asyncio.run(_deliver(sub, SUBSCRIPTION_RETRIES - 1)) == SUBSCRIPTION_RETRIES - 1
+        assert asyncio.run(_deliver(sub, SUBSCRIPTION_ATTEMPTS - 1)) == SUBSCRIPTION_ATTEMPTS - 1
         assert _dlq_entries(broker) == []
         assert list(sub.retry_counts) == [broker_id]
         _assert_native_dlq_empty(broker)

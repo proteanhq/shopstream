@@ -39,10 +39,10 @@ DLQ_STREAM = f"{SOURCE_STREAM}:dlq"
 # The outage case runs this many delivery cycles while the DLQ is down. Each one redelivers the
 # held message and fails the DLQ publish again.
 OUTAGE_CYCLES = 3
-# The normal case lets the subscription retry this many times before it dead-letters. The
-# InlineBroker's own limit is set lower, so a broker that ignored ownership would dead-letter the
-# message natively first.
-SUBSCRIPTION_RETRIES = 3
+# The normal case gives the subscription this many delivery attempts (its `max_retries`): it nacks
+# every failed attempt but the last, which dead-letters. The InlineBroker's own limit is set lower,
+# so a broker that ignored ownership would dead-letter the message natively first.
+SUBSCRIPTION_ATTEMPTS = 3
 
 
 @pytest.fixture()
@@ -57,7 +57,7 @@ def broker(monkeypatch: pytest.MonkeyPatch) -> Iterator[BaseBroker]:
     if isinstance(broker, InlineBroker):
         # A nacked message waits `_retry_delay` seconds before the next read can redeliver it.
         monkeypatch.setattr(broker, "_retry_delay", 0)
-        # Below OUTAGE_CYCLES and SUBSCRIPTION_RETRIES, so a group the broker did not treat as
+        # Below OUTAGE_CYCLES and SUBSCRIPTION_ATTEMPTS, so a group the broker did not treat as
         # owned would reach the native DLQ first and the test would catch it.
         monkeypatch.setattr(broker, "_max_retries", 1)
     yield broker
@@ -130,12 +130,12 @@ def _assert_single_dlq_entry(broker: BaseBroker, broker_id: str, message_id: str
 
 class TestStreamSubscriptionOwnsTheDLQ:
     def test_exhausted_message_lands_only_in_the_stream_dlq(self, broker):
-        sub = _subscription(max_retries=SUBSCRIPTION_RETRIES)
+        sub = _subscription(max_retries=SUBSCRIPTION_ATTEMPTS)
         asyncio.run(sub.initialize())
         broker_id, message_id = _publish_poison(broker)
 
         # Each failure before the last is nacked, and the broker redelivers it on the next read.
-        assert asyncio.run(_deliver(sub, SUBSCRIPTION_RETRIES - 1)) == SUBSCRIPTION_RETRIES - 1
+        assert asyncio.run(_deliver(sub, SUBSCRIPTION_ATTEMPTS - 1)) == SUBSCRIPTION_ATTEMPTS - 1
         assert _dlq_entries(broker) == []
         assert list(sub.retry_counts) == [broker_id]
         _assert_native_dlq_empty(broker)
