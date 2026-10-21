@@ -6,8 +6,10 @@ repos:
     hooks:
       - id: trailing-whitespace
         exclude: ^uv\.lock$
+      # Protean writes these diagram docs with no final newline. Adding one would make
+      # them differ from the render that `make docs-check` compares them against.
       - id: end-of-file-fixer
-        exclude: ^uv\.lock$
+        exclude: ^(uv\.lock|docs/[^/]+/(clusters|event-flows|handler-wiring|event-model)\.md)$
       - id: check-yaml
       - id: check-added-large-files
         exclude: ^uv\.lock$

@@ -120,7 +120,7 @@ docs/
 │       └── preference-management.md
 └── loyalty/
     ├── README.md
-    ├── clusters.md / event-flows.md / handler-wiring.md / catalog.md   ← generated
+    ├── clusters.md / event-flows.md / handler-wiring.md / catalog.md / event-model.md   ← generated
     └── scenarios/
         ├── earn-and-redeem-points.md
         └── points-transfer.md

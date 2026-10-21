@@ -1,0 +1,26 @@
+# Human notes merged into docs/loyalty/event-model.md by `make docs-event-model`.
+# Each key is an element's fully qualified name, quoted so TOML keeps the dots in
+# one key. An unquoted dotted key becomes nested tables, and the render aborts.
+# A key that matches nothing the model draws (a renamed element, or a fact event,
+# which the model leaves out) is listed under "Unmatched annotations" at the end
+# of the render. The render does not say which element a note belongs to, so each
+# note names its element first.
+
+[annotations."loyalty.reward.reward_account.RewardAccount"]
+note = """
+RewardAccount: a customer's points account. The balance never goes negative,
+and a closed account accepts no further changes. Other contexts also act on it
+through subscribers (customer registration, delivered orders, payment refunds,
+approved reviews), which this model does not draw."""
+owner = "Loyalty"
+
+[annotations."loyalty.redemption.saga.RedemptionSaga"]
+note = """
+RedemptionSaga: starts on RedemptionRequested. The failure branch ends on
+VoucherIssuanceFailed, after it refunds the reserved points. The success branch
+ends when the VoucherIssued handler calls mark_as_complete(), which the model
+cannot see, so VoucherIssued carries no "end" label."""
+owner = "Loyalty"
+
+[annotations."loyalty.reward.events.MembershipCardIssued"]
+note = "MembershipCardIssued: deprecated since 0.1.0 and superseded by MembershipCardIssuedV2. RewardAccount raises only the V2 event."

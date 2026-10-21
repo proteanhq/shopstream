@@ -1,7 +1,9 @@
-"""Regressions in domain setup and tooling: `current_domain`, config loading, `protean check`, `protean server` and `protean verify`."""
+"""Regressions in domain setup and tooling: `current_domain`, config loading, `protean check`, `protean server`, `protean verify` and `protean docs generate`."""
 
 from __future__ import annotations
 
+import json
+import os
 import sys
 import warnings
 
@@ -409,3 +411,87 @@ def test_is_event_sourced_warning_points_at_the_decorator():
     if not deprecations:
         pytest.fail("precondition: the deprecation warning was raised")
     assert deprecations[0].filename == __file__, deprecations[0].filename
+
+
+_LOYALTY_IR = os.path.join(os.path.dirname(__file__), "..", "..", ".protean", "loyalty", "ir.json")
+_IDENTITY_IR = os.path.join(os.path.dirname(__file__), "..", "..", ".protean", "identity", "ir.json")
+
+
+def _render_event_model(*args: str) -> str:
+    import click
+    import protean.cli
+    from typer.testing import CliRunner
+
+    result = CliRunner().invoke(protean.cli.app, ["docs", "generate", "--type=event-model", *args])
+    if result.exit_code != 0:
+        pytest.fail(f"precondition: the render succeeded\n{result.output}")
+    return click.unstyle(result.output)
+
+
+@pytest.mark.protean_bug(
+    issue=None,
+    state="open",
+    bug=(
+        "`protean docs generate --type=event-model` draws no `@domain.subscriber`. Its consumer indexes cover projectors, "
+        "event handlers and process managers only, so a context's inbound cross-context traffic is missing from the model."
+    ),
+)
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="the event model renderer does not index subscribers")
+def test_event_model_draws_subscribers():
+    """Protean finding (not filed yet): the event model leaves out subscribers.
+
+    `_read_model_index` and `_automation_index` in `protean/ir/generators/event_model.py`
+    read projectors, event handlers and process managers. Subscribers sit under
+    `flows.subscribers` in the IR and are not read. ShopStream routes all cross-context
+    traffic through its 25 subscribers, so none of the nine committed
+    `docs/<ctx>/event-model.md` names one. Loyalty has four, for example
+    `OrderDeliveredSubscriber`, which earns points when Ordering reports a delivery.
+    """
+    with open(_LOYALTY_IR) as fh:
+        subscribers = list(json.load(fh)["flows"]["subscribers"])
+    if not subscribers:
+        pytest.fail("precondition: the loyalty IR lists subscribers")
+
+    markdown = _render_event_model("--ir", _LOYALTY_IR)
+
+    missing = [fqn for fqn in subscribers if fqn.rsplit(".", 1)[-1] not in markdown]
+    assert not missing, missing
+
+
+@pytest.mark.protean_bug(
+    issue=None,
+    state="open",
+    bug=(
+        "The default event model annotations file is one `.protean/annotations.toml` per project. In a multi-domain "
+        "project each domain's render lists the other domains' notes under \"Unmatched annotations\"."
+    ),
+)
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="the default annotations path is shared by every domain")
+def test_default_annotations_file_does_not_report_another_domains_notes(tmp_path, monkeypatch):
+    """Protean finding (not filed yet): the default annotations path doesn't fit a multi-domain project.
+
+    Without `--annotations`, `protean docs generate --type=event-model` reads
+    `.protean/annotations.toml` from the working directory (`_DEFAULT_ANNOTATIONS_PATH`
+    in `protean/cli/docs.py`). ShopStream keeps one IR per context under
+    `.protean/<ctx>/`. With one shared notes file, a note on a Loyalty element is
+    reported as unmatched when Identity renders, and every other context's render does
+    the same. ShopStream works around it with `.protean/<ctx>/annotations.toml`, passed
+    explicitly by `make docs-event-model`.
+
+    The render runs from a temp directory, so the repo's own `.protean/` is untouched.
+    """
+    with open(_LOYALTY_IR) as fh:
+        reward_account = "loyalty.reward.reward_account.RewardAccount"
+        if reward_account not in json.load(fh)["clusters"]:
+            pytest.fail(f"precondition: {reward_account} is a loyalty aggregate")
+    (tmp_path / ".protean").mkdir()
+    (tmp_path / ".protean" / "annotations.toml").write_text(
+        f'[annotations."{reward_account}"]\nnote = "A loyalty note"\n'
+    )
+    monkeypatch.chdir(tmp_path)
+
+    markdown = _render_event_model("--ir", os.path.abspath(_IDENTITY_IR))
+
+    if "## Event Model: Customer" not in markdown:
+        pytest.fail(f"precondition: the identity model rendered\n{markdown}")
+    assert "Unmatched annotations" not in markdown, markdown

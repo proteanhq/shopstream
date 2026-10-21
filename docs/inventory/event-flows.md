@@ -123,6 +123,9 @@ flowchart LR
     evt_inventory_warehouse_events_WarehouseUpdated([WarehouseUpdated])
     evt_inventory_warehouse_events_ZoneAdded([ZoneAdded])
     evt_inventory_warehouse_events_ZoneRemoved([ZoneRemoved])
+    subgraph event_handlers["Event Handlers"]
+        eh_inventory_projections_event_audit_EventAuditHandler[EventAuditHandler]
+    end
     subgraph projectors["Projectors"]
         proj_inventory_projections_inventory_level_InventoryLevelProjector[InventoryLevelProjector → InventoryLevel]
         proj_inventory_projections_inventory_valuation_InventoryValuationProjector[InventoryValuationProjector → InventoryValuation]

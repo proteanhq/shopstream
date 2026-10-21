@@ -183,6 +183,13 @@ capabilities:
     source: A
     status: covered   # T1.6: docs-check gate + value-object doctests (make doctest)
 
+  - name: event_model_render
+    taught_by: docs/loyalty/event-model.md   # make docs-event-model; notes from .protean/loyalty/annotations.toml
+    guarded_by: verification/contracts/test_event_model_render.py   # + make docs-check, which re-renders every event-model.md and fails on drift (in CI)
+    property: "committed event-model.md == fresh render; a note lands in each slice that draws its element, and a key that matches nothing is reported, never dropped"
+    source: A
+    status: partial   # subscribers are not drawn, and the default annotations path is one file per project (xfail pins in verification/regression/test_tooling.py)
+
   - name: api_contract_fuzzing
     taught_by: src/app.py   # FastAPI routes + protean.integrations.fastapi exception handlers
     guarded_by: verification/fuzz/README.md   # make fuzz (schemathesis, nightly/local)

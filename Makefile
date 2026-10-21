@@ -352,13 +352,24 @@ events-catalog: ## List every event with its version, upcasters and consumers, r
 	done; \
 	exit $$fail
 
-docs-generate: ## Generate domain documentation (diagrams + event catalog)
+# Render context $$d's event model to the path $(1). Used inside a `for d in ...` loop.
+# --annotations is passed only when the context has its own notes file: an explicit
+# path that does not exist aborts the render, and the default .protean/annotations.toml
+# would be one file shared by all nine contexts.
+define render_event_model
+PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=event-model \
+	$$(if [ -f .protean/$$d/annotations.toml ]; then echo --annotations=.protean/$$d/annotations.toml; fi) \
+	--output=$(1)
+endef
+
+docs-generate: ## Generate domain documentation (diagrams, event catalog and event model)
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		echo "Generating docs for $$d..."; \
-		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=clusters --output=docs/$$d/clusters.md; \
-		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=events --output=docs/$$d/event-flows.md; \
-		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=handlers --output=docs/$$d/handler-wiring.md; \
-		PYTHONPATH=src uv run protean docs generate --domain=$$d.domain --type=catalog --output=docs/$$d/catalog.md; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=clusters --output=docs/$$d/clusters.md; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=events --output=docs/$$d/event-flows.md; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=handlers --output=docs/$$d/handler-wiring.md; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=catalog --output=docs/$$d/catalog.md; \
+		$(call render_event_model,docs/$$d/event-model.md); \
 	done
 
 docs-catalog: ## Regenerate the event/command catalog docs from the live domains
@@ -367,16 +378,34 @@ docs-catalog: ## Regenerate the event/command catalog docs from the live domains
 		echo "✓ docs/$$d/catalog.md"; \
 	done
 
-docs-check: ## CI gate — fail if any committed catalog.md is stale vs the code
+.PHONY: docs-event-model
+docs-event-model: ## Regenerate the event model docs (docs/<domain>/event-model.md) from the live domains
+	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
+		$(call render_event_model,docs/$$d/event-model.md) >/dev/null \
+			|| { echo "✗ $$d: event model render failed" >&2; exit 1; }; \
+		echo "✓ docs/$$d/event-model.md"; \
+	done
+
+docs-check: ## CI gate — fail if any committed catalog.md or event-model.md is stale vs the code
 	@# Docs are generated FROM the domain, so they cannot claim a feature the code
 	@# lacks. This fails the build if a committed catalog drifts — run 'make docs-catalog'.
+	@# The event model renders into a fresh directory and its exit code is checked, so a
+	@# render that fails cannot pass by leaving an old file to diff against.
 	@fail=0; for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		PYTHONPATH=src PROTEAN_ENV=memory uv run protean docs generate --domain=$$d.domain --type=catalog --output=/tmp/catalog_check_$$d.md >/dev/null 2>&1; \
 		if ! diff -q docs/$$d/catalog.md /tmp/catalog_check_$$d.md >/dev/null 2>&1; then \
 			echo "STALE: docs/$$d/catalog.md — run 'make docs-catalog' and commit"; fail=1; \
 		fi; \
 	done; \
-	if [ $$fail -eq 0 ]; then echo "✓ all catalog docs current"; else exit 1; fi
+	tmp=$$(mktemp -d); trap 'rm -rf "$$tmp"' EXIT; \
+	for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
+		if ! $(call render_event_model,$$tmp/$$d.md) >"$$tmp/$$d.log" 2>&1; then \
+			echo "FAILED: event model render for $$d:"; cat "$$tmp/$$d.log"; fail=1; \
+		elif ! diff -q docs/$$d/event-model.md $$tmp/$$d.md >/dev/null 2>&1; then \
+			echo "STALE: docs/$$d/event-model.md: run 'make docs-event-model' and commit"; fail=1; \
+		fi; \
+	done; \
+	if [ $$fail -eq 0 ]; then echo "✓ all catalog and event model docs current"; else exit 1; fi
 
 doctest: ## Run doctests on the value objects (executable examples in docstrings)
 	PYTHONPATH=src PROTEAN_ENV=memory uv run pytest --doctest-modules \
@@ -394,6 +423,18 @@ ir-diff: ## Diff live IR against saved baselines (.protean/<domain>/ir.json)
 		if [ -f .protean/$$d/ir.json ]; then \
 			echo "=== $$d ==="; \
 			PYTHONPATH=src PROTEAN_ENV=memory uv run protean ir diff --domain=$$d.domain --dir=.protean/$$d 2>&1 || true; \
+			echo ""; \
+		else \
+			echo "=== $$d === (no baseline, run 'make ir' first)"; \
+		fi; \
+	done
+
+.PHONY: ir-diff-model
+ir-diff-model: ## Diff live IR against saved baselines as event model slices (report only)
+	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
+		if [ -f .protean/$$d/ir.json ]; then \
+			echo "=== $$d ==="; \
+			PYTHONPATH=src PROTEAN_ENV=memory uv run protean ir diff --domain=$$d.domain --dir=.protean/$$d --format=event-model 2>&1 || true; \
 			echo ""; \
 		else \
 			echo "=== $$d === (no baseline, run 'make ir' first)"; \
