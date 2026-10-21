@@ -321,9 +321,12 @@ upgrade-opportunities: ## Report shipped Protean capability the contexts still b
 ir: ## Generate IR (intermediate representation) for all domains
 	@# --canonical: sorted keys + no volatile `generated_at`, so committed baselines
 	@# diff only on real changes (no key-reorder or timestamp churn between runs/versions).
+	@# A failed context stops the run with an error. The loop would otherwise end on the last
+	@# echo and exit 0, and a caller would take the empty baseline as rebuilt.
 	@for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
 		mkdir -p .protean/$$d; \
-		PYTHONPATH=src PROTEAN_ENV=memory uv run protean ir show --domain=$$d.domain --canonical > .protean/$$d/ir.json; \
+		PYTHONPATH=src PROTEAN_ENV=memory uv run protean ir show --domain=$$d.domain --canonical > .protean/$$d/ir.json \
+			|| { echo "✗ $$d: protean ir show failed" >&2; exit 1; }; \
 		echo "✓ $$d"; \
 	done
 
