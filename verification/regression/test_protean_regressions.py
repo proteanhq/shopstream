@@ -1158,7 +1158,7 @@ def test_inline_broker_dlq_api_reads_the_subscription_dlq_stream(monkeypatch, re
     message to its own `_dead_letter_queue`. But `dlq_list` on the InlineBroker
     reads only `_dead_letter_queue`, and it has no `dlq_depth`, so the base
     class returns 0. `dlq_inspect`, `dlq_replay` and `dlq_purge` read the same
-    `_dead_letter_queue` (read in the code; this pin runs only the first two).
+    `_dead_letter_queue` (read in the code; this pin runs only `dlq_list` and `dlq_depth`).
     Under the memory env the DLQ API reports an empty DLQ while
     `loyalty::poison_pill:dlq` holds the message. The Redis broker reads the
     `{stream}:dlq` stream and reports it.
