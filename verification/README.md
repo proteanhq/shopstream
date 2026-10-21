@@ -14,7 +14,7 @@ Read `VERIFICATION_STRATEGY.md` in the repo root for the full plan.
 verification/
   oracles/         hand-checked correctness checks (strongest: independent answer)
   metamorphic/     "two paths must agree" checks (projection==fold, replay, sync==async)
-  contracts/       IR backward-compat gate + cross-domain event payload snapshots
+  contracts/       IR backward-compat gate, cross-domain event payload snapshots, engine ports + /readyz shape
   resilience/      fault injection (Toxiproxy, process kill) on small fixed workloads
   conformance/     same behavior across adapters (memory/postgres/sqlite) - keep small
   capabilities.yaml  capability -> taught_by / guarded_by / property map

@@ -13,7 +13,7 @@ See `docs/notifications/` for the domain narrative + scenarios.
 ## Configuration
 
 `domain.toml` — PostgreSQL database, Redis broker (DB 7), Message DB event store, health port
-8088. Priority lanes enabled. Environment overlays for test (`notifications_test` DB),
+8170 (8171-8179 kept for extra workers, via `port_auto_increment`). Priority lanes enabled. Environment overlays for test (`notifications_test` DB),
 production (async + telemetry), and memory (in-memory/inline adapters). No cache section —
 projections are database-backed.
 Engine subscriptions use the shared `shopstream` profile; `[server.subscriptions.NotificationDispatcher]`

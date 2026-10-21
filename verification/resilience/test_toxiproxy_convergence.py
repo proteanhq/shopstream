@@ -49,13 +49,8 @@ import contextlib
 import os
 import uuid
 
-# Route the inventory broker through Toxiproxy — MUST be set before the inventory
-# domain is imported/initialized (the broker URI is read at init time). The socket
-# timeouts bound broker ops so a fault fails fast instead of hanging.
-os.environ.setdefault("REDIS_URL", "redis://127.0.0.1:26379/3?socket_connect_timeout=1&socket_timeout=2")
-
-import pytest  # noqa: E402
-import requests  # noqa: E402
+import pytest
+import requests
 
 TOXIPROXY_API = "http://localhost:8474"
 PROXY_NAME = "redis"
@@ -75,6 +70,17 @@ def _toxiproxy_ready() -> tuple[bool, str]:
 
 
 _ready, _why = _toxiproxy_ready()
+
+# Route the inventory broker through Toxiproxy. This must be set before the
+# inventory domain is imported, because the broker URI is read at init time. The
+# socket timeouts bound broker ops so a fault fails fast instead of hanging.
+# Only when the module will run: every context's domain.toml reads REDIS_URL, so
+# setting it during collection of a skipped module would point any domain loaded
+# later in the session at a proxy that is not there. When it does run (the base
+# env with Toxiproxy up, as `make toxiproxy-verify` does), domains loaded later in
+# the same session also go through the proxy.
+if _ready:
+    os.environ.setdefault("REDIS_URL", "redis://127.0.0.1:26379/3?socket_connect_timeout=1&socket_timeout=2")
 pytestmark = [
     pytest.mark.engine,
     pytest.mark.slow,

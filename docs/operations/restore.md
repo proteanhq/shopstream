@@ -155,33 +155,39 @@ step 6 as if the event still existed.
 
 ### 6. Start the engines and check readiness
 
-Start the API and the engines again. Each engine serves `/readyz` on
-`127.0.0.1` inside its own process, on the port its `domain.toml` sets under
-`[server.health]`:
+Start the API and the engines again. Each engine serves `/readyz` on the port
+its `domain.toml` sets under `[server.health]`. It binds `127.0.0.1` unless
+`PROTEAN_HEALTH_HOST` is set; the Docker engines set it to `0.0.0.0`. An empty
+`PROTEAN_HEALTH_HOST` binds every interface, so leave it unset on a laptop.
 
 | Context | Port |
 |---------|------|
-| identity | 8081 |
-| catalogue | 8082 |
-| ordering | 8083 |
-| inventory | 8084 |
-| payments | 8085 |
-| fulfillment | 8086 |
-| reviews | 8087 |
-| notifications | 8088 |
-| loyalty | 8089 |
+| identity | 8100 |
+| catalogue | 8110 |
+| ordering | 8120 |
+| inventory | 8130 |
+| payments | 8140 |
+| fulfillment | 8150 |
+| reviews | 8160 |
+| notifications | 8170 |
+| loyalty | 8180 |
+
+`port_auto_increment` is on, so with `--workers N` the first worker to start
+takes the base port and each other worker takes the next free port above it.
+Each worker logs `Health check server listening on ...` with the port it bound.
+Every worker answers for itself, so check each one.
 
 For an engine started with `make engine-<context>` on your machine:
 
 ```bash
-curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8083/readyz   # ordering
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8120/readyz   # ordering
 ```
 
 The Docker stack publishes no engine ports, so run `curl` inside the container:
 
 ```bash
 docker compose exec engine-ordering \
-  curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8083/readyz
+  curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8120/readyz
 ```
 
 200 means the engine reaches its databases, brokers, event store and caches

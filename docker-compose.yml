@@ -7,6 +7,20 @@ x-common-env: &common-env
   REDIS_EXTERNAL_URL: redis://redis:6379/15
   PROTEAN_LOG_LEVEL: ${PROTEAN_LOG_LEVEL:-INFO}
 
+# Engines bind their health server on 0.0.0.0 so other containers can probe
+# it. /readyz answers 503 when a database, broker, event store or cache is
+# unreachable, so the container reports unhealthy. start_period covers the
+# entrypoint's dependency install.
+x-engine-env: &engine-env
+  <<: *common-env
+  PROTEAN_HEALTH_HOST: 0.0.0.0
+
+x-engine-healthcheck: &engine-healthcheck
+  interval: 15s
+  timeout: 5s
+  retries: 5
+  start_period: 180s
+
 services:
   # ──────────────────────────────────────────────
   # Infrastructure
@@ -104,7 +118,7 @@ services:
       - ./src:/app/src
       - ../protean:/protean
     environment:
-      <<: *common-env
+      <<: *engine-env
       DATABASE_URL: postgresql://postgres:postgres@postgres:5432/identity_local
     depends_on:
       postgres:
@@ -114,6 +128,9 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *engine-healthcheck
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8100/readyz"]
     deploy:
       replicas: 1
 
@@ -126,7 +143,7 @@ services:
       - ./src:/app/src
       - ../protean:/protean
     environment:
-      <<: *common-env
+      <<: *engine-env
       CATALOGUE_DATABASE_URL: postgresql://postgres:postgres@postgres:5432/catalogue_local
     depends_on:
       postgres:
@@ -136,6 +153,9 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *engine-healthcheck
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8110/readyz"]
     deploy:
       replicas: 1
 
@@ -148,7 +168,7 @@ services:
       - ./src:/app/src
       - ../protean:/protean
     environment:
-      <<: *common-env
+      <<: *engine-env
       ORDERING_DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ordering_local
     depends_on:
       postgres:
@@ -158,6 +178,9 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *engine-healthcheck
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8120/readyz"]
     deploy:
       replicas: 1
 
@@ -170,7 +193,7 @@ services:
       - ./src:/app/src
       - ../protean:/protean
     environment:
-      <<: *common-env
+      <<: *engine-env
       INVENTORY_DATABASE_URL: postgresql://postgres:postgres@postgres:5432/inventory_local
     depends_on:
       postgres:
@@ -180,6 +203,9 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *engine-healthcheck
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8130/readyz"]
     deploy:
       replicas: 1
 
@@ -192,7 +218,7 @@ services:
       - ./src:/app/src
       - ../protean:/protean
     environment:
-      <<: *common-env
+      <<: *engine-env
       PAYMENTS_DATABASE_URL: postgresql://postgres:postgres@postgres:5432/payments_local
     depends_on:
       postgres:
@@ -202,6 +228,9 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *engine-healthcheck
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8140/readyz"]
     deploy:
       replicas: 1
 
@@ -214,7 +243,7 @@ services:
       - ./src:/app/src
       - ../protean:/protean
     environment:
-      <<: *common-env
+      <<: *engine-env
       FULFILLMENT_DATABASE_URL: postgresql://postgres:postgres@postgres:5432/fulfillment_local
     depends_on:
       postgres:
@@ -224,6 +253,9 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *engine-healthcheck
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8150/readyz"]
     deploy:
       replicas: 1
 
@@ -236,7 +268,7 @@ services:
       - ./src:/app/src
       - ../protean:/protean
     environment:
-      <<: *common-env
+      <<: *engine-env
       REVIEWS_DATABASE_URL: postgresql://postgres:postgres@postgres:5432/reviews_local
     depends_on:
       postgres:
@@ -246,6 +278,9 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *engine-healthcheck
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8160/readyz"]
     deploy:
       replicas: 1
 
@@ -258,7 +293,7 @@ services:
       - ./src:/app/src
       - ../protean:/protean
     environment:
-      <<: *common-env
+      <<: *engine-env
       NOTIFICATIONS_DATABASE_URL: postgresql://postgres:postgres@postgres:5432/notifications_local
     depends_on:
       postgres:
@@ -268,6 +303,9 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *engine-healthcheck
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8170/readyz"]
     deploy:
       replicas: 1
 
@@ -280,7 +318,7 @@ services:
       - ./src:/app/src
       - ../protean:/protean
     environment:
-      <<: *common-env
+      <<: *engine-env
       LOYALTY_DATABASE_URL: postgresql://postgres:postgres@postgres:5432/loyalty_local
       REDIS_CACHE_URL: redis://redis:6379/9
     depends_on:
@@ -291,6 +329,9 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      <<: *engine-healthcheck
+      test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8180/readyz"]
     deploy:
       replicas: 1
 

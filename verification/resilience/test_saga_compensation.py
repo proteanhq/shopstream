@@ -41,14 +41,21 @@ from __future__ import annotations
 
 import os
 import time
+import tomllib
 import uuid
+from pathlib import Path
 
 import pytest
 import requests
 
 BASE_URL = "http://localhost:8000"
-# Engine health endpoints (per each domain.toml `health_port`).
-ENGINE_HEALTH = {"ordering": 8083, "inventory": 8084, "payments": 8085}
+SRC = Path(__file__).resolve().parents[2] / "src"
+# Each engine's health port: its domain.toml `[server.health] port`, which a
+# single-worker engine binds when the port is free.
+ENGINE_HEALTH = {
+    name: tomllib.loads((SRC / name / "domain.toml").read_text(encoding="utf-8"))["server"]["health"]["port"]
+    for name in ("ordering", "inventory", "payments")
+}
 MAX_PAYMENT_RETRIES = 3  # mirrors src/ordering/checkout/saga.py:MAX_PAYMENT_RETRIES
 
 _ADDRESS = {
@@ -72,7 +79,8 @@ def _stack_ready() -> tuple[bool, str]:
         return False, "api not reachable on :8000 (start `make api`)"
     for name, port in ENGINE_HEALTH.items():
         try:
-            requests.get(f"http://127.0.0.1:{port}/", timeout=2)
+            if requests.get(f"http://127.0.0.1:{port}/readyz", timeout=2).status_code != 200:
+                return False, f"{name} engine not ready on :{port}"
         except requests.RequestException:
             return False, f"{name} engine not reachable on :{port} (start `make engine-{name}`)"
     return True, ""
