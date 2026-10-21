@@ -999,8 +999,7 @@ def test_stream_trim_keeps_entries_a_consumer_group_has_not_acknowledged():
     client = getattr(broker, "redis_instance", None)
     if client is None:
         pytest.skip("needs the Redis streams broker (run with --protean-env test)")
-    # When the Toxiproxy stack is up, the toxiproxy resilience module sets REDIS_URL
-    # to its proxy port on collection, so this broker can point at the proxy.
+    # A local test-env run may have no Redis at the broker's URL.
     try:
         client.ping()
     except redis.exceptions.ConnectionError:
