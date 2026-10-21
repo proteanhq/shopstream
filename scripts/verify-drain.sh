@@ -233,7 +233,7 @@ pass "No Inventory engine on $HEALTH_URL"
 
 start_engine; check $? "Inventory engine started and /readyz answers 200"
 [ -n "$ENGINE_PID" ] || { echo "  ERROR: the engine did not start. See $ENGINE_LOG"; exit 1; }
-DLQ_BEFORE=$(dlq_entries)
+DLQ_BEFORE=$(dlq_entries) || { echo "  ERROR: could not read the DLQ streams on $INTERNAL_REDIS and $GLOBAL_REDIS"; exit 1; }
 
 # ============================================================
 #  Phase 1: Seed items, then load
@@ -279,8 +279,11 @@ CODE=$(code_of "$HEALTH_URL/readyz")
 CODE=$(code_of "$HEALTH_URL/healthz")
 [ "$CODE" = "200" ]; check $? "/healthz still answers 200 (got $CODE)"
 
+# A failed read gives empty output, and two empty snapshots compare equal, so
+# each comparison also needs both reads to have succeeded.
 sleep "$SETTLE"
 SNAPSHOT=$(read_levels --xlen)
+SNAPSHOT_AT_DRAIN_OK=$?
 LEVELS_AT_DRAIN=$(echo "$SNAPSHOT" | sed '$d')
 STREAM_AT_DRAIN=$(echo "$SNAPSHOT" | tail -1)
 
@@ -288,12 +291,15 @@ wait "$LOAD_PID"
 LOAD_PID=""
 sleep "$SETTLE"
 SNAPSHOT=$(read_levels --xlen)
+SNAPSHOT_AFTER_LOAD_OK=$?
 LEVELS_AFTER_LOAD=$(echo "$SNAPSHOT" | sed '$d')
 STREAM_AFTER_LOAD=$(echo "$SNAPSHOT" | tail -1)
 
-[ "$STREAM_AFTER_LOAD" -gt "$STREAM_AT_DRAIN" ]
+[ "$SNAPSHOT_AT_DRAIN_OK" -eq 0 ] && [ "$SNAPSHOT_AFTER_LOAD_OK" -eq 0 ]
+check $? "Read InventoryLevel and the stream length at the drain and after the load"
+[ "$SNAPSHOT_AT_DRAIN_OK" -eq 0 ] && [ "$SNAPSHOT_AFTER_LOAD_OK" -eq 0 ] && [ "$STREAM_AFTER_LOAD" -gt "$STREAM_AT_DRAIN" ]
 check $? "The outbox kept publishing while draining (stream $STREAM_AT_DRAIN -> $STREAM_AFTER_LOAD entries)"
-[ "$LEVELS_AT_DRAIN" = "$LEVELS_AFTER_LOAD" ]
+[ "$SNAPSHOT_AT_DRAIN_OK" -eq 0 ] && [ "$SNAPSHOT_AFTER_LOAD_OK" -eq 0 ] && [ "$LEVELS_AT_DRAIN" = "$LEVELS_AFTER_LOAD" ]
 check $? "InventoryLevel stopped changing while draining"
 
 # ============================================================
@@ -331,11 +337,14 @@ fi
 
 sleep "$SETTLE"
 PENDING=$(pending_per_group)
+PENDING_OK=$?
 echo "$PENDING" | sed 's/^/    /'
-[ -n "$PENDING" ] && ! echo "$PENDING" | awk '$4 != 0 {bad=1} END {exit !bad}'
-check $? "XPENDING is 0 for every Inventory consumer group"
-DLQ_AFTER=$(dlq_entries)
-[ "$DLQ_AFTER" = "$DLQ_BEFORE" ]; check $? "No message was dead-lettered (DLQ entries $DLQ_BEFORE -> $DLQ_AFTER)"
+# A failed read of the shared bus would leave only the internal rows.
+[ "$PENDING_OK" -eq 0 ] && echo "$PENDING" | grep -q '^global ' \
+    && ! echo "$PENDING" | awk '$4 != 0 {bad=1} END {exit !bad}'
+check $? "XPENDING is 0 for every Inventory consumer group, internal and shared bus"
+DLQ_AFTER=$(dlq_entries) && [ "$DLQ_AFTER" = "$DLQ_BEFORE" ]
+check $? "No message was dead-lettered (DLQ entries $DLQ_BEFORE -> $DLQ_AFTER)"
 
 # ============================================================
 #  Phase 5: SIGTERM an idle engine
