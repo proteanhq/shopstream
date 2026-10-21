@@ -322,15 +322,25 @@ fails, and after the retries are exhausted the engine routes the message to `loy
 `tests/loyalty/integration/test_dlq.py` is ShopStream's **only engine-driven test** (`@pytest.mark.engine`):
 it flips loyalty to async + fast-fail retries, processes `EmitPoison`, runs the engine through `protean.testing.drain`,
 then asserts the message is in the DLQ via `broker.dlq_depth` / `dlq_list` and **replays** it with
-`broker.dlq_replay`. DLQ routing and the `broker.dlq_*` API only line up on the **Redis** streams
-broker, so it skips under the in-memory broker. It also **runs locally only**: driving a full
+`broker.dlq_replay`. It skips under the in-memory broker, because the InlineBroker's `dlq_*` API
+reads only the broker's native DLQ, not the `{stream}:dlq` stream the subscription writes (a
+Protean bug, pinned in `verification/regression/`). It also **runs locally only**: driving a full
 engine inside pytest is unreliable in CI — even isolated with every broker reachable, the engine's
 poll loops drop their Redis connections mid-run (filed upstream as **proteanhq/protean#1055**), so
 CI deselects it with `-m "not engine"`. #1055 is fixed in the Protean pin; CI still deselects it until
 an engine CI job is re-added. Locally it runs under `make test` / `make test-loyalty`.
 The command-handler half (`EmitPoison` → fail) is covered synchronously by
-`tests/loyalty/application/test_poison_command.py`. This handler is the *only* intentional failure
-in ShopStream and never runs in real flows.
+`tests/loyalty/application/test_poison_command.py`. `PoisonEventHandler` is the *only*
+intentional failure in ShopStream and never runs in real flows.
+
+`tests/loyalty/integration/test_dlq_ownership.py` checks the routing without the engine, on the
+InlineBroker and on Redis. It drives a `StreamSubscription` for `PoisonEventHandler` through
+`get_next_batch_of_messages` and `process_batch`. Since Protean's ADR-0042 the subscription alone
+retries and dead-letters: an exhausted message lands once on `loyalty::poison_pill:dlq`, never in
+the InlineBroker's native DLQ, and leaves no `retry_counts` entry. While the DLQ publish fails, the
+broker holds the message and redelivers it; once the DLQ is back, it lands there once.
+`tests/payments/integration/test_dlq_ownership.py` checks the same for a `BrokerSubscription`
+(`OrderReturnedSubscriber` on `ordering::order`).
 
 ## Tests
 
@@ -342,8 +352,9 @@ in ShopStream and never runs in real flows.
   fact events + snapshots, and **optimistic-concurrency** tests (`test_concurrency.py`: a stale
   writer is rejected with `ExpectedVersionError`, no lost updates);
 - **integration** — API tests (TestClient over account / campaign / redemption endpoints), the
-  async-command path (`test_async_command.py`), and the engine-driven **DLQ** test
-  (`test_dlq.py`, Redis-only — skips on memory);
+  async-command path (`test_async_command.py`), the engine-driven **DLQ** test
+  (`test_dlq.py`, Redis-only, skips on memory), and the DLQ ownership tests
+  (`test_dlq_ownership.py`, both brokers, no engine);
 - **bdd** — `pytest-bdd` scenarios (rewards lifecycle, points transfer, campaign lifecycle,
   redemption) in `features/*.feature`;
 - **property** — Hypothesis tests (`test_points_conservation.py`): points conservation,

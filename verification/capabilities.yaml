@@ -245,3 +245,10 @@ capabilities:
     property: "every context auto-increments on a PROTEAN_HEALTH_HOST-driven host; no two context ranges (base to base + 9) overlap; no fixed port (API, Observatory, Locust) falls in one; no scaled make target starts more workers than its range holds; each compose engine binds 0.0.0.0 and its healthcheck probes its context's base port"
     source: A
     status: covered   # the ten-port range is a ShopStream convention; Protean walks up to 100 ports
+
+  - name: dlq_single_destination
+    taught_by: src/loyalty/dlq/poison.py
+    guarded_by: tests/loyalty/integration/test_dlq_ownership.py
+    property: "a subscription's exhausted message lands once on {stream}:dlq, never in the broker's native DLQ, and leaves no retry_counts entry, also after a DLQ-publish outage"
+    source: A
+    status: covered   # Protean ADR-0042; StreamSubscription (loyalty) and BrokerSubscription (tests/payments/integration/test_dlq_ownership.py), InlineBroker and Redis

@@ -98,6 +98,17 @@ event_processing = "sync"
 [test.databases.default]
 database_uri = "${TEST_CATALOGUE_DATABASE_URL|postgresql://postgres:postgres@localhost:15432/catalogue_test}"
 
+# Test runs get their own Redis DBs (10 internal, 14 shared bus), away from the dev
+# DBs, so a test that writes to or flushes a stream never touches a dev engine's data.
+# CI sets REDIS_URL and REDIS_EXTERNAL_URL, which take precedence.
+[test.brokers.default]
+provider = "redis"
+URI = "${REDIS_URL|redis://127.0.0.1:16379/10}"
+
+[test.brokers.global]
+provider = "redis"
+URI = "${REDIS_EXTERNAL_URL|redis://127.0.0.1:16379/14}"
+
 # ──────────────────────────────────────────────
 # Production overrides (PROTEAN_ENV=production)
 # Events are processed asynchronously by Engine workers,

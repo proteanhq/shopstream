@@ -322,7 +322,7 @@ Protean applies config sections from `domain.toml` based on `PROTEAN_ENV`:
 | `memory` | in-memory (no Docker) | sync | During UoW commit |
 | `production` | `<domain>` | async | Via Engine workers |
 
-Tests and dev use separate databases so running the test suite never destroys development data.
+Tests and dev use separate databases so running the test suite never destroys development data. The same holds for Redis: under `test` every internal broker uses DB 10 and the shared bus uses DB 14, unless `REDIS_URL` or `REDIS_EXTERNAL_URL` is set. A test resets its broker by flushing the whole DB, so do not export the dev values below when you run the tests.
 
 ### Environment Variables
 

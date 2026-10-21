@@ -122,9 +122,22 @@ database_uri = "${TEST_LOYALTY_DATABASE_URL|postgresql://postgres:postgres@local
 database_uri = "${TEST_LOYALTY_REPORTING_URL|sqlite:////tmp/loyalty_reporting_test.db}"
 
 # Use the in-memory cache in tests so the PointsLeaderboard cache projection works
-# without a dedicated Redis cache instance.
+# without a dedicated Redis cache instance. The URI is read only by the cache TTL test,
+# which builds its own Redis cache; it points at the test DB, not the dev cache DB 9.
 [test.caches.loyalty]
 provider = "memory"
+URI = "${REDIS_CACHE_URL|redis://127.0.0.1:16379/10}"
+
+# Test runs get their own Redis DBs (10 internal, 14 shared bus), away from the dev
+# DBs, so a test that writes to or flushes a stream never touches a dev engine's data.
+# CI sets REDIS_URL and REDIS_EXTERNAL_URL, which take precedence.
+[test.brokers.default]
+provider = "redis"
+URI = "${REDIS_URL|redis://127.0.0.1:16379/10}"
+
+[test.brokers.global]
+provider = "redis"
+URI = "${REDIS_EXTERNAL_URL|redis://127.0.0.1:16379/14}"
 
 # ──────────────────────────────────────────────
 # Production overrides (PROTEAN_ENV=production)
