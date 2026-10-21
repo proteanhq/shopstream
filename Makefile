@@ -1,4 +1,4 @@
-.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas events-catalog docs-generate docs-catalog docs-check doctest ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-loyalty eventstore-verify verify-observatory verify-observatory-skip-seed verify-domain-visualizer verify-domain-visualizer-skip-seed verify-domains idempotency-cleanup outbox-reconcile
+.PHONY: help install test lint format typecheck clean shell dev docker-up docker-down docker-dev api engine-identity engine-catalogue engine-ordering engine-inventory engine-payments engine-fulfillment engine-reviews engine-notifications engine-loyalty domain-check domain-check-identity domain-check-catalogue domain-check-ordering domain-check-inventory domain-check-payments domain-check-fulfillment domain-check-reviews domain-check-notifications domain-check-loyalty ir ir-summary schemas events-catalog docs-generate docs-catalog docs-check doctest ir-check ir-diff loadtest loadtest-mixed loadtest-stress loadtest-headless loadtest-spike loadtest-stack loadtest-stack-scaled loadtest-install loadtest-clean loadtest-cross-domain loadtest-race loadtest-flash-sale loadtest-cross-flood loadtest-priority loadtest-priority-headless loadtest-backfill-drain loadtest-starvation loadtest-baseline loadtest-fulfillment loadtest-loyalty loadtest-loyalty-events verify-loyalty eventstore-verify verify-observatory verify-observatory-skip-seed verify-domain-visualizer verify-domain-visualizer-skip-seed verify-domains idempotency-cleanup outbox-reconcile upgrade-check upgrade-opportunities
 
 # Default target
 help: ## Show this help message
@@ -279,6 +279,37 @@ domain-check-notifications: ## Run protean check on notifications domain
 
 domain-check-loyalty: ## Run protean check on loyalty domain
 	PYTHONPATH=src uv run protean check --domain=loyalty.domain
+
+# ──────────────────────────────────────────────
+# Upgrade readiness (protean upgrade-check)
+# ──────────────────────────────────────────────
+# Report-only, run on each Protean pin bump against the dev stack. upgrade-check
+# exits 2 when a finding is a warning, so exit 2 counts as success here; any
+# other non-zero exit (crash, Postgres unreachable) fails the target. Click also
+# exits 2 on a usage error and prints nothing on stdout, so the output must be a
+# JSON list.
+# $(1): extra flags, $(2): output file suffix.
+define run_upgrade_check
+	@mkdir -p .upgrade-check; \
+	failed=0; \
+	for d in identity catalogue ordering inventory payments fulfillment reviews notifications loyalty; do \
+		out=.upgrade-check/$$d$(2).json; \
+		PROTEAN_LOG_LEVEL=WARNING PYTHONPATH=src uv run protean upgrade-check --domain=$$d.domain --format json $(1) > $$out; \
+		rc=$$?; \
+		if [ $$rc -ne 0 ] && [ $$rc -ne 2 ]; then \
+			echo "$$d: upgrade-check failed (exit $$rc)"; failed=1; continue; \
+		fi; \
+		jq -er --arg ctx $$d 'if type != "array" then error("not a list of findings") elif length == 0 then "\($$ctx): 0 findings" else "\($$ctx): \(length) findings (codes: \(map(.code) | unique | join(", ")))" end' $$out \
+			|| { echo "$$d: $$out is not a JSON list of findings (exit $$rc)"; failed=1; }; \
+	done; \
+	exit $$failed
+endef
+
+upgrade-check: ## Report Protean upgrade-readiness findings for all nine contexts (requires the dev stack; JSON in .upgrade-check/)
+	$(call run_upgrade_check,,)
+
+upgrade-opportunities: ## Report shipped Protean capability the contexts still build by hand (PINNED=<version being adopted>; JSON in .upgrade-check/)
+	$(call run_upgrade_check,--opportunities $(if $(PINNED),--pinned-version $(PINNED)),.opportunities)
 
 # ──────────────────────────────────────────────
 # IR & Schema Generation

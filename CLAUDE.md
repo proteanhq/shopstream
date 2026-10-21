@@ -265,6 +265,8 @@ make ir-diff              # Diff live IR against saved baselines
 make schemas              # JSON, Avro and Protobuf schemas for all domains (.protean/<domain>/schemas/)
 make events-catalog       # Event catalog (versions, upcasters, consumers) from the committed IR, no DB needed
 make domain-check         # Run protean check on all domains
+make upgrade-check        # protean upgrade-check for all nine contexts against the dev stack (report only; JSON in .upgrade-check/)
+make upgrade-opportunities PINNED=<version>  # Shipped Protean features the contexts still build by hand, up to <version>
 make verify-domains       # protean verify (init, check, tests) for all nine contexts + tests/integration, memory mode
 make eventstore-verify    # Check the shared Message DB's integrity (read-only; stop the engines first)
 make idempotency-cleanup  # Delete processed-message markers older than [consume_idempotency.cleanup] retention_hours (run from cron)
@@ -345,6 +347,19 @@ make loadtest-clean           # Truncate all data between runs
 - FastAPI + Uvicorn
 - scalar-fastapi (API docs at /docs)
 - Ruff (lint/format), MyPy (types), pytest (testing)
+
+### Bumping the Protean pin
+
+Create the `_local` tables with the old pin (`make docker-up && make setup-db`) before you move it. Do not run `make setup-db` again after the move: it would build the tables from the new pin, and `upgrade-check` would then find no outbox table diff to report. After moving the pin, run these in order:
+
+1. `make upgrade-check`: upgrade-readiness findings per context, including outbox table diffs with their SQL.
+2. `make upgrade-opportunities PINNED=<new version>`: features the new version ships that the contexts still build by hand. `PINNED` is the version being adopted, not the old one.
+3. `make domain-check`
+4. `make ir-check`
+5. `make test-memory`
+6. `make test`
+
+Both upgrade targets only report. They fail when a context's check crashes or cannot reach its Postgres database, never because of a finding. Give each finding an outcome in the pin-bump PR: fixed, a new issue, or does not apply with the reason.
 
 ### Switching to Local Protean for Development
 
