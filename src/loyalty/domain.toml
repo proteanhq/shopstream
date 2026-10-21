@@ -15,6 +15,10 @@ snapshot_threshold = 5
 [server]
 default_subscription_type = "stream"
 default_subscription_profile = "shopstream"
+# Seconds the engine waits for its tasks after SIGTERM before it cancels them.
+# Protean's hardening guide advises staying under the 30 seconds after which
+# the --workers supervisor kills a worker.
+drain_timeout = 20
 
 # Every engine subscription starts from this profile: production's batch size,
 # retries, DLQ and circuit breaker, with a stream cap of 50000 entries instead of

@@ -239,6 +239,13 @@ capabilities:
     source: A
     status: partial   # the engine is built in test mode and its health server started by hand; Engine.run() is not used (proteanhq/protean#1055). lag_drain_rate is checked for presence only (one refresh, no numeric lag_seconds). Live rows under load are a hand check
 
+  - name: engine_drain
+    taught_by: README.md   # "Draining and stopping an engine"; [server] drain_timeout in each domain.toml
+    guarded_by: verification/resilience/test_engine_drain.py   # + verification/contracts/test_process_ports.py
+    property: "every context's engine reads drain_timeout 20.0; POST /drainz answers 200 with this process's pid; after it /readyz answers 503 with only checks.draining true, /healthz stays 200, GET /drainz is a 404; every stream subscription and broker subscriber would stop before its next read and every outbox processor would not; the seven contexts that consume the `global` bus wire a broker subscriber; each compose engine's stop_grace_period is at least 5 seconds longer than its drain window, which stays under the supervisor's 30-second kill"
+    source: A
+    status: partial   # the engine is built in test mode and its health server started by hand; Engine.run() is not used (proteanhq/protean#1055). Draining a live engine under load, stopping and restarting it with nothing left pending is the hand check `make verify-drain`. SIGTERM without a drain leaves messages pending under a dead consumer (proteanhq/protean#1929, pinned in verification/regression/test_messaging.py)
+
   - name: engine_health_ports
     taught_by: src/identity/domain.toml   # [server.health] port + port_auto_increment + host
     guarded_by: verification/contracts/test_process_ports.py

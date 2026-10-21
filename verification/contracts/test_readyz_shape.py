@@ -34,9 +34,10 @@ WHY IT DOES NOT RUN THE ENGINE
 from __future__ import annotations
 
 import asyncio
-import json
 
 import pytest
+
+from verification.support.health_http import health_request
 
 # The fields Protean documents for a `/readyz` subscription row: the
 # SubscriptionStatus fields minus the stream cursors, plus the drain rate.
@@ -57,17 +58,6 @@ ROW_FIELDS = {
 GLOBAL_OUTBOX = "outbox-processor-default-to-global-external"
 
 
-async def _get(host: str, port: int, path: str) -> tuple[int, dict]:
-    reader, writer = await asyncio.open_connection(host, port)
-    writer.write(f"GET {path} HTTP/1.1\r\nHost: {host}\r\n\r\n".encode())
-    await writer.drain()
-    raw = await reader.read()
-    writer.close()
-    await writer.wait_closed()
-    head, _, body = raw.partition(b"\r\n\r\n")
-    return int(head.split()[1]), json.loads(body)
-
-
 async def _read_readyz(engine) -> tuple[int, dict]:
     from protean.server.health import HealthServer
 
@@ -79,7 +69,7 @@ async def _read_readyz(engine) -> tuple[int, dict]:
         # The first collection runs in a worker thread; until it lands the
         # block says `collection_pending` and has no rows.
         for _ in range(100):
-            code, body = await _get(server.host, server.port, "/readyz")
+            code, body = await health_request(server.host, server.port, "GET", "/readyz")
             block = body.get("checks", {}).get("subscriptions", {})
             if not block.get("collection_pending"):
                 return code, body

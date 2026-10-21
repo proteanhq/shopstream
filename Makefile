@@ -484,6 +484,10 @@ eventstore-verify: ## Check the shared Message DB's internal consistency (read-o
 verify-loyalty: ## Verify Loyalty end-to-end: account/points/transfer/campaign/redemption API checks (requires running stack + engine-loyalty)
 	./scripts/verify-loyalty.sh
 
+.PHONY: verify-drain
+verify-drain: ## Drain a live Inventory engine under load, restart it, check no message is lost (requires make api; starts its own engine)
+	./scripts/verify-drain.sh
+
 verify-observatory: ## Verify Observatory Timeline + Causation Graph: seeds data + runs ~66 API checks (requires running stack)
 	./scripts/verify-observatory.sh
 

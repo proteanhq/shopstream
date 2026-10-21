@@ -15,6 +15,11 @@ x-engine-env: &engine-env
   <<: *common-env
   PROTEAN_HEALTH_HOST: 0.0.0.0
 
+# How long `docker compose stop` waits after SIGTERM before it sends SIGKILL.
+# It covers the engine's drain window (`[server] drain_timeout` in each
+# domain.toml) plus time to close connections. Docker's default is 10 seconds.
+x-engine-stop-grace-period: &engine-stop-grace-period 30s
+
 x-engine-healthcheck: &engine-healthcheck
   interval: 15s
   timeout: 5s
@@ -128,6 +133,7 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    stop_grace_period: *engine-stop-grace-period
     healthcheck:
       <<: *engine-healthcheck
       test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8100/readyz"]
@@ -153,6 +159,7 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    stop_grace_period: *engine-stop-grace-period
     healthcheck:
       <<: *engine-healthcheck
       test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8110/readyz"]
@@ -178,6 +185,7 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    stop_grace_period: *engine-stop-grace-period
     healthcheck:
       <<: *engine-healthcheck
       test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8120/readyz"]
@@ -203,6 +211,7 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    stop_grace_period: *engine-stop-grace-period
     healthcheck:
       <<: *engine-healthcheck
       test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8130/readyz"]
@@ -228,6 +237,7 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    stop_grace_period: *engine-stop-grace-period
     healthcheck:
       <<: *engine-healthcheck
       test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8140/readyz"]
@@ -253,6 +263,7 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    stop_grace_period: *engine-stop-grace-period
     healthcheck:
       <<: *engine-healthcheck
       test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8150/readyz"]
@@ -278,6 +289,7 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    stop_grace_period: *engine-stop-grace-period
     healthcheck:
       <<: *engine-healthcheck
       test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8160/readyz"]
@@ -303,6 +315,7 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    stop_grace_period: *engine-stop-grace-period
     healthcheck:
       <<: *engine-healthcheck
       test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8170/readyz"]
@@ -329,6 +342,7 @@ services:
       message-db:
         condition: service_healthy
     restart: unless-stopped
+    stop_grace_period: *engine-stop-grace-period
     healthcheck:
       <<: *engine-healthcheck
       test: ["CMD-SHELL", "curl -fsS -o /dev/null http://127.0.0.1:8180/readyz"]

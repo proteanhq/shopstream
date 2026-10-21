@@ -339,3 +339,119 @@ def test_1923_engine_runs_outbox_processors_only_for_configured_databases(orderi
         "outbox-processor-default-to-default",
         "outbox-processor-default-to-global-external",
     ]
+
+
+def _restart_after_a_batch(shutting_down: bool) -> tuple[int, int, int]:
+    """Read a batch, process it with the engine shutting down or not, then let a restarted consumer catch up.
+
+    Returns `(handled, pending, dead_lettered)` for the three messages. Protean's own
+    asserts inside the subscription fail the test outright, so the pin's xfail
+    stays tied to its one assertion.
+    """
+    import asyncio
+    import uuid
+
+    from protean import current_domain
+    from protean.server.engine import Engine
+    from protean.server.subscription.stream_subscription import StreamSubscription
+    from protean.utils.eventing import Message
+
+    from inventory.projections.event_audit import EventAudit, EventAuditHandler
+    from inventory.stock.stock import InventoryItem
+
+    broker = current_domain.brokers["default"]
+    client = broker.redis_instance
+    stream = f"regression::sigterm-{uuid.uuid4().hex[:8]}"
+    engines = []
+
+    def subscription(consumer: str | None = None) -> StreamSubscription:
+        engines.append(Engine(current_domain, test_mode=True))
+        sub = StreamSubscription(engines[-1], stream, EventAuditHandler, blocking_timeout_ms=50, retry_delay_seconds=0)
+        if consumer:
+            # A restart on another host or pod: nothing in the name matches the stopped consumer.
+            sub.consumer_name = sub.subscription_id = consumer
+        return sub
+
+    try:
+        stopping = subscription()
+        asyncio.run(stopping.initialize())
+        ids = []
+        for n in range(3):
+            item = InventoryItem.create(f"p{n}", f"v{n}", "w", f"SIGTERM-{n}")
+            ids.append(str(item.id))
+            broker.publish(stream, Message.from_domain_object(item._events[0]).to_dict())
+        batch = asyncio.run(stopping.get_next_batch_of_messages())
+        if len(batch) != 3:
+            pytest.fail(f"precondition: one read handed the subscription all 3 messages, got {len(batch)}")
+
+        # What SIGTERM does first: Engine.shutdown() sets this flag, which Engine.handle_message reads, then
+        # waits for the batch in hand.
+        stopping.engine.shutting_down = shutting_down
+        try:
+            asyncio.run(stopping.process_batch(batch))
+        except AssertionError as exc:
+            pytest.fail(f"Protean asserted while processing the batch: {exc}")
+
+        # Age what the stopped consumer left, so a fix that claims idle entries at startup has something to claim.
+        left = [entry["message_id"] for entry in client.xpending_range(stream, stopping.consumer_group, "-", "+", 10)]
+        if left:
+            client.xclaim(stream, stopping.consumer_group, stopping.consumer_name, 0, left, idle=3_600_000)
+
+        restarted = subscription(f"EventAuditHandler-restarted-host-1-{uuid.uuid4().hex[:6]}")
+        asyncio.run(restarted.initialize())
+        asyncio.run(_deliver(restarted, 3))
+
+        audits = current_domain.repository_for(EventAudit)._dao.query.filter(inventory_item_id__in=ids).all()
+        pending = client.xpending(stream, stopping.consumer_group)["pending"]
+        dead = client.xlen(stopping.dlq_stream)
+        return audits.total, pending, dead
+    finally:
+        client.delete(stream, f"{stream}:dlq", f"{stream}:backfill", f"{stream}:backfill:dlq")
+        for engine in engines:
+            engine.loop.close()
+
+
+@pytest.mark.protean_bug(
+    issue=1929,
+    state="open",
+    bug=(
+        "On SIGTERM, `Engine.shutdown()` sets `shutting_down` and `Engine.handle_message` then returns False, so "
+        "`StreamSubscription.process_batch` marks every message left in its batch as failed without running it. They "
+        "stay pending under the stopped process's consumer name, which no later process reads, and the multi-group "
+        "trim then deletes them. Draining with `POST /drainz` and waiting for the batch to finish before SIGTERM "
+        "avoids it for messages that do not fail."
+    ),
+)
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="SIGTERM leaves the rest of an in-flight batch pending, and no restarted consumer handles it",
+)
+@pytest.mark.usefixtures("inventory_ctx")
+def test_1929_sigterm_does_not_strand_the_rest_of_an_in_flight_batch():
+    """proteanhq/protean#1929: messages in hand at SIGTERM are never handled.
+
+    The subscription reads three messages, then the engine starts shutting down
+    before it handles them. A subscription with an unrelated consumer name,
+    standing in for an engine restarted on another host, then catches up, an hour
+    after the stopped consumer last touched the messages. Each message should be
+    handled once by one of the two, with nothing left pending and nothing
+    dead-lettered. Today none is handled and all three stay pending in the group.
+    The same steps without the shutdown handle all three, which the test checks
+    first so it can only fail on the bug.
+    """
+    import redis
+    from protean import current_domain
+
+    client = getattr(current_domain.brokers["default"], "redis_instance", None)
+    if client is None:
+        pytest.skip("needs the Redis streams broker (run with --protean-env test)")
+    try:
+        client.ping()
+    except redis.exceptions.ConnectionError:
+        pytest.skip("the default broker's Redis is not reachable")
+
+    if _restart_after_a_batch(shutting_down=False) != (3, 0, 0):
+        pytest.fail("precondition: without a shutdown all three are handled and acknowledged")
+
+    assert _restart_after_a_batch(shutting_down=True) == (3, 0, 0)
