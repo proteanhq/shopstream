@@ -653,7 +653,7 @@ toxiproxy-up: ## Start Toxiproxy (API :8474) and create the Redis proxy on :2637
 toxiproxy-down: ## Stop and remove the Toxiproxy container
 	@docker rm -f shopstream-toxiproxy >/dev/null 2>&1 && echo "toxiproxy removed" || true
 
-toxiproxy-verify: ## Run the T2.6 convergence check (needs Docker + toxiproxy-up; runs under the dev env and empties the dev event store)
+toxiproxy-verify: ## Run the T2.6 convergence check (needs Docker + toxiproxy-up; dev env on the test databases and Redis DBs 12 and 14)
 	PROTEAN_ENV=development PYTHONPATH=src .venv/bin/python -m pytest \
 		verification/resilience/test_toxiproxy_convergence.py -q
 

@@ -18,12 +18,13 @@ WHAT THIS CHECKS
     Workload: init 20 units, reserve 3 -> reserved=3, available=17. FIXED, not the
     random Locust load.
 
-SCOPE — the PASSING assertion is the LATENCY case
-    Under broker LATENCY the pipeline converges cleanly, so that is the guarded
-    property. A hard PARTITION was also injected during exploration and surfaced
-    real findings (documented in TICKETS T2.6), but full re-convergence after a
-    hard partition is NOT reliable via an in-process `Engine.run()` drain (see the
-    findings below), so it is not asserted here — it needs the real engine process.
+SCOPE — the asserted property is the LATENCY case
+    Under broker LATENCY the pipeline should converge, so that is the guarded
+    property (see KNOWN FAILURE below). A hard PARTITION was also injected
+    during exploration and surfaced real findings (documented in TICKETS T2.6),
+    but full re-convergence after a hard partition is NOT reliable via an
+    in-process `Engine.run()` drain (see the findings below), so it is not
+    asserted here — it needs the real engine process.
 
     Findings from the partition injection (all proteanhq/protean#1055-class):
       * without a socket timeout on the broker, the engine BLOCKS FOREVER on a
@@ -33,6 +34,26 @@ SCOPE — the PASSING assertion is the LATENCY case
       * messages already delivered-but-unacked when the partition hits can stay
         stuck in the consumer group's pending list and are not reclaimed by an
         in-process drain, so the projection converges only partially.
+
+KNOWN FAILURE: PROTEAN PUBLISHES THE ITEM'S EVENTS OUT OF ORDER
+    The outbox claims rows by priority alone, so rows with the same priority
+    publish in whatever order Postgres returns them (proteanhq/protean#1893).
+    Under the latency toxic, the outbox often publishes two or three of the
+    item's `StockReserved` before its `StockInitialized`. `InventoryLevelProjector`
+    raises `ObjectNotFoundError` on each. After 3 attempts the subscription moves
+    the event to the dead-letter stream, so the projection never reaches
+    reserved=3, however long the drain runs. The latency test passes on some runs
+    only. It gets no xfail: the repo pins open bugs with strict xfails, and a
+    strict xfail would fail on the runs that pass.
+
+ISOLATED FROM THE DEV STACK
+    The check uses `inventory_test`, `message_store_test`, Redis DB 12 behind the
+    proxy and DB 14 for the external bus. A running dev inventory engine reads
+    `inventory_local` and Redis DB 3. On those, it claimed the workload's outbox
+    rows and joined each projector's consumer group, so it projected the events
+    itself and the test's engine received none of them.
+    The test stores are shared with `make test` and with other real-stores runs,
+    so do not run them at the same time.
 
 WHY ENGINE-MARKED / LOCAL
     Needs the real async engine + Redis + Postgres + a running Toxiproxy.
@@ -48,6 +69,7 @@ from __future__ import annotations
 import contextlib
 import os
 import uuid
+from pathlib import Path
 
 import pytest
 import requests
@@ -56,6 +78,7 @@ TOXIPROXY_API = "http://localhost:8474"
 PROXY_NAME = "redis"
 PROXY_LISTEN = "0.0.0.0:26379"
 REDIS_UPSTREAM = "host.docker.internal:16379"
+REDIS_DB = 12
 
 
 def _toxiproxy_ready() -> tuple[bool, str]:
@@ -71,6 +94,7 @@ def _toxiproxy_ready() -> tuple[bool, str]:
 
 _ready, _why = _toxiproxy_ready()
 
+
 # Route the inventory broker through Toxiproxy. This must be set before the
 # inventory domain is imported, because the broker URI is read at init time. The
 # socket timeouts bound broker ops so a fault fails fast instead of hanging.
@@ -78,9 +102,35 @@ _ready, _why = _toxiproxy_ready()
 # setting it during collection of a skipped module would point any domain loaded
 # later in the session at a proxy that is not there. When it does run (the base
 # env with Toxiproxy up, as `make toxiproxy-verify` does), domains loaded later in
-# the same session also go through the proxy.
+# the same session also go through the proxy, and use the test event store and bus
+# set below.
+#
+# The other three keep the check off the dev stack (see ISOLATED FROM THE DEV STACK
+# above). They take the `[test]` overlay's stores from src/inventory/domain.toml.
+# All four are assigned, not defaulted, so a dev URL exported in the shell cannot
+# undo the isolation. The overlay reads its bus URI from REDIS_EXTERNAL_URL, which
+# a dev shell may point at DB 15, so that variable is unset while the overlay loads.
+def _test_env_stores():
+    from protean.domain.config import Config2
+
+    saved = {var: os.environ.pop(var, None) for var in ("PROTEAN_ENV", "REDIS_EXTERNAL_URL")}
+    os.environ["PROTEAN_ENV"] = "test"
+    try:
+        return Config2.load_from_path(str(Path(__file__).resolve().parents[2] / "src" / "inventory"))
+    finally:
+        for var, value in saved.items():
+            if value is None:
+                os.environ.pop(var, None)
+            else:
+                os.environ[var] = value
+
+
 if _ready:
-    os.environ.setdefault("REDIS_URL", "redis://127.0.0.1:26379/3?socket_connect_timeout=1&socket_timeout=2")
+    os.environ["REDIS_URL"] = f"redis://127.0.0.1:26379/{REDIS_DB}?socket_connect_timeout=1&socket_timeout=2"
+    _test = _test_env_stores()
+    os.environ["REDIS_EXTERNAL_URL"] = _test["brokers"]["global"]["URI"]
+    os.environ["INVENTORY_DATABASE_URL"] = _test["databases"]["default"]["database_uri"]
+    os.environ["MESSAGE_DB_URL"] = _test["event_store"]["database_uri"]
 pytestmark = [
     pytest.mark.engine,
     pytest.mark.slow,
@@ -131,7 +181,7 @@ def inventory_domain():
         inventory.truncate_database()
         import redis
 
-        redis.Redis(host="localhost", port=26379, db=3).flushdb()
+        redis.Redis(host="localhost", port=26379, db=REDIS_DB).flushdb()
         yield inventory
     _clear_toxics()
 
@@ -202,7 +252,7 @@ def test_outbox_durable_before_publish(inventory_domain):
     independent of the broker — so a broker fault can delay publishing but never
     lose the events. Fast, fault-free sanity check of the durability premise."""
     item_id = _run_fixed_workload(inventory_domain)
-    assert _pending_outbox(inventory_domain) > 0
+    assert _pending_outbox(inventory_domain) == 4  # no other engine claimed a row
     assert _reserved(inventory_domain, item_id) is None  # nothing published/projected yet
 
 

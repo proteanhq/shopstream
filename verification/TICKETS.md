@@ -357,9 +357,12 @@ whether it gates PRs / nightly / releases.
 - `verification/resilience/test_toxiproxy_convergence.py`. Toxiproxy sits in front
   of Redis (`make toxiproxy-up` runs the container + creates the `:26379 -> redis`
   proxy). The inventory broker is routed through it just by setting
-  `REDIS_URL=redis://127.0.0.1:26379/3` — the domain.toml URI is `${REDIS_URL|...}`,
+  `REDIS_URL=redis://127.0.0.1:26379/12` — the domain.toml URI is `${REDIS_URL|...}`,
   so NO src change; Postgres + event store stay direct. A Redis toxic therefore
-  stalls exactly the publish/consume steps.
+  stalls exactly the publish/consume steps. The check also points the inventory
+  context at `inventory_test`, `message_store_test` and DB 14 for the external bus,
+  so a running dev inventory engine cannot claim its outbox rows or join its
+  consumer groups.
 - FIXED scripted workload with a hand-computed end state (init 20 units, reserve 3
   → reserved=3, available=17) — NOT the random Locust load. Driven in-process; the
   engine is drained with `Engine(inventory, test_mode=True).run()`.
@@ -367,6 +370,8 @@ whether it gates PRs / nightly / releases.
   slows the pipeline but loses nothing — the fixed workload still drains the outbox
   to zero and InventoryLevel converges to reserved=3. Plus a fast durability sanity
   check (the workload's events are in the outbox pending, independent of the broker).
+  The latency case passes on some runs only, because the outbox can publish
+  an item's `StockReserved` before its `StockInitialized` (proteanhq/protean#1893).
 - Partition was ALSO injected during exploration and produced the findings below;
   full re-convergence after a HARD partition is not asserted because it is not
   reliable via an in-process `Engine.run()` drain — it needs the real engine
