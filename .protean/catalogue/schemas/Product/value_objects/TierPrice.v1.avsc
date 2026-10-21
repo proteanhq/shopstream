@@ -1,0 +1,17 @@
+{
+  "doc": "The discounted price of a variant for one loyalty tier.",
+  "fields": [
+    {
+      "name": "amount",
+      "type": {
+        "logicalType": "decimal",
+        "precision": 19,
+        "scale": 4,
+        "type": "bytes"
+      }
+    }
+  ],
+  "name": "TierPrice",
+  "namespace": "catalogue.product.product",
+  "type": "record"
+}

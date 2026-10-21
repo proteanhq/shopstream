@@ -85,6 +85,11 @@ classDiagram
     }
     note for catalogue_product_product_SEO "slug_must_be_url_safe"
     catalogue_product_product_Product *-- catalogue_product_product_SEO : seo
+    class catalogue_product_product_TierPrice["TierPrice"] {
+        <<ValueObject>>
+        +amount Decimal~required~
+    }
+    note for catalogue_product_product_TierPrice "amount_must_be_positive"
     class catalogue_product_product_Weight["Weight"] {
         <<ValueObject>>
         +unit String

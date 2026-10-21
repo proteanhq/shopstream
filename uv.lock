@@ -1934,7 +1934,7 @@ wheels = [
 [[package]]
 name = "protean"
 version = "0.17.0"
-source = { git = "https://github.com/proteanhq/protean.git?rev=main#2acdfdb728ec014ad89057f09035d9e5d48d43a1" }
+source = { git = "https://github.com/proteanhq/protean.git?rev=main#310919002a530de633a45423d6bc81bac2a9fbb4" }
 dependencies = [
     { name = "bleach" },
     { name = "inflection" },

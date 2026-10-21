@@ -174,3 +174,96 @@ def test_ir_diff_summary_counts_a_breaking_field_type_change(tmp_path):
     if result.exit_code != 1 or [c["field_name"] for c in breaking] != [name]:
         pytest.fail(f"precondition: the type change is reported as breaking\n{result.output}")
     assert report["summary"]["has_breaking_changes"] is True
+
+
+CATALOGUE_IR = os.path.join(os.path.dirname(__file__), "..", "..", ".protean", "catalogue", "ir.json")
+PRICE_FQN = "catalogue.product.product.Price"
+
+
+def _price_fields(ir: dict) -> dict:
+    return ir["clusters"]["catalogue.product.product.Product"]["value_objects"][PRICE_FQN]["fields"]
+
+
+@pytest.mark.protean_bug(
+    issue=None,
+    state="open",
+    bug=(
+        "`protean ir diff` does not classify a change to a `Dict` field's value type. Typing catalogue's "
+        "`Price.tier_prices` as `Dict(value_type=ValueObject(TierPrice))` shows as `tier_prices.content_type: None → "
+        "TierPrice` and exits 2 (non-breaking), with only the added `TierPrice` listed as a safe change. Stored rows "
+        "whose tier values are bare numbers no longer load."
+    ),
+)
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="ir diff does not classify a Dict value type change, so it passes as non-breaking",
+)
+def test_ir_diff_classifies_a_dict_value_type_change_as_breaking(tmp_path):
+    """Protean finding (not yet filed upstream): a Dict value type change passes as safe.
+
+    The left side is the catalogue baseline with `Price.tier_prices` untyped, as it was
+    before it became a map of `TierPrice`. Values stored under the old shape can't be
+    loaded under the new one, so the change is breaking.
+    """
+    import json
+
+    with open(CATALOGUE_IR) as fh:
+        ir = json.load(fh)
+    field = _price_fields(ir)["tier_prices"]
+    if field.get("content_type") != "TierPrice":
+        pytest.fail("precondition: the catalogue baseline types Price.tier_prices as a map of TierPrice")
+    field["content_type"] = None
+    untyped = tmp_path / "catalogue-ir.json"
+    untyped.write_text(json.dumps(ir))
+
+    result = _ir_diff("--left", str(untyped), "--right", CATALOGUE_IR, "--dir", str(tmp_path), "--format", "json")
+
+    if result.exit_code not in (1, 2):
+        pytest.fail(f"precondition: ir diff reports the change\n{result.output}")
+    breaking = json.loads(result.stdout)["compatibility"]["breaking_changes"]
+    assert result.exit_code == 1
+    assert "tier_prices" in [c["field_name"] for c in breaking]
+
+
+@pytest.mark.protean_bug(
+    issue=None,
+    state="open",
+    bug=(
+        "`protean schema generate` ignores a `Dict` field's value type. For catalogue's `Price.tier_prices`, a "
+        "`Dict(value_type=ValueObject(TierPrice))`, the JSON Schema has a bare `object`, Avro a map of `string` and "
+        "Protobuf `map<string, string>`. None of them refers to `TierPrice`."
+    ),
+)
+@pytest.mark.parametrize("fmt", ["json", "avsc", "proto"])
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="schema generate writes a Dict of value objects as an untyped map",
+)
+def test_schema_generate_types_a_dict_of_value_objects(tmp_path, fmt):
+    """Protean finding (not yet filed upstream): typed Dict values are dropped from schemas."""
+    import protean.cli
+    from typer.testing import CliRunner
+
+    result = CliRunner().invoke(
+        protean.cli.app,
+        ["schema", "generate", "--ir", CATALOGUE_IR, "--format", "all", "--output", str(tmp_path)],
+    )
+    if result.exit_code != 0:
+        pytest.fail(f"precondition: schema generate succeeds\n{result.output}")
+    text = (tmp_path / "schemas" / "Product" / "value_objects" / f"Price.v1.{fmt}").read_text(encoding="utf-8")
+    if fmt == "proto":
+        tier_prices = next((line for line in text.splitlines() if " tier_prices = " in line), None)
+    else:
+        import json
+
+        schema = json.loads(text)
+        if fmt == "json":
+            tier_prices = schema["properties"].get("tier_prices")
+        else:
+            tier_prices = next((f["type"] for f in schema["fields"] if f["name"] == "tier_prices"), None)
+    if tier_prices is None:
+        pytest.fail(f"precondition: the Price schema has tier_prices\n{text}")
+
+    assert "TierPrice" in str(tier_prices)

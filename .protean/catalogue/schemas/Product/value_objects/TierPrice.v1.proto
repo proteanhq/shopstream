@@ -1,0 +1,6 @@
+syntax = "proto3";
+package catalogue.product.product;
+
+message TierPrice {
+  string amount = 1;
+}

@@ -48,38 +48,39 @@ class ProductVisibility(Enum):
 
 
 @catalogue.value_object(part_of="Product")
+class TierPrice:
+    """The discounted price of a variant for one loyalty tier."""
+
+    amount: D = Decimal(precision=19, scale=4, required=True)
+
+    @invariant.post
+    def amount_must_be_positive(self) -> None:
+        if self.amount <= 0:
+            raise ValidationError({"amount": ["Tier price must be a positive number"]})
+
+
+@catalogue.value_object(part_of="Product")
 class Price:
     """The monetary cost of a variant, with optional loyalty-tier discounts.
 
-    Base price is the standard retail price. Tier prices (stored as JSON) allow
-    different pricing for Silver, Gold, and Platinum customers. Tier prices must
-    always be lower than the base price.
+    Base price is the standard retail price. Tier prices map a tier name to a
+    `TierPrice`, allowing different pricing for Silver, Gold, and Platinum
+    customers. Tier prices must always be lower than the base price.
     """
 
     base_price: D = Decimal(precision=19, scale=4, required=True, min_value=D("0.01"))
     currency: str = String(max_length=3, default="USD")
-    tier_prices: dict[str, Any] = Dict()
+    tier_prices: dict[str, TierPrice] = Dict(value_type=ValueObject(TierPrice))
 
     @invariant.post
     def tier_prices_must_be_valid(self) -> None:
-        if not self.tier_prices:
-            return
-
-        tiers = self.tier_prices
-
-        if not isinstance(tiers, dict):
-            raise ValidationError({"tier_prices": ["Tier prices must be a JSON object"]})
-
-        for tier_name, price in tiers.items():
-            if not isinstance(price, int | float) or price <= 0:
-                raise ValidationError({"tier_prices": [f"Tier price for '{tier_name}' must be a positive number"]})
-            # The float in the JSON blob is compared at 4 places: 99.99 as a
-            # float is just below Decimal("99.99").
-            if to_money(price) >= self.base_price:
+        for tier_name, tier_price in self.tier_prices.items():
+            if tier_price.amount >= self.base_price:
                 raise ValidationError(
                     {
                         "tier_prices": [
-                            f"Tier price for '{tier_name}' ({price}) must be less than base price ({self.base_price})"
+                            f"Tier price for '{tier_name}' ({tier_price.amount}) "
+                            f"must be less than base price ({self.base_price})"
                         ]
                     }
                 )
@@ -367,9 +368,7 @@ class Product:
         existing_tiers = dict(variant.price.tier_prices) if variant.price.tier_prices else {}
 
         tier_price = to_money(price)
-        # tier_prices is a JSON blob whose values the invariant above reads as
-        # numbers. A Decimal would come back from the store as a string.
-        existing_tiers[tier] = float(tier_price)
+        existing_tiers[tier] = TierPrice(amount=tier_price)
 
         variant.price = Price(
             base_price=variant.price.base_price,

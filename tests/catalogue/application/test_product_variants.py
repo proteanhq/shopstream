@@ -108,4 +108,4 @@ class TestSetTierPriceHandler:
 
         product = current_domain.repository_for(Product).get(product_id)
         tiers = product.variants[0].price.tier_prices
-        assert tiers["Silver"] == 89.99
+        assert tiers["Silver"].amount == Decimal("89.99")

@@ -5,6 +5,7 @@ from decimal import Decimal
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
+from protean.integrations.fastapi import register_exception_handlers
 from protean.utils.globals import current_domain
 
 from catalogue.api import category_router, product_router
@@ -17,6 +18,7 @@ def client():
     app = FastAPI()
     app.include_router(product_router)
     app.include_router(category_router)
+    register_exception_handlers(app)
     return TestClient(app)
 
 
@@ -138,6 +140,30 @@ class TestVariantEndpoints:
             },
         )
         assert response.status_code == 200
+
+        product = current_domain.repository_for(Product).get(product_id)
+        assert product.variants[0].price.tier_prices["Silver"].amount == Decimal("89.99")
+
+    @pytest.mark.parametrize(
+        ("price", "field"),
+        [(0, "amount"), (99.99, "tier_prices")],
+    )
+    def test_set_invalid_tier_price_returns_400(self, client, price, field):
+        product_id = self._create(client)
+        client.post(
+            f"/products/{product_id}/variants",
+            json={"variant_sku": "V-API-004", "base_price": 99.99},
+        )
+        variant_id = current_domain.repository_for(Product).get(product_id).variants[0].id
+
+        response = client.put(
+            f"/products/{product_id}/variants/{variant_id}/tier-price",
+            json={"tier": "Silver", "price": price},
+        )
+
+        assert response.status_code == 400
+        assert field in response.json()["error"]
+        assert current_domain.repository_for(Product).get(product_id).variants[0].price.tier_prices == {}
 
 
 class TestImageEndpoints:

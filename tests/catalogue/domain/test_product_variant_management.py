@@ -6,13 +6,20 @@ import pytest
 from protean.exceptions import ValidationError
 
 from catalogue.product.events import TierPriceSet, VariantAdded, VariantPriceChanged
-from catalogue.product.product import Dimensions, Price, Product, Weight
+from catalogue.product.product import Dimensions, Price, Product, TierPrice, Weight
 
 
 def _make_product(**overrides):
     defaults = {"sku": "PROD-001", "title": "Test Product"}
     defaults.update(overrides)
     return Product.create(**defaults)
+
+
+def _product_with_variant(base_price):
+    product = _make_product()
+    variant = product.add_variant(variant_sku="VAR-001", price=Price(base_price=base_price))
+    product._events.clear()
+    return product, variant
 
 
 class TestAddVariant:
@@ -119,7 +126,7 @@ class TestSetTierPrice:
         product.set_tier_price(variant.id, "Silver", 89.99)
 
         tiers = product.variants[0].price.tier_prices
-        assert tiers["Silver"] == 89.99
+        assert tiers == {"Silver": TierPrice(amount=Decimal("89.9900"))}
         assert len(product._events) == 1
 
         event = product._events[0]
@@ -137,8 +144,34 @@ class TestSetTierPrice:
         product.set_tier_price(variant.id, "Gold", 79.99)
 
         tiers = product.variants[0].price.tier_prices
-        assert tiers["Silver"] == 89.99
-        assert tiers["Gold"] == 79.99
+        assert tiers["Silver"].amount == Decimal("89.99")
+        assert tiers["Gold"].amount == Decimal("79.99")
+
+    def test_set_gold_tier_below_base_price(self):
+        product, variant = _product_with_variant(base_price=19.99)
+
+        product.set_tier_price(variant.id, "Gold", 9.99)
+
+        assert product.variants[0].price.tier_prices == {"Gold": TierPrice(amount=Decimal("9.9900"))}
+
+    @pytest.mark.parametrize(
+        ("tier_price", "field", "message"),
+        [
+            (-1, "amount", "Tier price must be a positive number"),
+            (0, "amount", "Tier price must be a positive number"),
+            (19.99, "tier_prices", "must be less than base price"),
+            (25.00, "tier_prices", "must be less than base price"),
+        ],
+    )
+    def test_set_invalid_tier_price_leaves_variant_unchanged(self, tier_price, field, message):
+        product, variant = _product_with_variant(base_price=19.99)
+
+        with pytest.raises(ValidationError) as exc:
+            product.set_tier_price(variant.id, "Gold", tier_price)
+
+        assert message in str(exc.value.messages[field])
+        assert product.variants[0].price.tier_prices == {}
+        assert product._events == []
 
     def test_set_tier_price_nonexistent_variant_raises_error(self):
         product = _make_product()

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "The discounted price of a variant for one loyalty tier.",
+  "properties": {
+    "amount": {
+      "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?$",
+      "type": "string",
+      "x-precision": 19,
+      "x-scale": 4
+    }
+  },
+  "required": [
+    "amount"
+  ],
+  "title": "TierPrice",
+  "type": "object",
+  "x-protean-aggregate": "catalogue.product.product.Product",
+  "x-protean-element-type": "value_object",
+  "x-protean-fqn": "catalogue.product.product.TierPrice"
+}
