@@ -14,21 +14,27 @@ WHAT THIS CHECKS
     We run one FIXED workload (init 20 units, reserve 3) twice against the same
     real Postgres — once with `event_processing=sync` (inline) and once with
     `async` (outbox + `Engine.run()` drain) — and assert the two InventoryLevel
-    projections match field-for-field (bar the row id / timestamp).
+    projections match field-for-field (bar the row id, timestamp and version).
 
     The outbox is on in both modes, so the sync run also leaves its events as
     pending outbox rows. The test marks them published before the async run.
-    Otherwise the drain publishes them, and every consumer that is not
-    idempotent (EventAudit, for one) sees the sync item's events twice.
+    Otherwise the drain publishes them and every consumer receives the sync
+    item's events a second time. Projectors marked `idempotent=True` skip the
+    copy. EventAudit is not idempotent and adds a row per delivery, so the test
+    checks its row count for the sync item to prove no replay happened.
 
-KNOWN FAILURE: PROTEAN PUBLISHES ONE AGGREGATE'S EVENTS OUT OF ORDER
-    On Postgres the outbox claims rows by priority alone, so rows with the same
-    priority publish in whatever order the database returns them
-    (proteanhq/protean#1893). When the async item's `StockReserved` arrives
-    before its `StockInitialized`, or its reservations arrive out of order,
-    InventoryLevel ends with the wrong `available` and the final comparison
-    fails. Until the pin has the fix, this check passes on some runs only. It
-    gets no xfail, because a strict xfail would fail on the runs that pass.
+KNOWN FAILURE: PROTEAN CAN PUBLISH ONE AGGREGATE'S EVENTS OUT OF ORDER
+    The outbox claims rows by priority alone, so rows with the same priority
+    publish in whatever order the database returns them (proteanhq/protean#1893).
+    On Postgres this shows up in two ways:
+      * the async item's `StockReserved` arrives before its `StockInitialized`.
+        The projectors raise `ObjectNotFoundError`, the retries use up the
+        drain's cycles, and the async row is missing or short.
+      * its three `StockReserved` arrive out of order. InventoryLevel copies
+        `available` from the last event it applies, so it ends at 19, not 17.
+    Until the pin has the fix, this check passes on some runs only. It gets no
+    xfail: the repo pins open bugs with strict xfails, and a strict xfail would
+    fail on the runs that pass.
 
 WHY THIS WAS DEFERRED FROM T2.1, AND IS ENGINE-MARKED
     Both CI envs (memory, test) are `sync`, so a real sync-vs-async comparison
@@ -41,6 +47,8 @@ WHY THIS WAS DEFERRED FROM T2.1, AND IS ENGINE-MARKED
     read-model equivalence.
 
 RUN:
+    Stop the dev engines first. They read the same `inventory_local` outbox and
+    Redis DB 3, so they can publish the sync rows before the test marks them.
     make docker-up && make truncate-db
     make sync-async-verify        # PROTEAN_ENV=development, base(async) env
 """
@@ -170,16 +178,29 @@ def test_sync_and_async_yield_the_same_projection(inventory_domain):
     sync_item = _run_workload(inv, **inputs)
     sync_view = _level_view(inv, sync_item)
     sync_audit_rows = _audit_count(inv, sync_item)
-    assert _mark_published(inv, sync_item) > 0, "sync path wrote no outbox rows to keep out of the drain"
+    # One StockInitialized row for the internal broker, and two rows (internal
+    # and the global bus) for each of the three published StockReserved.
+    assert _mark_published(inv, sync_item) == 7, "not every sync outbox row was kept out of the drain"
 
     # Path 2 — async: events go to the outbox; drain the engine to project them.
     inv.config["event_processing"] = "async"
     async_item = _run_workload(inv, **inputs)
-    _drain(inv, until=lambda: (v := _level_view(inv, async_item)) is not None and v.get("reserved") == 3)
+    # Wait for EventAudit too, so the replay check below sees what it would
+    # have processed by the time the async item is fully projected.
+    _drain(
+        inv,
+        until=lambda: (
+            (v := _level_view(inv, async_item)) is not None
+            and v.get("reserved") == 3
+            and _audit_count(inv, async_item) == 4
+        ),
+    )
     async_view = _level_view(inv, async_item)
 
     assert sync_view is not None, "sync path did not project inline"
-    assert (sync_view["reserved"], sync_view["available"]) == (3, 17)
+    assert sync_audit_rows == 4, "sync path did not run EventAudit inline"
+    after_drain = _level_view(inv, sync_item)
+    assert (after_drain["reserved"], after_drain["available"]) == (3, 17)
     # EventAudit adds a row per delivery, so a replay of the sync item's events
     # would raise this count.
     assert _audit_count(inv, sync_item) == sync_audit_rows, "the async drain replayed the sync item's events"

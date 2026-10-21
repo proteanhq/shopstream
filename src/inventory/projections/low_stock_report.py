@@ -92,6 +92,7 @@ def _upsert_low_stock(
     retries=_UPSERT_RETRIES,
     backoff="fixed",
     retry_exceptions=[TransactionError, ValidationError],
+    idempotent=True,
 )
 class LowStockReportProjector:
     @on(LowStockDetected)

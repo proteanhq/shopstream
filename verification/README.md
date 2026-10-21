@@ -38,8 +38,9 @@ event back from the event store and hands it to the projector several times.
 The stored event carries its message id, which Protean's dedup needs.
 
 The projectors pass in one of two ways. `ProductRatingProjector` dedupes on its
-own `counted_reviews` (ticket T0.3). The other accumulating projectors are
-marked `idempotent=True`: Protean records a processed-message marker per
+own `counted_reviews` (ticket T0.3). The others are marked `idempotent=True`:
+the projectors that add to a stored value, and those that create a row from an
+event, which would otherwise raise "already present" on a replay. Protean records a processed-message marker per
 message id and handler, in the same unit of work as the read-model write, and
 skips a message it has already marked. `test_idempotency_cleanup.py` checks that
 `cleanup_processed_messages`, which `make idempotency-cleanup` runs, deletes old

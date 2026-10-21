@@ -218,7 +218,10 @@ whether it gates PRs / nightly / releases.
   twice against the same real Postgres — once with `event_processing="sync"` (events
   fire inline) and once with `"async"` (outbox + `Engine.run()` drain) — and asserts
   the two InventoryLevel projections are identical (bar the row id/timestamp). Same
-  events, same fold, so the read model must match whichever path ran. `make
+  events, same fold, so the read model must match whichever path ran. Between the
+  halves it marks the sync item's outbox rows published, so the drain does not
+  replay them. It still passes on some runs only, because Protean can publish one
+  aggregate's events out of order (proteanhq/protean#1893, tracked in #154). `make
   sync-async-verify`. `@pytest.mark.engine` + base(async) env (needs the live engine
   + Redis, #1055) — deselected in CI and skips cleanly under memory/test, so it
   never breaks the normal suite. (The helpers themselves,
