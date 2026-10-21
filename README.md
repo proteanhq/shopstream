@@ -260,7 +260,7 @@ The compose file creates `message_store_test` when Message DB starts on an empty
 make setup-test-event-store
 ```
 
-It does nothing when the database already exists. Two checks run under the dev env on purpose and still empty the dev event store: `make sync-async-verify` and `make toxiproxy-verify`.
+It does nothing when the database already exists. `make sync-async-verify` runs under the dev env on purpose and still empties the dev event store. `make toxiproxy-verify` also runs under the dev env, but points the inventory context at `inventory_test`, `message_store_test` and Redis DBs 12 and 14, so it leaves the dev data alone.
 
 ## Load Testing
 
