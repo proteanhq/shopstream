@@ -18,7 +18,7 @@ via `register_command_enricher` / `register_event_enricher`. All elements regist
 `domain.toml` — PostgreSQL database (`[databases.default]`), a **second SQLite provider**
 (`[databases.reporting]`) backing the `CampaignCatalog` read model, Redis broker (DB 8), Message
 DB event store, a Redis **cache** (`[caches.loyalty]`, DB 9) for the leaderboard projection,
-`snapshot_threshold = 5`, health port 8089. Environment overlays for test (`loyalty_test` DB + a
+`snapshot_threshold = 5`, health port 8180 (8181-8189 kept for extra workers, via `port_auto_increment`). Environment overlays for test (`loyalty_test` DB + a
 separate SQLite file; `[test.caches.loyalty]` uses the in-memory cache so tests need no Redis
 cache), production (async + telemetry), and memory (in-memory/inline adapters — the reporting
 provider also runs in-memory there).

@@ -28,10 +28,13 @@ default_subscription_profile = "shopstream"
 inherits = "production"
 retention_maxlen = 50000
 
-# Health-check HTTP server. Per-domain port so all engines run side by side
-# (identity..notifications use 8081-8088; loyalty is the ninth engine).
+# Health-check HTTP server. ShopStream keeps `port` to `port` + 9 for this
+# context's `--workers` workers; each worker after the first takes the next free
+# port (see verification/contracts/test_process_ports.py).
 [server.health]
-port = 8089
+host = "${PROTEAN_HEALTH_HOST|127.0.0.1}"
+port = 8180
+port_auto_increment = true
 
 [server.priority_lanes]
 enabled = true

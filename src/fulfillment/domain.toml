@@ -25,10 +25,13 @@ default_subscription_profile = "shopstream"
 inherits = "production"
 retention_maxlen = 50000
 
-# Health-check HTTP server (Protean 0.16+). The engine binds 8080 by default;
-# assign a distinct port per domain so all eight engines run side by side locally.
+# Health-check HTTP server. ShopStream keeps `port` to `port` + 9 for this
+# context's `--workers` workers; each worker after the first takes the next free
+# port (see verification/contracts/test_process_ports.py).
 [server.health]
-port = 8086
+host = "${PROTEAN_HEALTH_HOST|127.0.0.1}"
+port = 8150
+port_auto_increment = true
 
 # Priority Lanes: Route low-priority events (migrations, bulk imports) to a
 # separate Redis Stream so production events are always processed first.

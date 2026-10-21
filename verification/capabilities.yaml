@@ -231,3 +231,17 @@ capabilities:
     property: "after a simulated restore rolls the store and its global_position sequence back from g5 to g3, `protean recover --verify-checkpoints` reports a checkpoint at g5 as beyond head g3, a checkpoint at g2 and a fresh one as consistent, and a recovery-tracking entry at g5 as stale; `--reset-beyond-head` writes the int g3 to that checkpoint and clears only g5 from the tracking, and a third run finds nothing to report; with the shipped config no context has an event-store subscription for `recover` to check"
     source: A
     status: partial   # three inventory projectors, moved to event-store subscriptions in test config; every real handler reads Redis streams, so recover checks nothing in ShopStream as configured. A recovery-tracking stream recover cannot read (an unknown finding) is not exercised. Redis consumer groups and the Postgres outbox are outside recover's scope
+
+  - name: engine_readiness_probe
+    taught_by: src/ordering/domain.toml   # [server.health]
+    guarded_by: verification/contracts/test_readyz_shape.py
+    property: "/readyz on the ordering engine answers 200; every subscription the engine wired (handlers, broker subscribers, outbox processors including the `global` one) has a row and none is `unknown`; every row carries the documented fields including `lag_seconds` and `lag_drain_rate`; an empty outbox reads lag 0, not null; `lag_seconds` is null on every row, since ShopStream runs no event-store subscription"
+    source: A
+    status: partial   # the engine is built in test mode and its health server started by hand; Engine.run() is not used (proteanhq/protean#1055). lag_drain_rate is checked for presence only (one refresh, no numeric lag_seconds). Live rows under load are a hand check
+
+  - name: engine_health_ports
+    taught_by: src/identity/domain.toml   # [server.health] port + port_auto_increment + host
+    guarded_by: verification/contracts/test_process_ports.py
+    property: "every context auto-increments on a PROTEAN_HEALTH_HOST-driven host; no two context ranges (base to base + 9) overlap; no fixed port (API, Observatory, Locust) falls in one; no scaled make target starts more workers than its range holds; each compose engine binds 0.0.0.0 and its healthcheck probes its context's base port"
+    source: A
+    status: covered   # the ten-port range is a ShopStream convention; Protean walks up to 100 ports
