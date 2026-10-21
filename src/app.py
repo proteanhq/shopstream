@@ -7,12 +7,11 @@ Usage:
     uvicorn app:app --host 0.0.0.0 --port 8000 --reload --app-dir src
 """
 
-import contextlib
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from protean import g
+from protean.domain.context import has_domain_context
 from protean.integrations.fastapi import (
     DomainContextMiddleware,
     instrument_app,
@@ -107,8 +106,9 @@ class UserContextMiddleware:
             user_id = headers.get(b"x-user-id", b"").decode(errors="replace") or None
             actor_id = headers.get(b"x-actor-id", b"").decode(errors="replace").strip()[:_MAX_ACTOR_ID_LENGTH] or None
 
-            with contextlib.suppress(AttributeError):
-                # No-op for paths DomainContextMiddleware maps to no domain
+            # Paths DomainContextMiddleware maps to no domain (such as /docs) have no
+            # context, and touching `g` there emits a warning
+            if has_domain_context():
                 g.user_id = user_id
                 g.actor_id = actor_id
 
