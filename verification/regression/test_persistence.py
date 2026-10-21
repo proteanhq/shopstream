@@ -349,3 +349,33 @@ def test_process_manager_with_a_decimal_field_persists_its_transition():
         ]
         assert len(transitions) == 1
         assert str(transitions[0].data["state"]["amount"]) in ("49.99", "49.9900")
+
+
+@pytest.mark.protean_bug(
+    issue=1928,
+    state="open",
+    bug=(
+        "Value objects compare and hash by their `to_dict()`, which renders a `Decimal` as a string. Two value objects "
+        "whose amounts are equal but carry different decimal places compare unequal: catalogue's "
+        '`TierPrice(amount=Decimal("9.99"))` is not equal to `TierPrice(amount=Decimal("9.9900"))`. The `Decimal` field '
+        "does not round a value to its scale, so both forms occur."
+    ),
+)
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="value objects compare by to_dict strings, so equal Decimals with different scales are unequal",
+)
+@pytest.mark.usefixtures("catalogue_ctx")
+def test_1928_value_objects_with_equal_decimals_compare_equal():
+    """proteanhq/protean#1928: equal Decimal amounts make equal value objects."""
+    from decimal import Decimal
+
+    from catalogue.product.product import TierPrice
+
+    short, padded = TierPrice(amount=Decimal("9.99")), TierPrice(amount=Decimal("9.9900"))
+    if short.amount != padded.amount:
+        pytest.fail("precondition: the two amounts are equal Decimals")
+
+    assert short == padded
+    assert hash(short) == hash(padded)
