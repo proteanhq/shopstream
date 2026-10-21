@@ -407,6 +407,8 @@ make test-domain       # Domain layer only
 make test-application  # Application layer only
 make test-integration  # Integration tests
 make test-fast         # Skip slow tests
+make upgrade-check     # protean upgrade-check for all nine contexts (needs the dev stack; run on each Protean pin bump)
+make upgrade-opportunities PINNED=<version>  # Shipped Protean features still built by hand, up to <version>
 ```
 
 ### Code Quality

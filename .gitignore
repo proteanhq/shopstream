@@ -184,3 +184,6 @@ loyalty_reporting*.db
 
 # schemathesis fuzzing cache (T2.4)
 .schemathesis/
+
+# protean upgrade-check reports (make upgrade-check / upgrade-opportunities)
+.upgrade-check/
