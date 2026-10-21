@@ -185,7 +185,7 @@ def _price_fields(ir: dict) -> dict:
 
 
 @pytest.mark.protean_bug(
-    issue=None,
+    issue=1926,
     state="open",
     bug=(
         "`protean ir diff` does not classify a change to a `Dict` field's value type. Typing catalogue's "
@@ -199,8 +199,8 @@ def _price_fields(ir: dict) -> dict:
     raises=AssertionError,
     reason="ir diff does not classify a Dict value type change, so it passes as non-breaking",
 )
-def test_ir_diff_classifies_a_dict_value_type_change_as_breaking(tmp_path):
-    """Protean finding (not yet filed upstream): a Dict value type change passes as safe.
+def test_1926_ir_diff_classifies_a_dict_value_type_change_as_breaking(tmp_path):
+    """proteanhq/protean#1926: a Dict value type change passes as safe.
 
     The left side is the catalogue baseline with `Price.tier_prices` untyped, as it was
     before it became a map of `TierPrice`. Values stored under the old shape can't be
@@ -227,7 +227,7 @@ def test_ir_diff_classifies_a_dict_value_type_change_as_breaking(tmp_path):
 
 
 @pytest.mark.protean_bug(
-    issue=None,
+    issue=1927,
     state="open",
     bug=(
         "`protean schema generate` ignores a `Dict` field's value type. For catalogue's `Price.tier_prices`, a "
@@ -241,8 +241,8 @@ def test_ir_diff_classifies_a_dict_value_type_change_as_breaking(tmp_path):
     raises=AssertionError,
     reason="schema generate writes a Dict of value objects as an untyped map",
 )
-def test_schema_generate_types_a_dict_of_value_objects(tmp_path, fmt):
-    """Protean finding (not yet filed upstream): typed Dict values are dropped from schemas."""
+def test_1927_schema_generate_types_a_dict_of_value_objects(tmp_path, fmt):
+    """proteanhq/protean#1927: typed Dict values are dropped from schemas."""
     import protean.cli
     from typer.testing import CliRunner
 
