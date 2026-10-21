@@ -22,9 +22,9 @@ its type:
 - That includes ``ExpectedVersionError``. Passed through as itself, it made the
   command handler's version retry run the committed command again
   (proteanhq/protean#1883, guarded by
-  ``verification/regression/test_protean_regressions.py::test_1883_committed_command_is_not_rerun_when_a_sync_handler_raises_expected_version_error``).
+  ``verification/regression/test_event_sourcing.py::test_1883_committed_command_is_not_rerun_when_a_sync_handler_raises_expected_version_error``).
 - It also includes ``ValueError`` (proteanhq/protean#1682, guarded by
-  ``verification/regression/test_protean_regressions.py::test_1682_value_error_from_a_sync_handler_is_not_a_version_conflict``).
+  ``verification/regression/test_event_sourcing.py::test_1682_value_error_from_a_sync_handler_is_not_a_version_conflict``).
 - A ``BaseException`` that is not an ``Exception`` passes through untouched.
 """
 

@@ -106,6 +106,17 @@ class TestDispatcherCircuitBreaker:
         _skip_unless_redis_streams()
         engine.loop.run_until_complete(_with_scratch_group(dispatcher_subscription, self._failed_probes))
 
+    @pytest.mark.protean_bug(
+        issue=None,
+        state="open",
+        bug=(
+            "`StreamSubscription.process_batch` passes the result of `engine.handle_message` to the circuit breaker. A"
+            " handler with no method for an event type returns success for it, which resets "
+            "`consecutive_handler_failures`. `NotificationCreated` and the claim on `NotificationDispatchRequested` "
+            "precede each `NotificationDispatchStarted` on the notification stream, so during a channel outage the "
+            "dispatcher's count drops back to 0 before every failing send and the breaker does not open."
+        ),
+    )
     @pytest.mark.xfail(
         strict=True,
         raises=AssertionError,

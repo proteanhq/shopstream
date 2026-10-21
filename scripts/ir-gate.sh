@@ -12,7 +12,7 @@ set -uo pipefail
 # the exit code alone cannot tell a safe change from a broken command line. The gate
 # accepts exit 2 only when stdout holds the JSON report and its summary says there are
 # changes and none of them is breaking. Any other exit 2 fails the gate.
-# verification/regression/README.md lists both exit-code findings.
+# verification/regression/test_ir.py pins both exit-code findings.
 #
 # Exit 1 also covers `ir diff` errors (bad config, a missing baseline), not only
 # breaking changes. On exit 1 the gate runs the diff again in text format for that

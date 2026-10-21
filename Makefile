@@ -57,6 +57,10 @@ test-memory-cov: ## Run all memory tests with coverage report
 test-cov: ## Run all tests with combined coverage report
 	uv run pytest --cov=identity --cov=catalogue --cov=ordering --cov=inventory --cov=payments --cov=fulfillment --cov=reviews --cov=notifications --cov-report=term-missing --cov-report=html --cov-report=xml
 
+.PHONY: regression-manifest
+regression-manifest: ## List every Protean bug ShopStream guards, built from the protean_bug test markers (collection only, no database)
+	@uv run python scripts/regression_manifest.py
+
 # ──────────────────────────────────────────────
 # Identity domain testing
 # ──────────────────────────────────────────────

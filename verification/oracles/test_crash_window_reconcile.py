@@ -149,6 +149,11 @@ def _internal_received_rows(domain, item_id):
     return [r for r in rows if r.type == RECEIVED and r.target_broker == "default" and r.stream_name == stream]
 
 
+@pytest.mark.protean_bug(
+    issue=1040,
+    state="guard",
+    bug="Event-store append happened *after* the DB commit (crash window).",
+)
 @pytest.mark.usefixtures("inventory_ctx")
 def test_crash_leaves_event_durable_but_unpublished():
     """Characterize the ADR-0015 window: event is durable, its outbox row is not."""
@@ -165,6 +170,11 @@ def test_crash_leaves_event_durable_but_unpublished():
     assert _internal_received_rows(current_domain, item_id) == []
 
 
+@pytest.mark.protean_bug(
+    issue=1073,
+    state="guard",
+    bug=('`reconcile_outbox` no-op on Message-DB (`read_last_message("$all")` is None).'),
+)
 @pytest.mark.usefixtures("inventory_ctx")
 def test_reconcile_restores_the_lost_outbox_row():
     """P21 (guard): reconciliation recreates the outbox row so the event still publishes.
@@ -238,6 +248,14 @@ def test_engine_startup_sweep_restores_the_lost_outbox_row():
     assert len(_internal_received_rows(current_domain, item_id)) == 1
 
 
+@pytest.mark.protean_bug(
+    issue=1653,
+    state="guard",
+    bug=(
+        "`reconcile_outbox` rebuilt only the internal row, so a lost `published=True` event never got back its row for"
+        " the external broker. Fixed in proteanhq/protean#1718 (`4e82cdc`)."
+    ),
+)
 @pytest.mark.usefixtures("inventory_ctx")
 def test_reconcile_restores_the_external_row_of_a_published_event():
     """A lost published event gets back its internal row and its `global` row."""
@@ -269,6 +287,15 @@ def test_reconcile_restores_the_external_row_of_a_published_event():
     assert _total_rows(current_domain) == rows_before + 2
 
 
+@pytest.mark.protean_bug(
+    issue=1648,
+    state="guard",
+    bug=(
+        "`reconcile_outbox` gave a row to every message at the tail of `$all` that had none in this context's outbox, "
+        "so another context's event or a command at the tail of the shared store got a row this context never owns. "
+        "Fixed in proteanhq/protean#1655 (`581276a`)."
+    ),
+)
 @pytest.mark.usefixtures("inventory_ctx")
 def test_reconcile_skips_another_contexts_event_at_the_tail(ordering_bed):
     """An ordering event at the tail gets no row, and the lost inventory event behind it does."""
@@ -299,6 +326,15 @@ def test_reconcile_skips_another_contexts_event_at_the_tail(ordering_bed):
     assert _total_rows(current_domain) == rows_before + 1
 
 
+@pytest.mark.protean_bug(
+    issue=1648,
+    state="guard",
+    bug=(
+        "`reconcile_outbox` gave a row to every message at the tail of `$all` that had none in this context's outbox, "
+        "so another context's event or a command at the tail of the shared store got a row this context never owns. "
+        "Fixed in proteanhq/protean#1655 (`581276a`)."
+    ),
+)
 @pytest.mark.usefixtures("inventory_ctx")
 def test_reconcile_skips_a_command_at_the_tail():
     """A command at the tail gets no row, and the lost event behind it does."""
@@ -327,6 +363,15 @@ def test_reconcile_skips_a_command_at_the_tail():
     assert _total_rows(current_domain) == rows_before + 1
 
 
+@pytest.mark.protean_bug(
+    issue=1907,
+    state="open",
+    bug=(
+        "`reconcile_outbox` repairs only when the newest event the context owns has no outbox row. When another writer"
+        " in the same context (an API request, a subscriber, a second engine worker) commits after the crash, the lost"
+        " event is never repaired, whatever `--limit` is."
+    ),
+)
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,
@@ -351,6 +396,17 @@ def test_reconcile_repairs_a_lost_event_behind_a_later_commit():
     assert [r.target_broker for r in _rows_for(current_domain, lost.metadata.headers.id)] == ["default"]
 
 
+@pytest.mark.protean_bug(
+    issue=1906,
+    state="open",
+    bug=(
+        "`reconcile_outbox` run while a unit of work sits between its event-store append and its relational commit "
+        "sees no outbox row, inserts one and commits first. The live commit then fails on the `(message_id, "
+        "target_broker)` unique index and its caller gets `TransactionError`, though the event is in the store and "
+        'will be published. The engine docstring calls a race "safe", which holds only for one sweep against another. '
+        "`make outbox-reconcile` says to stop the API and engines first."
+    ),
+)
 @pytest.mark.xfail(
     strict=True,
     raises=TransactionError,
@@ -402,6 +458,16 @@ def test_reconcile_beside_a_live_commit_does_not_fail_it():
     assert len(_internal_received_rows(domain, item_id)) == 1
 
 
+@pytest.mark.protean_bug(
+    issue=1908,
+    state="open",
+    bug=(
+        "For a state-based (CQRS) aggregate, a crash after the event-store append rolls back the aggregate row with "
+        "the outbox rows. `reconcile_outbox` then restores the outbox rows, so the event is published for an aggregate"
+        " that was never saved: identity's `CustomerRegistered` goes out on the internal and `global` brokers with no "
+        "customer row."
+    ),
+)
 @pytest.mark.xfail(
     strict=True,
     raises=AssertionError,

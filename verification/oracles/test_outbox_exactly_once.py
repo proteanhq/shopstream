@@ -44,6 +44,12 @@ import uuid
 import pytest
 from sqlalchemy.exc import IntegrityError
 
+pytestmark = pytest.mark.protean_bug(
+    issue=1041,
+    state="guard",
+    bug="`target_broker` nullable → unique-index bypass.",
+)
+
 ENV = os.environ.get("PROTEAN_ENV")
 
 
@@ -82,6 +88,11 @@ def test_published_event_dual_written_exactly_once():
     assert len(pairs) == len(set(pairs)) == 2, f"expected 2 unique rows, got {pairs}"
 
 
+@pytest.mark.protean_bug(
+    issue=1071,
+    state="guard",
+    bug="In-memory adapter ignores `Index(unique=True)`.",
+)
 @pytest.mark.skipif(
     ENV != "test",
     reason="asserts the relational sqlalchemy IntegrityError; memory enforces too but raises a Protean error (see test_1071)",

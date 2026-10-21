@@ -6,6 +6,8 @@ E-Commerce platform built on [Protean](https://github.com/proteanhq/protean), a 
 
 ShopStream exists primarily to **test and verify Protean** in a realistic, multi-domain application. Treat issues discovered in Protean very seriously — surface them, fix them upstream (in the [Protean repo](https://github.com/proteanhq/protean)), re-test here, and iterate. ShopStream is the proving ground that keeps Protean honest.
 
+Each Protean bug gets a named test with a `@pytest.mark.protean_bug(issue=..., state=..., bug=...)` marker. `verification/regression/README.md` describes the habit and which file a new test goes in. Don't write the bug into a table: `make regression-manifest` builds the list from the markers.
+
 ## Architecture
 
 Multi-domain CQRS with nine bounded contexts sharing a single FastAPI server:
@@ -244,38 +246,30 @@ Every `domain.toml` sets `default_subscription_profile = "shopstream"`. That cus
 
 ## Common Commands
 
+Run `make help` to list every target with a one-line description. These are the ones to know without looking:
+
 ```bash
 make install              # Install dependencies
 make dev                  # docker-up + setup-db
+make setup-db             # Create the database tables for every context
 make api                  # FastAPI server (port 8000, Scalar docs at /docs)
-make observatory          # Observatory dashboard (port 9000, live message flow + Prometheus)
 make test                 # All tests (requires Docker infrastructure)
-make test-domain          # Pure business logic (no DB)
-make test-application     # Command handler tests (with DB)
-make test-integration     # Cross-domain outbox/event tests
 make test-memory          # All tests with in-memory adapters (no Docker needed)
 make test-memory-fast     # Fast memory tests (domain + application, excludes slow)
 make test-<domain>        # Per-domain tests (e.g., make test-reviews, make test-ordering)
-make test-<domain>-domain # Per-domain domain tests
-make test-<domain>-cov    # Per-domain coverage report
 make lint                 # Ruff linting
 make format               # Ruff formatting
 make typecheck            # MyPy type checking
+make check-src-clean      # Fail if src/ imports test or verification tools
+make domain-check         # Run protean check on all domains
 make ir                   # Regenerate IR baselines for all domains
 make ir-check             # Check IR staleness for all domains
 make ir-diff              # Diff live IR against saved baselines
-make schemas              # JSON, Avro and Protobuf schemas for all domains (.protean/<domain>/schemas/)
-make events-catalog       # Event catalog (versions, upcasters, consumers) from the committed IR, no DB needed
-make domain-check         # Run protean check on all domains
-make upgrade-check        # protean upgrade-check for all nine contexts against the dev stack (report only; JSON in .upgrade-check/)
-make upgrade-opportunities PINNED=<version>  # Shipped Protean features the contexts still build by hand, up to <version>
-make verify-domains       # protean verify (init, check, tests) for all nine contexts + tests/integration, memory mode
-make eventstore-verify    # Check the shared Message DB's integrity (read-only; stop the engines first)
-make idempotency-cleanup  # Delete processed-message markers older than [consume_idempotency.cleanup] retention_hours (run from cron)
-make outbox-reconcile     # After a crash, restore lost outbox rows in each context whose newest event lost its row (stop the API and engines first)
-make verify-observatory   # Verify Observatory Timeline + Causation Graph (~66 API checks)
-make verify-loyalty       # Verify Loyalty end-to-end (account/points/transfer/campaign/redemption)
+make ir-gate              # CI gate: fail unless each IR diff vs the baseline is clean or non-breaking
+make regression-manifest  # List every Protean bug ShopStream guards, built from the protean_bug markers
 ```
+
+**Adding a make target.** Give it a `## ` help comment on the target line, so `make help` prints it, and declare it with its own `.PHONY:` line beside the target rather than on the long `.PHONY` line at the top. Don't add it to this list or to `README.md`. Every PR that edits a shared list clashes with every other PR that does.
 
 ## Observatory Verification
 

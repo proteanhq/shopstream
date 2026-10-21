@@ -26,6 +26,16 @@ from payments.payment.webhook import ProcessPaymentWebhook
 from payments.projections.daily_revenue import DailyRevenue, DailyRevenueProjector
 from payments.projections.payment_status import PaymentStatusView
 
+pytestmark = pytest.mark.protean_bug(
+    issue=1038,
+    state="guard",
+    bug=(
+        "No `Decimal` field — money as `Float` loses precision. Events carry money as 4-place strings that rebuild as "
+        "exact `Decimal`s; the `DailyRevenue`, `PaymentStatusView` and `DailyOrderStats` projections and the Payment "
+        "`Money` value object store money as `Decimal(precision=19, scale=4)`."
+    ),
+)
+
 _DAY = datetime(2026, 1, 15, 12, 0, tzinfo=UTC)
 
 

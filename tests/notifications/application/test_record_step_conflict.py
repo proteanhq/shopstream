@@ -45,6 +45,23 @@ def _write_from_another_worker(notification_id: str) -> None:
     worker.join()
 
 
+@pytest.mark.protean_bug(
+    issue=1914,
+    state="open",
+    bug=(
+        "On Postgres, a version conflict on a dispatch handler's record step is found at save time. The step's own "
+        "retry runs in a transaction already marked for rollback, so the result is lost and the notification stays "
+        "DISPATCHING."
+    ),
+)
+@pytest.mark.protean_bug(
+    issue=1915,
+    state="open",
+    bug=(
+        "On memory, a version conflict on a dispatch handler's record step is found at commit, so Protean retries the "
+        "whole send method and the channel is called twice."
+    ),
+)
 @pytest.mark.xfail(
     strict=True,
     reason="proteanhq/protean#1915 and #1914: a conflict on the record step sends again or loses the result",

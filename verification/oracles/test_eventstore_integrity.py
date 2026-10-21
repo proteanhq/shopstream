@@ -416,6 +416,15 @@ def test_non_integer_snapshot_version_reports_malformed_snapshot(beds):
     assert violation.position == position
 
 
+@pytest.mark.protean_bug(
+    issue=1909,
+    state="open",
+    bug=(
+        "`BaseEventStore.verify()` raises `TypeError` on a Message DB row whose `data` is SQL NULL (the column is "
+        "nullable). The Message DB client calls `json.loads(None)` while `verify` reads `$all`, so no report comes "
+        "back and the row is never named, though `verify`'s docstring says a corrupt row is reported."
+    ),
+)
 @pytest.mark.xfail(
     strict=True,
     raises=TypeError,
@@ -457,6 +466,16 @@ def test_cli_exits_0_on_clean_store_and_1_on_corrupted_store(beds):
     assert violations[0]["position"] == 2
 
 
+@pytest.mark.protean_bug(
+    issue=1910,
+    state="open",
+    bug=(
+        '`protean eventstore verify --json` exits 1, its code for "violations found", when Message DB is unreachable, '
+        "and prints a traceback with no JSON envelope. The connection error is raised inside `store.verify()`, after "
+        "the domain loaded, so the CLI's handler does not map it to exit 2, which the CLI exit-code rule keeps for an "
+        'environment error. `scripts/eventstore-verify.sh` prints "returned no JSON report" in this case.'
+    ),
+)
 @pytest.mark.xfail(
     strict=True,
     reason="Protean bug proteanhq/protean#1910: an unreachable Message DB makes the CLI exit 1 with no JSON envelope",
