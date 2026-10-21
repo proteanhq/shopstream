@@ -29,7 +29,7 @@ WHY REAL POSTGRES, MULTI-PROCESS
     under `--protean-env memory`.
 
 RUN:
-    make docker-up && make setup-db
+    make docker-up && make setup-db && make setup-test-event-store
     .venv/bin/python -m pytest \
         verification/oracles/test_lowstock_projector_concurrency.py --protean-env test -q
 """

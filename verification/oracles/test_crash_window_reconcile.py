@@ -64,7 +64,7 @@ WHY POSTGRES + MESSAGE-DB ONLY
     adapters. Skipped under `--protean-env memory`.
 
 RUN:
-    make docker-up && make setup-db      # once
+    make docker-up && make setup-db && make setup-test-event-store      # once
     .venv/bin/python -m pytest \
         verification/oracles/test_crash_window_reconcile.py --protean-env test -q
 """

@@ -71,14 +71,14 @@ WHY POSTGRES + MESSAGE-DB ONLY
     `test`; the nine-context check runs everywhere.
 
 SHARED STORE
-    No context has a `[test.event_store]` overlay, so the test env and the dev
-    env share one `message_store` database. The test resets it at the start and
-    in a `finally`, which also wipes dev events, as the other Message DB oracles
-    do. Stop any dev engine first: one writing to the same category would move
-    the head.
+    The test env's `[test.event_store]` overlay points all nine contexts at
+    `message_store_test`, apart from the dev stack's `message_store`. The test
+    resets it at the start and in a `finally`, as the other Message DB oracles
+    do. A dev engine writes to the dev database and leaves this one alone; an
+    engine started with `PROTEAN_ENV=test` would move the head, so stop it first.
 
 RUN:
-    make docker-up && make setup-db      # once
+    make docker-up && make setup-db && make setup-test-event-store      # once
     .venv/bin/python -m pytest \
         verification/oracles/test_restore_checkpoints.py --protean-env test -q
 """

@@ -142,7 +142,7 @@ Two fixtures built on Protean's `DomainFixture`:
 1. **`<domain>_bed`** (session scope): imports the domain, wraps it in a `DomainFixture`, calls `setup()` once (init plus schema) and `teardown()` at the end
 2. **`_ctx`** (function scope, auto-used): enters `bed.domain_context()` for each test. On exit it resets the fixture's own domain's providers, brokers and event store
 
-In a full run, all nine domains share one pytest session. Each test enters its own domain's context through `_ctx`, so `current_domain` resolves to that domain. Each `DomainFixture` owns one domain, so the reset on exit touches only that domain's providers, brokers and event store. The other domains' stores are left alone.
+In a full run, all nine domains share one pytest session. Each test enters its own domain's context through `_ctx`, so `current_domain` resolves to that domain. Each `DomainFixture` owns one domain, so the reset on exit touches only that domain's providers, brokers and event store. Two of those are shared, though. All nine contexts use one Message DB database, and under `test` every internal broker uses Redis DB 10. A reset of either empties it for every domain. The other domains' databases are left alone.
 
 ```python
 @pytest.fixture(scope="session")
