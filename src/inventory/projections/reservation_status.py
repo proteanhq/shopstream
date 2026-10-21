@@ -28,7 +28,7 @@ class ReservationStatus:
     updated_at: datetime | None = DateTime()
 
 
-@inventory.projector(projector_for=ReservationStatus, aggregates=[InventoryItem])
+@inventory.projector(projector_for=ReservationStatus, aggregates=[InventoryItem], idempotent=True)
 class ReservationStatusProjector:
     @on(StockReserved)
     def on_stock_reserved(self, event: StockReserved) -> None:

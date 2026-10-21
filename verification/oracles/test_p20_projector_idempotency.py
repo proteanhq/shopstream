@@ -370,6 +370,67 @@ def test_inventory_level_projector_is_idempotent_under_redelivery():
 
 
 @pytest.mark.usefixtures("inventory_ctx")
+def test_reservation_status_projector_is_idempotent_under_redelivery():
+    from inventory.projections.reservation_status import ReservationStatus, ReservationStatusProjector
+    from inventory.stock.events import StockReserved
+    from inventory.stock.reservation import ConfirmReservation
+    from inventory.stock.stock import InventoryItem
+
+    item_id = _reserved_item(5)
+    event = _stored_event(InventoryItem, item_id, StockReserved)
+    # Without the marker a replayed StockReserved raises "already present".
+    # Confirming first also catches a replay that rewrites the row to Active.
+    current_domain.process(
+        ConfirmReservation(inventory_item_id=item_id, reservation_id=event.reservation_id),
+        asynchronous=False,
+    )
+
+    def check() -> None:
+        reservation = current_domain.repository_for(ReservationStatus).get(event.reservation_id)
+        assert reservation.status == "Confirmed"
+        assert reservation.quantity == 5
+
+    _redeliver(ReservationStatusProjector, event, check)
+
+
+@pytest.mark.usefixtures("inventory_ctx")
+def test_inventory_valuation_projector_is_idempotent_under_redelivery():
+    from inventory.projections.inventory_valuation import InventoryValuation, InventoryValuationProjector
+    from inventory.stock.events import StockInitialized
+    from inventory.stock.receiving import ReceiveStock
+    from inventory.stock.stock import InventoryItem
+
+    item_id = _stock_item(100)
+    # Without the marker a replayed StockInitialized raises "already present".
+    # Receiving first also catches a replay that rewrites on_hand back to 100.
+    current_domain.process(ReceiveStock(inventory_item_id=item_id, quantity=20), asynchronous=False)
+
+    def check() -> None:
+        assert current_domain.repository_for(InventoryValuation).get(item_id).on_hand == 120
+
+    _redeliver(InventoryValuationProjector, _stored_event(InventoryItem, item_id, StockInitialized), check)
+
+
+@pytest.mark.usefixtures("inventory_ctx")
+def test_low_stock_report_projector_is_idempotent_under_redelivery():
+    from inventory.projections.low_stock_report import LowStockReport, LowStockReportProjector
+    from inventory.stock.events import LowStockDetected
+    from inventory.stock.receiving import ReceiveStock
+    from inventory.stock.stock import InventoryItem
+
+    item_id = _reserved_item(91)
+    assert current_domain.repository_for(LowStockReport).get_or_none(item_id) is not None
+    # Restock above the reorder point, which removes the row, so a replayed
+    # LowStockDetected that upserts would bring back a stale row.
+    current_domain.process(ReceiveStock(inventory_item_id=item_id, quantity=50), asynchronous=False)
+
+    def check() -> None:
+        assert current_domain.repository_for(LowStockReport).get_or_none(item_id) is None
+
+    _redeliver(LowStockReportProjector, _stored_event(InventoryItem, item_id, LowStockDetected), check)
+
+
+@pytest.mark.usefixtures("inventory_ctx")
 def test_shrinkage_report_projector_is_idempotent_under_redelivery():
     from inventory.projections.shrinkage_report import ShrinkageReport, ShrinkageReportProjector
     from inventory.stock.adjustment import AdjustStock
