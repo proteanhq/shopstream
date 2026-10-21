@@ -13,6 +13,10 @@ set -uo pipefail
 # Usage:
 #   ./scripts/drain-compose-engines.sh          # drain, then wait 5 seconds
 #   DRAIN_WAIT=10 ./scripts/drain-compose-engines.sh
+#   ./scripts/drain-compose-engines.sh engine-ordering engine-inventory
+#
+# Service names limit the drain to those services. Drain only what the caller
+# is about to stop: a drained engine keeps running but reads no new messages.
 #
 # A container that does not answer gets a warning and does not stop the run,
 # so `make docker-down` still tears the stack down.
@@ -34,9 +38,14 @@ health_port() {
     esac
 }
 
+ONLY=" $* "
+
 drained=0
 while IFS=$'\t' read -r service container; do
     port=$(health_port "$service") || continue
+    if [ $# -gt 0 ] && [[ "$ONLY" != *" $service "* ]]; then
+        continue
+    fi
     if docker exec "$container" curl -fsS -m 5 -o /dev/null -X POST "http://127.0.0.1:$port/drainz"; then
         echo "[DRAIN] $container draining"
         drained=$((drained + 1))

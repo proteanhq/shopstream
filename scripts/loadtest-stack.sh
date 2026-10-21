@@ -37,7 +37,7 @@ cleanup() {
         kill -9 -- -"$pid" 2>/dev/null || kill -9 "$pid" 2>/dev/null || true
     done
     # Drain before stopping, or each engine drops the rest of its batch.
-    ./scripts/drain-compose-engines.sh
+    ./scripts/drain-compose-engines.sh $ALL_ENGINES
     docker compose stop api $ALL_ENGINES 2>/dev/null || true
     wait 2>/dev/null || true
     echo "[LOADTEST] Done."
