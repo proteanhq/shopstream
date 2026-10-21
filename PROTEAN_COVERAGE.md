@@ -72,7 +72,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 | Capability | Status | Where |
 |---|---|---|
 | `@apply`, `from_events`, `_create_new`, `_version` | ✅ | Order/Payment/InventoryItem/PromoCampaign |
-| snapshots — `snapshot_threshold` + `create_snapshot` | ✅ | loyalty (`snapshot_threshold=5`) |
+| snapshots — `snapshot_threshold` + `create_snapshot` | ✅ | loyalty (`snapshot_threshold=5`). A snapshot that no longer builds is discarded with a `snapshot_discarded` warning and the load replays the stream (`verification/metamorphic/test_stale_snapshot_falls_back_to_replay.py`). A snapshot that still builds is used as it is, even when it disagrees with replay (`verification/regression/test_protean_regressions.py::test_snapshot_that_builds_but_disagrees_with_replay_is_not_used`, open, not filed yet) |
 | bulk `create_snapshots()` | ✅ | loyalty PromoCampaign (**#1028** fixed on main) |
 | command `deadline` + `CommandExpiredError` | ✅ | payments (PR #8); the deadline is checked against the domain clock (`tests/payments/application/test_deadline_and_retry.py`, frozen clock) |
 | `domain.clock` (injectable clock) | ✅ | the ordering abandonment, inventory expiry and notifications scheduler jobs default `as_of` to it, and inventory reservation expiry counts from it. Tests swap in a `FrozenClock` through the `frozen_clock` fixture (`tests/conftest.py`) |
