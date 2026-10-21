@@ -199,6 +199,9 @@ def test_sync_and_async_yield_the_same_projection(inventory_domain):
 
     assert sync_view is not None, "sync path did not project inline"
     assert sync_audit_rows == 4, "sync path did not run EventAudit inline"
+    # The drain gives up quietly after its last cycle, so check that EventAudit
+    # did process the async events; otherwise the replay check proves nothing.
+    assert _audit_count(inv, async_item) == 4, "the drain ended before EventAudit processed the async events"
     after_drain = _level_view(inv, sync_item)
     assert (after_drain["reserved"], after_drain["available"]) == (3, 17)
     # EventAudit adds a row per delivery, so a replay of the sync item's events
