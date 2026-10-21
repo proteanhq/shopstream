@@ -67,9 +67,11 @@ Commands are processed synchronously via FastAPI. Internal events flow asynchron
 | 7 | Notifications |
 | 8 | Loyalty |
 | 9 | Loyalty cache (`[caches.loyalty]`, PointsLeaderboard projection) |
+| 10 | Test env only: every context's internal broker (`[test.brokers.default]`) |
+| 14 | Test env only: the external bus (`[test.brokers.global]`) |
 | 15 | External bus (shared, cross-domain published events) |
 
-This map is for the local run. In the Docker Compose stack all nine internal brokers share DB 0 (`REDIS_URL`); DBs 9 and 15 stay as listed.
+This map is for the local run. In the Docker Compose stack all nine internal brokers share DB 0 (`REDIS_URL`); DBs 9 and 15 stay as listed. Under `PROTEAN_ENV=test` the brokers default to DBs 10 and 14, so test runs never flush a dev engine's streams; `REDIS_URL` and `REDIS_EXTERNAL_URL` override both, as CI does.
 
 ## Project Structure
 

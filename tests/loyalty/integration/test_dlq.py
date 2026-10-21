@@ -9,8 +9,12 @@ pipeline end to end:
   3. Assert the message is in the DLQ, then **replay** it back onto the source stream.
 
 Requires asynchronous event processing (so the engine, not the inline path, handles the event)
-and the **Redis** streams broker (the subscription-routed DLQ and the `broker.dlq_*` inspection
-API only line up on Redis). It therefore skips under the in-memory broker.
+and the **Redis** streams broker, because it reads the DLQ through `broker.dlq_*`. On the
+InlineBroker that API reads only the broker's native DLQ, never the `{stream}:dlq` stream the
+subscription writes (a Protean bug pinned in `verification/regression/`), so this test skips under
+the in-memory broker. `test_dlq_ownership.py` covers the routing itself on both brokers without
+the engine: one entry on `{stream}:dlq`, nothing in the native DLQ, no leftover retry count, also
+after a DLQ outage. The engine loop and `dlq_replay` still need this test.
 
 **Marked `engine` → runs locally only.** Driving a full engine inside a pytest is unreliable in
 CI: even in an isolated job with every broker reachable, the engine's subscription poll loops drop
