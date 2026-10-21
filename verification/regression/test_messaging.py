@@ -308,27 +308,23 @@ def test_dlq_replay_reaches_only_the_failing_consumer_group():
 
 @pytest.mark.protean_bug(
     issue=1923,
-    state="open",
+    state="guard",
     bug=(
-        "Protean's default config always defines a `memory` database provider, and the engine runs an outbox "
-        "processor for every managed provider. Each ShopStream engine therefore runs `memory-to-<broker>` outbox "
-        "processors for a database it never configured, and they show as rows in `/readyz` and `protean subscriptions "
-        "status`."
+        "Protean's default config always defines a `memory` database provider, and the engine ran an outbox "
+        "processor for every managed provider. Each ShopStream engine therefore ran `memory-to-<broker>` outbox "
+        "processors for a database it never configured, and they showed as rows in `/readyz` and `protean "
+        "subscriptions status`. Fixed in proteanhq/protean#1924 (`3109190`)."
     ),
 )
-@pytest.mark.xfail(
-    strict=True,
-    raises=AssertionError,
-    reason="the engine runs outbox processors for the default memory provider no domain configured",
-)
 def test_1923_engine_runs_outbox_processors_only_for_configured_databases(ordering_bed):
-    """proteanhq/protean#1923: every engine runs outbox processors for `memory`.
+    """proteanhq/protean#1923 (guard): engines run outbox processors only for configured databases.
 
-    Protean's default config always defines a `memory` database provider, and the
-    engine creates an outbox processor per managed provider. Ordering's domain.toml
-    configures only `default`, yet its engine also runs `memory-to-default` and
-    `memory-to-global-external`, which poll an outbox nothing writes to and show
-    as rows in /readyz and `protean subscriptions status`.
+    Protean's default config always defines a `memory` database provider. The
+    engine used to create an outbox processor per managed provider, so Ordering's
+    engine also ran `memory-to-default` and `memory-to-global-external`, which
+    polled an outbox nothing writes to and showed as rows in /readyz and
+    `protean subscriptions status`. Ordering's domain.toml configures only
+    `default`, so only its two processors may run.
     """
     from protean.server.engine import Engine
 
