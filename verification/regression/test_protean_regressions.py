@@ -1130,3 +1130,32 @@ def test_snapshot_that_builds_but_disagrees_with_replay_is_not_used():
     )
 
     assert repo.get(campaign.id).to_dict() == full_replay.to_dict()
+
+
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="the engine runs outbox processors for the default memory provider no domain configured",
+)
+def test_1923_engine_runs_outbox_processors_only_for_configured_databases(ordering_bed):
+    """proteanhq/protean#1923: every engine runs outbox processors for `memory`.
+
+    Protean's default config always defines a `memory` database provider, and the
+    engine creates an outbox processor per managed provider. Ordering's domain.toml
+    configures only `default`, yet its engine also runs `memory-to-default` and
+    `memory-to-global-external`, which poll an outbox nothing writes to and show
+    as rows in /readyz and `protean subscriptions status`.
+    """
+    from protean.server.engine import Engine
+
+    with ordering_bed.domain_context():
+        engine = Engine(ordering_bed.domain, test_mode=True)
+        try:
+            processors = sorted(engine._outbox_processors)
+        finally:
+            engine.loop.close()
+
+    assert processors == [
+        "outbox-processor-default-to-default",
+        "outbox-processor-default-to-global-external",
+    ]
