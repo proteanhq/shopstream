@@ -10,8 +10,9 @@ it must name a dropped event and exit with the same code as `--format=text`, so 
 slice view can't hide a change that the text view reports.
 
 The last test runs `make docs-check` on a copy of the tree with two stale
-`event-model.md` files (one edited, one without its final newline), so the gate itself
-is checked, not only the render it calls.
+`event-model.md` files (one edited, one without its final newline), a broken loyalty
+notes file and a shared `.protean/annotations.toml`, so the gate itself is checked, not
+only the render it calls.
 """
 
 import copy
@@ -27,7 +28,19 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 PROTEAN = shutil.which("protean")
+CONTEXTS = (
+    "identity",
+    "catalogue",
+    "ordering",
+    "inventory",
+    "payments",
+    "fulfillment",
+    "reviews",
+    "notifications",
+    "loyalty",
+)
 CATALOGUE_IR = REPO / ".protean" / "catalogue" / "ir.json"
+IDENTITY_IR = REPO / ".protean" / "identity" / "ir.json"
 LOYALTY_IR = REPO / ".protean" / "loyalty" / "ir.json"
 REVIEWS_IR = REPO / ".protean" / "reviews" / "ir.json"
 
@@ -135,10 +148,10 @@ def test_a_note_on_a_fact_event_is_reported_unmatched(tmp_path):
 
 
 def test_an_unquoted_dotted_key_is_never_dropped_in_silence(tmp_path):
-    # TOML reads [annotations.loyalty.reward...] as nested tables. Protean today aborts
-    # naming only "loyalty" (pinned in verification/regression/test_tooling.py); listing
-    # the full name under "Unmatched annotations" would also be right. Rendering
-    # without a word about the note would not.
+    # TOML reads [annotations.loyalty.reward...] as nested tables. ADR-0032 says the key
+    # is listed under "Unmatched annotations". Protean today aborts instead, naming only
+    # "loyalty" (pinned in verification/regression/test_tooling.py). Both keep the note
+    # from vanishing, which is what this test guards; rendering without a word would not.
     notes = tmp_path / "notes.toml"
     notes.write_text('[annotations.loyalty.reward.reward_account.RewardAccount]\nnote = "NOTE"\n')
     output = tmp_path / "model.md"
@@ -172,23 +185,60 @@ def test_a_malformed_annotations_file_aborts_before_writing(tmp_path, content, m
     notes = tmp_path / "notes.toml"
     notes.write_text(content)
     output = tmp_path / "model.md"
+    output.write_text("A committed render the failed run must leave alone.\n")
 
     result = _render("loyalty", notes, output)
 
     assert result.returncode != 0
-    assert not output.exists()
+    assert output.read_text() == "A committed render the failed run must leave alone.\n"
     assert message.format(path=notes) in " ".join((result.stdout + result.stderr).split())
 
 
-def test_the_committed_loyalty_notes_all_render_and_all_match():
+def _quoted_text(markdown: str) -> str:
+    return " ".join(line.removeprefix(">").strip() for line in markdown.splitlines() if line.startswith(">"))
+
+
+def test_the_committed_loyalty_notes_all_render_in_their_own_slice():
     notes = tomllib.loads((REPO / ".protean" / "loyalty" / "annotations.toml").read_text())["annotations"]
     markdown = (REPO / "docs" / "loyalty" / "event-model.md").read_text()
+    # The element each note is keyed to, and the one slice that draws it. The saga is
+    # drawn in the slice of the aggregate whose events it handles.
+    expected = {
+        _fqn(LOYALTY_IR, "clusters", "RewardAccount"): "RewardAccount",
+        "loyalty.redemption.saga.RedemptionSaga": "Redemption",
+        "loyalty.reward.events.MembershipCardIssued": "RewardAccount",
+        _fqn(LOYALTY_IR, "clusters", "PoisonPill"): "PoisonPill",
+    }
 
-    assert len(notes) >= 3
+    assert sorted(notes) == sorted(expected)
     assert "Unmatched annotations" not in markdown
-    quoted_text = " ".join(line.removeprefix(">").strip() for line in markdown.splitlines() if line.startswith(">"))
-    for fqn, entry in notes.items():
-        assert " ".join(entry["note"].split()) in quoted_text, fqn
+    slices = {name: _quoted_text(body) for name, body in _slices(markdown).items()}
+    for fqn, slice_name in expected.items():
+        note = " ".join(notes[fqn]["note"].split())
+        holding = [name for name, text in slices.items() if note in text]
+        assert holding == [slice_name], fqn
+
+
+@pytest.mark.parametrize("context", CONTEXTS)
+def test_the_committed_event_model_matches_a_render_from_the_ir_baseline(tmp_path, context):
+    # `make docs-event-model` renders from the live domain. A render from the committed
+    # IR must give the same bytes, so the two inputs cannot drift apart unnoticed.
+    notes = REPO / ".protean" / context / "annotations.toml"
+    output = tmp_path / "model.md"
+
+    result = _run(
+        "docs",
+        "generate",
+        f"--ir={REPO / '.protean' / context / 'ir.json'}",
+        "--type=event-model",
+        f"--annotations={notes if notes.exists() else os.devnull}",
+        f"--output={output}",
+    )
+
+    rendered = _rendered(result, output)
+    if not rendered.endswith("\n"):
+        rendered += "\n"
+    assert rendered == (REPO / "docs" / context / "event-model.md").read_text()
 
 
 def _drop_one_event(ir: dict) -> tuple[dict, str]:
@@ -233,12 +283,13 @@ def test_ir_diff_as_event_model_reports_no_change_on_identical_files():
 def test_every_committed_diagram_doc_ends_with_a_newline():
     # Protean writes these with no final newline. The Makefile targets add one, as the
     # end-of-file-fixer hook would, and docs-check compares event-model.md with it added.
-    docs = sorted(
-        path
+    docs = [
+        REPO / "docs" / context / f"{name}.md"
+        for context in CONTEXTS
         for name in ("clusters", "event-flows", "handler-wiring", "event-model")
-        for path in (REPO / "docs").glob(f"*/{name}.md")
-    )
-    assert len(docs) == 36, docs
+    ]
+    absent = [str(path.relative_to(REPO)) for path in docs if not path.is_file()]
+    assert not absent, absent
 
     missing = [str(path.relative_to(REPO)) for path in docs if not path.read_bytes().endswith(b"\n")]
     assert not missing, missing
@@ -262,6 +313,13 @@ def test_docs_check_fails_on_a_stale_event_model_and_passes_the_rest(tmp_path):
     # file without one is stale too.
     no_newline = tmp_path / "docs" / "payments" / "event-model.md"
     no_newline.write_text(no_newline.read_text().rstrip("\n"))
+    # A render that fails must report FAILED, not pass on the committed file.
+    broken = tmp_path / ".protean" / "loyalty" / "annotations.toml"
+    broken.write_text(broken.read_text() + "[unclosed\n")
+    # Protean's default notes file is shared by every context. The gate never reads it,
+    # so a note in it must leave every render unchanged.
+    customer = _fqn(IDENTITY_IR, "clusters", "Customer")
+    _write_notes(tmp_path / ".protean" / "annotations.toml", {customer: "A note no context should read"})
 
     env = {**os.environ, "UV_NO_SYNC": "1"}
     result = subprocess.run([MAKE, "-s", "docs-check"], cwd=tmp_path, env=env, capture_output=True, text=True)
@@ -272,4 +330,6 @@ def test_docs_check_fails_on_a_stale_event_model_and_passes_the_rest(tmp_path):
     assert problems == [
         "STALE: docs/payments/event-model.md: run 'make docs-event-model' and commit",
         "STALE: docs/reviews/event-model.md: run 'make docs-event-model' and commit",
+        "FAILED: event model render for loyalty:",
     ], output
+    assert "Invalid TOML in .protean/loyalty/annotations.toml" in " ".join(output.split()), output

@@ -550,6 +550,38 @@ def test_event_model_draws_wildcard_event_handlers(tmp_path):
     issue=None,
     state="open",
     bug=(
+        "`protean docs generate --type=event-model` draws an abstract aggregate as a slice of its own, with no events "
+        "and no consumers. The IR cluster carries no abstract marker, so the renderer cannot tell it from a concrete "
+        "aggregate. `--type=clusters` draws it too."
+    ),
+)
+@pytest.mark.xfail(strict=True, raises=AssertionError, reason="the IR does not mark an abstract aggregate")
+def test_event_model_draws_no_slice_for_an_abstract_aggregate(tmp_path):
+    """Protean finding (not filed yet): an abstract aggregate gets an empty event model slice.
+
+    Loyalty's `Auditable` is declared `@loyalty.aggregate(abstract=True)` and is only a
+    base for `RewardAccount`. It is never loaded or saved and raises no event, yet
+    `docs/loyalty/event-model.md` draws an `Auditable` slice holding only the aggregate.
+    `IRBuilder` knows which aggregates are abstract (`_abstract_aggregate_fqns()` skips
+    them in its design rules), but it writes no marker into the cluster, so the
+    renderer draws every cluster.
+    """
+    from loyalty.reward.reward_account import Auditable
+
+    if not Auditable.meta_.abstract:
+        pytest.fail("precondition: Auditable is an abstract aggregate")
+
+    markdown = _render_event_model("--ir", _LOYALTY_IR, "--annotations", _no_notes(tmp_path))
+
+    if "## Event Model: RewardAccount" not in markdown:
+        pytest.fail(f"precondition: the loyalty model rendered\n{markdown}")
+    assert "## Event Model: Auditable" not in markdown
+
+
+@pytest.mark.protean_bug(
+    issue=None,
+    state="open",
+    bug=(
         "An unquoted dotted key in the event model annotations file, such as `[annotations.a.b.C]`, aborts the "
         "render with an error that names only the first segment (`'a'`), and does not say the key needs quotes."
     ),
@@ -559,10 +591,11 @@ def test_unquoted_annotation_key_is_reported_by_its_full_name(tmp_path):
     """Protean finding (not filed yet): an unquoted FQN key gives a misleading error.
 
     TOML reads `[annotations.loyalty.reward.reward_account.RewardAccount]` as nested
-    tables. `protean docs generate` then sees an entry keyed `loyalty` with no note and
-    aborts with "Annotation for 'loyalty' ... must have a non-empty string 'note'". The
-    right result names the full key, either in the error or under "Unmatched
-    annotations", so the author can see which note is wrong.
+    tables. ADR-0032 (the event model annotations file) says such a key "attaches to
+    nothing and is reported as unmatched". `protean docs generate` instead sees an entry
+    keyed `loyalty` with no note and aborts with "Annotation for 'loyalty' ... must have
+    a non-empty string 'note'". The fix names the full key, either in the error or under
+    "Unmatched annotations", so the author can see which note is wrong.
     """
     import click
 
@@ -599,18 +632,20 @@ def test_annotations_outside_what_the_loader_reads_are_reported(tmp_path, conten
     """Protean finding (not filed yet): annotations the loader does not read vanish.
 
     `_load_annotations` in `protean/cli/docs.py` reads `data.get("annotations", {})` and,
-    in each entry, `note` and `owner`. Anything else in the file is ignored. ADR-0032
-    says a note is reported, never dropped in silence, so either the render fails or it
-    names what it skipped.
+    in each entry, `note` and `owner`. Anything else in the file is ignored. The
+    docstring of `unmatched_annotations` in `protean/ir/generators/event_model.py` says
+    an orphaned note is "reported, never dropped in silence". The fix names what was
+    skipped, in an error or in the render's "Unmatched annotations" section.
     """
     import click
 
+    _render_event_model("--ir", _LOYALTY_IR, "--annotations", _no_notes(tmp_path))
     notes = tmp_path / "notes.toml"
     notes.write_text(content)
 
     result = _invoke_event_model("--ir", _LOYALTY_IR, "--annotations", str(notes))
 
-    assert result.exit_code != 0 or lost in click.unstyle(result.output), result.output
+    assert lost in click.unstyle(result.output), result.output
 
 
 @pytest.mark.protean_bug(
