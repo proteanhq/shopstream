@@ -26,7 +26,7 @@ def as_utc(value: datetime) -> datetime:
     """Return ``value`` in UTC, taking a naive datetime to be UTC already.
 
     Stored times are UTC, and the memory provider compares datetimes as
-    strings (proteanhq/protean#1900), so a query cutoff must be in UTC too.
+    strings, so a query cutoff must be in UTC too.
     """
     return (value if value.tzinfo else value.replace(tzinfo=UTC)).astimezone(UTC)
 

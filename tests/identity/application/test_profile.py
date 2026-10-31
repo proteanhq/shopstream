@@ -32,7 +32,7 @@ class TestUpdateProfileFlow:
         assert customer.profile.last_name == "Smith"
 
     def test_update_profile_with_date_of_birth(self):
-        """Cover profile.py line 19: date_of_birth parsing."""
+        """UpdateProfile parses date_of_birth from an ISO date string."""
         customer_id = self._register_customer()
 
         command = UpdateProfile(

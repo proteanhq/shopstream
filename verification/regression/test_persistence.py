@@ -64,11 +64,7 @@ def test_1039_event_datetime_serialized_as_iso_utc():
 )
 @pytest.mark.usefixtures("loyalty_ctx")
 def test_1071_memory_adapter_enforces_unique_index():
-    """proteanhq/protean#1071 (guard): the in-memory adapter enforces Index(unique=True).
-
-    Was a tripwire (xfail) while the fix was upstream-only; the pin bump to Protean
-    main (#1074) landed it, so this is now a permanent guard against regression.
-    """
+    """proteanhq/protean#1071 (guard): the in-memory adapter enforces Index(unique=True)."""
     from protean import current_domain
     from protean.utils.outbox import Outbox
 
@@ -103,8 +99,7 @@ def test_1078_all_default_value_object_round_trips():
     `StockLevels` count at 0) came back as `None` after a persist and reload. The
     fix touched both the attribute setter (`ValueObject.__set__`) and
     serialization (`to_dict`), so the test checks the reloaded attribute and its
-    serialized form. The fix arrived with the pin bump to Protean main 6b4cd312
-    (after 0.17.0), so this is now a permanent guard.
+    serialized form.
     """
     import uuid
 

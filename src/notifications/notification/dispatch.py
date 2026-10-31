@@ -20,11 +20,10 @@ method runs in its own unit of work:
    while it is still DISPATCHING.
 
 The record step joins the send method's unit of work, because Protean has no
-way to commit one step of a handler on its own (proteanhq/protean#1915). A
-version conflict found at commit makes Protean retry the whole send method, so
-the channel is called again. On Postgres the conflict is found at save time,
-inside the record step, and its own retry then loses the result without an
-error (proteanhq/protean#1914). Only the send method and the stale-dispatch
+way to commit one step of a handler on its own. A version conflict found at
+commit makes Protean retry the whole send method, so the channel is called
+again. On Postgres the conflict is found at save time, inside the record step,
+and its own retry then loses the result without an error. Only the send method and the stale-dispatch
 sweep (``ExpireStaleDispatches``) write to a DISPATCHING notification, so such
 a conflict means two workers handled the same event, or a result arrived just
 as the sweep expired the notification.

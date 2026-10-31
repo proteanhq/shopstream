@@ -1,7 +1,7 @@
 """Integration tests for DeliveryPerformanceView projection.
 
 Covers:
-- New record creation on first ShipmentHandedOff (lines 47-48 exception path)
+- New record creation on first ShipmentHandedOff (no view for that carrier and date yet)
 - Existing record update on subsequent ShipmentHandedOff
 - DeliveryConfirmed updates delivered_count
 - DeliveryException updates exception_count

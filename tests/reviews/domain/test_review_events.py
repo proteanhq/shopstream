@@ -1,4 +1,4 @@
-"""Tests for Review event structure — all 8 events have correct fields."""
+"""Tests for Review event structure — every event in reviews.review.events has the correct fields."""
 
 from reviews.review.events import (
     HelpfulVoteRecorded,

@@ -96,6 +96,8 @@ select = [
     "UP",   # pyupgrade
     "ARG",  # flake8-unused-arguments
     "SIM",  # flake8-simplify
+    "TD003",  # TODO must link an issue
+    "ERA001", # commented-out code
 ]
 ignore = [
     "E501",   # line too long (handled by formatter)
@@ -106,7 +108,9 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
-"tests/*" = ["ARG", "S101"]
+"tests/*" = ["ARG", "S101", "ERA001"]
+"verification/*" = ["ERA001"]
+"loadtests/*" = ["ERA001"]
 "**/carrier/fake_adapter.py" = ["ARG002"]  # Fake adapter implements port interface; unused args are by design
 
 [tool.ruff.format]

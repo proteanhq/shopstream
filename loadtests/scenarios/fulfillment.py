@@ -1,12 +1,12 @@
 """Fulfillment domain load test scenarios.
 
-Four stateful SequentialTaskSet journeys covering fulfillment creation
+Stateful SequentialTaskSet journeys covering fulfillment creation
 and picker assignment, cancellation, tracking webhook processing, and
 exception recording.
 
 Note: The full pick → pack → label → handoff → deliver lifecycle is not
-yet exercised. GET /fulfillments/{id} now returns item IDs, enabling
-future expansion of these journeys to cover the full lifecycle.
+yet exercised. GET /fulfillments/{id} returns item IDs, which the pick
+endpoint needs, so these journeys can be extended to cover it.
 """
 
 import random

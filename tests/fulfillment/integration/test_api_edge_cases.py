@@ -1,10 +1,9 @@
-"""Integration tests for uncovered API edge cases.
+"""Integration tests for fulfillment API edge cases.
 
 Covers:
-- Handoff with estimated_delivery date parsing (line 116)
-- Webhook signature verification failure (line 135)
-- Carrier configure in production mode (line 182)
-- Carrier configure with non-FakeCarrier (line 186)
+- Handoff parses estimated_delivery as an ISO date
+- A webhook with a bad signature is rejected
+- Carrier configuration is blocked in production
 """
 
 import pytest

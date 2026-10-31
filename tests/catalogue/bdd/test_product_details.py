@@ -2,7 +2,6 @@
 
 import json
 
-# json kept: used to parse BDD feature step strings
 from pytest_bdd import parsers, scenarios, then, when
 
 from catalogue.product.product import SEO

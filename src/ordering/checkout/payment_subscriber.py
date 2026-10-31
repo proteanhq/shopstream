@@ -3,9 +3,9 @@
 Listens for PaymentSucceeded and PaymentFailed events from the Payments
 domain's external bus and translates them into Ordering domain commands.
 
-This subscriber replaces the direct stream subscription that the
-OrderCheckoutSaga previously had to payments::payment. The saga now
-reacts only to internal ordering events.
+With this subscriber in place, the OrderCheckoutSaga reacts only to
+internal ordering events and does not subscribe to payments::payment
+itself.
 
 Flow:
 - PaymentSucceeded → dispatches RecordPaymentSuccess
