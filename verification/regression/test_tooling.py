@@ -28,13 +28,13 @@ def test_current_domain_probe_outside_context_is_silent():
     runs `getattr(obj, "__test__", None)` (`_pytest/compat.py`) and `isinstance`
     checks over every module attribute. With no domain context active, both go
     through the proxy's `_find_domain()` and emit the "Working outside of domain
-    context" `UserWarning`, so collection prints it for 9 modules in `tests/`.
+    context" `UserWarning`, so collection prints it for each module in `tests/` that does so.
 
     The proxy's docstring promises None-like results outside a context, not
     silence, and Protean's own tests assert that `bool`/`repr` warn. So this is a
     request for a probe that stays quiet (as `_domain_now()` already reads the
-    stack without warning), not a regression. The warning predates this pin: it
-    showed on Protean 0.16.0 too, and `pyproject.toml` filters it for the suite.
+    stack without warning), not a regression. `pyproject.toml` filters the warning
+    for the suite.
     """
     from protean import current_domain
     from protean.utils.globals import _domain_context_stack

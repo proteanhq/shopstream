@@ -12,7 +12,8 @@ WHAT THIS CHECKS
       outbox processors, including the one that publishes to the shared
       `global` bus) has a row, and no row is `unknown`;
     - each row carries the documented fields, including `lag_seconds` and
-      `lag_drain_rate` (the two fields #98 reads);
+      `lag_drain_rate`, the two fields the planned subscription-lag measurement
+      reads (#98);
     - an empty outbox reads `lag: 0` and `status: ok`, not `lag: null`
       (proteanhq/protean#1288 made an unknown lag `null`, so a healthy row
       reading `null` would hide real lag);

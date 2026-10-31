@@ -24,7 +24,7 @@ class ProductCatalogBuilder(SequentialTaskSet):
     """Create Product -> Add Variants -> Add Images -> Activate.
 
     Models a seller building out a product listing.
-    Generates 6 events: ProductCreated, VariantAdded (x2),
+    Generates events: ProductCreated, VariantAdded (x2),
     ProductImageAdded (x2), ProductActivated.
     """
 
@@ -144,7 +144,7 @@ class ProductLifecycleJourney(SequentialTaskSet):
 
     Exercises the full product state machine:
     Draft -> Active -> Discontinued -> Archived.
-    Generates 5 events: ProductCreated, VariantAdded,
+    Generates events: ProductCreated, VariantAdded,
     ProductActivated, ProductDiscontinued, ProductArchived.
     """
 
@@ -231,7 +231,7 @@ class CategoryHierarchyBuilder(SequentialTaskSet):
     """Create root -> child -> grandchild -> update -> reorder -> deactivate.
 
     Tests category depth up to 3 levels (max is 5).
-    Generates 6 events: CategoryCreated (x3), CategoryDetailsUpdated,
+    Generates events: CategoryCreated (x3), CategoryDetailsUpdated,
     CategoryReordered, CategoryDeactivated.
     """
 

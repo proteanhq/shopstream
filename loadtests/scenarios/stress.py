@@ -40,7 +40,7 @@ class EventFloodUser(HttpUser):
 
     @task(5)
     def register_customer(self):
-        """1 event: CustomerRegistered."""
+        """Generates events: CustomerRegistered."""
         first, last = customer_name()
         self.client.post(
             "/customers",
@@ -55,7 +55,7 @@ class EventFloodUser(HttpUser):
 
     @task(3)
     def create_product(self):
-        """1 event: ProductCreated."""
+        """Generates events: ProductCreated."""
         self.client.post(
             "/products",
             json=product_data(),
@@ -64,7 +64,7 @@ class EventFloodUser(HttpUser):
 
     @task(2)
     def create_category(self):
-        """1 event: CategoryCreated."""
+        """Generates events: CategoryCreated."""
         self.client.post(
             "/categories",
             json={"name": category_name()},
@@ -73,7 +73,7 @@ class EventFloodUser(HttpUser):
 
     @task(4)
     def create_product_with_variant(self):
-        """2 events: ProductCreated + VariantAdded."""
+        """Generates events: ProductCreated + VariantAdded."""
         resp = self.client.post(
             "/products",
             json=product_data(),
@@ -89,7 +89,7 @@ class EventFloodUser(HttpUser):
 
     @task(3)
     def create_order(self):
-        """1 event: OrderCreated."""
+        """Generates events: OrderCreated."""
         self.client.post(
             "/orders",
             json=order_data(),
@@ -98,7 +98,7 @@ class EventFloodUser(HttpUser):
 
     @task(3)
     def initialize_inventory(self):
-        """1 event: StockInitialized."""
+        """Generates events: StockInitialized."""
         self.client.post(
             "/inventory",
             json=initialize_stock_data(),
@@ -107,7 +107,7 @@ class EventFloodUser(HttpUser):
 
     @task(2)
     def create_payment(self):
-        """1 event: PaymentInitiated."""
+        """Generates events: PaymentInitiated."""
         self.client.post(
             "/payments",
             json=payment_data(),
@@ -116,7 +116,7 @@ class EventFloodUser(HttpUser):
 
     @task(2)
     def create_warehouse(self):
-        """1 event: WarehouseCreated."""
+        """Generates events: WarehouseCreated."""
         self.client.post(
             "/warehouses",
             json=warehouse_data(),

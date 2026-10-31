@@ -22,7 +22,7 @@ from loadtests.helpers.state import CustomerState
 class NewCustomerJourney(SequentialTaskSet):
     """Register -> Update Profile -> Add Addresses -> Upgrade Tier.
 
-    Generates 5 events: CustomerRegistered, ProfileUpdated,
+    Generates events: CustomerRegistered, ProfileUpdated,
     AddressAdded (x2), TierUpgraded.
     """
 
@@ -145,7 +145,7 @@ class AccountLifecycleJourney(SequentialTaskSet):
 
     Tests the full account state machine:
     Active -> Suspended -> Active -> Closed.
-    Generates 4 events: CustomerRegistered, AccountSuspended,
+    Generates events: CustomerRegistered, AccountSuspended,
     AccountReactivated, AccountClosed.
     """
 
@@ -226,7 +226,7 @@ class TierProgressionJourney(SequentialTaskSet):
     """Register -> Silver -> Gold -> Platinum.
 
     Exercises tier upgrade validation (no downgrades, must follow order).
-    Generates 4 events: CustomerRegistered + 3x TierUpgraded.
+    Generates events: CustomerRegistered + 3x TierUpgraded.
     """
 
     def on_start(self):

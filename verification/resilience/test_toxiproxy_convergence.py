@@ -58,7 +58,7 @@ ISOLATED FROM THE DEV STACK
 WHY ENGINE-MARKED / LOCAL
     Needs the real async engine + Redis + Postgres + a running Toxiproxy.
     `@pytest.mark.engine` (deselected in CI via `-m "not engine"`, like the saga +
-    DLQ tests; #1055). Run in base (async) env.
+    DLQ tests; proteanhq/protean#1055). Run in base (async) env.
 
 RUN:
     make docker-up && make toxiproxy-up && make toxiproxy-verify
@@ -187,19 +187,17 @@ def inventory_domain():
 
 
 # Hand-rolled on purpose: this loop suppresses an exception from each engine
-# pass, and `protean.testing.drain` lets it propagate. This test drops the broker
-# connection on purpose, so a pass that raises would change what it checks.
-# The `broker._ensure_connection()` call is a leftover for reconnecting after a
-# close: since proteanhq/protean#1086 the Redis broker does that on its own.
-# #1086 revives only a closed client, so the inline "won't re-establish" comment
-# below is out of date except for a dropped TCP connection.
+# pass, and `protean.testing.drain` lets it propagate. Under the latency toxic a
+# broker call can hit the socket timeout, and a pass that raised would end the
+# drain instead of letting the next pass retry. Before each pass,
+# `broker._ensure_connection()` pings the broker and reconnects if the
+# connection is broken.
 def _drain(inventory, *, until, max_cycles=10) -> int:
     from protean.server.engine import Engine
 
     broker = inventory.brokers["default"]
     for cycle in range(1, max_cycles + 1):
-        # The engine won't re-establish a dropped broker connection on its own;
-        # ping + reconnect-if-broken (preserving pool settings). #1055-class.
+        # Ping, and reconnect if the connection dropped, keeping the pool settings.
         with contextlib.suppress(Exception):
             broker._ensure_connection()
         with contextlib.suppress(Exception):

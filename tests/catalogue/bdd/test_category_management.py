@@ -2,7 +2,6 @@
 
 import json
 
-# json kept: used to parse BDD feature step strings
 from protean.exceptions import ValidationError
 from pytest_bdd import parsers, scenarios, then, when
 

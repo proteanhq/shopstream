@@ -1,6 +1,6 @@
 """Commands and handler that drive the event-sourced PromoCampaign lifecycle.
 
-These wire the previously-orphaned PromoCampaign aggregate into the domain: launch a
+These wire the PromoCampaign aggregate into the domain: launch a
 campaign, then move it through draft → active → paused → expired. Handlers are thin —
 load (or create) the aggregate, invoke a business method, persist. Because PromoCampaign
 is event-sourced, `repository_for(...).add(...)` appends the raised delta events to the

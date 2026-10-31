@@ -180,7 +180,7 @@ class TestAddressManagementFlow:
         assert str(defaults[0].id) == second_address_id
 
     def test_add_address_with_optional_fields(self):
-        """Cover addresses.py lines 25, 37, 39, 41: label, state, geo_coordinates."""
+        """AddAddress stores the optional label, state and geo coordinates."""
         customer_id = self._register_customer()
 
         command = AddAddress(

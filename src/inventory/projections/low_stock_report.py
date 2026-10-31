@@ -23,7 +23,7 @@ class LowStockReport:
     sku: str = String(required=True)
     current_available: int = Integer(default=0)
     reorder_point: int = Integer(default=10)
-    is_critical: bool = Boolean(default=False)  # available == 0
+    is_critical: bool = Boolean(default=False)  # True when nothing is available
     detected_at: datetime | None = DateTime()
 
 

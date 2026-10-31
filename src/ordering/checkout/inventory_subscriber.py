@@ -3,9 +3,9 @@
 Listens for StockReserved and ReservationReleased events from the Inventory
 domain's external bus and translates them into Ordering domain commands.
 
-This subscriber replaces the direct stream subscription that the
-OrderCheckoutSaga previously had to inventory::inventory_item. The saga
-now reacts only to internal ordering events.
+With this subscriber in place, the OrderCheckoutSaga reacts only to
+internal ordering events and does not subscribe to
+inventory::inventory_item itself.
 
 Flow:
 - StockReserved → dispatches RecordPaymentPending (initiates payment step)

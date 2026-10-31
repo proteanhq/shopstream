@@ -22,8 +22,8 @@ WHY THIS NEEDS THE ASYNC ENGINE (not the sync test suite)
     so the sync suite cannot follow it to cancellation. This check therefore drives the
     REAL stack over HTTP and reads terminal state back. It is `@pytest.mark.engine`
     (local-only, deselected in CI via `-m "not engine"`, same as the DLQ test) -
-    the engine's poll loops are unreliable in CI against Redis (proteanhq/protean
-    #1055).
+    the engine's poll loops are unreliable in CI against Redis
+    (proteanhq/protean#1055).
 
 RUN (needs the running stack, base env):
     make docker-up && make setup-db && make truncate-db

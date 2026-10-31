@@ -123,7 +123,7 @@ class OrderFullLifecycleJourney(SequentialTaskSet):
     Processing -> Ship -> Deliver -> Complete.
 
     The happy path: a full order lifecycle from creation to completion.
-    Generates 8 events exercising the order state machine end-to-end.
+    Generates an event for each step of the order state machine.
     """
 
     def on_start(self):

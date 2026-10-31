@@ -158,7 +158,7 @@ class RewardAccount(Auditable):
     lifetime_points: int = Integer(default=0)
     membership_since: date = Date(default=date.today)
     # member_code carries composed custom validators (built-in RegexValidator + a custom
-    # callable). It is required (always generated) — see generate_member_code / #1025.
+    # callable). It is required: enroll() calls generate_member_code when none is supplied.
     member_code: str = String(
         required=True,
         max_length=12,
@@ -170,8 +170,8 @@ class RewardAccount(Auditable):
             NoTripleRepeatValidator(),
         ],
     )
-    # Optional validated field — exercises validators on an optional field (validators are
-    # skipped when the value is None; proteanhq/protean#1025, fixed on main).
+    # Optional validated field — exercises validators on an optional field (Protean skips
+    # the validators when the value is None).
     referral_code: str | None = String(
         max_length=12,
         validators=[
