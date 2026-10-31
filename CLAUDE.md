@@ -230,6 +230,9 @@ class OrderDeliveredSubscriber:
         # Translate to domain-local side effect...
 ```
 
+### Comments and docstrings
+A docstring states the contract a caller relies on (what the code does, returns, raises or changes) and leaves out how it works. An inline comment says only why: a workaround, an ordering constraint, a reason the simpler version fails. Why the code changed goes in the commit message. A behaviour promise in a docstring needs a test that checks it. No line numbers, counts, version history or commented-out code. Issue numbers appear only in `TODO(#123): reason` and in a regression test's docstring, after the behaviour stated in words; a Protean issue uses the full name (`proteanhq/protean#123`).
+
 ## Environment Configuration
 
 Controlled by `PROTEAN_ENV` and `domain.toml` overlays:
