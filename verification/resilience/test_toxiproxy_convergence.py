@@ -187,11 +187,11 @@ def inventory_domain():
 
 
 # Hand-rolled on purpose: this loop suppresses an exception from each engine
-# pass, and `protean.testing.drain` lets it propagate. This test drops the broker
-# connection on purpose, so a pass that raises would change what it checks.
-# The Redis broker revives a closed client on its own, but not a dropped TCP
-# connection, which is what this test causes. `broker._ensure_connection()`
-# covers that case.
+# pass, and `protean.testing.drain` lets it propagate. Under the latency toxic a
+# broker call can hit the socket timeout, and a pass that raised would end the
+# drain instead of letting the next pass retry. Before each pass,
+# `broker._ensure_connection()` pings the broker and reconnects if the
+# connection is broken.
 def _drain(inventory, *, until, max_cycles=10) -> int:
     from protean.server.engine import Engine
 
