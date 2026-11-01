@@ -43,16 +43,20 @@ def seed_data(host: str, counts: dict | None = None) -> dict:
     """Seed baseline data. Returns dict of created entity IDs."""
     counts = counts or DEFAULT_COUNTS
     created: dict[str, list[str]] = {
-        "customer_ids": [],
-        "product_ids": [],
-        "category_ids": [],
-        "warehouse_ids": [],
-        "inventory_item_ids": [],
-        "loyalty_account_ids": [],
+        "customer_ids": _seed_customers(host, counts["customers"]),
+        "product_ids": _seed_products(host, counts["products"]),
+        "category_ids": _seed_categories(host, counts["categories"]),
+        "warehouse_ids": _seed_warehouses(host, counts["warehouses"]),
     }
+    # Stock for each product goes in the first warehouse.
+    created["inventory_item_ids"] = _seed_stock(host, created["warehouse_ids"][:1], created["product_ids"])
+    created["loyalty_account_ids"] = _seed_loyalty_accounts(host, counts.get("loyalty_accounts", 0))
+    return created
 
-    # Customers
-    for _ in range(counts["customers"]):
+
+def _seed_customers(host: str, count: int) -> list[str]:
+    ids = []
+    for _ in range(count):
         first, last = customer_name()
         resp = requests.post(
             f"{host}/customers",
@@ -66,39 +70,52 @@ def seed_data(host: str, counts: dict | None = None) -> dict:
             timeout=10,
         )
         if resp.status_code == 201:
-            created["customer_ids"].append(resp.json()["customer_id"])
+            ids.append(resp.json()["customer_id"])
+    return ids
 
-    # Products with variants (activated)
-    for _ in range(counts["products"]):
+
+def _seed_products(host: str, count: int) -> list[str]:
+    """Products with a variant, activated. A product whose variant or activation fails is left out."""
+    ids = []
+    for _ in range(count):
         resp = requests.post(f"{host}/products", json=product_data(), timeout=10)
-        if resp.status_code == 201:
-            pid = resp.json()["product_id"]
-            var_resp = requests.post(f"{host}/products/{pid}/variants", json=variant_data(), timeout=10)
-            if var_resp.status_code != 201:
-                print(f"[SEED] WARNING: variant creation failed for product {pid}: {var_resp.status_code}")
-                continue
-            act_resp = requests.put(f"{host}/products/{pid}/activate", timeout=10)
-            if act_resp.status_code != 200:
-                print(f"[SEED] WARNING: activation failed for product {pid}: {act_resp.status_code}")
-                continue
-            created["product_ids"].append(pid)
+        if resp.status_code != 201:
+            continue
+        pid = resp.json()["product_id"]
+        var_resp = requests.post(f"{host}/products/{pid}/variants", json=variant_data(), timeout=10)
+        if var_resp.status_code != 201:
+            print(f"[SEED] WARNING: variant creation failed for product {pid}: {var_resp.status_code}")
+            continue
+        act_resp = requests.put(f"{host}/products/{pid}/activate", timeout=10)
+        if act_resp.status_code != 200:
+            print(f"[SEED] WARNING: activation failed for product {pid}: {act_resp.status_code}")
+            continue
+        ids.append(pid)
+    return ids
 
-    # Categories
-    for _ in range(counts["categories"]):
+
+def _seed_categories(host: str, count: int) -> list[str]:
+    ids = []
+    for _ in range(count):
         resp = requests.post(f"{host}/categories", json={"name": category_name()}, timeout=10)
         if resp.status_code == 201:
-            created["category_ids"].append(resp.json()["category_id"])
+            ids.append(resp.json()["category_id"])
+    return ids
 
-    # Warehouses
-    for _ in range(counts["warehouses"]):
+
+def _seed_warehouses(host: str, count: int) -> list[str]:
+    ids = []
+    for _ in range(count):
         resp = requests.post(f"{host}/warehouses", json=warehouse_data(), timeout=10)
         if resp.status_code == 201:
-            created["warehouse_ids"].append(resp.json()["warehouse_id"])
+            ids.append(resp.json()["warehouse_id"])
+    return ids
 
-    # Initialize stock for each product in first warehouse
-    if created["warehouse_ids"] and created["product_ids"]:
-        wh_id = created["warehouse_ids"][0]
-        for pid in created["product_ids"]:
+
+def _seed_stock(host: str, warehouse_ids: list[str], product_ids: list[str]) -> list[str]:
+    ids = []
+    for wh_id in warehouse_ids:
+        for pid in product_ids:
             payload = initialize_stock_data(
                 product_id=pid,
                 warehouse_id=wh_id,
@@ -106,10 +123,14 @@ def seed_data(host: str, counts: dict | None = None) -> dict:
             )
             resp = requests.post(f"{host}/inventory", json=payload, timeout=10)
             if resp.status_code == 201:
-                created["inventory_item_ids"].append(resp.json()["inventory_item_id"])
+                ids.append(resp.json()["inventory_item_id"])
+    return ids
 
-    # Loyalty reward accounts (enrolled + seeded with points to redeem/transfer)
-    for _ in range(counts.get("loyalty_accounts", 0)):
+
+def _seed_loyalty_accounts(host: str, count: int) -> list[str]:
+    """Enrolled reward accounts, each earning 500 points so scenarios can redeem and transfer."""
+    ids = []
+    for _ in range(count):
         resp = requests.post(
             f"{host}/loyalty/accounts",
             json={"customer_id": loyalty_customer_id()},
@@ -117,14 +138,13 @@ def seed_data(host: str, counts: dict | None = None) -> dict:
         )
         if resp.status_code == 201:
             account_id = resp.json()["account_id"]
-            created["loyalty_account_ids"].append(account_id)
+            ids.append(account_id)
             requests.post(
                 f"{host}/loyalty/accounts/{account_id}/earn",
                 json={"amount": 500, "reason": "seed"},
                 timeout=10,
             )
-
-    return created
+    return ids
 
 
 def main():

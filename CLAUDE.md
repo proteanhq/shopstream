@@ -349,7 +349,7 @@ make loadtest-clean           # Truncate all data between runs
 - A plain `postgresql://` URL runs on psycopg 3. Message DB still uses psycopg2, which `message-db-py` installs, so both drivers are present.
 - FastAPI + Uvicorn
 - scalar-fastapi (API docs at /docs)
-- Ruff (lint/format), MyPy (types), pytest (testing)
+- Ruff (lint/format), complexipy (cognitive complexity), MyPy (types), pytest (testing)
 
 ### Bumping the Protean pin
 

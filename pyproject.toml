@@ -68,6 +68,7 @@ types = [
     "types-requests>=2.31.0",
 ]
 lint = [
+    "complexipy>=8.3.0",
     "ruff>=0.3.0",
 ]
 docs = [
@@ -98,11 +99,14 @@ select = [
     "SIM",  # flake8-simplify
     "TD003",  # TODO must link an issue
     "ERA001", # commented-out code
+    "C901",   # mccabe cyclomatic complexity
+    "PLR0911", # too many return statements
+    "PLR0912", # too many branches
+    "PLR0915", # too many statements
 ]
 ignore = [
     "E501",   # line too long (handled by formatter)
     "B008",   # do not perform function call in argument defaults
-    "C901",   # too complex
     "W191",   # indentation contains tabs
 ]
 
@@ -121,6 +125,20 @@ line-ending = "auto"
 
 [tool.ruff.lint.isort]
 known-first-party = ["shopstream"]
+
+# Ruff's default limits, written out so a reader sees them.
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.pylint]
+max-returns = 6
+max-branches = 12
+max-statements = 50
+
+# Cognitive complexity also charges for nesting and breaks in the flow.
+[tool.complexipy]
+paths = ["src", "tests", "verification"]
+max-complexity-allowed = 15
 
 # MyPy configuration
 [tool.mypy]

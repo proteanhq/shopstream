@@ -38,6 +38,10 @@ jobs:
       - name: Run linting
         run: uv run ruff check src/ tests/ verification/
 
+      - name: Check cognitive complexity
+        # Paths and the limit come from [tool.complexipy] in pyproject.toml.
+        run: uv run complexipy
+
       - name: Reference code is test-tool free
         run: make check-src-clean
 
@@ -217,6 +221,10 @@ jobs:
 
       - name: Run linting
         run: uv run ruff check src/ tests/
+
+      - name: Check cognitive complexity
+        # Paths and the limit come from [tool.complexipy] in pyproject.toml.
+        run: uv run complexipy
 
       - name: Run all tests with coverage
         # Engine-driven tests (-m engine) drive a full Protean Engine, which is unreliable against

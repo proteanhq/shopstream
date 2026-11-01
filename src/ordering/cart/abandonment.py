@@ -47,23 +47,10 @@ class DetectAbandonedCartsHandler:
                 threshold_hours=threshold_hours,
             )
 
-            # Query active carts
-            active_carts = current_domain.view_for(CartView).query.filter(status="Active").all().items
-
-            # Filter idle carts with items
-            abandoned = []
-            for cart in active_carts:
-                if cart.updated_at:
-                    # Normalize both to naive for comparison
-                    cart_updated = cart.updated_at.replace(tzinfo=None) if cart.updated_at.tzinfo else cart.updated_at
-                    if cart_updated <= cutoff_naive and (cart.item_count or 0) > 0:
-                        abandoned.append(cart)
-
+            abandoned = _idle_carts_with_items(cutoff_naive)
             if not abandoned:
                 logger.info("No abandoned carts found")
                 return 0
-
-            from ordering.cart.management import AbandonCart
 
             # Every AbandonCart joins this handler's transaction. A failed one would
             # roll back all of them, so skip any cart the aggregate would reject, and
@@ -73,26 +60,40 @@ class DetectAbandonedCartsHandler:
             for cart in abandoned:
                 aggregate = repo.get_or_none(str(cart.cart_id))
                 blocker = "Cart not found" if aggregate is None else aggregate.abandon_blocker()
-                if blocker is not None:
+                if blocker is None:
+                    _abandon(cart)
+                    abandoned_count += 1
+                else:
                     logger.warning(
                         "Skipped cart",
                         cart_id=str(cart.cart_id),
                         error=blocker,
                     )
-                    continue
-
-                current_domain.process(
-                    AbandonCart(cart_id=str(cart.cart_id)),
-                    asynchronous=False,
-                )
-                abandoned_count += 1
-                logger.info(
-                    "Marked cart as abandoned",
-                    cart_id=str(cart.cart_id),
-                    customer_id=str(cart.customer_id) if cart.customer_id else None,
-                    item_count=cart.item_count,
-                    last_updated=str(cart.updated_at),
-                )
 
             logger.info("Cart abandonment detection complete", abandoned_count=abandoned_count)
             return abandoned_count
+
+
+def _idle_carts_with_items(cutoff_naive: datetime) -> list[CartView]:
+    active_carts = current_domain.view_for(CartView).query.filter(status="Active").all().items
+    return [
+        cart
+        for cart in active_carts
+        if cart.updated_at and cart.updated_at.replace(tzinfo=None) <= cutoff_naive and (cart.item_count or 0) > 0
+    ]
+
+
+def _abandon(cart: CartView) -> None:
+    from ordering.cart.management import AbandonCart
+
+    current_domain.process(
+        AbandonCart(cart_id=str(cart.cart_id)),
+        asynchronous=False,
+    )
+    logger.info(
+        "Marked cart as abandoned",
+        cart_id=str(cart.cart_id),
+        customer_id=str(cart.customer_id) if cart.customer_id else None,
+        item_count=cart.item_count,
+        last_updated=str(cart.updated_at),
+    )
