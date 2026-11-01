@@ -224,8 +224,9 @@ test-watch: ## Run tests in watch mode
 	uv run pytest-watch
 
 # Code Quality
-lint: ## Run linting with ruff
-	uv run ruff check src/ tests/
+lint: ## Run linting with ruff, and the cognitive complexity check with complexipy
+	uv run ruff check src/ tests/ verification/
+	uv run complexipy
 
 check-src-clean: ## Fail if reference code (src/) imports test/verification-only tools
 	@bad=$$(grep -rnE '^[[:space:]]*(import|from)[[:space:]]+(pytest|hypothesis|schemathesis|toxiproxy)([[:space:].]|$$)' src/ || true); \
