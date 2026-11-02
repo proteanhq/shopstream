@@ -100,9 +100,6 @@ def main():
     poll_interval = 0.1
     poll_duration = 5
 
-    # Track which consumers we see actively processing
-    active_consumers = defaultdict(lambda: defaultdict(int))
-
     # Record stream length before burst
     before = int(redis_cli("XLEN", STREAM) or "0")
     print(f"Stream '{STREAM}' has {before} messages before burst\n")
@@ -115,23 +112,33 @@ def main():
 
     # Poll XPENDING while burst is in-flight
     print(f"Polling consumer activity for {poll_duration}s...\n")
-    start = time.time()
-    polls = 0
-    while time.time() - start < poll_duration:
-        for group in GROUPS:
-            entries = get_xpending_detail(STREAM, group)
-            for entry in entries:
-                active_consumers[group][entry["consumer"]] += 1
-        polls += 1
-        time.sleep(poll_interval)
+    active_consumers, polls = _poll_active_consumers(poll_duration, poll_interval)
 
     for t in threads:
         t.join()
 
     after = int(redis_cli("XLEN", STREAM) or "0")
-    new_messages = after - before
+    _print_report(after - before, polls, active_consumers)
 
-    # Print results
+
+def _poll_active_consumers(duration, interval):
+    """Count, per group and consumer, how many polls saw it holding a pending message.
+
+    Returns the counts and the number of polls.
+    """
+    active_consumers = defaultdict(lambda: defaultdict(int))
+    start = time.time()
+    polls = 0
+    while time.time() - start < duration:
+        for group in GROUPS:
+            for entry in get_xpending_detail(STREAM, group):
+                active_consumers[group][entry["consumer"]] += 1
+        polls += 1
+        time.sleep(interval)
+    return active_consumers, polls
+
+
+def _print_report(new_messages, polls, active_consumers):
     print("=" * 70)
     print("WORKER MESSAGE DISTRIBUTION REPORT")
     print("=" * 70)
@@ -158,8 +165,7 @@ def main():
     print("--- Final Consumer Idle Times ---")
     print(f"  {'Consumer':<55} {'Idle (ms)':>10}")
     for group in GROUPS:
-        consumers = get_consumer_stats(STREAM, group)
-        for c in consumers:
+        for c in get_consumer_stats(STREAM, group):
             print(f"  {c['name']:<55} {c['idle']:>10}")
 
 

@@ -75,6 +75,9 @@ def test_valid_email_addresses(email):
         "col:on@example.com",
         "less<than@example.com",
         "back\\slash@example.com",
+        "a[b]@example.com",
+        "user@exa]mple.com",
+        "user@[1..2]",
     ],
     ids=[
         "empty",
@@ -101,6 +104,9 @@ def test_valid_email_addresses(email):
         "colon",
         "less_than",
         "backslash",
+        "bracket_local",
+        "bracket_non_ip_domain",
+        "double_dot_ip_literal",
     ],
 )
 def test_invalid_email_addresses(email):

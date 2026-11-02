@@ -266,3 +266,10 @@ capabilities:
     property: "every extra named on the protean requirement is one Protean defines; every provider and the telemetry table configured in src/*/domain.toml have their extra named; docker/entrypoint.dev.sh names the same set; the server and shell extras' modules import; under the test env a plain postgresql:// URL builds a psycopg (3) engine while psycopg2 is also installed, and loyalty's reporting store runs on SQLite"
     source: A
     status: covered   # the driver check skips in memory mode and runs in CI's real-stores job
+
+  - name: complexity_limits
+    taught_by: pyproject.toml   # [tool.ruff.lint.mccabe], [tool.ruff.lint.pylint] and [tool.complexipy]
+    guarded_by: verification/support/test_complexity_limits.py
+    property: "under the project's config, ruff check flags a function one past each limit and not one at it: C901 at 11 paths, PLR0911 at 7 returns, PLR0912 at 13 branches, PLR0915 at 51 statements; complexipy fails a function at cognitive complexity 16 and passes one at 15; pyproject.toml writes out each limit; the whole tree passes the Ruff complexity rules, and src/, tests/ and verification/ pass complexipy"
+    source: A
+    status: covered

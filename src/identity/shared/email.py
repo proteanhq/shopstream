@@ -20,36 +20,45 @@ class EmailAddress:
     @invariant.post
     def verify_email_address(self) -> None:
         """Ensure that the email address follows a basic valid structure."""
-        email = self.address
+        if not _is_valid_email(self.address):
+            raise ValueError(f"Invalid email address: {self.address!r}")
 
-        if " " in email or "\t" in email or "\n" in email:
-            raise ValueError(f"Invalid email address: {email!r}")
 
-        if email.count("@") != 1:
-            raise ValueError(f"Invalid email address: {email!r}")
+_FORBIDDEN_CHARS = (";", ",", "(", ")", '"', ":", "<", ">", "[", "]", "\\")
 
-        local_part, domain_part = email.split("@", 1)
 
-        if not local_part or local_part.startswith(".") or local_part.endswith("."):
-            raise ValueError(f"Invalid email address: {email!r}")
+def _is_valid_email(email: str) -> bool:
+    if any(whitespace in email for whitespace in " \t\n") or email.count("@") != 1:
+        return False
 
-        if not domain_part or domain_part.startswith(".") or domain_part.endswith("."):
-            raise ValueError(f"Invalid email address: {email!r}")
+    local_part, domain_part = email.split("@", 1)
+    return (
+        _is_valid_local_part(local_part)
+        and _is_valid_domain_part(domain_part)
+        and not _has_forbidden_char(email, domain_part)
+    )
 
-        # Check each label in the domain for leading/trailing hyphens
-        if not (domain_part.startswith("[") and domain_part.endswith("]")):
-            for label in domain_part.split("."):
-                if label.startswith("-") or label.endswith("-"):
-                    raise ValueError(f"Invalid email address: {email!r}")
 
-        if "." not in domain_part and not (domain_part.startswith("[") and domain_part.endswith("]")):
-            raise ValueError(f"Invalid email address: {email!r}")
+def _is_ip_literal(domain_part: str) -> bool:
+    return domain_part.startswith("[") and domain_part.endswith("]")
 
-        if ".." in local_part or ".." in domain_part:
-            raise ValueError(f"Invalid email address: {email!r}")
 
-        for forbidden in (";", ",", "(", ")", '"', ":", "<", ">", "[", "]", "\\"):
-            if forbidden in email and not (
-                forbidden in "[]" and domain_part.startswith("[") and domain_part.endswith("]")
-            ):
-                raise ValueError(f"Invalid email address: {email!r}")
+def _is_valid_local_part(local_part: str) -> bool:
+    return (
+        bool(local_part) and not local_part.startswith(".") and not local_part.endswith(".") and ".." not in local_part
+    )
+
+
+def _is_valid_domain_part(domain_part: str) -> bool:
+    if not domain_part or domain_part.startswith(".") or domain_part.endswith(".") or ".." in domain_part:
+        return False
+    if _is_ip_literal(domain_part):
+        return True
+    labels = domain_part.split(".")
+    return len(labels) > 1 and not any(label.startswith("-") or label.endswith("-") for label in labels)
+
+
+def _has_forbidden_char(email: str, domain_part: str) -> bool:
+    # With an IP literal domain (user@[192.168.0.1]) brackets are allowed anywhere in the address.
+    allowed = "[]" if _is_ip_literal(domain_part) else ""
+    return any(char in email and char not in allowed for char in _FORBIDDEN_CHARS)

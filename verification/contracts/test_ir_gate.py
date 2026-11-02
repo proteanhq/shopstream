@@ -35,17 +35,17 @@ def _diff_exit_code(left: Path, right: Path) -> int:
 
 def _drop_first_published_event(node) -> bool:
     if isinstance(node, dict):
-        for key, value in node.items():
-            if key in ("contracts", "events") and isinstance(value, list) and value:
-                value.pop(0)
-                return True
-            if _drop_first_published_event(value):
-                return True
-    elif isinstance(node, list):
-        for item in node:
-            if _drop_first_published_event(item):
-                return True
+        return any(_drop_from_entry(key, value) for key, value in node.items())
+    if isinstance(node, list):
+        return any(_drop_first_published_event(item) for item in node)
     return False
+
+
+def _drop_from_entry(key, value) -> bool:
+    if key in ("contracts", "events") and isinstance(value, list) and value:
+        value.pop(0)
+        return True
+    return _drop_first_published_event(value)
 
 
 @pytest.mark.skipif(PROTEAN is None, reason="protean CLI not on PATH")

@@ -35,76 +35,53 @@ CREATE_ORDER_ARGS = {
 }
 
 
+# Each reachable status, with the status it is reached from and the command that moves it there.
+_STEPS = {
+    OrderStatus.CONFIRMED: (OrderStatus.CREATED, lambda order_id: ConfirmOrder(order_id=order_id)),
+    OrderStatus.PAYMENT_PENDING: (
+        OrderStatus.CONFIRMED,
+        lambda order_id: RecordPaymentPending(order_id=order_id, payment_id="pay-001", payment_method="credit_card"),
+    ),
+    OrderStatus.PAID: (
+        OrderStatus.PAYMENT_PENDING,
+        lambda order_id: RecordPaymentSuccess(
+            order_id=order_id, payment_id="pay-001", amount=50.0, payment_method="credit_card"
+        ),
+    ),
+    OrderStatus.PROCESSING: (OrderStatus.PAID, lambda order_id: MarkProcessing(order_id=order_id)),
+    OrderStatus.SHIPPED: (
+        OrderStatus.PROCESSING,
+        lambda order_id: RecordShipment(
+            order_id=order_id, shipment_id="ship-001", carrier="FedEx", tracking_number="TRACK-001"
+        ),
+    ),
+    OrderStatus.DELIVERED: (OrderStatus.SHIPPED, lambda order_id: RecordDelivery(order_id=order_id)),
+    OrderStatus.COMPLETED: (OrderStatus.DELIVERED, lambda order_id: CompleteOrder(order_id=order_id)),
+    OrderStatus.RETURN_REQUESTED: (
+        OrderStatus.DELIVERED,
+        lambda order_id: RequestReturn(order_id=order_id, reason="Defective"),
+    ),
+    OrderStatus.RETURN_APPROVED: (OrderStatus.RETURN_REQUESTED, lambda order_id: ApproveReturn(order_id=order_id)),
+    OrderStatus.RETURNED: (OrderStatus.RETURN_APPROVED, lambda order_id: RecordReturn(order_id=order_id)),
+    OrderStatus.CANCELLED: (
+        OrderStatus.CREATED,
+        lambda order_id: CancelOrder(order_id=order_id, reason="Test", cancelled_by="System"),
+    ),
+    OrderStatus.REFUNDED: (OrderStatus.CANCELLED, lambda order_id: RefundOrder(order_id=order_id)),
+}
+
+
 def _order_at_state(target_status):
     """Create an order and advance it to the desired state using given().process() chains."""
-    result = given(Order).process(CreateOrder(**CREATE_ORDER_ARGS))
-    order_id = str(result.aggregate.id)
-
     if target_status == OrderStatus.CREATED:
-        return result, order_id
+        result = given(Order).process(CreateOrder(**CREATE_ORDER_ARGS))
+        return result, str(result.aggregate.id)
+    if target_status not in _STEPS:
+        raise ValueError(f"Cannot create order at state {target_status}")
 
-    result = result.process(ConfirmOrder(order_id=order_id))
-    if target_status == OrderStatus.CONFIRMED:
-        return result, order_id
-
-    result = result.process(RecordPaymentPending(order_id=order_id, payment_id="pay-001", payment_method="credit_card"))
-    if target_status == OrderStatus.PAYMENT_PENDING:
-        return result, order_id
-
-    result = result.process(
-        RecordPaymentSuccess(order_id=order_id, payment_id="pay-001", amount=50.0, payment_method="credit_card")
-    )
-    if target_status == OrderStatus.PAID:
-        return result, order_id
-
-    result = result.process(MarkProcessing(order_id=order_id))
-    if target_status == OrderStatus.PROCESSING:
-        return result, order_id
-
-    result = result.process(
-        RecordShipment(order_id=order_id, shipment_id="ship-001", carrier="FedEx", tracking_number="TRACK-001")
-    )
-    if target_status == OrderStatus.SHIPPED:
-        return result, order_id
-
-    result = result.process(RecordDelivery(order_id=order_id))
-    if target_status == OrderStatus.DELIVERED:
-        return result, order_id
-
-    if target_status == OrderStatus.COMPLETED:
-        result = result.process(CompleteOrder(order_id=order_id))
-        return result, order_id
-
-    if target_status == OrderStatus.RETURN_REQUESTED:
-        result = result.process(RequestReturn(order_id=order_id, reason="Defective"))
-        return result, order_id
-
-    if target_status == OrderStatus.RETURN_APPROVED:
-        result = result.process(RequestReturn(order_id=order_id, reason="Defective"))
-        result = result.process(ApproveReturn(order_id=order_id))
-        return result, order_id
-
-    if target_status == OrderStatus.RETURNED:
-        result = result.process(RequestReturn(order_id=order_id, reason="Defective"))
-        result = result.process(ApproveReturn(order_id=order_id))
-        result = result.process(RecordReturn(order_id=order_id))
-        return result, order_id
-
-    if target_status == OrderStatus.CANCELLED:
-        # Create a fresh order and cancel from CREATED
-        result2 = given(Order).process(CreateOrder(**CREATE_ORDER_ARGS))
-        order_id2 = str(result2.aggregate.id)
-        result2 = result2.process(CancelOrder(order_id=order_id2, reason="Test", cancelled_by="System"))
-        return result2, order_id2
-
-    if target_status == OrderStatus.REFUNDED:
-        result2 = given(Order).process(CreateOrder(**CREATE_ORDER_ARGS))
-        order_id2 = str(result2.aggregate.id)
-        result2 = result2.process(CancelOrder(order_id=order_id2, reason="Test", cancelled_by="System"))
-        result2 = result2.process(RefundOrder(order_id=order_id2))
-        return result2, order_id2
-
-    raise ValueError(f"Cannot create order at state {target_status}")
+    previous_status, make_command = _STEPS[target_status]
+    result, order_id = _order_at_state(previous_status)
+    return result.process(make_command(order_id)), order_id
 
 
 # ---------------------------------------------------------------

@@ -46,27 +46,10 @@ class ExpireStaleReservationsHandler:
                 threshold_minutes=threshold_minutes,
             )
 
-            # Query active reservations
-            active_reservations = current_domain.view_for(ReservationStatus).query.filter(status="Active").all().items
-
-            # Filter expired ones
-            expired = []
-            for reservation in active_reservations:
-                if reservation.expires_at:
-                    # Normalize both to naive for comparison
-                    expires = (
-                        reservation.expires_at.replace(tzinfo=None)
-                        if reservation.expires_at.tzinfo
-                        else reservation.expires_at
-                    )
-                    if expires <= cutoff_naive:
-                        expired.append(reservation)
-
+            expired = _expired_reservations(cutoff_naive)
             if not expired:
                 logger.info("No stale reservations found")
                 return 0
-
-            from inventory.stock.reservation import ReleaseReservation
 
             # Every release joins this handler's transaction. A failed release would
             # roll back all of them, so skip any the aggregate would reject, and let
@@ -75,33 +58,46 @@ class ExpireStaleReservationsHandler:
             expired_count = 0
             for reservation in expired:
                 item = repo.get_or_none(str(reservation.inventory_item_id))
-                if item is None:
-                    blocker = "Inventory item not found"
+                blocker = (
+                    "Inventory item not found" if item is None else item.release_blocker(reservation.reservation_id)
+                )
+                if blocker is None:
+                    _release(reservation)
+                    expired_count += 1
                 else:
-                    blocker = item.release_blocker(reservation.reservation_id)
-                if blocker is not None:
                     logger.warning(
                         "Skipped stale reservation",
                         reservation_id=str(reservation.reservation_id),
                         error=blocker,
                     )
-                    continue
-
-                current_domain.process(
-                    ReleaseReservation(
-                        inventory_item_id=str(reservation.inventory_item_id),
-                        reservation_id=str(reservation.reservation_id),
-                        reason="timeout",
-                    ),
-                    asynchronous=False,
-                )
-                expired_count += 1
-                logger.info(
-                    "Released stale reservation",
-                    reservation_id=str(reservation.reservation_id),
-                    order_id=str(reservation.order_id),
-                    expired_at=str(reservation.expires_at),
-                )
 
             logger.info("Stale reservation cleanup complete", expired_count=expired_count)
             return expired_count
+
+
+def _expired_reservations(cutoff_naive: datetime) -> list[ReservationStatus]:
+    active_reservations = current_domain.view_for(ReservationStatus).query.filter(status="Active").all().items
+    return [
+        reservation
+        for reservation in active_reservations
+        if reservation.expires_at and reservation.expires_at.replace(tzinfo=None) <= cutoff_naive
+    ]
+
+
+def _release(reservation: ReservationStatus) -> None:
+    from inventory.stock.reservation import ReleaseReservation
+
+    current_domain.process(
+        ReleaseReservation(
+            inventory_item_id=str(reservation.inventory_item_id),
+            reservation_id=str(reservation.reservation_id),
+            reason="timeout",
+        ),
+        asynchronous=False,
+    )
+    logger.info(
+        "Released stale reservation",
+        reservation_id=str(reservation.reservation_id),
+        order_id=str(reservation.order_id),
+        expired_at=str(reservation.expires_at),
+    )

@@ -322,6 +322,14 @@ def test_recover_finds_and_resets_a_checkpoint_past_the_restored_head(restore_do
     _write_recovery_tracking(domain, InventoryLevelProjector, {g5: (item_stream, 4), g2: (item_stream, 1)})
 
     # 1. Detection: the checkpoint names g5, the restored head is g3.
+    _assert_recover_detects_the_stale_checkpoint(domain, g2, g3, g5)
+    # 2. Reset: only the stale checkpoint moves, and it moves back to the head.
+    _assert_reset_moves_only_the_stale_checkpoint(domain, g2, g3, g5)
+    # 3. Re-verify: nothing is beyond head or stale any more.
+    _assert_recover_finds_nothing_stale(domain, g2, g3)
+
+
+def _assert_recover_detects_the_stale_checkpoint(domain, g2, g3, g5):
     code, envelope = _recover(domain)
     assert (code, envelope["status"]) == (1, "fail"), envelope
     rows = _rows_by_handler(envelope)
@@ -343,7 +351,12 @@ def test_recover_finds_and_resets_a_checkpoint_past_the_restored_head(restore_do
     )
     assert (summary["recovery_stale"], summary["recovery_unknown"]) == (1, 0), summary
 
-    # 2. Reset: only the stale checkpoint moves, and it moves back to the head.
+
+def _assert_reset_moves_only_the_stale_checkpoint(domain, g2, g3, g5):
+    from inventory.projections.inventory_level import InventoryLevelProjector
+    from inventory.projections.stock_movement_log import StockMovementLogProjector
+
+    store = domain.event_store.store
     code, envelope = _recover(domain, "--reset-beyond-head")
     assert (code, envelope["status"]) == (0, "pass"), envelope
     resets = envelope["data"]["reset"]
@@ -362,7 +375,8 @@ def test_recover_finds_and_resets_a_checkpoint_past_the_restored_head(restore_do
     tracked = store._read_last_message(_recovery_stream(InventoryLevelProjector))["data"]["unresolved"]
     assert set(tracked) == {str(g2)}, tracked
 
-    # 3. Re-verify: nothing is beyond head or stale any more.
+
+def _assert_recover_finds_nothing_stale(domain, g2, g3):
     code, envelope = _recover(domain)
     assert (code, envelope["status"]) == (0, "pass"), envelope
     rows = _rows_by_handler(envelope)

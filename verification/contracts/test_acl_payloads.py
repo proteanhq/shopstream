@@ -66,6 +66,27 @@ from protean.utils.reflection import declared_fields
 _token = itertools.count(1)
 
 
+# Factories, so a list or dict is never shared between calls and each datetime is current.
+_PLACEHOLDERS = {
+    list: list,
+    dict: dict,
+    bool: lambda: True,
+    int: lambda: 1,
+    float: lambda: 1.0,
+    Decimal: lambda: Decimal("1.0000"),
+    datetime: lambda: datetime.now(UTC),
+    date: lambda: date(2026, 1, 1),
+}
+
+
+def _unwrap_optional(pt):
+    """Optional[T] / T | None -> the first real type (str if there is none)."""
+    if isinstance(pt, types.UnionType) or typing.get_origin(pt) is typing.Union:
+        args = [a for a in typing.get_args(pt) if a is not type(None)]
+        return args[0] if args else str
+    return pt
+
+
 def _dummy(field):
     """A schema-valid value for a field, inferred from its resolved python type.
 
@@ -73,33 +94,11 @@ def _dummy(field):
     the payload, not their contents. String/Identifier values are unique so that
     a subscriber that dispatches a command does not collide across cases.
     """
-    pt = field._python_type
-    # Optional[T] / T | None -> unwrap to the first real type.
-    if isinstance(pt, types.UnionType) or typing.get_origin(pt) is typing.Union:
-        args = [a for a in typing.get_args(pt) if a is not type(None)]
-        pt = args[0] if args else str
-    origin = typing.get_origin(pt)  # list[str] -> list, dict[..] -> dict
-    if origin is list:
-        return []
-    if origin is dict:
-        return {}
-    if pt is bool:
-        return True
-    if pt is int:
-        return 1
-    if pt is float:
-        return 1.0
-    if pt is Decimal:
-        return Decimal("1.0000")
-    if pt is datetime:
-        return datetime.now(UTC)
-    if pt is date:
-        return date(2026, 1, 1)
-    if pt is list:
-        return []
-    if pt is dict:
-        return {}
-    return f"acl-{next(_token)}"  # String / Identifier / Text
+    pt = _unwrap_optional(field._python_type)
+    make = _PLACEHOLDERS.get(typing.get_origin(pt) or pt)  # list[str] -> list, dict[..] -> dict
+    if make is None:
+        return f"acl-{next(_token)}"  # String / Identifier / Text
+    return make()
 
 
 def _event_type(producer: str, event_cls) -> str:

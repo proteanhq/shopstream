@@ -26,6 +26,18 @@ repos:
       # Run the formatter
       - id: ruff-format
 
+  # The locked complexipy from the lint group. It reads its paths and limit
+  # from [tool.complexipy] in pyproject.toml, so it checks the whole tree
+  # rather than the staged files.
+  - repo: local
+    hooks:
+      - id: complexipy
+        name: Check cognitive complexity
+        entry: uv run complexipy
+        language: system
+        types: [python]
+        pass_filenames: false
+
   # Protean IR hooks need to import domain modules to build the live IR,
   # so they must run in the project's own venv (not pre-commit's isolated
   # env). This is the same pattern pylint/mypy recommend for tools that
