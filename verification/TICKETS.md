@@ -168,7 +168,8 @@ whether it gates PRs / nightly / releases.
   claim a feature the code lacks.
 - `make docs-check` is the enforcement: it regenerates every catalog and fails if
   a committed one drifts (verified it has teeth). Wired into CI. It immediately
-  caught a stale `ordering` catalog, now regenerated.
+  caught a stale `ordering` catalog, now regenerated. It now regenerates every
+  `event-model.md` the same way (`make docs-event-model`).
 - Doctests on the value objects (Money, SKU, Rating) — executable examples in the
   docstrings, run by `make doctest` (`pytest --doctest-modules`), wired into CI.
 - Folded in: `make ir` now uses `--canonical` (sorted keys + no volatile

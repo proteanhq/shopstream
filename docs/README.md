@@ -83,44 +83,52 @@ docs/
 ├── glossary.md            ← Ubiquitous Language (all terms)
 ├── identity/
 │   ├── README.md          ← Business context, domain model, events, commands
+│   ├── clusters.md / event-flows.md / handler-wiring.md / catalog.md / event-model.md   ← generated
 │   └── scenarios/
 │       └── customer-registration.md
 ├── catalogue/
 │   ├── README.md
+│   ├── clusters.md / event-flows.md / handler-wiring.md / catalog.md / event-model.md   ← generated
 │   └── scenarios/
 │       └── product-lifecycle.md
 ├── ordering/
 │   ├── README.md
+│   ├── clusters.md / event-flows.md / handler-wiring.md / catalog.md / event-model.md   ← generated
 │   └── scenarios/
 │       ├── cart-to-order.md
 │       └── order-fulfillment.md
 ├── inventory/
 │   ├── README.md
+│   ├── clusters.md / event-flows.md / handler-wiring.md / catalog.md / event-model.md   ← generated
 │   └── scenarios/
 │       ├── stock-receiving.md
 │       └── reservation-lifecycle.md
 ├── payments/
 │   ├── README.md
+│   ├── clusters.md / event-flows.md / handler-wiring.md / catalog.md / event-model.md   ← generated
 │   └── scenarios/
 │       └── payment-lifecycle.md
 ├── fulfillment/
 │   ├── README.md
+│   ├── clusters.md / event-flows.md / handler-wiring.md / catalog.md / event-model.md   ← generated
 │   └── scenarios/
 │       ├── fulfillment-lifecycle.md
 │       └── delivery-exception.md
 ├── reviews/
 │   ├── README.md
+│   ├── clusters.md / event-flows.md / handler-wiring.md / catalog.md / event-model.md   ← generated
 │   └── scenarios/
 │       ├── review-submission.md
 │       └── review-moderation.md
 ├── notifications/
 │   ├── README.md
+│   ├── clusters.md / event-flows.md / handler-wiring.md / catalog.md / event-model.md   ← generated
 │   └── scenarios/
 │       ├── notification-dispatch.md
 │       └── preference-management.md
 └── loyalty/
     ├── README.md
-    ├── clusters.md / event-flows.md / handler-wiring.md / catalog.md   ← generated
+    ├── clusters.md / event-flows.md / handler-wiring.md / catalog.md / event-model.md   ← generated
     └── scenarios/
         ├── earn-and-redeem-points.md
         └── points-transfer.md

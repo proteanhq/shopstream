@@ -1,0 +1,32 @@
+# Human notes merged into docs/loyalty/event-model.md by `make docs-event-model`.
+# Each key is an element's fully qualified name, quoted so TOML keeps the dots in
+# one key. An unquoted dotted key becomes nested tables, and the render aborts.
+# A key that matches nothing the model draws (a renamed element, or a fact event,
+# which the model leaves out) is listed under "Unmatched annotations" at the end
+# of the render. The render does not say which element a note belongs to, so each
+# note names its element first.
+
+[annotations."loyalty.reward.reward_account.RewardAccount"]
+note = """
+RewardAccount: a customer's points account. The balance never goes negative,
+and a closed account accepts no further changes. Other contexts also act on it
+through subscribers (customer registration, delivered orders, payment refunds,
+approved reviews), which this model does not draw."""
+owner = "Loyalty"
+
+[annotations."loyalty.redemption.saga.RedemptionSaga"]
+note = """
+RedemptionSaga: starts on RedemptionRequested. It ends in one of three ways.
+If the account cannot cover the redemption (too few points, or closed), the
+RedemptionRequested handler sends no command, marks the saga rejected and calls
+mark_as_complete(), so the same event that starts the saga also ends it. The failure branch ends on
+VoucherIssuanceFailed, after it refunds the reserved points. The success branch
+ends when the VoucherIssued handler calls mark_as_complete(). The model cannot
+see mark_as_complete(), so only VoucherIssuanceFailed carries an "end" label."""
+owner = "Loyalty"
+
+[annotations."loyalty.reward.events.MembershipCardIssued"]
+note = "MembershipCardIssued: deprecated since 0.1.0 and superseded by MembershipCardIssuedV2. RewardAccount raises only the V2 event."
+
+[annotations."loyalty.dlq.poison.PoisonPill"]
+note = "PoisonPill: a test fixture for the dead-letter queue, not a business concept. Its PoisonDetonated handler always fails, so under async processing the engine moves the message to the dead-letter queue of the loyalty::poison_pill stream once the retries run out. Under sync processing (the test and memory environments) the handler raises inline. It is registered in every environment."

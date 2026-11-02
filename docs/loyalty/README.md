@@ -350,7 +350,7 @@ synchronous end-to-end completion tests now pass as guards.
 | Projections + projectors (DB account view + cache leaderboard + DB campaign catalog + DB redemption view) | [`src/loyalty/projections/`](../../src/loyalty/projections/) |
 | Query handlers (`@read`) for the read endpoints | [`reward_account_view_queries.py`](../../src/loyalty/projections/reward_account_view_queries.py), [`points_leaderboard_queries.py`](../../src/loyalty/projections/points_leaderboard_queries.py), [`campaign_catalog_queries.py`](../../src/loyalty/projections/campaign_catalog_queries.py), [`redemption_view_queries.py`](../../src/loyalty/projections/redemption_view_queries.py) |
 | API routes + schemas | [`src/loyalty/api/`](../../src/loyalty/api/) |
-| Generated reference: [clusters](clusters.md) · [event flows](event-flows.md) · [handler wiring](handler-wiring.md) · [catalog](catalog.md) | — |
+| Generated reference: [clusters](clusters.md) · [event flows](event-flows.md) · [handler wiring](handler-wiring.md) · [catalog](catalog.md) · [event model](event-model.md) | — |
 
 The HTTP API (`/loyalty`, see `src/loyalty/api/`) exposes enrol / earn / redeem / transfer, the
 campaign lifecycle (launch / activate / pause / expire), and redemption requests (which start the

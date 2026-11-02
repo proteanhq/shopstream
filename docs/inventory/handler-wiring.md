@@ -49,6 +49,15 @@ flowchart LR
     ch_inventory_warehouse_management_WarehouseManagementHandler --> agg_inventory_warehouse_warehouse_Warehouse[Warehouse]
 ```
 
+## Event Handlers
+
+```mermaid
+flowchart TD
+    subgraph event_handlers["Event Handlers"]
+        eh_inventory_projections_event_audit_EventAuditHandler[EventAuditHandler]
+    end
+```
+
 ## Subscribers
 
 ```mermaid
