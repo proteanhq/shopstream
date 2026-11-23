@@ -44,7 +44,7 @@ for its area. Add a new file only for an area none of the five covers.
 | `test_event_sourcing.py` | Event-sourced repositories, version conflicts, sync dispatch and snapshots |
 | `test_messaging.py` | Brokers, streams, engine outbox processors, dead-letter queues and projection rebuilds |
 | `test_ir.py` | `protean ir diff` |
-| `test_tooling.py` | `current_domain`, config loading, `protean check`, `protean server` and `protean verify` |
+| `test_tooling.py` | `current_domain`, config loading, `protean check`, `protean server`, `protean verify` and `protean docs generate` |
 
 ## Manifest
 

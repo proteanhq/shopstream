@@ -1,0 +1,160 @@
+## Event Model: InventoryItem
+
+> **Given** InventoryItem
+> **When** AdjustStock, RecordStockCheck, MarkDamaged, WriteOffDamaged, ExpireStaleReservations, InitializeStock, ReceiveStock, ConfirmReservation, ReleaseReservation, ReserveStock, ReturnToStock, CommitStock
+> **Then** DamagedStockWrittenOff, LowStockDetected, ReservationConfirmed, ReservationReleased, StockAdjusted, StockCheckRecorded, StockCommitted, StockInitialized, StockMarkedDamaged, StockReceived, StockReserved, StockReturned
+
+```mermaid
+flowchart LR
+    subgraph inventory_stock_stock_InventoryItem[InventoryItem]
+        cmd_inventory_stock_adjustment_AdjustStock[/AdjustStock/]
+        cmd_inventory_stock_adjustment_RecordStockCheck[/RecordStockCheck/]
+        cmd_inventory_stock_damage_MarkDamaged[/MarkDamaged/]
+        cmd_inventory_stock_damage_WriteOffDamaged[/WriteOffDamaged/]
+        cmd_inventory_stock_expiry_ExpireStaleReservations[/ExpireStaleReservations/]
+        cmd_inventory_stock_initialization_InitializeStock[/InitializeStock/]
+        cmd_inventory_stock_receiving_ReceiveStock[/ReceiveStock/]
+        cmd_inventory_stock_reservation_ConfirmReservation[/ConfirmReservation/]
+        cmd_inventory_stock_reservation_ReleaseReservation[/ReleaseReservation/]
+        cmd_inventory_stock_reservation_ReserveStock[/ReserveStock/]
+        cmd_inventory_stock_returns_ReturnToStock[/ReturnToStock/]
+        cmd_inventory_stock_shipping_CommitStock[/CommitStock/]
+        agg_inventory_stock_stock_InventoryItem[InventoryItem]
+        evt_inventory_stock_events_DamagedStockWrittenOff([DamagedStockWrittenOff])
+        evt_inventory_stock_events_LowStockDetected([LowStockDetected])
+        evt_inventory_stock_events_ReservationConfirmed([ReservationConfirmed])
+        evt_inventory_stock_events_ReservationReleased([ReservationReleased])
+        evt_inventory_stock_events_StockAdjusted([StockAdjusted])
+        evt_inventory_stock_events_StockCheckRecorded([StockCheckRecorded])
+        evt_inventory_stock_events_StockCommitted([StockCommitted])
+        evt_inventory_stock_events_StockInitialized([StockInitialized])
+        evt_inventory_stock_events_StockMarkedDamaged([StockMarkedDamaged])
+        evt_inventory_stock_events_StockReceived([StockReceived])
+        evt_inventory_stock_events_StockReserved([StockReserved])
+        evt_inventory_stock_events_StockReturned([StockReturned])
+        rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_level_InventoryLevelProjector[(InventoryLevelProjector → InventoryLevel)]
+        rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_valuation_InventoryValuationProjector[(InventoryValuationProjector → InventoryValuation)]
+        rm_inventory_stock_stock_InventoryItem_inventory_projections_low_stock_report_LowStockReportProjector[(LowStockReportProjector → LowStockReport)]
+        rm_inventory_stock_stock_InventoryItem_inventory_projections_product_availability_ProductAvailabilityProjector[(ProductAvailabilityProjector → ProductAvailability)]
+        rm_inventory_stock_stock_InventoryItem_inventory_projections_reservation_status_ReservationStatusProjector[(ReservationStatusProjector → ReservationStatus)]
+        rm_inventory_stock_stock_InventoryItem_inventory_projections_shrinkage_report_ShrinkageReportProjector[(ShrinkageReportProjector → ShrinkageReport)]
+        rm_inventory_stock_stock_InventoryItem_inventory_projections_stock_movement_log_StockMovementLogProjector[(StockMovementLogProjector → StockMovementLog)]
+        rm_inventory_stock_stock_InventoryItem_inventory_projections_warehouse_stock_WarehouseStockProjector[(WarehouseStockProjector → WarehouseStock)]
+    end
+    cmd_inventory_stock_adjustment_AdjustStock --> agg_inventory_stock_stock_InventoryItem
+    cmd_inventory_stock_adjustment_RecordStockCheck --> agg_inventory_stock_stock_InventoryItem
+    cmd_inventory_stock_damage_MarkDamaged --> agg_inventory_stock_stock_InventoryItem
+    cmd_inventory_stock_damage_WriteOffDamaged --> agg_inventory_stock_stock_InventoryItem
+    cmd_inventory_stock_expiry_ExpireStaleReservations --> agg_inventory_stock_stock_InventoryItem
+    cmd_inventory_stock_initialization_InitializeStock --> agg_inventory_stock_stock_InventoryItem
+    cmd_inventory_stock_receiving_ReceiveStock --> agg_inventory_stock_stock_InventoryItem
+    cmd_inventory_stock_reservation_ConfirmReservation --> agg_inventory_stock_stock_InventoryItem
+    cmd_inventory_stock_reservation_ReleaseReservation --> agg_inventory_stock_stock_InventoryItem
+    cmd_inventory_stock_reservation_ReserveStock --> agg_inventory_stock_stock_InventoryItem
+    cmd_inventory_stock_returns_ReturnToStock --> agg_inventory_stock_stock_InventoryItem
+    cmd_inventory_stock_shipping_CommitStock --> agg_inventory_stock_stock_InventoryItem
+    agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_DamagedStockWrittenOff
+    evt_inventory_stock_events_DamagedStockWrittenOff --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_level_InventoryLevelProjector
+    evt_inventory_stock_events_DamagedStockWrittenOff --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_valuation_InventoryValuationProjector
+    evt_inventory_stock_events_DamagedStockWrittenOff --> rm_inventory_stock_stock_InventoryItem_inventory_projections_shrinkage_report_ShrinkageReportProjector
+    evt_inventory_stock_events_DamagedStockWrittenOff --> rm_inventory_stock_stock_InventoryItem_inventory_projections_stock_movement_log_StockMovementLogProjector
+    evt_inventory_stock_events_DamagedStockWrittenOff --> rm_inventory_stock_stock_InventoryItem_inventory_projections_warehouse_stock_WarehouseStockProjector
+    agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_LowStockDetected
+    evt_inventory_stock_events_LowStockDetected --> rm_inventory_stock_stock_InventoryItem_inventory_projections_low_stock_report_LowStockReportProjector
+    agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_ReservationConfirmed
+    evt_inventory_stock_events_ReservationConfirmed --> rm_inventory_stock_stock_InventoryItem_inventory_projections_reservation_status_ReservationStatusProjector
+    evt_inventory_stock_events_ReservationConfirmed --> rm_inventory_stock_stock_InventoryItem_inventory_projections_stock_movement_log_StockMovementLogProjector
+    agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_ReservationReleased
+    evt_inventory_stock_events_ReservationReleased --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_level_InventoryLevelProjector
+    evt_inventory_stock_events_ReservationReleased --> rm_inventory_stock_stock_InventoryItem_inventory_projections_product_availability_ProductAvailabilityProjector
+    evt_inventory_stock_events_ReservationReleased --> rm_inventory_stock_stock_InventoryItem_inventory_projections_reservation_status_ReservationStatusProjector
+    evt_inventory_stock_events_ReservationReleased --> rm_inventory_stock_stock_InventoryItem_inventory_projections_stock_movement_log_StockMovementLogProjector
+    evt_inventory_stock_events_ReservationReleased --> rm_inventory_stock_stock_InventoryItem_inventory_projections_warehouse_stock_WarehouseStockProjector
+    agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_StockAdjusted
+    evt_inventory_stock_events_StockAdjusted --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_level_InventoryLevelProjector
+    evt_inventory_stock_events_StockAdjusted --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_valuation_InventoryValuationProjector
+    evt_inventory_stock_events_StockAdjusted --> rm_inventory_stock_stock_InventoryItem_inventory_projections_product_availability_ProductAvailabilityProjector
+    evt_inventory_stock_events_StockAdjusted --> rm_inventory_stock_stock_InventoryItem_inventory_projections_shrinkage_report_ShrinkageReportProjector
+    evt_inventory_stock_events_StockAdjusted --> rm_inventory_stock_stock_InventoryItem_inventory_projections_stock_movement_log_StockMovementLogProjector
+    evt_inventory_stock_events_StockAdjusted --> rm_inventory_stock_stock_InventoryItem_inventory_projections_warehouse_stock_WarehouseStockProjector
+    agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_StockCheckRecorded
+    evt_inventory_stock_events_StockCheckRecorded --> rm_inventory_stock_stock_InventoryItem_inventory_projections_stock_movement_log_StockMovementLogProjector
+    agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_StockCommitted
+    evt_inventory_stock_events_StockCommitted --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_level_InventoryLevelProjector
+    evt_inventory_stock_events_StockCommitted --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_valuation_InventoryValuationProjector
+    evt_inventory_stock_events_StockCommitted --> rm_inventory_stock_stock_InventoryItem_inventory_projections_product_availability_ProductAvailabilityProjector
+    evt_inventory_stock_events_StockCommitted --> rm_inventory_stock_stock_InventoryItem_inventory_projections_reservation_status_ReservationStatusProjector
+    evt_inventory_stock_events_StockCommitted --> rm_inventory_stock_stock_InventoryItem_inventory_projections_stock_movement_log_StockMovementLogProjector
+    evt_inventory_stock_events_StockCommitted --> rm_inventory_stock_stock_InventoryItem_inventory_projections_warehouse_stock_WarehouseStockProjector
+    agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_StockInitialized
+    evt_inventory_stock_events_StockInitialized --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_level_InventoryLevelProjector
+    evt_inventory_stock_events_StockInitialized --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_valuation_InventoryValuationProjector
+    evt_inventory_stock_events_StockInitialized --> rm_inventory_stock_stock_InventoryItem_inventory_projections_product_availability_ProductAvailabilityProjector
+    evt_inventory_stock_events_StockInitialized --> rm_inventory_stock_stock_InventoryItem_inventory_projections_stock_movement_log_StockMovementLogProjector
+    evt_inventory_stock_events_StockInitialized --> rm_inventory_stock_stock_InventoryItem_inventory_projections_warehouse_stock_WarehouseStockProjector
+    agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_StockMarkedDamaged
+    evt_inventory_stock_events_StockMarkedDamaged --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_level_InventoryLevelProjector
+    evt_inventory_stock_events_StockMarkedDamaged --> rm_inventory_stock_stock_InventoryItem_inventory_projections_product_availability_ProductAvailabilityProjector
+    evt_inventory_stock_events_StockMarkedDamaged --> rm_inventory_stock_stock_InventoryItem_inventory_projections_shrinkage_report_ShrinkageReportProjector
+    evt_inventory_stock_events_StockMarkedDamaged --> rm_inventory_stock_stock_InventoryItem_inventory_projections_stock_movement_log_StockMovementLogProjector
+    evt_inventory_stock_events_StockMarkedDamaged --> rm_inventory_stock_stock_InventoryItem_inventory_projections_warehouse_stock_WarehouseStockProjector
+    agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_StockReceived
+    evt_inventory_stock_events_StockReceived --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_level_InventoryLevelProjector
+    evt_inventory_stock_events_StockReceived --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_valuation_InventoryValuationProjector
+    evt_inventory_stock_events_StockReceived --> rm_inventory_stock_stock_InventoryItem_inventory_projections_low_stock_report_LowStockReportProjector
+    evt_inventory_stock_events_StockReceived --> rm_inventory_stock_stock_InventoryItem_inventory_projections_product_availability_ProductAvailabilityProjector
+    evt_inventory_stock_events_StockReceived --> rm_inventory_stock_stock_InventoryItem_inventory_projections_stock_movement_log_StockMovementLogProjector
+    evt_inventory_stock_events_StockReceived --> rm_inventory_stock_stock_InventoryItem_inventory_projections_warehouse_stock_WarehouseStockProjector
+    agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_StockReserved
+    evt_inventory_stock_events_StockReserved --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_level_InventoryLevelProjector
+    evt_inventory_stock_events_StockReserved --> rm_inventory_stock_stock_InventoryItem_inventory_projections_product_availability_ProductAvailabilityProjector
+    evt_inventory_stock_events_StockReserved --> rm_inventory_stock_stock_InventoryItem_inventory_projections_reservation_status_ReservationStatusProjector
+    evt_inventory_stock_events_StockReserved --> rm_inventory_stock_stock_InventoryItem_inventory_projections_stock_movement_log_StockMovementLogProjector
+    evt_inventory_stock_events_StockReserved --> rm_inventory_stock_stock_InventoryItem_inventory_projections_warehouse_stock_WarehouseStockProjector
+    agg_inventory_stock_stock_InventoryItem --> evt_inventory_stock_events_StockReturned
+    evt_inventory_stock_events_StockReturned --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_level_InventoryLevelProjector
+    evt_inventory_stock_events_StockReturned --> rm_inventory_stock_stock_InventoryItem_inventory_projections_inventory_valuation_InventoryValuationProjector
+    evt_inventory_stock_events_StockReturned --> rm_inventory_stock_stock_InventoryItem_inventory_projections_low_stock_report_LowStockReportProjector
+    evt_inventory_stock_events_StockReturned --> rm_inventory_stock_stock_InventoryItem_inventory_projections_product_availability_ProductAvailabilityProjector
+    evt_inventory_stock_events_StockReturned --> rm_inventory_stock_stock_InventoryItem_inventory_projections_stock_movement_log_StockMovementLogProjector
+    evt_inventory_stock_events_StockReturned --> rm_inventory_stock_stock_InventoryItem_inventory_projections_warehouse_stock_WarehouseStockProjector
+```
+
+## Event Model: Warehouse
+
+> **Given** Warehouse
+> **When** AddZone, CreateWarehouse, DeactivateWarehouse, RemoveZone, UpdateWarehouse
+> **Then** WarehouseCreated, WarehouseDeactivated, WarehouseUpdated, ZoneAdded, ZoneRemoved
+
+```mermaid
+flowchart LR
+    subgraph inventory_warehouse_warehouse_Warehouse[Warehouse]
+        cmd_inventory_warehouse_management_AddZone[/AddZone/]
+        cmd_inventory_warehouse_management_CreateWarehouse[/CreateWarehouse/]
+        cmd_inventory_warehouse_management_DeactivateWarehouse[/DeactivateWarehouse/]
+        cmd_inventory_warehouse_management_RemoveZone[/RemoveZone/]
+        cmd_inventory_warehouse_management_UpdateWarehouse[/UpdateWarehouse/]
+        agg_inventory_warehouse_warehouse_Warehouse[Warehouse]
+        evt_inventory_warehouse_events_WarehouseCreated([WarehouseCreated])
+        evt_inventory_warehouse_events_WarehouseDeactivated([WarehouseDeactivated])
+        evt_inventory_warehouse_events_WarehouseUpdated([WarehouseUpdated])
+        evt_inventory_warehouse_events_ZoneAdded([ZoneAdded])
+        evt_inventory_warehouse_events_ZoneRemoved([ZoneRemoved])
+        rm_inventory_warehouse_warehouse_Warehouse_inventory_projections_warehouse_directory_WarehouseDirectoryProjector[(WarehouseDirectoryProjector → WarehouseDirectory)]
+    end
+    cmd_inventory_warehouse_management_AddZone --> agg_inventory_warehouse_warehouse_Warehouse
+    cmd_inventory_warehouse_management_CreateWarehouse --> agg_inventory_warehouse_warehouse_Warehouse
+    cmd_inventory_warehouse_management_DeactivateWarehouse --> agg_inventory_warehouse_warehouse_Warehouse
+    cmd_inventory_warehouse_management_RemoveZone --> agg_inventory_warehouse_warehouse_Warehouse
+    cmd_inventory_warehouse_management_UpdateWarehouse --> agg_inventory_warehouse_warehouse_Warehouse
+    agg_inventory_warehouse_warehouse_Warehouse --> evt_inventory_warehouse_events_WarehouseCreated
+    evt_inventory_warehouse_events_WarehouseCreated --> rm_inventory_warehouse_warehouse_Warehouse_inventory_projections_warehouse_directory_WarehouseDirectoryProjector
+    agg_inventory_warehouse_warehouse_Warehouse --> evt_inventory_warehouse_events_WarehouseDeactivated
+    evt_inventory_warehouse_events_WarehouseDeactivated --> rm_inventory_warehouse_warehouse_Warehouse_inventory_projections_warehouse_directory_WarehouseDirectoryProjector
+    agg_inventory_warehouse_warehouse_Warehouse --> evt_inventory_warehouse_events_WarehouseUpdated
+    evt_inventory_warehouse_events_WarehouseUpdated --> rm_inventory_warehouse_warehouse_Warehouse_inventory_projections_warehouse_directory_WarehouseDirectoryProjector
+    agg_inventory_warehouse_warehouse_Warehouse --> evt_inventory_warehouse_events_ZoneAdded
+    evt_inventory_warehouse_events_ZoneAdded --> rm_inventory_warehouse_warehouse_Warehouse_inventory_projections_warehouse_directory_WarehouseDirectoryProjector
+    agg_inventory_warehouse_warehouse_Warehouse --> evt_inventory_warehouse_events_ZoneRemoved
+    evt_inventory_warehouse_events_ZoneRemoved --> rm_inventory_warehouse_warehouse_Warehouse_inventory_projections_warehouse_directory_WarehouseDirectoryProjector
+```
