@@ -257,7 +257,7 @@ def test_replay_after_the_fault_is_fixed_resolves_the_position(poison_handler):
 
 
 def test_purge_clears_the_position_without_running_the_handler(poison_handler):
-    _exhaust()  # a second exhausted position, so purge must pick the one it was given
+    other_position, _ = _exhaust()  # a second exhausted position, so purge must pick the one it was given
     position, note = _exhaust()
 
     result = _cli("purge", str(position), "--yes")
@@ -265,6 +265,8 @@ def test_purge_clears_the_position_without_running_the_handler(poison_handler):
     assert result.exit_code == 0, result.output
     assert position not in _listed_positions()
     assert _failed_records(position)[-2:] == ["Exhausted", "Purged"]
+    assert other_position in _listed_positions()
+    assert _failed_records(other_position)[-1] == "Exhausted"
 
     # A purged position can no longer be replayed, so the handler does not run again.
     replay = _cli("replay", str(position), "--yes")
