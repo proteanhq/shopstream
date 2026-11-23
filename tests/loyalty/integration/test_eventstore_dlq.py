@@ -2,15 +2,14 @@
 
 `PoisonEventStoreHandler` reads `loyalty::poison_pill` from the event store and fails until
 `heal` is set. Each test emits its own `PoisonDetonated` with a unique note, then drives one
-`EventStoreSubscription` the way the engine would: deliver the event, then run recovery passes
-until the subscription records its global position as `Exhausted` in its `failed-*` stream. The
-CLI commands then read and act on that record, with `load_domain` patched to return the loyalty
-domain this suite already set up.
+`EventStoreSubscription` by hand, with the calls the engine makes: deliver the event, then run
+recovery passes until the subscription records its global position as `Exhausted` in its
+`failed-*` stream. The CLI commands then read and act on that record, with `load_domain` patched
+to return the loyalty domain this suite already set up.
 
-On Message DB the category stream and the `failed-*` stream outlive the run, so every test
-filters to its own position and purges what it left exhausted. The handler's `seen` list is
-keyed by note for the same reason: a later recovery pass may retry a position an earlier run
-left behind.
+The suite's fixture empties the event store after every test. Within one test there can be more
+than one poison event, so each test filters to its own position, and the handler's `seen` list
+is checked by note.
 
 No engine run is needed, so this runs in CI under both the memory and the real stores.
 """
@@ -28,6 +27,7 @@ from protean.server.subscription.event_store_subscription import EventStoreSubsc
 from protean.server.subscription_status import collect_subscription_statuses
 from protean.utils import fqn
 from protean.utils.dlq import failed_positions_stream
+from protean.utils.eventing import Message
 from typer.testing import CliRunner
 
 from loyalty.dlq.poison import EmitPoison, PoisonEventStoreHandler
@@ -42,7 +42,7 @@ runner = CliRunner()
 
 @pytest.fixture(autouse=True)
 def async_processing():
-    """Process `EmitPoison` asynchronously, so no handler runs inline and the event only lands in the store."""
+    """Process `EmitPoison` asynchronously, so no handler runs inline."""
     saved = loyalty.config.get("event_processing")
     loyalty.config["event_processing"] = "async"
     try:
@@ -60,24 +60,6 @@ def poison_handler():
     finally:
         PoisonEventStoreHandler.heal = False
         PoisonEventStoreHandler.seen = []
-
-
-@pytest.fixture()
-def exhausted():
-    """Exhaust one position per call; purge whichever of them are still exhausted afterwards."""
-    positions: list[int] = []
-
-    def _make() -> tuple[int, str]:
-        position, note = _exhaust()
-        positions.append(position)
-        return position, note
-
-    yield _make
-
-    listed = _listed_positions()
-    for position in positions:
-        if position in listed:
-            _cli("purge", str(position), "--yes")
 
 
 def _subscription(engine: Engine) -> EventStoreSubscription:
@@ -103,14 +85,30 @@ def _drive(work) -> None:
         engine.loop.close()
 
 
-def _exhaust() -> tuple[int, str]:
-    """Emit one poison event and drive the subscription until its position is exhausted."""
+def _emit() -> tuple[Message, int, str]:
+    """Emit one poison event and return its stored message, global position and note."""
     note = f"es-dlq-{uuid.uuid4().hex[:12]}"
     pill_id = current_domain.process(EmitPoison(note=note), asynchronous=False)
     messages = loyalty.event_store.store.read(f"{STREAM}-{pill_id}")
     assert len(messages) == 1, f"expected the PoisonDetonated event in the store, got {messages}"
     message = messages[0]
-    position = message.metadata.event_store.global_position
+    return message, message.metadata.event_store.global_position, note
+
+
+def _deliver() -> int:
+    """Emit one poison event, deliver it once, and return its global position."""
+    message, position, _ = _emit()
+
+    async def work(subscription: EventStoreSubscription) -> None:
+        await subscription.process_batch([message])
+
+    _drive(work)
+    return position
+
+
+def _exhaust() -> tuple[int, str]:
+    """Emit one poison event and drive the subscription until its position is exhausted."""
+    message, position, note = _emit()
 
     async def work(subscription: EventStoreSubscription) -> None:
         await subscription.process_batch([message])
@@ -151,6 +149,16 @@ def _json(result) -> dict:
     return json.loads(result.stdout)["data"]
 
 
+def _failed_records(position: int) -> list[str]:
+    """The record types in the handler's `failed-*` stream for `position`, oldest first."""
+    failed_stream = failed_positions_stream(fqn(PoisonEventStoreHandler), STREAM)
+    return [
+        m.metadata.headers.type
+        for m in loyalty.event_store.store.read(failed_stream)
+        if m.data.get("position") == position
+    ]
+
+
 def _listed_positions() -> list[int]:
     """The exhausted positions `dlq list` shows for `PoisonEventStoreHandler`."""
     subscriptions = _json(_cli("list", "--json"))["subscriptions"]
@@ -169,8 +177,8 @@ def test_status_lists_the_handler_as_an_event_store_subscription():
     assert rows[0].stream_category == STREAM
 
 
-def test_list_shows_the_exhausted_position(exhausted):
-    position, _ = exhausted()
+def test_list_shows_the_exhausted_position():
+    position, _ = _exhaust()
 
     subscriptions = _json(_cli("list", "--json"))["subscriptions"]
 
@@ -180,8 +188,8 @@ def test_list_shows_the_exhausted_position(exhausted):
     assert owners[0]["stream_category"] == STREAM
 
 
-def test_inspect_rereads_the_failing_event(exhausted):
-    position, note = exhausted()
+def test_inspect_rereads_the_failing_event():
+    position, note = _exhaust()
 
     data = _json(_cli("inspect", str(position), "--json"))
 
@@ -190,8 +198,8 @@ def test_inspect_rereads_the_failing_event(exhausted):
     assert data["data"]["note"] == note
 
 
-def test_replay_refused_at_the_prompt_leaves_the_position_exhausted(exhausted, poison_handler):
-    position, note = exhausted()
+def test_replay_refused_at_the_prompt_leaves_the_position_exhausted(poison_handler):
+    position, note = _exhaust()
 
     result = _cli("replay", str(position), input="n\n")
 
@@ -204,8 +212,8 @@ def test_replay_refused_at_the_prompt_leaves_the_position_exhausted(exhausted, p
     assert poison_handler.seen.count(note) == 2
 
 
-def test_replay_that_fails_again_reopens_the_position(exhausted, poison_handler):
-    position, note = exhausted()
+def test_replay_that_fails_again_reopens_the_position(poison_handler):
+    position, note = _exhaust()
 
     result = _cli("replay", str(position), "--yes")
 
@@ -224,10 +232,13 @@ def test_replay_that_fails_again_reopens_the_position(exhausted, poison_handler)
     assert position in _listed_positions()
 
 
-def test_replay_after_the_fault_is_fixed_resolves_the_position(exhausted, poison_handler):
-    position, note = exhausted()
-    read_position = _stored_read_position()
+def test_replay_after_the_fault_is_fixed_resolves_the_position(poison_handler):
+    position, note = _exhaust()
     poison_handler.heal = True
+    # Move the read cursor past the exhausted position, so a replay that wrote the cursor to the
+    # replayed position would show as a change.
+    read_position = _deliver()
+    assert _stored_read_position() == read_position > position
 
     result = _cli("replay", str(position), "--yes")
 
@@ -235,22 +246,33 @@ def test_replay_after_the_fault_is_fixed_resolves_the_position(exhausted, poison
     assert "resolved" in result.output
     assert poison_handler.seen.count(note) == 3
     assert position not in _listed_positions()
+    assert _failed_records(position)[-1] == "Resolved"
     # Replay re-reads the event from its own stream; it never moves the read cursor.
     assert _stored_read_position() == read_position
 
+    # A restarted subscription does not retry a resolved position.
+    _rebuild_and_recover()
+    assert poison_handler.seen.count(note) == 3
+    assert position not in _listed_positions()
 
-def test_purge_clears_the_position_without_running_the_handler(exhausted, poison_handler):
-    exhausted()  # a second exhausted position, so purge must pick the one it was given
-    position, note = exhausted()
+
+def test_purge_clears_the_position_without_running_the_handler(poison_handler):
+    _exhaust()  # a second exhausted position, so purge must pick the one it was given
+    position, note = _exhaust()
 
     result = _cli("purge", str(position), "--yes")
 
     assert result.exit_code == 0, result.output
     assert position not in _listed_positions()
-    failed_stream = failed_positions_stream(fqn(PoisonEventStoreHandler), STREAM)
-    records = [m for m in loyalty.event_store.store.read(failed_stream) if m.data.get("position") == position]
-    assert [r.metadata.headers.type for r in records][-2:] == ["Exhausted", "Purged"]
+    assert _failed_records(position)[-2:] == ["Exhausted", "Purged"]
 
-    # A restarted subscription does not track a purged position, so it never retries it.
+    # A purged position can no longer be replayed, so the handler does not run again.
+    replay = _cli("replay", str(position), "--yes")
+    assert replay.exit_code != 0, replay.output
+    assert f"No exhausted position {position} found" in replay.output
+    assert poison_handler.seen.count(note) == 2
+
+    # A rebuild drops an exhausted position as it drops a purged one, so this check cannot tell
+    # the two apart. It guards only against a `Purged` record putting the position back.
     _rebuild_and_recover()
     assert poison_handler.seen.count(note) == 2

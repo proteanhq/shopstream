@@ -90,7 +90,7 @@ Legend: ✅ exercised · ⚠️ partial · ⛔ blocked by a Protean bug (xfail) 
 
 | Capability | Status | Where |
 |---|---|---|
-| the Engine (per-domain workers) | ✅ | `make engine-<domain>` (OutboxProcessor + StreamSubscriptions); scaled variants `engine-<domain>-scaled` |
+| the Engine (per-domain workers) | ✅ | `make engine-<domain>` (OutboxProcessor + StreamSubscriptions, plus one EventStoreSubscription in loyalty for `PoisonEventStoreHandler`); scaled variants `engine-<domain>-scaled` |
 | stream subscriptions (outbox-backed) | ✅ | `[server] default_subscription_type = "stream"` in every domain.toml. One handler overrides it: loyalty `PoisonEventStoreHandler` reads the event store, for the event-store DLQ demo |
 | the outbox (atomic write + dual-write) | ✅ | `[outbox]` in every domain.toml; exactly-once guarded by `verification/oracles/test_outbox_exactly_once.py` |
 | stream categories | ✅ | `stream_categories=[...]` on `OrderCheckoutSaga` and `RedemptionSaga` |

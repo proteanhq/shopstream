@@ -4,7 +4,7 @@
 fail to process. It isolates the DLQ demos from real loyalty flows on its own
 ``loyalty::poison_pill`` stream. One handler fails on it for each DLQ:
 
-- `PoisonEventHandler` reads the Redis stream. Under asynchronous event processing the engine
+- `PoisonEventHandler` reads the broker stream. Under asynchronous event processing the engine
   delivers the event, the handler raises, and once the retries are exhausted the subscription
   moves the message to the stream's `:dlq`, where it can be inspected and replayed (see
   `tests/loyalty/integration/test_dlq.py`).

@@ -315,7 +315,7 @@ window — `Date` fields flow through a command end-to-end
 ## Dead Letter Queue (DLQ) demo
 
 **Files:** `dlq/poison.py` (the intentional-failure fixtures). `PoisonPill` is a tiny aggregate
-on its own `loyalty::poison_pill` stream whose event handler `PoisonEventHandler` **always
+on its own `loyalty::poison_pill` stream. Its broker-stream handler `PoisonEventHandler` **always
 raises**. Under asynchronous event processing the engine delivers `PoisonDetonated`, the handler
 fails, and after the retries are exhausted the engine routes the message to `loyalty::poison_pill:dlq`.
 
@@ -331,8 +331,8 @@ CI deselects it with `-m "not engine"`. #1055 is fixed in the Protean pin; CI st
 an engine CI job is re-added. Locally it runs under `make test` / `make test-loyalty`.
 The command-handler half (`EmitPoison` → fail) is covered synchronously by
 `tests/loyalty/application/test_poison_command.py`. `PoisonEventHandler` and
-`PoisonEventStoreHandler` (below) are the only intentional failures in ShopStream and never run
-in real flows.
+`PoisonEventStoreHandler` (below) are the only intentional failures in ShopStream. Both run in
+every `make engine-loyalty`, and only a `PoisonDetonated` event makes them fail.
 
 `tests/loyalty/integration/test_dlq_ownership.py` checks the routing without the engine, on the
 InlineBroker and on Redis. It drives a `StreamSubscription` for `PoisonEventHandler` through
@@ -346,19 +346,22 @@ broker holds the message and redelivers it; once the DLQ is back, it lands there
 ### Event-store DLQ
 
 `PoisonEventStoreHandler` handles the same `PoisonDetonated` with
-`subscription_type=SubscriptionType.EVENT_STORE` (the string `"event_store"` makes `protean ir`
-fail, a Protean bug pinned in `verification/regression/test_ir.py`), so the engine runs an `EventStoreSubscription` for it on `loyalty::poison_pill` (the only
-event-store subscription in ShopStream). It fails until its class attribute `heal` is set, and
+`subscription_type=SubscriptionType.EVENT_STORE`. The string `"event_store"` makes `protean ir`
+fail, a Protean bug pinned in `verification/regression/test_ir.py`. The engine runs an
+`EventStoreSubscription` for the handler on `loyalty::poison_pill`, the only event-store
+subscription in ShopStream. The handler fails until its class attribute `heal` is set, and
 records each call's note in `seen`. When the recovery pass runs out of retries, the subscription
-records the global position as `Exhausted` in its `failed-*` stream in Message DB. The operator
-commands read that stream: `protean eventstore dlq list`, `inspect <pos>`, `replay <pos>` (re-runs
-the handler; a repeat failure reopens the position for the next restart) and `purge <pos>`
-(appends `Purged`). `tests/loyalty/integration/test_eventstore_dlq.py` drives the subscription
-without the engine, under both the memory stores and Message DB, and runs each command through
-Typer's `CliRunner`. `protean subscriptions status` reports `dlq_depth` 0 for this subscription even
-with a position exhausted ([proteanhq/protean#1921](https://github.com/proteanhq/protean/issues/1921),
-pinned as a strict xfail in `verification/regression/`). The event-store subscription is
-single-writer, so `make engine-loyalty` must keep running one worker.
+records the global position as `Exhausted` in its `failed-*` stream in the event store. The
+operator commands read that stream: `protean eventstore dlq list`, `inspect <pos>`,
+`replay <pos>` (re-runs the handler; a repeat failure reopens the position for the next restart)
+and `purge <pos>` (appends `Purged`). `tests/loyalty/integration/test_eventstore_dlq.py` drives
+the subscription without the engine, under both the memory stores and Message DB, and runs each
+command through Typer's `CliRunner`. `protean subscriptions status` reports `dlq_depth` 0 for
+this subscription even with a position exhausted
+([proteanhq/protean#1921](https://github.com/proteanhq/protean/issues/1921), pinned as a strict
+xfail in `verification/regression/`). The event-store subscription is single-writer. Run exactly
+one loyalty engine process: Protean refuses `--workers` above 1 for it, but nothing stops a
+second `make engine-loyalty` or a compose `engine-loyalty` with more than one replica.
 
 ## Tests
 

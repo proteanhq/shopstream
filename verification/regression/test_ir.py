@@ -273,7 +273,8 @@ def test_1927_schema_generate_types_a_dict_of_value_objects(tmp_path, fmt):
     issue=1930,
     state="tripwire",
     bug=(
-        "`IRBuilder._extract_subscription` calls `.value` on an event handler's raw `subscription_type` option. The "
+        "`IRBuilder._extract_subscription` calls `.value` on an event handler's raw `subscription_type` option "
+        "(and on `subscription_profile` the same way; ShopStream checks only the type). The "
         'options table documents it as a `str`, and `ConfigResolver` accepts `"event_store"`, but `protean ir` then '
         "aborts for the whole domain with `AttributeError`. Loyalty's `PoisonEventStoreHandler` passes "
         "`SubscriptionType.EVENT_STORE` instead. Fixed in proteanhq/protean#2096, after ShopStream's pin."
@@ -323,6 +324,10 @@ def test_ir_builds_for_a_handler_with_a_string_subscription_type():
     try:
         ir = IRBuilder(domain).build()
     except AttributeError as exc:
+        # Only the `.value` call on a `str` is the pinned bug; any other AttributeError after a
+        # pin move must fail the run instead of passing as the expected failure.
+        if "'str' object has no attribute 'value'" not in str(exc):
+            raise
         raise AssertionError(f"IRBuilder failed on a string subscription_type: {exc}") from exc
 
     handlers = [h for cluster in ir["clusters"].values() for h in cluster["event_handlers"].values()]

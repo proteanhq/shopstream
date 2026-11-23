@@ -11,7 +11,8 @@ message_processing = "sync"
 # fold from a snapshot instead of replaying the full history (PromoCampaign).
 snapshot_threshold = 5
 
-# Engine subscriptions use Redis Streams (outbox → broker → projectors).
+# Engine subscriptions use Redis Streams (outbox → broker → projectors). One handler,
+# PoisonEventStoreHandler, overrides this and reads the event store.
 [server]
 default_subscription_type = "stream"
 default_subscription_profile = "shopstream"
