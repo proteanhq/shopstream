@@ -38,7 +38,7 @@ flowchart LR
 > **When** EmitPoison
 > **Then** PoisonDetonated
 
-> **Note:** PoisonPill: a test fixture for the dead-letter queue, not a business concept. Its PoisonDetonated handler always fails, so under async processing the engine moves the message to the dead-letter queue of the loyalty::poison_pill stream once the retries run out. Under sync processing (the test and memory environments) the handler raises inline. It is registered in every environment.
+> **Note:** PoisonPill: a test fixture for the dead-letter queue, not a business concept. Two PoisonDetonated handlers fail on purpose. PoisonEventHandler reads the loyalty::poison_pill stream and always fails, so under async processing the engine moves the message to that stream's dead-letter queue once the retries run out. PoisonEventStoreHandler reads the event store and fails until the pill is healed, so its recovery pass records the exhausted position in the subscription's failed stream in Message DB. Under sync processing (the test and memory environments) the handlers raise inline. It is registered in every environment.
 
 ```mermaid
 flowchart LR

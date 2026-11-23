@@ -2,7 +2,7 @@
 
 `PoisonPill` is a tiny aggregate whose only purpose is to emit an event that its event handlers
 fail to process. It isolates the DLQ demos from real loyalty flows on its own
-``loyalty::poison_pill`` stream. Two handlers fail on it, one per DLQ:
+``loyalty::poison_pill`` stream. One handler fails on it for each DLQ:
 
 - `PoisonEventHandler` reads the Redis stream. Under asynchronous event processing the engine
   delivers the event, the handler raises, and once the retries are exhausted the subscription

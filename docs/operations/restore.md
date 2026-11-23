@@ -56,8 +56,8 @@ and checks that the command finds, resets and re-verifies their checkpoints.
 
 Restoring Message DB moves none of this state, and `recover` reads none of it:
 
-- **Redis consumer groups.** ShopStream's handlers read Redis streams. Their
-  progress is kept in Redis consumer groups, one Redis database per context
+- **Redis consumer groups.** Every ShopStream handler except the poison
+  handler reads Redis streams. Their progress is kept in Redis consumer groups, one Redis database per context
   (see the Redis DB table in `CLAUDE.md`).
 - **Outbox rows.** Each context's outbox table lives in that context's Postgres
   database. Step 5 rebuilds a lost row only in the narrow case
