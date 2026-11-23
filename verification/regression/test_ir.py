@@ -274,7 +274,7 @@ def test_1927_schema_generate_types_a_dict_of_value_objects(tmp_path, fmt):
     state="tripwire",
     bug=(
         "`IRBuilder._extract_subscription` calls `.value` on an event handler's raw `subscription_type` option. The "
-        "options table documents it as a `str`, and `ConfigResolver` accepts `\"event_store\"`, but `protean ir` then "
+        'options table documents it as a `str`, and `ConfigResolver` accepts `"event_store"`, but `protean ir` then '
         "aborts for the whole domain with `AttributeError`. Loyalty's `PoisonEventStoreHandler` passes "
         "`SubscriptionType.EVENT_STORE` instead. Fixed in proteanhq/protean#2096, after ShopStream's pin."
     ),
