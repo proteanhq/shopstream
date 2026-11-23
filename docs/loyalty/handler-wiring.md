@@ -59,8 +59,10 @@ flowchart LR
 flowchart TD
     subgraph event_handlers["Event Handlers"]
         eh_loyalty_dlq_poison_PoisonEventHandler[PoisonEventHandler]
+        eh_loyalty_dlq_poison_PoisonEventStoreHandler[PoisonEventStoreHandler]
     end
     evt_loyalty_dlq_poison_PoisonDetonated([PoisonDetonated]) --> eh_loyalty_dlq_poison_PoisonEventHandler
+    evt_loyalty_dlq_poison_PoisonDetonated([PoisonDetonated]) --> eh_loyalty_dlq_poison_PoisonEventStoreHandler
 ```
 
 ## Process Managers

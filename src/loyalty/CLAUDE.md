@@ -330,8 +330,9 @@ poll loops drop their Redis connections mid-run (filed upstream as **proteanhq/p
 CI deselects it with `-m "not engine"`. #1055 is fixed in the Protean pin; CI still deselects it until
 an engine CI job is re-added. Locally it runs under `make test` / `make test-loyalty`.
 The command-handler half (`EmitPoison` → fail) is covered synchronously by
-`tests/loyalty/application/test_poison_command.py`. `PoisonEventHandler` is the *only*
-intentional failure in ShopStream and never runs in real flows.
+`tests/loyalty/application/test_poison_command.py`. `PoisonEventHandler` and
+`PoisonEventStoreHandler` (below) are the only intentional failures in ShopStream and never run
+in real flows.
 
 `tests/loyalty/integration/test_dlq_ownership.py` checks the routing without the engine, on the
 InlineBroker and on Redis. It drives a `StreamSubscription` for `PoisonEventHandler` through
@@ -341,6 +342,23 @@ the InlineBroker's native DLQ, and leaves no `retry_counts` entry. While the DLQ
 broker holds the message and redelivers it; once the DLQ is back, it lands there once.
 `tests/payments/integration/test_dlq_ownership.py` checks the same for a `BrokerSubscription`
 (`OrderReturnedSubscriber` on `ordering::order`).
+
+### Event-store DLQ
+
+`PoisonEventStoreHandler` handles the same `PoisonDetonated` with
+`subscription_type=SubscriptionType.EVENT_STORE` (the string `"event_store"` makes `protean ir`
+fail, a Protean bug pinned in `verification/regression/test_ir.py`), so the engine runs an `EventStoreSubscription` for it on `loyalty::poison_pill` (the only
+event-store subscription in ShopStream). It fails until its class attribute `heal` is set, and
+records each call's note in `seen`. When the recovery pass runs out of retries, the subscription
+records the global position as `Exhausted` in its `failed-*` stream in Message DB. The operator
+commands read that stream: `protean eventstore dlq list`, `inspect <pos>`, `replay <pos>` (re-runs
+the handler; a repeat failure reopens the position for the next restart) and `purge <pos>`
+(appends `Purged`). `tests/loyalty/integration/test_eventstore_dlq.py` drives the subscription
+without the engine, under both the memory stores and Message DB, and runs each command through
+Typer's `CliRunner`. `protean subscriptions status` reports `dlq_depth` 0 for this subscription even
+with a position exhausted ([proteanhq/protean#1921](https://github.com/proteanhq/protean/issues/1921),
+pinned as a strict xfail in `verification/regression/`). The event-store subscription is
+single-writer, so `make engine-loyalty` must keep running one worker.
 
 ## Tests
 
@@ -353,8 +371,9 @@ broker holds the message and redelivers it; once the DLQ is back, it lands there
   writer is rejected with `ExpectedVersionError`, no lost updates);
 - **integration** — API tests (TestClient over account / campaign / redemption endpoints), the
   async-command path (`test_async_command.py`), the engine-driven **DLQ** test
-  (`test_dlq.py`, Redis-only, skips on memory), and the DLQ ownership tests
-  (`test_dlq_ownership.py`, both brokers, no engine);
+  (`test_dlq.py`, Redis-only, skips on memory), the DLQ ownership tests
+  (`test_dlq_ownership.py`, both brokers, no engine), and the event-store DLQ commands
+  (`test_eventstore_dlq.py`, both stores, no engine);
 - **bdd** — `pytest-bdd` scenarios (rewards lifecycle, points transfer, campaign lifecycle,
   redemption) in `features/*.feature`;
 - **property** — Hypothesis tests (`test_points_conservation.py`): points conservation,

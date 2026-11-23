@@ -47,10 +47,12 @@ flowchart LR
         agg_loyalty_dlq_poison_PoisonPill[PoisonPill]
         evt_loyalty_dlq_poison_PoisonDetonated([PoisonDetonated])
         auto_loyalty_dlq_poison_PoisonPill_loyalty_dlq_poison_PoisonEventHandler{{PoisonEventHandler}}
+        auto_loyalty_dlq_poison_PoisonPill_loyalty_dlq_poison_PoisonEventStoreHandler{{PoisonEventStoreHandler}}
     end
     cmd_loyalty_dlq_poison_EmitPoison --> agg_loyalty_dlq_poison_PoisonPill
     agg_loyalty_dlq_poison_PoisonPill --> evt_loyalty_dlq_poison_PoisonDetonated
     evt_loyalty_dlq_poison_PoisonDetonated --> auto_loyalty_dlq_poison_PoisonPill_loyalty_dlq_poison_PoisonEventHandler
+    evt_loyalty_dlq_poison_PoisonDetonated --> auto_loyalty_dlq_poison_PoisonPill_loyalty_dlq_poison_PoisonEventStoreHandler
 ```
 
 ## Event Model: Redemption

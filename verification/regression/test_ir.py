@@ -1,4 +1,4 @@
-"""Regressions in `protean ir diff`."""
+"""Regressions in `protean ir` and `protean ir diff`."""
 
 from __future__ import annotations
 
@@ -267,3 +267,63 @@ def test_1927_schema_generate_types_a_dict_of_value_objects(tmp_path, fmt):
         pytest.fail(f"precondition: the Price schema has tier_prices\n{text}")
 
     assert "TierPrice" in str(tier_prices)
+
+
+@pytest.mark.protean_bug(
+    issue=1930,
+    state="tripwire",
+    bug=(
+        "`IRBuilder._extract_subscription` calls `.value` on an event handler's raw `subscription_type` option. The "
+        "options table documents it as a `str`, and `ConfigResolver` accepts `\"event_store\"`, but `protean ir` then "
+        "aborts for the whole domain with `AttributeError`. Loyalty's `PoisonEventStoreHandler` passes "
+        "`SubscriptionType.EVENT_STORE` instead. Fixed in proteanhq/protean#2096, after ShopStream's pin."
+    ),
+)
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="proteanhq/protean#1930: IRBuilder calls .value on a string subscription_type; fixed upstream, not in the pin",
+)
+def test_ir_builds_for_a_handler_with_a_string_subscription_type():
+    """proteanhq/protean#1930: `protean ir` crashes on `subscription_type="event_store"`.
+
+    The event handler options table documents `subscription_type` as a `str`, and
+    `ConfigResolver` turns the string into `SubscriptionType.EVENT_STORE`, so the
+    engine runs the handler on the event store. `IRBuilder._extract_subscription`
+    reads the raw option and calls `.value` on it, which raises `AttributeError`
+    for a string, so `make ir` aborts for the whole domain. Loyalty's
+    `PoisonEventStoreHandler` passes the enum to avoid it.
+    """
+    from protean import Domain, handle
+    from protean.fields import String
+    from protean.ir.builder import IRBuilder
+    from protean.server.subscription.config_resolver import ConfigResolver
+    from protean.server.subscription.profiles import SubscriptionType
+
+    domain = Domain(name="StringSubscriptionTypeProbe")
+
+    @domain.aggregate
+    class Ticket:
+        title = String()
+
+    @domain.event(part_of=Ticket)
+    class TicketOpened:
+        title = String()
+
+    @domain.event_handler(part_of=Ticket, subscription_type="event_store")
+    class TicketAudit:
+        @handle(TicketOpened)
+        def record(self, event):  # noqa: ARG002
+            pass
+
+    domain.init(traverse=False)
+    if ConfigResolver(domain).resolve(TicketAudit).subscription_type != SubscriptionType.EVENT_STORE:
+        pytest.fail("precondition: the resolver accepts the string form")
+
+    try:
+        ir = IRBuilder(domain).build()
+    except AttributeError as exc:
+        raise AssertionError(f"IRBuilder failed on a string subscription_type: {exc}") from exc
+
+    handlers = [h for cluster in ir["clusters"].values() for h in cluster["event_handlers"].values()]
+    assert [h["subscription"]["type"] for h in handlers] == ["event_store"]

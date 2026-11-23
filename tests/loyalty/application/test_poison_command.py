@@ -1,8 +1,8 @@
 """Application test for the EmitPoison command handler.
 
 Processing `EmitPoison` creates a `PoisonPill` and raises `PoisonDetonated`. Under synchronous
-event processing the always-failing `PoisonEventHandler` runs inline, so the call fails fast —
-which also covers the command handler's happy path before the dispatch. (The asynchronous
+event processing the failing `PoisonEventHandler` and `PoisonEventStoreHandler` both run inline, so
+the call fails fast — which also covers the command handler's happy path before the dispatch. (The asynchronous
 retry → DLQ → replay path is exercised by the engine-driven `tests/loyalty/integration/test_dlq.py`.)
 """
 

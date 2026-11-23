@@ -1,6 +1,6 @@
 {
   "$schema": "https://protean.dev/ir/v0.3.0/schema.json",
-  "checksum": "sha256:b6d1b272e7d4732db955ea9212329b1660cee3bdf8c909983b954293c0e81818",
+  "checksum": "sha256:7f7973325d23ebc4000dd22e07f2765e932a3af7e50b07ba35ebc6246cc8ca8f",
   "clusters": {
     "loyalty.campaign.campaign.PromoCampaign": {
       "aggregate": {
@@ -591,6 +591,26 @@
             "config": {},
             "profile": null,
             "type": null
+          }
+        },
+        "loyalty.dlq.poison.PoisonEventStoreHandler": {
+          "description": "Fails until `heal` is set, so an event-store position exhausts and can then be replayed.\n\n`seen` records the note of every event it is called with, so a test can tell whether a\nrecovery pass or a replay ran it for that test's event.",
+          "element_type": "EVENT_HANDLER",
+          "fqn": "loyalty.dlq.poison.PoisonEventStoreHandler",
+          "handlers": {
+            "Loyalty.PoisonDetonated.v1": [
+              "fail_until_healed"
+            ]
+          },
+          "module": "loyalty.dlq.poison",
+          "name": "PoisonEventStoreHandler",
+          "part_of": "loyalty.dlq.poison.PoisonPill",
+          "source_stream": null,
+          "stream_category": "loyalty::poison_pill",
+          "subscription": {
+            "config": {},
+            "profile": null,
+            "type": "event_store"
           }
         }
       },
@@ -2557,7 +2577,8 @@
       "loyalty.reward.events.TierUpgraded"
     ],
     "EVENT_HANDLER": [
-      "loyalty.dlq.poison.PoisonEventHandler"
+      "loyalty.dlq.poison.PoisonEventHandler",
+      "loyalty.dlq.poison.PoisonEventStoreHandler"
     ],
     "PROCESS_MANAGER": [
       "loyalty.redemption.saga.RedemptionSaga"

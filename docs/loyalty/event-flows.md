@@ -137,6 +137,7 @@ flowchart LR
     evt_loyalty_reward_events_TierUpgraded([TierUpgraded])
     subgraph event_handlers["Event Handlers"]
         eh_loyalty_dlq_poison_PoisonEventHandler[PoisonEventHandler]
+        eh_loyalty_dlq_poison_PoisonEventStoreHandler[PoisonEventStoreHandler]
     end
     subgraph process_managers["Process Managers"]
         pm_loyalty_redemption_saga_RedemptionSaga["RedemptionSaga (start, end)"]
@@ -148,6 +149,7 @@ flowchart LR
         proj_loyalty_projections_reward_account_view_RewardAccountViewProjector[RewardAccountViewProjector → RewardAccountView]
     end
     evt_loyalty_dlq_poison_PoisonDetonated --> eh_loyalty_dlq_poison_PoisonEventHandler
+    evt_loyalty_dlq_poison_PoisonDetonated --> eh_loyalty_dlq_poison_PoisonEventStoreHandler
     evt_loyalty_redemption_events_PointsReserved --> pm_loyalty_redemption_saga_RedemptionSaga
     evt_loyalty_redemption_events_RedemptionRequested -->|start| pm_loyalty_redemption_saga_RedemptionSaga
     evt_loyalty_redemption_events_VoucherIssuanceFailed -->|end| pm_loyalty_redemption_saga_RedemptionSaga

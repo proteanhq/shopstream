@@ -235,14 +235,14 @@ capabilities:
   - name: restore_checkpoint_verification
     taught_by: docs/operations/restore.md
     guarded_by: verification/oracles/test_restore_checkpoints.py
-    property: "after a simulated restore rolls the store and its global_position sequence back from g5 to g3, `protean recover --verify-checkpoints` reports a checkpoint at g5 as beyond head g3, a checkpoint at g2 and a fresh one as consistent, and a recovery-tracking entry at g5 as stale; `--reset-beyond-head` writes the int g3 to that checkpoint and clears only g5 from the tracking, and a third run finds nothing to report; with the shipped config no context has an event-store subscription for `recover` to check"
+    property: "after a simulated restore rolls the store and its global_position sequence back from g5 to g3, `protean recover --verify-checkpoints` reports a checkpoint at g5 as beyond head g3, a checkpoint at g2 and a fresh one as consistent, and a recovery-tracking entry at g5 as stale; `--reset-beyond-head` writes the int g3 to that checkpoint and clears only g5 from the tracking, and a third run finds nothing to report; with the shipped config loyalty's PoisonEventStoreHandler is the only event-store subscription for `recover` to check"
     source: A
-    status: partial   # three inventory projectors, moved to event-store subscriptions in test config; every real handler reads Redis streams, so recover checks nothing in ShopStream as configured. A recovery-tracking stream recover cannot read (an unknown finding) is not exercised. Redis consumer groups and the Postgres outbox are outside recover's scope
+    status: partial   # three inventory projectors, moved to event-store subscriptions in test config; every real handler reads Redis streams, so as configured recover checks only loyalty's poison handler. A recovery-tracking stream recover cannot read (an unknown finding) is not exercised. Redis consumer groups and the Postgres outbox are outside recover's scope
 
   - name: engine_readiness_probe
     taught_by: src/ordering/domain.toml   # [server.health]
     guarded_by: verification/contracts/test_readyz_shape.py
-    property: "/readyz on the ordering engine answers 200; every subscription the engine wired (handlers, broker subscribers, outbox processors including the `global` one) has a row and none is `unknown`; every row carries the documented fields including `lag_seconds` and `lag_drain_rate`; an empty outbox reads lag 0, not null; `lag_seconds` is null on every row, since ShopStream runs no event-store subscription"
+    property: "/readyz on the ordering engine answers 200; every subscription the engine wired (handlers, broker subscribers, outbox processors including the `global` one) has a row and none is `unknown`; every row carries the documented fields including `lag_seconds` and `lag_drain_rate`; an empty outbox reads lag 0, not null; `lag_seconds` is null on every row, since the ordering engine runs no event-store subscription"
     source: A
     status: partial   # the engine is built in test mode and its health server started by hand; Engine.run() is not used (proteanhq/protean#1055). lag_drain_rate is checked for presence only (one refresh, no numeric lag_seconds). Live rows under load are a hand check
 
@@ -280,3 +280,10 @@ capabilities:
     property: "under the project's config, ruff check flags a function one past each limit and not one at it: C901 at 11 paths, PLR0911 at 7 returns, PLR0912 at 13 branches, PLR0915 at 51 statements; complexipy fails a function at cognitive complexity 16 and passes one at 15; pyproject.toml writes out each limit; the whole tree passes the Ruff complexity rules, and src/, tests/ and verification/ pass complexipy"
     source: A
     status: covered
+
+  - name: event_store_dlq
+    taught_by: src/loyalty/dlq/poison.py   # PoisonEventStoreHandler
+    guarded_by: tests/loyalty/integration/test_eventstore_dlq.py
+    property: "an event-store subscription position that runs out of retries is listed by `protean eventstore dlq list` and re-read by `inspect`; `replay` refused at the prompt leaves it exhausted, a replay that fails again reopens it for the next rebuild, and a replay that succeeds resolves it without moving the read cursor; `purge` clears it with an Exhausted then Purged record and a rebuild no longer retries it"
+    source: A
+    status: partial   # the subscription is driven by hand (deliver, then recovery passes), not by Engine.run(). `protean subscriptions status` reports dlq_depth 0 for the exhausted position (proteanhq/protean#1921, strict xfail in verification/regression/)

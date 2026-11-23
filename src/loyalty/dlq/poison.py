@@ -1,17 +1,24 @@
-"""A deliberately-failing event handler used to exercise the Dead Letter Queue (DLQ).
+"""Deliberately-failing event handlers used to exercise both dead-letter queues.
 
-`PoisonPill` is a tiny aggregate whose only purpose is to emit an event that an event handler
-*always* fails to process. Under asynchronous event processing the engine delivers the event,
-the handler raises, and after the configured retries are exhausted the engine routes the message
-to the stream's `:dlq` — where it can be inspected and replayed (see
-`tests/loyalty/integration/test_dlq.py`). This is the only intentionally-failing handler in
-ShopStream; it isolates the DLQ demo from real loyalty flows on its own
-``loyalty::poison_pill`` stream.
+`PoisonPill` is a tiny aggregate whose only purpose is to emit an event that its event handlers
+fail to process. It isolates the DLQ demos from real loyalty flows on its own
+``loyalty::poison_pill`` stream. Two handlers fail on it, one per DLQ:
+
+- `PoisonEventHandler` reads the Redis stream. Under asynchronous event processing the engine
+  delivers the event, the handler raises, and once the retries are exhausted the subscription
+  moves the message to the stream's `:dlq`, where it can be inspected and replayed (see
+  `tests/loyalty/integration/test_dlq.py`).
+- `PoisonEventStoreHandler` reads the event store. When its recovery pass exhausts the retries,
+  the subscription records the global position as `Exhausted` in its `failed-*` stream, which
+  `protean eventstore dlq list|inspect|replay|purge` reads and acts on (see
+  `tests/loyalty/integration/test_eventstore_dlq.py`). Setting `heal` lets a replay succeed.
 """
 
 from datetime import UTC, datetime
+from typing import ClassVar
 
 from protean.fields import DateTime, Identifier, String
+from protean.server.subscription.profiles import SubscriptionType
 from protean.utils.globals import current_domain
 from protean.utils.mixins import handle
 
@@ -57,3 +64,23 @@ class PoisonEventHandler:
     @handle(PoisonDetonated)
     def always_fail(self, event: PoisonDetonated) -> None:
         raise RuntimeError(f"poison pill detonated: {event.note}")
+
+
+# The enum, not the string "event_store": `protean ir` fails on a string here, though the
+# resolver accepts it (a Protean bug pinned in verification/regression/).
+@loyalty.event_handler(part_of=PoisonPill, subscription_type=SubscriptionType.EVENT_STORE)
+class PoisonEventStoreHandler:
+    """Fails until `heal` is set, so an event-store position exhausts and can then be replayed.
+
+    `seen` records the note of every event it is called with, so a test can tell whether a
+    recovery pass or a replay ran it for that test's event.
+    """
+
+    heal: ClassVar[bool] = False
+    seen: ClassVar[list[str | None]] = []
+
+    @handle(PoisonDetonated)
+    def fail_until_healed(self, event: PoisonDetonated) -> None:
+        type(self).seen.append(event.note)
+        if not type(self).heal:
+            raise RuntimeError(f"poison pill detonated: {event.note}")
