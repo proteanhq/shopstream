@@ -14,7 +14,9 @@ InlineBroker that API reads only the broker's native DLQ, never the `{stream}:dl
 subscription writes (a Protean bug pinned in `verification/regression/`), so this test skips under
 the in-memory broker. `test_dlq_ownership.py` covers the routing itself on both brokers without
 the engine: one entry on `{stream}:dlq`, nothing in the native DLQ, no leftover retry count, also
-after a DLQ outage. The engine loop and `dlq_replay` still need this test.
+after a DLQ outage. The engine loop and `dlq_replay` still need this test. The engine also starts
+an event-store subscription for `PoisonEventStoreHandler`, which fails on the same event and
+records its position in the event store; `test_eventstore_dlq.py` covers that one.
 
 **Marked `engine` → runs locally only.** Driving a full engine inside a pytest is unreliable in
 CI: even in an isolated job with every broker reachable, the engine's subscription poll loops drop

@@ -42,21 +42,25 @@ name a message the restore removed, and the reset clears them. It reads only
 **event-store subscriptions**, whose checkpoints live in Message DB itself.
 
 Every ShopStream context sets `default_subscription_type = "stream"` in its
-`domain.toml`, and no handler overrides it. So today `recover` checks nothing in
-ShopStream. A run without `--json` prints
+`domain.toml`. One handler overrides it: loyalty's `PoisonEventStoreHandler`, a
+deliberately failing handler kept to demonstrate the event-store DLQ, reads the
+event store. So today `recover` checks that one handler in loyalty and nothing
+in the other eight contexts. In loyalty, a `--json` run reports
+`summary.checked: 1`. In the other eight, a run without `--json` prints
 `No event-store subscriptions found in domain.` and exits 0, and a `--json` run
-reports `status: pass` with `summary.checked: 0`. Keep step 4 anyway: once a
-handler moves to the event store, it is the step that checks that handler.
-`verification/oracles/test_restore_checkpoints.py` checks that all nine contexts
-report `summary.checked: 0`. It also moves three inventory projectors to the
-event store in test config only, and checks that the command finds, resets and
-re-verifies their checkpoints.
+reports `status: pass` with `summary.checked: 0`. Keep step 4 for all nine: if a
+real handler moves to the event store, step 4 checks it too.
+`verification/oracles/test_restore_checkpoints.py` checks that the poison
+handler is the only event-store subscription in any of the nine contexts. It
+also moves three inventory projectors to the event store in test config only,
+and checks that the command finds, resets and re-verifies their checkpoints.
 
 Restoring Message DB moves none of this state, and `recover` reads none of it:
 
-- **Redis consumer groups.** ShopStream's handlers read Redis streams. Their
-  progress is kept in Redis consumer groups, one Redis database per context
-  (see the Redis DB table in `CLAUDE.md`).
+- **Redis consumer groups.** Every ShopStream handler except the poison
+  handler reads Redis streams. Their progress is kept in Redis consumer
+  groups, one Redis database per context (see the Redis DB table in
+  `CLAUDE.md`).
 - **Outbox rows.** Each context's outbox table lives in that context's Postgres
   database. Step 5 rebuilds a lost row only in the narrow case
   `make outbox-reconcile` handles (see below).

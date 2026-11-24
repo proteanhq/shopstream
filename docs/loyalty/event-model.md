@@ -38,7 +38,7 @@ flowchart LR
 > **When** EmitPoison
 > **Then** PoisonDetonated
 
-> **Note:** PoisonPill: a test fixture for the dead-letter queue, not a business concept. Its PoisonDetonated handler always fails, so under async processing the engine moves the message to the dead-letter queue of the loyalty::poison_pill stream once the retries run out. Under sync processing (the test and memory environments) the handler raises inline. It is registered in every environment.
+> **Note:** PoisonPill: a test fixture for the dead-letter queue, not a business concept. Two PoisonDetonated handlers fail on purpose. PoisonEventHandler reads the loyalty::poison_pill stream and always fails. Under async processing the engine moves the message to that stream's dead-letter queue once the retries run out. PoisonEventStoreHandler reads the event store and fails until its heal flag is set. When its recovery pass runs out of retries, it records the exhausted position in the subscription's failed stream in the event store. Under sync processing (the test and memory environments) the handlers raise inline. It is registered in every environment.
 
 ```mermaid
 flowchart LR
@@ -47,10 +47,12 @@ flowchart LR
         agg_loyalty_dlq_poison_PoisonPill[PoisonPill]
         evt_loyalty_dlq_poison_PoisonDetonated([PoisonDetonated])
         auto_loyalty_dlq_poison_PoisonPill_loyalty_dlq_poison_PoisonEventHandler{{PoisonEventHandler}}
+        auto_loyalty_dlq_poison_PoisonPill_loyalty_dlq_poison_PoisonEventStoreHandler{{PoisonEventStoreHandler}}
     end
     cmd_loyalty_dlq_poison_EmitPoison --> agg_loyalty_dlq_poison_PoisonPill
     agg_loyalty_dlq_poison_PoisonPill --> evt_loyalty_dlq_poison_PoisonDetonated
     evt_loyalty_dlq_poison_PoisonDetonated --> auto_loyalty_dlq_poison_PoisonPill_loyalty_dlq_poison_PoisonEventHandler
+    evt_loyalty_dlq_poison_PoisonDetonated --> auto_loyalty_dlq_poison_PoisonPill_loyalty_dlq_poison_PoisonEventStoreHandler
 ```
 
 ## Event Model: Redemption

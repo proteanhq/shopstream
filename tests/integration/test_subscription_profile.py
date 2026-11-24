@@ -2,7 +2,9 @@
 
 Each `domain.toml` sets `default_subscription_profile = "shopstream"`, a profile that inherits
 Protean's built-in `production` profile and lowers `retention_maxlen` to 50000. Notifications
-also overrides the circuit breaker for `NotificationDispatcher` alone.
+also overrides the circuit breaker for `NotificationDispatcher` alone. Loyalty's
+`PoisonEventStoreHandler` overrides the subscription type and reads the event store, so the
+profile's Redis stream retention does not apply to it.
 
 `ConfigResolver` is what the engine's subscription factory calls to build each subscription's
 config. It reads only `domain.config` and the handler's `Meta`, so these tests need no database
@@ -33,6 +35,8 @@ CONTEXTS = [
 
 # Handlers whose `[server.subscriptions.<Handler>]` table overrides the profile.
 OVERRIDDEN = {"NotificationDispatcher"}
+# Handlers whose `subscription_type` option moves them to the event store.
+EVENT_STORE = {"PoisonEventStoreHandler"}
 
 
 def _domain(context: str):
@@ -59,7 +63,7 @@ def test_context_handlers_resolve_to_the_shopstream_profile(context):
     domain = _domain(context)
     # A misspelt key would be ignored and leave every handler on the hardcoded defaults.
     assert domain.config["server"]["default_subscription_profile"] == "shopstream"
-    handlers = [cls for cls in _subscribed_handlers(domain) if cls.__name__ not in OVERRIDDEN]
+    handlers = [cls for cls in _subscribed_handlers(domain) if cls.__name__ not in OVERRIDDEN | EVENT_STORE]
     assert handlers, f"no event handlers or projectors registered for {context}"
 
     resolver = ConfigResolver(domain)
@@ -83,3 +87,16 @@ def test_notification_dispatcher_overrides_the_breaker_and_keeps_the_profile_ret
     assert config.circuit_breaker_reset_seconds == 30
     assert config.retention_maxlen == RETENTION_MAXLEN
     assert config.messages_per_tick == PRODUCTION["messages_per_tick"]
+
+
+@pytest.mark.fast
+def test_poison_event_store_handler_reads_the_event_store_with_the_profile_breaker():
+    from loyalty.dlq.poison import PoisonEventStoreHandler
+
+    config = ConfigResolver(_domain("loyalty")).resolve(PoisonEventStoreHandler)
+
+    assert config.subscription_type == SubscriptionType.EVENT_STORE
+    # Stream retention is a Redis setting, so the event-store subscription has none.
+    assert config.retention_maxlen is None
+    assert config.messages_per_tick == PRODUCTION["messages_per_tick"]
+    assert config.circuit_breaker_threshold == PRODUCTION["circuit_breaker_threshold"]

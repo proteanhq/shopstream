@@ -18,7 +18,7 @@ WHAT THIS CHECKS
       (proteanhq/protean#1288 made an unknown lag `null`, so a healthy row
       reading `null` would hide real lag);
     - `lag_seconds` is `null` on every row. Protean computes it only for
-      event-store subscriptions, and ShopStream runs none.
+      event-store subscriptions, and the ordering engine runs none.
 
     `lag_drain_rate` is checked only for presence. It needs two refreshes and a
     numeric `lag_seconds`, so it is `null` on every row here.

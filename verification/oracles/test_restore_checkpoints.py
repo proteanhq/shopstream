@@ -18,10 +18,11 @@ WHAT THIS CHECKS
     reports both, and `--reset-beyond-head` moves the checkpoint back to the
     head and clears the stale entries.
 
-    Every ShopStream handler reads Redis streams (`default_subscription_type =
-    "stream"`), so `recover` checks nothing in ShopStream as configured.
-    `test_no_context_uses_event_store_subscriptions` guards that for all nine
-    contexts, in every env. The restore test moves three inventory projectors
+    Every ShopStream handler but one reads Redis streams
+    (`default_subscription_type = "stream"`). Loyalty's `PoisonEventStoreHandler`
+    reads the event store, so it is the only subscription `recover` checks as
+    configured. `test_only_the_loyalty_poison_handler_uses_an_event_store_subscription`
+    guards that for all nine contexts, in every env. The restore test moves three inventory projectors
     to event-store subscriptions through the test-time domain config only
     (`server.subscriptions.<HandlerClassName>`, the key Protean's
     `ConfigResolver` reads):
@@ -255,9 +256,13 @@ def _rows_by_handler(envelope):
     return by_handler
 
 
+# Loyalty's poison handler is the one event-store subscription, kept for the event-store DLQ demo.
+EVENT_STORE_HANDLERS = {"loyalty": ["PoisonEventStoreHandler"]}
+
+
 @pytest.mark.parametrize("context", CONTEXTS)
-def test_no_context_uses_event_store_subscriptions(context, request):
-    """As configured, `recover` has nothing to check in any context, as the runbook says."""
+def test_only_the_loyalty_poison_handler_uses_an_event_store_subscription(context, request):
+    """As configured, `recover` checks only loyalty's poison handler, as the runbook says."""
     from protean.server.subscription_status import collect_subscription_statuses
 
     bed = request.getfixturevalue(f"{context}_bed")
@@ -266,7 +271,9 @@ def test_no_context_uses_event_store_subscriptions(context, request):
     assert len(statuses) > 0, f"{context} reported no subscriptions at all"
     # `recover` keeps exactly these and reports their count as `summary.checked`.
     event_store = [s.handler_name for s in statuses if s.subscription_type == "event_store"]
-    assert event_store == [], f"{context} handlers on event-store subscriptions: {event_store}"
+    assert event_store == EVENT_STORE_HANDLERS.get(context, []), (
+        f"{context} handlers on event-store subscriptions: {event_store}"
+    )
 
 
 @pytest.fixture()

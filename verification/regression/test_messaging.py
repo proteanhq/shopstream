@@ -455,3 +455,97 @@ def test_1929_sigterm_does_not_strand_the_rest_of_an_in_flight_batch():
         pytest.fail("precondition: without a shutdown all three are handled and acknowledged")
 
     assert _restart_after_a_batch(shutting_down=True) == (3, 0, 0)
+
+
+@pytest.mark.protean_bug(
+    issue=1921,
+    state="tripwire",
+    bug=(
+        "`collect_subscription_statuses` builds every event-store subscription row with `dlq_depth=0` and never reads "
+        "its `failed-*` stream. With a `PoisonEventStoreHandler` position exhausted, `protean eventstore dlq list` "
+        "shows it while `protean subscriptions status` and `/readyz` report an empty DLQ. Fixed in "
+        "proteanhq/protean#2095, after ShopStream's pin."
+    ),
+)
+@pytest.mark.xfail(
+    strict=True,
+    raises=AssertionError,
+    reason="proteanhq/protean#1921: subscription status reports dlq_depth 0 for an event-store subscription; fixed upstream, not in the pin",
+)
+@pytest.mark.usefixtures("loyalty_ctx")
+def test_1921_event_store_status_counts_exhausted_positions_as_dlq_depth(monkeypatch):
+    """proteanhq/protean#1921: an event-store subscription's status row always reads `dlq_depth` 0.
+
+    `collect_subscription_statuses` builds every event-store row with `dlq_depth=0` and never
+    reads the subscription's `failed-*` stream. With a `PoisonEventStoreHandler` position
+    exhausted, `protean eventstore dlq list` shows it while `protean subscriptions status`
+    and `/readyz` report an empty DLQ.
+    """
+    import asyncio
+    import uuid
+
+    from protean import current_domain
+    from protean.server.engine import Engine
+    from protean.server.subscription.event_store_subscription import (
+        EventStoreSubscription,
+        FailedPositionStatus,
+        write_recovery_status_record,
+    )
+    from protean.server.subscription_status import collect_subscription_statuses
+    from protean.utils import fqn
+    from protean.utils.dlq import failed_positions_stream
+
+    from loyalty.dlq.poison import EmitPoison, PoisonEventStoreHandler
+
+    stream = "loyalty::poison_pill"
+    monkeypatch.setitem(current_domain.config, "event_processing", "async")
+    monkeypatch.setattr(PoisonEventStoreHandler, "heal", False)
+    monkeypatch.setattr(PoisonEventStoreHandler, "seen", [])
+
+    store = current_domain.event_store.store
+    pill_id = current_domain.process(EmitPoison(note=f"dlq-depth-{uuid.uuid4().hex[:12]}"), asynchronous=False)
+    message = store.read(f"{stream}-{pill_id}")[0]
+    position = message.metadata.event_store.global_position
+    failed_stream = failed_positions_stream(fqn(PoisonEventStoreHandler), stream)
+
+    engine = Engine(current_domain, test_mode=True)
+    subscription = EventStoreSubscription(
+        engine,
+        stream,
+        PoisonEventStoreHandler,
+        max_retries=1,
+        enable_recovery=True,
+        recovery_interval_seconds=0,
+        retry_delay_seconds=0,
+    )
+
+    async def exhaust() -> None:
+        await subscription.process_batch([message])
+        for _ in range(2):
+            await subscription.run_recovery_pass()
+
+    try:
+        asyncio.run(exhaust())
+    finally:
+        engine.loop.close()
+
+    try:
+        statuses = [r.metadata.headers.type for r in store.read(failed_stream) if r.data.get("position") == position]
+        if not statuses or statuses[-1] != FailedPositionStatus.EXHAUSTED.value:
+            pytest.fail(f"precondition: position {position} exhausted, got {statuses}")
+
+        rows = [s for s in collect_subscription_statuses(current_domain) if s.handler_name == "PoisonEventStoreHandler"]
+        if len(rows) != 1:
+            pytest.fail(f"precondition: one PoisonEventStoreHandler status row, got {rows}")
+
+        assert rows[0].dlq_depth >= 1
+    finally:
+        write_recovery_status_record(
+            store,
+            failed_stream,
+            stream,
+            current_domain.clock.now().isoformat(),
+            position,
+            FailedPositionStatus.PURGED,
+            retry_count=2,
+        )
